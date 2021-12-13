@@ -917,6 +917,20 @@ enum PlayerRestState
     REST_STATE_RAF_LINKED       = 0x04                      // Exact use unknown
 };
 
+enum SetPlayerDifficultyResult
+{
+    RESULT_SET_DIFFICULTY           = 0, // payload bool isHeroic
+    RESULT_COOLDOWN                 = 1, // payload time
+    RESULT_WORLDSTATE               = 2, // failed state - maybe instance state like gunship moving?
+    RESULT_ENCOUNTER_IN_PROGRESS    = 3,
+    RESULT_PLAYER_IN_COMBAT         = 4,
+    RESULT_PLAYER_BUSY              = 5, // unk what it could be
+    RESULT_START                    = 6, // starts loading screen
+    RESULT_ALREADY_IN_PROGRESS      = 7, // we do it in place, originally its likely delayed to map update
+    RESULT_FAILED_CONDITION         = 8, // likely missing areatrigger transition condition
+    RESULT_COMPLETE                 = 9, // finishes and sticks changes on client
+};
+
 class PlayerTaxi
 {
     public:

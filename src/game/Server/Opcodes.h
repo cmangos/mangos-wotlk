@@ -560,7 +560,7 @@ enum Opcodes
     CMSG_UPDATE_ACCOUNT_DATA                        = 0x20B,
     SMSG_UPDATE_ACCOUNT_DATA                        = 0x20C,
     SMSG_CLEAR_FAR_SIGHT_IMMEDIATE                  = 0x20D,
-    SMSG_CHANGEPLAYER_DIFFICULTY_RESULT             = 0x20E,
+    SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT            = 0x20E,
     CMSG_GM_TEACH                                   = 0x20F,
     CMSG_GM_CREATE_ITEM_TARGET                      = 0x210,
     CMSG_GMTICKET_GETTICKET                         = 0x211,

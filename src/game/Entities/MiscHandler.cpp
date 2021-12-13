@@ -1363,7 +1363,7 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recv_data)
     bool isHeroic = mode == 1;
 
     Map* map = _player->GetMap();
-    if (!map->IsDungeon())
+    if (!map->IsDungeon() || !map->GetEntry()->IsDynamicDifficultyMap())
     {
         // can only be used from inside a dynamic difficulty dungeon
         return;
@@ -1377,45 +1377,65 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recv_data)
 
     Difficulty difficulty = Difficulty(isHeroic ? currentDifficulty + 2 : currentDifficulty - 2);
 
-    bool dynamicDifficultyChange = map->GetEntry()->IsDynamicDifficultyMap();
-    if (dynamicDifficultyChange && map->GetInstanceData()->IsEncounterInProgress())
+    if (map->GetInstanceData()->IsEncounterInProgress())
+    {
+        WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+        result << uint32(RESULT_ENCOUNTER_IN_PROGRESS);
+        SendPacket(result);
+        return;
+    }
+
+    Group* group = _player->GetGroup();
+    if (!group) // only used while in raid group
         return;
 
-    if (Group* group = _player->GetGroup())
+    if (!group->IsLeader(_player->GetObjectGuid()))
+        return;
+
+    // everyone must be eligible to enter the other difficulty
+    if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(map->GetId()))
     {
-        if (group->IsLeader(_player->GetObjectGuid()))
+        uint32 miscRequirement;
+        for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
         {
-            // everyone must be eligible to enter the other difficulty
-            if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(map->GetId()))
+            Player* player = itr->getSource();
+            if (player->IsInCombat())
             {
-                uint32 miscRequirement;
-                for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
-                {
-                    Player* player = itr->getSource();
-                    auto lockStatus = player->GetAreaTriggerLockStatus(at, difficulty, miscRequirement);
-                    if (AREA_LOCKSTATUS_OK != lockStatus)
-                    {
-                        _player->SendTransferAbortedByLockStatus(map->GetEntry(), lockStatus, miscRequirement);
-                        return;
-                    }
-                }
+                WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+                result << uint32(RESULT_PLAYER_IN_COMBAT);
+                SendPacket(result);
+                return;
             }
 
-            WorldPacket result(SMSG_CHANGEPLAYER_DIFFICULTY_RESULT);
-            result << uint32(0);
-            result << uint8(isHeroic);
-            SendPacket(result);
-
-            WorldPacket resultTwo(SMSG_CHANGEPLAYER_DIFFICULTY_RESULT);
-            resultTwo << uint32(9);
-            SendPacket(resultTwo);
-
-            group->SetRaidDifficulty(difficulty);
+            auto lockStatus = player->GetAreaTriggerLockStatus(at, difficulty, miscRequirement);
+            if (AREA_LOCKSTATUS_OK != lockStatus)
+            {
+                WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+                result << uint32(RESULT_FAILED_CONDITION);
+                result << uint32(miscRequirement);
+                SendPacket(result);
+                return;
+            }
         }
     }
 
-    if (dynamicDifficultyChange)
-        map->ChangeMapDifficulty(difficulty);
+    WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+    result << uint32(RESULT_SET_DIFFICULTY);
+    result << uint8(isHeroic);
+    group->BroadcastPacketInMap(_player, result);
+
+    group->SetRaidDifficulty(difficulty);
+
+    result = WorldPacket(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+    result << uint32(RESULT_START);
+    result << uint32(300); // 5 minute cooldown for another change
+    group->BroadcastPacketInMap(_player, result);
+
+    map->ChangeMapDifficulty(difficulty); // blizzard likely doesnt do this in-place        
+
+    result = WorldPacket(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+    result << uint32(RESULT_COMPLETE);
+    group->BroadcastPacketInMap(_player, result);
 }
 
 void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)

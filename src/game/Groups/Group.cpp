@@ -775,6 +775,22 @@ void Group::BroadcastPacket(WorldPacket const& packet, bool ignorePlayersInBGRai
     }
 }
 
+void Group::BroadcastPacketInMap(WorldObject const* who, WorldPacket const& packet, int group, ObjectGuid ignore) const
+{
+    for (auto itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        Player* pl = itr->getSource();
+        if (!pl || (ignore && pl->GetObjectGuid() == ignore))
+            continue;
+
+        if (!pl->IsInMap(who))
+            continue;
+
+        if (pl->GetSession() && (group == -1 || itr->getSubGroup() == group))
+            pl->GetSession()->SendPacket(packet);
+    }
+}
+
 void Group::BroadcastPacketInRange(WorldObject const* who, WorldPacket const& packet, bool ignorePlayersInBGRaid, int group, ObjectGuid ignore) const
 {
     for (auto itr = GetFirstMember(); itr != nullptr; itr = itr->next())

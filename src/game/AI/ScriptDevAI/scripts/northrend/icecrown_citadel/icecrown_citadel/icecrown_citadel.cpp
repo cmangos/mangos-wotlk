@@ -936,6 +936,20 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         SaveToDB();
         OUT_SAVE_INST_DATA_COMPLETE;
     }
+
+    if (uiData == FAIL) // this would need to be done in all dynamic difficulty instances but wotlk only really needs it in icc
+    {
+        if (Player* player = GetPlayerInMap(false, false))
+        {
+            if (Group* group = player->GetGroup())
+            {
+                WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+                result << uint32(RESULT_FAILED_CONDITION);
+                result << uint32(60);
+                group->BroadcastPacketInMap(player, result);
+            }
+        }
+    }
 }
 
 void instance_icecrown_citadel::JustDidDialogueStep(int32 iEntry)

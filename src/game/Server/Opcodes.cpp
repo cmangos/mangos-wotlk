@@ -552,7 +552,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x20B*/ { "CMSG_UPDATE_ACCOUNT_DATA",                     STATUS_AUTHED,   PROCESS_THREADUNSAFE, &WorldSession::HandleUpdateAccountData},
     /*0x20C*/ { "SMSG_UPDATE_ACCOUNT_DATA",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x20D*/ { "SMSG_CLEAR_FAR_SIGHT_IMMEDIATE",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x20E*/ { "SMSG_CHANGEPLAYER_DIFFICULTY_RESULT",          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
+    /*0x20E*/ { "SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT",         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x20F*/ { "CMSG_GM_TEACH",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x210*/ { "CMSG_GM_CREATE_ITEM_TARGET",                   STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x211*/ { "CMSG_GMTICKET_GETTICKET",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleGMTicketGetTicketOpcode   },

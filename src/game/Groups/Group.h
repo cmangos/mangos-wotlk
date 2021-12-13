@@ -265,6 +265,7 @@ class Group
         void UpdateOfflineLeader(time_t time, uint32 delay);
         // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket const& packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = ObjectGuid()) const;
+        void BroadcastPacketInMap(WorldObject const* who, WorldPacket const& packet, int group = -1, ObjectGuid ignore = ObjectGuid()) const;
         void BroadcastPacketInRange(WorldObject const* who, WorldPacket const& packet, bool ignorePlayersInBGRaid, int group = -1, ObjectGuid ignore = ObjectGuid()) const;
         void BroadcastReadyCheck(WorldPacket const& packet) const;
         void OfflineReadyCheck();
