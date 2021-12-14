@@ -1579,3 +1579,22 @@ void WorldSession::HandleCommentatorModeOpcode(WorldPacket& recv_data)
             return;
     }
 }
+void WorldSession::HandleInstanceLockResponse(WorldPacket& recv_data)
+{
+    uint8 accept;
+    recv_data >> accept;
+
+    if (!_player->HasPendingBind())
+    {
+        sLog.outError("InstanceLockResponse: Player %s %s tried to bind himself/teleport to graveyard without a pending bind!",
+            _player->GetName(), _player->GetGUIDLow());
+        return;
+    }
+
+    if (accept)
+        _player->BindToInstance();
+    else
+        _player->RepopAtGraveyard();
+
+    _player->SetPendingBind(0, 0, 0);
+}

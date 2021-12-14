@@ -2396,6 +2396,9 @@ class Player : public Unit
         void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
         void UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficulty, bool unload = false);
         InstancePlayerBind* BindToInstance(DungeonPersistentState* state, bool permanent, bool load = false);
+        void BindToInstance();
+        void SetPendingBind(uint32 mapId, uint32 instanceId, uint32 bindTimer);
+        bool HasPendingBind() const { return m_pendingBindId > 0; }
         void SendRaidInfo();
         void SendSavedInstances();
         static void ConvertInstancesToGroup(Player* player, Group* group = nullptr, ObjectGuid player_guid = ObjectGuid());
@@ -2880,6 +2883,10 @@ class Player : public Unit
 
         std::unordered_map<uint32, TimePoint> m_enteredInstances;
         uint32 m_createdInstanceClearTimer;
+
+        uint32 m_pendingBindMapId;
+        uint32 m_pendingBindId;
+        uint32 m_pendingBindTimer;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

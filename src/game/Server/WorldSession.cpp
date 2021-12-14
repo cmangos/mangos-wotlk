@@ -620,6 +620,11 @@ void WorldSession::LogoutPlayer()
             _player->BuildPlayerRepop();
             _player->RepopAtGraveyard();
         }
+        else if (_player->HasPendingBind())
+        {
+            _player->RepopAtGraveyard();
+            _player->SetPendingBind(0, 0, 0);
+        }
         else if (_player->IsInCombat())
             _player->CombatStopWithPets(true, true);
 

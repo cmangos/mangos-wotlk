@@ -689,6 +689,9 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_consumedMods = nullptr;
     m_modsSpell = nullptr;
+
+    m_pendingBindId = 0;
+    m_pendingBindTimer = 0;
 }
 
 Player::~Player()
@@ -1658,6 +1661,19 @@ void Player::Update(const uint32 diff)
 
         if (m_drunkTimer > 9 * IN_MILLISECONDS)
             HandleSobering();
+    }
+
+    if (HasPendingBind())
+    {
+        if (m_pendingBindTimer <= diff)
+        {
+            // Player left the instance
+            if (m_pendingBindId == GetInstanceId())
+                BindToInstance();
+            SetPendingBind(0, 0, 0);
+        }
+        else
+            m_pendingBindTimer -= diff;
     }
 
     // Not auto-free ghost from body in instances; also check for resurrection prevention
@@ -17734,6 +17750,35 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
         return &bind;
     }
     return nullptr;
+}
+
+void Player::BindToInstance()
+{
+    if (!IsInWorld())
+        return;
+
+    DungeonPersistentState* state = dynamic_cast<DungeonPersistentState*>(GetMap()->GetPersistentState());
+    if (!state)
+        return;
+
+    if (state->GetInstanceId() != m_pendingBindId || state->GetMapId() != m_pendingBindMapId)
+        return;
+
+    WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
+    data << uint32(0);
+    SendDirectMessage(data);
+    if (!IsGameMaster())
+    {
+        BindToInstance(state, true);
+        sCalendarMgr.SendCalendarRaidLockoutAdd(this, state);
+    }
+}
+
+void Player::SetPendingBind(uint32 mapId, uint32 instanceId, uint32 bindTimer)
+{
+    m_pendingBindMapId = mapId;
+    m_pendingBindId = instanceId;
+    m_pendingBindTimer = bindTimer;
 }
 
 DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)

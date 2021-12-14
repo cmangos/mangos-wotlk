@@ -1740,11 +1740,12 @@ bool DungeonMap::Add(Player* player)
                 // players also become permanently bound when they enter
                 if (groupBind->perm)
                 {
-                    WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
-                    data << uint32(0);
-                    player->GetSession()->SendPacket(data);
-                    player->BindToInstance(GetPersistanceState(), true);
-                    sCalendarMgr.SendCalendarRaidLockoutAdd(player, GetPersistanceState());
+                    WorldPacket data(SMSG_PENDING_RAID_LOCK, 9);
+                    data << uint32(60000);
+                    data << uint32(groupBind->state ? groupBind->state->GetCompletedEncountersMask() : 0);
+                    data << uint8(0);
+                    player->SendDirectMessage(data);
+                    player->SetPendingBind(GetId(), GetInstanceId(), 60000);
                 }
             }
         }
