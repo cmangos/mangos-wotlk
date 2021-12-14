@@ -17621,7 +17621,7 @@ void Player::_LoadBoundInstances(QueryResult* result)
 
     Group* group = GetGroup();
 
-    // QueryResult *result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(m_guid));
+    // QueryResult *result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, ExtendState, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(m_guid));
     if (result)
     {
         do
@@ -17631,6 +17631,7 @@ void Player::_LoadBoundInstances(QueryResult* result)
             uint32 mapId = fields[2].GetUInt32();
             uint32 instanceId = fields[0].GetUInt32();
             uint8 difficulty = fields[3].GetUInt8();
+            BindExtensionState extendState = BindExtensionState(fields[4].GetUInt8());
 
             time_t resetTime = (time_t)fields[4].GetUInt64();
             // the resettime for normal instances is only saved when the InstanceSave is unloaded
@@ -17671,14 +17672,14 @@ void Player::_LoadBoundInstances(QueryResult* result)
 
             // since non permanent binds are always solo bind, they can always be reset
             DungeonPersistentState* state = (DungeonPersistentState*)sMapPersistentStateMgr.AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, !perm, true);
-            if (state) BindToInstance(state, perm, true);
+            if (state) BindToInstance(state, perm, extendState, true);
         }
         while (result->NextRow());
         delete result;
     }
 }
 
-InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty)
+InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty, bool withExpired)
 {
     // some instances only have one difficulty
     MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapid, difficulty);
@@ -17687,7 +17688,8 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
 
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     if (itr != m_boundInstances[difficulty].end())
-        return &itr->second;
+        if (itr->second.extendState || withExpired)
+            return &itr->second;
     return nullptr;
 }
 
@@ -17712,24 +17714,31 @@ void Player::UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficu
     }
 }
 
-InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool permanent, bool load)
+InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool permanent, BindExtensionState extendState, bool load)
 {
     if (state)
     {
         InstancePlayerBind& bind = m_boundInstances[state->GetDifficulty()][state->GetMapId()];
+        if (extendState == EXTEND_STATE_KEEP) // special flag, keep the player's current extend state when updating for new boss down
+        {
+            if (state == bind.state)
+                extendState = bind.extendState;
+            else
+                extendState = EXTEND_STATE_NORMAL;
+        }
         if (bind.state)
         {
             // update the state when the group kills a boss
-            if (permanent != bind.perm || state != bind.state)
+            if (permanent != bind.perm || state != bind.state || extendState != bind.extendState)
                 if (!load)
-                    CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u', permanent = '%u' WHERE guid = '%u' AND instance = '%u'",
-                                               state->GetInstanceId(), permanent, GetGUIDLow(), bind.state->GetInstanceId());
+                    CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u', permanent = '%u', ExtendState = '%u' WHERE guid = '%u' AND instance = '%u'",
+                                               state->GetInstanceId(), permanent, extendState, GetGUIDLow(), bind.state->GetInstanceId());
         }
         else
         {
             if (!load)
-                CharacterDatabase.PExecute("INSERT INTO character_instance (guid, instance, permanent) VALUES ('%u', '%u', '%u')",
-                                           GetGUIDLow(), state->GetInstanceId(), permanent);
+                CharacterDatabase.PExecute("INSERT INTO character_instance (guid, instance, permanent, ExtendState) VALUES ('%u', '%u', '%u', '%u')",
+                                           GetGUIDLow(), state->GetInstanceId(), permanent, extendState);
         }
 
         if (bind.state != state)
@@ -17744,9 +17753,10 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
 
         bind.state = state;
         bind.perm = permanent;
+        bind.extendState = extendState;
         if (!load)
-            DEBUG_LOG("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d",
-                      GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty());
+            DEBUG_LOG("Player::BindToInstance: %s(%d) is now bound to map %d, instance %d, difficulty %d, extendState %u",
+                      GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty(), extendState);
         return &bind;
     }
     return nullptr;
@@ -17819,15 +17829,19 @@ void Player::SendRaidInfo()
     {
         for (BoundInstancesMap::const_iterator itr = m_boundInstance.begin(); itr != m_boundInstance.end(); ++itr)
         {
+            InstancePlayerBind const& bind = itr->second;
             if (itr->second.perm)
             {
                 DungeonPersistentState* state = itr->second.state;
                 data << uint32(state->GetMapId());          // map id
                 data << uint32(state->GetDifficulty());     // difficulty
                 data << ObjectGuid(state->GetInstanceGuid());// instance guid
-                data << uint8(1);                           // expired = 0
-                data << uint8(0);                           // extended = 1
-                data << uint32(state->GetResetTime() - now);// reset time
+                data << uint8(bind.extendState != EXTEND_STATE_EXPIRED); // expired = 0
+                data << uint8(bind.extendState == EXTEND_STATE_EXTENDED); // extended = 1
+                time_t nextReset = state->GetResetTime();
+                if (bind.extendState == EXTEND_STATE_EXTENDED)
+                    nextReset = sMapPersistentStateMgr.GetSubsequentResetTime(state->GetMapId(), state->GetDifficulty(), state->GetResetTime());
+                data << uint32(nextReset - now);// reset time
                 ++counter;
             }
         }
@@ -17905,7 +17919,8 @@ void Player::ConvertInstancesToGroup(Player* player, Group* group, ObjectGuid pl
                 has_binds = true;
 
                 if (group)
-                    group->BindToInstance(itr->second.state, itr->second.perm, true);
+                    if (itr->second.extendState) // not expired
+                        group->BindToInstance(itr->second.state, itr->second.perm, true);
 
                 // permanent binds are not removed
                 if (!itr->second.perm)

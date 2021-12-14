@@ -901,6 +901,7 @@ class WorldSession
         void HandleSetDungeonDifficultyOpcode(WorldPacket& recv_data);
         void HandleSetRaidDifficultyOpcode(WorldPacket& recv_data);
         void HandleChangePlayerDifficulty(WorldPacket& recv_data);
+        void HandleSetSavedInstanceExtend(WorldPacket& recv_data);
         void HandleInstanceLockResponse(WorldPacket& recv_data);
         void HandleSetTitleOpcode(WorldPacket& recv_data);
         void HandleRealmSplitOpcode(WorldPacket& recv_data);

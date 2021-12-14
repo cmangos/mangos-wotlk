@@ -187,6 +187,27 @@ void stripLineInvisibleChars(std::string& str)
         str.erase(wpos, str.size());
 }
 
+tm TimeBreakdown(time_t time)
+{
+    tm timeLocal = *localtime(&time);
+    return timeLocal;
+}
+
+time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime)
+{
+    tm timeLocal = TimeBreakdown(time);
+    timeLocal.tm_hour = 0;
+    timeLocal.tm_min = 0;
+    timeLocal.tm_sec = 0;
+    time_t midnightLocal = mktime(&timeLocal);
+    time_t hourLocal = midnightLocal + hour * HOUR;
+
+    if (onlyAfterTime && hourLocal <= time)
+        hourLocal += DAY;
+
+    return hourLocal;
+}
+
 std::string secsToTimeString(time_t timeInSecs, bool shortText, bool hoursOnly)
 {
     time_t secs    = timeInSecs % MINUTE;

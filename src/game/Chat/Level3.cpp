@@ -6339,11 +6339,12 @@ bool ChatHandler::HandleInstanceListBindsCommand(char* /*args*/)
         for (Player::BoundInstancesMap::const_iterator itr = binds.begin(); itr != binds.end(); ++itr)
         {
             DungeonPersistentState* state = itr->second.state;
+            auto bind = itr->second;
             std::string timeleft = secsToTimeString(state->GetResetTime() - time(nullptr), true);
             if (const MapEntry* entry = sMapStore.LookupEntry(itr->first))
             {
-                PSendSysMessage("map: %d (%s) inst: %d perm: %s diff: %d canReset: %s TTR: %s",
-                                itr->first, entry->name[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no",
+                PSendSysMessage("map: %d (%s) inst: %d perm: %s ExtendState: %s diff: %d canReset: %s TTR: %s",
+                                itr->first, entry->name[GetSessionDbcLocale()], state->GetInstanceId(), itr->second.perm ? "yes" : "no", bind.extendState == EXTEND_STATE_EXPIRED ? "expired" : bind.extendState == EXTEND_STATE_EXTENDED ? "yes" : "no",
                                 state->GetDifficulty(), state->CanReset() ? "yes" : "no", timeleft.c_str());
             }
             else

@@ -226,13 +226,17 @@ class DungeonPersistentState : public MapPersistentState
         /* Remove players bind to this state */
         void UnbindThisState();
 
+        typedef PlayerList PlayerListType;
+        typedef std::list<Group*> GroupListType;
+
+        PlayerListType& GetPlayerList() { return m_playerList; }
+        GroupListType& GetGroupList() { return m_groupList; }
+
     protected:
         bool CanBeUnload() const override;                  // overwrite MapPersistentState::CanBeUnload
         bool HasBounds() const { return !m_playerList.empty() || !m_groupList.empty(); }
 
     private:
-        typedef PlayerList PlayerListType;
-        typedef std::list<Group*> GroupListType;
 
         time_t m_resetTime;
         bool m_canReset;
@@ -364,6 +368,8 @@ class MapPersistentStateManager : public MaNGOS::Singleton<MapPersistentStateMan
         void GetStatistics(uint32& numStates, uint32& numBoundPlayers, uint32& numBoundGroups);
 
         void Update() { m_Scheduler.Update(); }
+
+        time_t GetSubsequentResetTime(uint32 mapid, Difficulty difficulty, time_t resetTime) const;
     private:
         typedef std::unordered_map<uint32 /*InstanceId or MapId*/, MapPersistentState*> PersistentStateMap;
 

@@ -882,6 +882,14 @@ enum ReputationSource
 #define MAX_PLAYER_SUMMON_DELAY (2*MINUTE)
 #define MAX_MONEY_AMOUNT        (0x7FFFFFFF-1)
 
+enum BindExtensionState
+{
+    EXTEND_STATE_EXPIRED  =   0,
+    EXTEND_STATE_NORMAL   =   1,
+    EXTEND_STATE_EXTENDED =   2,
+    EXTEND_STATE_KEEP     = 255   // special state: keep current save type
+};
+
 struct InstancePlayerBind
 {
     DungeonPersistentState* state;
@@ -889,7 +897,12 @@ struct InstancePlayerBind
     /* permanent PlayerInstanceBinds are created in Raid/Heroic instances for players
        that aren't already permanently bound when they are inside when a boss is killed
        or when they enter an instance that the group leader is permanently bound to. */
-    InstancePlayerBind() : state(nullptr), perm(false) {}
+    /* extend state listing:
+    EXPIRED  - doesn't affect anything unless manually re-extended by player
+    NORMAL   - standard state
+    EXTENDED - won't be promoted to EXPIRED at next reset period, will instead be promoted to NORMAL */
+    BindExtensionState extendState;
+    InstancePlayerBind() : state(nullptr), perm(false), extendState(EXTEND_STATE_NORMAL) {}
 };
 
 enum ReferAFriendError
@@ -2391,11 +2404,11 @@ class Player : public Unit
         bool m_InstanceValid;
         // permanent binds and solo binds by difficulty
         BoundInstancesMap m_boundInstances[MAX_DIFFICULTY];
-        InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty);
+        InstancePlayerBind* GetBoundInstance(uint32 mapid, Difficulty difficulty, bool withExpired = false);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
         void UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload = false);
         void UnbindInstance(BoundInstancesMap::iterator& itr, Difficulty difficulty, bool unload = false);
-        InstancePlayerBind* BindToInstance(DungeonPersistentState* state, bool permanent, bool load = false);
+        InstancePlayerBind* BindToInstance(DungeonPersistentState* state, bool permanent, BindExtensionState extendState = EXTEND_STATE_NORMAL, bool load = false);
         void BindToInstance();
         void SetPendingBind(uint32 mapId, uint32 instanceId, uint32 bindTimer);
         bool HasPendingBind() const { return m_pendingBindId > 0; }

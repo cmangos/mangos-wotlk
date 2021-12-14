@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_14035_01_characters_raf` bit(1) DEFAULT NULL
+  `required_14044_01_characters_extend_state` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -588,6 +588,7 @@ CREATE TABLE `character_instance` (
   `guid` int(11) unsigned NOT NULL DEFAULT '0',
   `instance` int(11) unsigned NOT NULL DEFAULT '0',
   `permanent` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `ExtendState` TINYINT UNSIGNED DEFAULT '1' COMMENT 'Extended Lock',
   PRIMARY KEY (`guid`,`instance`),
   KEY `instance` (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

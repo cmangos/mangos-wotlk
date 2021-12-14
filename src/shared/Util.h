@@ -33,6 +33,7 @@ float GetFloatValueFromArray(Tokens const& data, uint16 index);
 
 void stripLineInvisibleChars(std::string& str);
 
+time_t GetLocalHourTimestamp(time_t time, uint8 hour, bool onlyAfterTime = true);
 std::string secsToTimeString(time_t timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(const std::string& timestring);
 std::string TimeToTimestampStr(time_t t);

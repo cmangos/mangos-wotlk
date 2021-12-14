@@ -1579,6 +1579,40 @@ void WorldSession::HandleCommentatorModeOpcode(WorldPacket& recv_data)
             return;
     }
 }
+
+void WorldSession::HandleSetSavedInstanceExtend(WorldPacket& recv_data)
+{
+    uint32 mapId, difficulty;
+    uint8 toggleExtend;
+    recv_data >> mapId >> difficulty >> toggleExtend;
+    DEBUG_LOG("CMSG_SET_SAVED_INSTANCE_EXTEND - MapId: %u, Difficulty: %u, ToggleExtend: %s", mapId, difficulty, toggleExtend ? "On" : "Off");
+
+    if (Player* player = GetPlayer())
+    {
+        InstancePlayerBind* instanceBind = player->GetBoundInstance(mapId, Difficulty(difficulty), toggleExtend == 1); // include expired instances if we are toggling extend on
+        if (!instanceBind || !instanceBind->state || !instanceBind->perm)
+            return;
+
+        BindExtensionState newState;
+        if (!toggleExtend || instanceBind->extendState == EXTEND_STATE_EXPIRED)
+            newState = EXTEND_STATE_NORMAL;
+        else
+            newState = EXTEND_STATE_EXTENDED;
+
+        player->BindToInstance(instanceBind->state, true, newState, false);
+    }
+
+    /*
+    InstancePlayerBind* instanceBind = _player->GetBoundInstance(mapId, Difficulty(difficulty));
+    if (!instanceBind || !instanceBind->save)
+        return;
+
+    InstanceSave* save = instanceBind->save;
+    // http://www.wowwiki.com/Instance_Lock_Extension
+    // SendCalendarRaidLockoutUpdated(save);
+    */
+}
+
 void WorldSession::HandleInstanceLockResponse(WorldPacket& recv_data)
 {
     uint8 accept;
