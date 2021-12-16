@@ -6010,6 +6010,14 @@ TrainerGreeting const* ObjectMgr::GetTrainerGreetingData(uint32 entry) const
     return &itr->second;
 }
 
+AccessRequirement const* ObjectMgr::GetAccessRequirement(uint32 mapid, Difficulty difficulty) const
+{
+    auto itr = m_accessRequirements.find(MAKE_PAIR32(mapid, difficulty));
+    if (itr != m_accessRequirements.end())
+        return &itr->second;
+    return nullptr;
+}
+
 void ObjectMgr::LoadTrainerGreetings()
 {
     m_trainerGreetingMap.clear();                           // need for reload case
@@ -6656,6 +6664,98 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
     sLog.outString(">> Loaded %u area trigger teleport definitions", count);
     sLog.outString();
+}
+
+void ObjectMgr::LoadAccessRequirements()
+{
+    m_accessRequirements.clear();
+
+    //                                                              0      1           2          3          4           5      6             7             8                      9     10
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT mapid, difficulty, level_min, level_max, item_level, item, item2, quest_done_A, quest_done_H, completed_achievement, quest_failed_text FROM access_requirement"));
+
+    uint32 count = 0;
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outString(">> Loaded %u access_requirement definitions", count);
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field* fields = result->Fetch();
+
+        bar.step();
+
+        uint32 mapid = fields[0].GetUInt32();
+        uint8 difficulty = fields[1].GetUInt8();
+        uint32 requirement_ID = MAKE_PAIR32(mapid, difficulty);
+
+        AccessRequirement ar;
+
+        ar.levelMin = fields[2].GetUInt8();
+        ar.levelMax = fields[3].GetUInt8();
+        ar.item_level = fields[4].GetUInt16();
+        ar.item = fields[5].GetUInt32();
+        ar.item2 = fields[6].GetUInt32();
+        ar.quest_A = fields[7].GetUInt32();
+        ar.quest_H = fields[8].GetUInt32();
+        ar.achievement = fields[9].GetUInt32();
+        ar.questFailedText = fields[10].GetString();
+
+        if (ar.item)
+        {
+            ItemPrototype const* pProto = GetItemPrototype(ar.item);
+            if (!pProto)
+            {
+                sLog.outString("Key item %u does not exist for map %u difficulty %u, removing key requirement.", ar.item, mapid, difficulty);
+                ar.item = 0;
+            }
+        }
+
+        if (ar.item2)
+        {
+            ItemPrototype const* pProto = GetItemPrototype(ar.item2);
+            if (!pProto)
+            {
+                sLog.outString("Second key item %u does not exist for map %u difficulty %u, removing key requirement.", ar.item2, mapid, difficulty);
+                ar.item2 = 0;
+            }
+        }
+
+        if (ar.quest_A)
+        {
+            if (!GetQuestTemplate(ar.quest_A))
+            {
+                sLog.outString("Required Alliance Quest %u not exist for map %u difficulty %u, remove quest done requirement.", ar.quest_A, mapid, difficulty);
+                ar.quest_A = 0;
+            }
+        }
+
+        if (ar.quest_H)
+        {
+            if (!GetQuestTemplate(ar.quest_H))
+            {
+                sLog.outString("Required Horde Quest %u not exist for map %u difficulty %u, remove quest done requirement.", ar.quest_H, mapid, difficulty);
+                ar.quest_H = 0;
+            }
+        }
+
+        if (ar.achievement)
+        {
+            if (!sAchievementMgr.GetAchievementCriteriaByAchievement(ar.achievement))
+            {
+                sLog.outString("Required Achievement %u not exist for map %u difficulty %u, remove achievement requirement.", ar.achievement, mapid, difficulty);
+                ar.achievement = 0;
+            }
+        }
+
+        m_accessRequirements.emplace(requirement_ID, ar);
+    } while (result->NextRow());
 }
 
 /*

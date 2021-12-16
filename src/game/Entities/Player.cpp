@@ -25017,3 +25017,23 @@ void Player::SetSpellModSpell(Spell* spell)
     m_modsSpell = spell;
     m_consumedMods = &spell->m_usedAuraCharges;
 }
+
+float Player::GetAverageItemLevel() const
+{
+    float sum = 0;
+    uint32 count = 0;
+
+    for (int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+    {
+        // don't check tabard, ranged, offhand or shirt
+        if (i == EQUIPMENT_SLOT_TABARD || i == EQUIPMENT_SLOT_RANGED || i == EQUIPMENT_SLOT_OFFHAND || i == EQUIPMENT_SLOT_BODY)
+            continue;
+
+        if (m_items[i] && m_items[i]->GetProto())
+            sum += m_items[i]->GetProto()->GetItemLevelIncludingQuality();
+
+        ++count;
+    }
+
+    return ((float)sum) / count;
+}

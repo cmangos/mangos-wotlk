@@ -169,6 +169,7 @@ extern DBCStorage <ItemLimitCategoryEntry>       sItemLimitCategoryStore;
 extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
 extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
 extern DBCStorage <ItemSetEntry>                 sItemSetStore;
+extern DBCStorage <LFGDungeonEntry>              sLFGDungeonStore;
 extern DBCStorage <LiquidTypeEntry>              sLiquidTypeStore;
 extern DBCStorage <LockEntry>                    sLockStore;
 extern DBCStorage <MailTemplateEntry>            sMailTemplateStore;
@@ -234,5 +235,7 @@ DBCStorage <ItemEntry>                  const* GetItemDisplayStore();
 DBCStorage <CreatureDisplayInfoEntry>   const* GetCreatureDisplayStore();
 DBCStorage <EmotesEntry>                const* GetEmotesStore();
 DBCStorage <EmotesTextEntry>            const* GetEmotesTextStore();
+
+LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, Difficulty difficulty);
 
 #endif

@@ -2550,6 +2550,8 @@ class Player : public Unit
 
         Spell* GetSpellModSpell() { return m_modsSpell; }
         void SetSpellModSpell(Spell* spell);
+
+        float GetAverageItemLevel() const;
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

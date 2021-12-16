@@ -31,6 +31,7 @@
 #include "Entities/Item.h"
 #include "Server/WorldSocket.h"
 #include "Multithreading/Messager.h"
+#include "LFG/LFGDefines.h"
 
 #include <deque>
 #include <mutex>
@@ -168,17 +169,6 @@ enum LfgUpdateType
 {
     LFG_UPDATE_JOIN     = 5,
     LFG_UPDATE_LEAVE    = 7,
-};
-
-enum LfgType
-{
-    LFG_TYPE_NONE                 = 0,
-    LFG_TYPE_DUNGEON              = 1,
-    LFG_TYPE_RAID                 = 2,
-    LFG_TYPE_QUEST                = 3,
-    LFG_TYPE_ZONE                 = 4,
-    LFG_TYPE_HEROIC_DUNGEON       = 5,
-    LFG_TYPE_RANDOM_DUNGEON       = 6
 };
 
 enum ChatRestrictionType
@@ -1016,11 +1006,11 @@ class WorldSession
         // LFG - Wotlk
         void HandleLfgJoinOpcode(WorldPacket& recv_data);
         void HandleLfgLeaveOpcode(WorldPacket& recv_data);
-        void HandleSearchLfgJoinOpcode(WorldPacket& recv_data);
-        void HandleSearchLfgLeaveOpcode(WorldPacket& recv_data);
-        void HandleSetLfgCommentOpcode(WorldPacket& recv_data);
+        void HandleLfrJoinOpcode(WorldPacket& recv_data);
+        void HandleLfrLeaveOpcode(WorldPacket& recv_data);
+        void HandleLfgSetCommentOpcode(WorldPacket& recv_data);
         void HandleLfgSetBootVoteOpcode(WorldPacket& recv_data);
-        void HandleLfgTeleport(WorldPacket& recv_data);
+        void HandleLfgTeleportOpcode(WorldPacket& recv_data);
         void HandleLfgGetStatus(WorldPacket& recv_data);
         void HandleLfgProposalResultOpcode(WorldPacket& recv_data);
         void HandleLfgSetRolesOpcode(WorldPacket& recv_data);

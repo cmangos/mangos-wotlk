@@ -70,6 +70,7 @@
 #include "Cinematics/CinematicMgr.h"
 #include "Maps/TransportMgr.h"
 #include "Anticheat/Anticheat.hpp"
+#include "LFG/LFGMgr.h"
 
 #ifdef BUILD_AHBOT
  #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -1195,6 +1196,12 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading AreaTrigger script names...");
     sScriptDevAIMgr.LoadAreaTriggerScripts();
 
+    sLog.outString("Loading LFG dungeons...");
+    sLFGMgr.LoadLFGDungeons();
+
+    sLog.outString("Loading LFG rewards...");
+    sLFGMgr.LoadRewards();
+
     sLog.outString("Loading event id script names...");
     sScriptDevAIMgr.LoadEventIdScripts();
 
@@ -1259,6 +1266,9 @@ void World::SetInitialWorldSettings()
     sAchievementMgr.LoadCompletedAchievements();
     sLog.outString(">>> Achievements loaded");
     sLog.outString();
+
+    sLog.outString("Loading access requirements...");
+    sObjectMgr.LoadAccessRequirements();                    // must be after achievements
 
     sLog.outString("Loading Instance encounters data...");  // must be after Creature loading
     sObjectMgr.LoadInstanceEncounters();

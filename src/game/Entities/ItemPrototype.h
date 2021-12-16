@@ -717,6 +717,8 @@ struct ItemPrototype
     {
         return (Class == ITEM_CLASS_TRADE_GOODS && (1 << SubClass) & (1 << ITEM_SUBCLASS_ARMOR_ENCHANTMENT | 1 << ITEM_SUBCLASS_WEAPON_ENCHANTMENT));
     }
+
+    float GetItemLevelIncludingQuality() const;
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform

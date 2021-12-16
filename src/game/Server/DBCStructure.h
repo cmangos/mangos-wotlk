@@ -1337,26 +1337,31 @@ struct ItemSetEntry
     uint32    required_skill_value;                         // 52       m_requiredSkillRank
 };
 
-/*struct LfgDungeonsEntry
+struct LFGDungeonEntry
 {
-    m_ID
-    m_name_lang
-    m_minLevel
-    m_maxLevel
-    m_target_level
-    m_target_level_min
-    m_target_level_max
-    m_mapID
-    m_difficulty
-    m_flags
-    m_typeID
-    m_faction
-    m_textureFilename
-    m_expansionLevel
-    m_order_index
-    m_group_id
-    m_description_lang
-};*/
+    uint32 ID;                                              // 0
+    char const* Name[16];                                   // 1-16
+    //uint32 Name_lang_mask;                                // 17
+    uint32 MinLevel;                                        // 18
+    uint32 MaxLevel;                                        // 19
+    uint32 TargetLevel;                                     // 20
+    uint32 TargetLevelMin;                                  // 21
+    uint32 TargetLevelMax;                                  // 22
+    int32 MapID;                                            // 23
+    uint32 Difficulty;                                      // 24
+    uint32 Flags;                                           // 25
+    uint32 TypeID;                                          // 26
+    //int32 Faction;                                        // 27
+    //char const* TextureFilename;                          // 28
+    uint32 ExpansionLevel;                                  // 29
+    //uint32 OrderIndex;                                    // 30
+    uint32 GroupID;                                         // 31
+    //char const* Description[16];                          // 32-47
+    //uint32 Description_lang_mask;                         // 48
+
+    // Helpers
+    uint32 Entry() const { return ID + (TypeID << 24); }
+};
 
 /*struct LfgDungeonGroupEntry
 {
@@ -1527,7 +1532,7 @@ struct PvPDifficultyEntry
     uint32      mapId;                                      // 1        m_mapID
     uint32      bracketId;                                  // 2        m_rangeIndex
     uint32      minLevel;                                   // 3        m_minLevel
-    uint32      maxLevel;                                   // 4        m_maxLevel
+    uint32      maxLevel;                                   // 4        maxLevel
     uint32      difficulty;                                 // 5        m_difficulty
 
     // helpers
@@ -1823,7 +1828,7 @@ struct SpellEntry
         uint32    procFlags;                                // 34       m_procTypeMask
         uint32    procChance;                               // 35       m_procChance
         uint32    procCharges;                              // 36       m_procCharges
-        uint32    maxLevel;                                 // 37       m_maxLevel
+        uint32    maxLevel;                                 // 37       maxLevel
         uint32    baseLevel;                                // 38       m_baseLevel
         uint32    spellLevel;                               // 39       m_spellLevel
         uint32    DurationIndex;                            // 40       m_durationIndex

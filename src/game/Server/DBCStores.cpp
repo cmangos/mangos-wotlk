@@ -132,6 +132,7 @@ DBCStorage <ItemLimitCategoryEntry> sItemLimitCategoryStore(ItemLimitCategoryEnt
 DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
 DBCStorage <ItemRandomSuffixEntry> sItemRandomSuffixStore(ItemRandomSuffixfmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
+DBCStorage <LFGDungeonEntry> sLFGDungeonStore(LFGDungeonEntryfmt);
 DBCStorage <LightEntry> sLightStore(LightEntryfmt);
 DBCStorage <LiquidTypeEntry> sLiquidTypeStore(LiquidTypefmt);
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
@@ -494,6 +495,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemRandomPropertiesStore, dbcPath, "ItemRandomProperties.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemRandomSuffixStore,    dbcPath, "ItemRandomSuffix.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemSetStore,             dbcPath, "ItemSet.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLFGDungeonStore,          dbcPath, "LFGDungeons.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLightStore,               dbcPath, "Light.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLiquidTypeStore,          dbcPath, "LiquidType.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLockStore,                dbcPath, "Lock.dbc");
@@ -1155,3 +1157,18 @@ DBCStorage <ItemEntry>          const* GetItemDisplayStore()    { return &sItemS
 DBCStorage <CreatureDisplayInfoEntry> const* GetCreatureDisplayStore() { return &sCreatureDisplayInfoStore; }
 DBCStorage <EmotesEntry>        const* GetEmotesStore()         { return &sEmotesStore;         }
 DBCStorage <EmotesTextEntry>    const* GetEmotesTextStore()     { return &sEmotesTextStore;     }
+
+LFGDungeonEntry const* GetLFGDungeon(uint32 mapId, Difficulty difficulty)
+{
+    for (uint32 i = 0; i < sLFGDungeonStore.GetNumRows(); ++i)
+    {
+        LFGDungeonEntry const* dungeon = sLFGDungeonStore.LookupEntry(i);
+        if (!dungeon)
+            continue;
+
+        if (dungeon->MapID == int32(mapId) && Difficulty(dungeon->Difficulty) == difficulty)
+            return dungeon;
+    }
+
+    return nullptr;
+}

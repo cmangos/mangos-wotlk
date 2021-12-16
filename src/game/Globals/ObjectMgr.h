@@ -104,6 +104,19 @@ struct AreaTrigger
     }
 };
 
+struct AccessRequirement
+{
+    uint8  levelMin;
+    uint8  levelMax;
+    uint16 item_level;
+    uint32 item;
+    uint32 item2;
+    uint32 quest_A;
+    uint32 quest_H;
+    uint32 achievement;
+    std::string questFailedText;
+};
+
 struct BroadcastText
 {
     uint32 Id;
@@ -596,6 +609,8 @@ class ObjectMgr
             return nullptr;
         }
 
+        AccessRequirement const* GetAccessRequirement(uint32 mapid, Difficulty difficulty) const;
+
         std::vector<uint32> const* GetAllRandomEntries(std::unordered_map<uint32, std::vector<uint32>> const& map, uint32 dbguid) const
         {
             auto itr = map.find(dbguid);
@@ -732,6 +747,7 @@ class ObjectMgr
         void LoadGossipText();
 
         void LoadAreaTriggerTeleports();
+        void LoadAccessRequirements();
         void LoadQuestAreaTriggers();
         void LoadTavernAreaTriggers();
         void LoadGameObjectForQuests();
@@ -1403,6 +1419,8 @@ class ObjectMgr
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
 
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupEntries;
+
+        std::unordered_map<uint32, AccessRequirement> m_accessRequirements;
 
         std::map<uint32, uint32> m_transportMaps;
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm

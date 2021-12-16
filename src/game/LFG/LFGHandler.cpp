@@ -21,6 +21,17 @@
 #include "Entities/Player.h"
 #include "WorldPacket.h"
 #include "Globals/ObjectAccessor.h"
+#include "LFG/LFGMgr.h"
+
+void BuildPlayerLockDungeonBlock(WorldPacket& data, LfgLockMap const& lock)
+{
+    data << uint32(lock.size());                           // Size of lock dungeons
+    for (auto itr = lock.begin(); itr != lock.end(); ++itr)
+    {
+        data << uint32(itr->first);                         // Dungeon entry (id + type)
+        data << uint32(itr->second);                        // Lock status
+    }
+}
 
 void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 {
@@ -67,47 +78,6 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& /*recv_data*/)
     // SendLfgUpdate(false, LFG_UPDATE_LEAVE, 0);
 }
 
-void WorldSession::HandleSearchLfgJoinOpcode(WorldPacket& recv_data)
-{
-    DEBUG_LOG("CMSG_LFG_SEARCH_JOIN");
-
-    uint32 entry; // Raid id to search
-    recv_data >> entry;
-}
-
-void WorldSession::HandleSearchLfgLeaveOpcode(WorldPacket& recv_data)
-{
-    DEBUG_LOG("CMSG_LFG_SEARCH_LEAVE");
-
-    uint32 dungeonId; // Raid id queue to leave
-    recv_data >> dungeonId;
-}
-
-void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
-{
-    DEBUG_LOG("CMSG_SET_LFG_COMMENT");
-
-    std::string comment;
-    recv_data >> comment;
-    DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
-}
-
-void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recv_data)
-{
-    bool agree; // Agree to kick player
-    recv_data >> agree;
-}
-
-void WorldSession::HandleLfgTeleport(WorldPacket& recv_data)
-{
-    bool out;
-    recv_data >> out;
-}
-
-void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
-{
-}
-
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recv_data)
 {
     uint32 lfgGroupID; // Internal lfgGroupID
@@ -122,8 +92,113 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recv_data)
     recv_data >> roles; // Player Group Roles
 }
 
+void WorldSession::HandleLfgSetCommentOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_SET_LFG_COMMENT");
+
+    std::string comment;
+    recv_data >> comment;
+    DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
+}
+
+void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recv_data)
+{
+    bool agree; // Agree to kick player
+    recv_data >> agree;
+}
+
+void WorldSession::HandleLfrJoinOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_SEARCH_JOIN");
+
+    uint32 entry; // Raid id to search
+    recv_data >> entry;
+}
+
+void WorldSession::HandleLfrLeaveOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("CMSG_LFG_SEARCH_LEAVE");
+
+    uint32 dungeonId; // Raid id queue to leave
+    recv_data >> dungeonId;
+}
+
+void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
+{
+}
+
+void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recv_data)
+{
+    bool out;
+    recv_data >> out;
+}
+
 void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
 {
+    DEBUG_LOG("CMSG_LFG_PLAYER_LOCK_INFO_REQUEST %s", GetPlayer()->GetName());
+
+    // Get Random dungeons that can be done at a certain level and expansion
+    uint8 level = GetPlayer()->GetLevel();
+    LfgDungeonSet const& randomDungeons = sLFGMgr.GetRandomAndSeasonalDungeons(level, GetPlayer()->GetSession()->GetExpansion());
+
+    // Get player locked Dungeons
+    LfgLockMap const& lock = sLFGMgr.GetLockedDungeons(GetPlayer());
+    uint32 rsize = uint32(randomDungeons.size());
+    uint32 lsize = uint32(lock.size());
+
+    DEBUG_LOG("SMSG_LFG_PLAYER_INFO %s", GetPlayer()->GetName());
+    WorldPacket data(SMSG_LFG_PLAYER_INFO, 1 + rsize * (4 + 1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4) + 4 + lsize * (1 + 4 + 4 + 4 + 4 + 1 + 4 + 4 + 4));
+
+    data << uint8(randomDungeons.size());                  // Random Dungeon count
+    for (auto itr = randomDungeons.begin(); itr != randomDungeons.end(); ++itr)
+    {
+        data << uint32(*itr);                               // Dungeon Entry (id + type)
+        LfgReward const* reward = sLFGMgr.GetRandomDungeonReward(*itr, level);
+        Quest const* quest = nullptr;
+        bool done = false;
+        if (reward)
+        {
+            quest = sObjectMgr.GetQuestTemplate(reward->firstQuest);
+            if (quest)
+            {
+                done = !GetPlayer()->CanRewardQuest(quest, false);
+                if (done)
+                    quest = sObjectMgr.GetQuestTemplate(reward->otherQuest);
+            }
+        }
+
+        if (quest)
+        {
+            data << uint8(done);
+            data << uint32(quest->GetRewOrReqMoney());
+            data << uint32(quest->XPValue(GetPlayer()));
+            data << uint32(0); // money variance per missing member when queueing - not actually used back then
+            data << uint32(0); // experience variance per missing member when queueing - not actually used back then
+            data << uint8(quest->GetRewItemsCount());
+            if (quest->GetRewItemsCount())
+            {
+                for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+                    if (uint32 itemId = quest->RewItemId[i])
+                    {
+                        ItemPrototype const* item = sObjectMgr.GetItemPrototype(itemId);
+                        data << uint32(itemId);
+                        data << uint32(item ? item->DisplayInfoID : 0);
+                        data << uint32(quest->RewItemCount[i]);
+                    }
+            }
+        }
+        else
+        {
+            data << uint8(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint8(0);
+        }
+    }
+    BuildPlayerLockDungeonBlock(data, lock);
+    SendPacket(data);
 }
 
 void WorldSession::HandleLfgPartyLockInfoRequestOpcode(WorldPacket& recv_data)
