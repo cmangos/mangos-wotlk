@@ -9299,9 +9299,6 @@ void Aura::PeriodicDummyTick()
 //              case 42774: break;
 //              // Headless Horseman Climax - Summoning Rhyme Aura
 //              case 42879: break;
-                case 42919:                                 // Tricky Treat
-                    target->CastSpell(target, 42966, TRIGGERED_OLD_TRIGGERED);
-                    return;
 //              // Giddyup!
 //              case 42924: break;
 //              // Ram - Trot

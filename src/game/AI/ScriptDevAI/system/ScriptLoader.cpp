@@ -34,6 +34,7 @@ extern void AddSC_world_map_ebon_hold();
 extern void AddSC_shade_of_the_horseman();
 extern void AddSC_childrens_week_tbc();
 extern void AddSC_midsummer_festival();
+extern void AddSC_hallows_end();
 extern void AddSC_brewfest();
 
 // eastern kingdoms
@@ -531,6 +532,7 @@ void AddScripts()
     AddSC_shade_of_the_horseman();
     AddSC_childrens_week_tbc();
     AddSC_midsummer_festival();
+    AddSC_hallows_end();
     AddSC_brewfest();
 
     // eastern kingdoms
