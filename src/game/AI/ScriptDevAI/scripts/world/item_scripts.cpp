@@ -332,5 +332,5 @@ void AddSC_item_scripts()
     RegisterAuraScript<GDRPeriodicDamage>("spell_gdr_periodic");
     RegisterAuraScript<OgrilaFlasks>("spell_ogrila_flasks");
     RegisterAuraScript<ReducedProcChancePast60>("spell_reduced_proc_chance_past60");
-    RegisterAuraScript<BanishExile>("spell_banish_exile");
+    RegisterSpellScript<BanishExile>("spell_banish_exile");
 }
