@@ -449,6 +449,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(16836,'spell_brambles'),
+(16839,'spell_brambles'),
+(16840,'spell_brambles'),
 (57073,'spell_drink'),
 (61830,'spell_drink'),
 (72623,'spell_drink'),

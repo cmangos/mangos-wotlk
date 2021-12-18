@@ -311,6 +311,7 @@ class Aura
         void HandleAddModifier(bool apply, bool Real);
         void HandleAuraModStun(bool apply, bool Real);
         void HandleModDamageDone(bool apply, bool Real);
+        void HandleAuraDamageShield(bool apply, bool real);
         void HandleAuraUntrackable(bool apply, bool Real);
         void HandleAuraEmpathy(bool apply, bool Real);
         void HandleModOffhandDamagePercent(bool apply, bool Real);

@@ -71,9 +71,21 @@ struct WildGrowth : public SpellScript
     }
 };
 
+struct Brambles : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterAuraScript<Regrowth>("spell_regrowth");
     RegisterAuraScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
     RegisterSpellScript<WildGrowth>("spell_wild_growth");
+    RegisterAuraScript<Brambles>("spell_brambles");
 }
