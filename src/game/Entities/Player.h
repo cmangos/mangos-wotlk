@@ -1332,7 +1332,7 @@ class Player : public Unit
         void ApplyEquipCooldown(Item* pItem);
         void SetAmmo(uint32 item);
         void RemoveAmmo();
-        float GetAmmoDPS() const { return m_ammoDPS; }
+        std::pair<float, float> GetAmmoDPS() const { return { m_ammoDPSMin, m_ammoDPSMax}; }
         bool CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const;
         void QuickEquipItem(uint16 pos, Item* pItem);
         void VisualizeItem(uint8 slot, Item* pItem);
@@ -2751,7 +2751,8 @@ class Player : public Unit
         uint32 m_ArmorProficiency;
         bool m_canTitanGrip;
         uint8 m_swingErrorMsg;
-        float m_ammoDPS;
+        float m_ammoDPSMin;
+        float m_ammoDPSMax;
 
         //////////////////// Rest System/////////////////////
         time_t time_inn_enter;
