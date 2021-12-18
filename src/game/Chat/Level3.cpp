@@ -5753,7 +5753,7 @@ bool ChatHandler::HandleRespawnCommand(char* /*args*/)
             Creature* creature = static_cast<Creature*>(target);
             if (target->IsUsingNewSpawningSystem())
             {
-                if (creature->GetCreatureGroup())
+                if (creature->GetMap()->GetMapDataContainer().GetSpawnGroupByGuid(creature->GetDbGuid(), TYPEID_UNIT))
                     target->GetMap()->GetPersistentState()->SaveCreatureRespawnTime(target->GetDbGuid(), time(nullptr));
                 else
                     target->GetMap()->GetSpawnManager().RespawnCreature(target->GetDbGuid(), 0);
