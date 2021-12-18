@@ -1361,6 +1361,19 @@ struct SpellHasteHealerTrinket : public AuraScript
     }
 };
 
+struct IncreasedHealingDoneDummy : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, int32& advertisedBenefit, float& /*totalMod*/) const override
+    {
+        advertisedBenefit += aura->GetModifier()->m_amount;
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1395,6 +1408,7 @@ void AddSC_spell_scripts()
     RegisterAuraScript<Drink>("spell_drink");
     RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
     RegisterAuraScript<SpellHasteHealerTrinket>("spell_spell_haste_healer_trinket");
+    RegisterAuraScript<IncreasedHealingDoneDummy>("spell_increased_healing_done_dummy");
 
     // wotlk section
     RegisterSpellScript<Replenishment>("spell_replenishment");
