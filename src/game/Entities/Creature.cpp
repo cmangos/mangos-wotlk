@@ -576,7 +576,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     // checked and error show at loading templates
     if (FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
     {
-        if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_PVP)
+        if (factionTemplate->factionFlags & FACTION_TEMPLATE_FLAG_ASSIST_PLAYERS)
         {
             const AreaTableEntry* zone = GetAreaEntryByAreaID(GetAreaId());
             const bool sanctuary = (zone && (zone->flags & AREA_FLAG_SANCTUARY));

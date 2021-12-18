@@ -28,7 +28,6 @@
 #include "Log.h"
 #include "AI/BaseAI/PetAI.h"
 #include "BaseAI/PossessedAI.h"
-#include "BaseAI/CritterAI.h"
 #include "AI/PlayerAI/PlayerAI.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
@@ -66,8 +65,6 @@ namespace FactorySelector
             ai_factory = ai_registry.GetRegistryItem(ainame);
         else if (creature->IsGuard())
             ai_factory = ai_registry.GetRegistryItem("GuardAI");
-        else if (creature->IsCritter())
-            ai_factory = ai_registry.GetRegistryItem("CritterAI");
         else                                // select by permit check
         {
             int best_val = PERMIT_BASE_NO;
