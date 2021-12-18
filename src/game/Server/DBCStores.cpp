@@ -705,8 +705,8 @@ void LoadDBCStores(const std::string& dataPath)
             if (node->map_id < 2 || i == 82 || i == 83 || i == 93 || i == 94)
                 sOldContinentsNodesMask[field] |= submask;
 
-            // Hack DK node at Ebon Hold (unclear if bad dbc data or we need to revisit our checks in ObjectMgr::GetNearestTaxiNode )
-            if (i == 315)
+            // Hack DK nodes
+            if (node->MountCreatureID[0] == 32981)
                 (const_cast<TaxiNodesEntry*>(node))->MountCreatureID[1] = node->MountCreatureID[0];
         }
     }
