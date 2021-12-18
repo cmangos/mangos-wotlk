@@ -2758,6 +2758,9 @@ UPDATE spell_template SET MaxAffectedTargets=2 WHERE Id IN(50286,53196,53197,531
 -- Corpse explosion correct count
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(49158,51325,51326,51327,51328);
 
+-- earth shield should not proc on inc heals
+UPDATE spell_template SET ProcFlags=0x000222A8 WHERE Id IN(974,32593,32594,49283,49284);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
