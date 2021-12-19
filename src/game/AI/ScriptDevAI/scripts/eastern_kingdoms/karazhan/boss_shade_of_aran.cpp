@@ -131,7 +131,7 @@ struct boss_aranAI : public CombatAI
         AddTimerlessCombatAction(ARAN_ACTION_ELEMENTALS, true);
         AddCombatAction(ARAN_ACTION_BERSERK, uint32(12 * MINUTE * IN_MILLISECONDS));
         AddCombatAction(ARAN_ACTION_DRAGONS_BREATH, true);
-        AddCombatAction(ARAN_ACTION_SUPERSPELL, 35000u);
+        AddCombatAction(ARAN_ACTION_SUPERSPELL, 5000, 10000);
         AddCombatAction(ARAN_ACTION_SECONDARY_SPELL, 5000u);
         AddCombatAction(ARAN_ACTION_PRIMARY_SPELL, 0u);
         AddCustomAction(ARAN_DRINKING_STAGES, true, [&]() {HandleDrinking(); });
