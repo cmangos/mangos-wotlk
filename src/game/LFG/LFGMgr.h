@@ -59,6 +59,7 @@ struct LFGDungeonData
 };
 
 typedef std::map<uint32, uint32> LfgLockMap;
+typedef std::map<ObjectGuid, LfgLockMap> LfgLockPartyMap;
 typedef std::set<uint32> LfgDungeonSet;
 
 class LFGMgr

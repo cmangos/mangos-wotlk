@@ -907,7 +907,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x36E*/ { "CMSG_LFD_PLAYER_LOCK_INFO_REQUEST",            STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleLfgPlayerLockInfoRequestOpcode },
     /*0x36F*/ { "SMSG_LFG_PLAYER_INFO",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x370*/ { "CMSG_LFG_TELEPORT",                            STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleLfgTeleportOpcode               },
-    /*0x371*/ { "CMSG_LFD_PARTY_LOCK_INFO_REQUEST",             STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleLfgPartyLockInfoRequestOpcode },
+    /*0x371*/ { "CMSG_LFG_PARTY_LOCK_INFO_REQUEST",             STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleLfgPartyLockInfoRequestOpcode },
     /*0x372*/ { "SMSG_LFG_PARTY_INFO",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x373*/ { "SMSG_TITLE_EARNED",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x374*/ { "CMSG_SET_TITLE",                               STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleSetTitleOpcode            },

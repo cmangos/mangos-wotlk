@@ -23,13 +23,23 @@
 #include "Globals/ObjectAccessor.h"
 #include "LFG/LFGMgr.h"
 
-void BuildPlayerLockDungeonBlock(WorldPacket& data, LfgLockMap const& lock)
+void BuildPlayerLockDungeonBlock(WorldPacket& data, LfgLockMap const& locks)
 {
-    data << uint32(lock.size());                           // Size of lock dungeons
-    for (auto itr = lock.begin(); itr != lock.end(); ++itr)
+    data << uint32(locks.size());                           // Size of lock dungeons
+    for (auto& lock : locks)
     {
-        data << uint32(itr->first);                         // Dungeon entry (id + type)
-        data << uint32(itr->second);                        // Lock status
+        data << uint32(lock.first);                         // Dungeon entry (id + type)
+        data << uint32(lock.second);                        // Lock status
+    }
+}
+
+void BuildPartyLockDungeonBlock(WorldPacket& data, LfgLockPartyMap const& lockMap)
+{
+    data << uint8(lockMap.size());
+    for (auto& lock : lockMap)
+    {
+        data << uint64(lock.first);                         // Player guid
+        BuildPlayerLockDungeonBlock(data, lock.second);
     }
 }
 
@@ -203,6 +213,37 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleLfgPartyLockInfoRequestOpcode(WorldPacket& recv_data)
 {
+    DEBUG_LOG("CMSG_LFG_PARTY_LOCK_INFO_REQUEST %s", GetPlayer()->GetName());
+    Player* player = GetPlayer();
+    if (!player)
+        return;
+
+    Group* group = GetPlayer()->GetGroup();
+    if (!group)
+        return;
+
+    // Get the locked dungeons of the other party members
+    LfgLockPartyMap lockMap;
+    for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+    {
+        Player* member = itr->getSource();
+        if (!member)
+            continue;
+
+        if (member == player)
+            continue;
+
+        lockMap[player->GetObjectGuid()] = sLFGMgr.GetLockedDungeons(player);
+    }
+
+    uint32 size = 0;
+    for (auto& data : lockMap)
+        size += 8 + 4 + uint32(data.second.size()) * (4 + 4);
+
+    DEBUG_LOG("SMSG_LFG_PARTY_INFO %s", player->GetName());
+    WorldPacket data(SMSG_LFG_PARTY_INFO, 1 + size);
+    BuildPartyLockDungeonBlock(data, lockMap);
+    SendPacket(data);
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry) const

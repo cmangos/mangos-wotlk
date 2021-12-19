@@ -23,10 +23,10 @@
 
 enum LfgFlags
 {
-    LFG_FLAG_UNK1                                = 0x1,
-    LFG_FLAG_UNK2                                = 0x2,
-    LFG_FLAG_SEASONAL                            = 0x4,
-    LFG_FLAG_UNK3                                = 0x8
+    LFG_FLAG_XREALM                              = 0x1,
+    LFG_FLAG_GLOBAL                              = 0x2,
+    LFG_FLAG_HOLIDAY                             = 0x4,
+    LFG_FLAG_SPECIFIC_REWARD                     = 0x8
 };
 
 enum LfgType
