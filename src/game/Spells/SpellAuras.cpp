@@ -2325,12 +2325,6 @@ void Aura::TriggerSpell()
                     triggerTarget = static_cast<Creature*>(target)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, trigger_spell_id, SELECT_FLAG_PLAYER);
                 break;
             }
-            case 41480:                                     // Deadly Strike
-            {
-                if (target->GetTypeId() == TYPEID_UNIT) // each tick has to target a random target
-                    triggerTarget = static_cast<Creature*>(target)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 41485, SELECT_FLAG_PLAYER);
-                break;
-            }
             case 43149:                                     // Claw Rage
             {
                 // Need to provide explicit target for trigger spell target combination
@@ -6620,11 +6614,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             case 39053:
                 if (m_removeMode == AURA_REMOVE_BY_DEATH && target->GetTypeId() == TYPEID_PLAYER)
                     target->CastSpell(target, 39045, TRIGGERED_OLD_TRIGGERED); // Summon Serpentshrine Parasite
-                break;
-            case 41485: // Deadly Poison - Veras Shadowstrike - cast envenom
-                if (Unit* caster = GetCaster())
-                    caster->CastSpell(target, 41487, TRIGGERED_OLD_TRIGGERED);
-                target->CastSpell(nullptr, 41509, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }

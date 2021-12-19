@@ -641,7 +641,6 @@ struct boss_veras_darkshadowAI : public boss_illidari_councilAI
         {
             if (Creature* target = m_creature->GetMap()->GetCreature(m_envenomAnimTarget))
                 target->CastSpell(nullptr, SPELL_ENVENOM_DUMMY_2, TRIGGERED_NONE);
-            DoResetThreat();
         });
         AddCombatAction(VERAS_ACTION_VANISH, 10000u);
         AddOnKillText(SAY_VERA_SLAY);
@@ -674,6 +673,7 @@ struct boss_veras_darkshadowAI : public boss_illidari_councilAI
     {
         summoned->CastSpell(nullptr, SPELL_INSTANT_SPAWN, TRIGGERED_NONE);
         m_envenomAnimTarget = summoned->GetObjectGuid();
+        ResetTimer(VERAS_ENVENOM_ANIMATION, 1000);
         summoned->ForcedDespawn(4500);
     }
 };
@@ -683,7 +683,33 @@ struct VerasVanish : public AuraScript
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)
-            aura->GetTarget()->CastSpell(nullptr, 41479, TRIGGERED_NONE);
+            aura->GetTarget()->CastSpell(nullptr, SPELL_VANISH_TELEPORT, TRIGGERED_NONE);
+    }
+};
+
+struct VerasDeadlyPoison : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.target = aura->GetTarget()->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DEADLY_POISON, SELECT_FLAG_PLAYER);
+    }
+};
+
+struct VerasDeadlyPoisonTick : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (Unit* caster = aura->GetCaster())
+            {
+                caster->CastSpell(target, SPELL_ENVENOM, TRIGGERED_OLD_TRIGGERED);
+                if (caster->AI())
+                    caster->AI()->DoResetThreat();
+            }
+            target->CastSpell(nullptr, SPELL_ENVENOM_DUMMY_1, TRIGGERED_OLD_TRIGGERED);
+        }
     }
 };
 
@@ -720,4 +746,6 @@ void AddSC_boss_illidari_council()
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<VerasVanish>("spell_veras_vanish");
+    RegisterAuraScript<VerasDeadlyPoison>("spell_veras_deadly_poison");
+    RegisterAuraScript<VerasDeadlyPoisonTick>("spell_veras_deadly_poison_tick");
 }
