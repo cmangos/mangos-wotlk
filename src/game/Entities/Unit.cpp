@@ -534,6 +534,15 @@ void Unit::TriggerHomeEvents()
 {
     AI()->JustReachedHome();
 
+    if (!hasUnitState(UNIT_STAT_NO_FOLLOW_MOVEMENT))
+    {
+        Unit* target = GetMaster();
+        if (target && (!target->GetTransportInfo() || target->GetTransportInfo()->GetTransport() != this))
+            GetMotionMaster()->MoveFollow(target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, false, IsPlayer() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+        else if (IsLinkingEventTrigger())
+            GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)this);
+    }
+
     if (IsCreature() && static_cast<Creature*>(this)->GetCreatureGroup())
         static_cast<Creature*>(this)->GetCreatureGroup()->TriggerLinkingEvent(CREATURE_GROUP_EVENT_HOME, this);
 }
