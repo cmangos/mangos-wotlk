@@ -147,7 +147,7 @@ static inline ReputationRank GetFactionReaction(FactionTemplateEntry const* this
                 return REP_FRIENDLY;
         }
     }
-    return (thisTemplate->factionFlags & FACTION_TEMPLATE_FLAG_NEUTRAL_AGGRESSIVE) ? REP_HOSTILE : REP_NEUTRAL;
+    return (thisTemplate->factionFlags & FACTION_TEMPLATE_FLAG_HATES_ALL_EXCEPT_FRIENDS) ? REP_HOSTILE : REP_NEUTRAL;
 }
 
 /////////////////////////////////////////////////
