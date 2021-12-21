@@ -20,7 +20,11 @@
 #define _LFG_MGR_H
 
 #include "Common.h"
+#include "Entities/ObjectGuid.h"
+#include "Entities/Player.h"
+#include "Globals/ObjectMgr.h"
 #include "Policies/Singleton.h"
+#include "Server/DBCEnums.h"
 
 #include <map>
 

@@ -17,6 +17,7 @@
  */
 
 #include "LFGMgr.h"
+#include "Globals/ObjectMgr.h"
 #include "World/World.h"
 #include "Server/DBCStores.h"
 #include "GameEvents/GameEventMgr.h"
