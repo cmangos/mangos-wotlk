@@ -319,3 +319,13 @@ LfgDungeonSet const& LFGMgr::GetDungeonsByRandom(uint32 randomdungeon)
     uint32 group = dungeon ? dungeon->group : 0;
     return m_cachedDungeonMapsPerGroup[group];
 }
+
+void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::string& comment)
+{
+
+}
+
+void LFGMgr::LeaveLfg(Player* player)
+{
+
+}

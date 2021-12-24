@@ -86,6 +86,10 @@ class LFGMgr
 
         LfgDungeonSet const& GetDungeonsByRandom(uint32 randomdungeon);
 
+        // Attempts to join LFD or LFR
+        void JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::string& comment);
+        void LeaveLfg(Player* player);
+
     private:
         LFGDungeonData const* GetLFGDungeon(uint32 id);
 

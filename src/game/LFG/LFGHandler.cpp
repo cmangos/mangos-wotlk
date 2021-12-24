@@ -50,35 +50,36 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
     uint32 roles;
     uint8 noPartialClear;
     uint8 achievements;
-    uint8 slotsCount;
-    uint8 needCount;
 
     std::string comment;
     std::vector<uint32> slots;
-    std::vector<uint32> needs;
+    std::vector<uint8> needs;
 
     recv_data >> roles;
     recv_data >> noPartialClear;
     recv_data >> achievements;
 
-    recv_data >> slotsCount;
+    slots.resize(recv_data.read<uint8>());
 
-    slots.resize(slotsCount);
+    for (auto& slot : slots)
+        recv_data >> slot;
 
-    for (uint8 i = 0; i < slotsCount; ++i)
-        recv_data >> slots[i];
+    needs.resize(recv_data.read<uint8>());
 
-    recv_data >> needCount;
-
-    needs.resize(needCount);
-
-    for (uint8 i = 0; i < needCount; ++i)
-        recv_data >> needs[i];
+    for (auto& need : needs)
+        recv_data >> need;
 
     recv_data >> comment;
 
-    // SendLfgJoinResult(ERR_LFG_OK);
-    // SendLfgUpdate(false, LFG_UPDATE_JOIN, dungeons[0]);
+    LfgDungeonSet newDungeons;
+    for (uint32 slot : slots)
+    {
+        uint32 dungeon = slot & 0x00FFFFFF;                             // remove the type from the dungeon entry
+        if (sLFGDungeonStore.LookupEntry(dungeon))
+            newDungeons.insert(dungeon);
+    }
+
+    sLFGMgr.JoinLfg(GetPlayer(), roles, newDungeons, comment);
 }
 
 void WorldSession::HandleLfgLeaveOpcode(WorldPacket& /*recv_data*/)
