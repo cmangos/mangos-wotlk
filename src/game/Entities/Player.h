@@ -41,6 +41,7 @@
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
 #include "Cinematics/CinematicMgr.h"
+#include "LFG/LFG.h"
 
 #include <functional>
 #include <vector>
@@ -391,14 +392,6 @@ struct EnchantDuration
 
 typedef std::list<EnchantDuration> EnchantDurationList;
 typedef std::list<Item*> ItemDurationList;
-
-enum LfgRoles
-{
-    LEADER                      = 0x01,
-    TANK                        = 0x02,
-    HEALER                      = 0x04,
-    DAMAGE                      = 0x08
-};
 
 enum RaidGroupError
 {
@@ -2552,6 +2545,8 @@ class Player : public Unit
         void SetSpellModSpell(Spell* spell);
 
         float GetAverageItemLevel() const;
+
+        LfgData& GetLfgData() { return m_lfgData; }
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2903,6 +2898,8 @@ class Player : public Unit
         uint32 m_pendingBindMapId;
         uint32 m_pendingBindId;
         uint32 m_pendingBindTimer;
+
+        LfgData m_lfgData;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

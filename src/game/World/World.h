@@ -30,6 +30,7 @@
 #include "Entities/Object.h"
 #include "Multithreading/Messager.h"
 #include "Globals/GraveyardManager.h"
+#include "LFG/LFG.h"
 
 #include <set>
 #include <list>
@@ -85,7 +86,7 @@ enum WorldTimers
     WUPDATE_DELETECHARS = 4,
     WUPDATE_AHBOT       = 5,
     WUPDATE_GROUPS      = 6,
-    WUPDATE_WARDEN      = 7, // This is here for headache merge error issues
+    WUPDATE_RAID_BROWSER= 7,
     WUPDATE_METRICS     = 8, // not used if BUILD_METRICS is not set
     WUPDATE_COUNT       = 9
 };
@@ -681,6 +682,8 @@ class World
         GraveyardManager& GetGraveyardManager() { return m_graveyardManager; }
 
         void SendGMTextFlags(uint32 accountFlag, int32 stringId, std::string type, const char* message);
+
+        LfgRaidBrowser& GetRaidBrowser() { return m_raidBrowser; }
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -805,6 +808,9 @@ class World
         std::array<std::atomic<uint32>, MAX_CLASSES> m_onlineClasses;
 
         GraveyardManager m_graveyardManager;
+
+        // World is owner to differentiate from Dungeon finder where queue is completely disjoint
+        LfgRaidBrowser m_raidBrowser;
 };
 
 extern uint32 realmID;

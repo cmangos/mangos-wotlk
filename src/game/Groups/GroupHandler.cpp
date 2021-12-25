@@ -120,12 +120,12 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* initiatorGroup = initiator->GetGroup();
-    if (initiatorGroup && initiatorGroup->isBattleGroup())
+    if (initiatorGroup && initiatorGroup->IsBattleGroup())
         initiatorGroup = initiator->GetOriginalGroup();
     if (!initiatorGroup)
         initiatorGroup = initiator->GetGroupInvite();
 
-    if (initiatorGroup && initiatorGroup->isRaidGroup() && !recipient->GetAllowLowLevelRaid() && (recipient->GetLevel() < sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID)))
+    if (initiatorGroup && initiatorGroup->IsRaidGroup() && !recipient->GetAllowLowLevelRaid() && (recipient->GetLevel() < sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID)))
     {
         SendPartyResult(PARTY_OP_INVITE, "", ERR_RAID_DISALLOWED_BY_LEVEL);
         return;
@@ -139,7 +139,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* recipientGroup = recipient->GetGroup();
-    if (recipientGroup && recipientGroup->isBattleGroup())
+    if (recipientGroup && recipientGroup->IsBattleGroup())
         recipientGroup = recipient->GetOriginalGroup();
 
     // player already in another group
@@ -487,7 +487,7 @@ void WorldSession::HandleRaidTargetUpdateOpcode(WorldPacket& recv_data)
     }
     else                                                    // target icon update
     {
-        if (group->isRaidGroup() &&
+        if (group->IsRaidGroup() &&
                 !group->IsLeader(GetPlayer()->GetObjectGuid()) &&
                 !group->IsAssistant(GetPlayer()->GetObjectGuid()))
             return;
@@ -974,7 +974,7 @@ void WorldSession::HandleGroupSwapSubGroupOpcode(WorldPacket& recv_data)
     Player* player = GetPlayer();
 
     Group* group = player->GetGroup();
-    if (!group || !group->isRaidGroup())
+    if (!group || !group->IsRaidGroup())
         return;
 
     ObjectGuid const& guid = player->GetObjectGuid();

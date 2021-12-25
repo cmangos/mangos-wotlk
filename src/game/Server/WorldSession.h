@@ -143,34 +143,6 @@ enum PartyResult
     ERR_PARTY_LFG_TELEPORT_IN_COMBAT    = 30
 };
 
-enum LfgJoinResult
-{
-    ERR_LFG_OK                                  = 0x00,
-    ERR_LFG_ROLE_CHECK_FAILED                   = 0x01,
-    ERR_LFG_GROUP_FULL                          = 0x02,
-    ERR_LFG_NO_LFG_OBJECT                       = 0x04,
-    ERR_LFG_NO_SLOTS_PLAYER                     = 0x05,
-    ERR_LFG_NO_SLOTS_PARTY                      = 0x06,
-    ERR_LFG_MISMATCHED_SLOTS                    = 0x07,
-    ERR_LFG_PARTY_PLAYERS_FROM_DIFFERENT_REALMS = 0x08,
-    ERR_LFG_MEMBERS_NOT_PRESENT                 = 0x09,
-    ERR_LFG_GET_INFO_TIMEOUT                    = 0x0A,
-    ERR_LFG_INVALID_SLOT                        = 0x0B,
-    ERR_LFG_DESERTER_PLAYER                     = 0x0C,
-    ERR_LFG_DESERTER_PARTY                      = 0x0D,
-    ERR_LFG_RANDOM_COOLDOWN_PLAYER              = 0x0E,
-    ERR_LFG_RANDOM_COOLDOWN_PARTY               = 0x0F,
-    ERR_LFG_TOO_MANY_MEMBERS                    = 0x10,
-    ERR_LFG_CANT_USE_DUNGEONS                   = 0x11,
-    ERR_LFG_ROLE_CHECK_FAILED2                  = 0x12,
-};
-
-enum LfgUpdateType
-{
-    LFG_UPDATE_JOIN     = 5,
-    LFG_UPDATE_LEAVE    = 7,
-};
-
 enum ChatRestrictionType
 {
     ERR_CHAT_RESTRICTED = 0,
@@ -290,9 +262,9 @@ class WorldSession
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...) const;
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName) const;
-        void SendLfgSearchResults(LfgType type, uint32 entry) const;
-        void SendLfgJoinResult(LfgJoinResult result) const;
-        void SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 id) const;
+        void SendLfgJoinResult(LfgJoinResultData joinResult) const;
+        void SendLfgUpdatePlayer(LfgUpdateData const& updateData) const;
+        void SendLfgUpdate(bool isGroup, uint8 updateType, uint32 id) const;
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
         void SendGroupInvite(Player* player, bool alreadyInGroup = false) const;
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);

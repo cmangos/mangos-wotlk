@@ -25,6 +25,7 @@
 #include "Globals/ObjectMgr.h"
 #include "Policies/Singleton.h"
 #include "Server/DBCEnums.h"
+#include "LFG/LFGDefines.h"
 
 #include <map>
 
@@ -62,10 +63,6 @@ struct LFGDungeonData
     uint32 Entry() const { return id + (type << 24); }
 };
 
-typedef std::map<uint32, uint32> LfgLockMap;
-typedef std::map<ObjectGuid, LfgLockMap> LfgLockPartyMap;
-typedef std::set<uint32> LfgDungeonSet;
-
 class LFGMgr
 {
     public:
@@ -85,6 +82,9 @@ class LFGMgr
         LfgLockMap const GetLockedDungeons(Player* player);
 
         LfgDungeonSet const& GetDungeonsByRandom(uint32 randomdungeon);
+
+        // Helper functions
+        LfgType GetDungeonType(uint32 dungeonId);
 
         // Attempts to join LFD or LFR
         void JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::string& comment);

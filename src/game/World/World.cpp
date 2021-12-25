@@ -1409,6 +1409,7 @@ void World::SetInitialWorldSettings()
     // Update "uptime" table based on configuration entry in minutes.
     m_timers[WUPDATE_CORPSES].SetInterval(20 * MINUTE * IN_MILLISECONDS);
     m_timers[WUPDATE_DELETECHARS].SetInterval(DAY * IN_MILLISECONDS); // check for chars to delete every day
+    m_timers[WUPDATE_RAID_BROWSER].SetInterval(IN_MILLISECONDS);
 
 #ifdef BUILD_AHBOT
     // for AhBot
@@ -1690,6 +1691,13 @@ void World::Update(uint32 diff)
         uint32 nextGameEvent = sGameEventMgr.Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
         m_timers[WUPDATE_EVENTS].Reset();
+    }
+
+    //- Process Raid browser
+    if (m_timers[WUPDATE_RAID_BROWSER].Passed())
+    {
+        m_timers[WUPDATE_RAID_BROWSER].Reset();
+        GetRaidBrowser().Update(this);
     }
 
 #ifdef BUILD_METRICS

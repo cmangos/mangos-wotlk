@@ -15,3 +15,54 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
+#ifndef _LFG_H
+#define _LFG_H
+
+#include "Common.h"
+#include "LFG/LFGDefines.h"
+
+#include <string>
+
+class World;
+
+class LfgData
+{
+    public:
+        LfgData();
+        LfgState GetState() const { return m_state; }
+        void SetState(LfgState state) { m_state = state; }
+        uint32 GetDungeon() const { return m_dungeon; }
+        std::string GetComment() const { return m_comment; }
+        void SetComment(std::string comment) { m_comment = comment; }
+        LfgDungeonSet& GetListedDungeonSet() { return m_listedDungeonSet; }
+        // players store everything in index 0 - groups use all values for counts
+        void SetPlayerRoles(uint8 roles) { m_roles[0] = roles; }
+        uint8 GetPlayerRoles() const { return m_roles[0]; }
+    private:
+        LfgState m_state;
+        uint32 m_dungeon;
+        std::string m_comment;
+        LfgDungeonSet m_listedDungeonSet;
+        std::vector<uint8> m_roles;
+};
+
+class LfgRaidBrowser
+{
+    public:
+        WorldPacket BuildSearchResults(uint32 dungeonId, Team team);
+
+        void AddListener(uint32 dungeonId, Team team, ObjectGuid guid);
+        void RemoveListener(uint32 dungeonId, Team team, ObjectGuid guid);
+
+        void AddPlayer(LfgDungeonSet const& dungeons, Team team, ObjectGuid guid);
+        void RemovePlayer(LfgDungeonSet const& dungeons, Team team, ObjectGuid guid);
+
+        void Update(World* world);
+    private:
+        std::map<std::pair<uint32, uint32>, std::vector<ObjectGuid>> m_listeners;
+        std::map<std::pair<uint32, uint32>, std::vector<ObjectGuid>> m_listedPlayers;
+        std::map<std::pair<uint32, uint32>, bool> m_changed;
+};
+
+#endif

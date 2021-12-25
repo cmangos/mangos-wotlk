@@ -27,6 +27,7 @@
 #include "Battlefield/Battlefield.h"
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
+#include "LFG/Lfg.h"
 
 struct ItemPrototype;
 
@@ -60,13 +61,13 @@ GroupMemberStatus GetGroupMemberStatus(const Player* member);
 
 enum GroupType                                              // group type flags?
 {
-    GROUPTYPE_NORMAL = 0x00,
-    GROUPTYPE_BG     = 0x01,
-    GROUPTYPE_RAID   = 0x02,
-    GROUPTYPE_BGRAID = GROUPTYPE_BG | GROUPTYPE_RAID,       // mask
-    // 0x04?
-    GROUPTYPE_LFD    = 0x08,
-    // 0x10, leave/change group?, I saw this flag when leaving group and after leaving BG while in group
+    GROUP_FLAG_NORMAL           = 0x00,
+    GROUP_FLAG_BG               = 0x01,
+    GROUP_FLAG_RAID             = 0x02,
+    GROUP_FLAGS_BGRAID          = GROUP_FLAG_BG | GROUP_FLAG_RAID, // mask
+    GROUP_FLAG_LFG_RESTRICTED   = 0x04,
+    GROUP_FLAG_LFG              = 0x08,
+    GROUP_FLAG_DESTROYED        = 0x010,
 };
 
 enum GroupFlagMask
@@ -158,9 +159,10 @@ class Group
         uint32 GetId() const { return m_Id; }
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GROUP, GetId()); }
         std::string GetGuidStr() const { return GetObjectGuid().GetString(); }
-        bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
-        bool isRaidGroup() const { return (m_groupType & GROUPTYPE_RAID) != 0; }
-        bool isBattleGroup() const { return m_bgGroup != nullptr || m_bfGroup != nullptr; }
+        bool IsFull() const { return (m_groupFlags == GROUP_FLAG_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
+        bool IsRaidGroup() const { return (m_groupFlags & GROUP_FLAG_RAID) != 0; }
+        bool IsLfgGroup() const { return (m_groupFlags & GROUP_FLAG_LFG) != 0; }
+        bool IsBattleGroup() const { return m_bgGroup != nullptr || m_bfGroup != nullptr; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         ObjectGuid const& GetLeaderGuid() const { return m_leaderGuid; }
         const char*       GetLeaderName() const { return m_leaderName.c_str(); }
@@ -198,7 +200,7 @@ class Group
         GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }
         GroupReference const* GetFirstMember() const { return m_memberMgr.getFirst(); }
         uint32 GetMembersCount() const { return m_memberSlots.size(); }
-        uint32 GetMembersMinCount() const { return (isBattleGroup() ? 1 : 2); }
+        uint32 GetMembersMinCount() const { return (IsBattleGroup() ? 1 : 2); }
         uint32 GetInviteesCount() const { return m_invitees.size(); }
         void GetDataForXPAtKill(Unit const* victim, uint32& count, uint32& sum_level, Player*& member_with_max_level, Player*& not_gray_member_with_max_level, Player* additional = nullptr);
         uint8 GetMemberGroup(ObjectGuid guid) const
@@ -225,14 +227,14 @@ class Group
 
         void SetAssistant(ObjectGuid guid, bool state)
         {
-            if (!isRaidGroup())
+            if (!IsRaidGroup())
                 return;
             if (_setAssistantFlag(guid, state))
                 SendUpdate();
         }
         void SetMainTank(ObjectGuid guid)
         {
-            if (!isRaidGroup())
+            if (!IsRaidGroup())
                 return;
 
             if (_setMainTank(guid))
@@ -240,7 +242,7 @@ class Group
         }
         void SetMainAssistant(ObjectGuid guid)
         {
-            if (!isRaidGroup())
+            if (!IsRaidGroup())
                 return;
 
             if (_setMainAssistant(guid))
@@ -292,6 +294,8 @@ class Group
         InstanceGroupBind* GetBoundInstance(uint32 mapid);
         InstanceGroupBind* GetBoundInstance(Map* aMap, Difficulty difficulty);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
+
+        LfgData& GetLfgData() { return m_lfgData; }
 
     protected:
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
@@ -373,7 +377,7 @@ class Group
         time_t              m_leaderLastOnline;
         ObjectGuid          m_mainTankGuid;
         ObjectGuid          m_mainAssistantGuid;
-        GroupType           m_groupType;
+        GroupType           m_groupFlags;
         Difficulty          m_dungeonDifficulty;
         Difficulty          m_raidDifficulty;
         BattleGround*       m_bgGroup;
@@ -385,5 +389,7 @@ class Group
         ObjectGuid          m_currentLooterGuid;
         BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;
+
+        LfgData             m_lfgData;
 };
 #endif
