@@ -74,7 +74,7 @@ uint8* HMACSHA1::ComputeHash(BigNumber* bn)
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     HMAC_Update(m_ctx, bn->AsByteArray().data(), bn->GetNumBytes());
 #else
-    HMAC_Update(&m_ctx, bn->AsByteArray(), bn->GetNumBytes());
+    HMAC_Update(&m_ctx, bn->AsByteArray().data(), bn->GetNumBytes());
 #endif
     Finalize();
     return (uint8*)m_digest;
