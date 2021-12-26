@@ -203,12 +203,12 @@ void LfgRaidBrowser::Update(World* world)
 
 		data.second = false; // set to unchanged and process all listeners
 
-        WorldPacket data = BuildSearchResults(dungeonId, Team(team));
+        WorldPacket result = BuildSearchResults(dungeonId, Team(team));
 
         for (ObjectGuid guid : listeners)
         {
             Player* plr = ObjectAccessor::FindPlayer(guid);
-            plr->GetSession()->SendPacket(data);
+            plr->GetSession()->SendPacket(result);
         }
 	}
 }

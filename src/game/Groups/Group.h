@@ -27,7 +27,7 @@
 #include "Battlefield/Battlefield.h"
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
-#include "LFG/Lfg.h"
+#include "LFG/LFG.h"
 
 struct ItemPrototype;
 
