@@ -19,6 +19,7 @@
 
 #include "LFG/LFG.h"
 #include "World/World.h"
+#include "Globals/ObjectAccessor.h"
 
 #include <algorithm>
 

@@ -21,6 +21,8 @@
 
 #include "Common.h"
 #include "LFG/LFGDefines.h"
+#include "WorldPacket.h"
+#include "Globals/SharedDefines.h"
 
 #include <string>
 

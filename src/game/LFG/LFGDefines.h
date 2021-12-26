@@ -20,6 +20,7 @@
 #define _LFG_DEFINES_H
 
 #include "Common.h"
+#include "Entities/ObjectGuid.h"
 
 enum LfgFlags
 {
