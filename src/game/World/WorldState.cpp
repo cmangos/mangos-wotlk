@@ -714,7 +714,7 @@ Map* WorldState::GetMap(uint32 mapId, Position const& invZone)
 {
     Map* map = sMapMgr.FindMap(mapId);
     if (!map)
-        sLog.outError("ScourgeInvasionEvent::GetMap found no map with mapId %d, x: %d, y: %d.", mapId, invZone.x, invZone.y);
+        sLog.outError("ScourgeInvasionEvent::GetMap found no map with mapId %d, x: %f, y: %f.", mapId, invZone.x, invZone.y);
     return map;
 }
 
@@ -1872,7 +1872,7 @@ void WorldState::HandleActiveZone(uint32 attackTimeVar, uint32 zoneId, uint32 re
                 if (mouth)
                     mouth->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, mouth, mouth, EVENT_MOUTH_OF_KELTHUZAD_ZONE_STOP);
                 else
-                    sLog.outError("ScourgeInvasionEvent::HandleActiveZone ObjectGuid %d not found.", zone.mouthGuid);
+                    sLog.outError("ScourgeInvasionEvent::HandleActiveZone ObjectGuid %d not found.", zone.mouthGuid.GetCounter());
             }
         });
     }
@@ -2620,7 +2620,7 @@ void WorldState::StartExpansionEvent()
 
 void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId, uint32 areaId)
 {
-    if (m_siData.m_state != PHASE_0_DISABLED) // scourge invasion active - need to send all worldstates
+    if (m_siData.m_state != STATE_0_DISABLED) // scourge invasion active - need to send all worldstates
     {
         uint32 victories = GetBattlesWon();
 
