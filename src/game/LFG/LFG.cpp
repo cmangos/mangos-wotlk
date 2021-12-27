@@ -1,4 +1,3 @@
-#include "LFG.h"
 /*
  * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
  *
@@ -23,7 +22,7 @@
 
 #include <algorithm>
 
-LfgData::LfgData() : m_roles(3)
+LfgData::LfgData() : m_roles(ROLE_INDEX_COUNT)
 {
 }
 
@@ -81,7 +80,7 @@ WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, Team team)
     {
         Player* player = ObjectAccessor::FindPlayer(guid);
 
-        if (!player) // TODO: fix teams
+        if (!player)
             continue;
 
         if (!player->IsInWorld())

@@ -31,6 +31,7 @@
 #include "Multithreading/Messager.h"
 #include "Globals/GraveyardManager.h"
 #include "LFG/LFG.h"
+#include "LFG/LFGQueue.h"
 
 #include <set>
 #include <list>
@@ -40,6 +41,7 @@
 #include <utility>
 #include <vector>
 #include <array>
+#include <thread>
 
 class Object;
 class ObjectGuid;
@@ -684,6 +686,9 @@ class World
         void SendGMTextFlags(uint32 accountFlag, int32 stringId, std::string type, const char* message);
 
         LfgRaidBrowser& GetRaidBrowser() { return m_raidBrowser; }
+        LFGQueue& GetLFGQueue() { return m_lfgQueue; }
+
+        void StartLFGQueueThread();
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -811,6 +816,9 @@ class World
 
         // World is owner to differentiate from Dungeon finder where queue is completely disjoint
         LfgRaidBrowser m_raidBrowser;
+        // Housing this here but logically it is completely asynchronous - TODO: Separate this and unify with BG queue
+        LFGQueue m_lfgQueue;
+        std::thread m_lfgQueueThread;
 };
 
 extern uint32 realmID;

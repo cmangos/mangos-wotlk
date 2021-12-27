@@ -143,9 +143,19 @@ enum LfgUpdateType
     LFG_UPDATETYPE_GROUP_DISBAND_UNK16           = 16,     // FIXME: Sometimes at group disband
 };
 
+enum RoleIndex
+{
+    ROLE_INDEX_PLAYER   = 0,
+    ROLE_INDEX_TANK     = 0,
+    ROLE_INDEX_HEALER   = 1,
+    ROLE_INDEX_DPS      = 2,
+    ROLE_INDEX_COUNT
+};
+
 typedef std::map<uint32, uint32> LfgLockMap;
 typedef std::map<ObjectGuid, LfgLockMap> LfgLockPartyMap;
 typedef std::set<uint32> LfgDungeonSet;
+typedef std::map<ObjectGuid, uint8> LfgRolesMap;
 
 struct LfgJoinResultData
 {

@@ -224,6 +224,65 @@ LFGDungeonData const* LFGMgr::GetLFGDungeon(uint32 id)
     return nullptr;
 }
 
+/**
+   Given a list of dungeons remove the dungeons players have restrictions.
+
+   @param[in, out] dungeons Dungeons to check restrictions
+   @param[in]     players Set of players to check their dungeon restrictions
+   @param[out]    lockMap Map of players Lock status info of given dungeons (Empty if dungeons is not empty)
+*/
+void LFGMgr::GetCompatibleDungeons(LfgDungeonSet& dungeons, GuidSet const& players, LfgLockPartyMap& lockMap, bool isContinue)
+{
+    lockMap.clear();
+
+    std::map<uint32, uint32> lockedDungeons;
+
+    for (GuidSet::const_iterator it = players.begin(); it != players.end() && !dungeons.empty(); ++it)
+    {
+        ObjectGuid guid = (*it);
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        if (!player)
+            continue;
+        LfgLockMap const& cachedLockMap = GetLockedDungeons(player);
+        for (LfgLockMap::const_iterator it2 = cachedLockMap.begin(); it2 != cachedLockMap.end() && !dungeons.empty(); ++it2)
+        {
+            uint32 dungeonId = (it2->first & 0x00FFFFFF); // Compare dungeon ids
+            LfgDungeonSet::iterator itDungeon = dungeons.find(dungeonId);
+            if (itDungeon != dungeons.end())
+            {
+                bool eraseDungeon = true;
+
+                // Don't remove the dungeon if team members are trying to continue a locked instance
+                if (it2->second == LFG_LOCKSTATUS_RAID_LOCKED && isContinue)
+                {
+                    LFGDungeonData const* dungeon = GetLFGDungeon(dungeonId);
+                    MANGOS_ASSERT(dungeon);
+                    MANGOS_ASSERT(player);
+                    if (InstancePlayerBind* playerBind = player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
+                    {
+                        if (DungeonPersistentState* state = playerBind->state)
+                        {
+                            uint32 dungeonInstanceId = state->GetInstanceId();
+                            auto itLockedDungeon = lockedDungeons.find(dungeonId);
+                            if (itLockedDungeon == lockedDungeons.end() || itLockedDungeon->second == dungeonInstanceId)
+                                eraseDungeon = false;
+
+                            lockedDungeons[dungeonId] = dungeonInstanceId;
+                        }
+                    }
+                }
+
+                if (eraseDungeon)
+                    dungeons.erase(itDungeon);
+
+                lockMap[guid][dungeonId] = it2->second;
+            }
+        }
+    }
+    if (!dungeons.empty())
+        lockMap.clear();
+}
+
 uint32 LFGMgr::GetLFGDungeonEntry(uint32 id)
 {
     if (id)
@@ -431,26 +490,26 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
             LfgType type = GetDungeonType(*it);
             switch (type)
             {
-            case LFG_TYPE_RANDOM_DUNGEON:
-                if (dungeons.size() > 1)               // Only allow 1 random dungeon
+                case LFG_TYPE_RANDOM_DUNGEON:
+                    if (dungeons.size() > 1)               // Only allow 1 random dungeon
+                        joinData.result = LFG_JOIN_DUNGEON_INVALID;
+                    else
+                        rDungeonId = (*dungeons.begin());
+                    [[fallthrough]]; // Random can only be dungeon or heroic dungeon
+                case LFG_TYPE_HEROIC_DUNGEON:
+                case LFG_TYPE_DUNGEON:
+                    if (isRaid)
+                        joinData.result = LFG_JOIN_MIXED_RAID_DUNGEON;
+                    isDungeon = true;
+                    break;
+                case LFG_TYPE_RAID:
+                    if (isDungeon)
+                        joinData.result = LFG_JOIN_MIXED_RAID_DUNGEON;
+                    isRaid = true;
+                    break;
+                default:
                     joinData.result = LFG_JOIN_DUNGEON_INVALID;
-                else
-                    rDungeonId = (*dungeons.begin());
-                [[fallthrough]]; // Random can only be dungeon or heroic dungeon
-            case LFG_TYPE_HEROIC_DUNGEON:
-            case LFG_TYPE_DUNGEON:
-                if (isRaid)
-                    joinData.result = LFG_JOIN_MIXED_RAID_DUNGEON;
-                isDungeon = true;
-                break;
-            case LFG_TYPE_RAID:
-                if (isDungeon)
-                    joinData.result = LFG_JOIN_MIXED_RAID_DUNGEON;
-                isRaid = true;
-                break;
-            default:
-                joinData.result = LFG_JOIN_DUNGEON_INVALID;
-                break;
+                    break;
             }
         }
 
@@ -462,8 +521,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
                 dungeons = GetDungeonsByRandom(rDungeonId);
 
             // if we have lockmap then there are no compatible dungeons
-            // TODO: Add this
-            // GetCompatibleDungeons(dungeons, players, joinData.lockmap, isContinue);
+            GetCompatibleDungeons(dungeons, players, joinData.lockmap, isContinue);
             if (dungeons.empty())
                 joinData.result = grp ? LFG_JOIN_PARTY_NOT_MEET_REQS : LFG_JOIN_NOT_MEET_REQS;
         }
@@ -488,17 +546,50 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
 
     if (isRaid)
     {
-        player->GetSession()->SendLfgJoinResult(joinData);
-        player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_JOIN_RAID_BROWSER, dungeons, comment));
-        auto& dungeonSet = player->GetLfgData().GetListedDungeonSet();
-        dungeonSet = dungeons;
-        player->GetLfgData().SetState(LFG_STATE_RAIDBROWSER);
-        player->GetLfgData().SetPlayerRoles(roles);
-        sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = dungeons](World* world)
+        if (grp)
         {
-			world->GetRaidBrowser().AddPlayer(dungeonsCopy, team, guid);
-        });
+            // TODO: Start rolecheck
+        }
+        else
+        {
+            player->GetSession()->SendLfgJoinResult(joinData);
+            player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_JOIN_RAID_BROWSER, dungeons, comment));
+            auto& dungeonSet = player->GetLfgData().GetListedDungeonSet();
+            dungeonSet = dungeons;
+            player->GetLfgData().SetState(LFG_STATE_RAIDBROWSER);
+            player->GetLfgData().SetPlayerRoles(roles);
+            sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = dungeons](World* world)
+            {
+                world->GetRaidBrowser().AddPlayer(dungeonsCopy, team, guid);
+            });
+        }
         return;
+    }
+
+    if (grp)
+    {
+        // TODO: Start rolecheck
+    }
+    else
+    {
+        if (!isContinue)
+        {
+            if (rDungeonId)
+            {
+                dungeons.clear();
+                dungeons.insert(rDungeonId);
+            }
+        }
+        player->GetSession()->SendLfgJoinResult(joinData);
+        player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment));
+        LFGQueueData data;
+        data.m_ownerGuid = player->GetObjectGuid();
+        data.m_joinTime = player->GetMap()->GetCurrentClockTime();
+        player->GetLfgData().SetState(LFG_STATE_QUEUED);
+        sWorld.GetLFGQueue().GetMessager().AddMessage([data](LFGQueue* queue)
+        {
+            queue->AddToQueue(data);
+        });
     }
 }
 
@@ -507,14 +598,42 @@ void LFGMgr::LeaveLfg(Player* player)
     if (!player)
         return;
 
+    Group* grp = player->GetGroup();
+
     auto& lfgData = player->GetLfgData();
     if (lfgData.GetState() == LFG_STATE_RAIDBROWSER)
     {
-        player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""));
-        sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = player->GetLfgData().GetListedDungeonSet()](World* world)
+        if (grp)
         {
-            world->GetRaidBrowser().RemovePlayer(dungeonsCopy, team, guid);
+            grp->GetLfgData().GetListedDungeonSet().clear();
+            grp->GetLfgData().SetState(LFG_STATE_NONE);
+        }
+        else
+        {
+            player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""));
+            sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = player->GetLfgData().GetListedDungeonSet()](World* world)
+            {
+                world->GetRaidBrowser().RemovePlayer(dungeonsCopy, team, guid);
+            });
+            player->GetLfgData().GetListedDungeonSet().clear();
+            player->GetLfgData().SetState(LFG_STATE_NONE);
+        }
+        return;
+    }
+
+    if (grp)
+    {
+        grp->GetLfgData().GetListedDungeonSet().clear();
+        grp->GetLfgData().SetState(LFG_STATE_NONE);
+    }
+    else
+    {
+        player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""));
+        sWorld.GetLFGQueue().GetMessager().AddMessage([guid = player->GetObjectGuid()](LFGQueue* queue)
+        {
+            queue->RemoveFromQueue(guid);
         });
         player->GetLfgData().GetListedDungeonSet().clear();
+        player->GetLfgData().SetState(LFG_STATE_NONE);
     }
 }

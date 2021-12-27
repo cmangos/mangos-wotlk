@@ -92,6 +92,7 @@ class LFGMgr
 
     private:
         LFGDungeonData const* GetLFGDungeon(uint32 id);
+        void GetCompatibleDungeons(LfgDungeonSet& dungeons, GuidSet const& players, LfgLockPartyMap& lockMap, bool isContinue);
 
         std::unordered_map<uint32, LFGDungeonData> m_lfgDungeons;
         std::multimap<uint32, LfgReward> m_lfgRewards;

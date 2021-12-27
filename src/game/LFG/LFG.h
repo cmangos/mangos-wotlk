@@ -39,8 +39,8 @@ class LfgData
         void SetComment(std::string comment) { m_comment = comment; }
         LfgDungeonSet& GetListedDungeonSet() { return m_listedDungeonSet; }
         // players store everything in index 0 - groups use all values for counts
-        void SetPlayerRoles(uint8 roles) { m_roles[0] = roles; }
-        uint8 GetPlayerRoles() const { return m_roles[0]; }
+        void SetPlayerRoles(uint8 roles) { m_roles[ROLE_INDEX_PLAYER] = roles; }
+        uint8 GetPlayerRoles() const { return m_roles[ROLE_INDEX_PLAYER]; }
     private:
         LfgState m_state;
         uint32 m_dungeon;
