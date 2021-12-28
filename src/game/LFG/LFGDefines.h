@@ -77,7 +77,8 @@ enum LfgState
     //LFG_STATE_BOOT,                                      // Vote kick active
     LFG_STATE_DUNGEON = 5,                                 // In LFG Group, in a Dungeon
     LFG_STATE_FINISHED_DUNGEON,                            // In LFG Group, in a finished Dungeon
-    LFG_STATE_RAIDBROWSER                                  // Using Raid finder
+    LFG_STATE_RAIDBROWSER,                                 // Using Raid finder
+    LFG_STATE_RAIDBROWSER_ROLECHECK,                       // Using Raid finder and Rolecheck active
 };
 
 enum LfgSpells
@@ -168,17 +169,18 @@ struct LfgJoinResultData
 
 struct LfgUpdateData
 {
-    LfgUpdateData(LfgUpdateType type = LFG_UPDATETYPE_DEFAULT) : updateType(type), state(LFG_STATE_NONE), comment(""), partialClear(false) { }
+    LfgUpdateData(LfgUpdateType type = LFG_UPDATETYPE_DEFAULT) : updateType(type), state(LFG_STATE_NONE), comment(""), partialClear(false) { memset(m_roles, 0, sizeof(m_roles)); }
     LfgUpdateData(LfgUpdateType type, LfgDungeonSet const& dungeons, std::string const& comment) :
-        updateType(type), state(LFG_STATE_NONE), dungeons(dungeons), comment(comment), partialClear(false) { }
+        updateType(type), state(LFG_STATE_NONE), dungeons(dungeons), comment(comment), partialClear(false) { memset(m_roles, 0, sizeof(m_roles)); }
     LfgUpdateData(LfgUpdateType type, LfgState state, LfgDungeonSet const& dungeons, std::string const& comment = "") :
-        updateType(type), state(state), dungeons(dungeons), comment(comment), partialClear(false) { }
+        updateType(type), state(state), dungeons(dungeons), comment(comment), partialClear(false) { memset(m_roles, 0, sizeof(m_roles)); }
 
     LfgUpdateType updateType;
     LfgState state;
     LfgDungeonSet dungeons;
     bool partialClear;
     std::string comment;
+    uint8 m_roles[ROLE_INDEX_COUNT];
 };
 
 #endif

@@ -548,12 +548,12 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
     {
         if (grp)
         {
-            // TODO: Start rolecheck
+            grp->GetLfgData().SetState(LFG_STATE_RAIDBROWSER_ROLECHECK);
         }
         else
         {
             player->GetSession()->SendLfgJoinResult(joinData);
-            player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_JOIN_RAID_BROWSER, dungeons, comment));
+            player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_RAID_BROWSER, dungeons, comment), false);
             auto& dungeonSet = player->GetLfgData().GetListedDungeonSet();
             dungeonSet = dungeons;
             player->GetLfgData().SetState(LFG_STATE_RAIDBROWSER);
@@ -568,7 +568,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
 
     if (grp)
     {
-        // TODO: Start rolecheck
+        grp->GetLfgData().SetState(LFG_STATE_ROLECHECK);
     }
     else
     {
@@ -581,7 +581,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
             }
         }
         player->GetSession()->SendLfgJoinResult(joinData);
-        player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment));
+        player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment), false);
         LFGQueueData data;
         data.m_ownerGuid = player->GetObjectGuid();
         data.m_joinTime = player->GetMap()->GetCurrentClockTime();
@@ -610,7 +610,7 @@ void LFGMgr::LeaveLfg(Player* player)
         }
         else
         {
-            player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""));
+            player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), false);
             sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = player->GetLfgData().GetListedDungeonSet()](World* world)
             {
                 world->GetRaidBrowser().RemovePlayer(dungeonsCopy, team, guid);
@@ -628,7 +628,7 @@ void LFGMgr::LeaveLfg(Player* player)
     }
     else
     {
-        player->GetSession()->SendLfgUpdatePlayer(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""));
+        player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), false);
         sWorld.GetLFGQueue().GetMessager().AddMessage([guid = player->GetObjectGuid()](LFGQueue* queue)
         {
             queue->RemoveFromQueue(guid);

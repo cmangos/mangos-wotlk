@@ -32,6 +32,8 @@ struct LFGQueueData
 	LfgDungeonSet m_dungeons;
 	LfgRolesMap m_rolesPerGuid;
 	ObjectGuid m_ownerGuid; // either player or group
+	TimePoint m_cancelTime; // cancel time on rolecheck
+	LfgRoleCheckState m_roleCheckState;
 };
 
 /*

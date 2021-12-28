@@ -283,67 +283,58 @@ void WorldSession::SendLfgJoinResult(LfgJoinResultData joinResult) const
     SendPacket(data);
 }
 
-void WorldSession::SendLfgUpdatePlayer(LfgUpdateData const& updateData) const
+void WorldSession::SendLfgUpdate(LfgUpdateData const& updateData, bool isGroup) const
 {
+    bool join = false;
     bool queued = false;
     uint8 size = uint8(updateData.dungeons.size());
 
     switch (updateData.updateType)
     {
         case LFG_UPDATETYPE_JOIN_QUEUE:
-        case LFG_UPDATETYPE_ADDED_TO_QUEUE:
+        case LFG_UPDATETYPE_ADDED_TO_QUEUE:                // Rolecheck Success
             queued = true;
+            [[fallthrough]];
+        case LFG_UPDATETYPE_PROPOSAL_BEGIN:
+            join = true;
             break;
         case LFG_UPDATETYPE_UPDATE_STATUS:
+            join = updateData.state != LFG_STATE_ROLECHECK && updateData.state != LFG_STATE_NONE;
             queued = updateData.state == LFG_STATE_QUEUED;
             break;
         default:
             break;
     }
 
+    size_t packetSize = 0;
+    if (isGroup)
+        packetSize = 1 + 1 + (size > 0 ? 1 : 0) * (1 + 1 + 1 + 1 + 1 + size * 4 + updateData.comment.length());
+    else
+        packetSize = 1 + 1 + (size > 0 ? 1 : 0) * (1 + 1 + 1 + 1 + size * 4 + updateData.comment.length());
+
     DEBUG_LOG("SMSG_LFG_UPDATE_PLAYER %s updatetype: %u", GetPlayerName(), updateData.updateType);
-    WorldPacket data(SMSG_LFG_UPDATE_PLAYER, 1 + 1 + (size > 0 ? 1 : 0) * (1 + 1 + 1 + 1 + size * 4 + updateData.comment.length()));
+    WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER, packetSize);
     data << uint8(updateData.updateType);                  // Lfg Update type
     data << uint8(size > 0);                               // Is joined in LFG
     if (size)
     {
+        if (isGroup)
+            data << uint8(join);
+
         data << uint8(queued);                             // Join the queue
         data << uint8(0);                                  // NoPartialClear
         data << uint8(0);                                  // Achievements
+
+        if (isGroup)
+        {
+            for (uint32 i = 0; i < 3; ++i)
+                data << uint8(updateData.m_roles[i]);      // Needs
+        }
 
         data << uint8(size);
         for (auto itr = updateData.dungeons.begin(); itr != updateData.dungeons.end(); ++itr)
             data << uint32(*itr);
         data << updateData.comment;
-    }
-    SendPacket(data);
-}
-
-void WorldSession::SendLfgUpdate(bool isGroup, uint8 updateType, uint32 id) const
-{
-    WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER, 0);
-    data << uint8(updateType);
-
-    data << uint8(true);
-
-    if (true)
-    {
-        data << uint8(0);
-        data << uint8(0);
-        data << uint8(0);
-
-        if (isGroup)
-        {
-            data << uint8(0);
-            for (uint32 i = 0; i < 3; ++i)
-                data << uint8(0);
-        }
-
-        uint8 count = 1;
-        data << uint8(count);
-        for (uint32 i = 0; i < count; ++i)
-            data << uint32(id);
-        data << "";
     }
     SendPacket(data);
 }
