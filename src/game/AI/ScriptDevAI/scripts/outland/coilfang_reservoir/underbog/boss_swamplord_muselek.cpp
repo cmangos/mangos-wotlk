@@ -203,7 +203,7 @@ struct boss_swamplord_muselekAI : public CombatAI
     {
         CombatAI::DistancingEnded();
         ResetCombatAction(MUSELEK_ACTION_RANGED_ATTACK, GetSubsequentActionTimer(MUSELEK_ACTION_RANGED_ATTACK));
-        SetActionReadyStatus(MUSELEK_AIMED_SHOT, false);
+        SetActionReadyStatus(MUSELEK_AIMED_SHOT, false); // currently never used due to not being interrupted when the target is in his melee range (oneshotting everything)
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override 
