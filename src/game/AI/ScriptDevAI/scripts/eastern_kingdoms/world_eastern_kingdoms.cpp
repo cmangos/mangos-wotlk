@@ -217,6 +217,9 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             case NPC_ARGENT_PROTECTOR:
                 _spawnProtector.insert(pCreature->GetObjectGuid());
                 break;
+            case EK_SINPC_NECROPOLIS_HEALTH:
+                m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+                break;
         }
     }
 
@@ -239,8 +242,21 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             case NPC_ARGENT_PROTECTOR:
                 _spawnProtector.erase(pCreature->GetObjectGuid());
                 break;
+            case EK_SINPC_NECROPOLIS_HEALTH:
+                m_npcEntryGuidCollection.erase(pCreature->GetObjectGuid());
+                break;
             default:
                 _spawn.erase(pCreature->GetObjectGuid());
+                break;
+        }
+    }
+
+    void OnObjectCreate(GameObject* pGo) override
+    {
+        switch (pGo->GetEntry())
+        {
+            case EK_SIGOBJ_SUMMON_CIRCLE:
+                m_goEntryGuidCollection[pGo->GetEntry()].push_back(pGo->GetObjectGuid());
                 break;
         }
     }

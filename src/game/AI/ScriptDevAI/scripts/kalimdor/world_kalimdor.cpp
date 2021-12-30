@@ -108,6 +108,9 @@ struct world_map_kalimdor : public ScriptedMap
             case NPC_DARK_IRON_HERALD:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
+            case KA_SINPC_NECROPOLIS_HEALTH:
+                m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+                break;
         }
     }
 
@@ -189,6 +192,9 @@ struct world_map_kalimdor : public ScriptedMap
             case NPC_COLOSSUS_OF_ASHI:
                 WorldObject::SpawnCreature(155123, instance);
                 break;
+            case KA_SINPC_NECROPOLIS_HEALTH:
+                m_npcEntryGuidCollection.erase(pCreature->GetObjectGuid());
+                break;
         }
     }
 
@@ -214,6 +220,9 @@ struct world_map_kalimdor : public ScriptedMap
                 break;
             case GO_AIR_RIFT:
                 m_aElementalRiftGUIDs[ELEMENTAL_AIR].push_back(pGo->GetObjectGuid());
+                break;
+            case KA_SIGOBJ_SUMMON_CIRCLE:
+                m_goEntryGuidCollection[pGo->GetEntry()].push_back(pGo->GetObjectGuid());
                 break;
         }
     }
