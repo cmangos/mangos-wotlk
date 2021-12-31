@@ -266,6 +266,30 @@ struct SeedOfCorruptionDamage : public SpellScript
     }
 };
 
+struct SiphonLifeWotlk : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        if (data.damage == 0)
+            return false;
+        return true;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        int32  triggerAmount = aura->GetModifier()->m_amount;
+        // Glyph of Siphon Life
+        if (Aura* aur = aura->GetTarget()->GetAura(56216, EFFECT_INDEX_0))
+            triggerAmount += triggerAmount * aur->GetModifier()->m_amount / 100;
+
+        procData.basepoints[0] = int32(procData.damage * triggerAmount / 100);
+        procData.triggeredSpellId = 63106;
+        procData.triggerTarget = nullptr;
+
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterAuraScript<UnstableAffliction>("spell_unstable_affliction");
@@ -278,4 +302,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<SeedOfCorruptionDamage>("spell_seed_of_corruption_damage");
     RegisterScript<CurseOfDoom>("spell_curse_of_doom");
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
+    RegisterAuraScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
 }
