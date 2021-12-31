@@ -6686,6 +6686,14 @@ void Player::SendMessageToSetInRange(WorldPacket const& data, float dist, bool s
         GetSession()->SendPacket(data);
 }
 
+void Player::SendMessageToAllWhoSeeMe(WorldPacket const& data, bool self) const
+{
+    Unit::SendMessageToAllWhoSeeMe(data, self);
+
+    if (self)
+        GetSession()->SendPacket(data);
+}
+
 void Player::SendDirectMessage(WorldPacket const& data) const
 {
     GetSession()->SendPacket(data);

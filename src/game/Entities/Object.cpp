@@ -2037,6 +2037,14 @@ void WorldObject::SendMessageToSetExcept(WorldPacket const& data, Player const* 
     }
 }
 
+void WorldObject::SendMessageToAllWhoSeeMe(WorldPacket const& data, bool /*self*/) const
+{
+    if (IsInWorld())
+        for (ObjectGuid guid : m_clientGUIDsIAmAt)
+            if (Player* player = GetMap()->GetPlayer(guid))
+                player->GetSession()->SendPacket(data);
+}
+
 void WorldObject::SendObjectDeSpawnAnim(ObjectGuid guid) const
 {
     WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
