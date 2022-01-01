@@ -224,6 +224,7 @@ enum AttumenActions
     ATTUMEN_ACTION_KNOCKDOWN,
     ATTUMEN_ACTION_CHARGE, // only when mounted
     ATTUMEN_ACTION_MAX,
+    ATTUMEN_ATTACK_DELAY
 };
 
 struct boss_attumenAI : public CombatAI
@@ -237,9 +238,15 @@ struct boss_attumenAI : public CombatAI
         AddCombatAction(ATTUMEN_ACTION_YELL, 30000, 60000);
         AddCombatAction(ATTUMEN_ACTION_KNOCKDOWN, 6000, 9000);
         if (m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED)
+        {
+            SetReactState(REACT_PASSIVE);
+            m_creature->SetInCombatWithZone();
+            AddCustomAction(ATTUMEN_ATTACK_DELAY, 2000u, [&]() { HandleAttackDelay(); });
             AddCombatAction(ATTUMEN_ACTION_CHARGE, 20000u);
+        }
         if (m_creature->GetEntry() != NPC_ATTUMEN_MOUNTED)
             SetDeathPrevention(true);
+
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
         {
             return (y < -1945.f && x > -11096.f) || z > 73.5f;
@@ -358,8 +365,6 @@ struct boss_attumenAI : public CombatAI
             if (!m_instance)
                 return;
 
-            summoned->SetInCombatWithZone();
-
             // Smoke effect
             summoned->CastSpell(nullptr, SPELL_SPAWN_SMOKE_1, TRIGGERED_NONE);
 
@@ -367,6 +372,12 @@ struct boss_attumenAI : public CombatAI
             if (Creature* midnight = m_instance->GetSingleCreatureFromStorage(NPC_MIDNIGHT))
                 summoned->SetHealth(midnight->GetHealth() > m_creature->GetHealth() ? midnight->GetHealth() : m_creature->GetHealth());
         }
+    }
+
+    void HandleAttackDelay()
+    {
+        SetReactState(REACT_AGGRESSIVE);
+        AttackClosestEnemy();
     }
 };
 
