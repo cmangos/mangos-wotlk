@@ -25,15 +25,30 @@
 
 #include <string>
 
+struct LFGQueuePlayer
+{
+	uint32 m_level;
+	uint32 m_roles;
+};
+
+typedef std::map<ObjectGuid, LFGQueuePlayer> LfgPlayerInfoMap;
+
 struct LFGQueueData
 {
+	LfgState m_state;
 	TimePoint m_joinTime;
+	TimePoint m_queueTime;
 	uint8 m_roles[ROLE_INDEX_COUNT];
+	uint32 m_randomDungeonId;
 	LfgDungeonSet m_dungeons;
-	LfgRolesMap m_rolesPerGuid;
+	LfgPlayerInfoMap m_playerInfoPerGuid;
 	ObjectGuid m_ownerGuid; // either player or group
+	ObjectGuid m_leaderGuid; // for group only
 	TimePoint m_cancelTime; // cancel time on rolecheck
 	LfgRoleCheckState m_roleCheckState;
+	GuidVector m_groupGuids;
+
+	LFGQueueData() { memset(m_roles, 0, sizeof(m_roles)); }
 };
 
 /*
@@ -45,6 +60,7 @@ class LFGQueue
 	public:
 		void AddToQueue(LFGQueueData const& data);
 		void RemoveFromQueue(ObjectGuid owner);
+		void SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles);
 
 		void Update();
 
@@ -52,6 +68,8 @@ class LFGQueue
 
 		Messager<LFGQueue>& GetMessager() { return m_messager; }
 	private:
+		void UpdateRoleCheck(LFGQueueData& data, ObjectGuid guid, uint8 roles, bool abort);
+
 		std::map<ObjectGuid, LFGQueueData> m_queueData;
 		std::vector<LFGQueueData*> m_sortedQueue; // sorted by time
 

@@ -44,6 +44,7 @@ struct AuctionEntry;
 struct AuctionHouseEntry;
 struct DeclinedName;
 struct TradeStatusInfo;
+struct LFGQueueData;
 
 class ObjectGuid;
 class Creature;
@@ -262,8 +263,10 @@ class WorldSession
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...) const;
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName) const;
-        void SendLfgJoinResult(LfgJoinResultData joinResult) const;
-        void SendLfgUpdate(LfgUpdateData const& updateData, bool isGroup) const;
+        static WorldPacket BuildLfgJoinResult(LfgJoinResultData joinResult);
+        static WorldPacket BuildLfgUpdate(LfgUpdateData const& updateData, bool isGroup);
+        static WorldPacket BuildLfgRoleChosen(ObjectGuid guid, uint8 roles);
+        static WorldPacket BuildLfgRoleCheckUpdate(LFGQueueData const& data);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
         void SendGroupInvite(Player* player, bool alreadyInGroup = false) const;
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);

@@ -23,6 +23,7 @@
 #include "Globals/ObjectAccessor.h"
 #include "LFG/LFGMgr.h"
 #include "World/World.h"
+#include "LFG/LFGQueue.h"
 
 void BuildPlayerLockDungeonBlock(WorldPacket& data, LfgLockMap const& locks)
 {
@@ -102,6 +103,19 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recv_data)
 {
     uint8 roles;
     recv_data >> roles; // Player Group Roles
+
+    Player* player = GetPlayer();
+    if (!player)
+        return;
+
+    Group* group = player->GetGroup();
+    if (!group)
+        return;
+
+    sWorld.GetLFGQueue().GetMessager().AddMessage([group = group->GetObjectGuid(), playerGuid = GetPlayer()->GetObjectGuid(), roles](LFGQueue* queue)
+    {
+        queue->SetPlayerRoles(group, playerGuid, roles);
+    });
 }
 
 void WorldSession::HandleLfgSetCommentOpcode(WorldPacket& recv_data)
@@ -269,7 +283,7 @@ void WorldSession::HandleLfgPartyLockInfoRequestOpcode(WorldPacket& recv_data)
     SendPacket(data);
 }
 
-void WorldSession::SendLfgJoinResult(LfgJoinResultData joinResult) const
+WorldPacket WorldSession::BuildLfgJoinResult(LfgJoinResultData joinResult)
 {
     uint32 size = 0;
     for (auto itr = joinResult.lockmap.begin(); itr != joinResult.lockmap.end(); ++itr)
@@ -280,10 +294,11 @@ void WorldSession::SendLfgJoinResult(LfgJoinResultData joinResult) const
     data << uint32(joinResult.state);  // Check Value
     if (!joinResult.lockmap.empty())
         BuildPartyLockDungeonBlock(data, joinResult.lockmap);
-    SendPacket(data);
+
+    return data;
 }
 
-void WorldSession::SendLfgUpdate(LfgUpdateData const& updateData, bool isGroup) const
+WorldPacket WorldSession::BuildLfgUpdate(LfgUpdateData const& updateData, bool isGroup)
 {
     bool join = false;
     bool queued = false;
@@ -292,6 +307,14 @@ void WorldSession::SendLfgUpdate(LfgUpdateData const& updateData, bool isGroup) 
     switch (updateData.updateType)
     {
         case LFG_UPDATETYPE_JOIN_QUEUE:
+            if (isGroup)
+            {
+                queued = false;
+                join = false;
+            }
+            else
+                queued = true;
+            break;
         case LFG_UPDATETYPE_ADDED_TO_QUEUE:                // Rolecheck Success
             queued = true;
             [[fallthrough]];
@@ -312,7 +335,6 @@ void WorldSession::SendLfgUpdate(LfgUpdateData const& updateData, bool isGroup) 
     else
         packetSize = 1 + 1 + (size > 0 ? 1 : 0) * (1 + 1 + 1 + 1 + size * 4 + updateData.comment.length());
 
-    DEBUG_LOG("SMSG_LFG_UPDATE_PLAYER %s updatetype: %u", GetPlayerName(), updateData.updateType);
     WorldPacket data(isGroup ? SMSG_LFG_UPDATE_PARTY : SMSG_LFG_UPDATE_PLAYER, packetSize);
     data << uint8(updateData.updateType);                  // Lfg Update type
     data << uint8(size > 0);                               // Is joined in LFG
@@ -336,7 +358,43 @@ void WorldSession::SendLfgUpdate(LfgUpdateData const& updateData, bool isGroup) 
             data << uint32(*itr);
         data << updateData.comment;
     }
-    SendPacket(data);
+
+    return data;
+}
+
+WorldPacket WorldSession::BuildLfgRoleChosen(ObjectGuid guid, uint8 roles)
+{
+    WorldPacket data(SMSG_ROLE_CHOSEN, 8 + 1 + 4);
+    data << uint64(guid);                                  // Guid
+    data << uint8(roles > 0);                              // Ready
+    data << uint32(roles);                                 // Roles
+    return data;
+}
+
+WorldPacket WorldSession::BuildLfgRoleCheckUpdate(LFGQueueData const& queueData)
+{
+    WorldPacket data(SMSG_LFG_ROLE_CHECK_UPDATE, 4 + 1 + 1 + queueData.m_dungeons.size() * 4 + 1 + queueData.m_playerInfoPerGuid.size() * (8 + 1 + 4 + 1));
+
+    data << uint32(queueData.m_roleCheckState);               // Check result
+    data << uint8(queueData.m_roleCheckState == LFG_ROLECHECK_INITIALITING);
+    data << uint8(queueData.m_dungeons.size());               // Number of dungeons
+    if (!queueData.m_dungeons.empty())
+        for (auto itr = queueData.m_dungeons.begin(); itr != queueData.m_dungeons.end(); ++itr)
+            data << uint32(sLFGMgr.GetLFGDungeonEntry(*itr)); // Dungeon
+
+    data << uint8(queueData.m_playerInfoPerGuid.size());      // Players in group
+    if (!queueData.m_playerInfoPerGuid.empty())
+    {
+        for (auto itr = queueData.m_playerInfoPerGuid.begin(); itr != queueData.m_playerInfoPerGuid.end(); ++itr)
+        {
+            LFGQueuePlayer const& playerData = itr->second;
+            data << uint64(itr->first);                    // Guid
+            data << uint8(playerData.m_roles > 0);         // Ready
+            data << uint32(playerData.m_roles);            // Roles
+            data << uint8(playerData.m_level);             // Level
+        }
+    }
+    return data;
 }
 
 void WorldSession::SendLfgDisabled()

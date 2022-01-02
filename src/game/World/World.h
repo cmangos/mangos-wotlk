@@ -689,6 +689,7 @@ class World
         LFGQueue& GetLFGQueue() { return m_lfgQueue; }
 
         void StartLFGQueueThread();
+        void BroadcastToGroup(ObjectGuid groupGuid, std::vector<WorldPacket> const& packets);
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

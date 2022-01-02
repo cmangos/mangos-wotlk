@@ -22,6 +22,7 @@
 #include "Server/DBCStores.h"
 #include "GameEvents/GameEventMgr.h"
 #include "LFG/LFGDefines.h"
+#include "LFG/LFGQueue.h"
 
 std::string ConcatenateDungeons(LfgDungeonSet const& dungeons)
 {
@@ -413,7 +414,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
         return;
 
     // Sanitize input roles
-    roles &= PLAYER_ROLE_ANY;
+    roles = FilterClassRoles(roles, player->getClassMask());
 
     Group* grp = player->GetGroup();
     ObjectGuid guid = player->GetObjectGuid();
@@ -434,8 +435,11 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
     LfgState state = grp ? grp->GetLfgData().GetState() : player->GetLfgData().GetState();
     if (state == LFG_STATE_QUEUED)
     {
-        //LFGQueue& queue = GetQueue(gguid);
-        //queue.RemoveFromQueue(gguid);
+        ObjectGuid ownerGuid = grp ? grp->GetObjectGuid() : player->GetObjectGuid();
+        sWorld.GetLFGQueue().GetMessager().AddMessage([ownerGuid](LFGQueue* queue)
+        {
+            queue->RemoveFromQueue(ownerGuid);
+        });
     }
 
     // Check player or group member restrictions
@@ -535,7 +539,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
 
         if (!dungeons.empty())                             // Only should show lockmap when have no dungeons available
             joinData.lockmap.clear();
-        player->GetSession()->SendLfgJoinResult(joinData);
+        player->GetSession()->SendPacket(WorldSession::BuildLfgJoinResult(joinData));
         return;
     }
 
@@ -552,8 +556,9 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
         }
         else
         {
-            player->GetSession()->SendLfgJoinResult(joinData);
-            player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_RAID_BROWSER, dungeons, comment), false);
+            player->GetSession()->SendPacket(WorldSession::BuildLfgJoinResult(joinData));
+            WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_RAID_BROWSER, dungeons, comment), false);
+            player->GetSession()->SendPacket(data);
             auto& dungeonSet = player->GetLfgData().GetListedDungeonSet();
             dungeonSet = dungeons;
             player->GetLfgData().SetState(LFG_STATE_RAIDBROWSER);
@@ -566,9 +571,32 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
         return;
     }
 
+    LFGQueueData queueData;
     if (grp)
     {
         grp->GetLfgData().SetState(LFG_STATE_ROLECHECK);
+        queueData.m_ownerGuid = grp->GetObjectGuid();
+        queueData.m_leaderGuid = player->GetObjectGuid();
+        queueData.m_joinTime = player->GetMap()->GetCurrentClockTime();
+        queueData.m_cancelTime = player->GetMap()->GetCurrentClockTime() + std::chrono::seconds(45);
+        queueData.m_roleCheckState = LFG_ROLECHECK_INITIALITING;
+        queueData.m_dungeons = dungeons;
+        queueData.m_randomDungeonId = rDungeonId;
+        for (GroupReference* itr = grp->GetFirstMember(); itr != nullptr; itr = itr->next())
+        {
+            ObjectGuid groupMember = (*itr).getSource()->GetObjectGuid();
+            queueData.m_groupGuids.push_back(groupMember);
+            queueData.m_playerInfoPerGuid[groupMember].m_roles = 0;
+            queueData.m_playerInfoPerGuid[groupMember].m_level = (*itr).getSource()->GetLevel();
+        }
+        queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_roles = roles;
+        uint32 i = PLAYER_ROLE_TANK;
+        for (uint32 k = 0; i <= PLAYER_ROLE_DAMAGE; i = i << 1, ++k)
+            if ((i & roles) != 0)
+                ++queueData.m_roles[k];
+        // cross node broadcasts
+        WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment), true);
+        grp->BroadcastPacket(data, false);
     }
     else
     {
@@ -580,17 +608,20 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
                 dungeons.insert(rDungeonId);
             }
         }
-        player->GetSession()->SendLfgJoinResult(joinData);
-        player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment), false);
-        LFGQueueData data;
-        data.m_ownerGuid = player->GetObjectGuid();
-        data.m_joinTime = player->GetMap()->GetCurrentClockTime();
+        player->GetSession()->SendPacket(WorldSession::BuildLfgJoinResult(joinData));
+        WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment), false);
+        player->GetSession()->SendPacket(data);
+
+        queueData.m_ownerGuid = player->GetObjectGuid();
+        queueData.m_joinTime = player->GetMap()->GetCurrentClockTime();
+        queueData.m_dungeons = dungeons;
+        queueData.m_randomDungeonId = rDungeonId;
         player->GetLfgData().SetState(LFG_STATE_QUEUED);
-        sWorld.GetLFGQueue().GetMessager().AddMessage([data](LFGQueue* queue)
-        {
-            queue->AddToQueue(data);
-        });
     }
+    sWorld.GetLFGQueue().GetMessager().AddMessage([queueData](LFGQueue* queue)
+    {
+        queue->AddToQueue(queueData);
+    });
 }
 
 void LFGMgr::LeaveLfg(Player* player)
@@ -610,7 +641,8 @@ void LFGMgr::LeaveLfg(Player* player)
         }
         else
         {
-            player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), false);
+            WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), false);
+            player->GetSession()->SendPacket(data);
             sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = player->GetLfgData().GetListedDungeonSet()](World* world)
             {
                 world->GetRaidBrowser().RemovePlayer(dungeonsCopy, team, guid);
@@ -623,12 +655,19 @@ void LFGMgr::LeaveLfg(Player* player)
 
     if (grp)
     {
+        WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), true);
+        grp->BroadcastPacket(data, false);
         grp->GetLfgData().GetListedDungeonSet().clear();
         grp->GetLfgData().SetState(LFG_STATE_NONE);
+        sWorld.GetLFGQueue().GetMessager().AddMessage([guid = grp->GetObjectGuid()](LFGQueue* queue)
+        {
+            queue->RemoveFromQueue(guid);
+        });
     }
     else
     {
-        player->GetSession()->SendLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), false);
+        WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), false);
+        player->GetSession()->SendPacket(data);
         sWorld.GetLFGQueue().GetMessager().AddMessage([guid = player->GetObjectGuid()](LFGQueue* queue)
         {
             queue->RemoveFromQueue(guid);
@@ -636,4 +675,89 @@ void LFGMgr::LeaveLfg(Player* player)
         player->GetLfgData().GetListedDungeonSet().clear();
         player->GetLfgData().SetState(LFG_STATE_NONE);
     }
+}
+
+enum LfgRoleClasses {
+    TANK = (1 << (CLASS_WARRIOR - 1)) |
+           (1 << (CLASS_PALADIN - 1)) |
+           (1 << (CLASS_DEATH_KNIGHT - 1)) |
+           (1 << (CLASS_DRUID - 1)),
+
+    HEALER = (1 << (CLASS_PALADIN - 1)) |
+             (1 << (CLASS_PRIEST - 1)) |
+             (1 << (CLASS_SHAMAN - 1)) |
+             (1 << (CLASS_DRUID - 1)),
+};
+
+uint32 LFGMgr::FilterClassRoles(uint32 roles, uint32 classMask)
+{
+    roles &= PLAYER_ROLE_ANY;
+    if (!(LfgRoleClasses::TANK & classMask))
+        roles &= ~PLAYER_ROLE_TANK;
+    if (!(LfgRoleClasses::HEALER & classMask))
+        roles &= ~PLAYER_ROLE_HEALER;
+    return roles;
+}
+
+bool LFGMgr::CheckGroupRoles(LfgPlayerInfoMap& groles)
+{
+    if (groles.empty())
+        return false;
+
+    uint8 damage = 0;
+    uint8 tank = 0;
+    uint8 healer = 0;
+
+    for (auto itr = groles.begin(); itr != groles.end(); ++itr)
+    {
+        uint8 role = itr->second.m_roles & ~PLAYER_ROLE_LEADER;
+        if (role == PLAYER_ROLE_NONE)
+            return false;
+
+        if (role & PLAYER_ROLE_DAMAGE)
+        {
+            if (role != PLAYER_ROLE_DAMAGE)
+            {
+                itr->second.m_roles -= PLAYER_ROLE_DAMAGE;
+                if (CheckGroupRoles(groles))
+                    return true;
+                itr->second.m_roles += PLAYER_ROLE_DAMAGE;
+            }
+            else if (damage == LFG_DPS_NEEDED)
+                return false;
+            else
+                damage++;
+        }
+
+        if (role & PLAYER_ROLE_HEALER)
+        {
+            if (role != PLAYER_ROLE_HEALER)
+            {
+                itr->second.m_roles -= PLAYER_ROLE_HEALER;
+                if (CheckGroupRoles(groles))
+                    return true;
+                itr->second.m_roles += PLAYER_ROLE_HEALER;
+            }
+            else if (healer == LFG_HEALERS_NEEDED)
+                return false;
+            else
+                healer++;
+        }
+
+        if (role & PLAYER_ROLE_TANK)
+        {
+            if (role != PLAYER_ROLE_TANK)
+            {
+                itr->second.m_roles -= PLAYER_ROLE_TANK;
+                if (CheckGroupRoles(groles))
+                    return true;
+                itr->second.m_roles += PLAYER_ROLE_TANK;
+            }
+            else if (tank == LFG_TANKS_NEEDED)
+                return false;
+            else
+                tank++;
+        }
+    }
+    return (tank + healer + damage) == uint8(groles.size());
 }

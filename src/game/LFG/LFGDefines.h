@@ -79,6 +79,7 @@ enum LfgState
     LFG_STATE_FINISHED_DUNGEON,                            // In LFG Group, in a finished Dungeon
     LFG_STATE_RAIDBROWSER,                                 // Using Raid finder
     LFG_STATE_RAIDBROWSER_ROLECHECK,                       // Using Raid finder and Rolecheck active
+    LFG_STATE_FAILED,                                      // Deletes queue entry on next queue update
 };
 
 enum LfgSpells
@@ -153,10 +154,16 @@ enum RoleIndex
     ROLE_INDEX_COUNT
 };
 
+enum LFGEnum
+{
+    LFG_TANKS_NEEDED                             = 1,
+    LFG_HEALERS_NEEDED                           = 1,
+    LFG_DPS_NEEDED                               = 3
+};
+
 typedef std::map<uint32, uint32> LfgLockMap;
 typedef std::map<ObjectGuid, LfgLockMap> LfgLockPartyMap;
 typedef std::set<uint32> LfgDungeonSet;
-typedef std::map<ObjectGuid, uint8> LfgRolesMap;
 
 struct LfgJoinResultData
 {

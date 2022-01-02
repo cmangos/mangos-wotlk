@@ -31,6 +31,9 @@
 
 struct LFGDungeonEntry;
 
+struct LFGQueuePlayer;
+typedef std::map<ObjectGuid, LFGQueuePlayer> LfgPlayerInfoMap;
+
  /// Reward info
 struct LfgReward
 {
@@ -89,6 +92,9 @@ class LFGMgr
         // Attempts to join LFD or LFR
         void JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::string& comment);
         void LeaveLfg(Player* player);
+
+        static uint32 FilterClassRoles(uint32 roles, uint32 classMask);
+        static bool CheckGroupRoles(LfgPlayerInfoMap& groles);
 
     private:
         LFGDungeonData const* GetLFGDungeon(uint32 id);

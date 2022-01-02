@@ -2079,6 +2079,13 @@ void World::StartLFGQueueThread()
     });
 }
 
+void World::BroadcastToGroup(ObjectGuid groupGuid, std::vector<WorldPacket> const& packets)
+{
+    if (Group* group = sObjectMgr.GetGroupById(groupGuid.GetCounter()))
+        for (auto& packet : packets)
+            group->BroadcastPacket(packet, false);
+}
+
 /// Update the game time
 void World::_UpdateGameTime()
 {
