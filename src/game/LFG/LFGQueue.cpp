@@ -22,7 +22,7 @@
 
 void LFGQueue::AddToQueue(LFGQueueData const& data)
 {
-	auto& result = m_queueData.emplace(data.m_ownerGuid, data);
+	auto result = m_queueData.emplace(data.m_ownerGuid, data);
     auto& queueData = result.first->second;
 	if (data.m_roleCheckState == LFG_ROLECHECK_INITIALITING)
 		UpdateRoleCheck(queueData, queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
