@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14045_01_mangos_lfg_data` bit(1) DEFAULT NULL
+  `required_14046_01_mangos_groups_formation` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -16247,39 +16247,67 @@ LOCK TABLES `skinning_loot_template` WRITE;
 /*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
-DROP TABLE IF EXISTS spawn_group;
-CREATE TABLE spawn_group(
-Id INT NOT NULL COMMENT 'Spawn Group ID',
-Name VARCHAR(200) NOT NULL COMMENT 'Description of usage',
-Type INT NOT NULL COMMENT 'Creature or GO spawn group',
-MaxCount INT NOT NULL DEFAULT '0' COMMENT 'Maximum total count of all spawns in a group',
-WorldState INT NOT NULL DEFAULT '0' COMMENT 'Worldstate which enables spawning of given group',
-Flags INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Flags for various behaviour',
-PRIMARY KEY(Id)
+-- ----------------------------
+-- Table structure for spawn_group
+-- ----------------------------
+DROP TABLE IF EXISTS `spawn_group`;
+CREATE TABLE `spawn_group`  (
+  `Id` int(11) NOT NULL COMMENT 'Spawn Group ID',
+  `Name` varchar(200) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL COMMENT 'Description of usage',
+  `Type` int(11) NOT NULL COMMENT 'Creature or GO spawn group',
+  `MaxCount` int(11) NOT NULL DEFAULT 0 COMMENT 'Maximum total count of all spawns in a group',
+  `WorldState` int(11) NOT NULL DEFAULT 0 COMMENT 'Worldstate which enables spawning of given group',
+  `Flags` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Flags for various behaviour',
+  PRIMARY KEY (`Id`)
 );
 
-DROP TABLE IF EXISTS spawn_group_spawn;
-CREATE TABLE spawn_group_spawn(
-Id INT NOT NULL COMMENT 'Spawn Group ID',
-Guid INT NOT NULL COMMENT 'Guid of creature or GO',
-PRIMARY KEY(Id, Guid)
+-- ----------------------------
+-- Table structure for spawn_group_spawn
+-- ----------------------------
+DROP TABLE IF EXISTS `spawn_group_spawn`;
+CREATE TABLE `spawn_group_spawn`  (
+  `Id` int(11) NOT NULL COMMENT 'Spawn Group ID',
+  `Guid` int(11) NOT NULL COMMENT 'Guid of creature or GO',
+  `SlotId` tinyint(4) NOT NULL DEFAULT -1 COMMENT '0 is the leader, -1 not part of the formation',
+  PRIMARY KEY (`Id`, `Guid`)
 );
 
-DROP TABLE IF EXISTS spawn_group_entry;
-CREATE TABLE spawn_group_entry(
-Id INT NOT NULL COMMENT 'Spawn Group ID',
-Entry INT NOT NULL COMMENT 'Entry of creature or GO',
-MinCount INT NOT NULL DEFAULT '0' COMMENT 'Minimum count of entry in a group before random',
-MaxCount INT NOT NULL DEFAULT '0' COMMENT 'Maximum total count of entry in a group',
-Chance INT NOT NULL DEFAULT '0' COMMENT 'Chance for entry to be selected',
-PRIMARY KEY(Id, Entry)
+-- ----------------------------
+-- Table structure for spawn_group_entry
+-- ----------------------------
+DROP TABLE IF EXISTS `spawn_group_entry`;
+CREATE TABLE `spawn_group_entry`  (
+  `Id` int(11) NOT NULL COMMENT 'Spawn Group ID',
+  `Entry` int(11) NOT NULL COMMENT 'Entry of creature or GO',
+  `MinCount` int(11) NOT NULL DEFAULT 0 COMMENT 'Minimum count of entry in a group before random',
+  `MaxCount` int(11) NOT NULL DEFAULT 0 COMMENT 'Maximum total count of entry in a group',
+  `Chance` int(11) NOT NULL DEFAULT 0 COMMENT 'Chance for entry to be selected',
+  PRIMARY KEY (`Id`, `Entry`)
 );
 
-DROP TABLE IF EXISTS spawn_group_linked_group;
-CREATE TABLE spawn_group_linked_group(
-Id INT NOT NULL COMMENT 'Spawn Group ID',
-LinkedId INT NOT NULL COMMENT 'Linked Spawn Group ID',
-PRIMARY KEY(Id, LinkedId)
+-- ----------------------------
+-- Table structure for spawn_group_formation
+-- ----------------------------
+DROP TABLE IF EXISTS `spawn_group_formation`;
+CREATE TABLE `spawn_group_formation`  (
+  `SpawnGroupID` int(11) NOT NULL COMMENT 'Spawn group id',
+  `FormationType` tinyint(11) NOT NULL DEFAULT 0 COMMENT 'Formation shape 0..6',
+  `FormationSpread` float(11, 0) NOT NULL DEFAULT 0 COMMENT 'Distance between formation members',
+  `FormationOptions` int(11) NOT NULL DEFAULT 0 COMMENT 'Keep formation compact (bit 1)',
+  `MovementID` int(11) NOT NULL DEFAULT 0 COMMENT 'Id from waypoint_path path',
+  `MovementType` tinyint(11) NOT NULL COMMENT 'Same as creature table',
+  `Comment` varchar(255) NULL DEFAULT NULL,
+  PRIMARY KEY (`SpawnGroupID`)
+);
+
+-- ----------------------------
+-- Table structure for spawn_group_linked_group
+-- ----------------------------
+DROP TABLE IF EXISTS `spawn_group_linked_group`;
+CREATE TABLE `spawn_group_linked_group`  (
+  `Id` int(11) NOT NULL COMMENT 'Spawn Group ID',
+  `LinkedId` int(11) NOT NULL COMMENT 'Linked Spawn Group ID',
+  PRIMARY KEY (`Id`, `LinkedId`)
 );
 
 --
@@ -19999,6 +20027,26 @@ LOCK TABLES `vehicle_accessory` WRITE;
 /*!40000 ALTER TABLE `vehicle_accessory` ENABLE KEYS */;
 UNLOCK TABLES;
 
+--
+-- Table structure for table `waypoint_path`
+--
+
+DROP TABLE IF EXISTS `waypoint_path`;
+CREATE TABLE `waypoint_path`  (
+  `entry` mediumint(8) UNSIGNED NOT NULL COMMENT 'Creature entry',
+  `pathId` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Path ID for entry',
+  `point` mediumint(8) UNSIGNED NOT NULL DEFAULT 0,
+  `position_x` float NOT NULL DEFAULT 0,
+  `position_y` float NOT NULL DEFAULT 0,
+  `position_z` float NOT NULL DEFAULT 0,
+  `orientation` float NOT NULL DEFAULT 0,
+  `waittime` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `script_id` mediumint(8) UNSIGNED NOT NULL DEFAULT 0,
+  `comment` text NULL DEFAULT NULL,
+  PRIMARY KEY (`entry`, `pathId`, `point`)
+);
+
+--
 -- Table structure for table `world_safe_locs`
 --
 
