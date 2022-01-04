@@ -23,9 +23,9 @@
 void LFGQueue::AddToQueue(LFGQueueData const& data)
 {
 	auto result = m_queueData.emplace(data.m_ownerGuid, data);
-    auto& queueData = result.first->second;
+    LFGQueueData& queueData = result.first->second;
 	if (data.m_roleCheckState == LFG_ROLECHECK_INITIALITING)
-		UpdateRoleCheck(queueData, queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
+		queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
 }
 
 void LFGQueue::RemoveFromQueue(ObjectGuid owner)
@@ -37,7 +37,7 @@ void LFGQueue::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles)
 {
     auto itr = m_queueData.find(group);
     if (itr != m_queueData.end())
-        UpdateRoleCheck(itr->second, player, roles, false);
+        itr->second.UpdateRoleCheck(player, roles, false);
 }
 
 void LFGQueue::Update()
@@ -54,43 +54,43 @@ std::string LFGQueue::GetDebugPrintout()
 	return std::string();
 }
 
-void LFGQueue::UpdateRoleCheck(LFGQueueData& data, ObjectGuid guid, uint8 roles, bool abort)
+void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
 {
     LfgPlayerInfoMap check_roles;
 
-    bool sendRoleChosen = data.m_roleCheckState != LFG_ROLECHECK_DEFAULT && abort;
+    bool sendRoleChosen = m_roleCheckState != LFG_ROLECHECK_DEFAULT && abort;
 
     if (abort)
-        data.m_roleCheckState = LFG_ROLECHECK_ABORTED;
-    else if (data.m_playerInfoPerGuid.empty())                            // Player selected no role.
-        data.m_roleCheckState = LFG_ROLECHECK_NO_ROLE;
+        m_roleCheckState = LFG_ROLECHECK_ABORTED;
+    else if (m_playerInfoPerGuid.empty())                            // Player selected no role.
+        m_roleCheckState = LFG_ROLECHECK_NO_ROLE;
     else
     {
-        data.m_playerInfoPerGuid[guid].m_roles = roles;
+        m_playerInfoPerGuid[guid].m_roles = roles;
 
         // Check if all players have selected a role
-        auto itrRoles = data.m_playerInfoPerGuid.begin();
-        while (itrRoles != data.m_playerInfoPerGuid.end() && itrRoles->second.m_roles != PLAYER_ROLE_NONE)
+        auto itrRoles = m_playerInfoPerGuid.begin();
+        while (itrRoles != m_playerInfoPerGuid.end() && itrRoles->second.m_roles != PLAYER_ROLE_NONE)
             ++itrRoles;
 
-        if (itrRoles == data.m_playerInfoPerGuid.end())
+        if (itrRoles == m_playerInfoPerGuid.end())
         {
             // use temporal var to check roles, CheckGroupRoles modifies the roles
-            check_roles = data.m_playerInfoPerGuid;
-            data.m_roleCheckState = LFGMgr::CheckGroupRoles(check_roles) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
+            check_roles = m_playerInfoPerGuid;
+            m_roleCheckState = LFGMgr::CheckGroupRoles(check_roles) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
         }
     }
 
-    LfgDungeonSet dungeons = data.m_dungeons;
+    LfgDungeonSet dungeons = m_dungeons;
 
-    LfgJoinResultData joinData = LfgJoinResultData(LFG_JOIN_FAILED, data.m_roleCheckState);
+    LfgJoinResultData joinData = LfgJoinResultData(LFG_JOIN_FAILED, m_roleCheckState);
 
     std::vector<WorldPacket> packets;
     if (sendRoleChosen)
         packets.emplace_back(WorldSession::BuildLfgRoleChosen(guid, roles));
 
-    packets.emplace_back(WorldSession::BuildLfgRoleCheckUpdate(data));
-	switch (data.m_roleCheckState)
+    packets.emplace_back(WorldSession::BuildLfgRoleCheckUpdate(*this));
+	switch (m_roleCheckState)
 	{
 		case LFG_ROLECHECK_INITIALITING:
 			break;
@@ -103,17 +103,254 @@ void LFGQueue::UpdateRoleCheck(LFGQueueData& data, ObjectGuid guid, uint8 roles,
 			break;
 	}
 
-    sWorld.GetMessager().AddMessage([groupGuid = data.m_ownerGuid, packets](World* world)
+    sWorld.GetMessager().AddMessage([groupGuid = m_ownerGuid, packets](World* world)
     {
         world->BroadcastToGroup(groupGuid, packets);
     });
 
-    if (data.m_roleCheckState == LFG_ROLECHECK_FINISHED)
+    if (m_roleCheckState == LFG_ROLECHECK_FINISHED)
     {
-        data.m_state = LFG_STATE_QUEUED;
-        data.m_queueTime = sWorld.GetCurrentClockTime();
-        data.m_roleCheckState = LFG_ROLECHECK_FINISHED;
+        m_state = LFG_STATE_QUEUED;
+        m_queueTime = sWorld.GetCurrentClockTime();
+        m_roleCheckState = LFG_ROLECHECK_FINISHED;
+        RecalculateRoles();
     }
-    else if (data.m_roleCheckState != LFG_ROLECHECK_INITIALITING)
-        data.m_state = LFG_STATE_FAILED;
+    else if (m_roleCheckState != LFG_ROLECHECK_INITIALITING)
+        m_state = LFG_STATE_FAILED;
+}
+
+void LFGQueueData::RecalculateRoles()
+{
+    memset(m_roles, 0, sizeof(m_roles));
+    for (auto& playerInfo : m_playerInfoPerGuid)
+    {
+        uint32 i = PLAYER_ROLE_TANK;
+        for (uint32 k = 0; i <= PLAYER_ROLE_DAMAGE; i = i << 1, ++k)
+            if ((i & playerInfo.second.m_roles) != 0)
+                ++m_roles[k];
+    }
+}
+
+enum RaidBrowserFlags
+{
+    RAID_BROWSER_FLAG_PLAYER_STATS  = 0x01,
+    RAID_BROWSER_FLAG_COMMENT       = 0x02,
+    RAID_BROWSER_FLAG_ROLES         = 0x10,
+    RAID_BROWSER_FLAG_SAVE          = 0x80, // TODO
+};
+
+WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
+{
+    auto& listed = m_listedPerDungeon[{team, dungeonId}];
+
+    WorldPacket data(SMSG_LFG_SEARCH_RESULTS);
+
+    data << uint32(LFG_TYPE_RAID);  // type
+    data << uint32(dungeonId);      // entry from LFGDungeons.dbc
+
+    bool any = !listed.m_players.empty() || !listed.m_groups.empty();
+    data << uint8();
+    if (any)
+    {
+        data << uint32(listed.m_players.size() + listed.m_groups.size());
+        for (ObjectGuid guid : listed.m_players)
+            data << guid; // player guid
+        for (ObjectGuid guid : listed.m_groups)
+            data << guid; // group guid
+    }
+
+    uint32 groups_count = listed.m_groups.size();
+    data << uint32(groups_count);                           // groups count
+    data << uint32(groups_count);                           // groups count (total?)
+
+    for (ObjectGuid guid : listed.m_groups)
+    {
+        data << guid;                                       // group guid
+
+        LFGQueueData& queueData = m_listed[guid];
+
+        uint32 flags = RAID_BROWSER_FLAG_ROLES;
+
+        if (!queueData.m_comment.empty())
+            flags |= RAID_BROWSER_FLAG_COMMENT;
+
+        data << uint32(flags);                              // flags
+
+        if (flags & RAID_BROWSER_FLAG_COMMENT)
+            data << queueData.m_comment;                    // comment string, max len 256
+
+        if (flags & RAID_BROWSER_FLAG_ROLES)
+        {
+            for (uint32 j = 0; j < 3; ++j)
+                data << uint8(queueData.m_roles[j]);        // roles
+        }
+
+        if (flags & RAID_BROWSER_FLAG_SAVE)
+        {
+            data << uint64(0);                              // instance guid
+            data << uint32(0);                              // completed encounters
+        }
+    }
+
+    uint32 playersSize = listed.m_players.size();
+    data << uint32(playersSize);                            // players count
+    data << uint32(playersSize);                            // players count (total?)
+
+    for (ObjectGuid guid : listed.m_players)
+    {
+        LFGQueueData& queueData = m_listed[guid];
+        LFGQueuePlayer const& playerInfo = queueData.m_playerInfoPerGuid[guid];
+
+        data << guid;                                       // guid
+
+        uint32 flags = RAID_BROWSER_FLAG_PLAYER_STATS | RAID_BROWSER_FLAG_ROLES;
+
+        if (!queueData.m_comment.empty())
+            flags |= RAID_BROWSER_FLAG_COMMENT;
+
+        data << uint32(flags);                              // flags
+
+        if (flags & RAID_BROWSER_FLAG_PLAYER_STATS)
+        {
+            data << uint8(playerInfo.m_level);
+            data << uint8(playerInfo.m_class);
+            data << uint8(playerInfo.m_race);
+
+            for (uint32 i = 0; i < 3; ++i)
+                data << uint8(0);                           // talent spec x/x/x
+
+            data << uint32(0);                              // armor
+            data << uint32(0);                              // spd/heal
+            data << uint32(0);                              // spd/heal
+            data << uint32(0);                              // HasteMelee
+            data << uint32(0);                              // HasteRanged
+            data << uint32(0);                              // HasteSpell
+            data << float(0);                               // MP5
+            data << float(0);                               // MP5 Combat
+            data << uint32(0);                              // AttackPower
+            data << uint32(0);                              // Agility
+            data << uint32(0);                              // Health
+            data << uint32(0);                              // Mana
+            data << uint32(0);                              // Unk1
+            data << float(0);                               // Unk2
+            data << uint32(0);                              // Defence
+            data << uint32(0);                              // Dodge
+            data << uint32(0);                              // Block
+            data << uint32(0);                              // Parry
+            data << uint32(0);                              // Crit
+            data << uint32(0);                              // Expertise
+        }
+
+        if (flags & RAID_BROWSER_FLAG_COMMENT)
+            data << queueData.m_comment;                    // comment
+
+        if (flags & 0x4)
+            data << uint8(0);                               // group leader
+
+        if (flags & 0x8)
+            data << uint64(1);                              // group guid
+
+        if (flags & RAID_BROWSER_FLAG_ROLES)
+            data << uint8(playerInfo.m_roles);              // roles
+
+        if (flags & 0x20)
+            data << uint32(0);                              // areaid
+
+        if (flags & 0x40)
+            data << uint8(0);                               // status
+
+        if (flags & 0x80)
+        {
+            data << uint64(0);                              // instance guid
+            data << uint32(0);                              // completed encounters
+        }
+    }
+    return data;
+}
+
+void LfgRaidBrowser::AddListener(uint32 dungeonId, uint32 team, ObjectGuid guid)
+{
+    m_listeners[{team, dungeonId}].push_back(guid);
+    if (m_changed[{team, dungeonId}] == false) // if changed will send on next update
+    {
+        WorldPacket data = BuildSearchResults(dungeonId, team);
+        if (Player* plr = ObjectAccessor::FindPlayer(guid))
+            plr->GetSession()->SendPacket(data);
+    }
+}
+
+void LfgRaidBrowser::RemoveListener(uint32 dungeonId, uint32 team, ObjectGuid guid)
+{
+    auto& listenerGuids = m_listeners[{team, dungeonId}];
+    listenerGuids.erase(std::remove(listenerGuids.begin(), listenerGuids.end(), guid), listenerGuids.end());
+}
+
+void LfgRaidBrowser::AddListed(LFGQueueData const& data)
+{
+    auto result = m_listed.emplace(data.m_ownerGuid, data);
+    LFGQueueData& queueData = result.first->second;
+    if (queueData.m_ownerGuid.IsPlayer())
+        ProcessDungeons(queueData.m_dungeons, queueData.m_team, queueData.m_ownerGuid);
+    else
+        queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
+}
+
+void LfgRaidBrowser::RemoveListed(ObjectGuid guid)
+{
+    auto itr = m_listed.find(guid);
+    if (itr == m_listed.end())
+        return;
+
+    LFGQueueData& data = itr->second;
+
+    for (uint32 dungeonId : data.m_dungeons)
+    {
+        ListedContainer& dungeonGuids = m_listedPerDungeon[{data.m_team, dungeonId}];
+        if (guid.IsPlayer())
+            dungeonGuids.m_players.erase(std::remove(dungeonGuids.m_players.begin(), dungeonGuids.m_players.end(), guid), dungeonGuids.m_players.end());
+        else
+            dungeonGuids.m_groups.erase(std::remove(dungeonGuids.m_groups.begin(), dungeonGuids.m_groups.end(), guid), dungeonGuids.m_groups.end());
+        m_changed[{data.m_team, dungeonId}] = true;
+    }
+
+    m_listed.erase(itr);
+}
+
+void LfgRaidBrowser::Update(World* world)
+{
+    // runs in world thread - always safe to work with sessions
+    for (auto& data : m_changed)
+    {
+        if (data.second == false) // not changed
+            continue;
+
+        uint32 dungeonId = data.first.second;
+        uint32 team = data.first.first;
+        auto& listeners = m_listeners[{team, dungeonId}];
+        if (listeners.empty())
+            continue;
+
+        data.second = false; // set to unchanged and process all listeners
+
+        WorldPacket result = BuildSearchResults(dungeonId, Team(team));
+
+        for (ObjectGuid guid : listeners)
+        {
+            Player* plr = ObjectAccessor::FindPlayer(guid);
+            plr->GetSession()->SendPacket(result);
+        }
+    }
+}
+
+void LfgRaidBrowser::ProcessDungeons(LfgDungeonSet const& dungeons, uint32 team, ObjectGuid guid)
+{
+    for (uint32 dungeonId : dungeons)
+    {
+        ListedContainer& listed = m_listedPerDungeon[{team, dungeonId}];
+        if (guid.IsPlayer())
+            listed.m_players.push_back(guid);
+        else
+            listed.m_groups.push_back(guid);
+        m_changed[{team, dungeonId}] = true;
+    }
 }

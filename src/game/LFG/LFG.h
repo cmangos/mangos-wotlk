@@ -49,22 +49,4 @@ class LfgData
         std::vector<uint8> m_roles;
 };
 
-class LfgRaidBrowser
-{
-    public:
-        WorldPacket BuildSearchResults(uint32 dungeonId, Team team);
-
-        void AddListener(uint32 dungeonId, Team team, ObjectGuid guid);
-        void RemoveListener(uint32 dungeonId, Team team, ObjectGuid guid);
-
-        void AddPlayer(LfgDungeonSet const& dungeons, Team team, ObjectGuid guid);
-        void RemovePlayer(LfgDungeonSet const& dungeons, Team team, ObjectGuid guid);
-
-        void Update(World* world);
-    private:
-        std::map<std::pair<uint32, uint32>, std::vector<ObjectGuid>> m_listeners;
-        std::map<std::pair<uint32, uint32>, std::vector<ObjectGuid>> m_listedPlayers;
-        std::map<std::pair<uint32, uint32>, bool> m_changed;
-};
-
 #endif

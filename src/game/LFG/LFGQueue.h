@@ -28,6 +28,8 @@
 struct LFGQueuePlayer
 {
 	uint32 m_level;
+	uint32 m_class;
+	uint32 m_race;
 	uint32 m_roles;
 };
 
@@ -47,8 +49,14 @@ struct LFGQueueData
 	TimePoint m_cancelTime; // cancel time on rolecheck
 	LfgRoleCheckState m_roleCheckState;
 	GuidVector m_groupGuids;
+	bool m_raid;
+	uint32 m_team;
+	std::string m_comment;
 
 	LFGQueueData() { memset(m_roles, 0, sizeof(m_roles)); }
+
+	void RecalculateRoles();
+	void UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort);
 };
 
 /*
@@ -68,12 +76,38 @@ class LFGQueue
 
 		Messager<LFGQueue>& GetMessager() { return m_messager; }
 	private:
-		void UpdateRoleCheck(LFGQueueData& data, ObjectGuid guid, uint8 roles, bool abort);
 
 		std::map<ObjectGuid, LFGQueueData> m_queueData;
 		std::vector<LFGQueueData*> m_sortedQueue; // sorted by time
 
 		Messager<LFGQueue> m_messager;
+};
+
+struct ListedContainer
+{
+	std::vector<ObjectGuid> m_players;
+	std::vector<ObjectGuid> m_groups;
+};
+
+class LfgRaidBrowser
+{
+    public:
+        WorldPacket BuildSearchResults(uint32 dungeonId, uint32 team);
+
+        void AddListener(uint32 dungeonId, uint32 team, ObjectGuid guid);
+        void RemoveListener(uint32 dungeonId, uint32 team, ObjectGuid guid);
+
+        void AddListed(LFGQueueData const& data);
+        void RemoveListed(ObjectGuid guid);
+
+        void Update(World* world);
+    private:
+		void ProcessDungeons(LfgDungeonSet const& dungeons, uint32 team, ObjectGuid guid);
+
+		std::map<ObjectGuid, LFGQueueData> m_listed;
+        std::map<std::pair<uint32, uint32>, ListedContainer> m_listedPerDungeon;
+		std::map<std::pair<uint32, uint32>, bool> m_changed;
+		std::map<std::pair<uint32, uint32>, std::vector<ObjectGuid>> m_listeners;
 };
 
 #endif

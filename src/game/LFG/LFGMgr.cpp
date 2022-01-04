@@ -548,11 +548,17 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
     else
         player->GetLfgData().SetComment(comment);
 
+    LFGQueueData queueData;
     if (isRaid)
     {
         if (grp)
         {
             grp->GetLfgData().SetState(LFG_STATE_RAIDBROWSER_ROLECHECK);
+
+            sWorld.GetMessager().AddMessage([queueData](World* world)
+            {
+                world->GetRaidBrowser().AddListed(queueData);
+            });
         }
         else
         {
@@ -563,15 +569,23 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
             dungeonSet = dungeons;
             player->GetLfgData().SetState(LFG_STATE_RAIDBROWSER);
             player->GetLfgData().SetPlayerRoles(roles);
-            sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = dungeons](World* world)
+            queueData.m_ownerGuid = player->GetObjectGuid();
+            queueData.m_joinTime = player->GetMap()->GetCurrentClockTime();
+            queueData.m_dungeons = dungeons;
+            queueData.m_randomDungeonId = 0;
+            queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_roles = roles;
+            queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_level = player->GetLevel();
+            queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_class = player->getClass();
+            queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_race = player->getRace();
+            queueData.m_raid = true;
+            sWorld.GetMessager().AddMessage([queueData](World* world)
             {
-                world->GetRaidBrowser().AddPlayer(dungeonsCopy, team, guid);
+                world->GetRaidBrowser().AddListed(queueData);
             });
         }
         return;
     }
 
-    LFGQueueData queueData;
     if (grp)
     {
         grp->GetLfgData().SetState(LFG_STATE_ROLECHECK);
@@ -590,10 +604,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
             queueData.m_playerInfoPerGuid[groupMember].m_level = (*itr).getSource()->GetLevel();
         }
         queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_roles = roles;
-        uint32 i = PLAYER_ROLE_TANK;
-        for (uint32 k = 0; i <= PLAYER_ROLE_DAMAGE; i = i << 1, ++k)
-            if ((i & roles) != 0)
-                ++queueData.m_roles[k];
+        queueData.m_raid = false;
         // cross node broadcasts
         WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment), true);
         grp->BroadcastPacket(data, false);
@@ -616,6 +627,10 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
         queueData.m_joinTime = player->GetMap()->GetCurrentClockTime();
         queueData.m_dungeons = dungeons;
         queueData.m_randomDungeonId = rDungeonId;
+        queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_roles = roles;
+        queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_level = player->GetLevel();
+        queueData.m_raid = false;
+
         player->GetLfgData().SetState(LFG_STATE_QUEUED);
     }
     sWorld.GetLFGQueue().GetMessager().AddMessage([queueData](LFGQueue* queue)
@@ -636,6 +651,12 @@ void LFGMgr::LeaveLfg(Player* player)
     {
         if (grp)
         {
+            WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), true);
+            grp->BroadcastPacket(data, false);
+            sWorld.GetMessager().AddMessage([guid = grp->GetObjectGuid()](World* world)
+            {
+                world->GetRaidBrowser().RemoveListed(guid);
+            });
             grp->GetLfgData().GetListedDungeonSet().clear();
             grp->GetLfgData().SetState(LFG_STATE_NONE);
         }
@@ -643,9 +664,9 @@ void LFGMgr::LeaveLfg(Player* player)
         {
             WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_REMOVED_FROM_QUEUE, lfgData.GetListedDungeonSet(), ""), false);
             player->GetSession()->SendPacket(data);
-            sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid(), team = player->GetTeam(), dungeonsCopy = player->GetLfgData().GetListedDungeonSet()](World* world)
+            sWorld.GetMessager().AddMessage([guid = player->GetObjectGuid()](World* world)
             {
-                world->GetRaidBrowser().RemovePlayer(dungeonsCopy, team, guid);
+                world->GetRaidBrowser().RemoveListed(guid);
             });
             player->GetLfgData().GetListedDungeonSet().clear();
             player->GetLfgData().SetState(LFG_STATE_NONE);
