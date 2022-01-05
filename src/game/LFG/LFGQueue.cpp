@@ -190,8 +190,16 @@ WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
 
         if (flags & RAID_BROWSER_FLAG_SAVE)
         {
-            data << uint64(queueData.m_savedMap[dungeonId].instanceGuid);// instance guid
-            data << uint32(queueData.m_savedMap[dungeonId].completedEncountersMask); // completed encounters
+            if (queueData.m_savedMap.find(dungeonId) != queueData.m_savedMap.end())
+            {
+                data << uint64(queueData.m_savedMap[dungeonId].instanceGuid);// instance guid
+                data << uint32(queueData.m_savedMap[dungeonId].completedEncountersMask); // completed encounters
+            }
+            else
+            {
+                data << uint64(0);// instance guid
+                data << uint32(0); // completed encounters
+            }
         }
     }
 
@@ -265,8 +273,16 @@ WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
 
         if (flags & RAID_BROWSER_FLAG_SAVE)
         {
-            data << uint64(0);                              // instance guid
-            data << uint32(0);                              // completed encounters
+            if (queueData.m_savedMap.find(dungeonId) != queueData.m_savedMap.end())
+            {
+                data << uint64(queueData.m_savedMap[dungeonId].instanceGuid);// instance guid
+                data << uint32(queueData.m_savedMap[dungeonId].completedEncountersMask); // completed encounters
+            }
+            else
+            {
+                data << uint64(0);// instance guid
+                data << uint32(0); // completed encounters
+            }
         }
     }
     return data;
