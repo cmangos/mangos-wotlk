@@ -112,10 +112,20 @@ void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recv_data)
     if (!group)
         return;
 
-    sWorld.GetLFGQueue().GetMessager().AddMessage([group = group->GetObjectGuid(), playerGuid = GetPlayer()->GetObjectGuid(), roles](LFGQueue* queue)
+    if (group->GetLfgData().GetState() == LFG_STATE_RAIDBROWSER)
     {
-        queue->SetPlayerRoles(group, playerGuid, roles);
-    });
+        sWorld.GetMessager().AddMessage([group = group->GetObjectGuid(), playerGuid = GetPlayer()->GetObjectGuid(), roles](World* world)
+        {
+            world->GetRaidBrowser().SetPlayerRoles(group, playerGuid, roles);
+        });
+    }
+    else
+    {
+        sWorld.GetLFGQueue().GetMessager().AddMessage([group = group->GetObjectGuid(), playerGuid = GetPlayer()->GetObjectGuid(), roles](LFGQueue* queue)
+        {
+            queue->SetPlayerRoles(group, playerGuid, roles);
+        });
+    }
 }
 
 void WorldSession::HandleLfgSetCommentOpcode(WorldPacket& recv_data)
@@ -131,9 +141,27 @@ void WorldSession::HandleLfgSetCommentOpcode(WorldPacket& recv_data)
         return;
 
     if (Group* group = player->GetGroup())
+    {
         group->GetLfgData().SetComment(comment);
+        if (group->GetLfgData().GetState() == LFG_STATE_RAIDBROWSER)
+        {
+            sWorld.GetMessager().AddMessage([group = group->GetObjectGuid(), comment](World* world)
+            {
+                world->GetRaidBrowser().UpdateComment(group, comment);
+            });
+        }
+    }
     else
+    {
         player->GetLfgData().SetComment(comment);
+        if (player->GetLfgData().GetState() == LFG_STATE_RAIDBROWSER)
+        {
+            sWorld.GetMessager().AddMessage([group = player->GetObjectGuid(), comment](World* world)
+            {
+                world->GetRaidBrowser().UpdateComment(group, comment);
+            });
+        }
+    }
 }
 
 void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recv_data)
@@ -310,13 +338,15 @@ WorldPacket WorldSession::BuildLfgUpdate(LfgUpdateData const& updateData, bool i
             if (isGroup)
             {
                 queued = false;
-                join = false;
+                join = updateData.state == LFG_STATE_RAIDBROWSER;
             }
             else
-                queued = true;
+            {
+                queued = false;
+            }
             break;
         case LFG_UPDATETYPE_ADDED_TO_QUEUE:                // Rolecheck Success
-            queued = true;
+            queued = updateData.state != LFG_STATE_RAIDBROWSER;
             [[fallthrough]];
         case LFG_UPDATETYPE_PROPOSAL_BEGIN:
             join = true;

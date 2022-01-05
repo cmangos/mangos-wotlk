@@ -129,7 +129,7 @@ enum LfgUpdateType
 {
     LFG_UPDATETYPE_DEFAULT                       = 0,      // Internal Use
     LFG_UPDATETYPE_LEADER_UNK1                   = 1,      // FIXME: At group leave
-    LFG_UPDATETYPE_JOIN_RAID_BROWSER             = 2,
+    LFG_UPDATETYPE_UNK2                          = 2,
     LFG_UPDATETYPE_UNK3                          = 3,
     LFG_UPDATETYPE_ROLECHECK_ABORTED             = 4,
     LFG_UPDATETYPE_JOIN_QUEUE                    = 5,
@@ -164,6 +164,14 @@ enum LFGEnum
 typedef std::map<uint32, uint32> LfgLockMap;
 typedef std::map<ObjectGuid, LfgLockMap> LfgLockPartyMap;
 typedef std::set<uint32> LfgDungeonSet;
+
+struct LfgInstanceSave
+{
+    ObjectGuid instanceGuid;
+    uint32 completedEncountersMask;
+};
+
+typedef std::map<uint32, LfgInstanceSave> LfgInstanceSaveMap;
 
 struct LfgJoinResultData
 {

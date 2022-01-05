@@ -77,7 +77,7 @@ void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
         {
             // use temporal var to check roles, CheckGroupRoles modifies the roles
             check_roles = m_playerInfoPerGuid;
-            m_roleCheckState = LFGMgr::CheckGroupRoles(check_roles) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
+            m_roleCheckState = (m_raid || LFGMgr::CheckGroupRoles(check_roles)) ? LFG_ROLECHECK_FINISHED : LFG_ROLECHECK_WRONG_ROLES;
         }
     }
 
@@ -95,7 +95,8 @@ void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
 		case LFG_ROLECHECK_INITIALITING:
 			break;
 		case LFG_ROLECHECK_FINISHED:
-            packets.emplace_back(WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE, dungeons, ""), true));
+            packets.emplace_back(WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE,
+                m_raid ? LFG_STATE_RAIDBROWSER : LFG_STATE_NONE, dungeons, m_comment), true));
 			break;
 		default:
 			packets.emplace_back(WorldSession::BuildLfgJoinResult(joinData));
@@ -110,7 +111,7 @@ void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
 
     if (m_roleCheckState == LFG_ROLECHECK_FINISHED)
     {
-        m_state = LFG_STATE_QUEUED;
+        m_state = m_raid ? LFG_STATE_RAIDBROWSER : LFG_STATE_QUEUED;
         m_queueTime = sWorld.GetCurrentClockTime();
         m_roleCheckState = LFG_ROLECHECK_FINISHED;
         RecalculateRoles();
@@ -135,22 +136,27 @@ enum RaidBrowserFlags
 {
     RAID_BROWSER_FLAG_PLAYER_STATS  = 0x01,
     RAID_BROWSER_FLAG_COMMENT       = 0x02,
+    RAID_BROWSER_FLAG_GROUP_LEADER  = 0x04,
+    RAID_BROWSER_FLAG_GROUP_GUID    = 0x08,
     RAID_BROWSER_FLAG_ROLES         = 0x10,
+    RAID_BROWSER_FLAG_AREAID        = 0x20, // TODO
+    RAID_BROWSER_FLAG_STATUS        = 0x40, // TODO
     RAID_BROWSER_FLAG_SAVE          = 0x80, // TODO
 };
 
 WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
 {
-    auto& listed = m_listedPerDungeon[{team, dungeonId}];
+    ListedContainer& listed = m_listedPerDungeon[{team, dungeonId}];
 
+    // supposed to work akin to object update - at the moment broadcasting everything all the time
     WorldPacket data(SMSG_LFG_SEARCH_RESULTS);
 
     data << uint32(LFG_TYPE_RAID);  // type
     data << uint32(dungeonId);      // entry from LFGDungeons.dbc
 
-    bool any = !listed.m_players.empty() || !listed.m_groups.empty();
-    data << uint8();
-    if (any)
+    bool deletedPlayersOrGroups = false;
+    data << uint8(deletedPlayersOrGroups);
+    if (deletedPlayersOrGroups)
     {
         data << uint32(listed.m_players.size() + listed.m_groups.size());
         for (ObjectGuid guid : listed.m_players)
@@ -160,8 +166,8 @@ WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
     }
 
     uint32 groups_count = listed.m_groups.size();
-    data << uint32(groups_count);                           // groups count
-    data << uint32(groups_count);                           // groups count (total?)
+    data << uint32(groups_count);                           // groups count current in packet
+    data << uint32(groups_count);                           // groups count total in LFR
 
     for (ObjectGuid guid : listed.m_groups)
     {
@@ -169,10 +175,7 @@ WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
 
         LFGQueueData& queueData = m_listed[guid];
 
-        uint32 flags = RAID_BROWSER_FLAG_ROLES;
-
-        if (!queueData.m_comment.empty())
-            flags |= RAID_BROWSER_FLAG_COMMENT;
+        uint32 flags = RAID_BROWSER_FLAG_ROLES | RAID_BROWSER_FLAG_COMMENT | RAID_BROWSER_FLAG_SAVE;
 
         data << uint32(flags);                              // flags
 
@@ -187,26 +190,27 @@ WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
 
         if (flags & RAID_BROWSER_FLAG_SAVE)
         {
-            data << uint64(0);                              // instance guid
-            data << uint32(0);                              // completed encounters
+            data << uint64(queueData.m_savedMap[dungeonId].instanceGuid);// instance guid
+            data << uint32(queueData.m_savedMap[dungeonId].completedEncountersMask); // completed encounters
         }
     }
 
     uint32 playersSize = listed.m_players.size();
-    data << uint32(playersSize);                            // players count
-    data << uint32(playersSize);                            // players count (total?)
+    data << uint32(playersSize);                            // players count current in packet
+    data << uint32(playersSize);                            // players count total in LFR
 
     for (ObjectGuid guid : listed.m_players)
     {
-        LFGQueueData& queueData = m_listed[guid];
+        ObjectGuid ownerGuid = listed.m_playerToGroup.find(guid) != listed.m_playerToGroup.end() ? listed.m_playerToGroup[guid] : guid;
+        LFGQueueData& queueData = m_listed[ownerGuid];
         LFGQueuePlayer const& playerInfo = queueData.m_playerInfoPerGuid[guid];
 
         data << guid;                                       // guid
 
-        uint32 flags = RAID_BROWSER_FLAG_PLAYER_STATS | RAID_BROWSER_FLAG_ROLES;
+        uint32 flags = RAID_BROWSER_FLAG_PLAYER_STATS | RAID_BROWSER_FLAG_ROLES | RAID_BROWSER_FLAG_COMMENT | RAID_BROWSER_FLAG_SAVE | RAID_BROWSER_FLAG_AREAID | RAID_BROWSER_FLAG_SAVE;
 
-        if (!queueData.m_comment.empty())
-            flags |= RAID_BROWSER_FLAG_COMMENT;
+        if (queueData.m_ownerGuid.IsGroup())
+            flags |= (RAID_BROWSER_FLAG_GROUP_LEADER | RAID_BROWSER_FLAG_GROUP_GUID);
 
         data << uint32(flags);                              // flags
 
@@ -244,22 +248,22 @@ WorldPacket LfgRaidBrowser::BuildSearchResults(uint32 dungeonId, uint32 team)
         if (flags & RAID_BROWSER_FLAG_COMMENT)
             data << queueData.m_comment;                    // comment
 
-        if (flags & 0x4)
-            data << uint8(0);                               // group leader
+        if (flags & RAID_BROWSER_FLAG_GROUP_LEADER)
+            data << uint8(queueData.m_leaderGuid == guid);  // group leader
 
-        if (flags & 0x8)
-            data << uint64(1);                              // group guid
+        if (flags & RAID_BROWSER_FLAG_GROUP_GUID)
+            data << uint64(queueData.m_ownerGuid);          // group guid
 
         if (flags & RAID_BROWSER_FLAG_ROLES)
             data << uint8(playerInfo.m_roles);              // roles
 
-        if (flags & 0x20)
+        if (flags & RAID_BROWSER_FLAG_AREAID)
             data << uint32(0);                              // areaid
 
-        if (flags & 0x40)
+        if (flags & RAID_BROWSER_FLAG_STATUS)
             data << uint8(0);                               // status
 
-        if (flags & 0x80)
+        if (flags & RAID_BROWSER_FLAG_SAVE)
         {
             data << uint64(0);                              // instance guid
             data << uint32(0);                              // completed encounters
@@ -289,7 +293,7 @@ void LfgRaidBrowser::AddListed(LFGQueueData const& data)
 {
     auto result = m_listed.emplace(data.m_ownerGuid, data);
     LFGQueueData& queueData = result.first->second;
-    if (queueData.m_ownerGuid.IsPlayer())
+    if (queueData.m_state == LFG_STATE_RAIDBROWSER)
         ProcessDungeons(queueData.m_dungeons, queueData.m_team, queueData.m_ownerGuid);
     else
         queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
@@ -309,15 +313,51 @@ void LfgRaidBrowser::RemoveListed(ObjectGuid guid)
         if (guid.IsPlayer())
             dungeonGuids.m_players.erase(std::remove(dungeonGuids.m_players.begin(), dungeonGuids.m_players.end(), guid), dungeonGuids.m_players.end());
         else
+        {
             dungeonGuids.m_groups.erase(std::remove(dungeonGuids.m_groups.begin(), dungeonGuids.m_groups.end(), guid), dungeonGuids.m_groups.end());
+            LFGQueueData const& queueData = m_listed[guid];
+            for (auto& playerInfo : queueData.m_playerInfoPerGuid)
+            {
+                dungeonGuids.m_players.push_back(playerInfo.first);
+                dungeonGuids.m_playerToGroup.erase(playerInfo.first);
+            }
+        }            
         m_changed[{data.m_team, dungeonId}] = true;
     }
 
     m_listed.erase(itr);
 }
 
+void LfgRaidBrowser::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles)
+{
+    auto itr = m_listed.find(group);
+    if (itr != m_listed.end())
+        itr->second.UpdateRoleCheck(player, roles, false);
+}
+
+void LfgRaidBrowser::UpdateComment(ObjectGuid guid, std::string comment)
+{
+    auto itr = m_listed.find(guid);
+    if (itr != m_listed.end())
+    {
+        itr->second.m_comment = comment;
+        for (auto& dungeon : itr->second.m_dungeons)
+            m_changed[{itr->second.m_team, dungeon}] = true;
+    }
+}
+
 void LfgRaidBrowser::Update(World* world)
 {
+    for (auto& listed : m_listed)
+    {
+        LFGQueueData const& queueData = listed.second;
+        if (queueData.m_state == LFG_STATE_RAIDBROWSER && queueData.m_roleCheckState == LFG_ROLECHECK_FINISHED)
+        {
+            listed.second.m_roleCheckState = LFG_ROLECHECK_DEFAULT;
+            ProcessDungeons(queueData.m_dungeons, queueData.m_team, queueData.m_ownerGuid);
+        }
+    }
+
     // runs in world thread - always safe to work with sessions
     for (auto& data : m_changed)
     {
@@ -350,7 +390,15 @@ void LfgRaidBrowser::ProcessDungeons(LfgDungeonSet const& dungeons, uint32 team,
         if (guid.IsPlayer())
             listed.m_players.push_back(guid);
         else
+        {
             listed.m_groups.push_back(guid);
+            LFGQueueData const& queueData = m_listed[guid];
+            for (auto& playerInfo : queueData.m_playerInfoPerGuid)
+            {
+                listed.m_players.push_back(playerInfo.first);
+                listed.m_playerToGroup[playerInfo.first] = queueData.m_ownerGuid;
+            }
+        }
         m_changed[{team, dungeonId}] = true;
     }
 }

@@ -49,6 +49,7 @@ struct LFGQueueData
 	TimePoint m_cancelTime; // cancel time on rolecheck
 	LfgRoleCheckState m_roleCheckState;
 	GuidVector m_groupGuids;
+	LfgInstanceSaveMap m_savedMap;
 	bool m_raid;
 	uint32 m_team;
 	std::string m_comment;
@@ -87,6 +88,7 @@ struct ListedContainer
 {
 	std::vector<ObjectGuid> m_players;
 	std::vector<ObjectGuid> m_groups;
+	std::map<ObjectGuid, ObjectGuid> m_playerToGroup;
 };
 
 class LfgRaidBrowser
@@ -99,6 +101,8 @@ class LfgRaidBrowser
 
         void AddListed(LFGQueueData const& data);
         void RemoveListed(ObjectGuid guid);
+		void SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles);
+		void UpdateComment(ObjectGuid guid, std::string comment);
 
         void Update(World* world);
     private:
