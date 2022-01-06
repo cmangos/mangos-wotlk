@@ -11458,37 +11458,25 @@ void Spell::EffectSummonPlayer(SpellEffectIndex /*eff_idx*/)
     static_cast<Player*>(unitTarget)->GetSession()->SendPacket(data);
 }
 
-static ScriptInfo generateActivateCommand()
-{
-    ScriptInfo si;
-    si.command = SCRIPT_COMMAND_ACTIVATE_OBJECT;
-    si.id = 0;
-    si.buddyEntry = 0;
-    si.searchRadiusOrGuid = 0;
-    si.data_flags = 0x00;
-    return si;
-}
-
-void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
+void Spell::EffectActivateObject(SpellEffectIndex effIdx)
 {
     if (!gameObjTarget)
         return;
 
-    uint32 misc_value = m_spellInfo->EffectMiscValue[eff_idx];
+    uint32 misc_value = m_spellInfo->EffectMiscValue[effIdx];
 
-    switch (misc_value)
+    GameObjectActions action = GameObjectActions(m_spellInfo->EffectMiscValue[effIdx]);
+
+    switch (action)
     {
-        case 3:                     // GO custom anim - found mostly in Lunar Fireworks spells
-            gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
-            // no break: the GO is then used;
-        case 1:                     // GO simple use
-        case 2:                     // unk - 2 spells
-        case 4:                     // unk - 1 spell
-        case 5:                     // GO trap usage
-        case 8:                     // GO usage with TargetB = none or random
-        case 11:                    // unk - 1 spell
-        {
-            // Specific case for Darkmoon Faire Cannon (this is probably a hint that our logic about GO use / activation is not accurate)
+        case GameObjectActions::ANIMATE_CUSTOM_0:
+        case GameObjectActions::ANIMATE_CUSTOM_1:
+        case GameObjectActions::ANIMATE_CUSTOM_2:
+        case GameObjectActions::ANIMATE_CUSTOM_3:
+            gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid(), uint32(action) - uint32(GameObjectActions::ANIMATE_CUSTOM_0));
+            break;
+        case GameObjectActions::DISTURB: // What's the difference with Open?
+        case GameObjectActions::OPEN:
             switch (m_spellInfo->Id)
             {
                 case 24731:
@@ -11509,39 +11497,30 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                     gameObjTarget->ResetDoorOrButton();
                     break;
                 default:
-                {
-                    static ScriptInfo activateCommand = generateActivateCommand();
-
-                    int32 delay_secs = m_spellInfo->CalculateSimpleValue(eff_idx);
-
-                    gameObjTarget->GetMap()->ScriptCommandStart(activateCommand, delay_secs * IN_MILLISECONDS, m_caster, gameObjTarget);
+                    if (m_caster)
+                        gameObjTarget->Use(m_caster);
                     break;
-                }
             }
             break;
-        }
-        case 7:                     // unk - 2 spells
-        {
-            gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+        case GameObjectActions::OPEN_AND_UNLOCK:
+            gameObjTarget->UseDoorOrButton(0, false);
+            [[fallthrough]];
+        case GameObjectActions::UNLOCK:
+        case GameObjectActions::LOCK:
+            gameObjTarget->ApplyModFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED, action == GameObjectActions::LOCK);
             break;
-        }
-        case 10:                    // unk - 2 spells
-        {
-            gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
-            gameObjTarget->ResetDoorOrButton();
+        case GameObjectActions::CLOSE:
+        case GameObjectActions::REBUILD:
+            if (m_spellInfo->Id == 46610)
+                gameObjTarget->Use(m_caster, m_spellInfo);
+            else
+                gameObjTarget->ResetDoorOrButton();
             break;
-        }
-        case 12:                    // GO state active alternative - found mostly in Simon Game spells
-            gameObjTarget->UseDoorOrButton(0, true);
+        case GameObjectActions::DESPAWN:
+            gameObjTarget->ForcedDespawn();
             break;
-        case 13:                    // GO state ready - found only in Simon Game spells
-            gameObjTarget->ResetDoorOrButton();
-            break;
-        case 15:                    // GO destroy
-            gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
-            break;
-        case 16:                    // GO custom use - found mostly in Wind Stones spells, Simon Game spells and other GO target summoning spells
-        {
+        case GameObjectActions::MAKE_INERT:
+        case GameObjectActions::MAKE_ACTIVE:
             switch (m_spellInfo->Id)
             {
                 case 24734:         // Summon Templar Random
@@ -11561,9 +11540,9 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                 case 24790:         // Summon Royal (water)
                 {
                     uint32 npcEntry = 0;
-                    uint32 templars[] = {15209, 15211, 15212, 15307};
-                    uint32 dukes[] = {15206, 15207, 15208, 15220};
-                    uint32 royals[] = {15203, 15204, 15205, 15305};
+                    uint32 templars[] = { 15209, 15211, 15212, 15307 };
+                    uint32 dukes[] = { 15206, 15207, 15208, 15220 };
+                    uint32 royals[] = { 15203, 15204, 15205, 15305 };
 
                     switch (m_spellInfo->Id)
                     {
@@ -11655,18 +11634,37 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                     break;
                 }
             }
+            gameObjTarget->ApplyModFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT, action == GameObjectActions::MAKE_INERT);
+            break;
+        case GameObjectActions::CLOSE_AND_LOCK:
+            gameObjTarget->ResetDoorOrButton();
+            gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+            break;
+        case GameObjectActions::DESTROY:
+            gameObjTarget->UseDoorOrButton(0, true);
+            break;
+        case GameObjectActions::USE_ART_KIT_0:
+        case GameObjectActions::USE_ART_KIT_1:
+        case GameObjectActions::USE_ART_KIT_2:
+        case GameObjectActions::USE_ART_KIT_3:
+        {
+            GameObjectTemplateAddon const* templateAddon = gameObjTarget->GetTemplateAddon();
+
+            uint32 artKitIndex = uint32(action) - uint32(GameObjectActions::USE_ART_KIT_0);
+
+            uint32 artKitValue = 0;
+            if (templateAddon != nullptr)
+                artKitValue = templateAddon->artKits[artKitIndex];
+
+            if (artKitValue == 0)
+                sLog.outError("GameObject %d hit by spell %d needs `artkit%d` in `gameobject_template_addon`", gameObjTarget->GetEntry(), m_spellInfo->Id, artKitIndex);
+            else
+                gameObjTarget->SetGoArtKit(artKitValue);
+
             break;
         }
-        case 17:                    // GO unlock - found mostly in Simon Game spells
-            gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-            break;
-        case 19:                    // Midsummer - 1 spell
-        case 20:                    // Midsummer - 2 spells
-            if (gameObjTarget->AI())
-                gameObjTarget->AI()->ReceiveAIEvent(misc_value == 19 ? AI_EVENT_CUSTOM_B : AI_EVENT_CUSTOM_A);
-            break;
         default:
-            sLog.outError("Spell::EffectActivateObject called with unknown misc value. Spell Id %u", m_spellInfo->Id);
+            sLog.outError("Spell %d has unhandled action %d in effect %d", m_spellInfo->Id, int32(action), int32(effIdx));
             break;
     }
 }

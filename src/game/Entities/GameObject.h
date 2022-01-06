@@ -27,6 +27,8 @@
 #include "Spells/SpellDefines.h"
 #include "Entities/GameObjectDefines.h"
 
+#include <array>
+
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
 #pragma pack(1)
@@ -649,11 +651,45 @@ struct GameObjectData
     bool IsNotPartOfPoolOrEvent() const { return (!gameEvent && !GuidPoolId && !EntryPoolId); }
 };
 
+struct GameObjectTemplateAddon
+{
+    std::array<uint32, 4> artKits = {};
+};
+
 // from `gameobject_addon`
 struct GameObjectDataAddon
 {
     uint32 guid;
     QuaternionData path_rotation;
+};
+
+enum class GameObjectActions : uint32
+{
+    // Name from client executable    // Comments
+    NONE,                             // -NONE-
+    ANIMATE_CUSTOM_0,                 // Animate Custom0
+    ANIMATE_CUSTOM_1,                 // Animate Custom1
+    ANIMATE_CUSTOM_2,                 // Animate Custom2
+    ANIMATE_CUSTOM_3,                 // Animate Custom3
+    DISTURB,                          // Disturb                          // Triggers trap
+    UNLOCK,                           // Unlock                           // Resets GO_FLAG_LOCKED
+    LOCK,                             // Lock                             // Sets GO_FLAG_LOCKED
+    OPEN,                             // Open                             // Sets GO_STATE_ACTIVE
+    OPEN_AND_UNLOCK,                  // Open + Unlock                    // Sets GO_STATE_ACTIVE and resets GO_FLAG_LOCKED
+    CLOSE,                            // Close                            // Sets GO_STATE_READY
+    TOGGLE_OPEN,                      // Toggle Open
+    DESTROY,                          // Destroy                          // Sets GO_STATE_DESTROYED
+    REBUILD,                          // Rebuild                          // Resets from GO_STATE_DESTROYED
+    CREATION,                         // Creation
+    DESPAWN,                          // Despawn
+    MAKE_INERT,                       // Make Inert                       // Disables interactions
+    MAKE_ACTIVE,                      // Make Active                      // Enables interactions
+    CLOSE_AND_LOCK,                   // Close + Lock                     // Sets GO_STATE_READY and sets GO_FLAG_LOCKED
+    USE_ART_KIT_0,                    // Use ArtKit0                      // 46904: 121
+    USE_ART_KIT_1,                    // Use ArtKit1                      // 36639: 81, 46903: 122
+    USE_ART_KIT_2,                    // Use ArtKit2
+    USE_ART_KIT_3,                    // Use ArtKit3
+    SET_TAP_LIST,                     // Set Tap List
 };
 
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
@@ -721,6 +757,7 @@ class GameObject : public WorldObject
         void Update(const uint32 diff) override;
         void Heartbeat() override;
         GameObjectInfo const* GetGOInfo() const;
+        GameObjectTemplateAddon const* GetTemplateAddon() const;
 
         bool IsTransport() const;
         bool IsMoTransport() const;

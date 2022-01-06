@@ -2460,6 +2460,55 @@ void ObjectMgr::LoadGameObjectSpawnEntry()
     sLog.outString();
 }
 
+void ObjectMgr::LoadGameObjectTemplateAddons()
+{
+    m_gameobjectAddonTemplates.clear();
+
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT entry, artkit0, artkit1, artkit2, artkit3 FROM gameobject_template_addon"));
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outErrorDb(">> Loaded gameobject_template_addon, table is empty!");
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    uint32 count = 0;
+
+	do
+	{
+		bar.step();
+
+		Field* fields = result->Fetch();
+
+		uint32 entry = fields[0].GetUInt32();
+
+		GameObjectTemplateAddon& gameObjectAddon = m_gameobjectAddonTemplates[entry];
+
+		for (uint32 i = 1; i < gameObjectAddon.artKits.size(); ++i)
+		{
+			uint32 artKitID = fields[i].GetUInt32();
+			if (!artKitID)
+				continue;
+
+			if (!sGameObjectArtKitStore.LookupEntry(artKitID))
+			{
+				sLog.outErrorDb("GameObject (Entry: %u) has invalid `artkit%d` (%d) defined, set to zero instead.", entry, i, artKitID);
+				continue;
+			}
+
+			gameObjectAddon.artKits[i] = artKitID;
+		}
+	} while (result->NextRow());
+
+    sLog.outString(">> Loaded %u gameobject_template_addon entries", count);
+    sLog.outString();
+}
+
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
 {
     uint8 mask = data->spawnMask;
@@ -8318,6 +8367,15 @@ void ObjectMgr::DeleteCreatureData(uint32 guid)
         RemoveCreatureFromGrid(guid, data);
 
     mCreatureDataMap.erase(guid);
+}
+
+GameObjectTemplateAddon const* ObjectMgr::GetGOTemplateAddon(uint32 entry) const
+{
+    auto itr = m_gameobjectAddonTemplates.find(entry);
+    if (itr == m_gameobjectAddonTemplates.end())
+        return nullptr;
+
+    return &itr->second;
 }
 
 void ObjectMgr::DeleteGOData(uint32 guid)

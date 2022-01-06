@@ -409,6 +409,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (46880,'spell_sunwell_teleport'),
 (46240,'spell_earthquake_guardian'),
 (29831,'spell_light_bonfire'),
+(46903,'spell_bonfire_artkit'),
+(46904,'spell_bonfire_artkit'),
 (32727,'spell_arena_preparation'),
 (29710,'spell_test_ribbon_pole_channel_trigger'),
 (29705,'spell_test_ribbon_pole_channel'),

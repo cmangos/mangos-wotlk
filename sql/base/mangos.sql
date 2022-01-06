@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14046_01_mangos_groups_formation` bit(1) DEFAULT NULL
+  `required_14047_01_mangos_artkits` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -2491,6 +2491,16 @@ LOCK TABLES `gameobject_template` WRITE;
 /*!40000 ALTER TABLE `gameobject_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `gameobject_template` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `gameobject_template_addon`;
+CREATE TABLE `gameobject_template_addon`(
+`Entry` INT UNSIGNED NOT NULL COMMENT 'gameobject_template',
+`Artkit0` INT NOT NULL DEFAULT 0,
+`Artkit1` INT NOT NULL DEFAULT 0,
+`Artkit2` INT NOT NULL DEFAULT 0,
+`Artkit3` INT NOT NULL DEFAULT 0,
+PRIMARY KEY(entry)
+);
 
 --
 -- Table structure for table `gossip_menu`
