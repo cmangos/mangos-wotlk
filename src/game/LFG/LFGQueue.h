@@ -22,8 +22,11 @@
 #include "Common.h"
 #include "LFG/LFGDefines.h"
 #include "Multithreading/Messager.h"
+#include "WorldPacket.h"
 
 #include <string>
+
+class World;
 
 struct LFGQueuePlayer
 {

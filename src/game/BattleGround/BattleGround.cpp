@@ -1308,7 +1308,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid playerGuid, bool isOnTransport
         if (player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
             player->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
 
-        player->RemoveAurasDueToSpell(IsArena() ? SPELL_ARENA_DAMPENING : SPELL_BATTLEGROUND_DAMPENING);
+        player->RemoveAurasDueToSpell(IsArena() ? (uint32)SPELL_ARENA_DAMPENING : (uint32)SPELL_BATTLEGROUND_DAMPENING);
         player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
         if (!player->IsAlive())                                // resurrect on exit

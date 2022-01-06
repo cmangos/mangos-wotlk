@@ -111,7 +111,7 @@ enum ArenaWorldStates
     WORLD_STATE_ARENA_MAIN          = 3610,
 };
 
-enum ArenaSpells
+enum ArenaSpells : uint32
 {
     SPELL_LAST_MAN_STANDING         = 26549,
     SPELL_ARENA_PREPARATION         = 32727,                // use this one, 32728 not correct
@@ -122,7 +122,7 @@ enum ArenaSpells
     SPELL_ARENA_DAMPENING           = 74410,                // Arena - Dampening
 };
 
-enum BattleGroundSpells
+enum BattleGroundSpells : uint32
 {
     SPELL_GRAVEYARD_TELEPORT        = 24237,
     SPELL_PREPARATION               = 44521,                // Preparation

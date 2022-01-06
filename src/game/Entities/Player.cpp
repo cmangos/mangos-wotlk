@@ -21199,7 +21199,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
         case AREA_LOCKSTATUS_DIFFICULTY_REQUIREMENT:
         {
             auto data = sMapDifficultyStore.LookupEntry(miscRequirement);
-            GetSession()->SendAreaTriggerMessage(data->areaTriggerText[GetSession()->GetSessionDbcLocale()]);
+            GetSession()->SendAreaTriggerMessage("%s", data->areaTriggerText[GetSession()->GetSessionDbcLocale()]);
             break;
         }
         case AREA_LOCKSTATUS_ZONE_IN_COMBAT:

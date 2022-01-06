@@ -1621,8 +1621,8 @@ void WorldSession::HandleInstanceLockResponse(WorldPacket& recv_data)
 
     if (!_player->HasPendingBind())
     {
-        sLog.outError("InstanceLockResponse: Player %s %s tried to bind himself/teleport to graveyard without a pending bind!",
-            _player->GetName(), _player->GetGUIDLow());
+        sLog.outError("InstanceLockResponse: Player %s tried to bind himself/teleport to graveyard without a pending bind!",
+            _player->GetGuidStr().c_str());
         return;
     }
 
