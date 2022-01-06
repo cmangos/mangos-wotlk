@@ -2510,7 +2510,7 @@ enum
     TARGET_DUMMY_SPAWN_EFFECT   = 4507
 };
 
-struct npc_advanced_target_dummyAI : public ScriptedAI, public TimerManager
+struct npc_advanced_target_dummyAI : public ScriptedAI
 {
     npc_advanced_target_dummyAI(Creature* creature) : ScriptedAI(creature), m_dieTimer(15000)
     {

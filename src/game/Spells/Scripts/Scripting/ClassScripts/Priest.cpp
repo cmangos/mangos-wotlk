@@ -80,7 +80,7 @@ struct PrayerOfMending : public SpellScript
                 uint32 value = 0;
                 value = spell->CalculateSpellEffectValue(EFFECT_INDEX_0, target, true, false);
                 value = spell->GetCaster()->SpellHealingBonusDone(target, sSpellTemplate.LookupEntry<SpellEntry>(41635), value, HEAL);
-                if (aura->GetModifier()->m_amount > value)
+                if (aura->GetModifier()->m_amount > (int32)value)
                     return SPELL_FAILED_AURA_BOUNCED;
             }
         }

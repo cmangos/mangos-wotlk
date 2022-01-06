@@ -1093,12 +1093,12 @@ void WorldState::SpawnWarEffortGos()
 
 enum AQResourceTier : uint32
 {
-    RESOURCE_TIER_0,
-    RESOURCE_TIER_1,
-    RESOURCE_TIER_2,
-    RESOURCE_TIER_3,
-    RESOURCE_TIER_4,
-    RESOURCE_TIER_5,
+    RESOURCE_TIER_0 = 0,
+    RESOURCE_TIER_1 = 1,
+    RESOURCE_TIER_2 = 2,
+    RESOURCE_TIER_3 = 3,
+    RESOURCE_TIER_4 = 4,
+    RESOURCE_TIER_5 = 5,
 };
 
 struct WarEffortSpawn
