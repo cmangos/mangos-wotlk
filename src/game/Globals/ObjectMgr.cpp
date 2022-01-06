@@ -8147,15 +8147,6 @@ void ObjectMgr::LoadSpellTemplate()
         {
             if (spell->Category)
                 sSpellCategoryStore[spell->Category].insert(i);
-
-            if (spell->SpellFamilyName == SPELLFAMILY_ROGUE)
-            {
-                for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                {
-                    if (spell->Effect[i] == SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY)
-                        m_roguePoisonEnchantIds[spell->EffectMiscValue[i]] = true;
-                }
-            }
         }
 
         // DBC not support uint64 fields but SpellEntry have SpellFamilyFlags mapped at 2 uint32 fields
