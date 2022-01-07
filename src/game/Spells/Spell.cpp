@@ -7827,7 +7827,7 @@ void Spell::Delayed()
         return;
 
     // spells not loosing casting time ( slam, dynamites, bombs.. )
-    if (!(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE))
+    if (!(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE_PUSHBACK))
         return;
 
     // check pushback reduce
