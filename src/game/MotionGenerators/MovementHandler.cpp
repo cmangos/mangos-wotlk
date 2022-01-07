@@ -229,6 +229,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
                 _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         }
 
+        _player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_WORLD);
+
         // honorless target
         if (GetPlayer()->pvpInfo.inPvPEnforcedArea)
             GetPlayer()->CastSpell(GetPlayer(), 2479, TRIGGERED_OLD_TRIGGERED);

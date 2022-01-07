@@ -539,7 +539,7 @@ void BattleGroundEY::HandlePlayerClickedOnFlag(Player* source, GameObject* go)
     // Note: flag despawn and spell cast are handled in GameObject code
     // Set flag carrier and set right auras 
     SetFlagCarrier(source->GetObjectGuid());
-    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_PVP_ACTIVE_CANCELS);
 
     // send message
     if (source->GetTeam() == ALLIANCE)
@@ -562,7 +562,7 @@ void BattleGroundEY::ProcessPlayerFlagScoreEvent(Player* source, EYNodes node)
     m_flagRespawnTimer = EY_FLAG_RESPAWN_TIME;
 
     source->RemoveAurasDueToSpell(EY_SPELL_NETHERSTORM_FLAG);
-    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_PVP_ACTIVE_CANCELS);
 
     // process score actions by team
     if (source->GetTeam() == ALLIANCE)
