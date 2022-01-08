@@ -457,21 +457,23 @@ enum UnitNameSummonTitle
 // SummonProperties.dbc, col 5          == Flags            (m_flags)
 enum SummonPropFlags
 {
-    SUMMON_PROP_FLAG_NONE               = 0x0000,           // 1342 spells in 3.0.3
-    SUMMON_PROP_FLAG_UNK1               = 0x0001,           // 75 spells in 3.0.3, something unfriendly
-    SUMMON_PROP_FLAG_UNK2               = 0x0002,           // 616 spells in 3.0.3, something friendly
-    SUMMON_PROP_FLAG_UNK3               = 0x0004,           // 22 spells in 3.0.3, no idea...
-    SUMMON_PROP_FLAG_UNK4               = 0x0008,           // 49 spells in 3.0.3, some mounts
-    SUMMON_PROP_FLAG_UNK5               = 0x0010,           // 25 spells in 3.0.3, quest related?
-    SUMMON_PROP_FLAG_CANT_BE_DISMISSED  = 0x0020,           // 0 spells in 3.0.3, unused
-    SUMMON_PROP_FLAG_UNK7               = 0x0040,           // 12 spells in 3.0.3, no idea
-    SUMMON_PROP_FLAG_UNK8               = 0x0080,           // 4 spells in 3.0.3, no idea
-    SUMMON_PROP_FLAG_UNK9               = 0x0100,           // 51 spells in 3.0.3, no idea, many quest related
-    SUMMON_PROP_FLAG_INHERIT_FACTION    = 0x0200,           // 51 spells in 3.0.3, something defensive (Faction inheriting is much guesswork)
-    SUMMON_PROP_FLAG_UNK11              = 0x0400,           // 3 spells, requires something near?
-    SUMMON_PROP_FLAG_UNK12              = 0x0800,           // 30 spells in 3.0.3, no idea
-    SUMMON_PROP_FLAG_UNK13              = 0x1000,           // 8 spells in 3.0.3, siege vehicle
-    SUMMON_PROP_FLAG_UNK14              = 0x2000,           // 2 spells in 3.0.3, escort?
+    SUMMON_PROP_FLAG_NONE                           = 0x0000,
+    SUMMON_PROP_FLAG_ATTACK_SUMMONER                = 0x0001,
+    SUMMON_PROP_FLAG_HELP_WHEN_SUMMONED_IN_COMBAT   = 0x0002,
+    SUMMON_PROP_FLAG_USE_LEVEL_OFFSET               = 0x0004, // Implemented differently in tbc core
+    SUMMON_PROP_FLAG_DESPAWN_ON_SUMMONER_DEATH      = 0x0008, // NYI
+    SUMMON_PROP_FLAG_ONLY_VISIBLE_TO_SUMMONER       = 0x0010, // NYI
+    SUMMON_PROP_FLAG_CANNOT_DISMISS_PET             = 0x0020, // NYI
+    SUMMON_PROP_FLAG_USE_DEMON_TIMEOUT              = 0x0040, // NYI
+    SUMMON_PROP_FLAG_UNLIMITED_SUMMONS              = 0x0080, // NYI
+    SUMMON_PROP_FLAG_USE_CREATURE_LEVEL             = 0x0100, // NYI
+    SUMMON_PROP_FLAG_JOIN_SUMMONERS_SPAWN_GROUP     = 0x0200, // NYI
+    SUMMON_PROP_FLAG_DO_NOT_TOGGLE                  = 0x0400, // NYI
+    SUMMON_PROP_FLAG_DESPAWN_WHEN_EXPIRED           = 0x0800, // NYI
+    SUMMON_PROP_FLAG_USE_SUMMONER_FACTION           = 0x1000,
+    SUMMON_PROP_FLAG_DO_NOT_FOLLOW_MOUNTED_SUMMONER = 0x2000, // NYI
+    SUMMON_PROP_FLAG_SAVE_PET_AUTOCAST              = 0x4000, // NYI
+    SUMMON_PROP_FLAG_IGNORE_SUMMONERS_PHASE         = 0x8000, // NYI Wild Only
 };
 
 enum SpellEffectIndex
