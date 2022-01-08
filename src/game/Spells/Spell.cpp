@@ -866,7 +866,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
     // Hunter traps spells (for Entrapment trigger)
     // Gives your Immolation Trap, Frost Trap, Explosive Trap, and Snake Trap ....
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & uint64(0x000020000000001C))
-        procAttacker |= PROC_FLAG_DEAL_HELPFUL_PERIODIC;
+        procAttacker |= PROC_FLAG_ON_TRAP_ACTIVATION;
 
     if (IsNextMeleeSwingSpell(m_spellInfo))
     {
@@ -1355,7 +1355,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
             // traps need to be procced at trap triggerer
-            Unit::ProcDamageAndSpell(ProcSystemArguments(affectiveCaster, procAttacker & PROC_FLAG_DEAL_HELPFUL_PERIODIC ? m_targets.getUnitTarget() : unit, affectiveCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(affectiveCaster, procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : unit, affectiveCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
     }
 
     OnAfterHit();
@@ -1573,7 +1573,7 @@ void Spell::DoAllTargetlessEffects(bool dest)
         if (m_caster)
         {
             PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, m_trueCaster, unitTarget);
-            Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procAttacker & PROC_FLAG_DEAL_HELPFUL_PERIODIC ? m_targets.getUnitTarget() : nullptr, m_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : nullptr, m_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
         }
     }
 }

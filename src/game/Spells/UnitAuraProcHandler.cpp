@@ -4028,7 +4028,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
         case 56453:
         {
             // Proc only from trap activation (from periodic proc another aura of this spell)
-            if (!(procFlags & PROC_FLAG_DEAL_HELPFUL_PERIODIC) || !roll_chance_i(triggerAmount))
+            if (!(procFlags & PROC_FLAG_ON_TRAP_ACTIVATION) || !roll_chance_i(triggerAmount))
                 return SPELL_AURA_PROC_FAILED;
             break;
         }
