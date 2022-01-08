@@ -4131,9 +4131,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-    // remove SPELL_AURA_EMPATHY
-    target->RemoveSpellsCausingAura(SPELL_AURA_EMPATHY);
-
     if (ssEntry->modelID_A)
     {
         // i will asume that creatures will always take the defined model from the dbc
