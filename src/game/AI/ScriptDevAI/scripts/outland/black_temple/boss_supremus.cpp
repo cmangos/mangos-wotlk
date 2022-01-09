@@ -35,6 +35,7 @@ enum
     // Spells
     SPELL_BERSERK                   = 45078,
     // Phase 1
+    SPELL_HATEFUL_STRIKE_PRIMER     = 41925,
     SPELL_HATEFUL_STRIKE            = 41926,
     SPELL_MOLTEN_PUNCH              = 40126,
 
@@ -172,32 +173,6 @@ struct boss_supremusAI : public CombatAI
         }
     }
 
-    Unit* GetHatefulStrikeTarget() const
-    {
-        uint32 uiHealth = 0;
-        Unit* target = nullptr;
-        Unit* victim = m_creature->GetVictim();
-
-        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-        for (auto iter : tList)
-        {
-            Unit* pUnit = m_creature->GetMap()->GetUnit(iter->getUnitGuid());
-
-            if (pUnit && pUnit != victim && m_creature->CanReachWithMeleeAttack(pUnit))
-            {
-                if (pUnit->GetHealth() > uiHealth)
-                {
-                    uiHealth = pUnit->GetHealth();
-                    target = pUnit;
-                }
-            }
-        }
-        if (!target && victim && m_creature->CanReachWithMeleeAttack(victim))
-            target = victim;
-
-        return target;
-    }
-
     void JustSummoned(Creature* summoned) override
     {
         switch (summoned->GetEntry())
@@ -297,16 +272,9 @@ struct boss_supremusAI : public CombatAI
                 }
                 return;
             case SUPREMUS_ACTION_HATEFUL_STRIKE:
-                if (Unit* target = GetHatefulStrikeTarget())
-                {
-                    if (DoCastSpellIfCan(target, SPELL_HATEFUL_STRIKE) == CAST_OK)
-                    {
-                        m_creature->SetTarget(target);
-                        ResetCombatAction(action, GetSubsequentActionTimer(SupremusActions(action)));
-                    }
-                    return;
-                }
-                break;
+                if (DoCastSpellIfCan(nullptr, SPELL_HATEFUL_STRIKE_PRIMER) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(SupremusActions(action)));
+                return;
         }
     }
 };
@@ -329,6 +297,40 @@ struct SupremusRandomTarget : public AuraScript
     }
 };
 
+struct HatefulStrikePrimer : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        auto& targetInfo = spell->GetTargetList();
+        if (!target || targetInfo.rbegin()->targetGUID != target->GetObjectGuid())
+            return;
+
+        uint32 uiHealth = 0;
+        target = nullptr;
+        Unit* victim = caster->GetVictim();
+
+        for (auto& targetInfo : targetInfo)
+        {
+            Unit* unit = caster->GetMap()->GetUnit(targetInfo.targetGUID);
+
+            if (unit && unit != victim && caster->CanReachWithMeleeAttack(unit))
+            {
+                if (unit->GetHealth() > uiHealth)
+                {
+                    uiHealth = unit->GetHealth();
+                    target = unit;
+                }
+            }
+        }
+        if (!target && victim && caster->CanReachWithMeleeAttack(victim))
+            target = victim;
+
+        caster->CastSpell(target, SPELL_HATEFUL_STRIKE, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_NORMAL_COMBAT_CAST);
+    }
+};
+
 void AddSC_boss_supremus()
 {
     Script* pNewScript = new Script;
@@ -337,4 +339,5 @@ void AddSC_boss_supremus()
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<SupremusRandomTarget>("spell_supremus_random_target");
+    RegisterSpellScript<HatefulStrikePrimer>("spell_hateful_strike_primer");
 }
