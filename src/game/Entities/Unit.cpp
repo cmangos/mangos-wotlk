@@ -10270,6 +10270,8 @@ void Unit::SetDeathState(DeathState s)
         // remove aurastates allowing special moves
         ClearAllReactives();
         ClearDiminishings();
+
+        DespawnSummonsOnDeath();
     }
     else if (s == JUST_ALIVED)
     {
@@ -14116,6 +14118,20 @@ void Unit::OverrideMountDisplayId(uint32 newDisplayId)
             SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mountedAuras.back()->GetAmount());
         m_overridenMountId = 0;
     }
+}
+
+void Unit::AddSummonForOnDeathDespawn(ObjectGuid guid)
+{
+    m_summonsForOnDeathDespawn.insert(guid);
+}
+
+void Unit::DespawnSummonsOnDeath()
+{
+    for (ObjectGuid guid : m_summonsForOnDeathDespawn)
+        if (Creature* summon = GetMap()->GetAnyTypeCreature(guid))
+            summon->ForcedDespawn();
+
+    m_summonsForOnDeathDespawn.clear();
 }
 
 bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const
