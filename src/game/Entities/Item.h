@@ -190,8 +190,8 @@ enum EnchantmentSlotMask
 {
     ENCHANTMENT_SOULBOUND               = 0x01,
     ENCHANTMENT_DO_NOT_LOG              = 0x02,
-    ENCHANTMENT_MAINHAND_ONLY           = 0x04, // Not actually implemented - spells target only MH
-    ENCHANTMENT_ALLOW_ENTERING_ARENA    = 0x08,
+    ENCHANTMENT_MAINHAND_ONLY           = 0x04, // removed when MH is swapped elsewhere
+    ENCHANTMENT_ALLOW_ENTERING_ARENA    = 0x08
 };
 
 enum ItemUpdateState
@@ -290,6 +290,7 @@ class Item : public Object
         bool IsBoundAccountWide() const { return (GetProto()->Flags & ITEM_FLAG_IS_BOUND_TO_ACCOUNT) != 0; }
         bool IsBindedNotWith(Player const* player) const;
         bool IsBoundByEnchant() const;
+        bool IsMainHandOnlyEnchant(EnchantmentSlot slot) const;
         bool CanEnterArenaEnchant(EnchantmentSlot slot) const;
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guidLow, Field* fields, ObjectGuid ownerGuid = ObjectGuid());

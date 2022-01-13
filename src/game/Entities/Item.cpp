@@ -925,6 +925,15 @@ bool Item::IsBoundByEnchant() const
     return false;
 }
 
+bool Item::IsMainHandOnlyEnchant(EnchantmentSlot slot) const
+{
+    SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(GetEnchantmentId(slot));
+    if (enchantEntry && enchantEntry->flags & ENCHANTMENT_MAINHAND_ONLY)
+        return true;
+
+    return false;
+}
+
 bool Item::CanEnterArenaEnchant(EnchantmentSlot slot) const
 {
     SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(GetEnchantmentId(slot));
