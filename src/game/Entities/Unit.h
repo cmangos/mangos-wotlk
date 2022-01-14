@@ -2520,6 +2520,9 @@ class Unit : public WorldObject
         void AddSummonForOnDeathDespawn(ObjectGuid guid);
         void DespawnSummonsOnDeath();
 
+        // false if only visible to set and not equal
+        virtual bool IsOnlyVisibleTo(ObjectGuid guid) const { return false; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 

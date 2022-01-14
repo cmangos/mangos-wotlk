@@ -6326,6 +6326,9 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         if (summon_prop->Flags & SUMMON_PROP_FLAG_HELP_WHEN_SUMMONED_IN_COMBAT && m_caster)
             if (m_caster->CanEnterCombat() && creature->CanEnterCombat() && creature->CanAssist(m_caster) && m_caster->GetVictim())
                 creature->AI()->AttackStart(m_caster->GetVictim()); // maybe needs to help with everything around not just main target
+
+        if (summon_prop->Flags & SUMMON_PROP_FLAG_ONLY_VISIBLE_TO_SUMMONER)
+            creature->SetOnlyVisibleTo(m_trueCaster->GetObjectGuid());
     }
 }
 

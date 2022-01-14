@@ -1569,6 +1569,19 @@ void Creature::ClearCreatureGroup()
     m_creatureGroup = nullptr;
 }
 
+bool Creature::IsOnlyVisibleTo(ObjectGuid guid) const
+{
+    if (m_onlyVisibleTo.IsEmpty())
+        return true;
+
+    return guid == m_onlyVisibleTo;
+}
+
+void Creature::SetOnlyVisibleTo(ObjectGuid guid)
+{
+    m_onlyVisibleTo = guid;
+}
+
 bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     m_originalEntry = cinfo->Entry;

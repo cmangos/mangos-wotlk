@@ -863,6 +863,9 @@ class Creature : public Unit
         void ClearCreatureGroup();
         CreatureGroup* GetCreatureGroup() const { return m_creatureGroup; }
 
+        bool IsOnlyVisibleTo(ObjectGuid guid) const override;
+        void SetOnlyVisibleTo(ObjectGuid guid);
+
     protected:
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
@@ -928,6 +931,7 @@ class Creature : public Unit
 
         // Script logic
         bool m_countSpawns;
+        ObjectGuid m_onlyVisibleTo;
 
         // spell scripting persistency
         std::set<uint32> m_hitBySpells;
