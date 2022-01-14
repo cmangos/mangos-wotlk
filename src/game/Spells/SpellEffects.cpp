@@ -6079,7 +6079,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     WorldObject* petInvoker = responsibleCaster ? responsibleCaster : m_trueCaster;
     uint32 level;
     // Everything considered as guardian or critter pets uses its creature template level by default (may change depending on SpellEffect params)
-    if (summon_prop->Title == UNITNAME_SUMMON_TITLE_COMPANION)
+    if (summon_prop->Title == UNITNAME_SUMMON_TITLE_COMPANION || summon_prop->Flags & SUMMON_PROP_FLAG_USE_CREATURE_LEVEL)
     {
         if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
             level = urand(cInfo->MinLevel, cInfo->MaxLevel);
