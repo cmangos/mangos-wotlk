@@ -283,6 +283,9 @@ class Pet : public Creature
         void ResetCorpseRespawn();
 
         void ForcedDespawn(uint32 timeMSToDespawn = 0, bool onlyAlive = false) override;
+
+        void SetDismissDisabled() { m_dismissDisabled = true; }
+        bool IsDismissDisabled() { return m_dismissDisabled; }
     protected:
         uint32  m_happinessTimer;
         PetType m_petType;
@@ -295,6 +298,7 @@ class Pet : public Creature
         PetModeFlags m_petModeFlags;
         CharmInfo*   m_originalCharminfo;
         bool m_inStatsUpdate;
+        bool m_dismissDisabled;
 
         void SaveToDB(uint32, uint8, uint32) override       // overwrite of Creature::SaveToDB     - don't must be called
         {

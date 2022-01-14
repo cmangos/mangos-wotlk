@@ -251,6 +251,9 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 {
                     if (pet)
                     {
+                        if (pet->IsDismissDisabled())
+                            break;
+
                         pet->PlayDismissSound();
                         // No action for Hunter pets, Hunters must use their Dismiss Pet spell
                         if (pet->getPetType() != HUNTER_PET)

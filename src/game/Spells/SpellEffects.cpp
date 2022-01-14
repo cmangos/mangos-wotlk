@@ -6329,6 +6329,9 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 
         if (summon_prop->Flags & SUMMON_PROP_FLAG_ONLY_VISIBLE_TO_SUMMONER)
             creature->SetOnlyVisibleTo(m_trueCaster->GetObjectGuid());
+
+        if (summon_prop->Flags & SUMMON_PROP_FLAG_CANNOT_DISMISS_PET && creature->IsPet())
+            static_cast<Pet*>(creature)->SetDismissDisabled();
     }
 }
 
