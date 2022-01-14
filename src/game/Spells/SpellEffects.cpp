@@ -6038,13 +6038,6 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         return;
     }
 
-    // Pet's are atm handled differently - TODO: Unify with rest
-    if (summon_prop->Group == SUMMON_PROP_GROUP_PETS && prop_id != 1562)
-    {
-        DoSummonPet(eff_idx);
-        return;
-    }
-
     // Get casting object
     WorldObject* realCaster = GetCastingObject();
     if (!realCaster)
@@ -6254,11 +6247,12 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         }
         case SUMMON_PROP_GROUP_PETS:
         {
-            // FIXME : multiple summons -  not yet supported as pet
             // 1562 - force of nature  - sid 33831
             // 1161 - feral spirit - sid 51533
             if (prop_id == 1562)                            // 3 uncontrolable instead of one controllable :/
                 summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+            else
+                summonResult = DoSummonPet(summonPositions, summon_prop, eff_idx);
             break;
         }
         case SUMMON_PROP_GROUP_CONTROLLABLE:
@@ -6305,7 +6299,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         else if ((summon_prop->Flags & SUMMON_PROP_FLAG_USE_SUMMONER_FACTION) || !creature->IsTemporarySummon())
             creature->setFaction(petInvoker->GetFaction());
 
-        if (!creature->IsTemporarySummon())
+        if (!itr->processed)
         {
             m_trueCaster->GetMap()->Add(itr->creature);
 
@@ -6658,12 +6652,14 @@ bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEnt
     return true;
 }
 
-bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
+bool Spell::DoSummonPet(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx)
 {
+    MANGOS_ASSERT(!list.empty() && prop);
+
     if (m_caster->GetPetGuid())
         return false;
 
-    uint32 pet_entry = m_spellInfo->EffectMiscValue[eff_idx];
+    uint32 pet_entry = m_spellInfo->EffectMiscValue[effIdx];
     CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(pet_entry);
     if (!cInfo)
     {
@@ -6675,13 +6671,13 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
 
     Player* _player = nullptr;
 
-    Position spawnPos(m_targets.m_destPos.x, m_targets.m_destPos.y, m_targets.m_destPos.z, -m_caster->GetOrientation());
+    Position spawnPos(list[0].x, list[0].y, list[0].z, m_caster->GetOrientation());
 
     // set timer for unsummon
     if (m_duration > 0)
         spawnCreature->SetDuration(m_duration);
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_caster->IsPlayer())
     {
         _player = static_cast<Player*>(m_caster);
 
@@ -6690,8 +6686,7 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
             // Summon in dest location
             if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
                 spawnCreature->Relocate(m_targets.m_destPos.x, m_targets.m_destPos.y, m_targets.m_destPos.z, -m_caster->GetOrientation());
-            OnSummon(spawnCreature);
-            m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON), spawnCreature->GetPackGUID());
+            list[0].creature = spawnCreature;
             return true;
         }
 
@@ -6718,7 +6713,7 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
     spawnCreature->SetLoading(true);
 
     // Level of pet summoned
-    uint32 level = std::max(m_caster->GetLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+    uint32 level = std::max(m_caster->GetLevel() + m_spellInfo->EffectMultipleValue[effIdx], 1.0f);
 
     spawnCreature->SetRespawnCoord(pos);
 
@@ -6777,8 +6772,8 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
     if (m_caster->AI())
         m_caster->AI()->JustSummoned(spawnCreature);
 
-    OnSummon(spawnCreature);
-    m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON), spawnCreature->GetPackGUID());
+    list[0].creature = spawnCreature;
+    list[0].processed = true;
     return true;
 }
 
