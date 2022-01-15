@@ -199,6 +199,8 @@ inline bool IsEffectHandledImmediatelySpellLaunch(SpellEntry const* spellInfo, S
         case SPELL_EFFECT_HEAL_PCT:
         case SPELL_EFFECT_CHARGE:
         case SPELL_EFFECT_CHARGE_DEST:
+        case SPELL_EFFECT_JUMP:
+        case SPELL_EFFECT_JUMP_DEST:
             return true;
         default:
             return false;

@@ -190,7 +190,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveCharge(Unit& target, float speed, uint32 id = EVENT_CHARGE);
         bool MoveFall();
         void MoveJump(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id = EVENT_JUMP);
-        void MoveJumpFacing(float x, float y, float z, float o, float horizontalSpeed, float max_height, uint32 id = EVENT_JUMP);
+        void MoveJumpFacing(Position pos, float horizontalSpeed, float verticalSpeed, uint32 id = EVENT_JUMP);
 
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
 

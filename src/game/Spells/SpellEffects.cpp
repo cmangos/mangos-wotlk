@@ -4943,14 +4943,17 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effIndex)
 
 void Spell::EffectJump(SpellEffectIndex eff_idx)
 {
+    if (!m_trueCaster->IsUnit())
+        return;
+
     if (m_caster->IsTaxiFlying())
         return;
 
     // Init dest coordinates
-    float x, y, z, o;
+    Position pos;
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        m_targets.getDestination(x, y, z);
+        pos = m_targets.getDestination();
 
         if (m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_LOCATION_UNIT_BACK)
         {
@@ -4964,20 +4967,20 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 pTarget = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
 
-            o = pTarget ? pTarget->GetOrientation() : m_caster->GetOrientation();
+            pos.o = pTarget ? pTarget->GetOrientation() : m_caster->GetOrientation();
         }
         else
-            o = m_caster->GetOrientation();
+            pos.o = m_caster->GetOrientation();
     }
     else if (unitTarget)
     {
-        unitTarget->GetContactPoint(m_caster, x, y, z, CONTACT_DISTANCE);
-        o = m_caster->GetOrientation();
+        unitTarget->GetContactPoint(m_caster, pos.x, pos.y, pos.z, CONTACT_DISTANCE);
+        pos.o = m_caster->GetOrientation();
     }
     else if (gameObjTarget)
     {
-        gameObjTarget->GetContactPoint(m_caster, x, y, z, CONTACT_DISTANCE);
-        o = m_caster->GetOrientation();
+        gameObjTarget->GetContactPoint(m_caster, pos.x, pos.y, pos.z, CONTACT_DISTANCE);
+        pos.o = m_caster->GetOrientation();
     }
     else
     {
@@ -4986,10 +4989,33 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
     }
 
     // Try to normalize Z coord because GetContactPoint do nothing with Z axis
-    m_caster->UpdateAllowedPositionZ(x, y, z);
+    m_caster->UpdateAllowedPositionZ(pos.x, pos.y, pos.z);
 
-    float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
-    m_caster->GetMotionMaster()->MoveJumpFacing(x, y, z, o, speed, 2.5f);
+    float runSpeed = baseMoveSpeed[MOVE_RUN];
+    if (m_caster->IsCreature())
+        runSpeed *= static_cast<Creature*>(m_caster)->GetCreatureInfo()->SpeedRun;
+
+    float multiplier = m_spellInfo->EffectMultipleValue[eff_idx];
+    if (multiplier <= 0.0f)
+        multiplier = 1.0f;
+
+    float horizontalSpeed = std::min(runSpeed * 3.0f * multiplier, std::max(28.0f, m_caster->GetSpeed(MOVE_RUN) * 4.0f));
+    float dist = sqrt(m_caster->GetDistance2d(pos.x, pos.y, DIST_CALC_NONE));
+
+    float duration = dist / horizontalSpeed;
+    float durationSqr = duration * duration;
+    float minHeight = m_spellInfo->EffectMiscValue[eff_idx] ? m_spellInfo->EffectMiscValue[eff_idx] / 10.0f : 0.5f; // Lower bound is blizzlike
+    float maxHeight = m_spellInfo->EffectMiscValueB[eff_idx] ? m_spellInfo->EffectMiscValueB[eff_idx] / 10.0f : 1000.0f; // Upper bound is unknown
+    float height;
+    if (durationSqr < minHeight * 8 / Movement::gravity)
+        height = minHeight;
+    else if (durationSqr > maxHeight * 8 / Movement::gravity)
+        height = maxHeight;
+    else
+        height = Movement::gravity * durationSqr / 8;
+
+    float verticalSpeed = std::sqrt(2 * Movement::gravity * height);
+    m_caster->GetMotionMaster()->MoveJumpFacing(pos, horizontalSpeed, verticalSpeed, EVENT_JUMP);
 }
 
 void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target settings for this effect!

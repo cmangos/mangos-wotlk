@@ -1136,6 +1136,8 @@ struct SelectAttackingTargetParams
 
 struct SpellProcEventEntry;                                 // used only privately
 
+extern float baseMoveSpeed[MAX_MOVE_TYPE];
+
 class Unit : public WorldObject
 {
     public:
