@@ -6493,7 +6493,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
     PetType petType = prop->Title == UNITNAME_SUMMON_TITLE_COMPANION ? PROTECTOR_PET : GUARDIAN_PET;
 
     // second direct cast unsummon guardian(s) (guardians without like functionality have cooldown > spawn time)
-    if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER && (prop->Flags & SUMMON_PROP_FLAG_DO_NOT_TOGGLE) == 0)
     {
         bool found = false;
         // including protector
