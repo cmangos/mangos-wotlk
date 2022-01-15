@@ -229,7 +229,7 @@ class Pet : public Creature
         void _SaveSpellCooldowns();
         void _LoadAuras(uint32 timediff);
         void _SaveAuras();
-        void _LoadSpells();
+        bool _LoadSpells();
         void _SaveSpells();
 
         bool addSpell(uint32 spell_id, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
@@ -292,6 +292,10 @@ class Pet : public Creature
 
         void SetNoMountedFollow() { m_doNotFollowMounted = true; }
         bool IsNoMountedFollow() const override { return m_doNotFollowMounted; }
+        
+        void SetSaveAutoCast() { m_saveAutocast = true; }
+        bool IsSaveAutoCast() const { return m_saveAutocast; }
+        void InitializeSpellsForControllableGuardian(bool load);
     protected:
         uint32  m_happinessTimer;
         PetType m_petType;
@@ -307,6 +311,7 @@ class Pet : public Creature
         bool m_dismissDisabled;
         bool m_controllableGuardian;
         bool m_doNotFollowMounted;
+        bool m_saveAutocast;
 
         void SaveToDB(uint32, uint8, uint32) override       // overwrite of Creature::SaveToDB     - don't must be called
         {

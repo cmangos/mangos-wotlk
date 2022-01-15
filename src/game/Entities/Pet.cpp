@@ -432,8 +432,7 @@ void Pet::SavePetToDB(PetSaveMode mode, Player* owner)
     if (!isControlled())
         return;
 
-    // dont save shadowfiend
-    if (owner->getClass() == CLASS_PRIEST)
+    if (getPetType() == GUARDIAN_PET && !IsSaveAutoCast())
         return;
 
     // current/stable/not_in_slot
@@ -691,7 +690,7 @@ void Pet::Update(const uint32 diff)
                     m_duration -= (int32)diff;
                 else
                 {
-                    Unsummon(getPetType() != SUMMON_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, owner);
+                    Unsummon(getPetType() != SUMMON_PET && !IsSaveAutoCast() ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, owner);
                     return;
                 }
             }
@@ -873,8 +872,12 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
             case GUARDIAN_PET:
                 owner->RemoveGuardian(this);
                 if (m_controllableGuardian)
+                {
                     if (owner->GetPetGuid() == GetObjectGuid())
                         owner->SetPet(nullptr);
+                    else
+                        m_saveAutocast = false; // only save the main one
+                }
                 break;
             default:
                 if (owner->GetPetGuid() == GetObjectGuid())
@@ -1416,9 +1419,9 @@ void Pet::_SaveSpellCooldowns()
     }
 }
 
-void Pet::_LoadSpells()
+bool Pet::_LoadSpells()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT spell,active FROM pet_spell WHERE guid = '%u'", m_charmInfo->GetPetNumber());
+    std::unique_ptr<QueryResult> result(CharacterDatabase.PQuery("SELECT spell,active FROM pet_spell WHERE guid = '%u'", m_charmInfo->GetPetNumber()));
 
     if (result)
     {
@@ -1430,8 +1433,10 @@ void Pet::_LoadSpells()
         }
         while (result->NextRow());
 
-        delete result;
+        return true;
     }
+
+    return false;
 }
 
 void Pet::_SaveSpells()
@@ -2455,4 +2460,24 @@ void Pet::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
     RemoveCorpse(true);                                     // force corpse removal in the same grid
 
     Unsummon(PET_SAVE_NOT_IN_SLOT);
+}
+
+void Pet::InitializeSpellsForControllableGuardian(bool load)
+{
+    m_charmInfo->InitPetActionBar();
+
+    CreatureSpellList const& spellList = GetSpellList();
+
+    for (auto& spellData : spellList.Spells)
+        addSpell(spellData.second.SpellId, ACT_DECIDE, PETSPELL_NEW);
+
+    if (load && _LoadSpells())
+    {
+        // update autocast in bar
+        for (uint32 i = ACTION_BAR_INDEX_PET_SPELL_START; i < ACTION_BAR_INDEX_PET_SPELL_END; ++i)
+        {
+            UnitActionBarEntry const* bar = m_charmInfo->GetActionBarEntry(i);
+            m_charmInfo->SetActionBar(i, bar->GetAction(), (ActiveStates)m_spells[bar->GetAction()].active);
+        }
+    }
 }
