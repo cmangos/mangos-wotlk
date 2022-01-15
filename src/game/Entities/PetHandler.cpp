@@ -349,8 +349,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                         return;
                     }
 
-                    petUnit->GetMotionMaster()->Clear();
-
                     petUnit->AI()->AttackStart(unit_target);
                     // 10% chance to play special warlock pet attack talk, else growl
                     if (pet && pet->getPetType() == SUMMON_PET && pet != unit_target && roll_chance_i(10))
@@ -369,23 +367,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             targets.setUnitTarget(unit_target);
             SpellCastResult result = spell->SpellStart(&targets);
             charmInfo->SetSpellOpener();
-            // send update about target to owner unless possessed
-            if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
-            {
-                if (unit_target)
-                {
-                    if (unit_target->GetTypeId() == TYPEID_PLAYER)
-                        petUnit->SendCreateUpdateToPlayer((Player*)unit_target);
-                }
-                else if (Unit* unit_target2 = spell->m_targets.getUnitTarget())
-                {
-                    if (unit_target2->GetTypeId() == TYPEID_PLAYER)
-                        petUnit->SendCreateUpdateToPlayer((Player*)unit_target2);
-                }
-                if (Unit* powner = petUnit->GetMaster())
-                    if (powner->GetTypeId() == TYPEID_PLAYER)
-                        petUnit->SendCreateUpdateToPlayer((Player*)powner);
-            }
             if (result == SPELL_CAST_OK)
             {
                 //10% chance to play special pet attack talk, else growl
