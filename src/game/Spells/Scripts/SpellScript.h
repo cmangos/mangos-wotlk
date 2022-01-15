@@ -64,6 +64,9 @@ struct SpellScript
     virtual void OnSummon(Spell* /*spell*/, Creature* /*summon*/) const {}
     // called after summoning a gameobject
     virtual void OnSummon(Spell* /*spell*/, GameObject* /*summon*/) const {}
+    // wotlk+
+    // called with SUMMON_PROP_FLAG_IGNORE_SUMMONERS_PHASE - propid 1881
+    virtual uint32 GetPhaseMaskOverride(Spell* /*spell*/) const { return 1; }
 };
 
 struct AuraCalcData

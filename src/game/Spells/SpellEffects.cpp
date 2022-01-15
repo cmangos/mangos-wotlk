@@ -6370,9 +6370,13 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
 
     TempSpawnType summonType = (m_duration == 0) ? TEMPSPAWN_DEAD_DESPAWN : TEMPSPAWN_TIMED_OR_DEAD_DESPAWN;
 
+    uint32 phaseMask = m_trueCaster->GetPhaseMask();
+    if (prop->Flags & SUMMON_PROP_FLAG_IGNORE_SUMMONERS_PHASE)
+        phaseMask = GetPhaseMaskOverride();
+
     for (auto& itr : list)
         if (Creature* summon = WorldObject::SummonCreature(TempSpawnSettings(m_trueCaster, creature_entry, itr.x, itr.y, itr.z, m_trueCaster->GetOrientation(), summonType, m_duration, false,
-            IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id), m_trueCaster->GetMap(), m_trueCaster->GetPhaseMask()))
+            IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id), m_trueCaster->GetMap(), phaseMask))
         {
             itr.creature = summon;
 

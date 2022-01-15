@@ -9578,6 +9578,14 @@ void Spell::OnSummon(Creature* summon)
         return script->OnSummon(this, summon);
 }
 
+uint32 Spell::GetPhaseMaskOverride()
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->GetPhaseMaskOverride(this);
+
+    return 1;
+}
+
 SpellModRAII::SpellModRAII(Spell* spell, Player* modOwner, bool success, bool onlySave) : m_spell(spell), m_modOwner(modOwner), m_success(success), m_onlySave(onlySave)
 {
     if (m_modOwner && !modOwner->GetSpellModSpell()) // only if first spell in depth
