@@ -1681,6 +1681,8 @@ class Player : public Unit
         void CharmSpellInitialize() const;
         void CharmCooldownInitialize(WorldPacket& data) const;
         void RemovePetActionBar() const;
+        std::pair<float, float> RequestFollowData(ObjectGuid guid);
+        void RelinquishFollowData(ObjectGuid guid);
 
         bool HasSpell(uint32 spell) const override;
         bool HasActiveSpell(uint32 spell) const;            // show in spellbook
@@ -2902,6 +2904,8 @@ class Player : public Unit
         uint32 m_pendingBindTimer;
 
         LfgData m_lfgData;
+
+        std::map<uint32, ObjectGuid> m_followAngles;
 };
 
 void AddItemsSetItem(Player* player, Item* item);
