@@ -101,23 +101,18 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         return;
     }
 
-    Pet* pet = nullptr;
-    Creature* creature = nullptr;
-
-    if (petUnit->GetTypeId() == TYPEID_UNIT)
+    bool isPet = false;
+    if (petUnit->IsCreature())
     {
-        creature = static_cast<Creature*>(petUnit);
-
-        if (creature->IsPet())
+        if (static_cast<Creature*>(petUnit)->IsPet())
         {
-            pet = static_cast<Pet*>(petUnit);
-
-            if (pet->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
+            isPet = true;
+            if (static_cast<Pet*>(petUnit)->GetModeFlags() & PET_MODE_DISABLE_ACTIONS)
                 return;
         }
     }
 
-    if (!pet)
+    if (!isPet)
     {
         if (petUnit->hasUnitState(UNIT_STAT_POSSESSED))
         {
@@ -164,6 +159,30 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
         if (!petUnit->HasCharmer())
             return;
+    }
+
+    GuidSet controlled = _player->GetControlled();
+    if (controlled.empty() || controlled.size() == 1)
+        HandlePetActionHelper(flag, spellid, petUnit, targetGuid);
+    else
+    {
+        for (ObjectGuid guid : controlled)
+            if (Unit* unit = _player->GetMap()->GetUnit(guid))
+                HandlePetActionHelper(flag, spellid, unit, targetGuid);
+    }
+}
+
+void WorldSession::HandlePetActionHelper(uint8 flag, uint32 spellid, Unit* petUnit, ObjectGuid targetGuid)
+{
+    CharmInfo* charmInfo = petUnit->GetCharmInfo();
+    Pet* pet = nullptr;
+    Creature* creature = nullptr;
+
+    if (petUnit->IsCreature())
+    {
+        creature = static_cast<Creature*>(petUnit);
+        if (creature->IsPet())
+            pet = static_cast<Pet*>(petUnit);
     }
 
     switch (flag)

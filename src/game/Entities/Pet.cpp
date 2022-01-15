@@ -32,7 +32,8 @@ Pet::Pet(PetType type) :
     m_resetTalentsCost(0), m_resetTalentsTime(0), m_usedTalentCount(0),
     m_removed(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
     m_loading(false),
-    m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false), m_dismissDisabled(false)
+    m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false), m_dismissDisabled(false),
+    m_controllableGuardian(false)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
@@ -54,6 +55,11 @@ void Pet::AddToWorld()
         GetMap()->GetObjectsStore().insert<Pet>(GetObjectGuid(), (Pet*)this);
 
     Unit::AddToWorld();
+
+    if (isControlled())
+		if (Unit* owner = GetOwner())
+			if (owner->IsPlayer())
+				static_cast<Player*>(owner)->AddControllable(this);
 }
 
 void Pet::RemoveFromWorld()
@@ -68,6 +74,7 @@ void Pet::RemoveFromWorld()
         {
             if (owner->IsPlayer())
             {
+                static_cast<Player*>(owner)->RemoveControllable(this);
                 static_cast<Player*>(owner)->RelinquishFollowData(this->GetObjectGuid());
             }
         }
@@ -596,6 +603,9 @@ void Pet::SetOwnerGuid(ObjectGuid owner)
     {
         case SUMMON_PET:
         case HUNTER_PET:
+        case GUARDIAN_PET:
+            if (!m_controllableGuardian)
+                break;
             SetSummonerGuid(owner);
             break;
     }
@@ -668,7 +678,7 @@ void Pet::Update(const uint32 diff)
 
             if (isControlled())
             {
-                if (owner->GetPetGuid() != GetObjectGuid())
+                if (owner->GetPetGuid() != GetObjectGuid() && !IsControllableGuardian())
                 {
                     Unsummon(getPetType() == HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT, owner);
                     return;
@@ -862,6 +872,9 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
             case PROTECTOR_PET:
             case GUARDIAN_PET:
                 owner->RemoveGuardian(this);
+                if (m_controllableGuardian)
+                    if (owner->GetPetGuid() == GetObjectGuid())
+                        owner->SetPet(nullptr);
                 break;
             default:
                 if (owner->GetPetGuid() == GetObjectGuid())
@@ -2232,6 +2245,9 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
 
 bool Pet::HasSpell(uint32 spell) const
 {
+    if (m_controllableGuardian)
+        return Creature::HasSpell(spell);
+
     PetSpellMap::const_iterator itr = m_spells.find(spell);
     return (itr != m_spells.end() && itr->second.state != PETSPELL_REMOVED);
 }

@@ -1003,6 +1003,8 @@ class WorldSession
         void HandleComplainMail(WorldPacket& recv_data);
         void HandleComplainChat(WorldPacket& recv_data);
 
+        void HandlePetActionHelper(uint8 flag, uint32 spellid, Unit* petUnit, ObjectGuid targetGuid);
+
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
         bool VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mover, bool unroot) const;

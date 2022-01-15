@@ -147,7 +147,7 @@ class Pet : public Creature
 
         PetType getPetType() const { return m_petType; }
         void setPetType(PetType type) { m_petType = type; }
-        bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET; }
+        bool isControlled() const { return getPetType() == SUMMON_PET || getPetType() == HUNTER_PET || IsControllableGuardian(); }
         bool isTemporarySummoned() const { return m_duration > 0; }
         bool IsGuardian() const { return getPetType() == GUARDIAN_PET; }
 
@@ -286,6 +286,9 @@ class Pet : public Creature
 
         void SetDismissDisabled() { m_dismissDisabled = true; }
         bool IsDismissDisabled() { return m_dismissDisabled; }
+
+        void SetControllableGuardian() { m_controllableGuardian = true; }
+        bool IsControllableGuardian() const { return m_controllableGuardian; }
     protected:
         uint32  m_happinessTimer;
         PetType m_petType;
@@ -299,6 +302,7 @@ class Pet : public Creature
         CharmInfo*   m_originalCharminfo;
         bool m_inStatsUpdate;
         bool m_dismissDisabled;
+        bool m_controllableGuardian;
 
         void SaveToDB(uint32, uint8, uint32) override       // overwrite of Creature::SaveToDB     - don't must be called
         {

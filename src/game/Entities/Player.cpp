@@ -19315,7 +19315,7 @@ void Player::PossessSpellInitialize() const
 
 void Player::CharmSpellInitialize() const
 {
-    Unit* charm = GetCharm();
+    Unit* charm = GetFirstControlled();
 
     if (!charm)
         return;
@@ -19329,17 +19329,12 @@ void Player::CharmSpellInitialize() const
 
     uint8 addlist = 0;
 
-    if (charm->GetTypeId() != TYPEID_PLAYER)
+    if (!charm->IsPlayer())
     {
-        CreatureInfo const* cinfo = ((Creature*)charm)->GetCreatureInfo();
-
-        if (cinfo && cinfo->CreatureType == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
+        for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
         {
-            for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
-            {
-                if (charmInfo->GetCharmSpell(i)->GetAction())
-                    ++addlist;
-            }
+            if (charmInfo->GetCharmSpell(i)->GetAction())
+                ++addlist;
         }
     }
 
@@ -19410,6 +19405,49 @@ void Player::RemovePetActionBar() const
     WorldPacket data(SMSG_PET_SPELLS, 8);
     data << ObjectGuid();
     SendDirectMessage(data);
+}
+
+Unit* Player::GetFirstControlled() const
+{
+    Unit* unit = GetCharm();
+    if (!unit)
+        if (ObjectGuid guid = GetSummonGuid())
+            unit = ObjectAccessor::GetUnit(*this, guid);
+
+    return unit;
+}
+
+std::pair<float, float> Player::RequestFollowData(ObjectGuid guid)
+{
+    uint32 slotId = 0;
+    for (uint32 i = 0; i < 10; ++i)
+    {
+        if (m_followAngles.find(i) == m_followAngles.end())
+        {
+            slotId = i;
+            break;
+        }
+    }
+    m_followAngles.emplace(slotId, guid);
+    switch (slotId)
+    {
+        case 0: return { M_PI_F / 2, 1.5f }; // left
+        case 1: return { 3 * M_PI_F / 2, 1.5f }; // right
+        default: return { M_PI_F, 1.5f }; // behind
+        // TODO: Army of the dead angles
+    }
+}
+
+void Player::RelinquishFollowData(ObjectGuid guid)
+{
+    for (auto itr = m_followAngles.begin(); itr != m_followAngles.end(); ++itr)
+    {
+        if (itr->second == guid)
+        {
+            m_followAngles.erase(itr);
+            return;
+        }
+    }
 }
 
 bool Player::IsAffectedBySpellmod(SpellEntry const* spellInfo, SpellModifier* mod, std::set<SpellModifierPair>* consumedMods)
@@ -23488,6 +23526,16 @@ bool Player::IsPetNeedBeTemporaryUnsummoned(Pet* pet) const
         return true;
 
     return false;
+}
+
+void Player::AddControllable(Unit* controlled)
+{
+    m_controlled.insert(controlled->GetObjectGuid());
+}
+
+void Player::RemoveControllable(Unit* controlled)
+{
+    m_controlled.erase(controlled->GetObjectGuid());
 }
 
 void Player::ResummonPetTemporaryUnSummonedIfAny()

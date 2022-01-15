@@ -6273,12 +6273,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         }
         case SUMMON_PROP_GROUP_PETS:
         {
-            // 1562 - force of nature  - sid 33831
-            // 1161 - feral spirit - sid 51533
-            if (prop_id == 1562)                            // 3 uncontrolable instead of one controllable :/
-                summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
-            else
-                summonResult = DoSummonPet(summonPositions, summon_prop, eff_idx);
+            summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
             break;
         }
         case SUMMON_PROP_GROUP_CONTROLLABLE:
@@ -6512,6 +6507,8 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         if (Pet* old_protector = m_caster->GetProtectorPet())
             old_protector->Unsummon(PET_SAVE_AS_DELETED, m_caster);
 
+    bool initCharm = false;
+
     // in another case summon new
     for (auto& itr : list)
     {
@@ -6567,14 +6564,39 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         if (m_caster->IsPvPSanctuary())
             spawnCreature->SetPvPSanctuary(true);
 
+        if (prop->Group == SUMMON_PROP_GROUP_PETS || prop->Title == UNITNAME_SUMMON_TITLE_PET)
+        {
+            // controllable guardians
+            spawnCreature->SetControllableGuardian();
+            if (spawnCreature->GetCreatureInfo()->SpellList)
+                spawnCreature->SetSpellList(cInfo->SpellList);
+            else // legacy compatibility
+                spawnCreature->SetSpellList(cInfo->Entry * 100 + 0);
+            if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
+                charmInfo->InitCharmCreateSpells();
+            m_caster->SetPet(spawnCreature); // last guardian will be left in field
+            spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
+
+            initCharm = true;
+        }
+
         if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
-            charmInfo->SetPetNumber(pet_number, false);
+            charmInfo->SetPetNumber(pet_number, initCharm);
 
         spawnCreature->SetLoading(false);
         m_caster->AddGuardian(spawnCreature);
 
         spawnCreature->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK5);
+
+        m_caster->GetMap()->Add(static_cast<Creature*>(spawnCreature));
+
+        spawnCreature->AIM_Initialize();
+
+        itr.processed = true;
     }
+
+    if (initCharm && m_caster->IsPlayer())
+        static_cast<Player*>(m_caster)->CharmSpellInitialize();
 
     return true;
 }
