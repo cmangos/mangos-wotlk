@@ -289,6 +289,9 @@ class Pet : public Creature
 
         void SetControllableGuardian() { m_controllableGuardian = true; }
         bool IsControllableGuardian() const { return m_controllableGuardian; }
+
+        void SetNoMountedFollow() { m_doNotFollowMounted = true; }
+        bool IsNoMountedFollow() const override { return m_doNotFollowMounted; }
     protected:
         uint32  m_happinessTimer;
         PetType m_petType;
@@ -303,6 +306,7 @@ class Pet : public Creature
         bool m_inStatsUpdate;
         bool m_dismissDisabled;
         bool m_controllableGuardian;
+        bool m_doNotFollowMounted;
 
         void SaveToDB(uint32, uint8, uint32) override       // overwrite of Creature::SaveToDB     - don't must be called
         {

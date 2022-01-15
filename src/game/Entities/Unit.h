@@ -2525,6 +2525,8 @@ class Unit : public WorldObject
         // false if only visible to set and not equal
         virtual bool IsOnlyVisibleTo(ObjectGuid guid) const { return false; }
 
+        virtual bool IsNoMountedFollow() const { return false; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const;
 

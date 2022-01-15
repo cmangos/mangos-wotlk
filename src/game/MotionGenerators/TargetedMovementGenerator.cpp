@@ -1066,6 +1066,9 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
 
     const bool followerMoving = owner.m_movementInfo.HasMovementFlag(detected);
 
+    if (owner.IsNoMountedFollow() && i_target->IsMounted())
+        return;
+
     // Detect target movement and relocation (ignore jumping in place and long falls)
     const bool targetMovementIgnored = i_target->m_movementInfo.HasMovementFlag(ignored);
     const bool targetMovingLast = m_targetMoving;

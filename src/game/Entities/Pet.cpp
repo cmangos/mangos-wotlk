@@ -33,7 +33,7 @@ Pet::Pet(PetType type) :
     m_removed(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
     m_loading(false),
     m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false), m_dismissDisabled(false),
-    m_controllableGuardian(false)
+    m_controllableGuardian(false), m_doNotFollowMounted(false)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
