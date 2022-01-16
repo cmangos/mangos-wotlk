@@ -1396,6 +1396,10 @@ void Pet::_LoadSpellCooldowns()
 
 void Pet::_SaveSpellCooldowns()
 {
+    // controllable guardians only save spells and main entry
+    if (m_controllableGuardian)
+        return;
+
     static SqlStatementID delSpellCD ;
     static SqlStatementID insSpellCD ;
 
@@ -1600,6 +1604,10 @@ void Pet::_LoadAuras(uint32 timediff)
 
 void Pet::_SaveAuras()
 {
+    // controllable guardians only save spells and main entry
+    if (m_controllableGuardian)
+        return;
+
     static SqlStatementID delAuras ;
     static SqlStatementID insAuras ;
 
