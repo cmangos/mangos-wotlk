@@ -1390,8 +1390,9 @@ struct PreventSpellIfSameAuraOnCaster : public SpellScript
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
         if (spell->GetCaster()->HasAura(spell->m_spellInfo->Id))
+            return SPELL_FAILED_CASTER_AURASTATE;
 
-            return SPELL_CAST_OK;
+        return SPELL_CAST_OK;
     }
 };
 
