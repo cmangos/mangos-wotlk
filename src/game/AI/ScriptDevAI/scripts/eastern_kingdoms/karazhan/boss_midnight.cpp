@@ -240,7 +240,6 @@ struct boss_attumenAI : public CombatAI
         if (m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED)
         {
             SetReactState(REACT_PASSIVE);
-            m_creature->SetInCombatWithZone();
             AddCustomAction(ATTUMEN_ATTACK_DELAY, 2000u, [&]() { HandleAttackDelay(); });
             AddCombatAction(ATTUMEN_ACTION_CHARGE, 20000u);
         }
@@ -377,6 +376,7 @@ struct boss_attumenAI : public CombatAI
     void HandleAttackDelay()
     {
         SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
         AttackClosestEnemy();
     }
 };
