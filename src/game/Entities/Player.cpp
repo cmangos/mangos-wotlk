@@ -19433,7 +19433,9 @@ std::pair<float, float> Player::RequestFollowData(ObjectGuid guid)
     {
         case 0: return { M_PI_F / 2, 1.5f }; // left
         case 1: return { 3 * M_PI_F / 2, 1.5f }; // right
-        default: return { M_PI_F, 1.5f }; // behind
+        case 2: return { 7 * M_PI_F / 6, 1.5f }; // behind right
+        case 3: return { 5 * M_PI_F / 6, 1.5f }; // behind left
+        default: return { M_PI_F, 3.0f }; // behind
         // TODO: Army of the dead angles
     }
 }
