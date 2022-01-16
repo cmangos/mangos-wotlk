@@ -231,6 +231,7 @@ class Pet : public Creature
         void _SaveAuras();
         bool _LoadSpells();
         void _SaveSpells();
+        bool _LoadGuardianPetNumber();
 
         bool addSpell(uint32 spell_id, ActiveStates active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, PetSpellType type = PETSPELL_NORMAL);
         bool learnSpell(uint32 spell_id);

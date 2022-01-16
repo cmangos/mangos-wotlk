@@ -1484,6 +1484,21 @@ void Pet::_SaveSpells()
     }
 }
 
+bool Pet::_LoadGuardianPetNumber()
+{
+    std::unique_ptr<QueryResult> result(CharacterDatabase.PQuery("SELECT id FROM character_pet WHERE entry='%u' AND owner = '%u'", GetEntry(), GetOwnerGuid().GetCounter()));
+
+    if (result)
+    {
+        Field* fields = result->Fetch();
+		m_charmInfo->SetPetNumber(fields[0].GetUInt32(), false);
+
+        return true;
+    }
+
+    return false;
+}
+
 void Pet::_LoadAuras(uint32 timediff)
 {
     RemoveAllAuras();
@@ -2471,7 +2486,7 @@ void Pet::InitializeSpellsForControllableGuardian(bool load)
     for (auto& spellData : spellList.Spells)
         addSpell(spellData.second.SpellId, ACT_DECIDE, PETSPELL_NEW);
 
-    if (load && _LoadSpells())
+    if (load && _LoadGuardianPetNumber() && _LoadSpells())
     {
         // update autocast in bar
         for (uint32 i = ACTION_BAR_INDEX_PET_SPELL_START; i < ACTION_BAR_INDEX_PET_SPELL_END; ++i)
