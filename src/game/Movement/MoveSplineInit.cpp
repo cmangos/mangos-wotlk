@@ -48,7 +48,7 @@ namespace Movement
                 settings.tempSpawnMovegen = true;
                 settings.waypointId = counter++;
 
-                WorldObject::SummonCreature(settings, unit.GetMap());
+                WorldObject::SummonCreature(settings, unit.GetMap(), unit.GetPhaseMask());
             }
         }
         MoveSpline& move_spline = *unit.movespline;
