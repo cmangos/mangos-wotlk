@@ -8764,13 +8764,13 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid) const
     data << uint16(0);                                      // count of uint64 blocks, placeholder
 
     // Current arena season
-    FillInitialWorldState(data, count, 0xC77, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_ID));
+    FillInitialWorldState(data, count, WORLD_STATE_ARENA_SEASON, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_ID));
     // Previous arena season
-    FillInitialWorldState(data, count, 0xF3D, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_PREVIOUS_ID));
+    FillInitialWorldState(data, count, WORLD_STATE_PREVIOUS_ARENA_SEASON, sWorld.getConfig(CONFIG_UINT32_ARENA_SEASON_PREVIOUS_ID));
     // 0 - Battle for Wintergrasp in progress, 1 - otherwise
-    FillInitialWorldState(data, count, 0xED9, 1);
+    FillInitialWorldState(data, count, WORLD_STATE_WINTERGRASP_IN_PROGRESS, 1);
     // Time when next Battle for Wintergrasp starts
-    FillInitialWorldState(data, count, 0x1102, uint32(time(nullptr) + 9000));
+    FillInitialWorldState(data, count, WORLD_STATE_WINTERGRASP_NEXT_BATTLE_TIME, uint32(time(nullptr) + 9000));
 
     switch (zoneid)
     {

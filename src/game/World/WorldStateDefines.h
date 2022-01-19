@@ -323,6 +323,13 @@ enum WorldStateID : int32
     // Shade of the Horseman
     WORLD_STATE_SHADE_OF_THE_HORSEMAN_TIMER = -4676,
 
+    // Wotlk arena season
+    WORLD_STATE_PREVIOUS_ARENA_SEASON = 3901,
+
+    // Battle For Wintergrasp
+    WORLD_STATE_WINTERGRASP_IN_PROGRESS         = 3801,
+    WORLD_STATE_WINTERGRASP_NEXT_BATTLE_TIME    = 4354,
+
     // Custom Worldstates
     WORLD_STATE_CUSTOM_SPAWN_MALACRASS = 10000,
 };
