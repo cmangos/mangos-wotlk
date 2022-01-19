@@ -142,9 +142,6 @@ void instance_zulaman::OnCreatureCreate(Creature* creature)
             else
                 sDrumTriggerGuidSet.insert(creature->GetObjectGuid());
             break;
-        case NPC_REINFORCEMENT:
-            creature->SetInCombatWithZone();
-            break;
         case NPC_DRAGONHAWK_EGG:
             creature->SetCorpseDelay(5);
             break;
@@ -255,6 +252,9 @@ void instance_zulaman::OnCreatureRespawn(Creature* creature)
             creature->SetCanEnterCombat(false);
             creature->AI()->SetReactState(REACT_PASSIVE);
             creature->AI()->SetCombatMovement(false);
+            break;
+        case NPC_REINFORCEMENT:
+            creature->SetInCombatWithZone();
             break;
 	}
 }
