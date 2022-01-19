@@ -290,13 +290,13 @@ static const DialogueEntry aEventDialogue[] =
     {SAY_AKAMA_LEAVE,           NPC_AKAMA,              0},
     // Maiev cutscene
     {DUMMY_EMOTE_ID_4,          0,                      1500},
-    {SAY_ILLIDAN_SPEECH_6,      NPC_ILLIDAN_STORMRAGE,  7000},
+    {SAY_ILLIDAN_SPEECH_6,      NPC_ILLIDAN_STORMRAGE,  7500},
     {SPELL_SUMMMON_MAIEV,       0,                      1000},
-    {SAY_MAIEV_SPEECH_7,        NPC_MAIEV_SHADOWSONG,   2000},
+    {SAY_MAIEV_SPEECH_7,        NPC_MAIEV_SHADOWSONG,   2500},
     {EMOTE_ONESHOT_EXCLAMATION, 0,                      6000},
-    {SAY_ILLIDAN_SPEECH_8,      NPC_ILLIDAN_STORMRAGE,  4000},
+    {SAY_ILLIDAN_SPEECH_8,      NPC_ILLIDAN_STORMRAGE,  4500},
     {EMOTE_STATE_READY1H,       0,                      2000},
-    {SAY_MAIEV_SPEECH_9,        NPC_MAIEV_SHADOWSONG,   2000},
+    {SAY_MAIEV_SPEECH_9,        NPC_MAIEV_SHADOWSONG,   2500},
     {EMOTE_ONESHOT_YES,         0,                      2500},
     {EMOTE_ONESHOT_ROAR,        0,                      2500},
     {DUMMY_EMOTE_ID_5,          0,                      1000},
@@ -782,6 +782,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 break;
             case NPC_MAIEV_SHADOWSONG:
                 summoned->SetFacingToObject(m_creature);
+                m_creature->SetFacingToObject(summoned);
                 m_creature->SetTarget(summoned);
                 break;
             case NPC_CAGE_TRAP_TRIGGER_1:
