@@ -64,6 +64,9 @@ enum
 
     // Terokk
     NPC_SKYGUARD_TARGET     = 23277,
+
+    // Ysiel Windsinger - Quest 9718 - As the Crow Flies
+    NPC_YSIEL_WINDSINGER = 17841,
 };
 
 enum Shartuul

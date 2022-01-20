@@ -177,8 +177,11 @@ UnitAI* GetAI_npc_kayra_longmane(Creature* pCreature)
 
 enum
 {
-    QUEST_AS_THE_CROW_FLIES = 9718,
     EVENT_ID_STORMCROW      = 11225,
+    RELAY_SCRIPT_CROW_FLIES = 10205,
+    MODEL_ID_CROW           = 17447,
+    MODEL_ID_INVISIBLE      = 17657,
+    NPC_YSIEL_WINDSINGER    = 17841,
 };
 
 bool ProcessEventId_event_taxi_stormcrow(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool bIsStart)
@@ -186,11 +189,36 @@ bool ProcessEventId_event_taxi_stormcrow(uint32 uiEventId, Object* pSource, Obje
     if (uiEventId == EVENT_ID_STORMCROW && !bIsStart && pSource->GetTypeId() == TYPEID_PLAYER)
     {
         ((Player*)pSource)->SetDisplayId(((Player*)pSource)->GetNativeDisplayId());
-        ((Player*)pSource)->AreaExploredOrEventHappens(QUEST_AS_THE_CROW_FLIES);
         return true;
     }
     return false;
 }
+
+struct StormcrowAmulet : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        if (apply)
+        {
+            caster->SetDisplayId(MODEL_ID_INVISIBLE);
+
+            if (ScriptedMap* scriptedMap = (ScriptedMap*)caster->GetInstanceData())
+            {
+                if (Creature* ysiel = scriptedMap->GetSingleCreatureFromStorage(NPC_YSIEL_WINDSINGER))
+                {
+                    caster->GetMap()->ScriptsStart(sRelayScripts, RELAY_SCRIPT_CROW_FLIES, ysiel, caster);
+                }
+            }
+        }
+        else
+        {
+            caster->SetDisplayId(MODEL_ID_CROW);
+        }
+    }
+};
 
 /*#####
 ## npc_fhwoor
@@ -440,6 +468,8 @@ void AddSC_zangarmarsh()
     pNewScript->Name = "event_taxi_stormcrow";
     pNewScript->pProcessEventId = &ProcessEventId_event_taxi_stormcrow;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<StormcrowAmulet>("spell_stormcrow_amulet");
 
     pNewScript = new Script;
     pNewScript->Name = "npc_fhwoor";
