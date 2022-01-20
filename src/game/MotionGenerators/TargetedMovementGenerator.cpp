@@ -1140,6 +1140,8 @@ FormationMovementGenerator::FormationMovementGenerator(FormationSlotDataSPtr& sD
     FollowMovementGenerator(*sData->GetMaster(), sData->GetDistance(), sData->GetDistance(), main, false, false),
     m_slot(sData), m_headingToMaster(false), m_lastAngle(0)
 {
+    if (!this->i_path)
+        this->i_path = new PathFinder(sData->GetOwner());
 }
 
 FormationMovementGenerator::~FormationMovementGenerator()
@@ -1189,7 +1191,7 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
         bool done = false;
         angle += slotAngle;
         Position bestPos(masterPos.x, masterPos.y, masterPos.z, 0);
-        i_target->MovePositionToFirstCollision(bestPos, slotDist, angle);
+        owner.MovePositionToFirstCollision(bestPos, slotDist, angle);
         Vector3 nextPos(bestPos.x, bestPos.y, bestPos.z);
 
         float lenght = (masterPos - nextPos).magnitude();
@@ -1212,7 +1214,6 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
         int32 masterTravelTime = 0;
         Vector3 masterPrevPoint(masterPos);
 
-        float pathLen = 0;
         for (int32 pathIdx = masterSpline->GetRawPathIndex() + 1; pathIdx <= masterSpline->_Spline().last(); ++pathIdx)
         {
             float pathFactor = 1.0f;
@@ -1231,20 +1232,37 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
             Vector3 direction = nextMasterDest - masterPrevPoint;
             angle = atan2(direction.y, direction.x) + slotAngle;
 
-            // make direction change more soft for angle under 45deg
+            // make direction change more soft for angle under 90deg
             float diff = angle - m_lastAngle;
-            if (fabs(diff) < M_PI_F / 4.0f && fabs(diff) > M_PI_F / 36.0f) // angle should be under 45deg but over 5deg
-                angle = m_lastAngle + diff / 5.0f;
+            if (fabs(diff) < M_PI_F / 2.0f && fabs(diff) > M_PI_F / 36.0f) // angle should be under 90deg but over 5deg
+            {
+                if (m_slot->GetFormationData()->GetCurrentShape() != SPAWN_GROUP_FORMATION_TYPE_RANDOM)
+                    angle = m_lastAngle + diff / 5.0f;
+                else
+                    angle = m_lastAngle + diff / 20.0f;
+            }
             m_lastAngle = angle;
 
             // get best possible point near the slot position
             Position bestPos(nextMasterDest.x, nextMasterDest.y, nextMasterDest.z, 0);
-            i_target->MovePositionToFirstCollision(bestPos, slotDist, angle);
+            owner.MovePositionToFirstCollision(bestPos, slotDist, angle);
+
             Vector3 nextPos(bestPos.x, bestPos.y, bestPos.z);
+            float pathLen = 0;
+            if (m_slot->GetFormationData()->CanUseMMap())
+            {
+                // point is found but an obstacle can exist between this point and previous one
+                i_path->calculate(path.back(), nextPos, true, false);
+            }
+            else
+                i_path->getPath().push_back(nextPos);
+
+
+            for (auto posItr = i_path->getPath().begin() + 1; posItr != i_path->getPath().end(); ++posItr)
+                pathLen += (*(posItr - 1) - (*posItr)).length();
+
 
             // compute travel time and slave dist
-            Vector3& prevSlavePos = path[path.size() - 1];
-            pathLen = (prevSlavePos - nextPos).length();
             if (pathLen > 0.5f)
             {
                 // compute lenght
@@ -1255,7 +1273,12 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
                 masterTravelTime = masterTravelTime + (nextPointTime * pathFactor);
 
                 // time and lenght are added properly we can then push the next position for the follower
-                path.push_back(nextPos);
+                for (auto posItr = i_path->getPath().begin() + 1; posItr != i_path->getPath().end(); ++posItr)
+                {
+                    path.emplace_back(*posItr);
+                    auto& pos = path.back();
+                    owner.UpdateAllowedPositionZ(pos.x, pos.y, pos.z);
+                }
             }
 
             // distance to travel is good enough the last yard will be handled in next update
@@ -1272,8 +1295,8 @@ float FormationMovementGenerator::BuildPath(Unit& owner, PointsArray& path)
             speed = (slaveTravelDistance / (masterTravelTime / 1000.0f));
 
             // clamp the speed to some limit
-            speed = std::max(0.5f, speed);
-            speed = std::min(masterSpline->Speed() * 2, speed);
+            speed = std::max(1.0f, speed);
+            speed = std::min(masterSpline->Speed() * 1.5f, speed);
         }
     }
     return speed;
@@ -1295,7 +1318,7 @@ bool FormationMovementGenerator::HandleMasterDistanceCheck(Unit& owner, const ui
             //sLog.outString("BIG TELEPORT TO MASTER!!");
             return true;
         }
-        else if (distToMaster > 20)
+        else if (distToMaster > 40)
         {
             Position const& mPos = master->GetPosition();
             _addUnitStateMove(owner);
@@ -1327,6 +1350,9 @@ bool FormationMovementGenerator::HandleMasterDistanceCheck(Unit& owner, const ui
 
 void FormationMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& time_diff)
 {
+    if (!m_slot->CanFollow())
+        return;
+
     if (HandleMasterDistanceCheck(owner, time_diff))
         return;
 
