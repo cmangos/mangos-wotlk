@@ -425,6 +425,7 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
 
     void StartEvent(Player* pPlayer)
     {
+        Reset();
         m_creature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_playerGuid = pPlayer->GetObjectGuid();
