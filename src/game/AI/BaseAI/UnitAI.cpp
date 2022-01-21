@@ -1214,7 +1214,7 @@ void UnitAI::UpdateSpellLists()
                 if (castResult == CAST_OK)
                 {
                     success = true;
-                    OnSpellCast(sSpellTemplate.LookupEntry<SpellEntry>(spellId));
+                    OnSpellCast(sSpellTemplate.LookupEntry<SpellEntry>(spellId), target);
                     if (scriptId)
                         m_unit->GetMap()->ScriptsStart(sRelayScripts, scriptId, m_unit, target);
                     break;
