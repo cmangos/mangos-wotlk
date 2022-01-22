@@ -744,6 +744,11 @@ LogColors = ""
 #        Default:  1
 #                  0 (instant in liquid damage start)
 #
+#    EnvironmentalDamage.Min
+#    EnvironmentalDamage.Max
+#        Generic environmental (lava/slime/etc) damage taken on tick
+#        Default:  605-610
+#
 #    MaxPrimaryTradeSkill
 #        Max count that player can learn the primary trade skill.
 #        Default: 2
@@ -900,6 +905,8 @@ Guild.BankEventLogRecordsCount = 25
 MirrorTimer.Fatigue.Max = 60
 MirrorTimer.Breath.Max = 180
 MirrorTimer.Environmental.Max = 1
+EnvironmentalDamage.Min = 605
+EnvironmentalDamage.Max = 610
 MaxPrimaryTradeSkill = 2
 TradeSkill.GMIgnore.MaxPrimarySkillsCount = 4
 TradeSkill.GMIgnore.Level = 4
