@@ -6286,13 +6286,15 @@ void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
 
     holder->SetRemoveMode(mode);
 
+    uint32 auraFlags = holder->GetAuraFlags();
+
     for (auto aura : holder->m_auras)
     {
         if (aura)
             RemoveAura(aura, mode);
     }
 
-    holder->UnregisterAndCleanupTrackedAuras();
+    holder->UnregisterAndCleanupTrackedAuras(auraFlags);
 
     holder->_RemoveSpellAuraHolder();
 

@@ -11636,7 +11636,7 @@ bool SpellAuraHolder::IsCharm() const
     return false;
 }
 
-void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
+void SpellAuraHolder::UnregisterAndCleanupTrackedAuras(uint32 auraFlags)
 {
     TrackedAuraType trackedType = GetTrackedAuraType();
     if (trackedType == TRACK_AURA_TYPE_NOT_TRACKED)
@@ -11650,7 +11650,7 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
     else if (trackedType == TRACK_AURA_TYPE_CONTROL_VEHICLE)
     {
         Unit* caster = GetCaster();
-        if (caster && IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE, GetAuraFlags()))
+        if (caster && IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE, auraFlags))
         {
             caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
 

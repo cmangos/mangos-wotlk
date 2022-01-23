@@ -151,7 +151,7 @@ class SpellAuraHolder
 
         TrackedAuraType GetTrackedAuraType() const { return m_trackedAuraType; }
         void SetTrackedAuraType(TrackedAuraType val) { m_trackedAuraType = val; }
-        void UnregisterAndCleanupTrackedAuras();
+        void UnregisterAndCleanupTrackedAuras(uint32 auraFlags);
 
         int32 GetAuraMaxDuration() const { return m_maxDuration; }
         void SetAuraMaxDuration(int32 duration);
