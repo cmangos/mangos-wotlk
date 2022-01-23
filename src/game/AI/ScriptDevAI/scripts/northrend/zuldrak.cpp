@@ -270,7 +270,7 @@ bool EffectDummyCreature_npc_decaying_ghoul(Unit* pCaster, uint32 uiSpellId, Spe
     return false;
 }
 
-struct GymersBuddy : public SpellScript, public AuraScript
+struct GymersBuddy : public SpellScript
 {
     void OnCast(Spell* spell) const override
     {
@@ -278,16 +278,6 @@ struct GymersBuddy : public SpellScript, public AuraScript
         // this is required because effect 1 happens before effect 0 and at time of visibility update gymer needs to be in second phase in order for control not to malfunction
         if (target)
             target->SetPhaseMask(256, false);
-    }
-
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        if (!apply)
-        {
-            if (Unit* caster = aura->GetCaster())
-                caster->RemoveAurasDueToSpell(aura->GetId());
-            aura->GetTarget()->RemoveAurasDueToSpell(aura->GetId());
-        }
     }
 };
 
@@ -310,5 +300,5 @@ void AddSC_zuldrak()
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_decaying_ghoul;
     pNewScript->RegisterSelf();
 
-    RegisterScript<GymersBuddy>("spell_gymers_buddy");
+    RegisterSpellScript<GymersBuddy>("spell_gymers_buddy");
 }

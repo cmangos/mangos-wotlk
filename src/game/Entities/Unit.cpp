@@ -6285,13 +6285,14 @@ void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
     }
 
     holder->SetRemoveMode(mode);
-    holder->UnregisterAndCleanupTrackedAuras();
 
     for (auto aura : holder->m_auras)
     {
         if (aura)
             RemoveAura(aura, mode);
     }
+
+    holder->UnregisterAndCleanupTrackedAuras();
 
     holder->_RemoveSpellAuraHolder();
 
