@@ -2523,7 +2523,7 @@ class Unit : public WorldObject
         void DespawnSummonsOnDeath();
 
         // false if only visible to set and not equal
-        virtual bool IsOnlyVisibleTo(ObjectGuid guid) const { return false; }
+        virtual bool IsOnlyVisibleTo(ObjectGuid guid) const { return true; }
 
         virtual bool IsNoMountedFollow() const { return false; }
 
