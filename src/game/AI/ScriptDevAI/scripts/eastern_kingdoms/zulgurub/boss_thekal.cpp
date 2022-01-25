@@ -147,7 +147,7 @@ struct boss_thekalBaseAI : public CombatAI
         OnRevive();
     }
 
-    void PreventRevive()
+    virtual void PreventRevive()
     {
         if (m_creature->IsNonMeleeSpellCasted(true))
             m_creature->InterruptNonMeleeSpells(true);
@@ -340,6 +340,12 @@ struct mob_zealot_lorkhanAI : public boss_thekalBaseAI
         if (m_instance)
             m_instance->SetData(TYPE_LORKHAN, SPECIAL);
     }
+
+    void PreventRevive() override
+    {
+        boss_thekalBaseAI::PreventRevive();
+        DisableTimer(ACTION_RESSURECTION);
+    }
 };
 
 /*######
@@ -382,6 +388,12 @@ struct mob_zealot_zathAI : public boss_thekalBaseAI
 
         if (m_instance)
             m_instance->SetData(TYPE_ZATH, SPECIAL);
+    }
+
+    void PreventRevive() override
+    {
+        boss_thekalBaseAI::PreventRevive();
+        DisableTimer(ACTION_RESSURECTION);
     }
 };
 
