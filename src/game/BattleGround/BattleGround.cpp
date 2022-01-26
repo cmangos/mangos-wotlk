@@ -440,7 +440,7 @@ void BattleGround::Update(uint32 diff)
                 BattleGroundTypeId BgTypeId = GetTypeId();
 
                 if (!IsArena())
-                    sWorld.SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), Player::GetMinLevelForBattleGroundBracketId(bracketId, BgTypeId), Player::GetMaxLevelForBattleGroundBracketId(bracketId, BgTypeId));
+                    sWorld.SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), GetMinLevel(), GetMaxLevel());
                 else
                     sWorld.SendWorldText(LANG_ARENA_STARTED_ANNOUNCE_WORLD, GetName(), GetArenaType(), GetArenaType());
             }
@@ -1554,7 +1554,7 @@ void BattleGround::AddPlayer(Player* player)
         BattleGroundScore* score = new BattleGroundScore;
 
         // Needed for scoreboard if player leaves.
-        score->Team = plr->GetBGTeam();
+        score->Team = team;
 
         m_playerScores[player->GetObjectGuid()] = score;
 
