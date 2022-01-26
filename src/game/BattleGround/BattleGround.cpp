@@ -440,9 +440,9 @@ void BattleGround::Update(uint32 diff)
                 BattleGroundTypeId BgTypeId = GetTypeId();
 
                 if (!IsArena())
-                    sWorld.SendWorldTextPvpMessage(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), Player::GetMinLevelForBattleGroundBracketId(bracketId, BgTypeId), Player::GetMaxLevelForBattleGroundBracketId(bracketId, BgTypeId));
+                    sWorld.SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), Player::GetMinLevelForBattleGroundBracketId(bracketId, BgTypeId), Player::GetMaxLevelForBattleGroundBracketId(bracketId, BgTypeId));
                 else
-                    sWorld.SendWorldTextPvpMessage(LANG_ARENA_STARTED_ANNOUNCE_WORLD, GetName(), GetArenaType(), GetArenaType());
+                    sWorld.SendWorldText(LANG_ARENA_STARTED_ANNOUNCE_WORLD, GetName(), GetArenaType(), GetArenaType());
             }
         }
         // After 1 minute or 30 seconds, warning is signalled
