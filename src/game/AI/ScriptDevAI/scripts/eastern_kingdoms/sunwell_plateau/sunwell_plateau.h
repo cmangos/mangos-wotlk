@@ -133,6 +133,7 @@ static const Position aMadrigosaLoc[] =
 {
     {1463.82f, 661.212f, 19.7971f, 4.712551f},      // reload spawn loc - the place where to spawn Felmyst
     {1463.82f, 661.212f, 39.234f,  0.f},            // fly loc during the cinematig
+    {1464.6943f, 652.1426f, 20.81918f, 0.f},        // landing loc after fel fireball
 };
 
 static const Position aKalecLoc[] =
