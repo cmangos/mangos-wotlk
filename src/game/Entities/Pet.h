@@ -155,7 +155,7 @@ class Pet : public Creature
         bool CreateBaseAtCreature(Creature* creature);
         bool LoadPetFromDB(Player* owner, Position const& spawnPos, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, uint32 healthPercentage = 0, bool permanentOnly = false, bool forced = false);
         void SavePetToDB(PetSaveMode mode, Player* owner);
-        Position GetPetSpawnPosition(Player* owner);
+        static Position GetPetSpawnPosition(Unit* owner);
         bool isLoading() const { return m_loading; }
         void SetLoading(bool state) { m_loading = state; }
         void Unsummon(PetSaveMode mode, Unit* owner = nullptr);

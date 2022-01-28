@@ -257,6 +257,15 @@ bool Pet::LoadPetFromDB(Player* owner, Position const& spawnPos, uint32 petentry
         return false;
     }
 
+    // DK Permanent ghoul spell
+    if (summon_spell_id == 52150 && current && !forced) // must cast through spell in order to trigger correct ghoul CD
+    {
+        Position pos = Pet::GetPetSpawnPosition(owner);
+        owner->CastSpell(pos.x, pos.y, pos.z, summon_spell_id, TRIGGERED_IGNORE_GCD);
+        delete result;
+        return false;
+    }
+
     setPetType(pet_type);
     setFaction(owner->GetFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
@@ -544,7 +553,7 @@ void Pet::SavePetToDB(PetSaveMode mode, Player* owner)
     }
 }
 
-Position Pet::GetPetSpawnPosition(Player* owner)
+Position Pet::GetPetSpawnPosition(Unit* owner)
 {
     Position pos;
     owner->GetFirstCollisionPosition(pos, 2.f, owner->GetOrientation() + M_PI_F / 2);

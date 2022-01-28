@@ -42,7 +42,51 @@ struct ScourgeStrike : public SpellScript
     }
 };
 
+struct RaiseDead : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        if (eff == EFFECT_INDEX_1)
+        {
+            Unit* caster = spell->GetCaster();
+            if (target->IsTrivialForTarget(caster))
+                return false;
+
+            if (target->GetDeathState() != CORPSE)
+                return false;
+
+            if (target->GetCreatureType() != CREATURE_TYPE_HUMANOID)
+                return false;
+        }
+
+        return true;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_2) // reagent consuming version
+            if (spell->GetTargetList().size() > 1) // more than caster is hit
+                return;
+
+        Unit* caster = spell->GetCaster();
+        uint32 spellId = caster->HasAura(52143) ? 52150 : 46585; // Master of Ghouls talent
+        if (effIdx == EFFECT_INDEX_2) // corpse dust version
+        {
+            if (caster->CastSpell(nullptr, 48289, TRIGGERED_IGNORE_GCD) == SPELL_CAST_OK)
+            {
+                Position pos = Pet::GetPetSpawnPosition(caster);
+                caster->CastSpell(pos.x, pos.y, pos.z, spellId, TRIGGERED_OLD_TRIGGERED);
+            }
+            else
+                caster->RemoveSpellCooldown(*spell->m_spellInfo, true);
+        }
+        else if (effIdx == EFFECT_INDEX_1) // corpse version
+            caster->CastSpell(spell->GetUnitTarget(), spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
+    RegisterSpellScript<RaiseDead>("spell_dk_raise_dead");
 }

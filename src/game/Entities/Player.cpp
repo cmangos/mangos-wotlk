@@ -17285,12 +17285,11 @@ void Player::LoadPet()
     {
         Pet* pet = new Pet;
         if (!pet->LoadPetFromDB(this, pet->GetPetSpawnPosition(this), 0, 0, true, 0, true))
-        {
             delete pet;
-            return;
-        }
-        if (IsMounted())
-            pet->SetModeFlags(PET_MODE_DISABLE_ACTIONS);
+
+        if (Pet* pet = GetPet())
+            if (IsMounted())
+                pet->SetModeFlags(PET_MODE_DISABLE_ACTIONS);
     }
 }
 
