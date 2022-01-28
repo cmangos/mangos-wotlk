@@ -4256,7 +4256,7 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
             data << uint32(spellInfo->EquippedItemSubClassMask);// seems correct...
             break;
         case SPELL_FAILED_REAGENTS:
-            data << uint32(0);                              // item id
+            data << param1;                                 // item id
             break;
         case SPELL_FAILED_NEED_MORE_ITEMS:
             data << param1;
@@ -7519,7 +7519,10 @@ SpellCastResult Spell::CheckItems()
                 }
 
                 if (!p_caster->HasItemCount(itemid, itemcount))
+                {
+                    m_param1 = itemid;
                     return SPELL_FAILED_REAGENTS;
+                }
             }
         }
 
