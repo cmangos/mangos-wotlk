@@ -19367,7 +19367,7 @@ void Player::CharmCooldownInitialize(WorldPacket& data) const
     // write cooldown data
     uint32 cdCount = 0;
     const size_t cdCountPos = data.wpos();
-    data << uint16(0);
+    data << uint8(0);
     auto currTime = GetMap()->GetCurrentClockTime();
 
     for (auto& cdItr : m_cooldownMap)
@@ -19396,7 +19396,7 @@ void Player::CharmCooldownInitialize(WorldPacket& data) const
         data << uint32(catCDDuration);                      // category cooldown
         ++cdCount;
     }
-    data.put<uint16>(cdCountPos, cdCount);
+    data.put<uint8>(cdCountPos, cdCount);
 }
 
 void Player::RemovePetActionBar() const
