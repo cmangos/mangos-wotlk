@@ -2101,6 +2101,8 @@ enum
 {
     SPELL_MAGE_CLONE_ME                 = 45204,
     SPELL_MAGE_MASTERS_THREAT_LIST      = 58838,
+    SPELL_COPY_WEAPON                   = 41055,
+    SPELL_COPY_OFFHAND_WEAPON           = 45206,
 
     SPELL_MAGE_FROST_BOLT               = 59638,
     SPELL_MAGE_FIRE_BLAST               = 59637,
@@ -2113,6 +2115,8 @@ struct npc_mage_mirror_imageAI : public ScriptedAI
         if (Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
         {
             pOwner->CastSpell(m_creature, SPELL_MAGE_CLONE_ME, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(pOwner, SPELL_COPY_WEAPON, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(pOwner, SPELL_COPY_OFFHAND_WEAPON, TRIGGERED_OLD_TRIGGERED);
             m_creature->GetMotionMaster()->MoveFollow(pOwner, PET_FOLLOW_DIST, pOwner->GetAngle(m_creature) + M_PI_F/2);
             SetMoveChaseParams(3 * ATTACK_DISTANCE, 0.0f, false);
             SetReactState(REACT_DEFENSIVE);
@@ -2130,21 +2134,23 @@ struct npc_mage_mirror_imageAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        // update threat and owner on 1 sec timer
-        if (m_uiThreatUpdateTimer < uiDiff)
+        if (m_uiThreatUpdateTimer) // snapshot threat at start and attack else
         {
-            Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid());
-            if (!pOwner || !pOwner->IsAlive())
+            if (m_uiThreatUpdateTimer <= uiDiff)
             {
-                m_creature->ForcedDespawn();
-                return;
-            }
+                Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid());
+                if (!pOwner || !pOwner->IsAlive())
+                {
+                    m_creature->ForcedDespawn();
+                    return;
+                }
 
-            if (DoCastSpellIfCan(m_creature, SPELL_MAGE_MASTERS_THREAT_LIST) == CAST_OK)
-                m_uiThreatUpdateTimer = 1000;
+                if (DoCastSpellIfCan(m_creature, SPELL_MAGE_MASTERS_THREAT_LIST) == CAST_OK)
+                    m_uiThreatUpdateTimer = 0;
+            }
+            else
+                m_uiThreatUpdateTimer -= uiDiff;
         }
-        else
-            m_uiThreatUpdateTimer -= uiDiff;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
@@ -2168,6 +2174,17 @@ UnitAI* GetAI_npc_mage_mirror_image(Creature* pCreature)
 {
     return new npc_mage_mirror_imageAI(pCreature);
 }
+
+struct MirrorImageFrostbolt : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (Unit* target = spell->m_targets.getUnitTarget())
+            if (target->IsPolymorphed())
+                return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+};
 
 /*########
 # npc_mojo
@@ -3190,4 +3207,6 @@ void AddSC_npcs_special()
     RegisterAuraScript<GossipNPCAppearanceAllBrewfest>("spell_gossip_npc_appearance_all_brewfest");
     RegisterAuraScript<GossipNPCAppearanceAllSpiritOfCompetition>("spell_gossip_npc_appearance_all_spirit_of_competition");
     RegisterAuraScript<GossipNPCAppearanceAllPirateDay>("spell_gossip_npc_appearance_all_pirate_day");
+
+    RegisterSpellScript<MirrorImageFrostbolt>("spell_mirror_image_frostbolt");
 }
