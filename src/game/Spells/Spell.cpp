@@ -4364,6 +4364,7 @@ void Spell::SendSpellGo()
     {
         castFlags |= CAST_FLAG_NO_GCD;                      // same as in SMSG_SPELL_START
         castFlags |= CAST_FLAG_PREDICTED_RUNES;             // rune cooldowns list
+        castFlags |= CAST_FLAG_PREDICTED_POWER;
     }
 
     if (m_powerCost && m_spellInfo->powerType != POWER_HEALTH)
@@ -4958,7 +4959,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
                 continue;
 
             if (take)
-                plr->SetRuneCooldown(i, RUNE_COOLDOWN);     // 5*2=10 sec
+                plr->SetRuneCooldown(i, plr->GetRuneBaseCooldown(i));     // 5*2=10 sec
 
             --runeCost[rune];
         }
