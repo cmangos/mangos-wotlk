@@ -600,11 +600,11 @@ void Pet::SetOwnerGuid(ObjectGuid owner)
 {
     switch (uint32(m_petType))
     {
-        case SUMMON_PET:
-        case HUNTER_PET:
         case GUARDIAN_PET:
             if (!m_controllableGuardian)
                 break;
+        case SUMMON_PET:
+        case HUNTER_PET:
             SetSummonerGuid(owner);
             break;
     }
