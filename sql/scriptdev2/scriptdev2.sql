@@ -2571,8 +2571,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1000590','The feast of curruption is no more! Magtheridon has fallen to the battle prowess of $N and $Ghis:her; allies! Witness the might of the Alliance! A pit lord commander is destroyed!','0','6','0','15','0','Yell Magtheridon Death1 A'),
 ('-1000591','Hear me brothers and sisters-in-arms! The time of our enemies is at an end! We must strike at the fel orcs that remain! Exterminate them like the vermin that they are! Carry with you the favor of the Sons of Lothar!','0','6','0','22','0','Yell Magtheridon Death2 A'),
-('-1000592','For the first time - in as long as I can remember - there is silence.','0','6','0','15','0','Yell Magtheridon Death1 H'),
-('-1000593','This defeat is not only a blow to Illidan, $n. The Legion too reels... A pit lord commander has been defeated. The siege of Hellfire Citadel now holds no purpose for the Burning Legion. All of their efforts will undoubtedly be turned upon the Black Temple. Redemption comes for Illidan... and soon.','0','6','0','22','0','Yell Magtheridon Death2 H'),
+('-1000592','Hellfire Citadel is ours! The source of Illidan''s fel orc army is no more! Magtheridon has fallen to the might of $n and $g his:her; allies!','0','6','0','15','20765','Yell Magtheridon Death1 H'),
+('-1000593','The time for us to rise and strike at the fel orcs that remain is now! Do this for your Warchief! Do this for the Horde!','0','6','0','22','20766','Yell Magtheridon Death2 H'),
 
 ('-1000594','At last... now I can rest.','0','0','0','0','0','hero spirit SAY_BLESS_1'),
 ('-1000595','I''m so tired. Just let me rest for a moment.','0','0','0','0','0','hero spirit SAY_BLESS_2'),
