@@ -2088,13 +2088,8 @@ struct npc_flame_of_azzinothAI : public CombatAI
             case FLAME_ACTION_CHARGE:
             {
                 if (Unit* target = DoPickChargeTarget())
-                {
                     if (DoCastSpellIfCan(target, SPELL_CHARGE) == CAST_OK)
-                    {
                         ResetCombatAction(action, 5000);
-                        Enrage();
-                    }
-                }
                 return;
             }
         }
