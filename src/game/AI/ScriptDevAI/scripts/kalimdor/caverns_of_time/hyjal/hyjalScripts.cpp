@@ -226,44 +226,40 @@ struct npc_building_triggerAI : public ScriptedAI
     void Reset() override 
     {
         m_creature->AI()->SetReactState(REACT_PASSIVE);
+        SetDeathPrevention(true);
+        DoCastSpellIfCan(nullptr, SPELL_SUPER_INVIS, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/)
+    ObjectGuid m_firstAttackerGuid;
+
+    void DamageTaken(Unit* dealer, uint32& /*damage*/, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        // Never die
-        damage = 0;
-    }
-
-    void MoveInLineOfSight(Unit* who) override
-    {
-        // Only let one ghoul attack
-        if (m_creature->IsInCombat())
-            return;
-
-        if (who->GetTypeId() != TYPEID_UNIT)
-            return;
-
-        if (who->GetEntry() != NPC_GHOUL && who->GetEntry() != NPC_GARGO)
-            return;
-
-        if (who->IsInCombat())
-            return;
-
-        if (m_creature->IsWithinDistInMap(who, 35.0f))
+        if (dealer && (dealer->GetEntry() == NPC_GHOUL || dealer->GetEntry() == NPC_GARGO))
         {
-            who->SetInCombatWith(m_creature);
-            m_creature->SetInCombatWith(who);
-            if (who->GetEntry() == NPC_GHOUL)
+            if (!m_firstAttackerGuid)
             {
-                who->GetMotionMaster()->Clear();
-                who->GetMotionMaster()->MoveIdle();
-                ((Creature*)who)->SetWalk(false);
-                who->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-                who->Attack(m_creature, true);
-            }
-            else
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_firstAttackerGuid = dealer->GetObjectGuid();
+                dealer->setFaction(FACTION_SPAR);
+                m_creature->setFaction(FACTION_SPAR_BUDDY);
+
+                // only 1 attacker allowed at a time
+                if (instance_mount_hyjal* instance = static_cast<instance_mount_hyjal*>(m_creature->GetInstanceData()))
+                {
+                    for (uint32 i = 0; i < MAX_BASE; i++)
+                    {
+                        for (auto overrunSpawnGuid : instance->GetOverrunSpawns(i))
+                        {
+                            if (Creature* overrunSpawn = m_creature->GetMap()->GetAnyTypeCreature(overrunSpawnGuid))
+                            {
+                                if (overrunSpawn->GetObjectGuid() == m_firstAttackerGuid)
+                                    continue;
+                                if (!overrunSpawn->HasTarget(m_creature->GetObjectGuid()) || !overrunSpawn->HasTarget())
+                                    continue;
+                                overrunSpawn->AI()->EnterEvadeMode();
+                            }
+                        }
+                    }
+                }
             }
         }
     }
