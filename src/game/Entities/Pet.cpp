@@ -1518,8 +1518,6 @@ bool Pet::_LoadGuardianPetNumber()
 
 void Pet::_LoadAuras(uint32 timediff)
 {
-    RemoveAllAuras();
-
     QueryResult* result = CharacterDatabase.PQuery("SELECT caster_guid,item_guid,spell,stackcount,remaincharges,basepoints0,basepoints1,basepoints2,periodictime0,periodictime1,periodictime2,maxduration,remaintime,effIndexMask FROM pet_aura WHERE guid = '%u'", m_charmInfo->GetPetNumber());
 
     if (result)
