@@ -6216,6 +6216,9 @@ void Player::UpdateSkillTrainedSpells(uint16 id, uint16 currVal)
             // Check if auto-training method is set, skip if not
             if (!pAbility->learnOnGetSkill)
             {
+                if (pAbility->skillId == SKILL_FISHING && !pAbility->forward_spellid)
+                    continue;
+
                 // Check if its actually an original profession/tradeskill spell and we miss it somehow - repair
                 if (SpellLearnSkillNode const* training = sSpellMgr.GetSpellLearnSkill(pAbility->spellId))
                 {
