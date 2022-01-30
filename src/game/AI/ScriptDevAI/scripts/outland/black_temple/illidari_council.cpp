@@ -512,14 +512,14 @@ struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, SPELL_BLIZZARD) == CAST_OK)
-                        ResetCombatAction(action, urand(5000, 15000));
+                        ResetCombatAction(action, urand(12000, 24000));
                 return;
             }
             case ZEREVOR_ACTION_FLAMESTRIKE:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, SPELL_FLAMESTRIKE) == CAST_OK)
-                        ResetCombatAction(action, urand(5000, 15000));
+                        ResetCombatAction(action, urand(14000, 34000));
                 return;
             }
             case ZEREVOR_ACTION_ARCANE_BOLT:
@@ -562,12 +562,12 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
 {
     boss_lady_malandeAI(Creature* creature) : boss_illidari_councilAI(creature, MALANDE_ACTION_MAX)
     {
-        m_attackDistance = 20.0f;
         AddCombatAction(MALANDE_ACTION_EMPOWERED_SMITE, 0u);
         AddCombatAction(MALANDE_ACTION_CIRCLE_OF_HEALING, 20000u);
         AddCombatAction(MALANDE_ACTION_DIVINE_WRATH, 10000u);
         AddCombatAction(MALANDE_ACTION_REFLECTIVE_SHIELD, 26000, 32000);
         AddOnKillText(SAY_MALA_SLAY);
+        SetRangedMode(true, 20.0f, TYPE_PROXIMITY);
     }
 
     void JustDied(Unit* killer) override
@@ -615,7 +615,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
             case MALANDE_ACTION_EMPOWERED_SMITE:
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_EMPOWERED_SMITE) == CAST_OK)
-                    ResetCombatAction(action, urand(2000, 3000));
+                    ResetCombatAction(action, urand(2000, 12000)); // ranged action with chance in spell list
                 return;
             }
         }
