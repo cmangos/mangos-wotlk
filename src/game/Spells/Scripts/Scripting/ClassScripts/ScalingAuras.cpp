@@ -422,6 +422,8 @@ struct PriestPetScaling2 : public AuraScript
             case EFFECT_INDEX_1: // armor
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FIRE) * 0.4f);
                 break;
         }
         return value;
@@ -435,10 +437,16 @@ struct PriestPetScaling3 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FROST) * 0.4f);
                 break;
             case EFFECT_INDEX_1: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_ARCANE) * 0.4f);
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_NATURE) * 0.4f);
                 break;
         }
         return value;
@@ -452,6 +460,8 @@ struct PriestPetScaling4 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_SHADOW) * 0.4f);
                 break;
             default: break;
         }
