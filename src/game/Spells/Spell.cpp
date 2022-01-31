@@ -4267,7 +4267,7 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
             data << uint32(0);                              // required skill value
             break;
         case SPELL_FAILED_TOO_MANY_OF_ITEM:
-            data << uint32(0);                              // ItemLimitCategory.dbc id
+            data << param1;                                 // ItemLimitCategory.dbc id
             break;
         case SPELL_FAILED_FISHING_TOO_LOW:
             data << uint32(0);                              // required fishing skill
@@ -5982,7 +5982,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                     uint32 no_space = 0;
                     InventoryResult msg = static_cast<Player*>(target)->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], count, &no_space);
                     if (msg != EQUIP_ERR_OK)
+                    {
+                        ItemPrototype const* proto = sObjectMgr.GetItemPrototype(m_spellInfo->EffectItemType[i]);
+                        if (proto && proto->ItemLimitCategory)
+                            m_param1 = proto->ItemLimitCategory;
                         return SPELL_FAILED_TOO_MANY_OF_ITEM;
+                    }
                 }
 
                 break;
@@ -9148,7 +9153,12 @@ SpellCastResult Spell::OnCheckCast(bool strict)
             // check if we already have a healthstone
             uint32 itemType = GetUsableHealthStoneItemType(m_caster);
             if (itemType && m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(itemType) > 0)
+            {
+                ItemPrototype const* proto = sObjectMgr.GetItemPrototype(itemType);
+                if (proto && proto->ItemLimitCategory)
+                    m_param1 = proto->ItemLimitCategory;
                 return SPELL_FAILED_TOO_MANY_OF_ITEM;
+            }
             break;
         }
         case 7914: // Capture Spirit
