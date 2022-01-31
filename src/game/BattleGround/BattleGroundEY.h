@@ -349,7 +349,7 @@ class BattleGroundEY : public BattleGround
         EYFlagState m_flagState;
         ObjectGuid m_flagCarrier;
         ObjectGuid m_droppedFlagGuid;
-        ObjectGuid m_mainFlagGuid;
+        uint32 m_mainFlagDbGuid;
 
         uint8 m_towersAlliance;
         uint8 m_towersHorde;

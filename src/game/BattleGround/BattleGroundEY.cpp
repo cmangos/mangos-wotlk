@@ -223,7 +223,7 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
             m_droppedFlagGuid = go->GetObjectGuid();
             break;
         case GO_EY_NETHERSTORM_FLAG:
-            m_mainFlagGuid = go->GetObjectGuid();
+            m_mainFlagDbGuid = go->GetDbGuid();
             break;
     }
 }
@@ -448,7 +448,7 @@ void BattleGroundEY::RespawnFlagAtCenter(bool wasCaptured)
         SpawnEvent(EY_EVENT_CAPTURE_FLAG, EY_EVENT2_FLAG_CENTER, true);
     // respawn because of flag drop has to be handled separately
     else
-        ChangeBgObjectSpawnState(m_mainFlagGuid, RESPAWN_IMMEDIATELY);
+        ChangeBgObjectSpawnState(m_mainFlagDbGuid, RESPAWN_IMMEDIATELY);
 
     PlaySoundToAll(EY_SOUND_FLAG_RESET);
     SendMessageToAll(LANG_BG_EY_RESETED_FLAG, CHAT_MSG_BG_SYSTEM_NEUTRAL);

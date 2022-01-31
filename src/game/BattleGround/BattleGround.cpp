@@ -1985,7 +1985,10 @@ void BattleGround::ChangeBgObjectSpawnState(uint32 dbGuid, uint32 respawntime)
 
     GameObject* obj = map->GetGameObject(dbGuid);
     if (!obj)
+    {
+        map->GetSpawnManager().RespawnGameObject(dbGuid, respawntime);
         return;
+    }
 
     if (respawntime == 0)
     {
