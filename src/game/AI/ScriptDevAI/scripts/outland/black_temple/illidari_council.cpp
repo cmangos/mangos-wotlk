@@ -568,6 +568,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
         AddCombatAction(MALANDE_ACTION_REFLECTIVE_SHIELD, 26000, 32000);
         AddOnKillText(SAY_MALA_SLAY);
         SetRangedMode(true, 20.0f, TYPE_PROXIMITY);
+        AddMainSpell(SPELL_EMPOWERED_SMITE);
     }
 
     void JustDied(Unit* killer) override
