@@ -3184,7 +3184,8 @@ void AddSC_npcs_special()
     pNewScript->Name = "npc_advanced_target_dummy";
     pNewScript->GetAI = &GetNewAIInstance<npc_advanced_target_dummyAI>;
     pNewScript->RegisterSelf();
-    
+
+    pNewScript = new Script;
     pNewScript->Name = "go_imp_in_a_ball";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_imp_in_a_ball>;
     pNewScript->RegisterSelf();
