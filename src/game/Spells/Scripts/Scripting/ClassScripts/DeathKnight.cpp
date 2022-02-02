@@ -113,7 +113,7 @@ struct DeathCoilDK : public SpellScript
 
 struct UnholyBlightDK : public AuraScript
 {
-    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
         procData.triggeredSpellId = 50536; // unholy blight DOT
         uint32 damagePercent = aura->GetModifier()->m_amount;
@@ -124,10 +124,25 @@ struct UnholyBlightDK : public AuraScript
     }
 };
 
+struct SuddenDoom : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        Player* player = dynamic_cast<Player*>(aura->GetTarget());
+        if (!player)
+            return SPELL_AURA_PROC_OK;
+
+        // dk death coil rank 1 id - need max
+        procData.triggeredSpellId = player->LookupHighestLearnedRank(47541);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
     RegisterSpellScript<RaiseDead>("spell_dk_raise_dead");
     RegisterSpellScript<DeathCoilDK>("spell_dk_death_coil");
     RegisterAuraScript<UnholyBlightDK>("spell_dk_unholy_blight");
+    RegisterAuraScript<SuddenDoom>("spell_sudden_doom");
 }

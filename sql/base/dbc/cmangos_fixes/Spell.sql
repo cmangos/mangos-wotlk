@@ -2831,6 +2831,9 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- Proc flag for Unholy Blight on Death Coil
 UPDATE spell_template SET EffectSpellClassMask1_1=0x00002000 WHERE Id IN(49194);
 
+-- Sudden Doom - procflags - Heart Strike and Blood Strike
+UPDATE spell_template SET EffectSpellClassMask1_1=0x01400000 WHERE Id IN(49018,49529,49530);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
