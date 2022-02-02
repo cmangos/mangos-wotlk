@@ -364,6 +364,7 @@ struct RuneInfo
     uint8  BaseRune;
     uint8  CurrentRune;
     uint16 Cooldown;                                        // msec
+    std::unordered_set<Aura const*> ConvertAuras;
 };
 
 struct Runes
@@ -2465,6 +2466,11 @@ class Player : public Unit
         void ResyncRunes() const;
         void AddRunePower(uint8 index) const;
         void InitRunes();
+        void SetRuneConvertAura(uint8 index, Aura const* aura);
+        void RemoveRuneConvertAura(uint8 index, Aura const* aura);
+        void AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura);
+        void RemoveRunesByAuraEffect(Aura const* aura);
+        void RestoreBaseRune(uint8 index);
 
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }

@@ -22782,6 +22782,54 @@ bool Player::ActivateRunes(RuneType type, uint32 count)
     return modify;
 }
 
+void Player::RestoreBaseRune(uint8 index)
+{
+    std::vector<Aura const*> removeList;
+    std::unordered_set<Aura const*>& auras = m_runes->runes[index].ConvertAuras;
+
+    auto criteria = [&removeList](Aura const* storedAura) -> bool
+    {
+        // AuraEffect already gone
+        if (!storedAura)
+            return true;
+
+        if (storedAura->GetSpellProto()->HasAttribute(SPELL_ATTR_PASSIVE))
+        {
+            // Don't drop passive talents providing rune conversion
+            if (storedAura->GetModifier()->m_auraname == SPELL_AURA_CONVERT_RUNE)
+                removeList.push_back(storedAura);
+            return true;
+        }
+
+        // If rune was converted by a non-passive aura that is still active we should keep it converted
+        return false;
+    };
+
+	auras.erase(std::remove_if(auras.begin(), auras.end(), criteria), auras.end());
+
+    if (!auras.empty())
+        return;
+
+    ConvertRune(index, GetBaseRune(index));
+
+    if (removeList.empty())
+        return;
+
+    // Filter auras set to be removed if they are converting any other rune index
+    for (Aura const* storedAura : removeList)
+    {
+        uint8 itr = 0;
+        for (; itr < MAX_RUNES; ++itr)
+        {
+            if (m_runes->runes[itr].ConvertAuras.find(storedAura) != m_runes->runes[itr].ConvertAuras.end())
+                break;
+        }
+
+        if (itr == MAX_RUNES)
+            RemoveSpellAuraHolder(const_cast<SpellAuraHolder*>(storedAura->GetHolder()));
+    }
+}
+
 void Player::ResyncRunes() const
 {
     WorldPacket data(SMSG_RESYNC_RUNES, 4 + MAX_RUNES * 2);
@@ -22830,6 +22878,33 @@ void Player::InitRunes()
 
     for (uint32 i = 0; i < NUM_RUNE_TYPES; ++i)
         SetFloatValue(PLAYER_RUNE_REGEN_1 + i, 0.1f);
+}
+
+void Player::SetRuneConvertAura(uint8 index, Aura const* aura)
+{
+    m_runes->runes[index].ConvertAuras.insert(aura);
+}
+
+void Player::RemoveRuneConvertAura(uint8 index, Aura const* aura)
+{
+    m_runes->runes[index].ConvertAuras.erase(aura);
+}
+
+void Player::AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura)
+{
+    SetRuneConvertAura(index, aura);
+    ConvertRune(index, newType);
+}
+
+void Player::RemoveRunesByAuraEffect(Aura const* aura)
+{
+    for (uint8 itr = 0; itr < MAX_RUNES; ++itr)
+    {
+        RemoveRuneConvertAura(itr, aura);
+
+        if (m_runes->runes[itr].ConvertAuras.empty())
+            ConvertRune(itr, GetBaseRune(itr));
+    }
 }
 
 bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const

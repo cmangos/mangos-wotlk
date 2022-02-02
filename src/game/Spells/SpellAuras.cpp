@@ -9899,22 +9899,13 @@ void Aura::HandleAuraConvertRune(bool apply, bool Real)
         {
             if (plr->GetCurrentRune(i) == runeFrom && !plr->GetRuneCooldown(i))
             {
-                plr->ConvertRune(i, runeTo);
+                plr->AddRuneByAuraEffect(i, runeTo, this);
                 break;
             }
         }
     }
     else
-    {
-        for (uint32 i = 0; i < MAX_RUNES; ++i)
-        {
-            if (plr->GetCurrentRune(i) == runeTo && plr->GetBaseRune(i) == runeFrom)
-            {
-                plr->ConvertRune(i, runeFrom);
-                break;
-            }
-        }
-    }
+        plr->RemoveRunesByAuraEffect(this);
 }
 
 void Aura::HandlePhase(bool apply, bool Real)
