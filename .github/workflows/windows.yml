@@ -82,7 +82,7 @@ jobs:
 
     steps:
       - name: Run Discord Webhook
-        uses: johnnyhuy/discord-webhook@main
+        uses: johnnyhuy/actions-discord-git-webhook@v1.0.1
         with:
           webhook_url: ${{secrets.DISCORD_WEBHOOK}}
 
