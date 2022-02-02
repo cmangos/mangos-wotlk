@@ -46,7 +46,35 @@ struct ArcaneConcentration : public AuraScript
     }
 };
 
+struct MageIgnite : public AuraScript
+{
+    // implemented this way because we do not support proccing in spellscript on empty aura slot
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+
+        SpellAuraHolder* holder = caster->GetSpellAuraHolder(31658);
+        if (!holder)
+            holder = caster->GetSpellAuraHolder(31657);
+        if (!holder)
+            holder = caster->GetSpellAuraHolder(31656);
+        if (!holder)
+            return;
+
+        uint32 chance = holder->GetSpellProto()->procChance;
+        if (roll_chance_f(chance))
+        {
+            uint32 baseMana = caster->GetCreateMana();
+            int32 gainedMana = baseMana * 2 / 100;
+            caster->CastCustomSpell(nullptr, 67545, &gainedMana, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterAuraScript<ArcaneConcentration>("spell_arcane_concentration");
+    RegisterAuraScript<MageIgnite>("spell_mage_ignite");
 }

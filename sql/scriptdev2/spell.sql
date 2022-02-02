@@ -882,6 +882,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12575,'spell_arcane_concentration'),
 (12576,'spell_arcane_concentration'),
 (12577,'spell_arcane_concentration'),
+(31656,'spell_empowered_fire'),
+(31657,'spell_empowered_fire'),
+(31658,'spell_empowered_fire'),
 (59638,'spell_mirror_image_frostbolt');
 
 -- Druid
