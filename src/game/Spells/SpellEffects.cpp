@@ -4488,24 +4488,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_DEATHKNIGHT:
         {
-            // Death Coil
-            if (m_spellInfo->SpellFamilyFlags & uint64(0x002000))
-            {
-                if (m_caster->CanAssistSpell(unitTarget, m_spellInfo))
-                {
-                    if (!unitTarget || unitTarget->GetCreatureType() != CREATURE_TYPE_UNDEAD)
-                        return;
-
-                    int32 bp = int32(damage * 1.5f);
-                    m_caster->CastCustomSpell(unitTarget, 47633, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                }
-                else
-                {
-                    int32 bp = damage;
-                    m_caster->CastCustomSpell(unitTarget, 47632, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                }
-                return;
-            }
             // Hungering Cold
             if (m_spellInfo->SpellFamilyFlags & uint64(0x0000100000000000))
             {

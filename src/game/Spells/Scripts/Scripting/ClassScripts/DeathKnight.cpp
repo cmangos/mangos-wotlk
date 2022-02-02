@@ -85,8 +85,49 @@ struct RaiseDead : public SpellScript
     }
 };
 
+struct DeathCoilDK : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        uint32 damage = spell->GetDamage();
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->CanAssistSpell(target, spell->m_spellInfo))
+        {
+            if (!target || target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
+                return;
+
+            int32 bp = int32(damage * 1.5f);
+            caster->CastCustomSpell(target, 47633, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+        {
+            int32 bp = damage;
+            caster->CastCustomSpell(target, 47632, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct UnholyBlightDK : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const
+    {
+        procData.triggeredSpellId = 50536; // unholy blight DOT
+        uint32 damagePercent = aura->GetModifier()->m_amount;
+        if (Aura* aura = aura->GetTarget()->GetAura(63332, EFFECT_INDEX_0))
+            damagePercent += (damagePercent * aura->GetModifier()->m_amount / 100);
+        procData.basepoints[0] = procData.damage * damagePercent / 100;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
     RegisterSpellScript<RaiseDead>("spell_dk_raise_dead");
+    RegisterSpellScript<DeathCoilDK>("spell_dk_death_coil");
+    RegisterAuraScript<UnholyBlightDK>("spell_dk_unholy_blight");
 }

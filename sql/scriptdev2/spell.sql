@@ -716,6 +716,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Death Knight
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (46584,'spell_dk_raise_dead'),
+(47541,'spell_dk_death_coil'),
+(49892,'spell_dk_death_coil'),
+(49893,'spell_dk_death_coil'),
+(49894,'spell_dk_death_coil'),
+(49895,'spell_dk_death_coil'),
+(49194,'spell_dk_unholy_blight'),
 (55090,'spell_scourge_strike'),
 (55265,'spell_scourge_strike'),
 (55270,'spell_scourge_strike'),
