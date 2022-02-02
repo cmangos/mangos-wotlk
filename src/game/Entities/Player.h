@@ -2555,6 +2555,8 @@ class Player : public Unit
         float GetAverageItemLevel() const;
 
         LfgData& GetLfgData() { return m_lfgData; }
+
+        uint32 LookupHighestLearnedRank(uint32 spellId);
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
