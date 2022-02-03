@@ -22808,6 +22808,8 @@ void Player::RestoreBaseRune(uint8 index)
     for (auto itr = auras.begin(); itr != auras.end();)
         if (criteria(*itr))
             itr = auras.erase(itr);
+	else
+	    itr++;
 
     if (!auras.empty())
         return;
