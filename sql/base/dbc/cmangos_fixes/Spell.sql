@@ -2834,6 +2834,9 @@ UPDATE spell_template SET EffectSpellClassMask1_1=0x00002000 WHERE Id IN(49194);
 -- Sudden Doom - procflags - Heart Strike and Blood Strike
 UPDATE spell_template SET EffectSpellClassMask1_1=0x01400000 WHERE Id IN(49018,49529,49530);
 
+-- Proc flag for Desolation on Blood Strike
+UPDATE spell_template SET EffectSpellClassMask1_1=0x00400000 WHERE Id IN(66799);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
