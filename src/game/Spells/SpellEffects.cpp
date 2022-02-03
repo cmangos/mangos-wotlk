@@ -7860,28 +7860,6 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             }
             break;
         }
-        case SPELLFAMILY_WARRIOR:
-        {
-            // Devastate
-            if (m_spellInfo->SpellVisual[0] == 12295 && m_spellInfo->SpellIconID == 1508)
-            {
-                // Sunder Armor
-                Aura* sunder = unitTarget->GetAura(SPELL_AURA_MOD_RESISTANCE_PCT, SPELLFAMILY_WARRIOR, uint64(0x0000000000004000), 0x00000000, m_caster->GetObjectGuid());
-
-                // Devastate bonus and sunder armor refresh
-                if (sunder)
-                {
-                    sunder->GetHolder()->RefreshHolder();
-                    spell_bonus += sunder->GetStackAmount() * CalculateSpellEffectValue(EFFECT_INDEX_2, unitTarget);
-                }
-
-                // Devastate causing Sunder Armor Effect
-                // and no need to cast over max stack amount
-                if (!sunder || sunder->GetStackAmount() < sunder->GetSpellProto()->StackAmount)
-                    m_caster->CastSpell(unitTarget, 58567, TRIGGERED_IGNORE_HIT_CALCULATION | TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COSTS);
-            }
-            break;
-        }
         case SPELLFAMILY_ROGUE:
         {
             // Mutilate (for each hand)

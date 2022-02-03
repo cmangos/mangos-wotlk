@@ -885,6 +885,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (25236,'spell_warrior_execute'),
 (47470,'spell_warrior_execute'),
 (47471,'spell_warrior_execute'),
+(20243,'spell_warrior_devastate'),
+(30016,'spell_warrior_devastate'),
+(30022,'spell_warrior_devastate'),
+(47497,'spell_warrior_devastate'),
+(47498,'spell_warrior_devastate'),
 (20647,'spell_warrior_execute_damage'),
 (34428,'spell_warrior_victory_rush'),
 (58567,'spell_sunder_armor');

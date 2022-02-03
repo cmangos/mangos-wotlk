@@ -89,10 +89,45 @@ struct SunderArmor : public SpellScript
     }
 };
 
+struct WarriorDevastate : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        uint32 sunders = 1;
+
+        // Sunder Armor
+        Aura* sunder = target->GetAura(SPELL_AURA_MOD_RESISTANCE_PCT, SPELLFAMILY_WARRIOR, uint64(0x0000000000004000), 0x00000000, caster->GetObjectGuid());
+
+        // Devastate bonus and sunder armor refresh
+        if (sunder)
+        {
+            sunder->GetHolder()->RefreshHolder();
+            spell->SetDamage(spell->GetDamage() + sunder->GetStackAmount() * spell->CalculateSpellEffectValue(EFFECT_INDEX_2, target));
+        }
+
+        if (Aura* glyphAura = caster->GetAura(63332, EFFECT_INDEX_0))
+            sunders = 2;
+
+        // Devastate causing Sunder Armor Effect
+        // and no need to cast over max stack amount
+        if (!sunder || sunder->GetStackAmount() < sunder->GetSpellProto()->StackAmount)
+        {
+            for (uint32 i = 0; i < sunders; ++i)
+                caster->CastSpell(target, 58567, TRIGGERED_IGNORE_HIT_CALCULATION | TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COSTS);
+        }
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
     RegisterSpellScript<WarriorExecuteDamage>("spell_warrior_execute_damage");
     RegisterSpellScript<VictoryRush>("spell_warrior_victory_rush");
     RegisterSpellScript<SunderArmor>("spell_sunder_armor");
+    RegisterSpellScript<WarriorDevastate>("spell_warrior_devastate");
 }
