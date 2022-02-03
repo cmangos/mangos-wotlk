@@ -7993,11 +7993,6 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
 
                     totalDamagePercentMod *= 1.0f + bonus;
                 }
-
-                // Heart Strike secondary target
-                if (m_spellInfo->SpellIconID == 3145)
-                    if (m_targets.getUnitTarget() != unitTarget)
-                        weaponDamagePercentMod /= 2.0f;
             }
             // Glyph of Blood Strike
             if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000400000) &&
