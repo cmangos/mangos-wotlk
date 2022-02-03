@@ -2837,6 +2837,9 @@ UPDATE spell_template SET EffectSpellClassMask1_1=0x01400000 WHERE Id IN(49018,4
 -- Proc flag for Desolation on Blood Strike
 UPDATE spell_template SET EffectSpellClassMask1_1=0x00400000 WHERE Id IN(66799);
 
+-- blade barrier wrong target
+UPDATE spell_template SET EffectImplicitTargetA2=0 WHERE Id IN(49500,49501,55225,55226);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
