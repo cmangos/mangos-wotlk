@@ -117,8 +117,8 @@ struct UnholyBlightDK : public AuraScript
     {
         procData.triggeredSpellId = 50536; // unholy blight DOT
         uint32 damagePercent = aura->GetModifier()->m_amount;
-        if (Aura* aura = aura->GetTarget()->GetAura(63332, EFFECT_INDEX_0))
-            damagePercent += (damagePercent * aura->GetModifier()->m_amount / 100);
+        if (Aura* glyphAura = aura->GetTarget()->GetAura(63332, EFFECT_INDEX_0))
+            damagePercent += (damagePercent * glyphAura->GetModifier()->m_amount / 100);
         procData.basepoints[0] = procData.damage * damagePercent / 100;
         return SPELL_AURA_PROC_OK;
     }

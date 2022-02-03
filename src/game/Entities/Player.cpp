@@ -22805,7 +22805,7 @@ void Player::RestoreBaseRune(uint8 index)
         return false;
     };
 
-    for (auto itr = auras.begin(); itr != auras.end(); ++itr)
+    for (auto itr = auras.begin(); itr != auras.end();)
     {
         if (criteria(*itr))
             itr = auras.erase(itr);
