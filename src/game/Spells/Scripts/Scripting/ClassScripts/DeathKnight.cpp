@@ -184,6 +184,25 @@ struct DeathRuneDK : public AuraScript
     }
 };
 
+struct Bloodworm : public SpellScript
+{
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    {
+        summon->CastSpell(nullptr, 50453, TRIGGERED_OLD_TRIGGERED);
+        summon->AI()->SetReactState(REACT_DEFENSIVE);
+    }
+};
+
+struct HealthLeechPassive : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        int32 heal = procData.damage * 150 / 100; // 1.5x
+        aura->GetTarget()->CastCustomSpell(aura->GetTarget()->GetSpawner(), 50454, &heal, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -192,4 +211,6 @@ void LoadDeathKnightScripts()
     RegisterAuraScript<UnholyBlightDK>("spell_dk_unholy_blight");
     RegisterAuraScript<SuddenDoom>("spell_sudden_doom");
     RegisterAuraScript<DeathRuneDK>("spell_death_rune_dk");
+    RegisterSpellScript<Bloodworm>("spell_bloodworm");
+    RegisterAuraScript<HealthLeechPassive>("spell_health_leech_passive");
 }
