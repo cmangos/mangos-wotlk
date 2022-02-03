@@ -22805,7 +22805,13 @@ void Player::RestoreBaseRune(uint8 index)
         return false;
     };
 
-	auras.erase(std::remove_if(auras.begin(), auras.end(), criteria), auras.end());
+    for (auto itr = auras.begin(); itr != auras.end(); ++itr)
+    {
+        if (criteria(*itr))
+            itr = auras.erase(itr);
+        else
+            ++itr;
+    }
 
     if (!auras.empty())
         return;
@@ -22896,7 +22902,7 @@ void Player::AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura
     ConvertRune(index, newType);
 }
 
-void Player::RemoveRunesByAuraEffect(Aura const* aura)
+void Player::RemoveRunesByAura(Aura const* aura)
 {
     for (uint8 itr = 0; itr < MAX_RUNES; ++itr)
     {

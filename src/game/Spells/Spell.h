@@ -808,6 +808,9 @@ class Spell
         TargetList& GetTargetList() { return m_UniqueTargetInfo; }
         // enables customizing auras after creation - use only in OnEffectExecute and with aura effects
         SpellAuraHolder* GetSpellAuraHolder() { return m_spellAuraHolder; }
+        // enables fetching which runes were taken
+        uint8 GetOldRuneState() const { return m_runesState; }
+        uint8 GetNewRuneState() const { return m_runesStateAfterCast; }
 
         // Vehicle casting subsection
         static SpellCastResult CheckVehicle(Unit const* caster, SpellEntry const& spellInfo);
@@ -849,6 +852,7 @@ class Spell
         bool m_autoRepeat;
         float m_maxRange;                                   // For channeled spell check
         uint8 m_runesState;
+        uint8 m_runesStateAfterCast;
 
         uint8 m_delayAtDamageCount;
         bool isDelayableNoMore()

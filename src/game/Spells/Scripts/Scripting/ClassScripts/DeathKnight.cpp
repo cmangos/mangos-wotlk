@@ -138,6 +138,52 @@ struct SuddenDoom : public AuraScript
     }
 };
 
+struct DeathRuneDK : public AuraScript
+{
+    bool OnCheckProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!procData.spell || !aura->GetTarget()->IsPlayer())
+            return false;
+
+        if (aura->GetTarget()->getClass() != CLASS_DEATH_KNIGHT)
+            return false;
+
+        return true;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        uint8 oldRunesState = procData.spell->GetOldRuneState();
+        uint8 newRunesState = procData.spell->GetNewRuneState();
+        if (oldRunesState == newRunesState)
+            return SPELL_AURA_PROC_OK;
+
+        Player* player = static_cast<Player*>(aura->GetTarget());
+
+        for (uint8 i = 0; i < MAX_RUNES; ++i)
+        {
+            uint8 mask = (1 << i);
+            if (mask & oldRunesState && (!(mask & newRunesState))) // runes that were used by spell as cost
+            {
+                player->AddRuneByAuraEffect(i, RUNE_DEATH, aura);
+            }
+        }
+
+        aura->ForcePeriodicity(aura->GetModifier()->periodictime);
+        return SPELL_AURA_PROC_OK;
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsPlayer())
+            return;
+
+        // timer expired - remove death runes
+        static_cast<Player*>(target)->RemoveRunesByAura(aura);
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -145,4 +191,5 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<DeathCoilDK>("spell_dk_death_coil");
     RegisterAuraScript<UnholyBlightDK>("spell_dk_unholy_blight");
     RegisterAuraScript<SuddenDoom>("spell_sudden_doom");
+    RegisterAuraScript<DeathRuneDK>("spell_death_rune_dk");
 }

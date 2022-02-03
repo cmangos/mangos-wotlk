@@ -482,6 +482,7 @@ Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags
     m_autoRepeat = IsAutoRepeatRangedSpell(m_spellInfo);
 
     m_runesState = 0;
+    m_runesStateAfterCast = 0;
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, don't must be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, don't must be used before.
     m_timer = 0;                                            // will set to cast time in prepare
@@ -4402,8 +4403,8 @@ void Spell::SendSpellGo()
 
     if (castFlags & CAST_FLAG_PREDICTED_RUNES)              // predicted runes
     {
-        uint8 runeMaskInitial = m_runesState;
-        uint8 runeMaskAfterCast = (m_caster->getClass() == CLASS_DEATH_KNIGHT ? static_cast<Player*>(m_caster)->GetRunesState() : 0);
+        uint8 runeMaskInitial = GetOldRuneState();
+        uint8 runeMaskAfterCast = GetNewRuneState();
         data << uint8(runeMaskInitial);                                  // runes state before
         data << uint8(runeMaskAfterCast);                                  // runes state after
         for (uint8 i = 0; i < MAX_RUNES; ++i)
@@ -5002,6 +5003,8 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
         float rp = float(src->runePowerGain);
         rp *= sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_INCOME);
         plr->ModifyPower(POWER_RUNIC_POWER, (int32)rp);
+
+        m_runesStateAfterCast = plr->GetRunesState();
     }
 
     return SPELL_CAST_OK;

@@ -2469,7 +2469,7 @@ class Player : public Unit
         void SetRuneConvertAura(uint8 index, Aura const* aura);
         void RemoveRuneConvertAura(uint8 index, Aura const* aura);
         void AddRuneByAuraEffect(uint8 index, RuneType newType, Aura const* aura);
-        void RemoveRunesByAuraEffect(Aura const* aura);
+        void RemoveRunesByAura(Aura const* aura);
         void RestoreBaseRune(uint8 index);
 
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }

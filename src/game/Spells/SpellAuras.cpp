@@ -9905,7 +9905,7 @@ void Aura::HandleAuraConvertRune(bool apply, bool Real)
         }
     }
     else
-        plr->RemoveRunesByAuraEffect(this);
+        plr->RemoveRunesByAura(this);
 }
 
 void Aura::HandlePhase(bool apply, bool Real)
