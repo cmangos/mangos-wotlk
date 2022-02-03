@@ -22804,8 +22804,10 @@ void Player::RestoreBaseRune(uint8 index)
         // If rune was converted by a non-passive aura that is still active we should keep it converted
         return false;
     };
-
-	auras.erase(std::remove_if(auras.begin(), auras.end(), criteria), auras.end());
+	
+    for (auto itr = auras.begin(); itr != auras.end();)
+        if (criteria(*itr))
+            itr = auras.erase(itr);
 
     if (!auras.empty())
         return;
