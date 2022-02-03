@@ -617,6 +617,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (59858,'spell_summon_malformed_ooze_aura'),
 (59859,'spell_summon_iron_trogg_aura'),
 (59860,'spell_summon_iron_dwarf_aura'),
+(59906,'spell_swift_hand_of_justice'),
+(59915,'spell_discerning_eye_of_the_beast'),
 (60211,'spell_cauterize'),
 (61071,'spell_vortex_aura'),
 (61072,'spell_vortex_aura'),
