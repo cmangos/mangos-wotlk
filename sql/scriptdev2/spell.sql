@@ -731,6 +731,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (49467,'spell_death_rune_dk'),
 (50033,'spell_death_rune_dk'),
 (50034,'spell_death_rune_dk'),
+(54637,'spell_death_rune_dk'),
+(54638,'spell_death_rune_dk'),
 (54639,'spell_death_rune_dk'),
 (56834,'spell_death_rune_dk'),
 (56835,'spell_death_rune_dk'),
