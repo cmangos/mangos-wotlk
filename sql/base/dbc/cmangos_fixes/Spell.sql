@@ -2840,6 +2840,9 @@ UPDATE spell_template SET EffectSpellClassMask1_1=0x00400000 WHERE Id IN(66799);
 -- blade barrier wrong target
 UPDATE spell_template SET EffectImplicitTargetA2=0 WHERE Id IN(49500,49501,55225,55226);
 
+-- Blood Tap - not sure if blizzlike fix - but fixes it in our core
+UPDATE spell_template SET EffectMiscValue1=0 WHERE Id IN(45529);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
