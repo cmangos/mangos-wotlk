@@ -31,12 +31,18 @@ struct HunterPetScaling1 : public AuraScript
 {
     int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
     {
+        Unit* target = data.target;
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // stamina
                 if (Unit* owner = data.caster->GetOwner())
                 {
-                    value = float(owner->GetStat(STAT_STAMINA)) * 0.3f;
+                    float coeff = 1.f;
+                    if (target->HasSpell(62762))
+                        coeff = 1.4f;
+                    else if (target->HasSpell(62758))
+                        coeff = 1.2f;
+                    value = float(owner->GetStat(STAT_STAMINA)) * 0.3f * coeff;
                     if (owner->HasAura(SPELL_INCREASED_ATTACK_POWER))
                         value += 52;
                 }
@@ -44,14 +50,26 @@ struct HunterPetScaling1 : public AuraScript
             case EFFECT_INDEX_1: // attack power
                 if (Unit* owner = data.caster->GetOwner())
                 {
-                    value = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.25f;
+                    float coeff = 1.f;
+                    if (target->HasSpell(62762))
+                        coeff = 1.3f;
+                    else if (target->HasSpell(62758))
+                        coeff = 1.15f;
+                    value = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.25f * coeff;
                     if (owner->HasAura(SPELL_INCREASED_ATTACK_POWER))
                         value += 70;
                 }
                 break;
             case EFFECT_INDEX_2: // spell power
                 if (Unit* owner = data.caster->GetOwner())
-                    value = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.125f;
+                {
+                    float coeff = 1.f;
+                    if (target->HasSpell(62762))
+                        coeff = 1.3f;
+                    else if (target->HasSpell(62758))
+                        coeff = 1.15f;
+                    value = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.125f * coeff;
+                }
                 break;
         }
         return value;
