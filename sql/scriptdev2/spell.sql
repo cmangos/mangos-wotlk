@@ -776,6 +776,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20271,'spell_judgement'),
 (57774,'spell_judgement'),
 (53408,'spell_judgement'),
+(53385,'spell_divine_storm'),
+(54171,'spell_divine_storm_heal'),
+(70769,'spell_divine_storm_cooldown'),
 (31789,'spell_righteous_defense'),
 (40470,'spell_paladin_tier_6_trinket');
 
