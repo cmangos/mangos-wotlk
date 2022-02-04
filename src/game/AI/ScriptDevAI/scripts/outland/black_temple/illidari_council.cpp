@@ -564,7 +564,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
     {
         AddCombatAction(MALANDE_ACTION_EMPOWERED_SMITE, 0u);
         AddCombatAction(MALANDE_ACTION_CIRCLE_OF_HEALING, 20000u);
-        AddCombatAction(MALANDE_ACTION_DIVINE_WRATH, 10000u);
+        AddCombatAction(MALANDE_ACTION_DIVINE_WRATH, 10000, 18000);
         AddCombatAction(MALANDE_ACTION_REFLECTIVE_SHIELD, 26000, 32000);
         AddOnKillText(SAY_MALA_SLAY);
         SetRangedMode(true, 20.0f, TYPE_PROXIMITY);
@@ -604,7 +604,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(pTarget, SPELL_DIVINE_WRATH) == CAST_OK)
-                        ResetCombatAction(action, urand(5000, 10000));
+                        ResetCombatAction(action, urand(16000, 36000));
                 return;
             }
             case MALANDE_ACTION_REFLECTIVE_SHIELD:
