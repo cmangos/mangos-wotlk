@@ -744,6 +744,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34026,'spell_kill_command'),
 (34477,'spell_misdirection'),
 (34501,'spell_expose_weakness'),
+(53480,'spell_roar_of_sacrifice'),
 (781,'Disengage');
 
 -- Priest

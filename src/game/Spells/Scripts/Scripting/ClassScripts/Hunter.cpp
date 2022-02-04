@@ -67,10 +67,26 @@ struct Disengage : public SpellScript
     }
 };
 
+struct RoarOfSacrifice : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        Unit* pet = aura->GetCaster();
+        Unit* target = aura->GetTarget();
+        if (!pet)
+            return SPELL_AURA_PROC_OK;
+
+        int32 damage = procData.damage;
+        target->CastCustomSpell(pet, 67481, &damage, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<KillCommand>("spell_kill_command");
     RegisterSpellScript<Misdirection>("spell_misdirection");
     RegisterAuraScript<ExposeWeakness>("spell_expose_weakness");
     RegisterSpellScript<Disengage>("spell_disengage");
+    RegisterAuraScript<RoarOfSacrifice>("spell_roar_of_sacrifice");
 }
