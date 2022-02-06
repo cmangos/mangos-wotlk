@@ -2843,6 +2843,9 @@ UPDATE spell_template SET EffectImplicitTargetA2=0 WHERE Id IN(49500,49501,55225
 -- Blood Tap - not sure if blizzlike fix - but fixes it in our core
 UPDATE spell_template SET EffectMiscValue1=0 WHERE Id IN(45529);
 
+-- Heart of the Crusader - paladin talent proc corrections - based on judgements of the just
+UPDATE spell_template SET EffectSpellClassMask1_1=0x00800000,ProcChance=100,ProcFlags=0x00011110 WHERE Id IN(20335,20336,20337);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
