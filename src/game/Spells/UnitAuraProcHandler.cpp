@@ -4438,7 +4438,7 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(ProcExecutionData& data)
         if (!spellInfo)
             return SPELL_AURA_PROC_FAILED;
 
-        if (GetSpellSpecific(spellInfo->Id) != SPELL_JUDGEMENT)
+        if (spellInfo->Id != 54158)
             return SPELL_AURA_PROC_FAILED;
 
         int bp = triggeredByAura->GetModifier()->m_amount;
