@@ -2374,7 +2374,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 case 31877:
                 case 31878:
                     // triggered only at casted Judgement spells, not at additional Judgement effects
-                    if (!spellInfo || spellInfo->Category != 1210)
+                    if (!spellInfo || spellInfo->Id != 54158)
                         return SPELL_AURA_PROC_FAILED;
 
                     target = this;
