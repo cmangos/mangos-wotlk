@@ -203,6 +203,15 @@ struct HealthLeechPassive : public AuraScript
     }
 };
 
+struct AntiMagicZone : public SpellScript
+{
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    {
+        summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_HIDE_BODY);
+        summon->CastSpell(nullptr, 40031, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -213,4 +222,5 @@ void LoadDeathKnightScripts()
     RegisterAuraScript<DeathRuneDK>("spell_death_rune_dk");
     RegisterSpellScript<Bloodworm>("spell_bloodworm");
     RegisterAuraScript<HealthLeechPassive>("spell_health_leech_passive");
+    RegisterSpellScript<AntiMagicZone>("spell_anti_magic_zone");
 }
