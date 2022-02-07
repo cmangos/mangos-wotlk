@@ -827,7 +827,7 @@ void BattleGround::EndBattleGround(Team winner)
     if (winner == ALLIANCE)
     {
         winmsg_id = IsBattleGround() ? LANG_BG_A_WINS : LANG_ARENA_GOLD_WINS;
-        PlaySoundToAll(SOUND_ALLIANCE_WINS);
+        PlaySoundToTeam(SOUND_ALLIANCE_WINS, winner);
 
         SetWinner(WINNER_ALLIANCE);
 
@@ -837,7 +837,7 @@ void BattleGround::EndBattleGround(Team winner)
     else if (winner == HORDE)
     {
         winmsg_id = IsBattleGround() ? LANG_BG_H_WINS : LANG_ARENA_GREEN_WINS;
-        PlaySoundToAll(SOUND_HORDE_WINS);
+        PlaySoundToTeam(SOUND_HORDE_WINS, winner);
 
         SetWinner(WINNER_HORDE);
 
