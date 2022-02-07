@@ -111,6 +111,7 @@ enum
     SPELL_SINISTER_REFL_CLONE   = 45785,        // clone the player
     SPELL_VENGEANCE_BLUE_FLIGHT = 45839,        // possess the dragon
     SPELL_POSSESS_DRAKE_IMMUNE  = 45838,        // immunity while the player possesses the dragon
+    SPELL_SHIELD_OF_THE_BLUE_2  = 47314,
 
     // Npcs
     NPC_SHIELD_ORB              = 25502,
@@ -1358,8 +1359,13 @@ struct BreathHaste : public SpellScript
     }
 };
 
-struct ShieldOfTheBlue : public AuraScript
+struct ShieldOfTheBlue : public SpellScript, public AuraScript
 {
+    void OnCast(Spell* spell) const override
+    {
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SHIELD_OF_THE_BLUE_2, TRIGGERED_OLD_TRIGGERED);
+    }
+
     void OnApply(Aura* aura, bool apply) const override
     {
         if (apply)
