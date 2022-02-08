@@ -24841,6 +24841,19 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
         // after some aura fade or potion activation we have to send cooldown event to start cd client side
         if (haveToSendEvent)
         {
+            // client keeps track of category cd by original spellId
+            if (spellCategory && spellEntry.HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            {
+                auto itr = m_cooldownMap.FindByCategory(spellCategory);
+                if (itr != m_cooldownMap.end() && (*itr).second->GetSpellId() != spellEntry.Id)
+                {
+                    WorldPacket data(SMSG_COOLDOWN_EVENT, (4 + 8));
+                    data << uint32((*itr).second->GetSpellId());
+                    data << GetObjectGuid();
+                    SendDirectMessage(data);
+                }
+            }
+
             // Send activate cooldown timer (possible 0) at client side
             WorldPacket data(SMSG_COOLDOWN_EVENT, (4 + 8));
             data << uint32(spellEntry.Id);
@@ -24958,7 +24971,7 @@ void Player::ModifyCooldown(uint32 spellId, int32 cooldownModMs)
                 break; // invalidated iterator
             }
             else
-                cdData->SpellCDExpireTime(expireTime + std::chrono::milliseconds(cooldownModMs));
+                cdData->SetSpellCDExpireTime(expireTime + std::chrono::milliseconds(cooldownModMs));
         }
     }
 

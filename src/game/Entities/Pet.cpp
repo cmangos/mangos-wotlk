@@ -261,7 +261,7 @@ bool Pet::LoadPetFromDB(Player* owner, Position const& spawnPos, uint32 petentry
     if (summon_spell_id == 52150 && current && !forced) // must cast through spell in order to trigger correct ghoul CD
     {
         Position pos = Pet::GetPetSpawnPosition(owner);
-        owner->CastSpell(pos.x, pos.y, pos.z, summon_spell_id, TRIGGERED_IGNORE_GCD);
+        owner->CastSpell(pos.x, pos.y, pos.z, summon_spell_id, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COOLDOWNS);
         delete result;
         return false;
     }
