@@ -239,7 +239,8 @@ struct CorpseExplosionDK : public SpellScript
         Unit* target = spell->GetUnitTarget();
         if (effIdx == EFFECT_INDEX_0) // ghoul
         {
-            spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 47496, TRIGGERED_OLD_TRIGGERED);
+            target->InterruptNonMeleeSpells(false);
+            target->CastSpell(nullptr, 47496, TRIGGERED_NORMAL_COMBAT_CAST);
         }
         else
         {
@@ -262,12 +263,19 @@ struct ExplodeGhoulCorpseExplosion : public SpellScript
 		}
         else
         {
-            // Corpse Explosion (Suicide)
-            spell->GetCaster()->CastSpell(nullptr, 43999, TRIGGERED_OLD_TRIGGERED);
-            // Set corpse look
-            spell->GetCaster()->CastSpell(spell->GetCaster(), 51270, TRIGGERED_OLD_TRIGGERED);
+            spell->SetDamage(spell->GetCaster()->GetMaxHealth());
         }
     }
+
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        // Suicide
+        if (spell->GetCaster()->IsAlive())
+            spell->GetCaster()->CastSpell(nullptr, 7, TRIGGERED_OLD_TRIGGERED);
+        // Set corpse look
+        if (spell->GetCaster()->IsCreature())
+            static_cast<Creature*>(spell->GetCaster())->ForcedDespawn(500);
+    }          
 };
 
 void LoadDeathKnightScripts()
