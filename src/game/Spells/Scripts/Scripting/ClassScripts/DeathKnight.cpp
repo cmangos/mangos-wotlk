@@ -212,6 +212,64 @@ struct AntiMagicZone : public SpellScript
     }
 };
 
+struct CorpseExplosionDK : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        if (eff == EFFECT_INDEX_0) // can be cast on a ghoul
+        {
+            if (target->IsPlayerControlled() && target->GetOwnerGuid() == spell->GetCaster()->GetObjectGuid() &&
+                target->GetEntry() == 26125)
+                return true;
+        }
+        
+        if (target->GetDeathState() == CORPSE &&
+            (target->GetCreatureTypeMask() & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL) == 0)
+            return true;
+
+        return false;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->GetScriptValue() == 1)
+            return;
+
+        spell->SetScriptValue(1); // mark as used
+        Unit* target = spell->GetUnitTarget();
+        if (effIdx == EFFECT_INDEX_0) // ghoul
+        {
+            spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 47496, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+        {
+            int32 damage = spell->CalculateSpellEffectValue(EFFECT_INDEX_0, target);
+            spell->GetCaster()->CastCustomSpell(spell->GetUnitTarget(), spell->CalculateSpellEffectValue(EFFECT_INDEX_1, spell->GetUnitTarget()),
+                &damage, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+            spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 51270, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct ExplodeGhoulCorpseExplosion : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            int32 percentage = spell->CalculateSpellEffectValue(EFFECT_INDEX_2, spell->GetUnitTarget());
+            spell->SetDamage(spell->GetCaster()->GetMaxHealth() * percentage / 100);
+		}
+        else
+        {
+            // Corpse Explosion (Suicide)
+            spell->GetCaster()->CastSpell(nullptr, 43999, TRIGGERED_OLD_TRIGGERED);
+            // Set corpse look
+            spell->GetCaster()->CastSpell(spell->GetCaster(), 51270, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -223,4 +281,6 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<Bloodworm>("spell_bloodworm");
     RegisterAuraScript<HealthLeechPassive>("spell_health_leech_passive");
     RegisterSpellScript<AntiMagicZone>("spell_anti_magic_zone");
+    RegisterSpellScript<CorpseExplosionDK>("spell_dk_corpse_explosion");
+    RegisterSpellScript<ExplodeGhoulCorpseExplosion>("spell_explode_ghoul_corpse_explosion");
 }
