@@ -4944,7 +4944,7 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
             Unit* pTarget = nullptr;
             if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
                 pTarget = m_targets.getUnitTarget();
-            else if (unitTarget->GetVictim())
+            else if (m_caster->GetVictim())
                 pTarget = m_caster->GetVictim();
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 pTarget = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
