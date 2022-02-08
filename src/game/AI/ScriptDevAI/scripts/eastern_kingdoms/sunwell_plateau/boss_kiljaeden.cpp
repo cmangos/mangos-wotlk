@@ -1439,7 +1439,7 @@ void AddSC_boss_kiljaeden()
     RegisterSpellScript<PowerOfTheBlueFlight>("spell_power_of_the_blue_flight");
     RegisterAuraScript<VengeanceOfTheBlueFlight>("spell_vengeance_of_the_blue_flight");
     RegisterSpellScript<BreathHaste>("spell_breath_haste");
-    RegisterAuraScript<ShieldOfTheBlue>("spell_shield_of_the_blue");
+    RegisterScript<ShieldOfTheBlue>("spell_shield_of_the_blue");
     RegisterSpellScript<FlameDart>("spell_flame_dart");
     RegisterSpellScript<FlameDartMain>("spell_flame_dart_main");
 }
