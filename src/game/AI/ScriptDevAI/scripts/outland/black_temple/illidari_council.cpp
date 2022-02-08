@@ -616,7 +616,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
             case MALANDE_ACTION_EMPOWERED_SMITE:
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_EMPOWERED_SMITE) == CAST_OK)
-                    ResetCombatAction(action, urand(2000, 12000)); // ranged action with chance in spell list
+                    ResetCombatAction(action, GetCurrentRangedMode() ? urand(2000, 3000) : urand(2000, 12000)); // ranged action with chance in spell list
                 return;
             }
         }
