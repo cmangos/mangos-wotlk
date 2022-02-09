@@ -275,7 +275,8 @@ struct boss_archimondeAI : public CombatAI
             case ARCHIMONDE_ACTION_HAND_OF_DEATH:
                 if (DoCastSpellIfCan(nullptr, SPELL_HAND_OF_DEATH) == CAST_OK)
                 {
-                    DoScriptText(SAY_ENRAGE, m_creature);
+                    if (m_leashCheckTimer != 0)
+                        DoScriptText(SAY_ENRAGE, m_creature);
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
                     EnterEvadeMode();
                 }
