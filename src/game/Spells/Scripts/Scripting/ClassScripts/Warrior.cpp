@@ -139,6 +139,27 @@ struct RetaliationWarrior : public AuraScript
     }
 };
 
+struct HeroicStrike : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit::AuraList const& decSpeedList = target->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+        for (Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
+        {
+            if ((*iter)->GetSpellProto()->SpellIconID == 15 && (*iter)->GetSpellProto()->Dispel == 0)
+            {
+                // formula based on tooltip
+                spell->SetDamage(spell->GetDamage() + spell->m_spellInfo->EffectBasePoints[EFFECT_INDEX_0]);
+                break;
+            }
+        }
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
@@ -147,4 +168,5 @@ void LoadWarriorScripts()
     RegisterSpellScript<SunderArmor>("spell_sunder_armor");
     RegisterSpellScript<WarriorDevastate>("spell_warrior_devastate");
     RegisterAuraScript<RetaliationWarrior>("spell_retaliation_warrior");
+    RegisterSpellScript<HeroicStrike>("spell_heroic_strike");
 }
