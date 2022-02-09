@@ -317,8 +317,14 @@ void ThreatContainer::update(bool force, bool isPlayer)
                 Unit* right = rhs->getTarget();
                 if (left->IsPlayer() && !right->IsPlayer())
                     return true;
-                if (owner->CanAttack(left) && !owner->CanAttack(right))
+                if (!left->IsPlayer() && right->IsPlayer())
+                    return false;
+                bool attackLeft = owner->CanAttack(left);
+                bool attackRight = owner->CanAttack(right);
+                if (attackLeft && !attackRight)
                     return true;
+                if (!attackLeft && attackRight)
+                    return false;
             }
             if (lhs->GetTauntState() != rhs->GetTauntState())
                 return lhs->GetTauntState() > rhs->GetTauntState();
@@ -378,6 +384,12 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
             }
 
             if (currentRef->GetTauntState() > currentVictim->GetTauntState()) // taunt overrides root skipping
+            {
+                found = true;
+                break;
+            }
+
+            if (currentRef->getTarget()->IsPlayer() && !currentVictim->getTarget()->IsPlayer())
             {
                 found = true;
                 break;
