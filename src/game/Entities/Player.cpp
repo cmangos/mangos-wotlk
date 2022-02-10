@@ -19493,23 +19493,26 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
     Opcodes opcode = (mod->type == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
 
-    for (int eff = 0; eff < 64; ++eff)
+    for (uint32 i = 0; i < 3; ++i)
     {
-        uint64 _mask = uint64(1) << eff;
-        if (mod->mask.IsFitToFamilyMask(_mask))
+        for (uint32 eff = 0; eff < 32; ++eff)
         {
-            int32 val = 0;
-            for (SpellModifier* modifier : m_spellMods[mod->op])
+            uint32 mask = uint32(1) << eff;
+            if (mod->mask.IsFitToFamilyMask(i, mask))
             {
-                if (modifier->type == mod->type && (modifier->mask.IsFitToFamilyMask(_mask)))
-                    val += modifier->value;
+                int32 val = 0;
+                for (SpellModifier* modifier : m_spellMods[mod->op])
+                {
+                    if (modifier->type == mod->type && (modifier->mask.IsFitToFamilyMask(i, mask)))
+                        val += modifier->value;
+                }
+                val += apply ? mod->value : -(mod->value);
+                WorldPacket data(opcode, (1 + 1 + 4));
+                data << uint8(eff + 32 * i);
+                data << uint8(mod->op);
+                data << int32(val);
+                SendDirectMessage(data);
             }
-            val += apply ? mod->value : -(mod->value);
-            WorldPacket data(opcode, (1 + 1 + 4));
-            data << uint8(eff);
-            data << uint8(mod->op);
-            data << int32(val);
-            SendDirectMessage(data);
         }
     }
 

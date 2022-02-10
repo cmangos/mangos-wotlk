@@ -1776,6 +1776,16 @@ struct ClassFamilyMask
         return (Flags & familyFlags) || (Flags2 & familyFlags2);
     }
 
+    bool IsFitToFamilyMask(uint32 index, uint32 familyFlags) const
+    {
+        if (index == 0)
+            return Flags & familyFlags;
+        else if (index == 1)
+            return Flags & (uint64(familyFlags) << 32);
+        else
+            return Flags2 & familyFlags;
+    }
+
     bool IsFitToFamilyMask(ClassFamilyMask const& mask) const
     {
         return (Flags & mask.Flags) || (Flags2 & mask.Flags2);
