@@ -278,6 +278,66 @@ struct ExplodeGhoulCorpseExplosion : public SpellScript
     }          
 };
 
+struct DeathKnightDisease : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+
+        if (caster->GetOverrideScript(7282)) // Crypt Fever and Ebon Plaguebringer
+        {
+            Aura* chosen = nullptr; // need highest id
+            for (Aura* aura : caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS))
+                if (aura->GetModifier()->m_amount == 7282)
+                    if (!chosen || chosen->GetId() < aura->GetId())
+                        chosen = aura;
+
+            if (aura)
+            {
+                uint32 spellId = 0;
+                switch (aura->GetId())
+                {
+                    // Ebon Plague
+                    case 51161: spellId = 51735; break;
+                    case 51160: spellId = 51734; break;
+                    case 51099: spellId = 51726; break;
+                        // Crypt Fever
+                    case 49632: spellId = 50510; break;
+                    case 49631: spellId = 50509; break;
+                    case 49032: spellId = 50508; break;
+                    default: break;
+                }
+
+                if (spellId)
+                    caster->CastSpell(aura->GetTarget(), spellId, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
+struct CryptFeverServerside : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.effIdx == EFFECT_INDEX_1)
+        {
+            if (data.caster)
+            {
+                Aura* aura = data.target->GetAura(51735, EFFECT_INDEX_1);
+                if (!aura)
+                    aura = data.target->GetAura(51734, EFFECT_INDEX_1);
+                if (!aura)
+                    aura = data.target->GetAura(51726, EFFECT_INDEX_1);
+                if (aura)
+                    value = aura->GetAmount();
+            }                
+        }
+        return value;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -291,4 +351,6 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<AntiMagicZone>("spell_anti_magic_zone");
     RegisterSpellScript<CorpseExplosionDK>("spell_dk_corpse_explosion");
     RegisterSpellScript<ExplodeGhoulCorpseExplosion>("spell_explode_ghoul_corpse_explosion");
+    RegisterAuraScript<DeathKnightDisease>("spell_death_knight_disease");
+    RegisterAuraScript<CryptFeverServerside>("spell_crypt_fever_serverside");
 }
