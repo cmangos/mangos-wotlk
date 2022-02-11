@@ -1456,6 +1456,36 @@ struct PreventSpellIfSameAuraOnCaster : public SpellScript
     }
 };
 
+struct Stoned : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (apply)
+        {
+            if (target->GetTypeId() != TYPEID_UNIT)
+                return;
+
+            if (target->GetEntry() == 25507)
+                return;
+
+            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NOT_SELECTABLE);
+            target->addUnitState(UNIT_STAT_ROOT);
+        }
+        else
+        {
+            if (target->GetTypeId() != TYPEID_UNIT)
+                return;
+
+            if (target->GetEntry() == 25507)
+                return;
+
+            // see dummy effect of spell 10254 for removal of flags etc
+            target->CastSpell(nullptr, 10254, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 struct BirthNoVisualInstantSpawn : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -1503,6 +1533,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<TribalDeath>("spell_tribal_death");
     RegisterSpellScript<PreventSpellIfSameAuraOnCaster>("spell_prevent_spell_if_same_aura_on_caster");
     RegisterSpellScript<RetaliationCreature>("spell_retaliation_creature");
+    RegisterSpellScript<Stoned>("spell_stoned");
     RegisterSpellScript<BirthNoVisualInstantSpawn>("spell_birth_no_visual_instant_spawn");
 
     // wotlk section
