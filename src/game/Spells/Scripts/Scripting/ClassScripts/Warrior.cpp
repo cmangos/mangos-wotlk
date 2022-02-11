@@ -121,7 +121,7 @@ struct WarriorDevastate : public SpellScript
         if (!sunder || sunder->GetStackAmount() < sunder->GetSpellProto()->StackAmount)
         {
             for (uint32 i = 0; i < sunders; ++i)
-                caster->CastSpell(target, 58567, TRIGGERED_IGNORE_HIT_CALCULATION | TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COSTS);
+                caster->CastSpell(target, 58567, TRIGGERED_IGNORE_HIT_CALCULATION | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COSTS);
         }
     }
 };
@@ -134,7 +134,7 @@ struct RetaliationWarrior : public AuraScript
         if (procData.victim->IsFacingTargetsBack(procData.attacker))
             return SPELL_AURA_PROC_FAILED;
 
-        procData.victim->CastSpell(procData.attacker, 20240, TRIGGERED_IGNORE_HIT_CALCULATION | TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COSTS);
+        procData.victim->CastSpell(procData.attacker, 20240, TRIGGERED_IGNORE_HIT_CALCULATION | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COSTS);
         return SPELL_AURA_PROC_OK;
     }
 };
