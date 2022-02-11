@@ -900,7 +900,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61697,'spell_death_knight_pet_scaling_3'),
 
 (51905,'spell_death_knight_rune_weapon_scaling_1'),
-(51906,'spell_death_knight_rune_weapon_scaling_2');
+(51906,'spell_death_knight_rune_weapon_scaling_2'),
+
+(67561,'spell_death_knight_army_of_the_dead_1');
 
 -- Warrior
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
