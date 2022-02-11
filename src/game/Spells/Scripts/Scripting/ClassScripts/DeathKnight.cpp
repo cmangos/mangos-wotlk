@@ -348,6 +348,17 @@ struct ArmyOfTheDead : public AuraScript
     }
 };
 
+struct ArmyOfTheDeadGhoul : public SpellScript
+{
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    {
+        summon->CastSpell(nullptr, 7398, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, 51996, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, 67561, TRIGGERED_OLD_TRIGGERED); // unk scaling aura
+        summon->CastSpell(nullptr, 61697, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -364,4 +375,5 @@ void LoadDeathKnightScripts()
     RegisterAuraScript<DeathKnightDisease>("spell_death_knight_disease");
     RegisterAuraScript<CryptFeverServerside>("spell_crypt_fever_serverside");
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
+    RegisterSpellScript<ArmyOfTheDeadGhoul>("spell_army_of_the_dead_ghoul");
 }
