@@ -338,6 +338,16 @@ struct CryptFeverServerside : public AuraScript
     }
 };
 
+struct ArmyOfTheDead : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.effIdx == EFFECT_INDEX_1)
+            value = data.target->GetParryChance() + data.target->GetDodgeChance();
+        return value;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -353,4 +363,5 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<ExplodeGhoulCorpseExplosion>("spell_explode_ghoul_corpse_explosion");
     RegisterAuraScript<DeathKnightDisease>("spell_death_knight_disease");
     RegisterAuraScript<CryptFeverServerside>("spell_crypt_fever_serverside");
+    RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
 }
