@@ -10069,8 +10069,8 @@ void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
 
     if (apply)
     {
-        // ToDo: handle various cases where base points need to be applied!
-        target->CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+        int32 points = GetAmount();
+        target->CastCustomSpell(target, spellInfo, &points, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
     }
     else
         target->RemoveAurasByCasterSpell(linkedSpell, GetCasterGuid());
