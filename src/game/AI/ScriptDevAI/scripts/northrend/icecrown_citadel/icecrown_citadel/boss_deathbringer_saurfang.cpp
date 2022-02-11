@@ -389,7 +389,7 @@ void AddSC_boss_deathbringer_saurfang()
     pNewScript->GetAI = &GetNewAIInstance<boss_deathbringer_saurfangAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_grip_of_agony_aura>("spell_grip_of_agony_aura");
+    RegisterSpellScript<spell_grip_of_agony_aura>("spell_grip_of_agony_aura");
     RegisterSpellScript<spell_mark_fallen_champion>("spell_mark_fallen_champion");
     RegisterSpellScript<spell_blood_link>("spell_blood_link");
 }

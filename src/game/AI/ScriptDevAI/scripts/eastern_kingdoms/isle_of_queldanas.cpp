@@ -438,5 +438,5 @@ void AddSC_isle_of_queldanas()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<ShatteredSunMarksmanShoot>("spell_shattered_sun_marksman_shoot");
-    RegisterAuraScript<SparAuras>("spell_spar_auras");
+    RegisterSpellScript<SparAuras>("spell_spar_auras");
 }

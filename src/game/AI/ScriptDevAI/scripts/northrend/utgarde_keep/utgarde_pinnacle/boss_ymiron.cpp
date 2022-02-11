@@ -472,6 +472,6 @@ void AddSC_boss_ymiron()
     pNewScript->pProcessEventId = &ProcessEventId_event_achiev_kings_bane;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_create_spirit_fount_beam_aura>("spell_create_spirit_fount_beam_aura");
+    RegisterSpellScript<spell_create_spirit_fount_beam_aura>("spell_create_spirit_fount_beam_aura");
     RegisterSpellScript<spell_avenging_spirits>("spell_avenging_spirits");
 }

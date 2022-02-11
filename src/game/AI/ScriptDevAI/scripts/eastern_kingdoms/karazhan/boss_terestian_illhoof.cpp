@@ -305,5 +305,5 @@ void AddSC_boss_terestian_illhoof()
     pNewScript->GetAI = &GetNewAIInstance<npc_fiendish_portalAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<Sacrifice>("spell_sacrifice");
+    RegisterSpellScript<Sacrifice>("spell_sacrifice");
 }

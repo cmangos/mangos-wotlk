@@ -123,10 +123,10 @@ struct Brambles : public AuraScript
 
 void LoadDruidScripts()
 {
-    RegisterAuraScript<Regrowth>("spell_regrowth");
-    RegisterAuraScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
-    RegisterScript<ForceOfNatureSummon>("spell_force_of_nature_summon");
+    RegisterSpellScript<Regrowth>("spell_regrowth");
+    RegisterSpellScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
+    RegisterSpellScript<ForceOfNatureSummon>("spell_force_of_nature_summon");
     RegisterSpellScript<GuardianAggroSpell>("spell_guardian_aggro_spell");
     RegisterSpellScript<WildGrowth>("spell_wild_growth");
-    RegisterAuraScript<Brambles>("spell_brambles");
+    RegisterSpellScript<Brambles>("spell_brambles");
 }

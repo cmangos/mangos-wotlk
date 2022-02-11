@@ -773,6 +773,6 @@ void AddSC_boss_lady_vashj()
     pNewScript->pGOUse = &GOUse_go_vashj_bridge;
     pNewScript->RegisterSelf();
 
-    RegisterScript<VashjPersuasion>("spell_vashj_persuasion");
+    RegisterSpellScript<VashjPersuasion>("spell_vashj_persuasion");
     RegisterSpellScript<SporeDropEffect>("spell_spore_drop_effect");
 }

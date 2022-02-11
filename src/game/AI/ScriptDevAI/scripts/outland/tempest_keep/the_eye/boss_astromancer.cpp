@@ -515,9 +515,9 @@ void AddSC_boss_high_astromancer_solarian()
     pNewScript->GetAI = &GetNewAIInstance<mob_solarium_priestAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<WrathOfTheAstromancer>("spell_wrath_of_the_astromancer");
+    RegisterSpellScript<WrathOfTheAstromancer>("spell_wrath_of_the_astromancer");
     RegisterSpellScript<WOTAOldMainCastAndJump>("spell_wota_main_cast_and_jump");
-    RegisterAuraScript<WOTAOldDOT>("spell_wota_dot");
+    RegisterSpellScript<WOTAOldDOT>("spell_wota_dot");
     RegisterSpellScript<WOTAOldSearch>("spell_wota_search");
     RegisterSpellScript<WOTAOldRemove>("spell_wota_remove");
 }

@@ -861,22 +861,22 @@ void AddSC_brewfest()
 
     RegisterSpellScript<BrewfestMountTransformation>("spell_brewfest_mount_transformation");
     RegisterSpellScript<BrewfestMountTransformationFactionSwap>("spell_brewfest_mount_transformation_faction_swap");
-    RegisterScript<GiddyUp>("spell_giddy_up");
-    RegisterAuraScript<RamsteinsSwiftWorkRam>("spell_ramsteins_swift_work_ram");
-    RegisterAuraScript<RamNeutral>("spell_ram_neutral");
-    RegisterAuraScript<RamTrot>("spell_ram_trot");
-    RegisterAuraScript<RamCanter>("spell_ram_canter");
-    RegisterAuraScript<RamGallop>("spell_ram_gallop");
+    RegisterSpellScript<GiddyUp>("spell_giddy_up");
+    RegisterSpellScript<RamsteinsSwiftWorkRam>("spell_ramsteins_swift_work_ram");
+    RegisterSpellScript<RamNeutral>("spell_ram_neutral");
+    RegisterSpellScript<RamTrot>("spell_ram_trot");
+    RegisterSpellScript<RamCanter>("spell_ram_canter");
+    RegisterSpellScript<RamGallop>("spell_ram_gallop");
     RegisterSpellScript<RamFatigue>("spell_ram_fatigue");
-    RegisterScript<AppleTrapFriendly>("spell_apple_trap_friendly");
-    RegisterAuraScript<BrewfestBarkerBunny>("spell_brewfest_barker_bunny");
+    RegisterSpellScript<AppleTrapFriendly>("spell_apple_trap_friendly");
+    RegisterSpellScript<BrewfestBarkerBunny>("spell_brewfest_barker_bunny");
     RegisterSpellScript<FaceStringIDFacingBunny>("spell_face_stringid_facing_bunny");
     RegisterSpellScript<FaceMe>("spell_face_me");
     RegisterSpellScript<BrewfestThrowKegPlayerDND>("spell_brewfest_throw_keg_player_dnd");
     RegisterSpellScript<BrewfestRelayRacePlayerIncreaseMountDuration>("spell_brewfest_relay_race_player_increase_mount_duration");
     RegisterSpellScript<SummonMoleMachinePovBunny>("spell_summon_mole_machine_pov_bunny");
-    RegisterAuraScript<MoleMachinePortSchedule>("spell_mole_machine_port_schedule");
-    RegisterAuraScript<MoleMachinePortalSchedule>("spell_mole_machine_portal_schedule");
+    RegisterSpellScript<MoleMachinePortSchedule>("spell_mole_machine_port_schedule");
+    RegisterSpellScript<MoleMachinePortalSchedule>("spell_mole_machine_portal_schedule");
     RegisterSpellScript<MakeBunnySummonMoleMachine>("spell_make_bunny_summon_mole_machine");
     RegisterSpellScript<SummonMoleMachine>("spell_summon_mole_machine");
 }

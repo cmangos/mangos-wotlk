@@ -60,7 +60,7 @@ struct AncestralAwakening : public SpellScript
 
 void LoadShamanScripts()
 {
-    RegisterAuraScript<EarthShield>("spell_earth_shield");
-    RegisterAuraScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
+    RegisterSpellScript<EarthShield>("spell_earth_shield");
+    RegisterSpellScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
     RegisterSpellScript<AncestralAwakening>("spell_ancestral_awakening");
 }

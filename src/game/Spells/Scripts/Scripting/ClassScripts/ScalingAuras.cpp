@@ -1028,62 +1028,62 @@ struct DeathKnightBloodParasitePetScaling : public AuraScript
 
 void LoadScalingScripts()
 {
-    RegisterAuraScript<HunterPetScaling1>("spell_hunter_pet_scaling_1");
-    RegisterAuraScript<HunterPetScaling2>("spell_hunter_pet_scaling_2");
-    RegisterAuraScript<HunterPetScaling3>("spell_hunter_pet_scaling_3");
-    RegisterAuraScript<HunterPetScaling4>("spell_hunter_pet_scaling_4");
+    RegisterSpellScript<HunterPetScaling1>("spell_hunter_pet_scaling_1");
+    RegisterSpellScript<HunterPetScaling2>("spell_hunter_pet_scaling_2");
+    RegisterSpellScript<HunterPetScaling3>("spell_hunter_pet_scaling_3");
+    RegisterSpellScript<HunterPetScaling4>("spell_hunter_pet_scaling_4");
 
-    RegisterAuraScript<HunterSnakeTrapScaling1>("spell_hunter_snake_trap_scaling_1");
+    RegisterSpellScript<HunterSnakeTrapScaling1>("spell_hunter_snake_trap_scaling_1");
 
-    RegisterAuraScript<WarlockPetScaling1>("spell_warlock_pet_scaling_1");
-    RegisterAuraScript<WarlockPetScaling2>("spell_warlock_pet_scaling_2");
-    RegisterAuraScript<WarlockPetScaling3>("spell_warlock_pet_scaling_3");
-    RegisterAuraScript<WarlockPetScaling4>("spell_warlock_pet_scaling_4");
-    RegisterAuraScript<WarlockPetScaling5>("spell_warlock_pet_scaling_5");
+    RegisterSpellScript<WarlockPetScaling1>("spell_warlock_pet_scaling_1");
+    RegisterSpellScript<WarlockPetScaling2>("spell_warlock_pet_scaling_2");
+    RegisterSpellScript<WarlockPetScaling3>("spell_warlock_pet_scaling_3");
+    RegisterSpellScript<WarlockPetScaling4>("spell_warlock_pet_scaling_4");
+    RegisterSpellScript<WarlockPetScaling5>("spell_warlock_pet_scaling_5");
 
-    RegisterAuraScript<MagePetScaling1>("spell_mage_pet_scaling_1");
-    RegisterAuraScript<MagePetScaling2>("spell_mage_pet_scaling_2");
-    RegisterAuraScript<MagePetScaling3>("spell_mage_pet_scaling_3");
-    RegisterAuraScript<MagePetScaling4>("spell_mage_pet_scaling_4");
+    RegisterSpellScript<MagePetScaling1>("spell_mage_pet_scaling_1");
+    RegisterSpellScript<MagePetScaling2>("spell_mage_pet_scaling_2");
+    RegisterSpellScript<MagePetScaling3>("spell_mage_pet_scaling_3");
+    RegisterSpellScript<MagePetScaling4>("spell_mage_pet_scaling_4");
 
-    RegisterAuraScript<PriestPetScaling1>("spell_priest_pet_scaling_1");
-    RegisterAuraScript<PriestPetScaling2>("spell_priest_pet_scaling_2");
-    RegisterAuraScript<PriestPetScaling3>("spell_priest_pet_scaling_3");
-    RegisterAuraScript<PriestPetScaling4>("spell_priest_pet_scaling_4");
+    RegisterSpellScript<PriestPetScaling1>("spell_priest_pet_scaling_1");
+    RegisterSpellScript<PriestPetScaling2>("spell_priest_pet_scaling_2");
+    RegisterSpellScript<PriestPetScaling3>("spell_priest_pet_scaling_3");
+    RegisterSpellScript<PriestPetScaling4>("spell_priest_pet_scaling_4");
 
-    RegisterAuraScript<ElementalPetScaling1>("spell_elemental_pet_scaling_1");
-    RegisterAuraScript<ElementalPetScaling2>("spell_elemental_pet_scaling_2");
-    RegisterAuraScript<ElementalPetScaling3>("spell_elemental_pet_scaling_3");
-    RegisterAuraScript<ElementalPetScaling4>("spell_elemental_pet_scaling_4");
+    RegisterSpellScript<ElementalPetScaling1>("spell_elemental_pet_scaling_1");
+    RegisterSpellScript<ElementalPetScaling2>("spell_elemental_pet_scaling_2");
+    RegisterSpellScript<ElementalPetScaling3>("spell_elemental_pet_scaling_3");
+    RegisterSpellScript<ElementalPetScaling4>("spell_elemental_pet_scaling_4");
 
-    RegisterAuraScript<DruidPetScaling1>("spell_druid_pet_scaling_1");
-    RegisterAuraScript<DruidPetScaling2>("spell_druid_pet_scaling_2");
-    RegisterAuraScript<DruidPetScaling3>("spell_druid_pet_scaling_3");
-    RegisterAuraScript<DruidPetScaling4>("spell_druid_pet_scaling_4");
+    RegisterSpellScript<DruidPetScaling1>("spell_druid_pet_scaling_1");
+    RegisterSpellScript<DruidPetScaling2>("spell_druid_pet_scaling_2");
+    RegisterSpellScript<DruidPetScaling3>("spell_druid_pet_scaling_3");
+    RegisterSpellScript<DruidPetScaling4>("spell_druid_pet_scaling_4");
 
-    RegisterAuraScript<FeralSpiritPetScaling1>("spell_feral_spirit_pet_scaling_1");
-    RegisterAuraScript<FeralSpiritPetScaling2>("spell_feral_spirit_pet_scaling_2");
-    RegisterAuraScript<FeralSpiritPetScaling3>("spell_feral_spirit_pet_scaling_3");
-    RegisterAuraScript<FeralSpiritPetScaling4>("spell_feral_spirit_pet_scaling_4");
+    RegisterSpellScript<FeralSpiritPetScaling1>("spell_feral_spirit_pet_scaling_1");
+    RegisterSpellScript<FeralSpiritPetScaling2>("spell_feral_spirit_pet_scaling_2");
+    RegisterSpellScript<FeralSpiritPetScaling3>("spell_feral_spirit_pet_scaling_3");
+    RegisterSpellScript<FeralSpiritPetScaling4>("spell_feral_spirit_pet_scaling_4");
 
-    RegisterAuraScript<EarthElementalPetScaling1>("spell_earth_elemental_pet_scaling_1");
-    RegisterAuraScript<EarthElementalPetScaling2>("spell_earth_elemental_pet_scaling_2");
-    RegisterAuraScript<EarthElementalPetScaling3>("spell_earth_elemental_pet_scaling_3");
-    RegisterAuraScript<EarthElementalPetScaling4>("spell_earth_elemental_pet_scaling_4");
+    RegisterSpellScript<EarthElementalPetScaling1>("spell_earth_elemental_pet_scaling_1");
+    RegisterSpellScript<EarthElementalPetScaling2>("spell_earth_elemental_pet_scaling_2");
+    RegisterSpellScript<EarthElementalPetScaling3>("spell_earth_elemental_pet_scaling_3");
+    RegisterSpellScript<EarthElementalPetScaling4>("spell_earth_elemental_pet_scaling_4");
 
-    RegisterAuraScript<InfernalPetScaling1>("spell_infernal_pet_scaling_1");
-    RegisterAuraScript<InfernalPetScaling2>("spell_infernal_pet_scaling_2");
-    RegisterAuraScript<InfernalPetScaling3>("spell_infernal_pet_scaling_3");
-    RegisterAuraScript<InfernalPetScaling4>("spell_infernal_pet_scaling_4");
+    RegisterSpellScript<InfernalPetScaling1>("spell_infernal_pet_scaling_1");
+    RegisterSpellScript<InfernalPetScaling2>("spell_infernal_pet_scaling_2");
+    RegisterSpellScript<InfernalPetScaling3>("spell_infernal_pet_scaling_3");
+    RegisterSpellScript<InfernalPetScaling4>("spell_infernal_pet_scaling_4");
 
-    RegisterAuraScript<DeathKnightPetScaling1>("spell_death_knight_pet_scaling_1");
-    RegisterAuraScript<DeathKnightPetScaling2>("spell_death_knight_pet_scaling_2");
-    RegisterAuraScript<DeathKnightPetScaling3>("spell_death_knight_pet_scaling_3");
+    RegisterSpellScript<DeathKnightPetScaling1>("spell_death_knight_pet_scaling_1");
+    RegisterSpellScript<DeathKnightPetScaling2>("spell_death_knight_pet_scaling_2");
+    RegisterSpellScript<DeathKnightPetScaling3>("spell_death_knight_pet_scaling_3");
 
-    RegisterAuraScript<DeathKnightRuneWeaponScaling1>("spell_death_knight_rune_weapon_scaling_1");
-    RegisterAuraScript<DeathKnightRuneWeaponScaling2>("spell_death_knight_rune_weapon_scaling_2");
+    RegisterSpellScript<DeathKnightRuneWeaponScaling1>("spell_death_knight_rune_weapon_scaling_1");
+    RegisterSpellScript<DeathKnightRuneWeaponScaling2>("spell_death_knight_rune_weapon_scaling_2");
 
-    RegisterAuraScript<DeathKnightArmyOfTheDead1>("spell_death_knight_army_of_the_dead_1");
+    RegisterSpellScript<DeathKnightArmyOfTheDead1>("spell_death_knight_army_of_the_dead_1");
 
-    RegisterAuraScript<DeathKnightBloodParasitePetScaling>("spell_death_knight_blood_parasite_pet_scaling");
+    RegisterSpellScript<DeathKnightBloodParasitePetScaling>("spell_death_knight_blood_parasite_pet_scaling");
 }

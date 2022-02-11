@@ -820,17 +820,17 @@ void AddSC_boss_muru()
     pNewScript->GetAI = &GetNewAIInstance<DarkFiendAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<DarkFiendAura>("spell_dark_fiend_aura");
+    RegisterSpellScript<DarkFiendAura>("spell_dark_fiend_aura");
     RegisterSpellScript<DarkFiendDummy>("spell_dark_fiend_dummy");
     RegisterSpellScript<SummonBloodElvesScript>("spell_summon_blood_elves_script");
-    RegisterAuraScript<SummonBloodElvesPeriodic>("spell_summon_blood_elves_periodic");
+    RegisterSpellScript<SummonBloodElvesPeriodic>("spell_summon_blood_elves_periodic");
     RegisterSpellScript<DarknessMuru>("spell_darkness_muru");
     RegisterSpellScript<EntropiusDarkEnergy>("spell_entropius_dark_energy");
     RegisterSpellScript<OpenAllPortals>("spell_open_all_portals");
-    RegisterAuraScript<TransformVisualPeriodic>("spell_transform_visual_periodic");
+    RegisterSpellScript<TransformVisualPeriodic>("spell_transform_visual_periodic");
     RegisterSpellScript<OpenPortalMuru>("spell_open_portal_muru");
     RegisterSpellScript<SummonVoidSentinelSummoner>("spell_summon_void_sentinel_summoner");
     RegisterSpellScript<SummonVoidSentinelSummonerVisual>("spell_void_sentinel_summoner_visual");
-    RegisterAuraScript<SpellShadowPulsePeriodic>("spell_shadow_pulse_periodic");
+    RegisterSpellScript<SpellShadowPulsePeriodic>("spell_shadow_pulse_periodic");
     RegisterSpellScript<BlackHoleEffect>("spell_black_hole_effect");
 }

@@ -87,7 +87,7 @@ void LoadHunterScripts()
 {
     RegisterSpellScript<KillCommand>("spell_kill_command");
     RegisterSpellScript<Misdirection>("spell_misdirection");
-    RegisterAuraScript<ExposeWeakness>("spell_expose_weakness");
+    RegisterSpellScript<ExposeWeakness>("spell_expose_weakness");
     RegisterSpellScript<Disengage>("spell_disengage");
-    RegisterAuraScript<RoarOfSacrifice>("spell_roar_of_sacrifice");
+    RegisterSpellScript<RoarOfSacrifice>("spell_roar_of_sacrifice");
 }

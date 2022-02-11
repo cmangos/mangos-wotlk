@@ -9388,10 +9388,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() == TYPEID_PLAYER)
                 return false;
             break;
-        case 33812:                                         // Gruul the Dragonkiller - Hurtful Strike Primer
-            if (target->GetTypeId() != TYPEID_PLAYER || !m_caster->CanReachWithMeleeAttack(target))
-                return false;
-            break;
         case 36819:                                         // Always should hit main tank, no clue why rigged as AOE
             if (m_caster->GetVictim() && target != m_caster->GetVictim())
                 return false;

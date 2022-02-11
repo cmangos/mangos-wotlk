@@ -292,15 +292,15 @@ struct SiphonLifeWotlk : public AuraScript
 
 void LoadWarlockScripts()
 {
-    RegisterAuraScript<UnstableAffliction>("spell_unstable_affliction");
-    RegisterAuraScript<CurseOfAgony>("spell_curse_of_agony");
+    RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
+    RegisterSpellScript<CurseOfAgony>("spell_curse_of_agony");
     RegisterSpellScript<LifeTap>("spell_life_tap");
-    RegisterAuraScript<DemonicKnowledge>("spell_demonic_knowledge");
-    RegisterAuraScript<SeedOfCorruption>("spell_seed_of_corruption");
+    RegisterSpellScript<DemonicKnowledge>("spell_demonic_knowledge");
+    RegisterSpellScript<SeedOfCorruption>("spell_seed_of_corruption");
     RegisterSpellScript<EyeOfKilrogg>("spell_eye_of_kilrogg");
     RegisterSpellScript<DevourMagic>("spell_devour_magic");
     RegisterSpellScript<SeedOfCorruptionDamage>("spell_seed_of_corruption_damage");
-    RegisterScript<CurseOfDoom>("spell_curse_of_doom");
+    RegisterSpellScript<CurseOfDoom>("spell_curse_of_doom");
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
-    RegisterAuraScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
+    RegisterSpellScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
 }

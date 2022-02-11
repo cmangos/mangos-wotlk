@@ -1355,6 +1355,6 @@ void AddSC_boss_sartharion()
     pNewScript->GetAI = &GetNewAIInstance<npc_fire_cycloneAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_twilight_shift_aura>("spell_twilight_shift_aura");
+    RegisterSpellScript<spell_twilight_shift_aura>("spell_twilight_shift_aura");
     RegisterSpellScript<spell_lava_strike>("spell_lava_strike");
 }

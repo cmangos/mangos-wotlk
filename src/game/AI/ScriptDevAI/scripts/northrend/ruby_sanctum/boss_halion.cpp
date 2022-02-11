@@ -1137,8 +1137,8 @@ void AddSC_boss_halion()
     pNewScript->pGOUse = &GOUse_go_twilight_portal;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_leave_twilight_realm_aura>("spell_leave_twilight_realm_aura");
+    RegisterSpellScript<spell_leave_twilight_realm_aura>("spell_leave_twilight_realm_aura");
     RegisterSpellScript<spell_clear_debuffs>("spell_clear_debuffs");
-    RegisterAuraScript<spell_fiery_combustion_aura>("spell_fiery_combustion_aura");
-    RegisterAuraScript<spell_soul_consumption_aura>("spell_soul_consumption_aura");
+    RegisterSpellScript<spell_fiery_combustion_aura>("spell_fiery_combustion_aura");
+    RegisterSpellScript<spell_soul_consumption_aura>("spell_soul_consumption_aura");
 }

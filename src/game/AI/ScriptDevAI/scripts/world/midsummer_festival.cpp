@@ -418,15 +418,15 @@ void AddSC_midsummer_festival()
     RegisterSpellScript<LightBonfire>("spell_light_bonfire");
     RegisterSpellScript<BonfireArtkit>("spell_bonfire_artkit");
     RegisterSpellScript<TestRibbonPoleChannelTrigger>("spell_test_ribbon_pole_channel_trigger");
-    RegisterAuraScript<TestRibbonPoleChannel>("spell_test_ribbon_pole_channel");
+    RegisterSpellScript<TestRibbonPoleChannel>("spell_test_ribbon_pole_channel");
     RegisterSpellScript<RevelerApplauseCheer>("spell_reveler_applause_cheer");
-    RegisterAuraScript<RibbonPoleDancerCheckAura>("spell_ribbon_pole_dancer_check_aura");
+    RegisterSpellScript<RibbonPoleDancerCheckAura>("spell_ribbon_pole_dancer_check_aura");
     RegisterSpellScript<RibbonPoleDancerCheck>("spell_ribbon_pole_dancer_check");
     RegisterSpellScript<SummonRibbonPoleCritter>("spell_summon_ribbon_pole_critter");
     RegisterSpellScript<TorchToss>("spell_torch_toss");
-    RegisterAuraScript<BraziersHit>("spell_braziers_hit");
+    RegisterSpellScript<BraziersHit>("spell_braziers_hit");
     RegisterSpellScript<TorchTargetPicker>("spell_torch_target_picker");
     RegisterSpellScript<FlignTorch>("spell_fling_torch");
     RegisterSpellScript<JuggleTorchCatchQuest>("spell_juggle_torch_catch_quest");
-    RegisterAuraScript<TorchesCaught>("spell_torches_caught");
+    RegisterSpellScript<TorchesCaught>("spell_torches_caught");
 }

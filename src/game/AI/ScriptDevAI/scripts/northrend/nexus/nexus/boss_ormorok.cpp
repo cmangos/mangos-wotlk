@@ -302,6 +302,6 @@ void AddSC_boss_ormorok()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_crystal_spikes>("spell_crystal_spikes");
-    RegisterAuraScript<spell_crystal_spike_aura>("spell_crystal_spike_aura");
-    RegisterAuraScript<spell_crystal_spike_visual_aura>("spell_crystal_spike_visual_aura");
+    RegisterSpellScript<spell_crystal_spike_aura>("spell_crystal_spike_aura");
+    RegisterSpellScript<spell_crystal_spike_visual_aura>("spell_crystal_spike_visual_aura");
 }

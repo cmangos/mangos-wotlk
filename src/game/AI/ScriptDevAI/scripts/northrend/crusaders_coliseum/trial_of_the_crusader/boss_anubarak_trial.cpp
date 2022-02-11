@@ -786,6 +786,6 @@ void AddSC_boss_anubarak_trial()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_burrower_submerge>("spell_burrower_submerge");
-    RegisterAuraScript<spell_leeching_swarm_aura>("spell_leeching_swarm_aura");
+    RegisterSpellScript<spell_leeching_swarm_aura>("spell_leeching_swarm_aura");
     RegisterSpellScript<spell_pursuing_spikes>("spell_pursuing_spikes");
 }

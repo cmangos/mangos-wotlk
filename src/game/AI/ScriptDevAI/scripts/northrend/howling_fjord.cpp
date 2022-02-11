@@ -974,7 +974,7 @@ void AddSC_howling_fjord()
     pNewScript->pNpcSpellClick = &NpcSpellClick_npc_scalawag_frog;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<FlyingMachineControls>("spell_flying_machine_controls");
+    RegisterSpellScript<FlyingMachineControls>("spell_flying_machine_controls");
     RegisterSpellScript<GrapplingHook>("spell_grappling_hook");
     RegisterSpellScript<GrapplingBeam>("spell_grappling_beam");
 }

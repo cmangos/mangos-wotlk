@@ -196,5 +196,5 @@ void AddSC_boss_keristrasza()
     pNewScript->GetAI = &GetNewAIInstance<boss_keristraszaAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_intense_cold_aura>("spell_intense_cold_aura");
+    RegisterSpellScript<spell_intense_cold_aura>("spell_intense_cold_aura");
 }

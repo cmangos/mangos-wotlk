@@ -122,10 +122,10 @@ struct DeepFreezeImmunityState : public AuraScript
 
 void LoadMageScripts()
 {
-    RegisterAuraScript<ArcaneConcentration>("spell_arcane_concentration");
-    RegisterAuraScript<MageIgnite>("spell_mage_ignite");
-    RegisterAuraScript<FingersOfFrostProc>("spell_fingers_of_frost_proc");
+    RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
+    RegisterSpellScript<MageIgnite>("spell_mage_ignite");
+    RegisterSpellScript<FingersOfFrostProc>("spell_fingers_of_frost_proc");
     RegisterSpellScript<FingersOfFrostIgnore>("spell_fingers_of_frost_ignore");
-    RegisterAuraScript<FingersOfFrostDummy>("spell_fingers_of_frost_dummy");
-    RegisterAuraScript<DeepFreezeImmunityState>("spell_deep_freeze_immunity_state");
+    RegisterSpellScript<FingersOfFrostDummy>("spell_fingers_of_frost_dummy");
+    RegisterSpellScript<DeepFreezeImmunityState>("spell_deep_freeze_immunity_state");
 }

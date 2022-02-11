@@ -711,7 +711,7 @@ void AddSC_halls_of_stone()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_shatter>("spell_shatter");
-    RegisterAuraScript<spell_petrifying_grip_aura>("spell_petrifying_grip_aura");
-    RegisterAuraScript<spell_carve_stone_aura>("spell_carve_stone_aura");
+    RegisterSpellScript<spell_petrifying_grip_aura>("spell_petrifying_grip_aura");
+    RegisterSpellScript<spell_carve_stone_aura>("spell_carve_stone_aura");
     RegisterSpellScript<spell_taunt_brann>("spell_taunt_brann");
 }

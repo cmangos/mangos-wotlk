@@ -2380,9 +2380,9 @@ void AddSC_ebon_hold()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_emblazon_runeblade>("spell_emblazon_runeblade");
-    RegisterAuraScript<spell_emblazon_runeblade_aura>("spell_emblazon_runeblade_aura");
+    RegisterSpellScript<spell_emblazon_runeblade_aura>("spell_emblazon_runeblade_aura");
     RegisterSpellScript<spell_death_knight_initiate_visual>("spell_death_knight_initiate_visual");
-    RegisterAuraScript<spell_siphon_of_acherus_aura>("spell_siphon_of_acherus_aura");
+    RegisterSpellScript<spell_siphon_of_acherus_aura>("spell_siphon_of_acherus_aura");
     RegisterSpellScript<spell_siphon_of_acherus>("spell_siphon_of_acherus");
     RegisterSpellScript<spell_siphon_of_acherus_credit>("spell_siphon_of_acherus_credit");
     RegisterSpellScript<spell_recall_eye_of_acherus>("spell_recall_eye_of_acherus");

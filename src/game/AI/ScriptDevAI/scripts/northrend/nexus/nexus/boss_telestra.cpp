@@ -365,6 +365,6 @@ void AddSC_boss_telestra()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_summon_telestra_clones>("spell_summon_telestra_clones");
-    RegisterAuraScript<spell_telestra_clone_dies_aura>("spell_telestra_clone_dies_aura");
+    RegisterSpellScript<spell_telestra_clone_dies_aura>("spell_telestra_clone_dies_aura");
     RegisterSpellScript<spell_gravity_well_effect>("spell_gravity_well_effect");
 }

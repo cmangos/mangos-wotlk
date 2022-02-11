@@ -295,5 +295,5 @@ void AddSC_boss_moroes()
     pNewScript->GetAI = &GetNewAIInstance<boss_moroesAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<MoroesVanish>("spell_moroes_vanish");
+    RegisterSpellScript<MoroesVanish>("spell_moroes_vanish");
 }

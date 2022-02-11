@@ -1903,5 +1903,5 @@ void AddSC_instance_mount_hyjal()
     pNewScript->GetInstanceData = &GetNewInstanceScript<instance_mount_hyjal>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<EternalSilence>("spell_eternal_silence");
+    RegisterSpellScript<EternalSilence>("spell_eternal_silence");
 }

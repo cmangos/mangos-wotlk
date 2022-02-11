@@ -359,9 +359,9 @@ void AddSC_boss_ichoron()
     pNewScript->GetAI = &GetNewAIInstance<boss_ichoronAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_protective_bubble_aura>("spell_protective_bubble_aura");
-    RegisterAuraScript<spell_splatter_aura>("spell_splatter_aura");
-    RegisterAuraScript<spell_drained_aura>("spell_drained_aura");
+    RegisterSpellScript<spell_protective_bubble_aura>("spell_protective_bubble_aura");
+    RegisterSpellScript<spell_splatter_aura>("spell_splatter_aura");
+    RegisterSpellScript<spell_drained_aura>("spell_drained_aura");
     RegisterSpellScript<spell_water_globule_missile>("spell_water_globule_missile");
     RegisterSpellScript<spell_water_globule_merge>("spell_water_globule_merge");
 }

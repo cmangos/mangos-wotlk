@@ -430,5 +430,5 @@ void AddSC_boss_twinemperors()
     pNewScript->GetAI = &GetNewAIInstance<boss_veklorAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<MutateBug>("spell_mutate_bug");
+    RegisterSpellScript<MutateBug>("spell_mutate_bug");
 }

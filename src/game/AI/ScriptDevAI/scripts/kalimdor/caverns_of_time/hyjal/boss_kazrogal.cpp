@@ -169,5 +169,5 @@ void AddSC_boss_kazrogal()
     pNewScript->GetAI = &GetNewAIInstance<boss_kazrogalAI>;
     pNewScript->RegisterSelf();
 
-    RegisterScript<MarkOfKazrogal>("spell_mark_of_kazrogal");
+    RegisterSpellScript<MarkOfKazrogal>("spell_mark_of_kazrogal");
 }

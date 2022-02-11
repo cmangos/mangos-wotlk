@@ -3464,6 +3464,6 @@ void AddSC_blades_edge_mountains()
 
     RegisterSpellScript<ExorcismFeather>("spell_exorcism_feather");
     RegisterSpellScript<KoiKoiDeath>("spell_koi_koi_death");
-    RegisterAuraScript<Soaring>("spell_soaring");
-    RegisterAuraScript<CoaxMarmot>("spell_coax_marmot");
+    RegisterSpellScript<Soaring>("spell_soaring");
+    RegisterSpellScript<CoaxMarmot>("spell_coax_marmot");
 }

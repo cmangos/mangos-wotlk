@@ -106,6 +106,6 @@ struct VanishRogue : public SpellScript
 void LoadRogueScripts()
 {
     RegisterSpellScript<spell_preparation>("spell_preparation");
-    RegisterAuraScript<Stealth>("spell_stealth");
+    RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
 }

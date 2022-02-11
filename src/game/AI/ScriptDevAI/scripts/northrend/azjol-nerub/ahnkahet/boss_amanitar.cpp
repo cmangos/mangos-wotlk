@@ -239,5 +239,5 @@ void AddSC_boss_amanitar()
     pNewScript->GetAI = &GetAI_npc_amanitar_mushroom;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_remove_mushroom_power>("spell_remove_mushroom_power");
+    RegisterSpellScript<spell_remove_mushroom_power>("spell_remove_mushroom_power");
 }

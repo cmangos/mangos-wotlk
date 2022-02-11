@@ -281,8 +281,8 @@ void AddSC_sunwell_plateau()
     pNewScript->GetAI = &GetNewAIInstance<npc_sunblade_protectorAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<ActivateSunbladeProtectorChannel>("spell_activate_sunblade_protector");
+    RegisterSpellScript<ActivateSunbladeProtectorChannel>("spell_activate_sunblade_protector");
     RegisterSpellScript<SunwellTeleport>("spell_sunwell_teleport");
-    RegisterAuraScript<SpellFury>("spell_spell_fury");
-    RegisterAuraScript<EarthquakeGuardian>("spell_earthquake_guardian");
+    RegisterSpellScript<SpellFury>("spell_spell_fury");
+    RegisterSpellScript<EarthquakeGuardian>("spell_earthquake_guardian");
 }

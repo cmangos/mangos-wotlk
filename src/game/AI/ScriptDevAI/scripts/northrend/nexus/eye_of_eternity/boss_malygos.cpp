@@ -1006,6 +1006,6 @@ void AddSC_boss_malygos()
     RegisterSpellScript<spell_arcane_bomb>("spell_arcane_bomb");
     RegisterSpellScript<spell_arcane_storm>("spell_arcane_storm");
     RegisterSpellScript<spell_vortex>("spell_vortex");
-    RegisterAuraScript<spell_vortex_aura>("spell_vortex_aura");
+    RegisterSpellScript<spell_vortex_aura>("spell_vortex_aura");
     RegisterSpellScript<spell_align_disk_aggro>("spell_align_disk_aggro");
 }

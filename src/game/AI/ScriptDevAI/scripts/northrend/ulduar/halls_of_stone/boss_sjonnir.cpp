@@ -335,9 +335,9 @@ void AddSC_boss_sjonnir()
     pNewScript->GetAI = &GetNewAIInstance<boss_sjonnirAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_summon_iron_dwarf_aura>("spell_summon_iron_dwarf_aura");
-    RegisterAuraScript<spell_summon_iron_trogg_aura>("spell_summon_iron_trogg_aura");
-    RegisterAuraScript<spell_summon_malformed_ooze_aura>("spell_summon_malformed_ooze_aura");
-    RegisterAuraScript<spell_summon_earthen_dwarf_aura>("spell_summon_earthen_dwarf_aura");
+    RegisterSpellScript<spell_summon_iron_dwarf_aura>("spell_summon_iron_dwarf_aura");
+    RegisterSpellScript<spell_summon_iron_trogg_aura>("spell_summon_iron_trogg_aura");
+    RegisterSpellScript<spell_summon_malformed_ooze_aura>("spell_summon_malformed_ooze_aura");
+    RegisterSpellScript<spell_summon_earthen_dwarf_aura>("spell_summon_earthen_dwarf_aura");
     RegisterSpellScript<spell_ooze_combine>("spell_ooze_combine");
 }

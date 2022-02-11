@@ -304,6 +304,6 @@ void AddSC_boss_bronjahm()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_consume_soul>("spell_consume_soul");
-    RegisterAuraScript<spell_corrupt_soul_aura>("spell_corrupt_soul_aura");
-    RegisterAuraScript<spell_soulstorm_visual_aura>("spell_soulstorm_visual_aura");
+    RegisterSpellScript<spell_corrupt_soul_aura>("spell_corrupt_soul_aura");
+    RegisterSpellScript<spell_soulstorm_visual_aura>("spell_soulstorm_visual_aura");
 }

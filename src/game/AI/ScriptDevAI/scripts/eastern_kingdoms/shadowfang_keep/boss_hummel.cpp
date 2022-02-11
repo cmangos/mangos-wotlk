@@ -443,6 +443,6 @@ void AddSC_boss_hummel()
     RegisterSpellScript<spell_valentine_boss_validate_area>("spell_valentine_boss_validate_area");
     RegisterSpellScript<spell_valentine_trigger_vial_a>("spell_valentine_trigger_vial_a");
     RegisterSpellScript<spell_valentine_trigger_vial_b>("spell_valentine_trigger_vial_b");
-    RegisterAuraScript<spell_alluring_perfume_spill_aura>("spell_alluring_perfume_spill_aura");
-    RegisterAuraScript<spell_irresistible_cologne_spill_aura>("spell_irresistible_cologne_spill_aura");
+    RegisterSpellScript<spell_alluring_perfume_spill_aura>("spell_alluring_perfume_spill_aura");
+    RegisterSpellScript<spell_irresistible_cologne_spill_aura>("spell_irresistible_cologne_spill_aura");
 }

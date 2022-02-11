@@ -735,8 +735,8 @@ void AddSC_boss_kalecgos()
     RegisterSpellScript<SpectralBlast>("spell_spectral_blast");
     RegisterSpellScript<SpectralRealm>("spell_spectral_realm");
     RegisterSpellScript<SpectralRealmNotify>("spell_spectral_realm_notify");
-    RegisterAuraScript<SpectralRealmAura>("spell_spectral_realm_aura");
-    RegisterScript<CurseOfBoundlessAgony>("spell_curse_of_boundless_agony");
-    RegisterScript<CurseOfBoundlessAgonyRemoval>("spell_curse_of_boundless_agony_removal");
+    RegisterSpellScript<SpectralRealmAura>("spell_spectral_realm_aura");
+    RegisterSpellScript<CurseOfBoundlessAgony>("spell_curse_of_boundless_agony");
+    RegisterSpellScript<CurseOfBoundlessAgonyRemoval>("spell_curse_of_boundless_agony_removal");
     RegisterSpellScript<CrazedRage>("spell_crazed_rage");
 }

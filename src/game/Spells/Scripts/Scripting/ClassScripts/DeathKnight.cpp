@@ -387,17 +387,17 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
     RegisterSpellScript<RaiseDead>("spell_dk_raise_dead");
     RegisterSpellScript<DeathCoilDK>("spell_dk_death_coil");
-    RegisterAuraScript<UnholyBlightDK>("spell_dk_unholy_blight");
-    RegisterAuraScript<DeathRuneDK>("spell_death_rune_dk");
+    RegisterSpellScript<UnholyBlightDK>("spell_dk_unholy_blight");
+    RegisterSpellScript<DeathRuneDK>("spell_death_rune_dk");
     RegisterSpellScript<Bloodworm>("spell_bloodworm");
-    RegisterAuraScript<HealthLeechPassive>("spell_health_leech_passive");
+    RegisterSpellScript<HealthLeechPassive>("spell_health_leech_passive");
     RegisterSpellScript<AntiMagicZone>("spell_anti_magic_zone");
     RegisterSpellScript<CorpseExplosionDK>("spell_dk_corpse_explosion");
     RegisterSpellScript<ExplodeGhoulCorpseExplosion>("spell_explode_ghoul_corpse_explosion");
-    RegisterAuraScript<DeathKnightDisease>("spell_death_knight_disease");
-    RegisterAuraScript<CryptFeverServerside>("spell_crypt_fever_serverside");
-    RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
+    RegisterSpellScript<DeathKnightDisease>("spell_death_knight_disease");
+    RegisterSpellScript<CryptFeverServerside>("spell_crypt_fever_serverside");
+    RegisterSpellScript<ArmyOfTheDead>("spell_army_of_the_dead");
     RegisterSpellScript<ArmyOfTheDeadGhoul>("spell_army_of_the_dead_ghoul");
-    RegisterAuraScript<SuddenDoom>("spell_sudden_doom");
-    RegisterAuraScript<WillOfTheNecropolis>("spell_will_of_the_necropolis");
+    RegisterSpellScript<SuddenDoom>("spell_sudden_doom");
+    RegisterSpellScript<WillOfTheNecropolis>("spell_will_of_the_necropolis");
 }

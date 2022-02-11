@@ -325,8 +325,8 @@ void AddSC_pit_of_saron()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_necromantic_power>("spell_necromantic_power");
-    RegisterAuraScript<spell_strangulating_aura>("spell_strangulating_aura");
-    RegisterAuraScript<spell_feigh_death_pos_aura>("spell_feigh_death_pos_aura");
+    RegisterSpellScript<spell_strangulating_aura>("spell_strangulating_aura");
+    RegisterSpellScript<spell_feigh_death_pos_aura>("spell_feigh_death_pos_aura");
     RegisterSpellScript<spell_slave_trigger_closest>("spell_slave_trigger_closest");
     RegisterSpellScript<spell_summon_undead>("spell_summon_undead");
     RegisterSpellScript<spell_jainas_call>("spell_jainas_call");

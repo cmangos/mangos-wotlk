@@ -382,14 +382,14 @@ void AddSC_item_scripts()
     pNewScript->pItemUse = &ItemUse_item_petrov_cluster_bombs;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<AshbringerItemAura>("spell_ashbringer_item");
-    RegisterAuraScript<X52RocketHelmetAura>("spell_to_infinity_and_above");
-    RegisterAuraScript<PowerCircleAura>("spell_power_circle");
+    RegisterSpellScript<AshbringerItemAura>("spell_ashbringer_item");
+    RegisterSpellScript<X52RocketHelmetAura>("spell_to_infinity_and_above");
+    RegisterSpellScript<PowerCircleAura>("spell_power_circle");
 
     RegisterSpellScript<GDRChannel>("spell_gdr_channel");
-    RegisterAuraScript<GDRPeriodicDamage>("spell_gdr_periodic");
-    RegisterAuraScript<OgrilaFlasks>("spell_ogrila_flasks");
-    RegisterAuraScript<ReducedProcChancePast60>("spell_reduced_proc_chance_past60");
+    RegisterSpellScript<GDRPeriodicDamage>("spell_gdr_periodic");
+    RegisterSpellScript<OgrilaFlasks>("spell_ogrila_flasks");
+    RegisterSpellScript<ReducedProcChancePast60>("spell_reduced_proc_chance_past60");
     RegisterSpellScript<BanishExile>("spell_banish_exile");
-    RegisterAuraScript<OrbOfDeception>("spell_orb_of_deception");
+    RegisterSpellScript<OrbOfDeception>("spell_orb_of_deception");
 }

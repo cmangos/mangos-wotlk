@@ -5497,7 +5497,7 @@ void AddSC_shadowmoon_valley()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<DragonmawKnockdownTheAggroCheck>("spell_dragonmaw_knockdown_the_aggro_check");
-    RegisterScript<TagGreaterFelfireDiemetradon>("spell_tag_for_single_use");
-    RegisterAuraScript<DragonmawIllusionBase>("spell_dragonmaw_illusion_base");
-    RegisterAuraScript<DragonmawIllusionTransform>("spell_dragonmaw_illusion_transform");
+    RegisterSpellScript<TagGreaterFelfireDiemetradon>("spell_tag_for_single_use");
+    RegisterSpellScript<DragonmawIllusionBase>("spell_dragonmaw_illusion_base");
+    RegisterSpellScript<DragonmawIllusionTransform>("spell_dragonmaw_illusion_transform");
 }

@@ -113,6 +113,6 @@ struct spell_parachute_aura : public AuraScript
 void AddSC_oculus()
 {
     RegisterSpellScript<spell_call_oculus_drake>("spell_call_oculus_drake");
-    RegisterAuraScript<spell_ride_oculus_drake_saddle>("spell_ride_oculus_drake_saddle");
-    RegisterAuraScript<spell_parachute_aura>("spell_parachute_aura");
+    RegisterSpellScript<spell_ride_oculus_drake_saddle>("spell_ride_oculus_drake_saddle");
+    RegisterSpellScript<spell_parachute_aura>("spell_parachute_aura");
 }

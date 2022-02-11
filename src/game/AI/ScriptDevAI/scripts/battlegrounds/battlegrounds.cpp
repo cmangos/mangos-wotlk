@@ -362,13 +362,13 @@ void AddSC_battleground()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");
-    RegisterAuraScript<ArenaPreparation>("spell_arena_preparation");
-    RegisterScript<InactiveBattleground>("spell_inactive");
+    RegisterSpellScript<ArenaPreparation>("spell_arena_preparation");
+    RegisterSpellScript<InactiveBattleground>("spell_inactive");
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
     RegisterSpellScript<spell_outdoor_pvp_banner_trigger>("spell_outdoor_pvp_banner_trigger");
     RegisterSpellScript<spell_split_teleport_boat>("spell_split_teleport_boat");
     RegisterSpellScript<spell_gunship_portal_click>("spell_gunship_portal_click");
-    RegisterAuraScript<spell_repair_cannon_aura>("spell_repair_cannon_aura");
+    RegisterSpellScript<spell_repair_cannon_aura>("spell_repair_cannon_aura");
     RegisterSpellScript<spell_repair_cannon>("spell_repair_cannon");
     RegisterSpellScript<spell_end_of_round>("spell_end_of_round");
     RegisterSpellScript<spell_teleport_sota>("spell_teleport_sota");

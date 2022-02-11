@@ -341,8 +341,8 @@ void AddSC_black_temple()
     pNewScript->GetAI = &GetNewAIInstance<npc_bonechewer_combatant>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<SpellAbsorption>("spell_spell_absorption");
-    RegisterAuraScript<HarpoonersMark>("spell_harpooners_mark");
+    RegisterSpellScript<SpellAbsorption>("spell_spell_absorption");
+    RegisterSpellScript<HarpoonersMark>("spell_harpooners_mark");
     RegisterSpellScript<AssistBT>("spell_assist_bt");
     RegisterSpellScript<FixateBT>("spell_fixate_bt");
     RegisterSpellScript<StormBlink>("spell_storm_blink");

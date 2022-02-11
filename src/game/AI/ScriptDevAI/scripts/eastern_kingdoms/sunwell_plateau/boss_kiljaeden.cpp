@@ -1428,18 +1428,18 @@ void AddSC_boss_kiljaeden()
     pNewScript->GetAI = &GetNewAIInstance<npc_core_of_entropiusAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<DarknessOfSouls>("spell_darkness_of_souls");
+    RegisterSpellScript<DarknessOfSouls>("spell_darkness_of_souls");
     RegisterSpellScript<SinisterReflection>("spell_sinister_reflection");
-    RegisterScript<SinisterReflectionClone>("spell_sinister_reflection_clone");
+    RegisterSpellScript<SinisterReflectionClone>("spell_sinister_reflection_clone");
     RegisterSpellScript<CopyOffhandWeapon>("spell_copy_off_hand_weapon");
-    RegisterAuraScript<Armageddon>("spell_armageddon");
-    RegisterAuraScript<OpenPortalFromShattrath>("spell_open_portal_from_shattrath");
-    RegisterAuraScript<ShadowSpike>("spell_shadow_spike");
+    RegisterSpellScript<Armageddon>("spell_armageddon");
+    RegisterSpellScript<OpenPortalFromShattrath>("spell_open_portal_from_shattrath");
+    RegisterSpellScript<ShadowSpike>("spell_shadow_spike");
     RegisterSpellScript<ArmageddonAnimation>("spell_armageddon_animation");
     RegisterSpellScript<PowerOfTheBlueFlight>("spell_power_of_the_blue_flight");
-    RegisterAuraScript<VengeanceOfTheBlueFlight>("spell_vengeance_of_the_blue_flight");
+    RegisterSpellScript<VengeanceOfTheBlueFlight>("spell_vengeance_of_the_blue_flight");
     RegisterSpellScript<BreathHaste>("spell_breath_haste");
-    RegisterScript<ShieldOfTheBlue>("spell_shield_of_the_blue");
+    RegisterSpellScript<ShieldOfTheBlue>("spell_shield_of_the_blue");
     RegisterSpellScript<FlameDart>("spell_flame_dart");
     RegisterSpellScript<FlameDartMain>("spell_flame_dart_main");
 }

@@ -597,5 +597,5 @@ void AddSC_karazhan()
 
     RegisterSpellScript<BlinkArcaneAnomaly>("spell_blink_arcane_anomaly");
     RegisterSpellScript<WrathOfTheTitansStacker>("spell_wrath_of_the_titans_stacker");
-    RegisterAuraScript<WrathOfTheTitansProcAura>("spell_wrath_of_the_titans_proc_aura");
+    RegisterSpellScript<WrathOfTheTitansProcAura>("spell_wrath_of_the_titans_proc_aura");
 }

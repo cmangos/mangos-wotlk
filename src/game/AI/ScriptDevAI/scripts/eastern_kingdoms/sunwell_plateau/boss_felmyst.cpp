@@ -668,7 +668,7 @@ void AddSC_boss_felmyst()
 
     RegisterSpellScript<SoulSever>("spell_soul_sever");
     RegisterSpellScript<FogOfCorruption>("spell_fog_of_corruption");
-    RegisterAuraScript<FogOfCorruptionCharm>("spell_fog_of_corruption_charm");
-    RegisterScript<TriggerStrafe>("spell_trigger_strafe");
-    RegisterAuraScript<Encapsulate>("spell_encapsulate");
+    RegisterSpellScript<FogOfCorruptionCharm>("spell_fog_of_corruption_charm");
+    RegisterSpellScript<TriggerStrafe>("spell_trigger_strafe");
+    RegisterSpellScript<Encapsulate>("spell_encapsulate");
 }

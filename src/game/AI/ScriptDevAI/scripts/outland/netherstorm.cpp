@@ -4162,8 +4162,8 @@ void AddSC_netherstorm()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<Soulbind>("spell_soulbind");
-    RegisterAuraScript<RingOfFlame>("spell_ring_of_flame");
+    RegisterSpellScript<RingOfFlame>("spell_ring_of_flame");
     RegisterSpellScript<UltraDeconsolodationZapper>("spell_ultra_deconsolodation_zapper");
     RegisterSpellScript<ThrowBoomsDoom>("spell_throw_booms_doom");
-    RegisterScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
+    RegisterSpellScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
 }

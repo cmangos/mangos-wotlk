@@ -1097,13 +1097,13 @@ void AddSC_shade_of_the_horseman()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<HorsemanCreateWaterBucket>("spell_horseman_create_water_bucket");
-    RegisterAuraScript<HorsemanManiacalLaugh>("spell_horseman_maniacal_laugh");
-    RegisterAuraScript<HorsemanManiacalLaughDelayed>("spell_horseman_maniacal_laugh_delayed");
-    RegisterAuraScript<HorsemanStartFirePeriodic>("spell_horseman_start_fire_periodic");
+    RegisterSpellScript<HorsemanManiacalLaugh>("spell_horseman_maniacal_laugh");
+    RegisterSpellScript<HorsemanManiacalLaughDelayed>("spell_horseman_maniacal_laugh_delayed");
+    RegisterSpellScript<HorsemanStartFirePeriodic>("spell_horseman_start_fire_periodic");
     RegisterSpellScript<HorsemanStartFireTargetTest>("spell_horseman_start_fire_target_test");
     RegisterSpellScript<HorsemanStartFire>("spell_horseman_start_fire");
-    RegisterAuraScript<HorsemanFire>("spell_horseman_fire");
-    RegisterAuraScript<HorsemanConflagratePeriodic>("spell_horseman_conflagrate_periodic");
+    RegisterSpellScript<HorsemanFire>("spell_horseman_fire");
+    RegisterSpellScript<HorsemanConflagratePeriodic>("spell_horseman_conflagrate_periodic");
     RegisterSpellScript<HorsemanConflagrateTargetTest>("spell_horseman_conflagrate_target_test");
     RegisterSpellScript<BucketLands>("spell_bucket_lands");
     RegisterSpellScript<FireExtinguish>("spell_fire_extinguish");

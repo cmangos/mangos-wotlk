@@ -746,7 +746,7 @@ void AddSC_boss_illidari_council()
     pNewScript->GetAI = &GetNewAIInstance<boss_high_nethermancer_zerevorAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<VerasVanish>("spell_veras_vanish");
-    RegisterAuraScript<VerasDeadlyPoison>("spell_veras_deadly_poison");
-    RegisterAuraScript<VerasDeadlyPoisonTick>("spell_veras_deadly_poison_tick");
+    RegisterSpellScript<VerasVanish>("spell_veras_vanish");
+    RegisterSpellScript<VerasDeadlyPoison>("spell_veras_deadly_poison");
+    RegisterSpellScript<VerasDeadlyPoisonTick>("spell_veras_deadly_poison_tick");
 }

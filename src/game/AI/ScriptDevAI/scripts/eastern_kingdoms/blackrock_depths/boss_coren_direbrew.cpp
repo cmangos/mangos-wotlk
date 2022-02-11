@@ -275,7 +275,7 @@ void AddSC_boss_coren_direbrew()
 
     RegisterSpellScript<RequestSecondMug>("spell_request_second_mug");
     RegisterSpellScript<DirebrewDisarm>("spell_direbrew_disarm");
-    RegisterAuraScript<DirebrewDisarmPrecast>("spell_direbrew_disarm_precast");
+    RegisterSpellScript<DirebrewDisarmPrecast>("spell_direbrew_disarm_precast");
     RegisterSpellScript<SummonMoleMachineTargetPicker>("spell_summon_mole_machine_target_picker");
     RegisterSpellScript<SummonDirebrewMinion>("spell_summon_direbrew_minion");
 }

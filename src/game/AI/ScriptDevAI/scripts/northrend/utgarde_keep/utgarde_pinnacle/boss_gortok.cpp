@@ -107,6 +107,6 @@ void AddSC_boss_gortok()
     pNewScript->pProcessEventId = &ProcessEventId_event_spell_gortok_event;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_awaken_subboss_aura>("spell_awaken_subboss_aura");
+    RegisterSpellScript<spell_awaken_subboss_aura>("spell_awaken_subboss_aura");
     RegisterSpellScript<spell_awaken_gortok>("spell_awaken_gortok");
 }

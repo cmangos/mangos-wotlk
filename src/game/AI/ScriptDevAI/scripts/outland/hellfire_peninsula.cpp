@@ -2497,8 +2497,8 @@ void AddSC_hellfire_peninsula()
     RegisterSpellScript<CursedScarabPeriodicTrigger>("spell_cursed_scarab_periodic");
     RegisterSpellScript<CursedScarabDespawnPeriodicTrigger>("spell_cursed_scarab_despawn_periodic");
     RegisterSpellScript<ExposeRazorthornRoot>("spell_razorthorn_root");
-    RegisterAuraScript<CharmRavager>("spell_charm_ravager");
+    RegisterSpellScript<CharmRavager>("spell_charm_ravager");
     RegisterSpellScript<LivingFlareDetonator>("spell_living_flare_detonator");
-    RegisterAuraScript<LivingFlareMaster>("spell_living_flare_master");
-    RegisterAuraScript<LivingFlareUnstable>("spell_living_flare_unstable");
+    RegisterSpellScript<LivingFlareMaster>("spell_living_flare_master");
+    RegisterSpellScript<LivingFlareUnstable>("spell_living_flare_unstable");
 }

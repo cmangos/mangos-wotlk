@@ -704,7 +704,7 @@ void AddSC_boss_eredar_twins()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<BlazeTwins>("spell_blaze_twins");
-    RegisterAuraScript<DarkFlameShadowAura>("spell_dark_flame_shadow_aura");
-    RegisterAuraScript<DarkFlameFireAura>("spell_dark_flame_fire_aura");
+    RegisterSpellScript<DarkFlameShadowAura>("spell_dark_flame_shadow_aura");
+    RegisterSpellScript<DarkFlameFireAura>("spell_dark_flame_fire_aura");
     RegisterSpellScript<FlameSear>("spell_flame_sear");
 }

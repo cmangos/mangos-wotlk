@@ -519,6 +519,6 @@ void AddSC_icecrown_citadel()
     pNewScript->GetGameObjectAI = &GetNewAIInstance<LadyDeathwhisperElevator>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<RocketPack>("spell_rocket_pack");
-    RegisterAuraScript<RocketPackPeriodic>("spell_rocket_pack_periodic");
+    RegisterSpellScript<RocketPack>("spell_rocket_pack");
+    RegisterSpellScript<RocketPackPeriodic>("spell_rocket_pack_periodic");
 }

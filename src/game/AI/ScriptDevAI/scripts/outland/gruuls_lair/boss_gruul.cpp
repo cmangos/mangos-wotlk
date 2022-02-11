@@ -193,6 +193,36 @@ struct GronnLordsGrasp : public AuraScript
     }
 };
 
+struct HurtfulStrikePrimer : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->GetTypeId() != TYPEID_PLAYER || !spell->GetCaster()->CanReachWithMeleeAttack(target))
+            return false;
+        return true;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        auto& targetInfo = spell->GetTargetList();
+        if (!target || targetInfo.rbegin()->targetGUID != target->GetObjectGuid())
+            return;
+
+        for (auto& targetInfo : targetInfo)
+        {
+            if (caster->GetMap()->GetPlayer(targetInfo.targetGUID) == caster->GetVictim())
+                continue;
+
+            if (caster->getThreatManager().getThreat(caster->GetMap()->GetPlayer(targetInfo.targetGUID)) > caster->getThreatManager().getThreat(target) || target == caster->GetVictim())
+                target = caster->GetMap()->GetPlayer(targetInfo.targetGUID);
+        }
+
+        caster->CastSpell(target, 33813, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_NORMAL_COMBAT_CAST);
+    }
+};
+
 void AddSC_boss_gruul()
 {
     Script* pNewScript = new Script;
@@ -200,5 +230,6 @@ void AddSC_boss_gruul()
     pNewScript->GetAI = &GetNewAIInstance<boss_gruulAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<GronnLordsGrasp>("spell_gronn_lords_grasp");
+    RegisterSpellScript<GronnLordsGrasp>("spell_gronn_lords_grasp");
+    RegisterSpellScript<HurtfulStrikePrimer>("spell_hurtful_strike_primer");
 }

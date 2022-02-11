@@ -1964,9 +1964,9 @@ void AddSC_boss_kaelthas()
     pNewScript->GetAI = &GetNewAIInstance<npc_nether_vaporAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<NetherVaporLightning>("spell_nether_vapor_lightning");
+    RegisterSpellScript<NetherVaporLightning>("spell_nether_vapor_lightning");
     RegisterSpellScript<NetherVaporSummon>("spell_nether_vapor_summon");
     RegisterSpellScript<NetherVaporSummonParent>("spell_nether_vapor_summon_parent");
     RegisterSpellScript<RemoveWeapons>("spell_remove_weapons");
-    RegisterAuraScript<spell_gravity_lapse_knockup>("spell_gravity_lapse_knockup");
+    RegisterSpellScript<spell_gravity_lapse_knockup>("spell_gravity_lapse_knockup");
 }

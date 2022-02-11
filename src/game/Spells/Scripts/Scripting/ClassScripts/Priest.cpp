@@ -174,7 +174,7 @@ void LoadPriestScripts()
     RegisterSpellScript<ShadowWordDeath>("spell_shadow_word_death");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
     RegisterSpellScript<PrayerOfMending>("spell_prayer_of_mending");
-    RegisterAuraScript<PainSuppression>("spell_pain_suppression");
+    RegisterSpellScript<PainSuppression>("spell_pain_suppression");
     RegisterSpellScript<Shadowfiend>("spell_shadowfiend");
     RegisterSpellScript<DivineHymn>("spell_divine_hymn");
     RegisterSpellScript<HymnOfHope>("spell_hymn_of_hope");

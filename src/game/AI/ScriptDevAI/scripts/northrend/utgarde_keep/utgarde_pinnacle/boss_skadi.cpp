@@ -581,7 +581,7 @@ void AddSC_boss_skadi()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_launch_harpoon>("spell_launch_harpoon");
-    RegisterAuraScript<spell_summon_gauntlet_mobs_periodic_aura>("spell_summon_gauntlet_mobs_periodic_aura");
-    RegisterAuraScript<spell_freezing_cloud_aura>("spell_freezing_cloud_aura");
+    RegisterSpellScript<spell_summon_gauntlet_mobs_periodic_aura>("spell_summon_gauntlet_mobs_periodic_aura");
+    RegisterSpellScript<spell_freezing_cloud_aura>("spell_freezing_cloud_aura");
     RegisterSpellScript<spell_poisoned_spear>("spell_poisoned_spear");
 }

@@ -404,5 +404,5 @@ void AddSC_boss_devourer_of_souls()
     RegisterSpellScript<spell_wailing_souls>("spell_wailing_souls");
     RegisterSpellScript<spell_mirrored_soul>("spell_mirrored_soul");
     RegisterSpellScript<spell_mirrored_soul_proc>("spell_mirrored_soul_proc");
-    RegisterAuraScript<spell_wailing_souls_aura>("spell_wailing_souls_aura");
+    RegisterSpellScript<spell_wailing_souls_aura>("spell_wailing_souls_aura");
 }

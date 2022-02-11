@@ -55,6 +55,6 @@ struct DiscerningEyeOfTheBeast : public AuraScript
 
 void AddSC_item_scripts_wotlk()
 {
-	RegisterAuraScript<SwiftHandOfJustice>("spell_swift_hand_of_justice");
-	RegisterAuraScript<DiscerningEyeOfTheBeast>("spell_discerning_eye_of_the_beast");
+	RegisterSpellScript<SwiftHandOfJustice>("spell_swift_hand_of_justice");
+	RegisterSpellScript<DiscerningEyeOfTheBeast>("spell_discerning_eye_of_the_beast");
 }

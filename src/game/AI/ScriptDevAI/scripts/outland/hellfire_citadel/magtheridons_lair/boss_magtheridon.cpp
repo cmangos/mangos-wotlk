@@ -574,9 +574,9 @@ void AddSC_boss_magtheridon()
     pNewScript->GetAI = &GetNewAIInstance<mob_abyssalAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<ShadowGraspCube>("spell_shadow_grasp_cube");
-    RegisterAuraScript<ShadowGraspMagth>("spell_shadow_grasp_magtheridon");
+    RegisterSpellScript<ShadowGraspCube>("spell_shadow_grasp_cube");
+    RegisterSpellScript<ShadowGraspMagth>("spell_shadow_grasp_magtheridon");
     RegisterSpellScript<QuakeMagth>("spell_quake_magtheridon");
     RegisterSpellScript<QuakeMagthKnockback>("spell_quake_magtheridon_knockback");
-    RegisterAuraScript<DebrisMagtheridon>("spell_magtheridon_debris");
+    RegisterSpellScript<DebrisMagtheridon>("spell_magtheridon_debris");
 }

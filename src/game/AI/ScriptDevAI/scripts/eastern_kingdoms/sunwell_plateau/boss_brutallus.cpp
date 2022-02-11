@@ -582,9 +582,9 @@ void AddSC_boss_brutallus()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SpellBurnBrutallus>("spell_burn_brutallus");
-    RegisterAuraScript<SpellBurnDamageBrutallus>("spell_burn_damage_brutallus");
+    RegisterSpellScript<SpellBurnDamageBrutallus>("spell_burn_damage_brutallus");
     RegisterSpellScript<StompBrutallus>("spell_stomp_brutallus");
-    RegisterAuraScript<DeathCloudBrutallus>("spell_death_cloud_brutallus");
+    RegisterSpellScript<DeathCloudBrutallus>("spell_death_cloud_brutallus");
     RegisterSpellScript<FreezeMadrigosa>("spell_freeze_madrigosa");
-    RegisterAuraScript<spell_break_ice>("spell_break_ice");
+    RegisterSpellScript<spell_break_ice>("spell_break_ice");
 }

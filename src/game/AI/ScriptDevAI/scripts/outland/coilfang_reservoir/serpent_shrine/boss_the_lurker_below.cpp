@@ -366,5 +366,5 @@ void AddSC_boss_the_lurker_below()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<Spout>("spell_lurker_spout_initial");
-    RegisterAuraScript<SpoutTurning>("spell_lurker_spout_turning");
+    RegisterSpellScript<SpoutTurning>("spell_lurker_spout_turning");
 }

@@ -2336,5 +2336,5 @@ void AddSC_zulaman()
     pNewScript->GetAI = &GetNewAIInstance<npc_eagle_trash_aggro_triggerAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<CallOfTheBeast>("spell_call_of_the_beast");
+    RegisterSpellScript<CallOfTheBeast>("spell_call_of_the_beast");
 }

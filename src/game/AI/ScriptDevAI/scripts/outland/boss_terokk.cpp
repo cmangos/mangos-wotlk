@@ -323,5 +323,5 @@ void AddSC_boss_terokk()
     pNewScript->GetAI = &GetNewAIInstance<boss_terokkAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<TerokkAncientFlames>("spell_terokk_ancient_flames");
+    RegisterSpellScript<TerokkAncientFlames>("spell_terokk_ancient_flames");
 }

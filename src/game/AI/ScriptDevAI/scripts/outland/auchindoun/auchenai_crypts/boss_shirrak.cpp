@@ -169,6 +169,6 @@ void AddSC_boss_shirrak()
     pNewScript->GetAI = &GetNewAIInstance<boss_shirrakAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<InhibitMagic>("spell_shirrak_inhibit_magic");
-    RegisterAuraScript<FocusTargetVisual>("spell_focus_target_visual");
+    RegisterSpellScript<InhibitMagic>("spell_shirrak_inhibit_magic");
+    RegisterSpellScript<FocusTargetVisual>("spell_focus_target_visual");
 }

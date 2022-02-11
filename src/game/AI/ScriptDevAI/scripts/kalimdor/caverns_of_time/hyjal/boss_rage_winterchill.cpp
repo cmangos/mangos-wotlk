@@ -173,5 +173,5 @@ void AddSC_boss_rage_winterchill()
     pNewScript->GetAI = &GetNewAIInstance<boss_rage_winterchillAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<DeathAndDecay>("spell_winterchill_death_and_decay");
+    RegisterSpellScript<DeathAndDecay>("spell_winterchill_death_and_decay");
 }

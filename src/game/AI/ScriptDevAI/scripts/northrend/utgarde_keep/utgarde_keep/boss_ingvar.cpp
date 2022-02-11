@@ -508,5 +508,5 @@ void AddSC_boss_ingvar()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_summon_banshee>("spell_summon_banshee");
-    RegisterAuraScript<spell_ingvar_transform_aura>("spell_ingvar_transform_aura");
+    RegisterSpellScript<spell_ingvar_transform_aura>("spell_ingvar_transform_aura");
 }

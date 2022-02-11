@@ -27,5 +27,5 @@ struct TrickyTreat : public AuraScript
 
 void AddSC_hallows_end()
 {
-    RegisterAuraScript<TrickyTreat>("spell_tricky_treat");
+    RegisterSpellScript<TrickyTreat>("spell_tricky_treat");
 }

@@ -361,6 +361,6 @@ void AddSC_boss_krick_and_ick()
     pNewScript->GetAI = &GetNewAIInstance<boss_krickAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_explosive_barrage_aura>("spell_explosive_barrage_aura");
-    RegisterScript<spell_pursuit>("spell_pursuit");
+    RegisterSpellScript<spell_explosive_barrage_aura>("spell_explosive_barrage_aura");
+    RegisterSpellScript<spell_pursuit>("spell_pursuit");
 }

@@ -224,6 +224,6 @@ void AddSC_boss_hadronox()
     pNewScript->GetAI = &GetNewAIInstance<boss_hadronoxAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_web_door_aura>("spell_web_door_aura");
-    RegisterAuraScript<spell_summon_anubar_periodic_aura>("spell_summon_anubar_periodic_aura");
+    RegisterSpellScript<spell_web_door_aura>("spell_web_door_aura");
+    RegisterSpellScript<spell_summon_anubar_periodic_aura>("spell_summon_anubar_periodic_aura");
 }

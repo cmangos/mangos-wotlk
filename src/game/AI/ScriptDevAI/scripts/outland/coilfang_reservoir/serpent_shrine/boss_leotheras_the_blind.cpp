@@ -539,8 +539,8 @@ void AddSC_boss_leotheras_the_blind()
     pNewScript->GetAI = &GetNewAIInstance<npc_inner_demonAI>;
     pNewScript->RegisterSelf();
 
-    RegisterScript<InsidiousWhisper>("spell_insidious_whisper");
+    RegisterSpellScript<InsidiousWhisper>("spell_insidious_whisper");
     RegisterSpellScript<ClearConsumingMadness>("spell_clear_consuming_madness");
-    RegisterAuraScript<LeoWhirlwindAura>("spell_leotheras_whirlwind_aura");
+    RegisterSpellScript<LeoWhirlwindAura>("spell_leotheras_whirlwind_aura");
     RegisterSpellScript<LeoWhirlwindProc>("spell_leotheras_whirlwind_proc");
 }

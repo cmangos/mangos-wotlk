@@ -3203,11 +3203,11 @@ void AddSC_npcs_special()
 
     RegisterSpellScript<ImpInABottleSay>("spell_imp_in_a_bottle_say");
     RegisterSpellScript<GossipNPCPeriodicTriggerFidget>("spell_gossip_npc_periodic_trigger_fidget");
-    RegisterAuraScript<GossipNPCPeriodicTalk>("spell_gossip_npc_periodic_talk");
+    RegisterSpellScript<GossipNPCPeriodicTalk>("spell_gossip_npc_periodic_talk");
     RegisterSpellScript<GossipNPCPeriodicTriggerTalk>("spell_gossip_npc_periodic_trigger_talk");
-    RegisterAuraScript<GossipNPCAppearanceAllBrewfest>("spell_gossip_npc_appearance_all_brewfest");
-    RegisterAuraScript<GossipNPCAppearanceAllSpiritOfCompetition>("spell_gossip_npc_appearance_all_spirit_of_competition");
-    RegisterAuraScript<GossipNPCAppearanceAllPirateDay>("spell_gossip_npc_appearance_all_pirate_day");
+    RegisterSpellScript<GossipNPCAppearanceAllBrewfest>("spell_gossip_npc_appearance_all_brewfest");
+    RegisterSpellScript<GossipNPCAppearanceAllSpiritOfCompetition>("spell_gossip_npc_appearance_all_spirit_of_competition");
+    RegisterSpellScript<GossipNPCAppearanceAllPirateDay>("spell_gossip_npc_appearance_all_pirate_day");
 
     RegisterSpellScript<MirrorImageFrostbolt>("spell_mirror_image_frostbolt");
 }

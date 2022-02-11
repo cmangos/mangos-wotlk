@@ -289,6 +289,6 @@ void AddSC_boss_mechano_lord_capacitus()
     pNewScript->GetAI = &GetNewAIInstance<NetherCharge>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<NetherChargePassive>("spell_nether_charge_passive");
-    RegisterAuraScript<NetherChargeTimer>("spell_nether_charge_timer");
+    RegisterSpellScript<NetherChargePassive>("spell_nether_charge_passive");
+    RegisterSpellScript<NetherChargeTimer>("spell_nether_charge_timer");
 }

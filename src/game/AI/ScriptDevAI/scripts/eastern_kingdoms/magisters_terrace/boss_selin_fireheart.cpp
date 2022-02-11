@@ -312,5 +312,5 @@ void AddSC_boss_selin_fireheart()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_fel_crystal_dummy>("spell_fel_crystal_dummy");
-    RegisterAuraScript<spell_mana_rage_selin>("spell_mana_rage_selin");
+    RegisterSpellScript<spell_mana_rage_selin>("spell_mana_rage_selin");
 }

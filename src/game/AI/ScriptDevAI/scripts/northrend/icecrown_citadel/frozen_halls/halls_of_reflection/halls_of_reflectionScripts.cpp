@@ -363,7 +363,7 @@ void AddSC_halls_of_reflection()
     pNewScript->pAreaTrigger = &AreaTrigger_at_queldelar_start;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_gunship_cannon_fire_aura>("spell_gunship_cannon_fire_aura");
+    RegisterSpellScript<spell_gunship_cannon_fire_aura>("spell_gunship_cannon_fire_aura");
     RegisterSpellScript<spell_halls_of_reflection_clone>("spell_halls_of_reflection_clone");
     RegisterSpellScript<spell_start_halls_of_reflection_quest>("spell_start_halls_of_reflection_quest");
 }

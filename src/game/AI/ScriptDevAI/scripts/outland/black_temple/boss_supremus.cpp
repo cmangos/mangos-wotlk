@@ -338,6 +338,6 @@ void AddSC_boss_supremus()
     pNewScript->GetAI = &GetNewAIInstance<boss_supremusAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<SupremusRandomTarget>("spell_supremus_random_target");
+    RegisterSpellScript<SupremusRandomTarget>("spell_supremus_random_target");
     RegisterSpellScript<HatefulStrikePrimer>("spell_hateful_strike_primer");
 }

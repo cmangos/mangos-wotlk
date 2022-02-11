@@ -247,7 +247,7 @@ struct ShapeOfTheBeast : public AuraScript
 
 void AddSC_instance_shadow_labyrinth()
 {
-    RegisterAuraScript<ShapeOfTheBeast>("spell_shape_of_the_beast");
+    RegisterSpellScript<ShapeOfTheBeast>("spell_shape_of_the_beast");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_shadow_labyrinth";

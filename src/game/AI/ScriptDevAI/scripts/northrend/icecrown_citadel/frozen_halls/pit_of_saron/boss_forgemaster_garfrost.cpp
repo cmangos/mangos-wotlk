@@ -300,5 +300,5 @@ void AddSC_boss_garfrost()
     pNewScript->GetAI = &GetNewAIInstance<boss_forgemaster_garfrostAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_permafrost_aura>("spell_permafrost_aura");
+    RegisterSpellScript<spell_permafrost_aura>("spell_permafrost_aura");
 }

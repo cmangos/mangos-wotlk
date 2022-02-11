@@ -396,8 +396,8 @@ void AddSC_dragonblight()
     RegisterSpellScript<ContainerOfRatsSpellScript>("spell_container_of_rats");
     RegisterSpellScript<DropOffVillager>("spell_drop_off_villager");
     RegisterSpellScript<TwistingBlade>("spell_twisting_blade");
-    RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
+    RegisterSpellScript<ArmyOfTheDead>("spell_army_of_the_dead");
     RegisterSpellScript<CorrosiveSpit>("spell_corrosive_spit");
-    RegisterAuraScript<spell_ley_line_focus_item>("spell_ley_line_focus_ring");
+    RegisterSpellScript<spell_ley_line_focus_item>("spell_ley_line_focus_ring");
     RegisterSpellScript<spell_ley_line_focus_item_trigger>("spell_ley_line_focus_item_trigger");
 }

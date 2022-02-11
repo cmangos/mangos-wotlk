@@ -453,5 +453,5 @@ void AddSC_violet_hold()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_teleport_inside_violet_hold>("spell_teleport_inside_violet_hold");
-    RegisterAuraScript<spell_void_shift_aura>("spell_void_shift_aura");
+    RegisterSpellScript<spell_void_shift_aura>("spell_void_shift_aura");
 }

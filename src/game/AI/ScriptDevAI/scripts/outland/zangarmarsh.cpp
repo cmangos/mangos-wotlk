@@ -469,7 +469,7 @@ void AddSC_zangarmarsh()
     pNewScript->pProcessEventId = &ProcessEventId_event_taxi_stormcrow;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<StormcrowAmulet>("spell_stormcrow_amulet");
+    RegisterSpellScript<StormcrowAmulet>("spell_stormcrow_amulet");
 
     pNewScript = new Script;
     pNewScript->Name = "npc_fhwoor";

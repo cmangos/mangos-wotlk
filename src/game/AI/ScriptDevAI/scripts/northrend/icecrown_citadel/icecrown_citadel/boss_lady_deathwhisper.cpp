@@ -669,12 +669,12 @@ void AddSC_boss_lady_deathwhisper()
     pNewScript->GetAI = &GetNewAIInstance<boss_lady_deathwhisperAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_mana_barrier_aura>("spell_mana_barrier_aura");
+    RegisterSpellScript<spell_mana_barrier_aura>("spell_mana_barrier_aura");
     RegisterSpellScript<spell_dark_transformation>("spell_dark_transformation");
     RegisterSpellScript<spell_dark_empowerment>("spell_dark_empowerment");
     RegisterSpellScript<spell_dark_martyrdom>("spell_dark_martyrdom");
-    RegisterAuraScript<spell_dark_transformation_aura>("spell_dark_transformation_aura");
-    RegisterAuraScript<spell_dark_empowerment_aura>("spell_dark_empowerment_aura");
-    RegisterAuraScript<spell_dark_fanatic_martyrdom_aura>("spell_dark_fanatic_martyrdom_aura");
-    RegisterAuraScript<spell_dark_adherent_martyrdom_aura>("spell_dark_adherent_martyrdom_aura");
+    RegisterSpellScript<spell_dark_transformation_aura>("spell_dark_transformation_aura");
+    RegisterSpellScript<spell_dark_empowerment_aura>("spell_dark_empowerment_aura");
+    RegisterSpellScript<spell_dark_fanatic_martyrdom_aura>("spell_dark_fanatic_martyrdom_aura");
+    RegisterSpellScript<spell_dark_adherent_martyrdom_aura>("spell_dark_adherent_martyrdom_aura");
 }

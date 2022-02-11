@@ -963,10 +963,10 @@ void AddSC_shartuul_transporter()
     pNewScript->GetAI = &GetNewAIInstance<StunField>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<PossessionTransfer>("spell_possession_transfer");
+    RegisterSpellScript<PossessionTransfer>("spell_possession_transfer");
     RegisterSpellScript<TouchOfMadness>("spell_touch_of_madness");
     RegisterSpellScript<MadnessRift>("spell_madness_rift");
-    RegisterAuraScript<EredarPreGateBeam>("spell_eredar_pre_gate_beam");
+    RegisterSpellScript<EredarPreGateBeam>("spell_eredar_pre_gate_beam");
     RegisterSpellScript<ThrowAxe>("spell_throw_axe");
     RegisterSpellScript<SuperJump>("spell_super_jump");
     RegisterSpellScript<CleansingFlame>("spell_cleansing_flame");
@@ -976,10 +976,10 @@ void AddSC_shartuul_transporter()
     RegisterSpellScript<AbsorbLife>("spell_absorb_life");
     RegisterSpellScript<ShartuulDiveBomb>("spell_shartuul_dive_bomb");
     RegisterSpellScript<ChaosStrike>("spell_chaos_strike");
-    RegisterAuraScript<FlyingAttackAura>("spell_flying_attack_aura");
+    RegisterSpellScript<FlyingAttackAura>("spell_flying_attack_aura");
     RegisterSpellScript<ShartuulFireballBarrage>("spell_fireball_barrage");
     RegisterSpellScript<ChaosStrikeTransform>("spell_chaos_strike_transform");
-    RegisterAuraScript<ShivanShapeshiftForm>("spell_shivan_shapeshift_form");
-    RegisterAuraScript<BuildPortableFelCannon>("spell_build_portable_fel_cannon");
+    RegisterSpellScript<ShivanShapeshiftForm>("spell_shivan_shapeshift_form");
+    RegisterSpellScript<BuildPortableFelCannon>("spell_build_portable_fel_cannon");
     RegisterSpellScript<StunRopeAttunement>("spell_stun_rope_attunement");
 }

@@ -463,5 +463,5 @@ void AddSC_boss_ouro()
     pNewScript->GetAI = &GetNewAIInstance<OuroScarab>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<PeriodicScarabTrigger>("spell_periodic_scarab_trigger");
+    RegisterSpellScript<PeriodicScarabTrigger>("spell_periodic_scarab_trigger");
 }

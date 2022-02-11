@@ -2382,6 +2382,6 @@ void AddSC_boss_illidan()
     pNewScript->pGOUse = &GOUse_go_cage_trap;
     pNewScript->RegisterSelf();
 
-    RegisterScript<ParasiticShadowfiendAura>("spell_parasitic_shadowfiend");
+    RegisterSpellScript<ParasiticShadowfiendAura>("spell_parasitic_shadowfiend");
     RegisterSpellScript<ShadowPrison>("spell_shadow_prison");
 }

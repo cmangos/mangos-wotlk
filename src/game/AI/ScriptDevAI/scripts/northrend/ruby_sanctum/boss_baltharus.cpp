@@ -231,5 +231,5 @@ void AddSC_boss_baltharus()
     pNewScript->GetAI = &GetNewAIInstance<boss_baltharusAI>;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<spell_enervating_brand_aura>("spell_enervating_brand_aura");
+    RegisterSpellScript<spell_enervating_brand_aura>("spell_enervating_brand_aura");
 }

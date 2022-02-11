@@ -448,7 +448,7 @@ void AddSC_boss_teron_gorefiend()
     pNewScript->pAreaTrigger = &AreaTrigger_at_teron_gorefiend;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<ShadowOfDeath>("spell_shadow_of_death");
-    RegisterAuraScript<ShadowOfDeathRemove>("spell_shadow_of_death_remove");
+    RegisterSpellScript<ShadowOfDeath>("spell_shadow_of_death");
+    RegisterSpellScript<ShadowOfDeathRemove>("spell_shadow_of_death_remove");
     RegisterSpellScript<SummonBlossomMoveTarget>("spell_summon_blossom_move_target");
 }
