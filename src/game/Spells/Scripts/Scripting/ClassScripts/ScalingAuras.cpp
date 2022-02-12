@@ -850,9 +850,43 @@ struct DeathKnightPetScaling1 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // stamina
+            {
+                float coeff = 0.3f;
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    for (uint32 auraId : {49572, 49571, 48965})
+                    {
+                        if (Aura* aura = owner->GetAura(auraId, EFFECT_INDEX_0))
+                        {
+                            coeff = coeff * (100 + aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)) / 100;
+                            break;
+                        }
+                    }
+                    if (Aura* aura = owner->GetAura(58686, EFFECT_INDEX_0)) // Glyph of the Ghoul
+                        coeff += float(aura->GetAmount()) / 100;
+                    value = float(owner->GetStat(STAT_STAMINA)) * coeff;
+                }
                 break;
+            }
             case EFFECT_INDEX_1: // strength
+            {
+                float coeff = 0.7f;
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    for (uint32 auraId : {49572, 49571, 48965})
+                    {
+                        if (Aura* aura = owner->GetAura(auraId, EFFECT_INDEX_0))
+                        {
+                            coeff = coeff * (100 + aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1)) / 100;
+                            break;
+                        }
+                    }
+                    if (Aura* aura = owner->GetAura(58686, EFFECT_INDEX_0)) // Glyph of the Ghoul
+                        coeff += float(aura->GetAmount()) / 100;
+                    value = float(owner->GetStat(STAT_STRENGTH)) * coeff;
+                }
                 break;
+            }
             case EFFECT_INDEX_2: // spell damage
                 break;
         }
@@ -869,6 +903,14 @@ struct DeathKnightPetScaling2 : public AuraScript
             case EFFECT_INDEX_0: // damage percent done
                 break;
             case EFFECT_INDEX_1: // melee slow
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    // For others recalculate it from:
+                    float hasteMelee = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                    hasteMelee += (1 - owner->m_modAttackSpeedPct[BASE_ATTACK]) * 100;
+                    value += int32(hasteMelee);
+                }
                 break;
             case EFFECT_INDEX_2: // mechanic immunity
                 break;
@@ -884,8 +926,29 @@ struct DeathKnightPetScaling3 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // hit chance
+                if (Player* owner = dynamic_cast<Player*>(data.caster->GetOwner()))
+                {
+                    // For others recalculate it from:
+                    float hitMelee = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                    hitMelee += owner->GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE);
+                    // Increase hit melee from meele hit ratings
+                    hitMelee += owner->GetRatingBonusValue(CR_HIT_MELEE);
+                    value += int32(hitMelee);
+                }
                 break;
             case EFFECT_INDEX_1: // spell hit chance
+                if (Player* owner = dynamic_cast<Player*>(data.caster->GetOwner()))
+                {
+                    // For others recalculate it from:
+                    float hitSpell = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_SPELL_HIT_CHANCE
+                    hitSpell += owner->GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE);
+                    // Increase hit spell from spell hit ratings
+                    hitSpell += owner->GetRatingBonusValue(CR_HIT_SPELL);
+
+                    value += int32(hitSpell);
+                }
                 break;
             case EFFECT_INDEX_2: // mechanic immunity
                 break;
