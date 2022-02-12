@@ -10066,11 +10066,12 @@ void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
     }
 
     Unit* target = GetTarget();
+    Unit* caster = GetCaster();
 
     if (apply)
     {
         int32 points = GetAmount();
-        target->CastCustomSpell(target, spellInfo, &points, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+        caster->CastCustomSpell(target, spellInfo, &points, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
     }
     else
         target->RemoveAurasByCasterSpell(linkedSpell, GetCasterGuid());
