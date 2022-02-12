@@ -369,6 +369,17 @@ struct SuddenDoom : public AuraScript
     }
 };
 
+struct WillOfTheNecropolis : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/) const override
+    {
+        remainingDamage += currentAbsorb;
+        currentAbsorb = 0;
+        if (aura->GetTarget()->GetHealth() - remainingDamage < aura->GetTarget()->GetMaxHealth() * 35 / 100)
+            currentAbsorb = aura->GetAmount() * remainingDamage / 100;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -386,4 +397,5 @@ void LoadDeathKnightScripts()
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
     RegisterSpellScript<ArmyOfTheDeadGhoul>("spell_army_of_the_dead_ghoul");
     RegisterAuraScript<SuddenDoom>("spell_sudden_doom");
+    RegisterAuraScript<WillOfTheNecropolis>("spell_will_of_the_necropolis");
 }
