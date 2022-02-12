@@ -282,6 +282,9 @@ struct DeathKnightDisease : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
+        if (!apply || aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
         Unit* caster = aura->GetCaster();
         if (!caster)
             return;
@@ -290,14 +293,14 @@ struct DeathKnightDisease : public AuraScript
         {
             Aura* chosen = nullptr; // need highest id
             for (Aura* aura : caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS))
-                if (aura->GetModifier()->m_amount == 7282)
+                if (aura->GetModifier()->m_miscvalue == 7282)
                     if (!chosen || chosen->GetId() < aura->GetId())
                         chosen = aura;
 
-            if (aura)
+            if (chosen)
             {
                 uint32 spellId = 0;
-                switch (aura->GetId())
+                switch (chosen->GetId())
                 {
                     // Ebon Plague
                     case 51161: spellId = 51735; break;
