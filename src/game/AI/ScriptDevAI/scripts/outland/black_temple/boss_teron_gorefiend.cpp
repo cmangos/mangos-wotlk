@@ -375,7 +375,7 @@ bool AreaTrigger_at_teron_gorefiend(Player* player, AreaTriggerEntry const* /*at
 
 struct ShadowOfDeath : public AuraScript
 {
-    void OnAbsorb(Aura* aura, int32& currentAbsorb, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath) const override
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath) const override
     {
         preventedDeath = true;
         currentAbsorb = 0;
