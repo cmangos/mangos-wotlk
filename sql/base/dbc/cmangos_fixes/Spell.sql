@@ -2867,6 +2867,9 @@ UPDATE spell_template SET Effect2=6,EffectImplicitTargetA1=6,EffectApplyAuraName
 -- Icy Talons - correct proc mask
 UPDATE spell_template SET EffectSpellClassMask1_2=0x04000000 WHERE Id IN(50880,50884,50885,50886,50887);
 
+-- Unholy Blight - mask for Death Coil
+UPDATE spell_template SET EffectSpellClassMask1_3=0x00000001 WHERE Id IN(49194);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

@@ -115,11 +115,13 @@ struct UnholyBlightDK : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
-        procData.triggeredSpellId = 50536; // unholy blight DOT
         uint32 damagePercent = aura->GetModifier()->m_amount;
         if (Aura* glyphAura = aura->GetTarget()->GetAura(63332, EFFECT_INDEX_0))
             damagePercent += (damagePercent * glyphAura->GetModifier()->m_amount / 100);
-        procData.basepoints[0] = procData.damage * damagePercent / 100;
+        int32 damage = int32(procData.damage * damagePercent / 100);
+        // unholy blight DOT
+        if (procData.attacker)
+            procData.attacker->CastCustomSpell(procData.target, 50536, &damage, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
         return SPELL_AURA_PROC_OK;
     }
 };
