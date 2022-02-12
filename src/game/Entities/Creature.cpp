@@ -345,6 +345,8 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
 
     SetObjectScale(cinfo->Scale);
 
+    SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 1.f); // TODO: Add setting in DB
+
     // equal to player Race field, but creature does not have race
     SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_RACE, 0);
 
