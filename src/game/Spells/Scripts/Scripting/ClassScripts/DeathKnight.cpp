@@ -124,20 +124,6 @@ struct UnholyBlightDK : public AuraScript
     }
 };
 
-struct SuddenDoom : public AuraScript
-{
-    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
-    {
-        Player* player = dynamic_cast<Player*>(aura->GetTarget());
-        if (!player)
-            return SPELL_AURA_PROC_OK;
-
-        // dk death coil rank 1 id - need max
-        procData.triggeredSpellId = player->LookupHighestLearnedRank(47541);
-        return SPELL_AURA_PROC_OK;
-    }
-};
-
 struct DeathRuneDK : public AuraScript
 {
     bool OnCheckProc(Aura* aura, ProcExecutionData& procData) const override
@@ -363,13 +349,32 @@ struct ArmyOfTheDeadGhoul : public SpellScript
     }
 };
 
+struct SuddenDoom : public AuraScript
+{
+    bool OnCheckProc(Aura* aura, ProcExecutionData& /*data*/) const override
+    {
+        if (aura->GetTarget()->IsPlayer())
+            return true;
+
+        return false;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        // Death Coil
+        uint32 highestDeathCoil = static_cast<Player*>(aura->GetTarget())->LookupHighestLearnedRank(47541);
+        if (highestDeathCoil && procData.attacker)
+            procData.attacker->CastSpell(procData.victim, highestDeathCoil, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_COSTS);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
     RegisterSpellScript<RaiseDead>("spell_dk_raise_dead");
     RegisterSpellScript<DeathCoilDK>("spell_dk_death_coil");
     RegisterAuraScript<UnholyBlightDK>("spell_dk_unholy_blight");
-    RegisterAuraScript<SuddenDoom>("spell_sudden_doom");
     RegisterAuraScript<DeathRuneDK>("spell_death_rune_dk");
     RegisterSpellScript<Bloodworm>("spell_bloodworm");
     RegisterAuraScript<HealthLeechPassive>("spell_health_leech_passive");
@@ -380,4 +385,5 @@ void LoadDeathKnightScripts()
     RegisterAuraScript<CryptFeverServerside>("spell_crypt_fever_serverside");
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
     RegisterSpellScript<ArmyOfTheDeadGhoul>("spell_army_of_the_dead_ghoul");
+    RegisterAuraScript<SuddenDoom>("spell_sudden_doom");
 }
