@@ -186,9 +186,10 @@ struct DeathRuneDK : public AuraScript
 
 struct Bloodworm : public SpellScript
 {
-    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    void OnSummon(Spell* spell, Creature* summon) const override
     {
         summon->CastSpell(nullptr, 50453, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, 52001, TRIGGERED_OLD_TRIGGERED);
         summon->AI()->SetReactState(REACT_DEFENSIVE);
     }
 };

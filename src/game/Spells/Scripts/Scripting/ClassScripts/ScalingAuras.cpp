@@ -946,6 +946,23 @@ struct DeathKnightArmyOfTheDead1 : public AuraScript
     }
 };
 
+struct DeathKnightBloodParasitePetScaling : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        switch (data.effIdx)
+        {
+            case EFFECT_INDEX_0: // Unk
+                break;
+            case EFFECT_INDEX_1: // Unk
+                break;
+            case EFFECT_INDEX_2: // Unk
+                break;
+        }
+        return value;
+    }
+};
+
 void LoadScalingScripts()
 {
     RegisterAuraScript<HunterPetScaling1>("spell_hunter_pet_scaling_1");
@@ -1004,4 +1021,6 @@ void LoadScalingScripts()
     RegisterAuraScript<DeathKnightRuneWeaponScaling2>("spell_death_knight_rune_weapon_scaling_2");
 
     RegisterAuraScript<DeathKnightArmyOfTheDead1>("spell_death_knight_army_of_the_dead_1");
+
+    RegisterAuraScript<DeathKnightBloodParasitePetScaling>("spell_death_knight_blood_parasite_pet_scaling");
 }
