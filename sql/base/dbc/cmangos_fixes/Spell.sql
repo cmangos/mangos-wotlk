@@ -2864,6 +2864,9 @@ INSERT INTO spell_template(Id, Dispel, Mechanic, Attributes, AttributesEx, Attri
 -- and add magic damage taken aura to it
 UPDATE spell_template SET Effect2=6,EffectImplicitTargetA1=6,EffectApplyAuraName2=87 WHERE Id IN(65142);
 
+-- Icy Talons - correct proc mask
+UPDATE spell_template SET EffectSpellClassMask1_2=0x04000000 WHERE Id IN(50880,50884,50885,50886,50887);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
