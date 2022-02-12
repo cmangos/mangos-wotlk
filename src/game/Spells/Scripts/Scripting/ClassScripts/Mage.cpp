@@ -109,6 +109,17 @@ struct FingersOfFrostDummy : public AuraScript
     }
 };
 
+struct DeepFreezeImmunityState : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        if (data.victim->IsCreature())
+            if (static_cast<Creature*>(data.victim)->GetCreatureInfo()->MechanicImmuneMask & (1 << (MECHANIC_STUN - 1)))
+                return true;
+        return false;
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterAuraScript<ArcaneConcentration>("spell_arcane_concentration");
@@ -116,4 +127,5 @@ void LoadMageScripts()
     RegisterAuraScript<FingersOfFrostProc>("spell_fingers_of_frost_proc");
     RegisterSpellScript<FingersOfFrostIgnore>("spell_fingers_of_frost_ignore");
     RegisterAuraScript<FingersOfFrostDummy>("spell_fingers_of_frost_dummy");
+    RegisterAuraScript<DeepFreezeImmunityState>("spell_deep_freeze_immunity_state");
 }

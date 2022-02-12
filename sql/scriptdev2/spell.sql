@@ -753,6 +753,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (44545,'spell_fingers_of_frost_proc'),
 (44544,'spell_fingers_of_frost_ignore'),
 (74396,'spell_fingers_of_frost_dummy'),
+(44572,'spell_deep_freeze_immunity_state'),
 (52284,'spell_will_of_the_necropolis'),
 (52285,'spell_will_of_the_necropolis'),
 (52286,'spell_will_of_the_necropolis'),
