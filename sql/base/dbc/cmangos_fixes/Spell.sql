@@ -2870,6 +2870,11 @@ UPDATE spell_template SET EffectSpellClassMask1_2=0x04000000 WHERE Id IN(50880,5
 -- Unholy Blight - mask for Death Coil
 UPDATE spell_template SET EffectSpellClassMask1_3=0x00000001 WHERE Id IN(49194);
 
+-- Finger of Frost - Correct mask for ignore state spell
+UPDATE spell_template SET EffectSpellClassMask1_1=685904631,EffectSpellClassMask1_2=1151048 WHERE Id IN(44544);
+-- Mask for proc ignore spell
+UPDATE spell_template SET EffectSpellClassMask1_1=1049120,EffectSpellClassMask1_2=4096 WHERE Id IN(44543,44545);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

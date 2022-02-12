@@ -3431,12 +3431,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                         (((Creature*)pVictim)->GetCreatureInfo()->MechanicImmuneMask & (1 << (MECHANIC_STUN - 1))) == 0)
                     return SPELL_AURA_PROC_FAILED;
             }
-            else if (auraSpellInfo->SpellIconID == 2947)     // Fingers of Frost
-            {
-                // proc chance for spells in basepoints
-                if (!roll_chance_i(triggerAmount))
-                    return SPELL_AURA_PROC_FAILED;
-            }
             break;
         }
         case SPELLFAMILY_WARRIOR:

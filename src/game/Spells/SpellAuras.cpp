@@ -10206,7 +10206,6 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
         case 65294:                                         // Empowered
         case 70672:                                         // Gaseous Bloat
         case 71564:                                         // Deadly Precision
-        case 74396:                                         // Fingers of Frost
             m_stackAmount = m_spellProto->StackAmount;
             break;
     }
@@ -10825,14 +10824,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         cast_at_remove = true;
                         boostSpells.push_back(70753);                   // Pushing the Limit
                     }
-                    else
-                        return;
-                    break;
-                }
-                case 74396:                                 // Fingers of Frost (remove main aura)
-                {
-                    if (!apply)
-                        boostSpells.push_back(44544);
                     else
                         return;
                     break;

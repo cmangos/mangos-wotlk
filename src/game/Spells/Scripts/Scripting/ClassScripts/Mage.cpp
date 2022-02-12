@@ -73,8 +73,47 @@ struct MageIgnite : public AuraScript
     }
 };
 
+struct FingersOfFrostProc : public AuraScript
+{
+    bool OnCheckProc(Aura* aura, ProcExecutionData& /*data*/) const override
+    {
+        return roll_chance_i(aura->GetAmount());
+    }
+};
+
+struct FingersOfFrostIgnore : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->AddPrecastSpell(74396);
+    }
+};
+
+struct FingersOfFrostDummy : public AuraScript
+{
+    void OnHolderInit(SpellAuraHolder* holder, WorldObject* /*caster*/) const override
+    {
+        holder->PresetAuraStacks(holder->GetSpellProto()->StackAmount);
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() != AURA_REMOVE_BY_GAINED_STACK)
+            aura->GetTarget()->RemoveAurasDueToSpell(44544);
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& /*procData*/) const override
+    {
+        aura->GetTarget()->RemoveAuraStack(aura->GetId());
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterAuraScript<ArcaneConcentration>("spell_arcane_concentration");
     RegisterAuraScript<MageIgnite>("spell_mage_ignite");
+    RegisterAuraScript<FingersOfFrostProc>("spell_fingers_of_frost_proc");
+    RegisterSpellScript<FingersOfFrostIgnore>("spell_fingers_of_frost_ignore");
+    RegisterAuraScript<FingersOfFrostDummy>("spell_fingers_of_frost_dummy");
 }
