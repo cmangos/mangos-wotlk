@@ -2878,6 +2878,9 @@ UPDATE spell_template SET EffectSpellClassMask1_1=1049120,EffectSpellClassMask1_
 -- Enduring Winter - Mage talent - Frostbolt mask
 UPDATE spell_template SET EffectSpellClassMask2_1=0x00000020 WHERE Id IN(44557,44560,44561);
 
+-- Brain Freeze - Mage talent - Frostbolt and Cone of Cold mask
+UPDATE spell_template SET EffectSpellClassMask2_1=0x00000220 WHERE Id IN(44546,44548,44549);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
