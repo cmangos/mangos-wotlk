@@ -718,7 +718,7 @@ struct CalcDamageInfo
     SubDamageInfo subDamage[MAX_ITEM_PROTO_DAMAGES];
     uint32 blocked_amount;
     uint32 HitInfo;
-    uint32 TargetState;
+    uint8  TargetState;
     // Helper
     WeaponAttackType attackType; //
     uint32 procAttacker;

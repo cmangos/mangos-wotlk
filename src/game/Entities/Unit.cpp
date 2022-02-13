@@ -7071,7 +7071,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
     // Subdamage count:
     uint32 lines = m_weaponDamageInfo.weapon[calcDamageInfo->attackType].lines;
 
-    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (4 + 8 + 8 + 4 + 4) + 1 + (lines * (4 + 4 + 4)) + (4 + 4 + 4));
+    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (4 + 8 + 8 + 4 + 4) + 1 + (lines * (4 + 4 + 4)) + (1 + 4 + 4));
 
     data << uint32(calcDamageInfo->HitInfo);
     data << calcDamageInfo->attacker->GetPackGUID();
@@ -7105,7 +7105,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
             data << int32(calcDamageInfo->subDamage[i].resist);
     }
 
-    data << uint32(calcDamageInfo->TargetState);
+    data << uint8(calcDamageInfo->TargetState);
     data << uint32(0);                                      // unknown, usually seen with -1, 0 and 1000
     data << uint32(0);                                      // spell id, seen with heroic strike and disarm as examples.
     // HITINFO_NOACTION normally set if spell
