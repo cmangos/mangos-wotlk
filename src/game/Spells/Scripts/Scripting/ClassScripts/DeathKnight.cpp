@@ -382,6 +382,106 @@ struct WillOfTheNecropolis : public AuraScript
     }
 };
 
+enum DancingRuneWeaponData
+{
+    SPELL_COPY_WEAPON                   = 63416,
+    SPELL_DANCING_RUNE_WEAPON_VISUAL    = 53160,
+    SPELL_RUNE_WEAPON_MARK              = 50474,
+    SPELL_FAKE_AGGRO_RADIUS_8YD         = 49812, // dummy periodic aura
+    SPELL_AGGRO_RADIUS_8YD              = 49813,
+    SPELL_RUNE_WEAPON_SCALING_01        = 51905,
+    SPELL_RUNE_WEAPON_SCALING_02        = 51906,
+    SPELL_DEATH_KNIGHT_PET_SCALING_03   = 61697,
+
+    NPC_DANCING_RUNE_WEAPON             = 27893,
+};
+
+struct DancingRuneWeapon : public SpellScript, public AuraScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Unit* caster = spell->GetCaster();
+        summon->CastSpell(caster, SPELL_COPY_WEAPON, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_DANCING_RUNE_WEAPON_VISUAL, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_RUNE_WEAPON_MARK, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_FAKE_AGGRO_RADIUS_8YD, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_RUNE_WEAPON_SCALING_01, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_RUNE_WEAPON_SCALING_02, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_DEATH_KNIGHT_PET_SCALING_03, TRIGGERED_NONE);
+        summon->AI()->SetMoveChaseParams(0.f, M_PI_F, false);
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetEffIndex() == EFFECT_INDEX_1)
+            if (Pet* guardian = aura->GetTarget()->FindGuardianWithEntry(NPC_DANCING_RUNE_WEAPON))
+                guardian->ForcedDespawn();
+    }
+
+    bool OnCheckProc(Aura* aura, ProcExecutionData& data) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+            return data.spellInfo && data.spellInfo->IsFitToFamily(SPELLFAMILY_DEATHKNIGHT, 0x2002000001402013, 0x1);
+        return true;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+        {
+            Player* player = dynamic_cast<Player*>(aura->GetTarget());
+            Unit* runeWeapon = player->FindGuardianWithEntry(NPC_DANCING_RUNE_WEAPON);
+            if (runeWeapon && runeWeapon->GetVictim())
+                runeWeapon->CastSpell(runeWeapon->GetVictim(), procData.spellInfo, TRIGGERED_IGNORE_COSTS | TRIGGERED_NORMAL_COMBAT_CAST);
+        }
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+struct FakeAggroRadius8YD : public AuraScript
+{
+    void OnAuraInit(Aura* aura) const override
+    {
+        aura->ForcePeriodicity(1000);
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->CastSpell(nullptr, SPELL_AGGRO_RADIUS_8YD, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct AggroRadius8YD : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster->IsInCombat())
+            return;
+
+        if (caster->CanAttack(target))
+        {
+            if (caster->IsVisibleForOrDetect(target, target, true))
+            {
+                if (Unit* spawner = caster->GetSpawner())
+                {
+                    if (spawner->getAttackers().find(target) != spawner->getAttackers().end())
+                    {
+                        if (caster->GetVictim())
+                            caster->AddThreat(target);
+                        else
+                            caster->AI()->AttackStart(target);
+                    }
+                }
+            }
+        }
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -400,4 +500,7 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<ArmyOfTheDeadGhoul>("spell_army_of_the_dead_ghoul");
     RegisterSpellScript<SuddenDoom>("spell_sudden_doom");
     RegisterSpellScript<WillOfTheNecropolis>("spell_will_of_the_necropolis");
+    RegisterSpellScript<DancingRuneWeapon>("spell_dancing_rune_weapon");
+    RegisterSpellScript<FakeAggroRadius8YD>("spell_fake_aggro_radius_8yd");
+    RegisterSpellScript<AggroRadius8YD>("spell_aggro_radius_8yd");
 }

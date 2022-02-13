@@ -984,6 +984,14 @@ struct DeathKnightRuneWeaponScaling2 : public AuraScript
             case EFFECT_INDEX_0: // damage done
                 break;
             case EFFECT_INDEX_1: // melee slow
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    // For others recalculate it from:
+                    float hasteMelee = 0.0f;
+                    // Increase hit from SPELL_AURA_MOD_HIT_CHANCE
+                    hasteMelee += (1 - owner->m_modAttackSpeedPct[BASE_ATTACK]) * 100;
+                    value += int32(hasteMelee);
+                }
                 break;
             case EFFECT_INDEX_2: // damage percent done
                 break;
