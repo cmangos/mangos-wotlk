@@ -1259,25 +1259,6 @@ struct spell_eject_all_passengers : public SpellScript
     }
 };
 
-struct Replenishment : public SpellScript
-{
-    void OnInit(Spell* spell) const override
-    {
-        spell->SetMaxAffectedTargets(10);
-        spell->SetFilteringScheme(EFFECT_INDEX_0, false, SCHEME_PRIORITIZE_MANA);
-    }
-
-    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
-    {
-        Unit* caster = spell->GetCaster();
-        if (caster->GetMap()->IsBattleArena()) // in arenas only hits caster
-            if (target != caster)
-                return false;
-
-        return true;
-    }
-};
-
 enum SpellVisualKitFoodOrDrink
 {
     SPELL_VISUAL_KIT_FOOD = 406,
@@ -1535,7 +1516,4 @@ void AddSC_spell_scripts()
     RegisterSpellScript<RetaliationCreature>("spell_retaliation_creature");
     RegisterSpellScript<Stoned>("spell_stoned");
     RegisterSpellScript<BirthNoVisualInstantSpawn>("spell_birth_no_visual_instant_spawn");
-
-    // wotlk section
-    RegisterSpellScript<Replenishment>("spell_replenishment");
 }

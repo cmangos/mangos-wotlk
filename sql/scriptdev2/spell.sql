@@ -640,6 +640,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (62138,'spell_teleport_inside_violet_hold'),
 (63482,'spell_lightning_whirl_heroic'),
 (65869,'spell_disengage'),
+(65932,'spell_retaliation_dummy_creature'),
 (66118,'spell_leeching_swarm_aura'),
 (66312,'spell_light_ball_passive'),
 (66314,'spell_dark_ball_passive'),

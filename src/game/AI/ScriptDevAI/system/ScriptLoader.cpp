@@ -27,6 +27,7 @@ extern void AddSC_npc_professions();
 extern void AddSC_npcs_special();
 extern void AddSC_quests_scripts();
 extern void AddSC_spell_scripts();
+extern void AddSC_spell_scripts_wotlk();
 extern void AddSC_world_map_scripts();
 extern void AddSC_boss_highlord_kruul();
 extern void AddSC_war_effort();
@@ -525,6 +526,7 @@ void AddScripts()
     AddSC_npcs_special();
     AddSC_quests_scripts();
     AddSC_spell_scripts();
+    AddSC_spell_scripts_wotlk();
     AddSC_world_map_scripts();
     AddSC_boss_highlord_kruul();
     AddSC_war_effort();
