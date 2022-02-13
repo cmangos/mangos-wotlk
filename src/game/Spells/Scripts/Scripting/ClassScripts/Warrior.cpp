@@ -85,7 +85,10 @@ struct SunderArmor : public SpellScript
     void OnInit(Spell* spell) const override
     {
         if (spell->GetCaster()->HasAura(58387)) // Glyph of Sunder Armor
-            spell->SetMaxAffectedTargets(2);
+        {
+            spell->SetChainTargetsCount(EFFECT_INDEX_0, 2);
+            spell->SetChainTargetsCount(EFFECT_INDEX_1, 2);
+        }
     }
 };
 
@@ -123,6 +126,19 @@ struct WarriorDevastate : public SpellScript
     }
 };
 
+struct RetaliationWarrior : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        // check attack comes not from behind
+        if (procData.victim->IsFacingTargetsBack(procData.attacker))
+            return SPELL_AURA_PROC_FAILED;
+
+        procData.victim->CastSpell(procData.attacker, 20240, TRIGGERED_IGNORE_HIT_CALCULATION | TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_COSTS);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
@@ -130,4 +146,5 @@ void LoadWarriorScripts()
     RegisterSpellScript<VictoryRush>("spell_warrior_victory_rush");
     RegisterSpellScript<SunderArmor>("spell_sunder_armor");
     RegisterSpellScript<WarriorDevastate>("spell_warrior_devastate");
+    RegisterAuraScript<RetaliationWarrior>("spell_retaliation_warrior");
 }
