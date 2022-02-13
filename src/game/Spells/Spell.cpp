@@ -515,6 +515,8 @@ Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags
     m_spellFlags = SPELL_FLAG_NORMAL;
 
     m_affectedTargetCount = m_spellInfo->MaxAffectedTargets;
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        m_chainTargetCount[i] = m_spellInfo->EffectChainTarget[SpellEffectIndex(i)];
 
     m_jumpRadius = SpellTargetMgr::GetJumpRadius(m_spellInfo->Id);
     memcpy(m_filteringScheme, SpellTargetMgr::GetSpellTargetingData(m_spellInfo->Id).filteringScheme, sizeof(m_filteringScheme));
@@ -566,9 +568,20 @@ WorldObject* Spell::FindCorpseUsing()
 
 void Spell::FillTargetMap()
 {
-    // TODO: ADD the correct target FILLS!!!!!!
     TempTargetingData targetingData;
     uint8 effToIndex[MAX_EFFECT_INDEX] = {0, 1, 2};         // Helper array, to link to another tmpUnitList, if the targets for both effects match
+
+    if (m_trueCaster->IsUnit())
+    {
+        auto const& mod = m_caster->GetAurasByType(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
+        for (Aura* aura : mod)
+        {
+            if (!aura->isAffectedOnSpell(m_spellInfo))
+                continue;
+            m_affectedTargetCount += aura->GetModifier()->m_amount;
+        }
+    }
+
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         // not call for empty effect.
@@ -581,7 +594,7 @@ void Spell::FillTargetMap()
         auto& targetMask = data.targetMask[i];
         auto& ignoredTargets = data.ignoredTargets[i];
         auto& filterScheme = m_filteringScheme[i];
-        targetingData.chainTargetCount[i] = m_spellInfo->EffectChainTarget[SpellEffectIndex(i)];
+        targetingData.chainTargetCount[i] = m_chainTargetCount[i];
 
         if (effectTargetType == TARGET_TYPE_SPECIAL_UNIT) // area auras need custom handling
         {
@@ -1817,17 +1830,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
     uint32 unMaxTargets = m_affectedTargetCount;  // Get spell max affected targets
 
     GetSpellRangeAndRadius(effIndex, radius, targetB, targetingData.chainTargetCount[effIndex]);
-
-    if (m_trueCaster->IsUnit())
-    {
-        Unit::AuraList const& mod = m_caster->GetAurasByType(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
-        for (auto m : mod)
-        {
-            if (!m->isAffectedOnSpell(m_spellInfo))
-                continue;
-            unMaxTargets += m->GetModifier()->m_amount;
-        }
-    }
 
     float cone = GetCone();
 

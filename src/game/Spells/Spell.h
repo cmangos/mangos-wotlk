@@ -799,6 +799,7 @@ class Spell
         void SetTotalTargetValueModifier(float modifier);
         // script initialization hook only setters - use only if dynamic - else use appropriate helper
         void SetMaxAffectedTargets(uint32 newValue) { m_affectedTargetCount = newValue; }
+        void SetChainTargetsCount(SpellEffectIndex effIdx, uint32 newValue) { m_chainTargetCount[effIdx] = newValue; }
         void SetJumpRadius(float newValue) { m_jumpRadius = newValue; }
         // warning - always set scheme for first unique target in a row
         void SetFilteringScheme(SpellEffectIndex effIdx, bool targetB, SpellTargetFilterScheme scheme) { m_filteringScheme[effIdx][uint32(targetB)] = scheme; }
@@ -983,6 +984,7 @@ class Spell
         float m_castOrientation;
 
         uint32 m_affectedTargetCount;
+        uint32 m_chainTargetCount[MAX_EFFECT_INDEX];
         float m_jumpRadius;
         SpellTargetFilterScheme m_filteringScheme[MAX_EFFECT_INDEX][2];
 
