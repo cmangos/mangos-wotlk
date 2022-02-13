@@ -224,6 +224,35 @@ struct DivineStormCooldown : public SpellScript
     }
 };
 
+struct JudgementsOfTheWise : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        if (data.damage == 0)
+            return false;
+        return true;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        Unit* caster = aura->GetTarget();
+        procData.triggeredSpellId = 31930; // Judgements of the Wise
+        procData.triggerTarget = nullptr;
+
+        // Replenishment
+        caster->CastSpell(nullptr, 57669, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+struct JudgementsOfTheWiseEnergize : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->SetDamage(spell->GetDamage() * spell->GetCaster()->GetCreateMana() / 100);
+    }
+};
+
 void LoadPaladinScripts()
 {
     RegisterSpellScript<IncreasedHolyLightHealing>("spell_increased_holy_light_healing");
@@ -234,4 +263,6 @@ void LoadPaladinScripts()
     RegisterSpellScript<DivineStorm>("spell_divine_storm");
     RegisterSpellScript<DivineStormHeal>("spell_divine_storm_heal");
     RegisterSpellScript<DivineStormCooldown>("spell_divine_storm_cooldown");
+    RegisterSpellScript<JudgementsOfTheWise>("spell_judgements_of_the_wise");
+    RegisterSpellScript<JudgementsOfTheWiseEnergize>("spell_judgements_of_the_wise_energize");
 }
