@@ -7361,7 +7361,7 @@ SpellCastResult Spell::CheckPower(bool strict)
 
 bool Spell::IgnoreItemRequirements() const
 {
-    if (m_channelOnly)
+    if (m_channelOnly || m_ignoreCosts)
         return true;
 
     /// Check if it's an enchant scroll. These have no required reagents even though their spell does.
