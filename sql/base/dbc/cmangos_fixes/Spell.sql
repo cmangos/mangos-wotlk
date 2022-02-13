@@ -2875,6 +2875,9 @@ UPDATE spell_template SET EffectSpellClassMask1_1=685904631,EffectSpellClassMask
 -- Mask for proc ignore spell
 UPDATE spell_template SET EffectSpellClassMask1_1=1049120,EffectSpellClassMask1_2=4096 WHERE Id IN(44543,44545);
 
+-- Enduring Winter - Mage talent - Frostbolt mask
+UPDATE spell_template SET EffectSpellClassMask2_1=0x00000020 WHERE Id IN(44557,44560,44561);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
