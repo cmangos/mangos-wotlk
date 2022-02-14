@@ -2184,26 +2184,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 target = this;
                 break;
             }
-            // Rapid Recuperation
-            if (dummySpell->SpellIconID == 3560)
-            {
-                // This effect only from Rapid Killing (mana regen)
-                if (!(spellInfo->SpellFamilyFlags & uint64(0x0100000000000000)))
-                    return SPELL_AURA_PROC_FAILED;
-
-                target = this;
-
-                switch (dummySpell->Id)
-                {
-                    case 53228:                             // Rank 1
-                        triggered_spell_id = 56654;
-                        break;
-                    case 53232:                             // Rank 2
-                        triggered_spell_id = 58882;
-                        break;
-                }
-                break;
-            }
             // Glyph of Mend Pet
             if (dummySpell->Id == 57870)
             {
@@ -3592,13 +3572,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 basepoints[0] = damage * triggerAmount / 100 / 8;
                 trigger_spell_id = 63468;
                 target = pVictim;
-            }
-            // Rapid Recuperation
-            else if (auraSpellInfo->Id == 53228 || auraSpellInfo->Id == 53232)
-            {
-                // This effect only from Rapid Fire (ability cast)
-                if (!(spellInfo->SpellFamilyFlags & uint64(0x0000000000000020)))
-                    return SPELL_AURA_PROC_FAILED;
             }
             // Lock and Load
             else if (auraSpellInfo->SpellIconID == 3579)

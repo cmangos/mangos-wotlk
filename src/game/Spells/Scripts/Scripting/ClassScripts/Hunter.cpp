@@ -83,6 +83,39 @@ struct RoarOfSacrifice : public AuraScript
     }
 };
 
+struct RapidRecuperationPeriodic : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        Unit* target = aura->GetTarget();
+        data.basePoints[0] = target->GetPower(POWER_MANA) * aura->GetAmount() / 100;
+    }
+};
+
+struct RapidKilling : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            return;
+
+        Unit* target = aura->GetTarget();
+        if (Player* player = dynamic_cast<Player*>(target))
+        {
+            if (Aura* aura = player->GetKnownTalentRankAuraById(2131, EFFECT_INDEX_1)) // Rapid Recuperation talent
+            {
+                uint32 spellId = 0;
+                switch (aura->GetId())
+                {
+                    case 53228: spellId = 56654; break; // Rank 1
+                    case 53232: spellId = 58882; break; // Rank 2
+                }
+                target->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<KillCommand>("spell_kill_command");
@@ -90,4 +123,6 @@ void LoadHunterScripts()
     RegisterSpellScript<ExposeWeakness>("spell_expose_weakness");
     RegisterSpellScript<Disengage>("spell_disengage");
     RegisterSpellScript<RoarOfSacrifice>("spell_roar_of_sacrifice");
+    RegisterSpellScript<RapidRecuperationPeriodic>("spell_rapid_recuperation_periodic");
+    RegisterSpellScript<RapidKilling>("spell_rapid_killing");
 }
