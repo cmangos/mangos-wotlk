@@ -306,6 +306,9 @@ UPDATE creature_template SET ScriptName='npc_pallid_horror' WHERE entry IN (1639
 UPDATE gameobject_template SET ScriptName='scourge_invasion_go_circle' WHERE entry=181136;
 UPDATE gameobject_template SET ScriptName='scourge_invasion_go_necropolis' WHERE entry IN (181154,181215,181223,181374,181373);
 
+/* Death Knight*/
+UPDATE creature_template SET ScriptName='npc_gargoyle_dk' WHERE entry=27829;
+
 /*  */
 /* ZONE */
 /* */

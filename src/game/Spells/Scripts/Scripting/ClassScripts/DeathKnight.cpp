@@ -18,6 +18,7 @@
 
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 struct ScourgeStrike : public SpellScript
 {
@@ -482,6 +483,74 @@ struct AggroRadius8YD : public SpellScript
     }
 };
 
+enum SummonGargoyleData
+{
+    SPELL_RISEN_GHOUL_SPAWN_IN = 47448,
+    SPELL_DEATH_KNIGHT_PET_SCALING_01 = 54566,
+    SPELL_DEATH_KNIGHT_PET_SCALING_02 = 51996,
+    SPELL_AVOIDANCE_PASSIVE = 62137,
+    SPELL_TAUNT_GARGOYLE = 37486,
+
+    NPC_GARGOYLE_DK = 27829,
+
+    POINT_ABOVE_TARGET = 1,
+};
+
+struct SummonGargoyle : public SpellScript, public AuraScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->CastSpell(nullptr, SPELL_RISEN_GHOUL_SPAWN_IN, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_DEATH_KNIGHT_PET_SCALING_01, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_DEATH_KNIGHT_PET_SCALING_02, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_DEATH_KNIGHT_PET_SCALING_03, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, SPELL_AVOIDANCE_PASSIVE, TRIGGERED_NONE);
+        // TODO: Figure out cast speed scaling
+
+        Unit* target = spell->m_targets.getUnitTarget();
+        Position pos = target ? target->GetPosition() : spell->GetCaster()->GetPosition();
+        pos.z += 15.f;
+        summon->SetLevitate(true);
+        summon->AI()->SetFollowMovement(false);
+        summon->AI()->SetCombatMovement(false);
+        summon->AI()->SetCombatScriptStatus(true);
+        summon->AI()->SetMeleeEnabled(false);
+        summon->GetMotionMaster()->MovePoint(POINT_ABOVE_TARGET, pos, FORCED_MOVEMENT_RUN);
+        if (target)
+            summon->AddThreat(target, 0.f);
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+
+        Pet* gargoyle = caster->FindGuardianWithEntry(NPC_GARGOYLE_DK);
+        aura->GetTarget()->CastSpell(gargoyle, SPELL_TAUNT_GARGOYLE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct GargoyleDeathKnightAI : public CombatAI
+{
+    GargoyleDeathKnightAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        if (creature->GetCreatureInfo()->SpellList)
+            creature->SetSpellList(creature->GetCreatureInfo()->SpellList);
+        SetRangedMode(true, 40.f, TYPE_FULL_CASTER);
+    }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType == POINT_MOTION_TYPE && data == POINT_ABOVE_TARGET)
+        {
+            SetCombatScriptStatus(false);
+            m_creature->SetHover(true);
+            m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_FLY_ANIM);
+        }
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -503,4 +572,10 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<DancingRuneWeapon>("spell_dancing_rune_weapon");
     RegisterSpellScript<FakeAggroRadius8YD>("spell_fake_aggro_radius_8yd");
     RegisterSpellScript<AggroRadius8YD>("spell_aggro_radius_8yd");
+    RegisterSpellScript<SummonGargoyle>("spell_summon_gargoyle");
+
+    Script* pNewScript = new Script;
+    pNewScript->Name = "npc_gargoyle_dk";
+    pNewScript->GetAI = &GetNewAIInstance<GargoyleDeathKnightAI>;
+    pNewScript->RegisterSelf();
 }

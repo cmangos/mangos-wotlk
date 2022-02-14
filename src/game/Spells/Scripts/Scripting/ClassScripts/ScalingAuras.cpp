@@ -888,6 +888,8 @@ struct DeathKnightPetScaling1 : public AuraScript
                 break;
             }
             case EFFECT_INDEX_2: // spell damage
+                if (Unit* owner = data.caster->GetOwner())
+                    value = owner->GetTotalAttackPowerValue(BASE_ATTACK) * 0.125f;
                 break;
         }
         return value;

@@ -755,6 +755,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54639,'spell_death_rune_dk'),
 (56834,'spell_death_rune_dk'),
 (56835,'spell_death_rune_dk'),
+(49206,'spell_summon_gargoyle'),
 (44543,'spell_fingers_of_frost_proc'),
 (44545,'spell_fingers_of_frost_proc'),
 (44544,'spell_fingers_of_frost_ignore'),
