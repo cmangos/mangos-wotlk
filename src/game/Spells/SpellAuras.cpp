@@ -10627,7 +10627,7 @@ void SpellAuraHolder::BuildUpdatePacket(WorldPacket& data) const
     data << uint8(auraFlags);
     data << uint8(GetAuraLevel());
 
-    uint32 stackCount = m_procCharges ? m_procCharges * m_stackAmount : m_stackAmount;
+    uint32 stackCount = m_spellProto->StackAmount ?  m_stackAmount : m_procCharges;
     data << uint8(stackCount <= 255 ? stackCount : 255);
 
     if (!(auraFlags & AFLAG_NOT_CASTER))
