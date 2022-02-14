@@ -23357,6 +23357,13 @@ SpellEntry const* Player::GetKnownTalentRankById(int32 talentId) const
     return nullptr;
 }
 
+Aura* Player::GetKnownTalentRankAuraById(int32 talentId, SpellEffectIndex effIdx)
+{
+    if (SpellEntry const* spellInfo = GetKnownTalentRankById(talentId))
+        return GetAura(spellInfo->Id, effIdx);
+    return nullptr;
+}
+
 void Player::LearnTalent(uint32 talentId, uint32 talentRank)
 {
     uint32 CurTalentPoints = GetFreeTalentPoints();

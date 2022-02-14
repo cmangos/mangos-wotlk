@@ -58,9 +58,21 @@ struct AncestralAwakening : public SpellScript
     }
 };
 
+struct EartbindTotem : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (Player* caster = dynamic_cast<Player*>(spell->GetCaster()))
+            if (Aura* aura = caster->GetKnownTalentRankAuraById(2052, EFFECT_INDEX_1)) // Storm, Earth and Fire talent
+                if (roll_chance_i(aura->GetAmount()))
+                    summon->CastSpell(nullptr, 64695, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadShamanScripts()
 {
     RegisterSpellScript<EarthShield>("spell_earth_shield");
     RegisterSpellScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
     RegisterSpellScript<AncestralAwakening>("spell_ancestral_awakening");
+    RegisterSpellScript<EartbindTotem>("spell_earthbind_totem");
 }
