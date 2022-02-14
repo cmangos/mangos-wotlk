@@ -48,8 +48,26 @@ struct RetaliationDummyCreature : public AuraScript
     }
 };
 
+struct Shadowmeld : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        Unit* caster = spell->GetCaster();
+        caster->CastSpell(nullptr, 62196, TRIGGERED_OLD_TRIGGERED);
+        std::vector<Unit*> removal;
+        for (auto& data : caster->getHostileRefManager())
+        {
+            if (data.getSource()->getThreatList().size() == 1)
+                removal.push_back(data.getSource()->getOwner());
+        }
+        for (Unit* enemy : removal)
+            enemy->getThreatManager().modifyThreatPercent(caster, -101);
+    }
+};
+
 void AddSC_spell_scripts_wotlk()
 {
     RegisterSpellScript<Replenishment>("spell_replenishment");
     RegisterSpellScript<RetaliationDummyCreature>("spell_retaliation_dummy_creature");
+    RegisterSpellScript<Shadowmeld>("spell_shadowmeld");
 }

@@ -615,6 +615,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57669,'spell_replenishment'),
 (58418,'spell_portal_to_capital_city'),
 (58420,'spell_portal_to_capital_city'),
+(58984,'spell_shadowmeld'),
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
 (59317,'spell_teleporting_dalaran'),
 (59331,'spell_poisoned_spear'),
