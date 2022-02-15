@@ -297,6 +297,8 @@ class Pet : public Creature
         void SetSaveAutoCast() { m_saveAutocast = true; }
         bool IsSaveAutoCast() const { return m_saveAutocast; }
         void InitializeSpellsForControllableGuardian(bool load);
+
+        void StartCooldown(Unit* owner);
     protected:
         uint32  m_happinessTimer;
         PetType m_petType;
@@ -313,6 +315,7 @@ class Pet : public Creature
         bool m_controllableGuardian;
         bool m_doNotFollowMounted;
         bool m_saveAutocast;
+        bool m_imposedCooldown;
 
         void SaveToDB(uint32, uint8, uint32) override       // overwrite of Creature::SaveToDB     - don't must be called
         {

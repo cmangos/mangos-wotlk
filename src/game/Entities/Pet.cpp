@@ -33,7 +33,7 @@ Pet::Pet(PetType type) :
     m_removed(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
     m_loading(false),
     m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false), m_dismissDisabled(false),
-    m_controllableGuardian(false), m_doNotFollowMounted(false)
+    m_controllableGuardian(false), m_doNotFollowMounted(false), m_imposedCooldown(false)
 {
     m_name = "Pet";
     m_regenTimer = 4000;
@@ -419,14 +419,6 @@ bool Pet::LoadPetFromDB(Player* owner, Position const& spawnPos, uint32 petentry
 
     SavePetToDB(PET_SAVE_AS_CURRENT, owner);
 
-    if (owner)
-    {
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(GetUInt32Value(UNIT_CREATED_BY_SPELL));
-        // Add infinity cooldown on db load
-        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
-            owner->AddCooldown(*spellInfo, nullptr, true);
-    }
-
     if (GenericTransport* transport = owner->GetTransport())
         transport->AddPetToTransport(owner, this);
     return true;
@@ -646,6 +638,13 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
         }
 
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+
+        if (Unit* owner = GetOwner())
+        {
+            StartCooldown(owner);
+            if (getPetType() == GUARDIAN_PET)
+                owner->RemoveGuardian(this);
+        }
     }
     else if (GetDeathState() == ALIVE)
     {
@@ -653,10 +652,6 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
         CastPetAuras(true);
     }
     CastOwnerTalentAuras();
-
-    if (getPetType() == GUARDIAN_PET)
-        if (Unit* owner = GetOwner())
-            owner->RemoveGuardian(this);
 }
 
 void Pet::Update(const uint32 diff)
@@ -867,12 +862,7 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
         }
 
         if (p_owner)
-        {
-            SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(GetUInt32Value(UNIT_CREATED_BY_SPELL));
-            // Remove infinity cooldown
-            if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
-                p_owner->AddCooldown(*spellInfo);
-        }
+            StartCooldown(p_owner);
 
         // only if current pet in slot
         switch (getPetType())
@@ -2501,5 +2491,17 @@ void Pet::InitializeSpellsForControllableGuardian(bool load)
             UnitActionBarEntry const* bar = m_charmInfo->GetActionBarEntry(i);
             m_charmInfo->SetActionBar(i, bar->GetAction(), (ActiveStates)m_spells[bar->GetAction()].active);
         }
+    }
+}
+
+void Pet::StartCooldown(Unit* owner)
+{
+    if (!m_imposedCooldown)
+    {
+        m_imposedCooldown = true;
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(GetUInt32Value(UNIT_CREATED_BY_SPELL));
+        // Remove infinity cooldown
+        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            owner->AddCooldown(*spellInfo);
     }
 }
