@@ -108,7 +108,7 @@ void WorldSession::HandleQuestgiverHelloOpcode(WorldPacket& recv_data)
     if (sScriptDevAIMgr.OnGossipHello(_player, pCreature))
         return;
 
-    _player->PrepareGossipMenu(pCreature, pCreature->GetCreatureInfo()->GossipMenuId);
+    _player->PrepareGossipMenu(pCreature, pCreature->GetDefaultGossipMenuId());
     _player->SendPreparedGossip(pCreature);
 }
 
