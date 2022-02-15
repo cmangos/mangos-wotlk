@@ -882,7 +882,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
 
     // Hunter traps spells (for Entrapment trigger)
     // Gives your Immolation Trap, Frost Trap, Explosive Trap, and Snake Trap ....
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & uint64(0x000020000000001C))
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->IsFitToFamilyMask(uint64(0x000020000000001C), uint32(0x00040000)))
         procAttacker |= PROC_FLAG_ON_TRAP_ACTIVATION;
 
     if (IsNextMeleeSwingSpell(m_spellInfo))

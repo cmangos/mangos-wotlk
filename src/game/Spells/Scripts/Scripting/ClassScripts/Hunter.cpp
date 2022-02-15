@@ -19,6 +19,16 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
+struct Entrapment : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& procData) const override
+    {
+        if (procData.spell)
+            procData.triggerOriginalCaster = procData.spell->GetTrueCaster()->GetObjectGuid();
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 struct KillCommand : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
@@ -118,6 +128,7 @@ struct RapidKilling : public AuraScript
 
 void LoadHunterScripts()
 {
+    RegisterSpellScript<Entrapment>("spell_entrapment");
     RegisterSpellScript<KillCommand>("spell_kill_command");
     RegisterSpellScript<Misdirection>("spell_misdirection");
     RegisterSpellScript<ExposeWeakness>("spell_expose_weakness");

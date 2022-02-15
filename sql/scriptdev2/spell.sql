@@ -778,6 +778,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(19185,'spell_entrapment'),
+(19387,'spell_entrapment'),
+(19388,'spell_entrapment'),
 (34026,'spell_kill_command'),
 (34477,'spell_misdirection'),
 (34501,'spell_expose_weakness'),
