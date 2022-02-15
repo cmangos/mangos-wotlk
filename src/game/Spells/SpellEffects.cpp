@@ -6301,6 +6301,12 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         else if ((summon_prop->Flags & SUMMON_PROP_FLAG_USE_SUMMONER_FACTION) || !creature->IsTemporarySummon())
             creature->setFaction(petInvoker->GetFaction());
 
+        if (summon_prop->Flags & SUMMON_PROP_FLAG_JOIN_SUMMONERS_SPAWN_GROUP && petInvoker->IsControlledByPlayer())
+        {
+            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            creature->setFaction(petInvoker->GetFaction());
+        }
+
         if (!itr->processed)
         {
             m_trueCaster->GetMap()->Add(itr->creature);
