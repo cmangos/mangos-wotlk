@@ -19,6 +19,7 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
 struct ScourgeStrike : public SpellScript
 {
