@@ -85,6 +85,7 @@ enum GurtoggActions
     GURTOGG_ACTION_FEL_ACID,
     GURTOGG_ACTION_BEWILDERING_STRIKE, // Phase 1 only
     GURTOGG_ACTION_EJECT,
+    GURTOGG_ACTION_CHARGE, // Phase 2 only
     GURTOGG_ACTION_MAX,
 };
 
@@ -99,6 +100,7 @@ struct boss_gurtogg_bloodboilAI : public CombatAI
         AddCombatAction(GURTOGG_ACTION_FEL_ACID, GetInitialActionTimer(GURTOGG_ACTION_FEL_ACID));
         AddCombatAction(GURTOGG_ACTION_BEWILDERING_STRIKE, GetInitialActionTimer(GURTOGG_ACTION_BEWILDERING_STRIKE));
         AddCombatAction(GURTOGG_ACTION_EJECT, GetInitialActionTimer(GURTOGG_ACTION_EJECT));
+        AddCombatAction(GURTOGG_ACTION_CHARGE, true);
         m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float, float y, float)
         {
             return y < 140.f;
@@ -146,6 +148,7 @@ struct boss_gurtogg_bloodboilAI : public CombatAI
             case GURTOGG_ACTION_FEL_ACID: return urand(7000, 23000);
             case GURTOGG_ACTION_BEWILDERING_STRIKE: return 20000;
             case GURTOGG_ACTION_EJECT: return 15000;
+            case GURTOGG_ACTION_CHARGE: return urand(10000, 15000);
             default: return 0;
         }
     }
@@ -212,8 +215,9 @@ struct boss_gurtogg_bloodboilAI : public CombatAI
                 m_phase1 = false;
                 DisableCombatAction(GURTOGG_ACTION_BLOODBOIL);
                 DisableCombatAction(GURTOGG_ACTION_BEWILDERING_STRIKE);
-                ResetTimer(GURTOGG_ACTION_ARCING_SMASH, 10000);
-                ResetTimer(GURTOGG_ACTION_FEL_ACID, urand(12000, 15000));
+                ResetCombatAction(GURTOGG_ACTION_ARCING_SMASH, 10000);
+                ResetCombatAction(GURTOGG_ACTION_FEL_ACID, urand(12000, 15000));
+                ResetCombatAction(GURTOGG_ACTION_CHARGE, urand(2000, 5000));
             }
         }
         else
@@ -223,11 +227,12 @@ struct boss_gurtogg_bloodboilAI : public CombatAI
             m_phase1 = true;
             DoCastSpellIfCan(nullptr, SPELL_ACIDIC_WOUND, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
             m_creature->CastSpell(nullptr, SPELL_FEL_GEYSER, TRIGGERED_OLD_TRIGGERED);
-            ResetTimer(GURTOGG_ACTION_BLOODBOIL, 10000);
-            ResetTimer(GURTOGG_ACTION_ARCING_SMASH, 10000);
-            ResetTimer(GURTOGG_ACTION_FEL_ACID, GetInitialActionTimer(GURTOGG_ACTION_FEL_ACID));
-            ResetTimer(GURTOGG_ACTION_BEWILDERING_STRIKE, 28000);
-            ResetTimer(GURTOGG_ACTION_EJECT, 30000);
+            ResetCombatAction(GURTOGG_ACTION_BLOODBOIL, 10000);
+            ResetCombatAction(GURTOGG_ACTION_ARCING_SMASH, 10000);
+            ResetCombatAction(GURTOGG_ACTION_FEL_ACID, GetInitialActionTimer(GURTOGG_ACTION_FEL_ACID));
+            ResetCombatAction(GURTOGG_ACTION_BEWILDERING_STRIKE, 28000);
+            ResetCombatAction(GURTOGG_ACTION_EJECT, 30000);
+            DisableCombatAction(GURTOGG_ACTION_CHARGE);
             if (Unit* felRageTarget = m_creature->GetMap()->GetCreature(m_felRageTarget))
                 m_creature->getThreatManager().modifyThreatPercent(felRageTarget, -100);
         }
@@ -290,6 +295,12 @@ struct boss_gurtogg_bloodboilAI : public CombatAI
             case GURTOGG_ACTION_EJECT:
             {
                 if (DoCastSpellIfCan(m_creature->GetVictim(), m_phase1 ? SPELL_EJECT_1 : SPELL_EJECT_2) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(GurtoggActions(action)));
+                return;
+            }
+            case GURTOGG_ACTION_CHARGE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHARGE) == CAST_OK)
                     ResetCombatAction(action, GetSubsequentActionTimer(GurtoggActions(action)));
                 return;
             }
