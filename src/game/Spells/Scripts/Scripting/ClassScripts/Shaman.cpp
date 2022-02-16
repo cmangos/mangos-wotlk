@@ -69,10 +69,32 @@ struct EartbindTotem : public SpellScript
     }
 };
 
+struct LavaLash : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Player* caster = dynamic_cast<Player*>(spell->GetCaster());
+        if (!caster)
+            return;
+
+        if (Item* offhand = caster->GetWeaponForAttack(OFF_ATTACK))
+            if (uint32 enchantId = offhand->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+                if (SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchantId))
+                    if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(enchantEntry->spellid[0]))
+                        if (spellInfo->IsFitToFamilyMask(0x00200000))
+                            // adds damage to targets total damage at end of effect
+                            spell->SetDamage(spell->GetDamage() + caster->CalculateSpellEffectValue(spell->GetUnitTarget(), spell->m_spellInfo, EFFECT_INDEX_1));
+    }
+};
+
 void LoadShamanScripts()
 {
     RegisterSpellScript<EarthShield>("spell_earth_shield");
     RegisterSpellScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
     RegisterSpellScript<AncestralAwakening>("spell_ancestral_awakening");
     RegisterSpellScript<EartbindTotem>("spell_earthbind_totem");
+    RegisterSpellScript<LavaLash>("spell_lava_lash");
 }
