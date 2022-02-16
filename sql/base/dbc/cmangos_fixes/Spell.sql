@@ -1694,9 +1694,6 @@ UPDATE `spell_template` SET `InterruptFlags` = `InterruptFlags`&~0x00000010 WHER
 35394 -- Spore Cloud
 );
 
-UPDATE spell_template SET Attributes=320 WHERE id=28282; -- This makes Ashbringer passive aura icon invisible
-UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; -- AB Effect 000, critters/neutral no longer attack
-
 -- Osmosis - child spell should not be categorized as channel
 UPDATE `spell_template` SET `AttributesEx`=AttributesEx&~0x00004004 WHERE `Id` IN(35342);
 
