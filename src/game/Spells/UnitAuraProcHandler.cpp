@@ -2725,14 +2725,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 triggered_spell_id = 64695;
                 break;
             }
-            // Ancestral Awakening
-            if (dummySpell->SpellIconID == 3065)
-            {
-                triggered_spell_id = 52759;
-                basepoints[0] = triggerAmount * damage / 100;
-                target = this;
-                break;
-            }
             // Flametongue Weapon (Passive), Ranks
             if (dummySpell->SpellFamilyFlags & uint64(0x0000000000200000))
             {

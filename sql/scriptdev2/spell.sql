@@ -1026,8 +1026,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (49284,'spell_earth_shield'),
 (2484,'spell_earthbind_totem'),
 (60103,'spell_lava_lash'),
-(70811,'spell_item_shaman_t10_elemental_2p_bonus'),
-(52759,'spell_ancestral_awakening');
+(51556,'spell_ancestral_awakening'),
+(51557,'spell_ancestral_awakening'),
+(51558,'spell_ancestral_awakening'),
+(52759,'spell_ancestral_awakening_search'),
+(70811,'spell_item_shaman_t10_elemental_2p_bonus');
 
 -- Food and Drink
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

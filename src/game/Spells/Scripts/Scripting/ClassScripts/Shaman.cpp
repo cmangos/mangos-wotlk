@@ -118,15 +118,6 @@ struct ItemShamanT10Elemental2PBonus : public AuraScript
     }
 };
 
-struct AncestralAwakening : public SpellScript
-{
-    void OnInit(Spell* spell) const override
-    {
-        spell->SetMaxAffectedTargets(1);
-        spell->SetFilteringScheme(EFFECT_INDEX_0, false, SCHEME_PRIORITIZE_HEALTH);
-    }
-};
-
 struct EartbindTotem : public SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
@@ -159,17 +150,44 @@ struct LavaLash : public SpellScript
     }
 };
 
+struct AncestralAwakening : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        int32 damage = procData.damage * aura->GetAmount() / 100;
+        aura->GetTarget()->CastCustomSpell(nullptr, 52759, &damage, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+struct AncestralAwakeningSearch : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(1);
+        spell->SetFilteringScheme(EFFECT_INDEX_0, false, SCHEME_PRIORITIZE_HEALTH);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        int32 damage = spell->GetDamage();
+        if (Unit* target = spell->GetUnitTarget())
+            spell->GetCaster()->CastCustomSpell(target, 52752, &damage, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+    }
+};
+
 void LoadShamanScripts()
 {
-    RegisterSpellScript<EarthShield>("spell_earth_shield");
-    RegisterSpellScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
-    RegisterSpellScript<AncestralAwakening>("spell_ancestral_awakening");
-    RegisterSpellScript<EartbindTotem>("spell_earthbind_totem");
-    RegisterSpellScript<LavaLash>("spell_lava_lash");
-    RegisterSpellScript<SentryTotem>("spell_sentry_totem");
-
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_sentry_totem";
     pNewScript->GetAI = &GetNewAIInstance<SentryTotemAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SentryTotem>("spell_sentry_totem");
+    RegisterSpellScript<EarthShield>("spell_earth_shield");
+    RegisterSpellScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
+    RegisterSpellScript<EartbindTotem>("spell_earthbind_totem");
+    RegisterSpellScript<LavaLash>("spell_lava_lash");
+    RegisterSpellScript<AncestralAwakening>("spell_ancestral_awakening");
+    RegisterSpellScript<AncestralAwakeningSearch>("spell_ancestral_awakening_search");
 }
