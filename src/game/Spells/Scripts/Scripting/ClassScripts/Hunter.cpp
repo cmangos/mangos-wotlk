@@ -145,6 +145,41 @@ struct ExplosiveShot : public AuraScript
     }
 };
 
+struct LockAndLoad : public AuraScript
+{
+    bool OnCheckProc(Aura* aura, ProcExecutionData& /*data*/) const override
+    {
+        if (aura->GetTarget()->HasAura(67544)) // Lock and Load Marker
+            return false;
+        return true;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!procData.spellInfo || aura->GetEffIndex() != EFFECT_INDEX_0)
+            return SPELL_AURA_PROC_OK;
+
+        if (procData.spellInfo->IsFitToFamilyMask(0x00000018) && (procData.procFlags & PROC_FLAG_ON_TRAP_ACTIVATION) != 0)
+            if (!roll_chance_i(aura->GetAmount())) // eff 0 chance
+                return SPELL_AURA_PROC_FAILED;
+
+        if (procData.spellInfo->IsFitToFamilyMask(0x0800000000000000, 0x00024000) && (procData.procFlags & PROC_FLAG_DEAL_HARMFUL_PERIODIC) != 0)
+            if (Aura* secondEffectAura = aura->GetHolder()->m_auras[EFFECT_INDEX_1]) // should never fail
+                if (!roll_chance_i(secondEffectAura->GetAmount())) // eff 0 chance
+                    return SPELL_AURA_PROC_FAILED;
+
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+struct LockAndLoadTrigger : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->AddPrecastSpell(67544);
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<Entrapment>("spell_entrapment");
@@ -156,4 +191,6 @@ void LoadHunterScripts()
     RegisterSpellScript<RapidRecuperationPeriodic>("spell_rapid_recuperation_periodic");
     RegisterSpellScript<RapidKilling>("spell_rapid_killing");
     RegisterSpellScript<ExplosiveShot>("spell_explosive_shot");
+    RegisterSpellScript<LockAndLoad>("spell_lock_and_load");
+    RegisterSpellScript<LockAndLoadTrigger>("spell_lock_and_load_trigger");
 }

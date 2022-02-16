@@ -2174,16 +2174,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 target = this;
                 break;
             }
-            // Lock and Load
-            if (dummySpell->SpellIconID == 3579)
-            {
-                // Proc only from periodic (from trap activation proc another aura of this spell)
-                if (!(procFlags & PROC_FLAG_DEAL_HARMFUL_PERIODIC) || !roll_chance_i(triggerAmount))
-                    return SPELL_AURA_PROC_FAILED;
-                triggered_spell_id = 56453;
-                target = this;
-                break;
-            }
             // Glyph of Mend Pet
             if (dummySpell->Id == 57870)
             {
@@ -3573,13 +3563,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 trigger_spell_id = 63468;
                 target = pVictim;
             }
-            // Lock and Load
-            else if (auraSpellInfo->SpellIconID == 3579)
-            {
-                // Check for Lock and Load Marker
-                if (HasAura(67544))
-                    return SPELL_AURA_PROC_FAILED;
-            }
             // Item - Hunter T9 4P Bonus
             else if (auraSpellInfo->Id == 67151)
             {
@@ -3967,14 +3950,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 return SPELL_AURA_PROC_FAILED;
             // Need Interrupt or Silenced mechanic
             if (!(GetAllSpellMechanicMask(spellInfo) & IMMUNE_TO_INTERRUPT_AND_SILENCE_MASK))
-                return SPELL_AURA_PROC_FAILED;
-            break;
-        }
-        // Lock and Load
-        case 56453:
-        {
-            // Proc only from trap activation (from periodic proc another aura of this spell)
-            if (!(procFlags & PROC_FLAG_ON_TRAP_ACTIVATION) || !roll_chance_i(triggerAmount))
                 return SPELL_AURA_PROC_FAILED;
             break;
         }

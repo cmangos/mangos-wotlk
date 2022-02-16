@@ -3489,9 +3489,6 @@ SpellCastResult Spell::cast(bool skipCheck)
             // Deterrence
             if (m_spellInfo->Id == 19263)
                 AddPrecastSpell(67801);
-            // Lock and Load
-            else if (m_spellInfo->Id == 56453)
-                AddPrecastSpell(67544);                     // Lock and Load Marker
             break;
         }
         case SPELLFAMILY_PALADIN:
