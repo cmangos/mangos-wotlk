@@ -789,6 +789,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (58882,'spell_rapid_recuperation_periodic'),
 (35098,'spell_rapid_killing'),
 (35099,'spell_rapid_killing'),
+(53301,'spell_explosive_shot'),
+(60051,'spell_explosive_shot'),
+(60052,'spell_explosive_shot'),
+(60053,'spell_explosive_shot'),
 (781,'Disengage');
 
 -- Priest

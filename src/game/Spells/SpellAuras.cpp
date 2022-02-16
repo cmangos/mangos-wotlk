@@ -6267,24 +6267,6 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
             }
             break;
         }
-        case SPELLFAMILY_HUNTER:
-        {
-            Unit* caster = GetCaster();
-
-            switch (spell->Id)
-            {
-                case 53301: // Explosive Shot
-                case 60051:
-                case 60052:
-                case 60053:
-
-                    break;
-            }
-            // Explosive Shot
-            if (apply && !loading && caster)
-                m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 14 / 100);
-            break;
-        }
     }
 
     m_isPeriodic = apply;
@@ -9521,12 +9503,6 @@ void Aura::PeriodicDummyTick()
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Explosive Shot
-            if (spell->SpellFamilyFlags & uint64(0x8000000000000000))
-            {
-                target->CastCustomSpell(target, 53352, &m_modifier.m_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, GetCasterGuid());
-                return;
-            }
             switch (spell->Id)
             {
                 // Harpooner's Mark

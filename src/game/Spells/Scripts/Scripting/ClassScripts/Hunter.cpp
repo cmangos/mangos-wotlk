@@ -126,6 +126,25 @@ struct RapidKilling : public AuraScript
     }
 };
 
+struct ExplosiveShot : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.caster)
+            value += int32(data.caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 14 / 100);
+        return value;
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (Unit* caster = aura->GetCaster())
+        {
+            int32 amount = aura->GetAmount();
+            caster->CastCustomSpell(aura->GetTarget(), 53352, &amount, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG, nullptr, aura);
+        }
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<Entrapment>("spell_entrapment");
@@ -136,4 +155,5 @@ void LoadHunterScripts()
     RegisterSpellScript<RoarOfSacrifice>("spell_roar_of_sacrifice");
     RegisterSpellScript<RapidRecuperationPeriodic>("spell_rapid_recuperation_periodic");
     RegisterSpellScript<RapidKilling>("spell_rapid_killing");
+    RegisterSpellScript<ExplosiveShot>("spell_explosive_shot");
 }
