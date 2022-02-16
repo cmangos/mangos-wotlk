@@ -805,6 +805,8 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
     if (IsInCombat())
         CombatStop(true);
 
+    AI()->OnUnsummon();
+
     if (owner)
     {
         Player* p_owner = nullptr;
