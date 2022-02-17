@@ -34,7 +34,7 @@ class ScriptedInstance : public InstanceData
         ~ScriptedInstance() {}
 
         // Default accessor functions
-        GameObject* GetSingleGameObjectFromStorage(uint32 entry) const;
+        GameObject* GetSingleGameObjectFromStorage(uint32 entry, bool skipDebugLog = false) const;
         Creature* GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog = false) const;
         void GetCreatureGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog = false) const;
         void GetGameObjectGuidVectorFromStorage(uint32 entry, GuidVector& entryGuidVector, bool skipDebugLog = false) const;
