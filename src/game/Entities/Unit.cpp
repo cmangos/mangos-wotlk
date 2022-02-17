@@ -8187,7 +8187,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
     {
         if (!i->isAffectedOnSpell(spellProto))
             continue;
-        i->OnDamageCalculate(DoneAdvertisedBenefit, DoneTotalMod);
+        i->OnDamageCalculate(victim, DoneAdvertisedBenefit, DoneTotalMod);
     }
 
     AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
@@ -8528,7 +8528,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
     {
         if (!i->isAffectedOnSpell(spellProto))
             continue;
-        i->OnDamageCalculate(TakenAdvertisedBenefit, TakenTotalMod);
+        i->OnDamageCalculate(this, TakenAdvertisedBenefit, TakenTotalMod);
     }
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
@@ -8731,7 +8731,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, i
     {
         if (!i->isAffectedOnSpell(spellProto))
             continue;
-        i->OnDamageCalculate(DoneAdvertisedBenefit, DoneTotalMod);
+        i->OnDamageCalculate(victim, DoneAdvertisedBenefit, DoneTotalMod);
     }
 
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
@@ -8818,7 +8818,7 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
     {
         if (!i->isAffectedOnSpell(spellProto))
             continue;
-        i->OnDamageCalculate(TakenAdvertisedBenefit, TakenTotalMod);
+        i->OnDamageCalculate(this, TakenAdvertisedBenefit, TakenTotalMod);
     }
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
@@ -9250,7 +9250,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
         {
             if (!i->isAffectedOnSpell(spellProto))
                 continue;
-            i->OnDamageCalculate(DoneFlat, DoneTotalMod);
+            i->OnDamageCalculate(victim, DoneFlat, DoneTotalMod);
         }
     }
 
@@ -9397,7 +9397,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
         {
             if (!i->isAffectedOnSpell(spellProto))
                 continue;
-            i->OnDamageCalculate(TakenAdvertisedBenefit, TakenTotalMod);
+            i->OnDamageCalculate(this, TakenAdvertisedBenefit, TakenTotalMod);
         }
     }
 
