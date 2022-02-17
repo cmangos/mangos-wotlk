@@ -182,6 +182,102 @@ struct PowerWordShield : public AuraScript
     }
 };
 
+enum LightwellData
+{
+    NPC_PRIEST_LIGHTWELL_1 = 31897,
+    NPC_PRIEST_LIGHTWELL_2 = 31896,
+    NPC_PRIEST_LIGHTWELL_3 = 31895,
+    NPC_PRIEST_LIGHTWELL_4 = 31894,
+    NPC_PRIEST_LIGHTWELL_5 = 31893,
+    NPC_PRIEST_LIGHTWELL_6 = 31883,
+
+    SPELL_PRIEST_LIGHTWELL_RENEW_R1 = 7001,
+    SPELL_PRIEST_LIGHTWELL_RENEW_R2 = 27873,
+    SPELL_PRIEST_LIGHTWELL_RENEW_R3 = 27874,
+    SPELL_PRIEST_LIGHTWELL_RENEW_R4 = 28276,
+    SPELL_PRIEST_LIGHTWELL_RENEW_R5 = 48084,
+    SPELL_PRIEST_LIGHTWELL_RENEW_R6 = 48085,
+
+    SPELL_PRIEST_LIGHTWELL_CHARGES = 59907,
+};
+
+struct LightwellRenew : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->SetScriptValue(aura->GetTarget()->GetMaxHealth() * 30 / 100); // set at 30% hp of target
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        // proc until 30% of hp as damage
+        uint64 remainingDamage = aura->GetScriptValue();
+        if (remainingDamage > procData.damage)
+            remainingDamage -= procData.damage;
+        else
+            remainingDamage = 0;
+        aura->SetScriptValue(remainingDamage);
+        return remainingDamage ? SPELL_AURA_PROC_FAILED : SPELL_AURA_PROC_OK;
+    }
+};
+
+struct LightwellRelay : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Creature* caster = dynamic_cast<Creature*>(spell->GetCaster());
+        if (!caster || !caster->IsTemporarySummon())
+            return;
+
+        uint32 lightwellRenew = 0;
+        switch (caster->GetEntry())
+        {
+            case NPC_PRIEST_LIGHTWELL_1:
+                lightwellRenew = SPELL_PRIEST_LIGHTWELL_RENEW_R1;
+                break;
+            case NPC_PRIEST_LIGHTWELL_2:
+                lightwellRenew = SPELL_PRIEST_LIGHTWELL_RENEW_R2;
+                break;
+            case NPC_PRIEST_LIGHTWELL_3:
+                lightwellRenew = SPELL_PRIEST_LIGHTWELL_RENEW_R3;
+                break;
+            case NPC_PRIEST_LIGHTWELL_4:
+                lightwellRenew = SPELL_PRIEST_LIGHTWELL_RENEW_R4;
+                break;
+            case NPC_PRIEST_LIGHTWELL_5:
+                lightwellRenew = SPELL_PRIEST_LIGHTWELL_RENEW_R5;
+                break;
+            case NPC_PRIEST_LIGHTWELL_6:
+                lightwellRenew = SPELL_PRIEST_LIGHTWELL_RENEW_R6;
+                break;
+            default:
+                return;
+        }
+
+        // proc a spellcast
+        if (SpellAuraHolder* chargesHolder = caster->GetSpellAuraHolder(SPELL_PRIEST_LIGHTWELL_CHARGES))
+        {
+            caster->CastSpell(spell->GetUnitTarget(), lightwellRenew, TRIGGERED_NONE, nullptr, nullptr, caster->GetSpawnerGuid());
+            if (chargesHolder->DropAuraCharge())
+                caster->ForcedDespawn();
+        }
+    }
+};
+
+struct GlyphOfLightwell : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, int32& advertisedBenefit, float& totalMod) const override
+    {
+        advertisedBenefit += aura->GetModifier()->m_amount / 3; // ticks 3 times
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -194,4 +290,7 @@ void LoadPriestScripts()
     RegisterSpellScript<HymnOfHope>("spell_hymn_of_hope");
     RegisterSpellScript<CircleOfHealing>("spell_circle_of_healing");
     RegisterSpellScript<PowerWordShield>("spell_power_word_shield");
+    RegisterSpellScript<LightwellRenew>("spell_lightwell_renew");
+    RegisterSpellScript<LightwellRelay>("spell_lightwell_relay");
+    RegisterSpellScript<GlyphOfLightwell>("spell_glyph_of_lightwell");
 }
