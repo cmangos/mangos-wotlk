@@ -346,10 +346,11 @@ struct ArmyOfTheDeadGhoul : public SpellScript
 {
     void OnSummon(Spell* /*spell*/, Creature* summon) const override
     {
-        summon->CastSpell(nullptr, 7398, TRIGGERED_NONE);
+        summon->CastSpell(nullptr, 7398, TRIGGERED_NORMAL_COMBAT_CAST);
         summon->CastSpell(nullptr, 51996, TRIGGERED_OLD_TRIGGERED);
         summon->CastSpell(nullptr, 67561, TRIGGERED_OLD_TRIGGERED); // unk scaling aura
         summon->CastSpell(nullptr, 61697, TRIGGERED_OLD_TRIGGERED);
+        summon->AI()->SetFollowMovement(false);
     }
 };
 
