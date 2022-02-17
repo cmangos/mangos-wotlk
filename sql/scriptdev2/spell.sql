@@ -896,6 +896,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30405,'spell_unstable_affliction'),
 (32379,'spell_shadow_word_death'),
 (32996,'spell_shadow_word_death'),
+(48157,'spell_shadow_word_death'),
+(48158,'spell_shadow_word_death'),
 (19505,'spell_devour_magic'),
 (19731,'spell_devour_magic'),
 (19734,'spell_devour_magic'),
