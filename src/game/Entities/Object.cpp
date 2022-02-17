@@ -2217,6 +2217,9 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map, uint
     if (settings.spellId)
         creature->SetUInt32Value(UNIT_CREATED_BY_SPELL, settings.spellId);
 
+    if (settings.level)
+        creature->SelectLevel(settings.level);
+
     if (settings.ownerGuid)
         creature->SetOwnerGuid(settings.ownerGuid);
 
