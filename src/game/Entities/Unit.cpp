@@ -1146,7 +1146,7 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
 
         // remember victim PvP death for corpse type and corpse reclaim delay
         // at original death (not at SpiritOfRedemtionTalent timeout)
-        if (!damagetype != INSTAKILL)
+        if (damagetype != INSTAKILL)
             playerVictim->SetPvPDeath(responsiblePlayer != nullptr);
 
         // achievement stuff
