@@ -5346,6 +5346,14 @@ struct DragonmawIllusionTransform : public AuraScript
     }
 };
 
+struct CallingRider : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 25.f;
+    }
+};
+
 void AddSC_shadowmoon_valley()
 {
     Script* pNewScript = new Script;
@@ -5495,4 +5503,5 @@ void AddSC_shadowmoon_valley()
     RegisterSpellScript<TagGreaterFelfireDiemetradon>("spell_tag_for_single_use");
     RegisterSpellScript<DragonmawIllusionBase>("spell_dragonmaw_illusion_base");
     RegisterSpellScript<DragonmawIllusionTransform>("spell_dragonmaw_illusion_transform");
+    RegisterSpellScript<CallingRider>("spell_calling_rider");
 }

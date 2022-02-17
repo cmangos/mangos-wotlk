@@ -256,6 +256,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (37430,'spell_lurker_spout_turning'),
 (37851,'spell_tag_for_single_use'),
 (37896,'spell_to_infinity_and_above'),
+(38119,'spell_calling_rider'),
+(38249,'spell_calling_rider'),
 (37751,'spell_submerged'),
 (37752,'spell_stand'),
 (38606,'spell_exorcism_feather'),
