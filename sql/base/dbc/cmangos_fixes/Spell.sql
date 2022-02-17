@@ -2897,6 +2897,9 @@ UPDATE spell_template SET EffectSpellClassMask1_1=0x00000018,EffectSpellClassMas
 -- Freezing Trap and Freezing Arrow - should be able to proc - same way the others do
 UPDATE spell_template SET AttributesEx3=AttributesEx3|0x00000200 WHERE Id IN(3355,14308,14309,60210);
 
+-- Glyph of Shadow Word: Death - correct mask
+UPDATE spell_template SET EffectSpellClassMask1_1=0x0,EffectSpellClassMask1_2=0x00000002,EffectSpellClassMask1_3=0x0 WHERE Id IN(55682);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
