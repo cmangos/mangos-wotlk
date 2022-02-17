@@ -12283,9 +12283,31 @@ void Spell::EffectBreakPlayerTargeting(SpellEffectIndex /* eff_idx */)
     if (!unitTarget)
         return;
 
-    WorldPacket data(SMSG_CLEAR_TARGET, 8);
-    data << unitTarget->GetObjectGuid();
-    unitTarget->SendMessageToSet(data, false);
+    WorldPacket dataBreak(SMSG_CLEAR_TARGET, 8);
+    dataBreak << unitTarget->GetPackGUID();
+
+    WorldPacket dataClear(SMSG_CLEAR_TARGET, 8);
+    dataClear << unitTarget->GetObjectGuid();
+
+    for (auto& seesMe : unitTarget->GetClientGuidsIAmAt())
+    {
+        if (Player* player = unitTarget->GetMap()->GetPlayer(seesMe))
+        {
+            if (!player->CanAttack(unitTarget))
+                continue;
+
+            player->GetSession()->SendPacket(dataBreak);
+            player->GetSession()->SendPacket(dataClear);
+        }
+    }
+
+    Unit::AttackerSet attackerSet;
+    for (Unit::AttackerSet::const_iterator itr = unitTarget->getAttackers().begin(); itr != unitTarget->getAttackers().end(); ++itr)
+        if ((*itr)->GetTypeId() == TYPEID_UNIT && !(*itr)->CanHaveThreatList())
+            attackerSet.insert(*itr);
+
+    for (Unit* attacker : attackerSet)
+        attacker->AttackStop();
 }
 
 void Spell::EffectDurabilityDamage(SpellEffectIndex eff_idx)

@@ -238,7 +238,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[90]*/     { "SPELL_EFFECT_KILL_CREDIT_PERSONAL",         TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[91]*/     { "SPELL_EFFECT_THREAT_ALL",                   TARGET_TYPE_UNKNOWN,        TARGET_NONE },
     /*[92]*/     { "SPELL_EFFECT_ENCHANT_HELD_ITEM",            TARGET_TYPE_UNIT,           TARGET_NONE },
-    /*[93]*/     { "SPELL_EFFECT_BREAK_PLAYER_TARGETING",       TARGET_TYPE_UNIT,           TARGET_NONE },
+    /*[93]*/     { "SPELL_EFFECT_BREAK_PLAYER_TARGETING",       TARGET_TYPE_UNIT,           TARGET_UNIT_CASTER },
     /*[94]*/     { "SPELL_EFFECT_SELF_RESURRECT",               TARGET_TYPE_NONE,           TARGET_NONE }, // confirmed none
     /*[95]*/     { "SPELL_EFFECT_SKINNING",                     TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[96]*/     { "SPELL_EFFECT_CHARGE",                       TARGET_TYPE_UNIT,           TARGET_NONE },
