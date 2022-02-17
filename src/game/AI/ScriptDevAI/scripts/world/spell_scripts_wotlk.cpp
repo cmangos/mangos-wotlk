@@ -65,9 +65,20 @@ struct Shadowmeld : public SpellScript
     }
 };
 
+struct StoicismAbsorb : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.caster)
+            value = data.caster->GetMaxHealth() * 0.20f;
+        return value;
+    }
+};
+
 void AddSC_spell_scripts_wotlk()
 {
     RegisterSpellScript<Replenishment>("spell_replenishment");
     RegisterSpellScript<RetaliationDummyCreature>("spell_retaliation_dummy_creature");
     RegisterSpellScript<Shadowmeld>("spell_shadowmeld");
+    RegisterSpellScript<StoicismAbsorb>("spell_stoicism");
 }

@@ -168,6 +168,19 @@ struct CircleOfHealing : public SpellScript
     }
 };
 
+struct PowerWordShield : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.caster && data.caster->IsPlayer())
+        {
+            if (Aura* borrowedTime = static_cast<Player*>(data.caster)->GetKnownTalentRankAuraById(1202, EFFECT_INDEX_1))
+                value += (borrowedTime->GetAmount() * data.caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(data.spellProto)) / 100);
+        }
+        return value;
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -179,4 +192,5 @@ void LoadPriestScripts()
     RegisterSpellScript<DivineHymn>("spell_divine_hymn");
     RegisterSpellScript<HymnOfHope>("spell_hymn_of_hope");
     RegisterSpellScript<CircleOfHealing>("spell_circle_of_healing");
+    RegisterSpellScript<PowerWordShield>("spell_power_word_shield");
 }
