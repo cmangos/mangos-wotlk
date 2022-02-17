@@ -68,18 +68,6 @@ void Pet::RemoveFromWorld()
     if (IsInWorld())
         GetMap()->GetObjectsStore().erase<Pet>(GetObjectGuid(), (Pet*)nullptr);
 
-    if (isControlled())
-    {
-        if (Unit* owner = GetOwner())
-        {
-            if (owner->IsPlayer())
-            {
-                static_cast<Player*>(owner)->RemoveControllable(this);
-                static_cast<Player*>(owner)->RelinquishFollowData(this->GetObjectGuid());
-            }
-        }
-    }
-
     ///- Don't call the function for Creature, normal mobs + totems go in a different storage
     Unit::RemoveFromWorld();
 }

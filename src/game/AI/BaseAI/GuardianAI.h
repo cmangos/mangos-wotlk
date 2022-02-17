@@ -39,7 +39,12 @@ class GuardianAI : public CreatureEventAI
         virtual void EnterEvadeMode() override;
         virtual void UpdateAI(const uint32 diff) override;
         virtual void CombatStop() override;
+
+        void OnUnsummon() override;
     protected:
         std::string GetAIName() override { return "GuardianAI"; }
+
+        float m_followAngle;
+        float m_followDist;
 };
 #endif
