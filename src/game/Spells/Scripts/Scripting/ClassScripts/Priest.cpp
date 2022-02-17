@@ -293,6 +293,24 @@ struct GlyphOfShadowWordDeath : public AuraScript
     }
 };
 
+struct ShadowAffinityDots : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_DISPEL)
+        {
+            if (Player* caster = dynamic_cast<Player*>(aura->GetCaster()))
+            {
+                if (Aura* aura = caster->GetKnownTalentRankAuraById(466, EFFECT_INDEX_1))
+                {
+                    int32 basepoints0 = aura->GetModifier()->m_amount * caster->GetCreateMana() / 100;
+                    caster->CastCustomSpell(nullptr, 64103, &basepoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
+        }
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -309,4 +327,5 @@ void LoadPriestScripts()
     RegisterSpellScript<LightwellRelay>("spell_lightwell_relay");
     RegisterSpellScript<GlyphOfLightwell>("spell_glyph_of_lightwell");
     RegisterSpellScript<GlyphOfShadowWordDeath>("spell_glyph_of_shadow_word_death");
+    RegisterSpellScript<ShadowAffinityDots>("spell_shadow_affinity_dots");
 }
