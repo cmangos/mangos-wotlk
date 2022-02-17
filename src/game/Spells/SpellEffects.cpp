@@ -12262,7 +12262,7 @@ void Spell::EffectBreakPlayerTargeting(SpellEffectIndex /* eff_idx */)
     if (!unitTarget)
         return;
 
-    WorldPacket dataBreak(SMSG_CLEAR_TARGET, 8);
+    WorldPacket dataBreak(SMSG_BREAK_TARGET, 8);
     dataBreak << unitTarget->GetPackGUID();
 
     WorldPacket dataClear(SMSG_CLEAR_TARGET, 8);
