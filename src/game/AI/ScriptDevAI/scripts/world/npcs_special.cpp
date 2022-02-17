@@ -2173,10 +2173,25 @@ struct npc_mage_mirror_imageAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_mage_mirror_image(Creature* pCreature)
+struct InheritMastersThreatList : public SpellScript
 {
-    return new npc_mage_mirror_imageAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* spawner = caster->GetSpawner();
+        auto& attackers = spawner->getAttackers();
+        Unit* target = spell->GetUnitTarget();
+
+        if (!caster->CanAttack(target) || target->IsCrowdControlled())
+            return;
+
+        if (spawner->GetVictim() == target || attackers.find(target) != attackers.end() || target->getThreatManager().HasThreat(spawner))
+        {
+            caster->AddThreat(target);
+            return;
+        }
+    }
+};
 
 struct MirrorImageFrostbolt : public SpellScript
 {
@@ -3165,7 +3180,7 @@ void AddSC_npcs_special()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_mage_mirror_image";
-    pNewScript->GetAI = &GetAI_npc_mage_mirror_image;
+    pNewScript->GetAI = &GetNewAIInstance<npc_mage_mirror_imageAI>;
     pNewScript->RegisterSelf();
     
     pNewScript = new Script;
@@ -3213,4 +3228,5 @@ void AddSC_npcs_special()
     RegisterSpellScript<GossipNPCAppearanceAllPirateDay>("spell_gossip_npc_appearance_all_pirate_day");
 
     RegisterSpellScript<MirrorImageFrostbolt>("spell_mirror_image_frostbolt");
+    RegisterSpellScript<InheritMastersThreatList>("spell_inherit_masters_threat_list");
 }

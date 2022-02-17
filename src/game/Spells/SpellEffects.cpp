@@ -3528,27 +3528,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED);
                     return;
                 }
-                case 58838:                                 // Inherit Master's Threat List
-                {
-                    if (m_caster->GetTypeId() != TYPEID_UNIT && !((Creature*)m_caster)->IsTemporarySummon())
-                        return;
-
-                    Player* owner = m_caster->GetMap()->GetPlayer(m_caster->GetSpawnerGuid());
-                    if (!owner || !owner->IsAlive())
-                        return;
-
-                    ThreatList const& threatList = owner->getThreatManager().getThreatList();
-
-                    for (auto itr : threatList)
-                    {
-                        if (Unit* target = m_caster->GetMap()->GetUnit(itr->getUnitGuid()))
-                        {
-                            if (!target->isFrozen() && !target->IsCrowdControlled())
-                                m_caster->getThreatManager().addThreatDirectly(target, unitTarget->getThreatManager().getThreat(target));
-                        }
-                    }
-                    return;
-                }
                 case 59640:                                 // Underbelly Elixir
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
