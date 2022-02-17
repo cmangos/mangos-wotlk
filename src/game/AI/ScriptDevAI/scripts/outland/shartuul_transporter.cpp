@@ -527,7 +527,7 @@ struct PossessionTransfer : public AuraScript
         if (!apply)
         {
             Unit* caster = aura->GetTarget();
-            Unit* target = caster->GetChannelObject();
+            Unit* target = dynamic_cast<Unit*>(caster->GetChannelObject());
             if (!target)
                 return;
             Unit* charmer = target->GetCharmer();

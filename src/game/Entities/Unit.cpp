@@ -7692,7 +7692,7 @@ Unit* Unit::GetTarget(WorldObject const* pov /*= nullptr*/) const
     return nullptr;
 }
 
-Unit* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
+WorldObject* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
 {
     if (ObjectGuid const& guid = GetChannelObjectGuid())
     {
@@ -7711,7 +7711,7 @@ Unit* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
             return nullptr;
         }
         // We need a unit in the same map only
-        if (Unit* unit = accessor->GetMap()->GetUnit(guid))
+        if (WorldObject* unit = accessor->GetMap()->GetWorldObject(guid))
             return unit;
         // Bugcheck
         sLog.outDebug("Unit::GetChannelObject: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",

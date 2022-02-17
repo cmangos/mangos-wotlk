@@ -97,7 +97,7 @@ enum SpellTarget
     TARGET_LOCATION_CASTER_RANDOM_CIRCUMFERENCE        = 73,
     TARGET_LOCATION_UNIT_RANDOM_SIDE                   = 74,
     TARGET_LOCATION_UNIT_RANDOM_CIRCUMFERENCE          = 75,
-    TARGET_LOCATION_DYNOBJ_POSITION                    = 76,
+    TARGET_LOCATION_CHANNEL_TARGET_DEST                = 76,
     TARGET_UNIT_CHANNEL_TARGET                         = 77,
     TARGET_LOCATION_NORTH                              = 78,
     TARGET_LOCATION_SOUTH                              = 79,

@@ -1920,10 +1920,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 m_targets.setDestination(x, y, z);
             }
             break;
-        case TARGET_LOCATION_DYNOBJ_POSITION:
+        case TARGET_LOCATION_CHANNEL_TARGET_DEST:
             // if parent spell create dynamic object extract area from it
-            if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
-                m_targets.setDestination(dynObj->GetPositionX(), dynObj->GetPositionY(), dynObj->GetPositionZ());
+            if (WorldObject* channelObject = m_caster->GetChannelObject())
+                m_targets.setDestination(channelObject->GetPositionX(), channelObject->GetPositionY(), channelObject->GetPositionZ());
             break;
         case TARGET_LOCATION_NORTH:
         case TARGET_LOCATION_SOUTH:
@@ -2722,7 +2722,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             break;
         case TARGET_UNIT_CHANNEL_TARGET:
         {
-            if (Unit* target = m_caster->GetChannelObject())
+            if (Unit* target = dynamic_cast<Unit*>(m_caster->GetChannelObject()))
                 if (!CheckAndAddMagnetTarget(target, effIndex, targetB, targetingData))
                     tempUnitList.push_back(target);
             break;
@@ -3941,7 +3941,7 @@ void Spell::update(uint32 difftime)
 
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST)) // these fail on lost target attention (aggro)
                     {
-                        if (Unit* target = m_caster->GetChannelObject())
+                        if (Unit* target = dynamic_cast<Unit*>(m_caster->GetChannelObject()))
                         {
                             Unit* targetsTarget = target->GetTarget();
                             if (targetsTarget && targetsTarget != m_caster)
@@ -3951,7 +3951,7 @@ void Spell::update(uint32 difftime)
 
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) && m_UniqueTargetInfo.begin() != m_UniqueTargetInfo.end())
                     {
-                        if (Unit* target = m_caster->GetChannelObject())
+                        if (WorldObject* target = m_caster->GetChannelObject())
                         {
                             if (target != m_caster)
                             {
@@ -3989,7 +3989,7 @@ void Spell::update(uint32 difftime)
                     // need check distance for channeled target only - but only when its set
                     if (m_maxRange && !m_caster->HasChannelObject(m_caster->GetObjectGuid()))
                     {
-                        if (Unit* channelTarget = m_caster->GetChannelObject())
+                        if (WorldObject* channelTarget = m_caster->GetChannelObject())
                         {
                             if (!m_caster->IsWithinCombatDistInMap(channelTarget, m_maxRange * 1.5f))
                             {
@@ -4676,7 +4676,7 @@ void Spell::SendChannelUpdate(uint32 time, uint32 lastTick) const
 
         if (!m_caster->HasChannelObject(m_caster->GetObjectGuid()))
         {
-            if (Unit* target = m_caster->GetChannelObject())
+            if (Unit* target = dynamic_cast<Unit*>(m_caster->GetChannelObject()))
             {
                 if (lastTick)
                 {
@@ -6006,7 +6006,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (gmmode)
                     tameTarget = caster->GetTarget();
                 else
-                    tameTarget = m_caster->GetChannelObject();
+                    tameTarget = dynamic_cast<Unit*>(m_caster->GetChannelObject());
 
                 if (!caster || caster->GetTypeId() != TYPEID_PLAYER ||
                         !tameTarget || tameTarget->GetTypeId() == TYPEID_PLAYER)
@@ -8083,7 +8083,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                         case TARGET_LOS_CASTER:
                             if (target != m_trueCaster)
                             {
-                                if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_LOCATION_DYNOBJ_POSITION)
+                                if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_LOCATION_CHANNEL_TARGET_DEST)
                                 {
                                     if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
                                         if (!target->IsWithinLOSInMap(dynObj, true))

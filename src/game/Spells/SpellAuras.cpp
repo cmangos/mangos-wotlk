@@ -1115,8 +1115,10 @@ void Aura::PickTargetsForSpellTrigger(Unit*& triggerCaster, Unit*& triggerTarget
             triggerCaster = GetTarget();
             triggerTarget = GetTarget();
             break;
-        case TARGET_LOCATION_DYNOBJ_POSITION:
-            triggerTargetObject = GetTarget()->GetDynObject(GetId());
+        case TARGET_LOCATION_CHANNEL_TARGET_DEST:
+            triggerCaster = GetCaster();
+            if (triggerCaster)
+                triggerTargetObject = GetCaster()->GetChannelObject();
         case TARGET_LOCATION_CASTER_SRC: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
             //[[fallthrough]]
         case TARGET_LOCATION_CASTER_DEST:

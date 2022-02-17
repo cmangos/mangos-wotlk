@@ -106,7 +106,7 @@ SpellTargetInfo SpellTargetInfoTable[MAX_SPELL_TARGETS] =
     /*[73]*/    { "TARGET_LOCATION_CASTER_RANDOM_CIRCUMFERENCE",          TARGET_TYPE_LOCATION_DEST                                                 },
     /*[74]*/    { "TARGET_LOCATION_UNIT_RANDOM_SIDE",                     TARGET_TYPE_LOCATION_DEST                                                 },
     /*[75]*/    { "TARGET_LOCATION_UNIT_RANDOM_CIRCUMFERENCE",            TARGET_TYPE_LOCATION_DEST                                                 },
-    /*[76]*/    { "TARGET_LOCATION_DYNOBJ_POSITION",                      TARGET_TYPE_LOCATION_DEST                                                 },
+    /*[76]*/    { "TARGET_LOCATION_CHANNEL_TARGET_DEST",                  TARGET_TYPE_LOCATION_DEST                                                 },
     /*[77]*/    { "TARGET_UNIT_CHANNEL_TARGET",                           TARGET_TYPE_UNIT,             TARGET_HARMFUL,    TARGET_ENUMERATOR_SINGLE },
     /*[78]*/    { "TARGET_LOCATION_NORTH",                                TARGET_TYPE_LOCATION_DEST                                                 },
     /*[79]*/    { "TARGET_LOCATION_SOUTH",                                TARGET_TYPE_LOCATION_DEST                                                 },
