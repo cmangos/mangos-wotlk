@@ -161,7 +161,7 @@ struct CurseOfDoom : public SpellScript, public AuraScript
 
     void OnApply(Aura* aura, bool apply) const override
     {
-        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_DEATH && urand(0, 100) > 95)
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
             if (Unit* caster = aura->GetCaster())
                 caster->CastSpell(nullptr, 18662, TRIGGERED_OLD_TRIGGERED);
     }
