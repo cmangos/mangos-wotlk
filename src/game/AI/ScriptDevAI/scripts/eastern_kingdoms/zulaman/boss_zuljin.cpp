@@ -208,6 +208,8 @@ struct boss_zuljinAI : public CombatAI
 
     void EnterEvadeMode() override
     {
+        m_creature->SetStunned(false);
+
         if (m_instance)
             m_instance->SetData(TYPE_ZULJIN, FAIL);
 
@@ -493,16 +495,6 @@ struct boss_zuljinAI : public CombatAI
                 if (DoCastSpellIfCan(nullptr, SPELL_FLAME_BREATH) == CAST_OK)
                     ResetCombatAction(action, 15000);
                 return;
-        }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->IsStunned() && m_creature->getThreatManager().isThreatListEmpty())
-        {
-            m_creature->SetStunned(false);
-            EnterEvadeMode();
         }
     }
 };
