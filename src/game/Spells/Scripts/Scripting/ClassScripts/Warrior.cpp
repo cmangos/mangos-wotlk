@@ -160,6 +160,33 @@ struct HeroicStrike : public SpellScript
     }
 };
 
+struct Overpower : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            return;
+
+        Player* caster = dynamic_cast<Player*>(aura->GetCaster());
+        Unit* target = aura->GetTarget();
+        if (!caster || !target->IsNonMeleeSpellCasted(false))
+            return;
+
+        if (Aura* aura = caster->GetKnownTalentRankAuraById(1860, EFFECT_INDEX_0)) // Unrelenting Assault talent
+        {
+            uint32 spellId = 0;
+            switch (aura->GetId())
+            {
+                case 46859: spellId = 64849; break; // Unrelenting Assault, rank 1
+                case 46860: spellId = 64850; break; // Unrelenting Assault, rank 2
+                default: break;
+            }
+            if (spellId)
+                target->CastSpell(nullptr, spellId, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        }
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
@@ -169,4 +196,5 @@ void LoadWarriorScripts()
     RegisterSpellScript<WarriorDevastate>("spell_warrior_devastate");
     RegisterSpellScript<RetaliationWarrior>("spell_retaliation_warrior");
     RegisterSpellScript<HeroicStrike>("spell_heroic_strike");
+    RegisterSpellScript<Overpower>("spell_overpower");
 }

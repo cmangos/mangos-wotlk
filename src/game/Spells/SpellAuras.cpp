@@ -2922,40 +2922,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         return;
                     }
                 }
-
-                // Overpower
-                if (GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000004))
-                {
-                    // Must be casting target
-                    if (!target->IsNonMeleeSpellCasted(false))
-                        return;
-
-                    Unit* caster = GetCaster();
-                    if (!caster)
-                        return;
-
-                    Unit::AuraList const& modifierAuras = caster->GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
-                    for (auto modifierAura : modifierAuras)
-                    {
-                        // Unrelenting Assault
-                        if (modifierAura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARRIOR && modifierAura->GetSpellProto()->SpellIconID == 2775)
-                        {
-                            switch (modifierAura->GetSpellProto()->Id)
-                            {
-                                case 46859:                 // Unrelenting Assault, rank 1
-                                    target->CastSpell(target, 64849, TRIGGERED_OLD_TRIGGERED, nullptr, modifierAura);
-                                    break;
-                                case 46860:                 // Unrelenting Assault, rank 2
-                                    target->CastSpell(target, 64850, TRIGGERED_OLD_TRIGGERED, nullptr, modifierAura);
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        }
-                    }
-                    return;
-                }
                 break;
             }
             case SPELLFAMILY_MAGE:
