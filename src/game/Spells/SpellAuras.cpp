@@ -5738,7 +5738,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
     target->ApplySpellImmune(this, IMMUNITY_EFFECT, m_modifier.m_miscvalue, apply);
 
     if (apply && IsPositive())
-        target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_INVULNERABILITY_BUFF_CANCELS);
+        target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_INVULNERABILITY_BUFF_CANCELS, GetHolder());
 
     switch (GetSpellProto()->Id)
     {

@@ -1962,6 +1962,7 @@ class Unit : public WorldObject
         void RemoveRankAurasDueToSpell(uint32 spellId);
         bool RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder);
         void RemoveAurasWithInterruptFlags(uint32 flags);
+        void RemoveAurasWithInterruptFlags(uint32 flags, SpellAuraHolder* except);
         void RemoveAurasWithDispelType(DispelType type, ObjectGuid casterGuid = ObjectGuid());
         void RemoveAllAuras(AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveArenaAuras(bool onleave = false);
