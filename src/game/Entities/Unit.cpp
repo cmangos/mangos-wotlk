@@ -7159,7 +7159,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit* target, SpellSchoolMask d
     SendAttackStateUpdate(&dmgInfo);
 }
 
-void Unit::SetPowerType(Powers new_powertype)
+void Unit::SetPowerType(Powers new_powertype, bool sendUpdate/*=true*/)
 {
     // set power type
     SetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE, new_powertype);
@@ -11118,7 +11118,7 @@ void Unit::SetHealthPercent(float percent)
     SetHealth(newHealth);
 }
 
-void Unit::SetPower(Powers power, uint32 val)
+void Unit::SetPower(Powers power, uint32 val, bool withPowerUpdate /*= true*/)
 {
     if (GetPower(power) == val)
         return;
@@ -11128,6 +11128,15 @@ void Unit::SetPower(Powers power, uint32 val)
         val = maxPower;
 
     SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);
+
+    if (withPowerUpdate)
+    {
+        WorldPacket data(SMSG_POWER_UPDATE, 8 + 1 + 4);
+        data << GetPackGUID();
+        data << uint8(power);
+        data << uint32(val);
+        SendMessageToSet(data, GetTypeId() == TYPEID_PLAYER);
+    }
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)

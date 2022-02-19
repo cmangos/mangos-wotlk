@@ -1410,11 +1410,11 @@ class Unit : public WorldObject
         float OCTRegenMPPerSpirit() const;
 
         Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE)); }
-        void SetPowerType(Powers new_powertype);
+        void SetPowerType(Powers new_powertype, bool sendUpdate = true);
         uint32 GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 + power); }
         uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1 + power); }
         float GetPowerPercent() const { return (GetMaxPower(GetPowerType()) == 0) ? 0.0f : (GetPower(GetPowerType()) * 100.0f) / GetMaxPower(GetPowerType()); }
-        void SetPower(Powers power, uint32 val);
+        void SetPower(Powers power, uint32 val, bool withPowerUpdate = true);
         void SetMaxPower(Powers power, uint32 val);
         int32 ModifyPower(Powers power, int32 dVal);
         void ApplyPowerMod(Powers power, uint32 val, bool apply);
@@ -2277,13 +2277,7 @@ class Unit : public WorldObject
             return SPELL_AURA_PROC_CANT_TRIGGER;
         }
 
-        void SetLastManaUse()
-        {
-            if (GetTypeId() == TYPEID_PLAYER && !IsUnderLastManaUseEffect())
-                RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
-
-            m_lastManaUseTimer = 5000;
-        }
+        void SetLastManaUse() { m_lastManaUseTimer = 5000; }
         bool IsUnderLastManaUseEffect() const { return m_lastManaUseTimer != 0 && m_lastManaUseTimer != 5000; }
 
         uint32 GetRegenTimer() const { return m_regenTimer; }

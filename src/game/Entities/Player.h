@@ -1603,7 +1603,6 @@ class Player : public Unit
         void RegenerateAll(uint32 diff = REGEN_TIME_FULL);
         void Regenerate(Powers power, uint32 diff);
         void RegenerateHealth(uint32 diff);
-        void setRegenTimer(uint32 time) {m_regenTimer = time;}
 
         uint32 GetMoney() const { return GetUInt32Value(PLAYER_FIELD_COINAGE); }
         void ModifyMoney(int32 d)

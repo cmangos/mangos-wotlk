@@ -36,7 +36,6 @@ Pet::Pet(PetType type) :
     m_controllableGuardian(false), m_doNotFollowMounted(false), m_imposedCooldown(false)
 {
     m_name = "Pet";
-    m_regenTimer = 4000;
 
     // pets always have a charminfo, even if they are not actually charmed
     InitCharmInfo(this);
@@ -699,31 +698,29 @@ void Pet::Update(const uint32 diff)
     Creature::Update(diff);
 }
 
-void Pet::RegenerateAll(uint32 update_diff)
+void Pet::RegenerateAll(uint32 diff)
 {
     // regenerate focus for hunter pets or energy for deathknight's ghoul
-    if (m_regenTimer <= update_diff)
+    m_regenTimer += diff;
+    if (m_regenTimer >= 4000)
     {
         if (!IsInCombat())
             RegenerateHealth();
 
         RegeneratePower(4.f);
-
-        m_regenTimer = 4000;
+        m_regenTimer -= 4000;
     }
-    else
-        m_regenTimer -= update_diff;
 
     if (getPetType() != HUNTER_PET)
         return;
 
-    if (m_happinessTimer <= update_diff)
+    if (m_happinessTimer <= diff)
     {
         LooseHappiness();
         m_happinessTimer = 7500;
     }
     else
-        m_happinessTimer -= update_diff;
+        m_happinessTimer -= diff;
 }
 
 void Pet::LooseHappiness()

@@ -7332,7 +7332,7 @@ SpellCastResult Spell::CheckPower(bool strict)
     if (m_powerCost > 0 && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         Player* playerCaster = (Player*)m_caster;
-        uint32 diff = REGEN_TIME_FULL - m_caster->GetRegenTimer();
+        uint32 diff = m_caster->GetRegenTimer();
         if (diff >= REGEN_TIME_PRECISE)
             playerCaster->RegenerateAll(diff);
     }
