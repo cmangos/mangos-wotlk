@@ -6010,6 +6010,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     uint32 amount = 1;
     uint32 health = 0; // totems have HP in base points
     uint32 unk = 0; // no idea what it means, but 4000-25000 cant be right for summon count
+    uint32 creatureLevel = 0;
     if (prop_id == 121 || summon_prop->Title == UNITNAME_SUMMON_TITLE_TOTEM)
     {
         health = damage;
@@ -6022,7 +6023,10 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 unk = damage;
                 break;
             default:
-                amount = damage > 0 ? damage : 1; // old code
+                if (m_spellInfo->Id == 18662)
+                    creatureLevel = damage;
+                else
+                    amount = damage > 0 ? damage : 1; // old code
                 break;
         }
     }
@@ -6033,7 +6037,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 
     // Expected Level
     WorldObject* petInvoker = responsibleCaster ? responsibleCaster : m_trueCaster;
-    uint32 level;
+    uint32 level = 0;
     // Everything considered as guardian or critter pets uses its creature template level by default (may change depending on SpellEffect params)
     if (summon_prop->Title == UNITNAME_SUMMON_TITLE_COMPANION || summon_prop->Flags & SUMMON_PROP_FLAG_USE_CREATURE_LEVEL)
     {
