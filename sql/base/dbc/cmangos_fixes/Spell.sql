@@ -2910,6 +2910,9 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- Juggernaut - Warrior Talent - correct mask
 UPDATE spell_template SET EffectSpellClassMask2_1=0x1,EffectSpellClassMask2_2=0 WHERE Id IN(64976);
 
+-- Empowered Imp - Wrong mask removal
+UPDATE spell_template SET EffectSpellClassMask1_1=0 WHERE Id IN(54278);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
