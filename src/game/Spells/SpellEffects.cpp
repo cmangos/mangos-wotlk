@@ -6308,7 +6308,6 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
             {
                 case 1122: // Warlock Infernal - requires custom code - generalized in WOTLK
                 {
-                    summon->SelectLevel(level); // needs to have casters level
                     // Enslave demon effect, without mana cost and cooldown
                     summon->CastSpell(nullptr, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
                     m_caster->CastSpell(summon, 20882, TRIGGERED_OLD_TRIGGERED);
