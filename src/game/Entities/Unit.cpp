@@ -2013,7 +2013,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
             calcDamageInfo->blocked_amount = calcDamageInfo->target->GetShieldBlockValue();
 
             // Target has a chance to double the blocked amount if it has SPELL_AURA_MOD_BLOCK_CRIT_CHANCE
-            if (roll_chance_i(pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE)))
+            if (calcDamageInfo->target->IsBlockCritical())
                 calcDamageInfo->blocked_amount *= 2;
 
             if (calcDamageInfo->blocked_amount >= calcDamageInfo->totalDamage)
@@ -2954,7 +2954,10 @@ void Unit::CalculateAbsorbResistBlock(Unit* caster, SpellNonMeleeDamage* spellDa
 {
     if (RollAbilityPartialBlockOutcome(caster, attType, spellProto))
     {
-        spellDamageInfo->blocked = std::min(GetShieldBlockValue(), spellDamageInfo->damage);
+        uint32 blockValue = GetShieldBlockValue();
+        if (IsBlockCritical())
+            blockValue *= 2;
+        spellDamageInfo->blocked = std::min(blockValue, spellDamageInfo->damage);
         spellDamageInfo->damage -= spellDamageInfo->blocked;
     }
 
@@ -3387,6 +3390,15 @@ SpellMissInfo Unit::SpellHitResult(WorldObject* caster, Unit* pVictim, SpellEntr
     }
 
     return SPELL_MISS_NONE;
+}
+
+bool Unit::IsBlockCritical() const
+{
+    int32 chance = GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE);
+    if (!chance) // dont roll if no chance
+        return false;
+
+    return roll_chance_i(chance);
 }
 
 uint32 Unit::GetDefenseSkillValue(Unit const* target) const
