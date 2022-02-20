@@ -5296,7 +5296,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_trueCaster->IsPlayer())
         {
             // can cast triggered (by aura only?) spells while have this flag
-            if (static_cast<Player*>(m_trueCaster)->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY))
+            if (static_cast<Player*>(m_trueCaster)->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY) && m_clientCast)
             {
                 bool found = false;
                 for (Aura* aura : m_caster->GetAurasByType(SPELL_AURA_ALLOW_ONLY_ABILITY))
