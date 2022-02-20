@@ -19,6 +19,7 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
+// 5308 - Execute
 struct WarriorExecute : public SpellScript
 {
     void OnCast(Spell* spell) const override // confirmed main spell can not hit and child still hits
@@ -34,6 +35,7 @@ enum
     SPELL_SUDDEN_DEATH = 52437,
 };
 
+// 20647 - Execute
 struct WarriorExecuteDamage : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo missInfo) const override
@@ -67,6 +69,7 @@ struct WarriorExecuteDamage : public SpellScript
     }
 };
 
+// 34428 - Victory Rush
 struct VictoryRush : public SpellScript
 {
     void OnCast(Spell* spell) const override
@@ -80,6 +83,7 @@ struct VictoryRush : public SpellScript
     }
 };
 
+// 58567 - Sunder Armor
 struct SunderArmor : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -92,6 +96,7 @@ struct SunderArmor : public SpellScript
     }
 };
 
+// 20243 - Devastate
 struct WarriorDevastate : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -126,6 +131,7 @@ struct WarriorDevastate : public SpellScript
     }
 };
 
+// 20230 - Retaliation
 struct RetaliationWarrior : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
@@ -139,6 +145,7 @@ struct RetaliationWarrior : public AuraScript
     }
 };
 
+// 29707 - Heroic Strike
 struct HeroicStrike : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -160,6 +167,7 @@ struct HeroicStrike : public SpellScript
     }
 };
 
+// 7384 - Overpower
 struct Overpower : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -187,6 +195,7 @@ struct Overpower : public AuraScript
     }
 };
 
+// 23920 - Spell Reflection
 struct SpellReflection : public SpellScript
 {
     void OnCast(Spell* spell) const override
@@ -197,6 +206,7 @@ struct SpellReflection : public SpellScript
     }
 };
 
+// 59725 - Spell Reflection
 struct SpellReflectionRaid : public SpellScript, public AuraScript
 {
     void OnInit(Spell* spell) const override
@@ -237,6 +247,19 @@ struct SpellReflectionRaid : public SpellScript, public AuraScript
     }
 };
 
+// 50725 - Vigilance
+struct Vigilance : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        caster->RemoveSpellCategoryCooldown(82, true); // remove cooldown on Taunt
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
@@ -249,4 +272,5 @@ void LoadWarriorScripts()
     RegisterSpellScript<Overpower>("spell_overpower");
     RegisterSpellScript<SpellReflection>("spell_spell_reflection");
     RegisterSpellScript<SpellReflectionRaid>("spell_spell_reflection_raid");
+    RegisterSpellScript<Vigilance>("spell_vigilance");
 }

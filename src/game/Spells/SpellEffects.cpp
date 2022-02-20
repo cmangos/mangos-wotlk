@@ -10046,15 +10046,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 50446, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 50725:                                 // Vigilance - remove cooldown on Taunt
-                {
-                    Unit* caster = GetAffectiveCaster();
-                    if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    caster->RemoveSpellCategoryCooldown(82, true);
-                    return;
-                }
                 case 50894:                                 // Zul'Drak Rat
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)

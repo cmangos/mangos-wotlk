@@ -1004,6 +1004,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (7384,'spell_overpower'),
 (23920,'spell_spell_reflection'),
 (59725,'spell_spell_reflection_raid'),
+(50725,'spell_vigilance'),
 (58567,'spell_sunder_armor');
 
 -- Mage
