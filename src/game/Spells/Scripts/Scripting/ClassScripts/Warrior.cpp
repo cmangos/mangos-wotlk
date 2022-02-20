@@ -247,16 +247,27 @@ struct SpellReflectionRaid : public SpellScript, public AuraScript
     }
 };
 
+// 50720 - Vigilance
+struct Vigilance : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        procData.triggeredSpellId = aura->GetSpellProto()->EffectTriggerSpell[aura->GetEffIndex()];
+        procData.triggerTarget = aura->GetCaster();
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 // 50725 - Vigilance
-struct Vigilance : public SpellScript
+struct VigilanceTrigger : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        Unit* caster = spell->GetCaster();
-        if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
             return;
 
-        caster->RemoveSpellCategoryCooldown(82, true); // remove cooldown on Taunt
+        target->RemoveSpellCategoryCooldown(82, true); // remove cooldown on Taunt
     }
 };
 
@@ -273,4 +284,5 @@ void LoadWarriorScripts()
     RegisterSpellScript<SpellReflection>("spell_spell_reflection");
     RegisterSpellScript<SpellReflectionRaid>("spell_spell_reflection_raid");
     RegisterSpellScript<Vigilance>("spell_vigilance");
+    RegisterSpellScript<VigilanceTrigger>("spell_vigilance_trigger");
 }
