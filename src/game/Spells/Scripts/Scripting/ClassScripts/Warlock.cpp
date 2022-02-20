@@ -267,6 +267,37 @@ struct SeedOfCorruptionDamage : public SpellScript
     }
 };
 
+// 30293 - Soul Leech
+struct SoulLeech : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        int32 damage = int32(procData.damage * aura->GetAmount() / 100);
+        Unit* target = aura->GetTarget();
+        target->CastSpell(nullptr, 30294, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+
+        if (target->IsPlayer())
+        {
+            if (Aura* improvedSoulLeech = static_cast<Player*>(target)->GetKnownTalentRankAuraById(1889, EFFECT_INDEX_1)) // Improved Soul Leech
+            {
+                uint32 selfId = 0, petId = 0;
+                switch (aura->GetId())
+                {
+                    case 54117: selfId = 54300; petId = 54607; break;
+                    case 54118: selfId = 59117; petId = 59118; break;
+                }
+
+                target->CastSpell(nullptr, selfId, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+                target->CastSpell(nullptr, petId, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+
+                if (roll_chance_i(improvedSoulLeech->GetAmount()))
+                    target->CastSpell(nullptr, 57669, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+            }
+        }
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 struct SiphonLifeWotlk : public AuraScript
 {
     bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
@@ -328,6 +359,7 @@ void LoadWarlockScripts()
     RegisterSpellScript<LifeTap>("spell_life_tap");
     RegisterSpellScript<DemonicKnowledge>("spell_demonic_knowledge");
     RegisterSpellScript<SeedOfCorruption>("spell_seed_of_corruption");
+    RegisterSpellScript<SoulLeech>("spell_soul_leech");
     RegisterSpellScript<EyeOfKilrogg>("spell_eye_of_kilrogg");
     RegisterSpellScript<DevourMagic>("spell_devour_magic");
     RegisterSpellScript<SeedOfCorruptionDamage>("spell_seed_of_corruption_damage");
