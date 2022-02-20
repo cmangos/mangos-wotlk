@@ -291,6 +291,36 @@ struct SiphonLifeWotlk : public AuraScript
     }
 };
 
+// 54049 - Shadow Bite
+struct ShadowBite : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* owner = spell->GetCaster()->GetOwner();
+        if (!owner)
+            return;
+
+        uint32 counter = 0;
+        Unit::AuraList const& dotAuras = owner->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+        for (auto dotAura : dotAuras)
+            if (dotAura->GetCasterGuid() == owner->GetObjectGuid())
+                ++counter;
+
+        uint32 damage = spell->GetDamage();
+        if (counter)
+            spell->SetDamage( + (counter * owner->CalculateSpellEffectValue(owner, spell->m_spellInfo, EFFECT_INDEX_2) * damage) / 100.0f);
+
+        if (owner->IsPlayer())
+        {
+            if (SpellEntry const* talent = static_cast<Player*>(owner)->GetKnownTalentRankById(1873)) // Improved Felhunter
+            {
+                int32 damage = talent->Id == 54037 ? 4 : 8;
+                spell->GetCaster()->CastCustomSpell(nullptr, 54425, &damage, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+            }
+        }
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -304,4 +334,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<CurseOfDoom>("spell_curse_of_doom");
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
     RegisterSpellScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
+    RegisterSpellScript<ShadowBite>("spell_shadow_bite");
 }

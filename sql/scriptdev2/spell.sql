@@ -915,6 +915,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19736,'spell_devour_magic'),
 (27276,'spell_devour_magic'),
 (27277,'spell_devour_magic'),
+(54049,'spell_shadow_bite'),
+(54050,'spell_shadow_bite'),
+(54051,'spell_shadow_bite'),
+(54052,'spell_shadow_bite'),
+(54053,'spell_shadow_bite'),
 (63108,'spell_siphon_life_wotlk');
 
 -- Pet Scaling
