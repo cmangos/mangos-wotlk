@@ -786,7 +786,7 @@ bool Spell::FillUnitTargets(TempTargetingData& targetingData, SpellTargetingData
             // spells which should only be cast if a target was found
             if (unitTargetList.size() <= 0)
             {
-                SendCastResult(SPELL_FAILED_BAD_TARGETS);
+                SendCastResult(m_spellInfo->Id == 51690 ? SPELL_FAILED_OUT_OF_RANGE : SPELL_FAILED_BAD_TARGETS);
                 finish(false);
                 return false;
             }
@@ -5909,19 +5909,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || static_cast<Player*>(m_caster)->IsInHighLiquid()))
                         return SPELL_FAILED_ONLY_ABOVEWATER;
-                }
-                else if (m_spellInfo->Id == 51690)          // Killing Spree
-                {
-                    UnitList targets;
-
-                    float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-
-                    MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck unitCheck(m_caster, m_caster, radius);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck> checker(targets, unitCheck);
-                    Cell::VisitAllObjects(m_caster, checker, radius);
-
-                    if (targets.empty())
-                        return SPELL_FAILED_OUT_OF_RANGE;
                 }
                 else if (m_spellInfo->SpellIconID == 156)   // Holy Shock
                 {

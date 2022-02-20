@@ -2913,6 +2913,9 @@ UPDATE spell_template SET EffectSpellClassMask2_1=0x1,EffectSpellClassMask2_2=0 
 -- Empowered Imp - Wrong mask removal
 UPDATE spell_template SET EffectSpellClassMask1_1=0 WHERE Id IN(54278);
 
+-- Killing Spree - SPELL_ATTR_EX_REQUIRE_ALL_TARGETS
+UPDATE spell_template SET AttributesEx=AttributesEx|0x04000000 WHERE Id IN(51690);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

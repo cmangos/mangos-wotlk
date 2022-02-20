@@ -103,9 +103,68 @@ struct VanishRogue : public SpellScript
     }
 };
 
+struct KillingSpreeStorage : public ScriptStorage
+{
+    GuidSet targets;
+};
+
+// 51690 - Killing Spree
+struct KillingSpree : public SpellScript, public AuraScript
+{
+    void OnAuraInit(Aura* aura) const override
+    {
+        // this is likely emulation due to us killing off spell after it ends even though auras still exist
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->SetScriptStorage(new KillingSpreeStorage());
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply || aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = aura->GetTarget();
+        target->CastSpell(nullptr, 61851, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1 || !spell->GetUnitTarget())
+            return;
+        // aura is self effect so this must be executed after in all cases
+        if (Aura* aura = spell->GetCaster()->GetAura(spell->m_spellInfo->Id, EFFECT_INDEX_0))
+            if (KillingSpreeStorage* storage = dynamic_cast<KillingSpreeStorage*>(aura->GetScriptStorage()))
+                storage->targets.insert(spell->GetUnitTarget()->GetObjectGuid());
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (KillingSpreeStorage* storage = dynamic_cast<KillingSpreeStorage*>(aura->GetScriptStorage()))
+        {
+            Unit* target = aura->GetTarget();
+            Unit* victim = nullptr;
+            std::vector<Unit*> eligibleUnits;
+            for (ObjectGuid guid : storage->targets)
+                if (Unit* unit = target->GetMap()->GetUnit(guid))
+                    if (unit->IsAlive() && target->CanAttackSpell(unit) && target->IsWithinCombatDistInMap(unit, 10.f))
+                        eligibleUnits.push_back(unit);
+
+            if (eligibleUnits.size() > 0)
+                victim = eligibleUnits[urand(0, eligibleUnits.size() - 1)];
+
+            if (victim)
+            {
+                target->CastSpell(victim, 57840, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+                target->CastSpell(victim, 57841, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+            }
+        }
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<spell_preparation>("spell_preparation");
     RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
+    RegisterSpellScript<KillingSpree>("spell_killing_spree");
 }

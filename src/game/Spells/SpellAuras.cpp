@@ -9343,42 +9343,6 @@ void Aura::PeriodicDummyTick()
             }
             break;
         }
-        case SPELLFAMILY_ROGUE:
-        {
-            switch (spell->Id)
-            {
-                // Killing Spree
-                case 51690:
-                {
-                    if (target->hasUnitState(UNIT_STAT_STUNNED) || target->isFeared())
-                        return;
-
-                    UnitList targets;
-                    {
-                        // eff_radius ==0
-                        float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->rangeIndex));
-
-                        MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck u_check(target, target, radius);
-                        MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyVisibleUnitInObjectRangeCheck> checker(targets, u_check);
-                        Cell::VisitAllObjects(target, checker, radius);
-                    }
-
-                    if (targets.empty())
-                        return;
-
-                    UnitList::const_iterator itr = targets.begin();
-                    std::advance(itr, urand() % targets.size());
-                    Unit* victim = *itr;
-
-                    target->CastSpell(victim, 57840, TRIGGERED_OLD_TRIGGERED);
-                    target->CastSpell(victim, 57841, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                default:
-                    break;
-            }
-            break;
-        }
         case SPELLFAMILY_HUNTER:
         {
             switch (spell->Id)

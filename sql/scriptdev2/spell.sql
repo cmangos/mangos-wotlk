@@ -1065,7 +1065,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (1856,'spell_vanish'),
 (1857,'spell_vanish'),
 (26889,'spell_vanish'),
-(14185,'spell_preparation');
+(14185,'spell_preparation'),
+(51690,'spell_killing_spree');
 
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
