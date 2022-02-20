@@ -577,7 +577,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     if (IsWorldBoss())
         ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, true);
 
-    if (GetCreatureInfo()->RegenerateStats & (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER) == (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER))
+    if ((GetCreatureInfo()->RegenerateStats & (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER)) == (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER))
         SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
 
     SetCanModifyStats(true);
@@ -796,13 +796,6 @@ void Creature::Update(const uint32 diff)
 void Creature::RegenerateAll(uint32 diff)
 {
     m_regenTimer += diff;
-    if (m_regenTimer > 0)
-    {
-        if (diff >= m_regenTimer)
-            m_regenTimer = 0;
-        else
-            m_regenTimer -= diff;
-    }
     if (m_regenTimer < REGEN_TIME_FULL)
         return;
 
