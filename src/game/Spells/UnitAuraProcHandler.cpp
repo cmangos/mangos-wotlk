@@ -4100,9 +4100,6 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
         case 5510:                                          // Flexibility - T4 Holy Priest bonus
             RemoveAurasDueToSpell(37565);
             return SPELL_AURA_PROC_OK;
-        case 6953:                                          // Warbringer
-            RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0, true);
-            return SPELL_AURA_PROC_OK;
         case 7010:                                          // Revitalize (rank 1)
         case 7011:                                          // Revitalize (rank 2)
         case 7012:                                          // Revitalize (rank 3)

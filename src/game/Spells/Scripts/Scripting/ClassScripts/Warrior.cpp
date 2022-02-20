@@ -271,6 +271,23 @@ struct VigilanceTrigger : public SpellScript
     }
 };
 
+// 3411 - Intervene
+struct Intervene : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        if (spell->GetCaster()->GetOverrideScript(6953))
+            spell->SetIgnoreRoot(true);
+    }
+
+    void OnCast(Spell* spell) const override
+    {
+        spell->GetCaster()->RemoveAurasAtMechanicImmunity(IMMUNE_TO_ROOT_AND_SNARE_MASK, 0, true);
+        // temporary hack to investigate root flag changes serverside - necessary to make it work
+        spell->GetCaster()->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
@@ -285,4 +302,5 @@ void LoadWarriorScripts()
     RegisterSpellScript<SpellReflectionRaid>("spell_spell_reflection_raid");
     RegisterSpellScript<Vigilance>("spell_vigilance");
     RegisterSpellScript<VigilanceTrigger>("spell_vigilance_trigger");
+    RegisterSpellScript<Intervene>("spell_intervene");
 }
