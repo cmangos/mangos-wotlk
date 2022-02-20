@@ -6007,7 +6007,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 unk = damage;
                 break;
             default:
-                if (m_spellInfo->Id == 18662)
+                if (m_spellInfo->Id == 18662 || m_spellInfo->Id == 1122)
                     creatureLevel = damage;
                 else
                     amount = damage > 0 ? damage : 1; // old code
