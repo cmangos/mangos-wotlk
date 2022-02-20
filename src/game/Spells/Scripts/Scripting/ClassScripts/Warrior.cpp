@@ -187,6 +187,56 @@ struct Overpower : public AuraScript
     }
 };
 
+struct SpellReflection : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (Player* caster = dynamic_cast<Player*>(spell->GetCaster()))
+            if (Aura* dummy = caster->GetKnownTalentRankAuraById(2247, EFFECT_INDEX_1)) // Improved Spell Reflections
+                caster->CastSpell(nullptr, 59725, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct SpellReflectionRaid : public SpellScript, public AuraScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        if (Player* caster = dynamic_cast<Player*>(spell->GetCaster()))
+            if (Aura* dummy = caster->GetKnownTalentRankAuraById(2247, EFFECT_INDEX_1)) // Improved Spell Reflections
+                spell->SetMaxAffectedTargets(dummy->GetAmount());
+
+        spell->SetFilteringScheme(EFFECT_INDEX_0, false, SCHEME_CLOSEST);
+    }
+
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (spell->GetCaster() == target)
+            return false;
+        return true;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT)
+        {
+            if (Player* player = dynamic_cast<Player*>(aura->GetTarget()))
+            {
+                if (Group* group = player->GetGroup())
+                {
+                    for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+                    {
+                        if (itr->getSource()->IsInMap(player))
+                        {
+                            // avoid infinite loop
+                            itr->getSource()->RemoveAurasByCasterSpell(aura->GetId(), aura->GetCasterGuid(), AURA_REMOVE_BY_CANCEL);
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
@@ -197,4 +247,6 @@ void LoadWarriorScripts()
     RegisterSpellScript<RetaliationWarrior>("spell_retaliation_warrior");
     RegisterSpellScript<HeroicStrike>("spell_heroic_strike");
     RegisterSpellScript<Overpower>("spell_overpower");
+    RegisterSpellScript<SpellReflection>("spell_spell_reflection");
+    RegisterSpellScript<SpellReflectionRaid>("spell_spell_reflection_raid");
 }
