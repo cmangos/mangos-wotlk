@@ -104,6 +104,15 @@ struct VanishRogue : public SpellScript
     }
 };
 
+// 13983 - Setup
+struct SetupRogue : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        return data.victim->GetTarget() == data.attacker;
+    }
+};
+
 struct KillingSpreeStorage : public ScriptStorage
 {
     GuidSet targets;
@@ -167,5 +176,6 @@ void LoadRogueScripts()
     RegisterSpellScript<spell_preparation>("spell_preparation");
     RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
+    RegisterSpellScript<SetupRogue>("spell_setup_rogue");
     RegisterSpellScript<KillingSpree>("spell_killing_spree");
 }
