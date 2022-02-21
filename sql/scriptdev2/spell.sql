@@ -1069,7 +1069,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (14070,'spell_setup_rogue'),
 (14071,'spell_setup_rogue'),
 (14185,'spell_preparation'),
-(51690,'spell_killing_spree');
+(51690,'spell_killing_spree'),
+(51685,'spell_prey_on_the_weak'),
+(51686,'spell_prey_on_the_weak'),
+(51687,'spell_prey_on_the_weak'),
+(51688,'spell_prey_on_the_weak'),
+(51689,'spell_prey_on_the_weak');
 
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

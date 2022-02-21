@@ -159,6 +159,26 @@ struct KillingSpree : public SpellScript, public AuraScript
     }
 };
 
+struct PreyOnTheWeak : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        Unit* victim = target->GetTarget();
+        if (victim && target->GetHealthPercent() > victim->GetHealthPercent())
+        {
+            Aura* buff = target->GetAura(58670, EFFECT_INDEX_0);
+            if (!buff || buff->GetAmount() < aura->GetAmount())
+            {
+                int32 basepoints = aura->GetAmount();
+                target->CastCustomSpell(nullptr, 58670, &basepoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+            target->RemoveAurasDueToSpell(58670);
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<Preparation>("spell_preparation");
@@ -166,4 +186,5 @@ void LoadRogueScripts()
     RegisterSpellScript<VanishRogue>("spell_vanish");
     RegisterSpellScript<SetupRogue>("spell_setup_rogue");
     RegisterSpellScript<KillingSpree>("spell_killing_spree");
+    RegisterSpellScript<PreyOnTheWeak>("spell_prey_on_the_weak");
 }

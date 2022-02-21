@@ -9279,21 +9279,6 @@ void Aura::PeriodicDummyTick()
                     break;
             }
 
-            // Prey on the Weak
-            if (spell->SpellIconID == 2983)
-            {
-                Unit* victim = target->GetVictim();
-                if (victim && (target->GetHealth() * 100 / target->GetMaxHealth() > victim->GetHealth() * 100 / victim->GetMaxHealth()))
-                {
-                    if (!target->HasAura(58670))
-                    {
-                        int32 basepoints = GetBasePoints();
-                        target->CastCustomSpell(target, 58670, &basepoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                    }
-                }
-                else
-                    target->RemoveAurasDueToSpell(58670);
-            }
             break;
         }
         case SPELLFAMILY_MAGE:
