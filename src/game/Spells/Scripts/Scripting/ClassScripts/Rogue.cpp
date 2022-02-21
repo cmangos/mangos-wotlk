@@ -19,7 +19,8 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
-struct spell_preparation : public SpellScript
+// 14185 - Preparation
+struct Preparation : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -41,6 +42,7 @@ enum
 };
 
 // Warning: Also currently used by Prowl
+// 1784 - Stealth
 struct Stealth : public AuraScript
 {
     bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override // per 1.12.0 patch notes - no other indication of how it works
@@ -66,25 +68,10 @@ void CastHighestStealthRank(Unit* caster)
         return;
 
     // get highest rank of the Stealth spell
-    SpellEntry const* stealthSpellEntry = nullptr;
-    const PlayerSpellMap& sp_list = static_cast<Player*>(caster)->GetSpellMap();
-    for (const auto& itr : sp_list)
-    {
-        // only highest rank is shown in spell book, so simply check if shown in spell book
-        if (!itr.second.active || itr.second.disabled || itr.second.state == PLAYERSPELL_REMOVED)
-            continue;
-
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr.first);
-        if (!spellInfo)
-            continue;
-
-        if (spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000400000)))
-        {
-            stealthSpellEntry = spellInfo;
-            break;
-        }
-    }
-
+    uint32 spellId = static_cast<Player*>(caster)->LookupHighestLearnedRank(1784);
+    if (!spellId)
+        return;
+    SpellEntry const* stealthSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     // no Stealth spell found
     if (!stealthSpellEntry)
         return;
@@ -96,6 +83,7 @@ void CastHighestStealthRank(Unit* caster)
     caster->CastSpell(nullptr, stealthSpellEntry, TRIGGERED_OLD_TRIGGERED);
 }
 
+// 1856 - Vanish
 struct VanishRogue : public SpellScript
 {
     void OnCast(Spell* spell) const override
@@ -173,7 +161,7 @@ struct KillingSpree : public SpellScript, public AuraScript
 
 void LoadRogueScripts()
 {
-    RegisterSpellScript<spell_preparation>("spell_preparation");
+    RegisterSpellScript<Preparation>("spell_preparation");
     RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
     RegisterSpellScript<SetupRogue>("spell_setup_rogue");
