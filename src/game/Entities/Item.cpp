@@ -1248,6 +1248,25 @@ void Item::BuildUpdateData(UpdateDataMapType& update_players)
     ClearUpdateMask(false);
 }
 
+uint32 Item::GetTotalAP() const
+{
+    int32 totalAP = 0;
+    ItemPrototype const* proto = GetProto();
+    for (uint32 i = 0; i < proto->StatsCount; ++i)
+        if (proto->ItemStat[i].ItemStatType == ITEM_MOD_ATTACK_POWER)
+            totalAP += proto->ItemStat[i].ItemStatValue;
+
+    // some items can have equip spells with +AP
+    for (uint32 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        if (proto->Spells[i].SpellId > 0 && proto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_EQUIP)
+            if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(proto->Spells[i].SpellId))
+                for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                    if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_ATTACK_POWER)
+                        totalAP += spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+
+    return totalAP;
+}
+
 InventoryResult Item::CanBeMergedPartlyWith(ItemPrototype const* proto) const
 {
     // check item type

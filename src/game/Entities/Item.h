@@ -386,6 +386,8 @@ class Item : public Object
 
         bool IsUsedInSpell() const { return m_usedInSpell; }
         void SetUsedInSpell(bool state) { m_usedInSpell = state; }
+
+        uint32 GetTotalAP() const;
     private:
         std::string m_text;
         uint8 m_slot;

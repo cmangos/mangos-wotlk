@@ -3720,13 +3720,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
 
-            // Predatory Strikes
-            if (target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->SpellIconID == 1563)
-            {
-                ((Player*)target)->UpdateAttackPowerAndDamage();
-                return;
-            }
-
             // Improved Moonkin Form
             if (GetSpellProto()->SpellIconID == 2855)
             {

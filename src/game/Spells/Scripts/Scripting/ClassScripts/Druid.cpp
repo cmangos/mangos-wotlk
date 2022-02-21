@@ -38,16 +38,11 @@ struct FormScalingAttackPowerAuras : public AuraScript
 {
     int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
     {
-        if (data.spellProto->EffectApplyAuraName[data.effIdx] == SPELL_AURA_MOD_ATTACK_POWER)
+        if (data.spellProto->EffectApplyAuraName[data.effIdx] == SPELL_AURA_MOD_ATTACK_POWER && data.target->IsPlayer())
         {
+            Player* player = static_cast<Player*>(data.target);
             // Predatory Strikes
-            Aura* predatoryStrikes = nullptr;
-            if (Aura* aura = data.target->GetAura(16975, EFFECT_INDEX_0)) // rank 3
-                predatoryStrikes = aura;
-            else if (Aura* aura = data.target->GetAura(16974, EFFECT_INDEX_0)) // rank 2
-                predatoryStrikes = aura;
-            else if (Aura* aura = data.target->GetAura(16972, EFFECT_INDEX_0)) // rank 1
-                predatoryStrikes = aura;
+            Aura* predatoryStrikes = player->GetKnownTalentRankAuraById(803, EFFECT_INDEX_0);
             if (predatoryStrikes)
                 value += data.target->GetLevel() * predatoryStrikes->GetAmount() / 100;
         }
