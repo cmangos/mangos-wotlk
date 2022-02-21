@@ -17,6 +17,7 @@
 */
 
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 struct spell_preparation : public SpellScript
 {
