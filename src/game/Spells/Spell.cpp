@@ -4098,21 +4098,36 @@ void Spell::finish(bool ok)
         m_caster->DealHeal(m_caster, uint32(m_healthLeech) - absorb, m_spellInfo, false, absorb);
     }
 
-    if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_REFUND_POWER)
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_REFUND_POWER) || m_spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS))
     {
         for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
         {
+            bool end = false;
             switch (ihit->missCondition)
             {
                 case SPELL_MISS_MISS:
                 case SPELL_MISS_DODGE:
                 case SPELL_MISS_PARRY:
                 case SPELL_MISS_DEFLECT:
-                    m_caster->ModifyPower(Powers(m_spellInfo->powerType), int32(float(m_powerCost) * 0.8f));
+                {
+                    float coeff = 0.8f;
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_REQ_TARGET_COMBO_POINTS)) // optimization in wotlk because no other utilize it
+                    {
+                        coeff = 1;
+                        if (Player* modOwner = m_caster->GetSpellModOwner())
+                            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_SPELL_COST_REFUND_ON_FAIL, coeff);
+                        coeff = 1 - coeff;
+                    }
+                    if (coeff > 0)
+                        m_caster->ModifyPower(Powers(m_spellInfo->powerType), int32(float(m_powerCost) * coeff));
+                    end = true;
                     break;
+                }
                 default:
                     break;
             }
+            if (end)
+                break;
         }
     }
 
