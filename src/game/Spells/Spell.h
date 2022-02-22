@@ -664,6 +664,7 @@ class Spell
         WorldObject* GetCastingObject() const;
         // channels are generally instant - until more research provided all need to have speed 0
         float GetSpellSpeed() const;
+        bool IsDelayedSpell() const;
         void RecalculateDelayMomentForDest();
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
