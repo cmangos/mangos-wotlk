@@ -624,7 +624,10 @@ void GameEventMgr::LoadFromDB()
         sLog.outString(">> Loaded %u start/end game event mails", count);
     }
 
-    time_t firstJanuary2000 = 946684800;
+    auto packDate = [](uint8 year, uint8 month, uint8 day) -> uint32
+    {
+        return (uint32(year - 100) << 24) | (uint32(month) << 20) | (uint32(day - 1) << 14);
+    };
 
     for (GameEventData& gameEvent : m_gameEvents)
     {
@@ -632,31 +635,73 @@ void GameEventMgr::LoadFromDB()
         {
             if (HolidaysEntry* holiday = const_cast<HolidaysEntry*>(sHolidaysStore.LookupEntry(gameEvent.holiday_id)))
             {
-                if (holiday->Id == HOLIDAY_DARKMOON_FAIRE_ELWYNN || holiday->Id == HOLIDAY_DARKMOON_FAIRE_THUNDER || holiday->Id == HOLIDAY_DARKMOON_FAIRE_SHATTRATH)
+                switch (holiday->Id)
                 {
-                    switch (gameEvent.scheduleType)
+                    case HOLIDAY_DARKMOON_FAIRE_ELWYNN:
+                    case HOLIDAY_DARKMOON_FAIRE_THUNDER:
+                    case HOLIDAY_DARKMOON_FAIRE_SHATTRATH:
                     {
-                        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
-                        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
-                        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_3:
-                            break;
-                        default: continue;
+                        switch (gameEvent.scheduleType)
+                        {
+                            // client expects building stage date and offsets it in calendar
+                            case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
+                            case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
+                            case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_3:
+                                break;
+                            default: continue;
+                        }
+                        time_t today = time(nullptr);
+                        for (uint32 i = 0; i < 24; ++i) // monthly so send next 5 years
+                        {
+                            ComputeEventStartAndEndTime(gameEvent, today);
+                            tm t = *localtime(&gameEvent.start);
+                            holiday->Date[i] = packDate(t.tm_year, t.tm_mon, t.tm_mday);
+
+                            //char buff[20];
+                            //strftime(buff, 20, "%Y %b %d", &t);
+                            //printf("Holiday: %u Index: %u Date: %s\n", holiday->Id, i, buff);
+
+                            t.tm_mon += 3; // add month
+                            if (t.tm_mon >= 12)
+                            {
+                                ++t.tm_year;
+                                t.tm_mon = t.tm_mon % 12;
+                            }
+                            t.tm_mday = 2;
+                            today = mktime(&t);
+                        }
+                        break;
                     }
-                    time_t today = time(nullptr);
-                    for (uint32 i = 0; i < 24; ++i)
+                    case HOLIDAY_NOBLEGARDEN:
+                    case HOLIDAY_CHILDRENS_WEEK:
+                    case HOLIDAY_HARVEST_FESTIVAL:
+                    case HOLIDAY_LUNAR_FESTIVAL:
+                    case HOLIDAY_PILGRIMS_BOUNTY:
                     {
-                        ComputeEventStartAndEndTime(gameEvent, today);
-                        holiday->Date[i] = gameEvent.start - firstJanuary2000;
-                        tm t = *localtime(&today);
-                        t.tm_mon += 1; // add month
-                        today = mktime(&t);
+                        time_t today = time(nullptr);
+                        tm todayTm = *localtime(&today);
+                        tm t = *localtime(&gameEvent.start);
+                        t.tm_year = todayTm.tm_year;
+                        time_t year = mktime(&t);
+                        for (uint32 i = 0; i < 5; ++i) // yearly so send next 5 years
+                        {
+                            tm t = *localtime(&year);
+                            holiday->Date[i] = packDate(t.tm_year, t.tm_mon, t.tm_mday);
+
+                            //char buff[20];
+                            //strftime(buff, 20, "%Y %b %d", &t);
+                            //printf("Holiday: %u Index: %u Date: %s\n", holiday->Id, i, buff);
+
+                            ++t.tm_year;
+                            year = mktime(&t);
+                        }
+                        break;
                     }
                 }
             }
         }
     }
-
-}
+ }
 
 uint32 GameEventMgr::Initialize()                           // return the next event delay in ms
 {
