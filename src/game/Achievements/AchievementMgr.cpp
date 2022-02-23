@@ -93,6 +93,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
         case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
         case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
+        case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
             break;
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` have not supported data for criteria %u (Not supported as of its criteria type: %u), ignore.", criteria->ID, criteria->requiredType);
@@ -260,6 +261,16 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             }
             return true;
         }
+        case ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE:
+        {
+            if (creatureType.creatureType > CREATURE_TYPE_GAS_CLOUD)
+                return false;
+
+            if (creatureType.customCond > 2)
+                return false;
+
+            return true;
+        }
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
             return false;
@@ -390,6 +401,15 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
             }
 
             return false;
+        }
+        case ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE:
+        {
+            if (creatureType.customCond == 1) // Total Npc Kills
+                return miscvalue1 > 0;
+            else if (creatureType.customCond == 2) // Kill an NPC that yields XP
+                return target && target->IsTrivialForTarget(source);
+
+            return miscvalue1 == creatureType.creatureType;
         }
     }
     return false;
@@ -983,6 +1003,16 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
                 if (!data || !data->Meets(GetPlayer(), unit))
+                    continue;
+
+                change = miscvalue2;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
+            {
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if (!data || !data->Meets(GetPlayer(), unit, miscvalue1))
                     continue;
 
                 change = miscvalue2;
@@ -1789,11 +1819,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             {
                 // ToDo: check if player played arena based on map id
-                break;
-            }
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
-            {
-                // ToDo: check creature kill based on creature type
                 break;
             }
             // std case: not exist in DBC, not triggered in code as result

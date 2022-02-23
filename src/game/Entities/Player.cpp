@@ -15354,6 +15354,8 @@ void Player::KilledMonster(CreatureInfo const* cInfo, Creature const* creature)
     for (unsigned int i : cInfo->KillCredit)
         if (i)
             KilledMonsterCredit(i, guid);
+
+    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE, cInfo->CreatureType, 1, const_cast<Creature*>(creature));
 }
 
 void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid)
