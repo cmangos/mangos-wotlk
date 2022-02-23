@@ -125,7 +125,7 @@ class GameEventMgr
         void UpdateWorldStates(uint16 event_id, bool Activate);
         void SendEventMails(int16 event_id);
         void OnEventHappened(uint16 event_id, bool activate, bool resume);
-        void ComputeEventStartAndEndTime(GameEventData& data);
+        void ComputeEventStartAndEndTime(GameEventData& data, time_t today);
     protected:
         typedef std::list<uint32> GuidList;
         typedef std::list<uint16> IdList;

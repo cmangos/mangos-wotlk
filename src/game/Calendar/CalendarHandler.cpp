@@ -152,12 +152,19 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
     data << uint32(boundCounter);
     data.append(dataBuffer);
 
-    // TODO: Fix this, how we do know how many and what holidays to send?
     uint32 holidayCount = 0;
+    for (uint32 i = 0; i < sHolidaysStore.GetNumRows(); ++i)
+        if (HolidaysEntry const* holiday = sHolidaysStore.LookupEntry(i))
+            if (!holiday->Looping)
+                ++holidayCount;
+
     data << uint32(holidayCount);
-    /*for (uint32 i = 0; i < holidayCount; ++i)
+    for (uint32 i = 0; i < sHolidaysStore.GetNumRows(); ++i)
     {
-        HolidaysEntry const* holiday = sHolidaysStore.LookupEntry(666);
+        HolidaysEntry const* holiday = sHolidaysStore.LookupEntry(i);
+
+        if (!holiday || holiday->Looping)
+            continue;
 
         data << uint32(holiday->Id);                        // m_ID
         data << uint32(holiday->Region);                    // m_region, might be looping
@@ -175,7 +182,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
             data << uint32(holiday->CalendarFlags[j]);      // 10 * m_calendarFlags
 
         data << holiday->TextureFilename;                   // m_textureFilename (holiday name)
-    }*/
+    }
 
     SendPacket(data);
 }

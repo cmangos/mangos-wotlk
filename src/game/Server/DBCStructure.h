@@ -1222,20 +1222,24 @@ struct HolidayNamesEntry
 };
 */
 
+#define MAX_HOLIDAY_DURATIONS 10
+#define MAX_HOLIDAY_DATES 26
+#define MAX_HOLIDAY_FLAGS 10
+
 struct HolidaysEntry
 {
-    uint32 ID;                                              // 0        m_ID
-    // uint32 duration[10];                                 // 1-10     m_duration
-    // uint32 date[26];                                     // 11-36    m_date (dates in unix time starting at January, 1, 2000)
-    // uint32 region;                                       // 37       m_region (region)
-    // uint32 looping;                                      // 38       m_looping
-    // uint32 calendarFlags[10];                            // 39-48    m_calendarFlags
-    // uint32 holidayNameId;                                // 49       m_holidayNameID (HolidayNames.dbc)
-    // uint32 holidayDescriptionId;                         // 50       m_holidayDescriptionID (HolidayDescriptions.dbc)
-    // char *textureFilename;                               // 51       m_textureFilename
-    // uint32 priority;                                     // 52       m_priority
-    // uint32 calendarFilterType;                           // 53       m_calendarFilterType (-1,0,1 or 2)
-    // uint32 flags;                                        // 54       m_flags
+    uint32 Id;                                              // 0
+    uint32 Duration[MAX_HOLIDAY_DURATIONS];                 // 1-10
+    uint32 Date[MAX_HOLIDAY_DATES];                         // 11-36 dates in unix time starting at January, 1, 2000
+    uint32 Region;                                          // 37 WoW region
+    uint32 Looping;                                         // 38
+    uint32 CalendarFlags[MAX_HOLIDAY_FLAGS];                // 39-48
+    //uint32 HolidayNameID;                                 // 49 HolidayNames.dbc
+    //uint32 HolidayDescriptionID;                          // 50 HolidayDescriptions.dbc
+    char const* TextureFilename;                            // 51
+    uint32 Priority;                                        // 52
+    int32 CalendarFilterType;                               // 53
+    //uint32 Flags;                                         // 54 0 = Darkmoon Faire, Fishing Contest and Wotlk Launch, rest is 1
 };
 
 struct ItemEntry

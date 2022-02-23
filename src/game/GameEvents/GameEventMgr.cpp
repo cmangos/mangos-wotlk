@@ -154,7 +154,7 @@ void GameEventMgr::LoadFromDB()
                 case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
                 case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
                 case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_3:
-                    ComputeEventStartAndEndTime(gameEvent);
+                    ComputeEventStartAndEndTime(gameEvent, time(nullptr));
                     break;
             }
 
@@ -623,6 +623,39 @@ void GameEventMgr::LoadFromDB()
         sLog.outString();
         sLog.outString(">> Loaded %u start/end game event mails", count);
     }
+
+    time_t firstJanuary2000 = 946684800;
+
+    for (GameEventData& gameEvent : m_gameEvents)
+    {
+        if (gameEvent.holiday_id)
+        {
+            if (HolidaysEntry* holiday = const_cast<HolidaysEntry*>(sHolidaysStore.LookupEntry(gameEvent.holiday_id)))
+            {
+                if (holiday->Id == HOLIDAY_DARKMOON_FAIRE_ELWYNN || holiday->Id == HOLIDAY_DARKMOON_FAIRE_THUNDER || holiday->Id == HOLIDAY_DARKMOON_FAIRE_SHATTRATH)
+                {
+                    switch (gameEvent.scheduleType)
+                    {
+                        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_1:
+                        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_2:
+                        case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_3:
+                            break;
+                        default: continue;
+                    }
+                    time_t today = time(nullptr);
+                    for (uint32 i = 0; i < 24; ++i)
+                    {
+                        ComputeEventStartAndEndTime(gameEvent, today);
+                        holiday->Date[i] = gameEvent.start - firstJanuary2000;
+                        tm t = *localtime(&today);
+                        t.tm_mon += 1; // add month
+                        today = mktime(&t);
+                    }
+                }
+            }
+        }
+    }
+
 }
 
 uint32 GameEventMgr::Initialize()                           // return the next event delay in ms
@@ -1103,9 +1136,9 @@ void GameEventMgr::OnEventHappened(uint16 event_id, bool activate, bool resume)
     });
 }
 
-void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data)
+void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data, time_t today)
 {
-    time_t curTime = time(nullptr);
+    time_t curTime = today;
     const tm* t = localtime(&curTime);
     tm firstMonday = *t;
     firstMonday.tm_sec = 0;
@@ -1169,7 +1202,7 @@ void GameEventMgr::WeeklyEventTimerRecalculation()
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_3:
-                ComputeEventStartAndEndTime(gameEvent);
+                ComputeEventStartAndEndTime(gameEvent, time(nullptr));
                 break;
             default: break;
         }
