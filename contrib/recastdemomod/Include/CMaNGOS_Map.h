@@ -21,6 +21,7 @@
 
 #include <set>
 #include <vector>
+#include <map>
 #include "Tools.h"
 #include "MapData.h"
 #include "DetourNavMesh.h"
@@ -37,12 +38,80 @@
 
 #define MAX_TILE_TO_LOAD 9
 
+typedef std::map<std::string, std::string> TransportDataContainer;
+static TransportDataContainer TransportMap =
+{
+    // List of MO Transport gameobjects
+    {"3015", "Transportship.wmo.vmo"},
+    {"3031", "Transport_Zeppelin.wmo.vmo"},
+    {"7087", "Transportship_Ne.wmo.vmo"},
+    // List of Transport gameobjects
+    {"0360", "Elevatorcar.m2.vmo"},
+    {"0455", "Undeadelevator.m2.vmo"},
+    // buildGameObject("Undeadelevatordoor.m2.vmo", 462); // no model on which to path
+    {"0561", "Ironforgeelevator.m2.vmo"},
+    // buildGameObject("Ironforgeelevatordoor.m2.vmo", 562); // no model on which to path
+    {"0807", "Gnomeelevatorcar01.m2.vmo"},
+    {"0808", "Gnomeelevatorcar02.m2.vmo"},
+    {"0827", "Gnomeelevatorcar03.m2.vmo"},
+    {"0852", "Gnomeelevatorcar03.m2.vmo"},
+    {"1587", "Gnomehutelevator.m2.vmo"},
+    {"2454", "Burningsteppselevator.m2.vmo"},
+    {"3831", "Subwaycar.m2.vmo"},
+    // TBC+
+    {"7026", "Ancdrae_Elevatorpiece.m2.vmo"},
+    {"7028", "Mushroombase_Elevator.m2.vmo"},
+    {"7043", "Cf_Elevatorplatform.m2.vmo"},
+    {"7060", "Cf_Elevatorplatform_Small.m2.vmo"},
+    {"7077", "Factoryelevator.m2.vmo"},
+    {"7163", "Ancdrae_Elevatorpiece_Netherstorm.m2.vmo"},
+    // WOTLK+
+    {"6637", "Blackcitadel.wmo.vmo"},
+    {"7446", "Transport_Icebreaker_Ship.wmo.vmo"},
+    {"7451", "Vr_Elevator_Gate.m2.vmo"},
+    {"7452", "Vr_Elevator_Lift.m2.vmo"},
+    {"7491", "Vr_Elevator_Gears.m2.vmo"},
+    {"7519", "Hf_Elevator_Gate.m2.vmo"},
+    {"7520", "Hf_Elevator_Lift_02.m2.vmo"},
+    {"7521", "Hf_Elevator_Lift.m2.vmo"},
+    {"7546", "Transport_Horde_Zeppelin.wmo.vmo"},
+    {"7570", "Transport_Pirate_Ship.wmo.vmo"},
+    {"7636", "Transport_Tuskarr_Ship.wmo.vmo"},
+    {"7642", "Vrykul_Gondola.m2.vmo"},
+    {"7648", "Logrun_Pumpelevator01.m2.vmo"},
+    {"7767", "Vrykul_Gondola_02.m2.vmo"},
+    {"7793", "Nexus_Elevator_Basestructure_01.m2.vmo"},
+    {"7794", "Id_Elevator.m2.vmo"},
+    {"7797", "Orc_Fortress_Elevator01.m2.vmo"},
+    {"7966", "Org_Arena_Pillar.m2.vmo"},
+    {"7973", "Org_Arena_Elevator.m2.vmo"},
+    {"8079", "Logrun_Pumpelevator02.m2.vmo"},
+    {"8080", "Logrun_Pumpelevator03.m2.vmo"},
+    {"8253", "Nd_Hordegunship.wmo.vmo"},
+    {"8254", "Nd_Alliancegunship.wmo.vmo"},
+    {"8258", "Org_Arena_Yellow_Elevator.m2.vmo"},
+    {"8259", "Org_Arena_Axe_Pillar.m2.vmo"},
+    {"8260", "Org_Arena_Lightning_Pillar.m2.vmo"},
+    {"8261", "Org_Arena_Ivory_Pillar.m2.vmo"},
+    {"8277", "Gundrak_Elevator_01.m2.vmo"},
+    {"8409", "Nd_Icebreaker_Ship_Bg_Transport.wmo.vmo"},
+    {"8410", "Nd_Ship_Ud_Bg_Transport.wmo.vmo"},
+    {"8587", "Ulduarraid_Gnomewing_Transport_Wmo.wmo.vmo"},
+    {"9001", "Nd_Hordegunship_Bg.wmo.vmo"},
+    {"9002", "Nd_Alliancegunship_Bg.wmo.vmo"},
+    {"9136", "Icecrown_Elevator.m2.vmo"},
+    {"9150", "Nd_Alliancegunship_Icecrown.wmo.vmo"},
+    {"9151", "Nd_Hordegunship_Icecrown.wmo.vmo"},
+    {"9248", "Icecrown_Elevator02.m2.vmo"},
+};
+
 enum ShowLevels
 {
     SHOW_LEVEL_NONE,
     SHOW_LEVEL_MAP,
     SHOW_LEVEL_NEIGHBOR_TILES,
-    SHOW_LEVEL_TILES
+    SHOW_LEVEL_TILES,
+    SHOW_LEVEL_TRANSPORT
 };
 
 struct SelectedTile
@@ -125,6 +194,7 @@ protected:
     std::set <uint32> m_MapsFound;
     std::set <uint32> m_NeighborTiles;
     string m_TileButtonStr;
+    string m_transportButtonStr;
     bool m_GeomChanged;
 
     BuildContext* m_ctx;
@@ -185,6 +255,7 @@ public:
     bool ShowMapLevel(int height, int width);
     bool ShowNeighborTiles(int height, int width);
     bool ShowTilesLevel(int height, int width);
+    bool ShowTransportLevel(int height, int width);
     bool LoadTileData(unsigned int tx, unsigned int ty);
     bool GeomChanged();
     inline void GetGeomBounds(float const* &bmin, float const* &bmax) { bmin = m_MapInfos->BMin(); bmax = m_MapInfos->BMax(); }
