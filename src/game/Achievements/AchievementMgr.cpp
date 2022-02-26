@@ -407,7 +407,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
             if (creatureType.customCond == 1) // Total Npc Kills
                 return miscvalue1 > 0;
             else if (creatureType.customCond == 2) // Kill an NPC that yields XP
-                return target && target->IsTrivialForTarget(source);
+                return target && !target->IsTrivialForTarget(source);
 
             return miscvalue1 == creatureType.creatureType;
         }
