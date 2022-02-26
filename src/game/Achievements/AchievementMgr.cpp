@@ -272,6 +272,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             return true;
         }
         case ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID:
+        {
             MapEntry const* map = sMapStore.LookupEntry(mapId.mapId);
             if (!map)
             {
@@ -280,6 +281,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
                 return false;
             }
             break;
+        }
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
             return false;
