@@ -71,6 +71,7 @@ enum AchievementCriteriaRequirementType
     ACHIEVEMENT_CRITERIA_REQUIRE_KNOWN_TITLE         = 21,  // title_id                     known (pvp) title, values from dbc
     ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT          = 22,  // 0              0             maker battleground or outdoor pvp script call for check current criteria requirements fit
     ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE  = 23,  // creatureType
+    ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID              = 24,  // mapId                        player must be in map
 };
 
 class Player;
@@ -186,6 +187,10 @@ struct AchievementCriteriaRequirement
             uint32 customCond;
         } creatureType;
         // ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE   = 23
+        struct
+        {
+            uint32 mapId;
+        } mapId;
         // ...
         struct
         {

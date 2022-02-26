@@ -271,6 +271,15 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
 
             return true;
         }
+        case ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID:
+            MapEntry const* map = sMapStore.LookupEntry(mapId.mapId);
+            if (!map)
+            {
+                sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID (%u) have unknown map ID in value1 (%u), ignore.",
+                    criteria->ID, criteria->requiredType, requirementType, mapId.mapId);
+                return false;
+            }
+            break;
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
             return false;
@@ -411,6 +420,8 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
 
             return miscvalue1 == creatureType.creatureType;
         }
+        case ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID:
+            return source->GetMapId() == mapId.mapId;
     }
     return false;
 }
