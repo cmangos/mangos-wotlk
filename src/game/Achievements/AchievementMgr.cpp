@@ -1829,8 +1829,37 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_STAT:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_RATING:
                 break;
-            // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
+            {
+                time_t nextDailyResetTime = sWorld.GetNextDailyQuestsResetTime();
+                CriteriaProgress const* progress = GetCriteriaProgress(achievementCriteria);
+
+                if (!miscvalue1) // Login case.
+                {
+                    // reset if player missed one day.
+                    if (progress && progress->date < (nextDailyResetTime - 2 * DAY))
+                        SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                    continue;
+                }
+
+                ProgressType progressType;
+                if (!progress)
+                    // 1st time. Start count.
+                    progressType = PROGRESS_SET;
+                else if (progress->date < (nextDailyResetTime - 2 * DAY))
+                    // last progress is older than 2 days. Player missed 1 day => Retart count.
+                    progressType = PROGRESS_SET;
+                else if (progress->date < (nextDailyResetTime - DAY))
+                    // last progress is between 1 and 2 days. => 1st time of the day.
+                    progressType = PROGRESS_ACCUMULATE;
+                else
+                    // last progress is within the day before the reset => Already counted today.
+                    continue;
+
+                SetCriteriaProgress(achievementCriteria, achievement, 1, progressType);
+                break;
+            }
+            // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
@@ -1840,6 +1869,12 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
 
         SetCriteriaProgress(achievementCriteria, achievement, change, progressType);
     }
+}
+
+CriteriaProgress* AchievementMgr::GetCriteriaProgress(AchievementCriteriaEntry const* entry)
+{
+    auto itr = m_criteriaProgress.find(entry->ID);
+    return itr != m_criteriaProgress.end() ? &(*itr).second : nullptr;
 }
 
 uint32 AchievementMgr::GetCriteriaProgressCounter(AchievementCriteriaEntry const* entry) const
@@ -1867,6 +1902,9 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_ACHIEVEMENT:
             resultValue = 1;
+            break;
+        case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
+            resultValue = achievementCriteria->raw.count;
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST_COUNT:
             resultValue = achievementCriteria->complete_quest_count.totalQuestCount;

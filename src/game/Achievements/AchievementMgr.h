@@ -291,6 +291,7 @@ class AchievementMgr
         CompletedAchievementMap const& GetCompletedAchievements() const { return m_completedAchievements; }
         bool IsCompletedCriteria(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement) const;
 
+        CriteriaProgress* GetCriteriaProgress(AchievementCriteriaEntry const* entry);
         uint32 GetCriteriaProgressCounter(AchievementCriteriaEntry const* entry) const;
         static uint32 GetCriteriaProgressMaxCounter(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement);
 
