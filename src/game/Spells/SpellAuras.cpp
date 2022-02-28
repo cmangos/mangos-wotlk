@@ -5499,6 +5499,9 @@ void Aura::HandleModTaunt(bool /*apply*/, bool Real)
         return;
 
     target->TauntUpdate();
+
+    if (target->AI())
+        target->AI()->OnTaunt();
 }
 
 void Aura::HandleAuraFakeInebriation(bool apply, bool Real)
