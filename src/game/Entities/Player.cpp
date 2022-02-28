@@ -2549,7 +2549,7 @@ void Player::RegenerateHealth(uint32 diff)
     if (addvalue < 0)
         addvalue = 0;
 
-    ModifyHealth(int32(addvalue * uint32(float(diff) / 1000)));
+    ModifyHealth(int32(addvalue * float(diff) / 1000));
 }
 
 Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
