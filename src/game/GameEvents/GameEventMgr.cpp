@@ -1394,6 +1394,9 @@ void GameEventMgr::WeeklyEventTimerRecalculation()
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
             case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_3:
+            case GAME_EVENT_SCHEDULE_YEARLY:
+            case GAME_EVENT_SCHEDULE_LUNAR_NEW_YEAR:
+            case GAME_EVENT_SCHEDULE_EASTER:
                 ComputeEventStartAndEndTime(gameEvent, time(nullptr));
                 break;
             default: break;
