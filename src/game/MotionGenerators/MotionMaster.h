@@ -206,7 +206,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
 
         void InterruptPanic();
 
-        void PauseWaypoints(uint32 time = MINUTE * IN_MILLISECONDS);
+        void PauseWaypoints(uint32 time);
         void UnpauseWaypoints();
 
         void UnMarkFollowMovegens();
