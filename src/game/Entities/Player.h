@@ -1142,6 +1142,8 @@ class Player : public Unit
         bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
+        bool isDebuggingAreaTriggers() { return m_isDebuggingAreaTriggers; }
+        void SetDebuggingAreaTriggers(bool on) { m_isDebuggingAreaTriggers = on; }
 
         // 0 = own auction, -1 = enemy auction, 1 = goblin auction
         int GetAuctionAccessMode() const { return m_ExtraFlags & PLAYER_EXTRA_AUCTION_ENEMY ? -1 : (m_ExtraFlags & PLAYER_EXTRA_AUCTION_NEUTRAL ? 1 : 0); }
@@ -2798,6 +2800,7 @@ class Player : public Unit
         Runes* m_runes;
         EquipmentSets m_EquipmentSets;
 
+        bool m_isDebuggingAreaTriggers;
     private:
         void _HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEntry const* spellInfo);
         // internal common parts for CanStore/StoreItem functions
