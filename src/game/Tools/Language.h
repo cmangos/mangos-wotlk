@@ -588,6 +588,7 @@ enum MangosStrings
     LANG_YOURS_EXPLORE_SET_NOTHING      = 554,
 
     LANG_NPCINFO_PHASEMASK              = 555,
+
     //                                    556,              // not used
     LANG_YOURS_LEVEL_UP                 = 557,
     LANG_YOURS_LEVEL_DOWN               = 558,
@@ -606,7 +607,8 @@ enum MangosStrings
     LANG_GET_UINT_FIELD                 = 570,
     LANG_GET_FLOAT                      = 571,              // log
     LANG_GET_FLOAT_FIELD                = 572,
-    //                                    573,              // not used
+
+    LANG_AREATRIGGER_LIST               = 573,
     //                                    574,              // not used
     LANG_CHANGE_INT32                   = 575,              // log
     LANG_CHANGE_INT32_FIELD             = 576,
