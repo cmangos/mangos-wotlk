@@ -802,7 +802,7 @@ void Creature::RegenerateAll(uint32 diff)
     if (!IsInCombat() || GetCombatManager().IsEvadeRegen())
         RegenerateHealth();
 
-    RegeneratePower(2.f);
+    RegeneratePower(REGEN_TIME_FULL_UNIT / 1000);
 
     m_regenTimer -= REGEN_TIME_FULL_UNIT;
 }
