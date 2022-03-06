@@ -1396,12 +1396,7 @@ void ObjectMgr::LoadSpawnGroups()
             {
                 maxRandom += randomEntry.MaxCount;
                 if (randomEntry.Chance == 0)
-                {
                     maxCount = true;
-                    entry.EquallyChanced.push_back(&randomEntry);
-                }
-                else
-                    entry.ExplicitlyChanced.push_back(&randomEntry);
             }                
             if (maxCount)
                 entry.MaxCount = entry.DbGuids.size();
@@ -1410,6 +1405,15 @@ void ObjectMgr::LoadSpawnGroups()
             if (!entry.MaxCount && entry.RandomEntries.empty())
                 entry.MaxCount = entry.DbGuids.size();
         }
+
+        for (auto& randomEntry : entry.RandomEntries)
+        {
+            if (randomEntry.Chance == 0)
+                entry.EquallyChanced.push_back(&randomEntry);
+            else
+                entry.ExplicitlyChanced.push_back(&randomEntry);
+        }
+
         for (auto& guidData : entry.DbGuids)
         {
             if (entry.Type == SPAWN_GROUP_CREATURE)
