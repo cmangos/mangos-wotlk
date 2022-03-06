@@ -378,7 +378,6 @@ struct WillOfTheNecropolis : public AuraScript
 {
     void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/) const override
     {
-        remainingDamage += currentAbsorb;
         currentAbsorb = 0;
         if (aura->GetTarget()->GetHealth() - remainingDamage < aura->GetTarget()->GetMaxHealth() * 35 / 100)
             currentAbsorb = aura->GetAmount() * remainingDamage / 100;
