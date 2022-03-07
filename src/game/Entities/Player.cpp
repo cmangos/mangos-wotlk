@@ -19347,7 +19347,7 @@ void Player::CharmSpellInitialize() const
     WorldPacket data(SMSG_PET_SPELLS, 8 + 2 + 4 + 4 + 4 * MAX_UNIT_ACTION_BAR_INDEX + 1 + 4 * uint32(addlist) + 1);
     data << charm->GetObjectGuid();
     data << uint16(0);
-    data << uint32(0);
+    data << uint32(charm->IsCreature() ? static_cast<Creature*>(charm)->GetDuration() : 0);
     data << uint8(charm->AI()->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0);
 
     charmInfo->BuildActionBar(data);

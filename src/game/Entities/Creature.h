@@ -878,6 +878,8 @@ class Creature : public Unit
         void SetNoWeaponSkillGain(bool state) { m_noWeaponSkillGain = state; }
         bool IsNoWeaponSkillGain() const override { return m_noWeaponSkillGain; }
 
+        virtual uint32 GetDuration() const { return 0; }
+
     protected:
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);

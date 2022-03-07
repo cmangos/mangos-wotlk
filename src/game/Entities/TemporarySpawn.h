@@ -37,6 +37,8 @@ class TemporarySpawn : public Creature
         void SetLinkedToOwnerAura(uint32 flags) { m_linkedToOwnerAura |= flags; };
 
         void SetDeathState(DeathState state) override;
+
+        uint32 GetDuration() const override;
     private:
         bool IsExpired() const;
 

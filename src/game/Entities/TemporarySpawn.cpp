@@ -283,6 +283,11 @@ void TemporarySpawn::SetDeathState(DeathState state)
     Creature::SetDeathState(state);
 }
 
+uint32 TemporarySpawn::GetDuration() const
+{
+    return std::max(int64((m_expirationTimestamp - GetMap()->GetCurrentClockTime()).count()), int64(0));
+}
+
 bool TemporarySpawn::IsExpired() const
 {
     auto now = GetMap()->GetCurrentClockTime();

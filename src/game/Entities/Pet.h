@@ -201,7 +201,7 @@ class Pet : public Creature
         bool HaveInDiet(ItemPrototype const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel) const;
         void SetDuration(int32 dur) { m_duration = dur; }
-        int32 GetDuration() const { return m_duration; }
+        uint32 GetDuration() const override { return uint32(m_duration); }
 
         bool UpdateStats(Stats stat) override;
         bool UpdateAllStats() override;
