@@ -9522,6 +9522,24 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
     {
         //sLog.outString("Boarding %s %s on %s %s", caster->GetName(), caster->GetGuidStr().c_str(), target->GetName(), target->GetGuidStr().c_str());
         target->GetVehicleInfo()->Board(caster, GetBasePoints() - 1);
+
+        if (Player* playerCaster = dynamic_cast<Player*>(caster))
+        {
+            UpdateMask updateMask;
+            updateMask.SetCount(target->GetValuesCount());
+            target->MarkUpdateFieldsWithFlagForUpdate(updateMask, UF_FLAG_OWNER_ONLY);
+            if (updateMask.HasData())
+            {
+                UpdateData newData;
+                target->BuildValuesUpdateBlockForPlayer(newData, updateMask, playerCaster);
+
+                if (newData.HasData())
+                {
+                    WorldPacket newDataPacket = newData.BuildPacket(0);
+                    playerCaster->SendDirectMessage(newDataPacket);
+                }
+            }
+        }
     }
     else
     {
