@@ -372,10 +372,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         }
 
         if (passenger->IsRooted())
-        {
             passenger->SetImmobilizedState(false);
-            passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT); // do not wait on client ACK in this case - verified with sniff
-        }
 
         Movement::MoveSplineInit init(*passenger);
         // ToDo: Set proper unboard coordinates
@@ -645,12 +642,14 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             }
         }
 
+        pPlayer->SendForcedObjectUpdate();
+
         if (seatFlags & SEAT_FLAG_CAN_CAST)
         {
             CharmInfo* charmInfo = pVehicle->InitCharmInfo(pVehicle);
             charmInfo->InitVehicleCreateSpells();
 
-            pPlayer->PossessSpellInitialize();
+            pPlayer->VehicleSpellInitialize();
         }
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)

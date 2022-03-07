@@ -1680,6 +1680,7 @@ class Player : public Unit
         void PetSpellInitialize() const;
         void SendPetGUIDs() const;
         void PossessSpellInitialize() const;
+        void VehicleSpellInitialize() const;
         void CharmSpellInitialize() const;
         void CharmCooldownInitialize(WorldPacket& data) const;
         void RemovePetActionBar() const;

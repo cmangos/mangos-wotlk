@@ -19319,6 +19319,36 @@ void Player::PossessSpellInitialize() const
     GetSession()->SendPacket(data);
 }
 
+void Player::VehicleSpellInitialize() const
+{
+    Unit* charm = GetCharm();
+
+    if (!charm)
+        return;
+
+    CharmInfo* charmInfo = charm->GetCharmInfo();
+
+    if (!charmInfo)
+    {
+        sLog.outError("Player::PossessSpellInitialize(): charm (GUID: %u TypeId: %u) has no charminfo!", charm->GetGUIDLow(), charm->GetTypeId());
+        return;
+    }
+
+    WorldPacket data(SMSG_PET_SPELLS, 8 + 2 + 4 + 4 + 4 * MAX_UNIT_ACTION_BAR_INDEX + 1 + 1);
+    data << charm->GetObjectGuid();
+    data << uint16(0);
+    data << uint32(charm->IsCreature() ? static_cast<Creature*>(charm)->GetDuration() : 0);
+    data << uint8(charm->AI()->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0x800); // disable actions sent for all vehicles
+
+    charmInfo->BuildActionBar(data);
+
+    data << uint8(0);                                       // spells count
+
+    CharmCooldownInitialize(data);
+
+    GetSession()->SendPacket(data);
+}
+
 void Player::CharmSpellInitialize() const
 {
     Unit* charm = GetFirstControlled();
