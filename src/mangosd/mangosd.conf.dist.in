@@ -619,6 +619,13 @@ LogColors = ""
 #        Default: 0 (disabled, original behavior)
 #                 1 (enabled)
 #
+#    AlwaysForceQuestGossip
+#        Forces the client to show a creature's gossip text even when it would automatically pick a choice for the player
+#        (most notably, profession trainers and some vendors), restoring a behavior that was changed in one of the later TBC patches.
+#        Delete client cache or increment ClientCacheVersion after changing this option.
+#        Default: 0 (disabled, original behavior)
+#                 1 (enabled)
+#
 #    TaxiFlightChatFix
 #        Workaround for client bug: resuming taxi flight on login causes missing chat channels until the flight ends.
 #        When enabled allows clients to join local channels of the zone they are flying over on login and all custom channels.
@@ -890,6 +897,7 @@ StartArenaPoints = 0
 InstantLogout = 1
 DisableWaterBreath = 4
 AlwaysShowQuestGreeting = 0
+AlwaysForceQuestGossip = 0
 TaxiFlightChatFix = 0
 LongFlightPathsPersistence = 0
 AllFlightPaths = 0

@@ -741,6 +741,8 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->visibilityDistanceType = VisibilityDistanceType::Normal;
         }
 
+        if (sWorld.getConfig(CONFIG_BOOL_ALWAYS_FORCE_GOSSIP) && cInfo->NpcFlags & UNIT_NPC_FLAG_GOSSIP)
+            const_cast<CreatureInfo*>(cInfo)->CreatureTypeFlags |= CREATURE_TYPEFLAGS_FORCE_GOSSIP;
     }
 
     sLog.outString(">> Loaded %u creature definitions", sCreatureStorage.GetRecordCount());
