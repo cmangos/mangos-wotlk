@@ -96,6 +96,9 @@ namespace Movement
         if (!args.Validate(&unit))
             return 0;
 
+        if (args.flags.hasFlag(MoveSplineFlag::eFlags::BoardVehicle | MoveSplineFlag::eFlags::ExitVehicle))
+            moveFlags &= ~MOVEFLAG_ROOT;
+
         if (moveFlags & MOVEFLAG_ROOT && !pathEmpty)
         {
             sLog.outCustomLog("Invalid movement during root. Entry: %u IsImmobilized %s, moveflags %u", unit.GetEntry(), unit.IsImmobilizedState() ? "true" : "false", moveFlags);
