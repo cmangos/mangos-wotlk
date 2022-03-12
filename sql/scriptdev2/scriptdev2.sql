@@ -975,7 +975,6 @@ UPDATE instance_template SET ScriptName='instance_shattered_halls' WHERE map=540
 UPDATE instance_template SET ScriptName='instance_magtheridons_lair' WHERE map=544;
 UPDATE gameobject_template SET ScriptName='go_manticron_cube' WHERE entry=181713;
 UPDATE creature_template SET ScriptName='boss_magtheridon' WHERE entry=17257;
-UPDATE creature_template SET ScriptName='mob_abyssal' WHERE entry=17454;
 UPDATE creature_template SET ScriptName='mob_hellfire_channeler' WHERE entry=17256;
 
 /* HELLFIRE PENINSULA */

@@ -76,12 +76,9 @@ enum
     SPELL_BURNING_ABYSSAL       = 30511,
     SPELL_SOUL_TRANSFER         = 30531,
 
-    // Abyss spells
-    SPELL_FIRE_BLAST            = 37110,
-
     // summons
-    // NPC_MAGS_ROOM             = 17516,
-    NPC_BURNING_ABYSS           = 17454,
+    // NPC_MAGS_ROOM               = 17516,
+    // NPC_BURNING_ABYSSAL         = 17454,
     NPC_RAID_TRIGGER            = 17376,
 
     MAX_QUAKE_COUNT             = 7,
@@ -361,12 +358,6 @@ struct mob_hellfire_channelerAI : public CombatAI
             m_instance->SetData(TYPE_CHANNELER_EVENT, FAIL);
     }
 
-    void JustSummoned(Creature* summoned) override
-    {
-        if (m_creature->GetVictim())
-            summoned->AI()->AttackStart(m_creature->GetVictim());
-    }
-
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -443,45 +434,6 @@ bool GOUse_go_manticron_cube(Player* player, GameObject* go)
 
     return true;
 }
-
-// ToDo: move this script to eventAI
-struct mob_abyssalAI : public ScriptedAI
-{
-    mob_abyssalAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
-
-    uint32 m_uiFireBlastTimer;
-    uint32 m_uiDespawnTimer;
-
-    void Reset() override
-    {
-        m_uiDespawnTimer   = 60000;
-        m_uiFireBlastTimer = 6000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiDespawnTimer < uiDiff)
-        {
-            m_creature->ForcedDespawn();
-            m_uiDespawnTimer = 10000;
-        }
-        else
-            m_uiDespawnTimer -= uiDiff;
-
-        if (m_uiFireBlastTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIRE_BLAST) == CAST_OK)
-                m_uiFireBlastTimer = urand(5000, 15000);
-        }
-        else
-            m_uiFireBlastTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
-};
 
 struct ShadowGraspCube : public AuraScript
 {
@@ -567,11 +519,6 @@ void AddSC_boss_magtheridon()
     pNewScript->Name = "go_manticron_cube";
     pNewScript->pGOUse = &GOUse_go_manticron_cube;
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_manticron_cubeAI>;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "mob_abyssal";
-    pNewScript->GetAI = &GetNewAIInstance<mob_abyssalAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<ShadowGraspCube>("spell_shadow_grasp_cube");
