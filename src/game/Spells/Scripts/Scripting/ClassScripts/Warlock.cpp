@@ -274,7 +274,7 @@ struct SoulLeech : public AuraScript
     {
         int32 damage = int32(procData.damage * aura->GetAmount() / 100);
         Unit* target = aura->GetTarget();
-        target->CastSpell(nullptr, 30294, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        target->CastCustomSpell(nullptr, 30294, &damage, nullptr, nullptr, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
 
         if (target->IsPlayer())
         {
