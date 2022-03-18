@@ -234,6 +234,7 @@ class Quest
         int32  GetPrevQuestId() const { return PrevQuestId; }
         int32  GetNextQuestId() const { return NextQuestId; }
         int32  GetExclusiveGroup() const { return ExclusiveGroup; }
+        uint32 GetBreadcrumbForQuestId() const { return BreadcrumbForQuestId; }
         uint32 GetNextQuestInChain() const { return NextQuestInChain; }
         uint32 GetRewXPId() const { return RewXPId; }
         uint32 GetCharTitleId() const { return CharTitleId; }
@@ -317,6 +318,7 @@ class Quest
         PrevQuests prevQuests;
         typedef std::vector<uint32> PrevChainQuests;
         PrevChainQuests prevChainQuests;
+        std::vector<uint32> DependentBreadcrumbQuests;
 
         // cached data
     private:
@@ -357,6 +359,7 @@ class Quest
         int32  PrevQuestId;
         int32  NextQuestId;
         int32  ExclusiveGroup;
+        uint32 BreadcrumbForQuestId;
         uint32 NextQuestInChain;
         uint32 RewXPId;
         uint32 SrcItemId;

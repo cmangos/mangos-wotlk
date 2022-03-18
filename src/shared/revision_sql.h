@@ -3,5 +3,5 @@
  #define REVISION_DB_REALMD "required_14039_01_realmd_anticheat"
  #define REVISION_DB_LOGS "required_14039_01_logs_anticheat"
  #define REVISION_DB_CHARACTERS "required_14044_01_characters_extend_state"
- #define REVISION_DB_MANGOS "required_14052_01_mangos_creature_spawn_data_template"
+ #define REVISION_DB_MANGOS "required_14053_01_mangos_quest_template"
 #endif // __REVISION_SQL_H__
