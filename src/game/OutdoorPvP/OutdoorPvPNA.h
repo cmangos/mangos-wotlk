@@ -102,6 +102,8 @@ enum
     EVENT_HALAA_BANNER_CONTEST_HORDE        = 11558,
     EVENT_HALAA_BANNER_PROGRESS_ALLIANCE    = 11821,
     EVENT_HALAA_BANNER_PROGRESS_HORDE       = 11822,
+
+    ZONE_HALAA                              = 3628,
 };
 
 struct HalaaSoldiersSpawns

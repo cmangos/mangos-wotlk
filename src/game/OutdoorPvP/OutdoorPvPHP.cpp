@@ -153,7 +153,7 @@ void OutdoorPvPHP::HandlePlayerKillInsideArea(Player* player, Unit* victim)
             GameObjectInfo const* info = capturePoint->GetGOInfo();
             if (info && player->IsWithinDistInMap(capturePoint, info->capturePoint.radius))
             {
-                player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_HELLFIRE_TOWER_TOKEN_ALLIANCE : SPELL_HELLFIRE_TOWER_TOKEN_HORDE, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(nullptr, player->GetTeam() == ALLIANCE ? SPELL_HELLFIRE_TOWER_TOKEN_ALLIANCE : SPELL_HELLFIRE_TOWER_TOKEN_HORDE, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
         }
