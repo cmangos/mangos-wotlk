@@ -712,8 +712,8 @@ void WorldSession::HandleGetMailList(WorldPacket& recv_data)
             data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
             // durability
             data << uint32(item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
-            // unknown wotlk
-            data << uint8(0);
+            // is unlocked
+            data << uint8(item ? item->IsUnlocked() : 0);
         }
 
         mailsCount += 1;

@@ -298,6 +298,7 @@ class Item : public Object
         void DeleteFromInventoryDB() const;
         void LoadLootFromDB(Field* fields);
 
+        bool IsUnlocked() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_DYNFLAG_UNLOCKED); }
         bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
         bool IsBroken() const { return GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && GetUInt32Value(ITEM_FIELD_DURABILITY) == 0; }
         bool CanBeTraded(bool mail = false) const;
