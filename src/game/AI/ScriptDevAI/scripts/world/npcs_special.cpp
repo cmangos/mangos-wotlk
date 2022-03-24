@@ -3001,7 +3001,7 @@ struct GossipNPCAppearanceAllBrewfest : public AuraScript
 
 struct GossipNPCAppearanceAllSpiritOfCompetition : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const override
+    uint32 GetAuraScriptCustomizationValue(Aura* aura) const override
     {
         uint32 displayId = 0;
         switch (aura->GetTarget()->GetEntry()) // TODO
@@ -3019,13 +3019,13 @@ struct GossipNPCAppearanceAllSpiritOfCompetition : public AuraScript
             case NPC_FORSAKEN_COMMONER: displayId = urand(0, 1) ? 24518 : 24529; break;
             case NPC_GOBLIN_COMMONER: displayId = urand(0, 1) ? 24512 : 24523; break;
         }
-        aura->GetModifier()->m_amount = displayId;
+        return displayId;
     }
 };
 
 struct GossipNPCAppearanceAllPirateDay : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const override
+    uint32 GetAuraScriptCustomizationValue(Aura* aura) const override
     {
         uint32 displayId = 0;
         switch (aura->GetTarget()->GetEntry()) // TODO
@@ -3043,7 +3043,7 @@ struct GossipNPCAppearanceAllPirateDay : public AuraScript
             case NPC_FORSAKEN_COMMONER: displayId = urand(0, 1) ? 25042 : 25053; break;
             case NPC_GOBLIN_COMMONER: displayId = urand(0, 1) ? 25036 : 25047; break;
         }
-        aura->GetModifier()->m_amount = displayId;
+        return displayId;
     }
 };
 

@@ -1031,6 +1031,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12576,'spell_arcane_concentration'),
 (12577,'spell_arcane_concentration'),
 (12654,'spell_mage_ignite'),
+(118,'spell_polymorph'),
+(12824,'spell_polymorph'),
+(12825,'spell_polymorph'),
+(12826,'spell_polymorph'),
 (58838,'spell_inherit_masters_threat_list'),
 (59638,'spell_mirror_image_frostbolt');
 

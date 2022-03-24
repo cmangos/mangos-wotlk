@@ -120,6 +120,18 @@ struct DeepFreezeImmunityState : public AuraScript
     }
 };
 
+// 118 - Polymorph
+struct Polymorph : public AuraScript
+{
+    uint32 GetAuraScriptCustomizationValue(Aura* aura) const override
+    {
+        if (Unit* caster = aura->GetCaster())
+            if (caster->HasAura(52648)) // Glyph of the Penguin
+                return 26452;
+        return 0;
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
@@ -128,4 +140,5 @@ void LoadMageScripts()
     RegisterSpellScript<FingersOfFrostIgnore>("spell_fingers_of_frost_ignore");
     RegisterSpellScript<FingersOfFrostDummy>("spell_fingers_of_frost_dummy");
     RegisterSpellScript<DeepFreezeImmunityState>("spell_deep_freeze_immunity_state");
+    RegisterSpellScript<Polymorph>("spell_polymorph");
 }
