@@ -372,7 +372,7 @@ struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
     {
         AddCombatAction(GATHIOS_ACTION_JUDGEMENT, true);
         AddCombatAction(GATHIOS_ACTION_SEAL, 0u);
-        AddCombatAction(GATHIOS_ACTION_AURA, 90000, 90000);
+        AddCombatAction(GATHIOS_ACTION_AURA, 5000, 6000);
         AddCombatAction(GATHIOS_ACTION_BLESSING, 19000, 26000);
         AddCombatAction(GATHIOS_ACTION_CONSECRATION, 10000u);
         AddCombatAction(GATHIOS_ACTION_HAMMER_OF_JUSTICE, 10000, 10000);
@@ -439,7 +439,7 @@ struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
             case GATHIOS_ACTION_AURA:
             {
                 if (DoCastSpellIfCan(nullptr, urand(0, 1) ? SPELL_DEVOTION_AURA : SPELL_CHROMATIC_AURA) == CAST_OK)
-                    ResetCombatAction(action, 90000);
+                    ResetCombatAction(action, 60000);
                 return;
             }
             case GATHIOS_ACTION_BLESSING:
