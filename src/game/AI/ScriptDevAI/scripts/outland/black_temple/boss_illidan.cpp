@@ -316,7 +316,7 @@ static const DialogueEntry aEpilogueDialogue[] =
 };
 
 /*** Phase Names ***/
-enum Phase
+enum IllidanPhase
 {
     PHASE_1_AKAMA,
     PHASE_2_FLIGHT,
@@ -446,13 +446,13 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
 
     instance_black_temple* m_instance;
 
-    Phase m_phase;
+    IllidanPhase m_phase;
 
     float m_targetMoveX, m_targetMoveY, m_targetMoveZ;
 
     uint8 m_flameAzzinothKilled;
 
-    Phase m_prevPhase;                                    // store the previous phase in transition
+    IllidanPhase m_prevPhase;                             // store the previous phase in transition
     PhaseTransition m_currentTransition;                  // store the current transition between phases
     uint32 m_phaseTransitionStage;
     uint8 m_curEyeBlastLoc;
