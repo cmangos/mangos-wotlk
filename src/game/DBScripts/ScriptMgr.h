@@ -112,7 +112,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SET_HOVER                  = 39,           // resSource = Creature
     // datalong = bool 0=off, 1=on
     // data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_FLY_ANIM
-    SCRIPT_COMMAND_DESPAWN_GO               = 40,           // resTarget = GameObject
+    SCRIPT_COMMAND_DESPAWN_GO               = 40,           // resTarget = GameObject, datalong = timer in ms
     SCRIPT_COMMAND_RESPAWN                  = 41,           // resSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets
     SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS      = 42,           // resSource = Creature
     // datalong = resetDefault: bool 0=false, 1=true
@@ -403,8 +403,10 @@ struct ScriptInfo
             uint32 empty;                                   // datalong2
         } fly;
 
-        // datalong unsed                                   // SCRIPT_COMMAND_DESPAWN_GO (40)
-        // datalong unsed                                   // SCRIPT_COMMAND_RESPAWN (41)
+        struct                                              // SCRIPT_COMMAND_DESPAWN_GO (40)
+        {
+            uint32 despawnDelay;                            // datalong
+        } despawnGo;
 
         struct                                              // SCRIPT_COMMAND_SET_EQUIPMENT_SLOTS (42)
         {
