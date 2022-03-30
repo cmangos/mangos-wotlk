@@ -330,6 +330,13 @@ void BattleGroundWS::HandlePlayerDroppedFlag(Player* player)
     }
 }
 
+bool BattleGroundWS::IsFlagHeldFor45Seconds(Team flagHolderTeam)
+{
+    PvpTeamIndex teamIdx = GetTeamIndexByTeamId(flagHolderTeam);
+    PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(teamIdx);
+    return m_flagPickupFromBaseTime[otherTeamIdx] + std::chrono::seconds(45) < GetBgMap()->GetCurrentClockTime();
+}
+
 // Function that handles the flag pick up from the base
 void BattleGroundWS::ProcessFlagPickUpFromBase(Player* player, Team attackerTeam)
 {
@@ -344,6 +351,7 @@ void BattleGroundWS::ProcessFlagPickUpFromBase(Player* player, Team attackerTeam
     SpawnEvent(otherTeamIdx, 0, false);
     SetFlagCarrier(otherTeamIdx, player->GetObjectGuid());
     m_flagState[otherTeamIdx] = BG_WS_FLAG_STATE_ON_PLAYER;
+    m_flagPickupFromBaseTime[otherTeamIdx] = GetBgMap()->GetCurrentClockTime();
 
     // update world state to show correct flag carrier
     UpdateFlagState(attackerTeam, BG_WS_FLAG_STATE_ON_PLAYER);
