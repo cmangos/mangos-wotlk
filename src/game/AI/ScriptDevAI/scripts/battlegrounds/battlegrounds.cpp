@@ -205,6 +205,21 @@ struct spell_outdoor_pvp_banner_trigger : public SpellScript
     }
 };
 
+struct OutdoorPvpNotifyAI : public GameObjectAI
+{
+    using GameObjectAI::GameObjectAI;
+
+    void OnUse(Unit* user, SpellEntry const* spellInfo) override
+    {
+        if (!user->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(user);
+        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
+            outdoorPvP->HandleGameObjectUse(player, m_go);
+    }
+};
+
 /*#####
 # spell_split_teleport_boat - 52365, 52528, 53464, 53465
 #####*/
@@ -359,6 +374,11 @@ void AddSC_battleground()
     pNewScript->Name = "npc_spirit_guide";
     pNewScript->GetAI = &GetNewAIInstance<npc_spirit_guideAI>;
     pNewScript->pGossipHello = &GossipHello_npc_spirit_guide;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_outdoor_pvp_notify";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<OutdoorPvpNotifyAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");

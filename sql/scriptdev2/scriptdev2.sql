@@ -126,6 +126,16 @@ UPDATE gameobject_template SET ScriptName='go_containment_coffer' WHERE entry=12
 UPDATE gameobject_template SET ScriptName='go_large_jack_o_lantern' WHERE entry=186887;
 UPDATE gameobject_template SET ScriptName='go_imp_in_a_ball' WHERE entry=185898;
 
+/* Outdoor PVP*/
+-- si
+UPDATE gameobject_template SET ScriptName='go_outdoor_pvp_notify' WHERE entry IN(181597,181598);
+-- ep
+UPDATE gameobject_template SET ScriptName='go_outdoor_pvp_notify' WHERE entry IN(181682,181955);
+-- halaa
+UPDATE gameobject_template SET ScriptName='go_outdoor_pvp_notify' WHERE entry IN(182297,182298,182299,182300,182266,182275,182276,182277);
+UPDATE gameobject_template SET ScriptName='go_outdoor_pvp_notify' WHERE entry IN(182301,182302,182303,182304,182267,182280,182281,182282);
+UPDATE gameobject_template SET ScriptName='go_outdoor_pvp_notify' WHERE entry IN(182222,182272,182273,182274,182305,182306,182307,182308);
+
 /* GUARD */
 UPDATE creature_template SET ScriptName='guard_azuremyst' WHERE entry=18038;
 UPDATE creature_template SET ScriptName='guard_orgrimmar' WHERE entry IN (3296,14304);
