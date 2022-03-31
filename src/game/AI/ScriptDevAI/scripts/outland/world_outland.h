@@ -67,6 +67,8 @@ enum
 
     // Ysiel Windsinger - Quest 9718 - As the Crow Flies
     NPC_YSIEL_WINDSINGER = 17841,
+
+    GO_HALAA_BANNER = 182210,
 };
 
 enum Shartuul
