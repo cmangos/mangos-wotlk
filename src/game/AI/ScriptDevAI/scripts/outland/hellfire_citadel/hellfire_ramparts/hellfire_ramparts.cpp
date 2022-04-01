@@ -25,7 +25,7 @@ EndScriptData */
 #include "hellfire_ramparts.h"
 
 instance_ramparts::instance_ramparts(Map* pMap) : ScriptedInstance(pMap),
-    m_uiSentryCounter(0)
+    m_uiSentryCounter(0), m_sentryGroup(nullptr)
 {
     Initialize();
 }
@@ -43,8 +43,16 @@ void instance_ramparts::OnCreatureCreate(Creature* pCreature)
         case NPC_VAZRUDEN:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+    }
+}
+
+void instance_ramparts::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
         case NPC_HELLFIRE_SENTRY:
-            m_lSentryGUIDs.push_back(pCreature->GetObjectGuid());
+            if (CreatureGroup* group = creature->GetCreatureGroup())
+                m_sentryGroup = group;
             break;
     }
 }
@@ -129,11 +137,8 @@ void instance_ramparts::DoFailVazruden()
 
     // Restore Sentries (counter and respawn them)
     m_uiSentryCounter = 0;
-    for (GuidList::const_iterator itr = m_lSentryGUIDs.begin(); itr != m_lSentryGUIDs.end(); ++itr)
-    {
-        if (Creature* pSentry = instance->GetCreature(*itr))
-            pSentry->Respawn();
-    }
+    // respawns sentry group
+    m_sentryGroup->Spawn(true);
 
     // Respawn or Reset Vazruden the herald
     if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))

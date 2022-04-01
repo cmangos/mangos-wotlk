@@ -28,6 +28,7 @@ class instance_ramparts : public ScriptedInstance
         void Initialize() override;
 
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
@@ -41,7 +42,7 @@ class instance_ramparts : public ScriptedInstance
         uint32 m_auiEncounter[MAX_ENCOUNTER];
 
         uint32 m_uiSentryCounter;
-        GuidList m_lSentryGUIDs;
+        CreatureGroup* m_sentryGroup;
 };
 
 #endif
