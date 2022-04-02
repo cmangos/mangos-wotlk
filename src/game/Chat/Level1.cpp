@@ -1781,15 +1781,6 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
             SetSentErrorMessage(true);
             return false;
         }
-
-        if (mapid == player->GetMap()->GetId())
-            player->UpdateAllowedPositionZ(x, y, z);
-        else
-        {
-            TerrainInfo const* map = sTerrainMgr.LoadTerrain(mapid);
-            float groundZ = map->GetHeightStatic(x, y, z);
-            z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, groundZ);
-        }
     }
     else
     {
