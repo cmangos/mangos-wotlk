@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14056_01_mangos_dbscript_extension` bit(1) DEFAULT NULL
+  `required_14057_01_mangos_spawn_group_chanced_spawns` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -16299,6 +16299,7 @@ CREATE TABLE `spawn_group_spawn`  (
   `Id` int(11) NOT NULL COMMENT 'Spawn Group ID',
   `Guid` int(11) NOT NULL COMMENT 'Guid of creature or GO',
   `SlotId` tinyint(4) NOT NULL DEFAULT -1 COMMENT '0 is the leader, -1 not part of the formation',
+  `Chance` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Chance for a spawn to occur',
   PRIMARY KEY (`Id`, `Guid`)
 );
 
