@@ -414,16 +414,20 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         // change caster to player and let him cast
         if (!_player->GetTransportInfo() || _player->GetTransportInfo()->GetTransport() != caster || Spell::CheckVehicle(_player, *spellInfo) != SPELL_CAST_OK)
         {
+            bool isPassive = IsPassiveSpell(spellInfo);
             // not have spell in spellbook or spell passive and not casted by client
-            if (!mover->HasSpell(spellId) || IsPassiveSpell(spellInfo))
+            if (!mover->HasSpell(spellId) || isPassive)
             {
-                // cheater? kick? ban?
-                recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
-                return;
+                if (!_player->HasSpell(spellId) || isPassive)
+                {
+                    // cheater? kick? ban?
+                    recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
+                    return;
+                }
             }
+            else
+                caster = _player;
         }
-        else
-            caster = _player;
     }
 
     // client provided targets
@@ -462,11 +466,12 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         {
             handled = true;
             _player->SetQueuedSpell(spell);
-            GetMessager().AddMessage([guid = caster->GetObjectGuid(), targets = targets](WorldSession* session) mutable
+            GetMessager().AddMessage([guid = caster->GetObjectGuid(), isPlayer = caster != mover, targets = targets](WorldSession* session) mutable
             {
                 if (session->GetPlayer()) // in case of logout
                 {
-                    if (session->GetPlayer()->GetMover()->GetObjectGuid() == guid) // in case of mind control end
+                    // in case of mind control end
+                    if ((isPlayer && session->GetPlayer()->GetObjectGuid() == guid) || (!isPlayer && session->GetPlayer()->GetMover()->GetObjectGuid() == guid))
                         session->GetPlayer()->CastQueuedSpell(targets);
                     else
                         session->GetPlayer()->ClearQueuedSpell();
