@@ -360,6 +360,8 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
                     SetData(TYPE_RUN_EVENT_TIME, m_auiEncounter[TYPE_RUN_EVENT_TIME]);
                 else
                     SetData(TYPE_RUN_EVENT_TIME, 20);   // 20 Minutes as default time
+
+                static_cast<DungeonMap*>(instance)->PermBindAllPlayers();
             }
             if (data == FAIL)
             {
