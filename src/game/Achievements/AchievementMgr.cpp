@@ -280,7 +280,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
                     criteria->ID, criteria->requiredType, requirementType, mapId.mapId);
                 return false;
             }
-            break;
+            return true;
         }
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
