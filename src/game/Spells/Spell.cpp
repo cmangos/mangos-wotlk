@@ -6593,8 +6593,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (int32(expectedTarget->GetLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
                         return SPELL_FAILED_HIGHLEVEL;
 
-                    if (expectedTarget->GetOwner() && expectedTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-                        return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
+                    if (expectedTarget->GetOwner())
+                        return expectedTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) ? SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED : SPELL_FAILED_CANT_BE_CHARMED;
                 }
                 break;
             }
@@ -6617,8 +6617,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (int32(expectedTarget->GetLevel()) > CalculateSpellEffectValue(SpellEffectIndex(i), expectedTarget))
                         return SPELL_FAILED_HIGHLEVEL;
 
-                    if (expectedTarget->GetOwner() && expectedTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-                        return SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED;
+                    if (expectedTarget->GetOwner())
+                        return expectedTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) ? SPELL_FAILED_TARGET_IS_PLAYER_CONTROLLED : SPELL_FAILED_CANT_BE_CHARMED;
                 }
                 break;
             }
