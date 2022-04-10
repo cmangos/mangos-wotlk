@@ -906,7 +906,8 @@ class GameObject : public WorldObject
         // Destructible GO handling
         void DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster);
         void RebuildGameObject(Unit* caster);
-        void ForceGameObjectHealth(int32 diff, Unit* caster);
+        void SetDestructibleState(GameObjectDestructibleState state, Unit* attackerOrHealer = nullptr, bool setHealth = false);
+        GameObjectDestructibleState GetDestructibleState() const;
         uint32 GetHealth() const { return m_useTimes; }
         uint32 GetMaxHealth() const { return m_goInfo->destructibleBuilding.intactNumHits + m_goInfo->destructibleBuilding.damagedNumHits; }
 
@@ -1031,6 +1032,7 @@ class GameObject : public WorldObject
         void TickCapturePoint();
         void UpdateModel();                                 // updates model in case displayId were changed
         void UpdateCollisionState() const;                  // updates state in Map's dynamic collision tree
+        void ForceGameObjectHealth(int32 diff, Unit* caster); // should use SetDestructibleState from outside
 
         GridReference<GameObject> m_gridRef;
 };

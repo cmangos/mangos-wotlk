@@ -2716,6 +2716,37 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     SetGoAnimProgress(GetMaxHealth() ? m_useTimes * 255 / GetMaxHealth() : 255);
 }
 
+void GameObject::SetDestructibleState(GameObjectDestructibleState state, Unit* attackerOrHealer /*= nullptr*/, bool setHealth /*= false*/)
+{
+    // the user calling this must know he is already operating on destructible gameobject
+    MANGOS_ASSERT(GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING);
+
+    switch (state)
+    {
+        case GO_DESTRUCTIBLE_INTACT:                        // Set to full health
+            ForceGameObjectHealth(GetMaxHealth(), attackerOrHealer);
+            break;
+        case GO_DESTRUCTIBLE_DAMAGED:                       // Set to damaged
+            ForceGameObjectHealth(GetGOInfo()->destructibleBuilding.damagedNumHits, attackerOrHealer);
+            break;
+        case GO_DESTRUCTIBLE_DESTROYED:                     // Set to destroyed
+            ForceGameObjectHealth(-int32(GetHealth()), attackerOrHealer);
+            break;
+        case GO_DESTRUCTIBLE_REBUILDING:                    // Set to rebuilding
+            ForceGameObjectHealth(0, attackerOrHealer);
+            break;
+    }
+}
+
+GameObjectDestructibleState GameObject::GetDestructibleState() const
+{
+    if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))
+        return GO_DESTRUCTIBLE_DESTROYED;
+    if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED))
+        return GO_DESTRUCTIBLE_DAMAGED;
+    return GO_DESTRUCTIBLE_INTACT;
+}
+
 float GameObject::GetInteractionDistance() const
 {
     switch (GetGoType())
