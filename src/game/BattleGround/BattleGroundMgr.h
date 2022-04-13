@@ -59,6 +59,7 @@ struct GroupQueueInfo                                       // stores informatio
     uint32  joinTime;                                       // time when group was added
     uint32  removeInviteTime;                               // time when we will remove invite for players in group
     uint32  isInvitedToBgInstanceGuid;                      // was invited to certain BG
+    uint32  desiredInstanceId;                              // queued for this instance specifically
     uint32  arenaTeamRating;                                // if rated match, inited to the rating of the team
     uint32  opponentsTeamRating;                            // for rated arena matches
 };
@@ -86,7 +87,7 @@ class BattleGroundQueue
         bool CheckPremadeMatch(BattleGroundBracketId /*bracketId*/, uint32 /*minPlayersPerTeam*/, uint32 /*maxPlayersPerTeam*/);
         bool CheckNormalMatch(BattleGround* /*bgTemplate*/, BattleGroundBracketId /*bracketId*/, uint32 /*minPlayers*/, uint32 /*maxPlayers*/);
         bool CheckSkirmishForSameFaction(BattleGroundBracketId /*bracketId*/, uint32 /*minPlayersPerTeam*/);
-        GroupQueueInfo* AddGroup(Player* /*leader*/, Group* /*group*/, BattleGroundTypeId /*bgTypeId*/, PvPDifficultyEntry const* /*bracketEntry*/, ArenaType /*arenaType*/, bool /*isRated*/, bool /*isPremade*/, uint32 /*arenaRating*/, uint32 arenaTeamId = 0);
+        GroupQueueInfo* AddGroup(Player* /*leader*/, Group* /*group*/, BattleGroundTypeId /*bgTypeId*/, PvPDifficultyEntry const* /*bracketEntry*/, ArenaType /*arenaType*/, bool /*isRated*/, bool /*isPremade*/, uint32 /*instanceId*/, uint32 /*arenaRating*/, uint32 arenaTeamId = 0);
         void RemovePlayer(ObjectGuid /*guid*/, bool /*decreaseInvitedCount*/);
         bool IsPlayerInvited(ObjectGuid /*playerGuid*/, const uint32 /*bgInstanceGuid*/, const uint32 /*removeTime*/);
         bool GetPlayerGroupInfoData(ObjectGuid /*guid*/, GroupQueueInfo* /*groupInfo*/);
@@ -120,7 +121,7 @@ class BattleGroundQueue
             public:
                 SelectionPool() : playerCount(0) {}
                 void Init();
-                bool AddGroup(GroupQueueInfo* ginfo, uint32 desiredCount);
+                bool AddGroup(GroupQueueInfo* ginfo, uint32 desiredCount, uint32 bgInstanceId);
                 bool KickGroup(uint32 size);
                 uint32 GetPlayerCount() const {return playerCount;}
                 GroupsQueueType selectedGroups;
