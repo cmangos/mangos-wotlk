@@ -284,7 +284,7 @@ BattleGround::~BattleGround()
     // skip template bgs as they were never added to visible bg list
     BattleGroundBracketId bracketId = GetBracketId();
     if (bracketId != BG_BRACKET_ID_TEMPLATE)
-        sBattleGroundMgr.DeleteClientVisibleInstanceId(GetTypeId(), bracketId, GetClientInstanceID());
+        sBattleGroundMgr.DeleteClientVisibleInstanceId(GetTypeId(), bracketId, GetClientInstanceId());
 
     // unload map
     // map can be null at bg destruction

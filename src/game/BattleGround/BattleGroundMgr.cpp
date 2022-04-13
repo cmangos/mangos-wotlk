@@ -596,14 +596,14 @@ void BattleGroundQueue::FillPlayersToBg(BattleGround* bg, BattleGroundBracketId 
     uint32 aliCount = m_queuedGroups[bracketId][BG_QUEUE_NORMAL_ALLIANCE].size();
     // index to queue which group is current
     uint32 aliIndex = 0;
-    for (; aliIndex < aliCount && m_selectionPools[TEAM_INDEX_ALLIANCE].AddGroup((*Ali_itr), aliFree, bg->GetClientInstanceID()); ++aliIndex)
+    for (; aliIndex < aliCount && m_selectionPools[TEAM_INDEX_ALLIANCE].AddGroup((*Ali_itr), aliFree, bg->GetClientInstanceId()); ++aliIndex)
         ++Ali_itr;
 
     // the same thing for horde
     GroupsQueueType::const_iterator Horde_itr = m_queuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].begin();
     uint32 hordeCount = m_queuedGroups[bracketId][BG_QUEUE_NORMAL_HORDE].size();
     uint32 hordeIndex = 0;
-    for (; hordeIndex < hordeCount && m_selectionPools[TEAM_INDEX_HORDE].AddGroup((*Horde_itr), hordeFree, bg->GetClientInstanceID()); ++hordeIndex)
+    for (; hordeIndex < hordeCount && m_selectionPools[TEAM_INDEX_HORDE].AddGroup((*Horde_itr), hordeFree, bg->GetClientInstanceId()); ++hordeIndex)
         ++Horde_itr;
 
     // if ofc like BG queue invitation is set in config, then we are happy
@@ -629,7 +629,7 @@ void BattleGroundQueue::FillPlayersToBg(BattleGround* bg, BattleGroundBracketId 
             // kick alliance group, add to pool new group if needed
             if (m_selectionPools[TEAM_INDEX_ALLIANCE].KickGroup(diffHorde - diffAli))
             {
-                for (; aliIndex < aliCount && m_selectionPools[TEAM_INDEX_ALLIANCE].AddGroup((*Ali_itr), (aliFree >= diffHorde) ? aliFree - diffHorde : 0, bg->GetClientInstanceID()); ++aliIndex)
+                for (; aliIndex < aliCount && m_selectionPools[TEAM_INDEX_ALLIANCE].AddGroup((*Ali_itr), (aliFree >= diffHorde) ? aliFree - diffHorde : 0, bg->GetClientInstanceId()); ++aliIndex)
                     ++Ali_itr;
             }
             // if ali selection is already empty, then kick horde group, but if there are less horde than ali in bg - break;
@@ -645,7 +645,7 @@ void BattleGroundQueue::FillPlayersToBg(BattleGround* bg, BattleGroundBracketId 
             // kick horde group, add to pool new group if needed
             if (m_selectionPools[TEAM_INDEX_HORDE].KickGroup(diffAli - diffHorde))
             {
-                for (; hordeIndex < hordeCount && m_selectionPools[TEAM_INDEX_HORDE].AddGroup((*Horde_itr), (hordeFree >= diffAli) ? hordeFree - diffAli : 0, bg->GetClientInstanceID()); ++hordeIndex)
+                for (; hordeIndex < hordeCount && m_selectionPools[TEAM_INDEX_HORDE].AddGroup((*Horde_itr), (hordeFree >= diffAli) ? hordeFree - diffAli : 0, bg->GetClientInstanceId()); ++hordeIndex)
                     ++Horde_itr;
             }
             if (!m_selectionPools[TEAM_INDEX_HORDE].GetPlayerCount())
@@ -1391,9 +1391,9 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket& data, BattleGro
     data << uint32(queueSlot);                             // queue id (0...1) - player can be in 2 queues in time
     // uint64 in client
     data << uint64(uint64(arenaType) | (uint64(0x0D) << 8) | (uint64(bg->GetTypeId()) << 16) | (uint64(0x1F90) << 48));
-    data << uint8(0);                                      // 3.3.0, some level, only saw 80...
-    data << uint8(0);                                      // 3.3.0, some level, only saw 80...
-    data << uint32(bg->GetClientInstanceID());
+    data << uint8(bg->GetMinLevel());
+    data << uint8(bg->GetMaxLevel());
+    data << uint32(bg->GetClientInstanceId());
     // alliance/horde for BG and skirmish/rated for Arenas
     // following displays the minimap-icon 0 = faction icon 1 = arenaicon
     data << uint8(bg->IsRated());
@@ -1630,7 +1630,7 @@ BattleGround* BattleGroundMgr::GetBattleGroundThroughClientInstance(uint32 insta
 
     for (auto& itr : m_battleGrounds[bgTypeId])
     {
-        if (itr.second->GetClientInstanceID() == instanceId)
+        if (itr.second->GetClientInstanceId() == instanceId)
             return itr.second;
     }
 

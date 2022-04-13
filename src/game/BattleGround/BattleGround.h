@@ -368,7 +368,7 @@ class BattleGround
         // that's why the m_map hack is here..
         uint32 GetInstanceId() const        { return m_bgMap ? GetBgMap()->GetInstanceId() : 0; }
         BattleGroundStatus GetStatus() const { return m_status; }
-        uint32 GetClientInstanceID() const  { return m_clientInstanceId; }
+        uint32 GetClientInstanceId() const  { return m_clientInstanceId; }
         uint32 GetStartTime() const         { return m_startTime; }
         uint32 GetEndTime() const           { return m_endTime; }
         uint32 GetMaxPlayers() const        { return m_maxPlayers; }
