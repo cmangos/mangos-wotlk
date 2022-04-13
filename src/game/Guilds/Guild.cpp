@@ -2421,6 +2421,17 @@ void Guild::MoveFromCharToBank(Player* pl, uint8 PlayerBag, uint8 PlayerSlot, ui
     }
 }
 
+ObjectGuid Guild::GetGuildInviter(ObjectGuid playerGuid) const
+{
+    for (auto const& itr : m_GuildEventLog)
+    {
+        if (itr.EventType == GUILD_EVENT_LOG_INVITE_PLAYER &&
+            itr.PlayerGuid2 == playerGuid)
+            return ObjectGuid(HIGHGUID_PLAYER, itr.PlayerGuid1);
+    }
+    return ObjectGuid();
+}
+
 void Guild::BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 /*=nullptr*/, char const* str2 /*=nullptr*/, char const* str3 /*=nullptr*/)
 {
     uint8 strCount = !str1 ? 0 : (!str2 ? 1 : (!str3 ? 2 : 3));
