@@ -394,8 +394,7 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->SetWalk(false);
-        pSummoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+        pSummoned->AI()->AttackStart(m_creature);
         m_summons.push_back(pSummoned->GetObjectGuid());
     }
 
@@ -430,9 +429,9 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_playerGuid = pPlayer->GetObjectGuid();
 
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8756.952f, -7124.688f, 35.227f, 3.925692f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
-        m_creature->SummonCreature(NPC_GHARSUL,	   8756.182f, -7130.453f, 35.227f, 3.816502f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8761.380f, -7132.638f, 35.696f, 3.664015f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8755.3798828125f, -7131.521484375f, 35.30957412719726562f, 3.664015054702758789f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_GHARSUL, 8751.291015625f, -7131.166015625f, 35.327850341796875f, 3.816501855850219726f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8753.19921875f, -7125.97509765625f, 35.31986236572265625f, 3.925692081451416015f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000, true);
 
         m_creature->SetActiveObjectState(true);
     }
