@@ -2834,6 +2834,21 @@ bool WorldObject::IsSpellReady(uint32 spellId, ItemPrototype const* itemProto /*
     return IsSpellReady(*spellEntry, itemProto);
 }
 
+bool WorldObject::IsSpellOnPermanentCooldown(SpellEntry const& spellEntry) const
+{
+    TimePoint now;
+    if (IsInWorld())
+        now = GetMap()->GetCurrentClockTime();
+    else
+        now = World::GetCurrentClockTime();
+
+    auto itr = m_cooldownMap.FindBySpellId(spellEntry.Id);
+    if (itr != m_cooldownMap.end() && !(*itr).second->IsSpellCDExpired(now))
+        return itr->second->IsPermanent();
+
+    return false;
+}
+
 bool WorldObject::HasGCDOrCooldownWithinMargin(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/)
 {
     uint64 diff = 0;
