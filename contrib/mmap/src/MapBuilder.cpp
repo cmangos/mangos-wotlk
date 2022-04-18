@@ -24,10 +24,13 @@
 
 #include "DetourNavMeshBuilder.h"
 #include "DetourCommon.h"
+#include "Vmap/VMapDefinitions.h"
 
 #include <climits>
 #include <fstream>
 #include <future>
+
+#include <G3D/Quat.h>
 
 using namespace VMAP;
 
@@ -73,12 +76,13 @@ namespace MMAP
     }
 
     MapBuilder::MapBuilder(const char* configInputPath, int threads, bool skipLiquid, bool skipContinents, bool skipJunkMaps,
-                           bool skipBattlegrounds, bool debug, const char* offMeshFilePath, const char* workdir) :
+                           bool skipBattlegrounds, bool debug, bool buildAlternate, const char* offMeshFilePath, const char* workdir) :
         m_taskQueue(new TaskQueue(this, threads)),
         m_debug(debug),
         m_skipContinents(skipContinents),
         m_skipJunkMaps(skipJunkMaps),
         m_skipBattlegrounds(skipBattlegrounds),
+        m_buildAlternate(buildAlternate),
         m_offMeshFilePath(offMeshFilePath),
         m_workdir(workdir)
     {
@@ -91,6 +95,8 @@ namespace MMAP
 
         printf("Using %d thread(s) for processing.\n", threads);
         discoverTiles();
+
+        m_modelList = GameobjectModelData::LoadGameObjectModelList(std::string(m_workdir) + "/vmaps/" + VMAP::GAMEOBJECT_MODELS);
     }
 
     /**************************************************************************/
@@ -293,7 +299,7 @@ namespace MMAP
         rcCalcGridSize(config.bmin, config.bmax, config.cs, &config.width, &config.height);
 
         Tile tile;
-        buildCommonTile(modelName.data(), tile, config, tVerts, tVertCount, tTris, tTriCount, nullptr, 0, nullptr, 0, 0);
+        buildCommonTile(modelName.data(), tile, config, tVerts, tVertCount, tTris, tTriCount, nullptr, nullptr, 0, nullptr, 0, nullptr);
 
         IntermediateValues iv;
         iv.polyMesh = tile.pmesh;
@@ -652,6 +658,16 @@ namespace MMAP
         dtFreeNavMesh(navMesh);
     }
 
+    const std::array<uint32, 6> factorial =
+    {
+        1,
+        1,
+        2,
+        6,
+        24,
+        120
+    };
+
     /**************************************************************************/
     void MapBuilder::buildTile(uint32 mapID, uint32 tileX, uint32 tileY, dtNavMesh* navMesh, uint32 curTile, uint32 tileCount)
     {
@@ -666,6 +682,86 @@ namespace MMAP
         m_terrainBuilder->loadVMap(mapID, tileY, tileX, meshData);
 
         // if there is no data, give up now
+        if (!meshData.solidVerts.size() && !meshData.liquidVerts.size() && BuildingMap.find(mapID) == BuildingMap.end())
+            return;
+
+        meshData.solidType.resize(meshData.solidTris.size() / 3);
+        std::fill(meshData.solidType.begin(), meshData.solidType.end(), NAV_AREA_GROUND);
+
+        m_terrainBuilder->loadOffMeshConnections(mapID, tileX, tileY, meshData, m_offMeshFilePath);
+
+        std::vector<TileBuilding const*> buildingsByDefault;
+        std::map<uint32, std::vector<TileBuilding const*>> buildingsInTile;
+        std::map<uint32, std::vector<TileBuilding const*>> buildingsByGroup;
+        std::map<uint32, uint32> flagToGroup;
+
+        std::tie(buildingsByDefault, buildingsInTile, buildingsByGroup, flagToGroup) = GameobjectModelData::GetTileBuildingData(mapID, tileX, tileY, m_modelList);
+
+        // only builds tiles with possible alternates - GOs in them
+        if (m_buildAlternate && buildingsByDefault.empty() && buildingsInTile.empty() && buildingsByGroup.empty())
+            return;
+
+        // some buildings are by default like icc platform
+        for (TileBuilding const* building : buildingsByDefault)
+            AddBuildingToMeshData(building, meshData);
+
+        // build navmesh tile 0
+        PrepareAndBuildTile(meshData, mapID, tileX, tileY, 0, navMesh);
+
+        if (buildingsInTile.size()) // predefined tile ids
+        {
+            for (auto& data : buildingsInTile)
+            {
+                MeshData copyMeshData = meshData;
+                uint32 tileId = data.first;
+                for (TileBuilding const* building : data.second)
+                    AddBuildingToMeshData(building, copyMeshData);
+
+                PrepareAndBuildTile(copyMeshData, mapID, tileX, tileY, tileId, navMesh);
+            }
+        }
+        else if (buildingsByGroup.size())
+        {
+            uint32 groupCount = buildingsByGroup.size();
+            for (uint32 i = 1; i <= factorial[groupCount]; ++i)
+            {
+                MeshData copyMeshData = meshData;
+                std::set<uint32> entryExclusivity;
+                bool stop = false;
+                for (auto& dataUpper : buildingsByGroup)
+                {
+                    // first we need to eliminate cases which never occur and reduce state space
+                    // check if same GO isnt in this permutation twice
+                    if ((1 << (dataUpper.first - 1)) & i)
+                    {
+                        for (TileBuilding const* building : dataUpper.second)
+                        {
+                            if (entryExclusivity.find(building->goEntry) != entryExclusivity.end())
+                            {
+                                stop = true;
+                                break;;
+                            }
+
+                            entryExclusivity.insert(building->goEntry);
+                        }
+                    }
+
+                    if (stop) // do not generate this permutation
+                        continue;
+
+                    // groups start at 1
+                    if ((1 << (dataUpper.first - 1)) & i)
+                        for (TileBuilding const* building : dataUpper.second)
+                            AddBuildingToMeshData(building, copyMeshData);
+                }
+                PrepareAndBuildTile(copyMeshData, mapID, tileX, tileY, i, navMesh);
+            }
+        }
+    }
+
+    void MapBuilder::PrepareAndBuildTile(MeshData& meshData, uint32 mapID, uint32 tileX, uint32 tileY, uint32 tileId, dtNavMesh* navMesh)
+    {
+        // do not generate empty tile
         if (!meshData.solidVerts.size() && !meshData.liquidVerts.size())
             return;
 
@@ -685,10 +781,7 @@ namespace MMAP
         float bmin[3], bmax[3];
         getTileBounds(tileX, tileY, allVerts.getCArray(), allVerts.size() / 3, bmin, bmax);
 
-        m_terrainBuilder->loadOffMeshConnections(mapID, tileX, tileY, meshData, m_offMeshFilePath);
-
-        // build navmesh tile
-        buildMoveMapTile(mapID, tileX, tileY, meshData, bmin, bmax, navMesh);
+        buildMoveMapTile(mapID, tileX, tileY, tileId, meshData, bmin, bmax, navMesh);
     }
 
     /**************************************************************************/
@@ -769,13 +862,13 @@ namespace MMAP
     }
 
     /**************************************************************************/
-    void MapBuilder::buildMoveMapTile(uint32 mapID, uint32 tileX, uint32 tileY,
+    void MapBuilder::buildMoveMapTile(uint32 mapID, uint32 tileX, uint32 tileY, uint32 tileNumber,
                                       MeshData& meshData, float bmin[3], float bmax[3],
                                       dtNavMesh* navMesh)
     {
         // console output
-        char tileString[20];
-        sprintf(tileString, "[Map %03i] [%02i,%02i]: ", mapID, tileX, tileY);
+        char tileString[25];
+        sprintf(tileString, "[Map %03i] [%02i,%02i] [%02i]", mapID, tileX, tileY, tileNumber);
         printf("%s Building movemap tiles...                          \r", tileString);
 
         IntermediateValues iv(m_workdir);
@@ -784,6 +877,7 @@ namespace MMAP
         int tVertCount = meshData.solidVerts.size() / 3;
         int* tTris = meshData.solidTris.getCArray();
         int tTriCount = meshData.solidTris.size() / 3;
+        uint8* tTriFlags = meshData.solidType.getCArray();
 
         float* lVerts = meshData.liquidVerts.getCArray();
         int lVertCount = meshData.liquidVerts.size() / 3;
@@ -828,7 +922,7 @@ namespace MMAP
 //                 tbmin[1] = tileCfg.bmin[2];
 //                 tbmax[0] = tileCfg.bmax[0];
 //                 tbmax[1] = tileCfg.bmax[2];
-                buildCommonTile(tileString, tile, tileCfg, tVerts, tVertCount, tTris, tTriCount, lVerts, lVertCount, lTris, lTriCount, lTriFlags);
+                buildCommonTile(tileString, tile, tileCfg, tVerts, tVertCount, tTris, tTriCount, tTriFlags, lVerts, lVertCount, lTris, lTriCount, lTriFlags);
             }
         }
 
@@ -880,6 +974,7 @@ namespace MMAP
 
         // set polygons as walkable
         // TODO: special flags for DYNAMIC polygons, ie surfaces that can be turned on and off
+        std::set<uint8> values;
         for (int i = 0; i < iv.polyMesh->npolys; ++i)
         {
             if (uint8 area = iv.polyMesh->areas[i] & NAV_AREA_ALL_MASK)
@@ -990,7 +1085,10 @@ namespace MMAP
 
             // file output
             char fileName[1024];
-            sprintf(fileName, "%s/mmaps/%03u%02i%02i.mmtile", m_workdir, mapID, tileY, tileX);
+            if (tileNumber == 0)
+                sprintf(fileName, "%s/mmaps/%03u%02i%02i.mmtile", m_workdir, mapID, tileY, tileX);
+            else
+                sprintf(fileName, "%s/mmaps/%03u%02i%02i_%02i.mmtile", m_workdir, mapID, tileY, tileX, tileNumber);
             FILE* file = fopen(fileName, "wb");
             if (!file)
             {
@@ -1033,7 +1131,7 @@ namespace MMAP
         }
     }
 
-    bool MapBuilder::buildCommonTile(const char* tileString, Tile& tile, rcConfig& tileCfg, float* tVerts, int tVertCount, int* tTris, int tTriCount, float* lVerts, int lVertCount,
+    bool MapBuilder::buildCommonTile(const char* tileString, Tile& tile, rcConfig& tileCfg, float* tVerts, int tVertCount, int* tTris, int tTriCount, uint8* tTriFlags, float* lVerts, int lVertCount,
                                      int* lTris, int lTriCount, uint8* lTriFlags)
     {
         // Build heightfield for walkable area
@@ -1045,11 +1143,8 @@ namespace MMAP
         }
 
         // mark all walkable tiles, both liquids and solids
-        unsigned char* triFlags = new unsigned char[tTriCount];
-        memset(triFlags, NAV_AREA_GROUND, tTriCount * sizeof(unsigned char));
-        rcClearUnwalkableTriangles(m_rcContext, tileCfg.walkableSlopeAngle, tVerts, tVertCount, tTris, tTriCount, triFlags);
-        rcRasterizeTriangles(m_rcContext, tVerts, tVertCount, tTris, triFlags, tTriCount, *tile.solid, tileCfg.walkableClimb);
-        delete[] triFlags;
+        rcClearUnwalkableTriangles(m_rcContext, tileCfg.walkableSlopeAngle, tVerts, tVertCount, tTris, tTriCount, tTriFlags);
+        rcRasterizeTriangles(m_rcContext, tVerts, tVertCount, tTris, tTriFlags, tTriCount, *tile.solid, tileCfg.walkableClimb);
 
         rcFilterLowHangingWalkableObstacles(m_rcContext, tileCfg.walkableClimb, *tile.solid);
         rcFilterLedgeSpans(m_rcContext, tileCfg.walkableHeight, tileCfg.walkableClimb, *tile.solid);

@@ -118,6 +118,7 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
             {
                 pPlatform->RebuildGameObject(pMalygos);
                 pPlatform->SetGoState(GO_STATE_READY);
+                instance->ChangeGOPathfinding(194232, 8546, true);
             }
 
             // despawn and respawn boss

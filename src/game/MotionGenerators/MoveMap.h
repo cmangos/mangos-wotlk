@@ -84,38 +84,41 @@ namespace MMAP
     };
 
 
-    typedef std::unordered_map<uint32, MMapData*> MMapDataSet;
+    typedef std::unordered_map<uint64, MMapData*> MMapDataSet;
 
     // singelton class
     // holds all all access to mmap loading unloading and meshes
     class MMapManager
     {
         public:
-            MMapManager() : loadedTiles(0) {}
+            MMapManager() : m_loadedTiles(0) {}
             ~MMapManager();
 
-            bool loadMap(uint32 mapId, int32 x, int32 y);
+            bool loadMap(uint32 mapId, uint32 instanceId, int32 x, int32 y, uint32 number);
+            bool loadMapData(uint32 mapId, uint32 instanceId);
             void loadAllGameObjectModels(std::vector<uint32> const& displayIds);
             bool loadGameObject(uint32 displayId);
-            bool unloadMap(uint32 mapId, int32 x, int32 y);
+            bool unloadMap(uint32 mapId, uint32 instanceId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);
             bool unloadMapInstance(uint32 mapId, uint32 instanceId);
-            bool IsMMapIsLoaded(uint32 mapId, uint32 x, uint32 y) const;
+            bool IsMMapTileLoaded(uint32 mapId, uint32 instanceId, uint32 x, uint32 y) const;
 
             // the returned [dtNavMeshQuery const*] is NOT threadsafe
             dtNavMeshQuery const* GetNavMeshQuery(uint32 mapId, uint32 instanceId);
             dtNavMeshQuery const* GetModelNavMeshQuery(uint32 displayId);
-            dtNavMesh const* GetNavMesh(uint32 mapId);
+            dtNavMesh const* GetNavMesh(uint32 mapId, uint32 instanceId);
             dtNavMesh const* GetGONavMesh(uint32 displayId);
 
-            uint32 getLoadedTilesCount() const { return loadedTiles; }
-            uint32 getLoadedMapsCount() const { return loadedMMaps.size(); }
-        private:
-            bool loadMapData(uint32 mapId);
-            uint32 packTileID(int32 x, int32 y) const;
+            uint32 getLoadedTilesCount() const { return m_loadedTiles; }
+            uint32 getLoadedMapsCount() const { return m_loadedMMaps.size(); }
 
-            MMapDataSet loadedMMaps;
-            uint32 loadedTiles;
+            void ChangeTile(uint32 mapId, uint32 instanceId, uint32 tileX, uint32 tileY, uint32 tileNumber);
+        private:
+            uint32 packTileID(int32 x, int32 y) const;
+            uint64 packInstanceId(uint32 mapId, uint32 instanceId) const;
+
+            MMapDataSet m_loadedMMaps;
+            uint32 m_loadedTiles;
 
             std::unordered_map<uint32, MMapGOData*> m_loadedModels;
             std::mutex m_modelsMutex;

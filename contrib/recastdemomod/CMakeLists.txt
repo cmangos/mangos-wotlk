@@ -21,6 +21,7 @@ FILE(GLOB_RECURSE HEADERS "${CMAKE_CURRENT_SOURCE_DIR}" "Include/*.h")
 
 add_executable(RecastDemoMod ${SRCS} ${HEADERS})
 #add_definitions(-DDT_POLYREF64)
+ADD_DEFINITIONS("-DNO_CORE_FUNCS")
 target_compile_definitions(RecastDemoMod PRIVATE -DDT_POLYREF64)
 target_link_libraries(RecastDemoMod
     PUBLIC fastlz

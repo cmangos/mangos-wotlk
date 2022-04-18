@@ -790,6 +790,7 @@ UPDATE creature_template SET ScriptName='boss_crusader_shaman_enha' WHERE entry 
 UPDATE creature_template SET ScriptName='boss_crusader_shaman_resto' WHERE entry IN (34470,34444);
 UPDATE creature_template SET ScriptName='boss_crusader_warlock' WHERE entry IN (34474,34450);
 UPDATE creature_template SET ScriptName='boss_crusader_warrior' WHERE entry IN (34475,34453);
+UPDATE gameobject_template SET ScriptName='go_coliseum_floor' WHERE entry IN(195527);
 
 /* DALARAN */
 UPDATE creature_template SET ScriptName='npc_dalaran_guardian_mage' WHERE entry IN (29255, 29254);

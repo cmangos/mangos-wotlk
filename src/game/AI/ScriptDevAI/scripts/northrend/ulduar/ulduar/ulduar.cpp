@@ -121,6 +121,9 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
         }
     }
 
+    if (GetData(TYPE_KOLOGARN) == DONE)
+        instance->ChangeGOPathfinding(194232, 8546, true);
+
     // spawn Algalon and init world states if necessary
     if (GetData(TYPE_ALGALON_TIMER))
     {

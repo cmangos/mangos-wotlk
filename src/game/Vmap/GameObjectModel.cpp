@@ -26,47 +26,12 @@
 #include "Vmap/GameObjectModel.h"
 #include "Server/DBCStores.h"
 #include "ModelInstance.h"
+#include "Vmap/GameObjectModelVmaps.h"
+#include "MotionGenerators/MoveMapSharedDefines.h"
 
-struct GameobjectModelData
-{
-    GameobjectModelData(const std::string& name_, const G3D::AABox& box) :
-        name(name_), bound(box) {}
-
-    std::string name;
-    G3D::AABox bound;
-};
-
-typedef std::unordered_map<uint32, GameobjectModelData> ModelList;
-ModelList model_list;
-
-void LoadGameObjectModelList()
-{
-    FILE* model_list_file = fopen((sWorld.GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS).c_str(), "rb");
-    if (!model_list_file)
-        return;
-
-    uint32 name_length, displayId;
-    char buff[500];
-    while (!feof(model_list_file))
-    {
-        fread(&displayId, sizeof(uint32), 1, model_list_file);
-        fread(&name_length, sizeof(uint32), 1, model_list_file);
-
-        if (name_length >= sizeof(buff))
-        {
-            sLog.outDebug("File %s seems to be corrupted", VMAP::GAMEOBJECT_MODELS);
-            break;
-        }
-
-        fread(&buff, sizeof(char), name_length, model_list_file);
-        Vector3 v1, v2;
-        fread(&v1, sizeof(Vector3), 1, model_list_file);
-        fread(&v2, sizeof(Vector3), 1, model_list_file);
-
-        model_list.insert(ModelList::value_type(displayId, GameobjectModelData(std::string(buff, name_length), AABox(v1, v2))));
-    }
-    fclose(model_list_file);
-}
+ModelList modelList;
+std::map<std::pair<uint32, uint32>, std::vector<std::pair<uint32, uint32>>> tilesPerGoEntryInMap;
+std::map<std::tuple<uint32, uint32, uint32, uint32, uint32>, std::pair<bool, uint32>> goDisplayIdTileData;
 
 GameObjectModel::~GameObjectModel()
 {
@@ -76,8 +41,8 @@ GameObjectModel::~GameObjectModel()
 
 bool GameObjectModel::initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* const pDisplayInfo)
 {
-    ModelList::const_iterator it = model_list.find(pDisplayInfo->Displayid);
-    if (it == model_list.end())
+    ModelList::const_iterator it = modelList.find(pDisplayInfo->Displayid);
+    if (it == modelList.end())
         return false;
 
     G3D::AABox mdl_box(it->second.bound);
@@ -171,8 +136,8 @@ bool GameObjectModel::Relocate(GameObject const& go)
     if (!iModel)
         return false;
 
-    ModelList::const_iterator it = model_list.find(go.GetDisplayId());
-    if (it == model_list.end())
+    ModelList::const_iterator it = modelList.find(go.GetDisplayId());
+    if (it == modelList.end())
         return false;
 
     G3D::AABox mdl_box(it->second.bound);
@@ -205,4 +170,62 @@ bool GameObjectModel::Relocate(GameObject const& go)
     }
 #endif
     return true;
+}
+
+void GameObjectModel::LoadGOVmapModels()
+{
+    modelList = GameobjectModelData::LoadGameObjectModelList(sWorld.GetDataPath() + "vmaps/" + VMAP::GAMEOBJECT_MODELS);
+    std::set<std::tuple<uint32, uint32, uint32>> usedTilesPerMap;
+    for (auto& data : BuildingMap)
+    {
+        uint32 mapId = data.first;
+        for (TileBuilding& building : data.second)
+        {
+            ModelList::const_iterator itr = modelList.find(building.displayId);
+            if (itr == modelList.end())
+                continue;
+
+            uint32 lowX, lowY, highX, highY;
+            std::tie(lowX, lowY, highX, highY) = GameobjectModelData::CalculateBuildingTiles(building, itr->second.bound);
+            for (uint32 x = lowX; x <= highX; ++x)
+            {
+                for (uint32 y = lowY; y <= highY; ++y)
+                {
+                    usedTilesPerMap.insert(std::make_tuple(mapId, x, y));
+                    tilesPerGoEntryInMap[std::make_pair(mapId, building.goEntry)].push_back(std::make_pair(x, y));
+                }
+            }
+        }
+    }
+
+    for (auto& mapTileData : usedTilesPerMap)
+    {
+        uint32 mapId, tileX, tileY;
+        std::tie(mapId, tileX, tileY) = mapTileData;
+        std::vector<TileBuilding const*> buildingsByDefault;
+        std::map<uint32, std::vector<TileBuilding const*>> buildingsInTile;
+        std::map<uint32, std::vector<TileBuilding const*>> buildingsByGroup;
+        std::map<uint32, uint32> flagToGroup;
+
+        // yes I am reusing a function that is computationally expensive - but we do it for a trivial amount of tiles
+        std::tie(buildingsByDefault, buildingsInTile, buildingsByGroup, flagToGroup) = GameobjectModelData::GetTileBuildingData(mapId, tileX, tileY, modelList);
+        // case of tile numbers - no flag usage
+        for (auto& data : buildingsInTile)
+            for (auto& building : data.second)
+                goDisplayIdTileData[std::make_tuple(mapId, building->goEntry, building->displayId, tileX, tileY)] = std::make_pair(false, data.first);
+
+        for (auto& data : buildingsByGroup)
+            for (auto& building : data.second)
+                goDisplayIdTileData[std::make_tuple(mapId, building->goEntry, building->displayId, tileX, tileY)] = std::make_pair(true, (1 << (data.first - 1)));
+    }
+}
+
+std::vector<std::pair<uint32, uint32>> GameObjectModel::GetTilesForGOEntry(uint32 mapId, uint32 goEntry)
+{
+    return tilesPerGoEntryInMap[std::make_pair(mapId, goEntry)];
+}
+
+std::pair<bool, uint32> GameObjectModel::GetTileDataForGoDisplayId(uint32 mapId, uint32 goEntry, uint32 displayId, uint32 tileX, uint32 tileY)
+{
+    return goDisplayIdTileData[std::make_tuple(mapId, goEntry, displayId, tileX, tileY)];
 }

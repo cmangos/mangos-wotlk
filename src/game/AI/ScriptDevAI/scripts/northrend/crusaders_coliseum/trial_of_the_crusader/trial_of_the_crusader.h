@@ -5,6 +5,8 @@
 #ifndef DEF_TRIAL_OF_THE_CRUSADER_H
 #define DEF_TRIAL_OF_THE_CRUSADER_H
 
+#include "Chat/Chat.h"
+
 enum
 {
     MAX_ENCOUNTER               = 7,
@@ -316,6 +318,9 @@ class instance_trial_of_the_crusader : public ScriptedInstance, private Dialogue
 
         void Update(const uint32 diff) override;
 
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
     private:
         void DoSummonRamsey(uint32 uiEntry);
         void JustDidDialogueStep(int32 iEntry) override;
@@ -323,6 +328,8 @@ class instance_trial_of_the_crusader : public ScriptedInstance, private Dialogue
 
         void DoSelectCrusaders();
         void DoCleanupCrusaders();
+
+        void HandleDestroyFloor();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;

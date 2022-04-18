@@ -143,13 +143,16 @@ bool MMapData::LoadObjectNavMesh(const std::string fileName)
     return true;
 }
 
-bool MMapData::LoadTile(unsigned int tx, unsigned int ty)
+bool MMapData::LoadTile(unsigned int tx, unsigned int ty, unsigned int id)
 {
     if (!m_Initialized)
         return false;
 
     char tileFilename[256];
-    snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%03d%02d%02d.mmtile", m_Ctx->getDataDir(), m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
+    if (id > 0)
+        snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%03d%02d%02d_%02d.mmtile", m_Ctx->getDataDir(), m_MapId, tx, ty, id); // Todo: check X,Y swap reason and get ride of it
+    else
+        snprintf(tileFilename, sizeof(tileFilename), "%s/mmaps/%03d%02d%02d.mmtile", m_Ctx->getDataDir(), m_MapId, tx, ty); // Todo: check X,Y swap reason and get ride of it
 
     TileInfos tInfos;
     if (!LoadNavmesh(tileFilename, tInfos))
@@ -178,7 +181,7 @@ bool MMapData::LoadTile(float const* bmin, float const* bmax)
     // add all tiles within bounds to tile list.
     for (unsigned int i = minX; i <= maxX; ++i)
         for (unsigned int j = minY; j <= maxY; ++j)
-            LoadTile(j, i);
+            LoadTile(j, i, 0);
 
     if (m_TilesInfos.size() != 0)
         return true;

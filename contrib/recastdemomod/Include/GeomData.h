@@ -8,6 +8,7 @@
 #include "SampleInterfaces.h"
 #include "ChunkyTriMesh.h"
 #include "..\..\..\..\contrib\mmap\src\TerrainBuilder.h"
+#include "Vmap/GameObjectModelVmaps.h"
 
 class MeshDetails
 {
@@ -65,7 +66,7 @@ enum MeshObjectType
 class MeshObjects
 {
 public:
-    MeshObjects(unsigned int mapId, unsigned int tx, unsigned int ty, BuildContext* ctx);
+    MeshObjects(unsigned int mapId, unsigned int tx, unsigned int ty, uint32 tileId, BuildContext* ctx);
     MeshObjects(const std::string modelName, BuildContext* ctx);
     ~MeshObjects();
 
@@ -102,6 +103,9 @@ private:
     unsigned int   m_MapId;
     unsigned int   m_TileX;
     unsigned int   m_TileY;
+    uint32         m_tileId;
+
+    ModelList m_modelList;
 };
 
 typedef std::map<unsigned int, MeshObjects*> MeshObjectsMap;
@@ -114,7 +118,7 @@ public:
 
     void               Init(unsigned int mapId, BuildContext* ctx);
     void               Init(const std::string modelName, BuildContext* ctx);
-    MeshObjects const* LoadTile(unsigned int tx, unsigned int ty);
+    MeshObjects const* LoadTile(unsigned int tx, unsigned int ty, uint32 tileId);
     MeshObjects const* LoadModel(const std::string modelName);
     bool               RemoveTile(unsigned int tx, unsigned int ty);
     void               RemoveAllTiles();

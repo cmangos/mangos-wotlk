@@ -4,6 +4,10 @@
 #include "MapTree.h"
 #include "ChunkyTriMesh.h"
 #include "WorldModel.h"
+#include <G3D/Quat.h>
+#include "MotionGenerators/MoveMapSharedDefines.h"
+#include "Vmap/VMapDefinitions.h"
+#include <array>
 
 #ifdef WIN32
 #   define snprintf _snprintf
@@ -114,18 +118,23 @@ MeshInfos::MeshInfos(MeshDetails const* sMesh, MeshDetails const* lMesh, float c
 }
 
 MeshObjects::MeshObjects(const std::string modelName, BuildContext* ctx) :
-    m_MapId(0), m_TileX(0), m_TileY(0), m_Ctx(ctx),
+    m_MapId(0), m_TileX(0), m_TileY(0), m_tileId(0), m_Ctx(ctx),
     m_MapInfos(NULL), m_VMapInfos(NULL), m_ModelInfos(nullptr), m_modelName(modelName), m_meshType(MESH_OBJECT_TYPE_OBJECT)
 {
     LoadObject();
 }
 
-MeshObjects::MeshObjects(unsigned int mapId, unsigned int tileX, unsigned int tileY, BuildContext* ctx) :
-    m_MapId(mapId), m_TileX(tileX), m_TileY(tileY), m_Ctx(ctx),
+MeshObjects::MeshObjects(unsigned int mapId, unsigned int tileX, unsigned int tileY, uint32 tileId, BuildContext* ctx) :
+    m_MapId(mapId), m_TileX(tileX), m_TileY(tileY), m_tileId(tileId), m_Ctx(ctx),
     m_MapInfos(NULL), m_VMapInfos(NULL), m_ModelInfos(nullptr), m_meshType(MESH_OBJECT_TYPE_TILE)
 {
     if (mapId < 0 || tileX < 0 || tileX > 64 || tileY < 0 || tileY > 64)
         return;
+
+    std::string fullName(m_Ctx->getDataDir());
+    fullName += "/vmaps/";
+    fullName += VMAP::GAMEOBJECT_MODELS;
+    m_modelList = GameobjectModelData::LoadGameObjectModelList(fullName);
 
     LoadMap();
     LoadVMap();
@@ -213,11 +222,58 @@ void MeshObjects::LoadMap()
     delete terrainBuilder;
 }
 
+const std::array<uint32, 6> factorial =
+{
+    1,
+    1,
+    2,
+    6,
+    24,
+    120
+};
+
 void MeshObjects::LoadVMap()
 {
     TerrainBuilder* terrainBuilder = new TerrainBuilder(false, m_Ctx->getDataDir());
 
     terrainBuilder->loadVMap(m_MapId, m_TileX, m_TileY, m_VMapMesh);
+    uint32 mapID = m_MapId;
+    uint32 tileX = m_TileY;
+    uint32 tileY = m_TileX;
+
+    std::vector<TileBuilding const*> buildingsByDefault;
+    std::map<uint32, std::vector<TileBuilding const*>> buildingsInTile;
+    std::map<uint32, std::vector<TileBuilding const*>> buildingsByGroup;
+    std::map<uint32, uint32> flagToGroup;
+
+    std::tie(buildingsByDefault, buildingsInTile, buildingsByGroup, flagToGroup) = GameobjectModelData::GetTileBuildingData(mapID, tileX, tileY, m_modelList);
+
+    if (buildingsByDefault.size())
+    {
+        for (TileBuilding const* building : buildingsByDefault)
+            AddBuildingToMeshData(building, m_VMapMesh, m_Ctx->getDataDir());
+    }
+
+    if (buildingsInTile.size()) // predefined tile ids
+    {
+        for (auto& data : buildingsInTile)
+        {
+            uint32 tileId = data.first;
+            for (TileBuilding const* building : data.second)
+                if (tileId == m_tileId)
+                    AddBuildingToMeshData(building, m_VMapMesh, m_Ctx->getDataDir());
+        }
+    }
+    else if (buildingsByGroup.size())
+    {
+        for (auto& dataUpper : buildingsByGroup)
+        {
+            // groups start at 1
+            if ((1 << (dataUpper.first - 1)) & m_tileId)
+                for (TileBuilding const* building : dataUpper.second)
+                    AddBuildingToMeshData(building, m_VMapMesh, m_Ctx->getDataDir());
+        }
+    }
 
     // get the coord bounds of the model data
     if (m_VMapMesh.solidVerts.size() + m_VMapMesh.liquidVerts.size() == 0)
@@ -389,14 +445,14 @@ void GeomData::Init(const std::string modelName, BuildContext* ctx)
     m_modelName = modelName;
 }
 
-MeshObjects const* GeomData::LoadTile(unsigned int tx, unsigned int ty)
+MeshObjects const* GeomData::LoadTile(unsigned int tx, unsigned int ty, uint32 tileId)
 {
     unsigned int pxy = StaticMapTree::packTileID(tx, ty);
 
     if (tx == ty && tx == 64)
         m_NoMapFile = true;
 
-    MeshObjects* newObj = new MeshObjects(m_MapId, tx, ty, m_Ctx);
+    MeshObjects* newObj = new MeshObjects(m_MapId, tx, ty, tileId, m_Ctx);
 
     if (newObj->GetMap() || newObj->GetVMap())
     {

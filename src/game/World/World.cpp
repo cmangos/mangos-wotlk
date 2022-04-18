@@ -71,6 +71,7 @@
 #include "Maps/TransportMgr.h"
 #include "Anticheat/Anticheat.hpp"
 #include "LFG/LFGMgr.h"
+#include "Vmap/GameObjectModel.h"
 
 #ifdef BUILD_AHBOT
  #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -84,8 +85,6 @@
 #include <mutex>
 
 INSTANTIATE_SINGLETON_1(World);
-
-extern void LoadGameObjectModelList();
 
 volatile bool World::m_stopEvent = false;
 uint8 World::m_ExitCode = SHUTDOWN_EXIT_CODE;
@@ -1010,7 +1009,7 @@ void World::SetInitialWorldSettings()
     MMAP::MMapFactory::createOrGetMMapManager()->loadAllGameObjectModels(transportDisplayIds);
 
     sLog.outString("Loading GameObject models...");
-    LoadGameObjectModelList();
+    GameObjectModel::LoadGOVmapModels();
     sLog.outString();
 
     // loads GO data

@@ -31,6 +31,8 @@
 #include "IVMapManager.h"
 #include "WorldModel.h"
 
+#include "Vmap/GameObjectModelVmaps.h"
+
 #include "Recast.h"
 #include "DetourNavMesh.h"
 
@@ -89,6 +91,7 @@ namespace MMAP
                        bool skipJunkMaps        = true,
                        bool skipBattlegrounds   = false,
                        bool debug               = false,
+                       bool buildAlternate      = true,
                        const char* offMeshFilePath = NULL,
                        const char* workdir = NULL);
 
@@ -117,11 +120,12 @@ namespace MMAP
             void buildNavMesh(uint32 mapID, dtNavMesh*& navMesh);
 
             void buildTile(uint32 mapID, uint32 tileX, uint32 tileY, dtNavMesh* navMesh, uint32 curTile, uint32 tileCount);
-            bool buildCommonTile(const char* tileString, Tile& tile, rcConfig& tileCfg, float* tVerts, int tVertCount, int* tTris, int tTriCount, float* lVerts, int lVertCount,
+            void PrepareAndBuildTile(MeshData& meshData, uint32 mapID, uint32 tileX, uint32 tileY, uint32 tileId, dtNavMesh* navMesh);
+            bool buildCommonTile(const char* tileString, Tile& tile, rcConfig& tileCfg, float* tVerts, int tVertCount, int* tTris, int tTriCount, uint8* tTriFlags, float* lVerts, int lVertCount,
                                  int* lTris, int lTriCount, uint8* lTriFlags);
 
             // move map building
-            void buildMoveMapTile(uint32 mapID, uint32 tileX, uint32 tileY, MeshData& meshData, float bmin[3], float bmax[3], dtNavMesh* navMesh);
+            void buildMoveMapTile(uint32 mapID, uint32 tileX, uint32 tileY, uint32 tileNumber, MeshData& meshData, float bmin[3], float bmax[3], dtNavMesh* navMesh);
             void getTileBounds(uint32 tileX, uint32 tileY, float* verts, int vertCount, float* bmin, float* bmax);
             void getGridBounds(uint32 mapID, uint32& minX, uint32& minY, uint32& maxX, uint32& maxY);
 
@@ -143,6 +147,7 @@ namespace MMAP
             bool m_skipContinents;
             bool m_skipJunkMaps;
             bool m_skipBattlegrounds;
+            bool m_buildAlternate;
 
             json m_config;
 
@@ -154,6 +159,8 @@ namespace MMAP
 
             // used to know wich map have launched all its tile work
             MapSet m_mapDone;
+
+            ModelList m_modelList;
     };
 
     // Task queue : not thread safe (do not add worker asynchronously)

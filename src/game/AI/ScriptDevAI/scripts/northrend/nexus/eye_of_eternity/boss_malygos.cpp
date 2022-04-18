@@ -500,6 +500,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                     {
                         pPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                         pPlatform->SetGoState(GO_STATE_ACTIVE);
+                        m_creature->GetMap()->ChangeGOPathfinding(194232, 8546, false);
                     }
                 }
 

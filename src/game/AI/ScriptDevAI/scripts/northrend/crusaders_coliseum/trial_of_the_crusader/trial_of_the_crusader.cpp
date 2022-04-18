@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "trial_of_the_crusader.h"
+#include "MotionGenerators/MoveMapSharedDefines.h"
 
 /* Trial Of The Crusader encounters:
 0 - Wipe Count
@@ -878,12 +879,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
                 pPlayer->SummonCreature(NPC_THE_LICHKING_VISUAL, aSpawnPositions[10][0], aSpawnPositions[10][1], aSpawnPositions[10][2], aSpawnPositions[10][3], TEMPSPAWN_DEAD_DESPAWN, 0);
             break;
         case EVENT_DESTROY_FLOOR:
-            if (GameObject* pColiseumFloor = GetSingleGameObjectFromStorage(GO_COLISEUM_FLOOR))
-            {
-                pColiseumFloor->SetDisplayId(DISPLAYID_DESTROYED_FLOOR);
-                pColiseumFloor->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
-                pColiseumFloor->SetGoState(GO_STATE_ACTIVE);
-            }
+            HandleDestroyFloor();
 
             if (Creature* pLichKingVisual = GetSingleCreatureFromStorage(NPC_THE_LICHKING_VISUAL))
             {
@@ -926,15 +922,58 @@ void instance_trial_of_the_crusader::Update(uint32 uiDiff)
     }
 }
 
-InstanceData* GetInstanceData_instance_trial_of_the_crusader(Map* pMap)
+void instance_trial_of_the_crusader::HandleDestroyFloor()
 {
-    return new instance_trial_of_the_crusader(pMap);
+    if (GameObject* coliseumFloor = GetSingleGameObjectFromStorage(GO_COLISEUM_FLOOR))
+    {
+        coliseumFloor->SetDisplayId(DISPLAYID_DESTROYED_FLOOR);
+        coliseumFloor->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
+        coliseumFloor->SetGoState(GO_STATE_ACTIVE);
+    }
 }
+
+void instance_trial_of_the_crusader::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands:\n openfloor");
+}
+
+void instance_trial_of_the_crusader::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "openfloor")
+        HandleDestroyFloor();
+}
+
+struct ColiseumFloor : public GameObjectAI
+{
+    ColiseumFloor(GameObject* go) : GameObjectAI(go) {}
+
+    void JustSpawned() override
+    {
+        m_go->GetMap()->ChangeGOPathfinding(195527, 9059, true);
+    }
+
+    void OnGoStateChange(GOState state) override
+    {
+        if (state == GO_STATE_ACTIVE)
+        {
+            m_go->GetMap()->ChangeGOPathfinding(195527, 9059, false);
+        }
+    }
+};
 
 void AddSC_instance_trial_of_the_crusader()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_trial_of_the_crusader";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_trial_of_the_crusader;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_trial_of_the_crusader>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_coliseum_floor";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<ColiseumFloor>;
     pNewScript->RegisterSelf();
 }

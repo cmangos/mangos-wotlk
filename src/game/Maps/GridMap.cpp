@@ -797,8 +797,8 @@ void TerrainInfo::CleanUpGrids(const uint32 diff)
                 // unload VMAPS...
                 VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(m_mapId, x, y);
 
-                // unload mmap...
-                MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(m_mapId, x, y);
+                // unload mmap... - not possible like this - mmaps are per-map
+                // MMAP::MMapFactory::createOrGetMMapManager()->unloadMap(m_mapId, x, y);
             }
         }
     }
@@ -1245,8 +1245,7 @@ GridMap* TerrainInfo::GetGrid(const float x, const float y, bool loadOnlyMap /*=
 
 GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnly /*= false*/)
 {
-    if ((m_GridMaps[x][y] && mapOnly)
-        || (VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(m_mapId, x, y) && MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y)))
+    if ((m_GridMaps[x][y] && mapOnly) || VMAP::VMapFactory::createOrGetVMapManager()->IsTileLoaded(m_mapId, x, y))
     {
         // nothing to load here
         return m_GridMaps[x][y];
@@ -1299,12 +1298,6 @@ GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnl
                 DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", mapName, m_mapId, x, y, x, y);
                 break;
         }
-    }
-
-    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapIsLoaded(m_mapId, x, y))
-    {
-        // load navmesh
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(m_mapId, x, y);
     }
 
     if (m_GridMaps[x][y])
