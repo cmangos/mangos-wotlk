@@ -1497,6 +1497,18 @@ struct BirthNoVisualInstantSpawn : public SpellScript
     }
 };
 
+struct SleepVisualFlavor : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (apply)
+            target->SetStandState(UNIT_STAND_STATE_SLEEP);
+        else
+            target->SetStandState(UNIT_STAND_STATE_STAND);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1540,4 +1552,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<HateToZero>("spell_hate_to_zero");
     RegisterSpellScript<Stoned>("spell_stoned");
     RegisterSpellScript<BirthNoVisualInstantSpawn>("spell_birth_no_visual_instant_spawn");
+    RegisterSpellScript<SleepVisualFlavor>("spell_sleep_visual_flavor");
 }
