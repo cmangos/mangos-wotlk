@@ -1168,6 +1168,9 @@ void World::SetInitialWorldSettings()
     sLog.outString(">>> Game Event Data loaded");
     sLog.outString();
 
+    sLog.outString("Loading WorldState Names...");          // must be before conditions and dbscripts
+    sObjectMgr.LoadWorldStateNames();
+
     sLog.outString("Loading Conditions...");                // Load Conditions
     sObjectMgr.LoadConditions();
 
