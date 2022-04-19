@@ -279,7 +279,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[131]*/    { "SPELL_EFFECT_PLAY_SOUND",                   TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[132]*/    { "SPELL_EFFECT_PLAY_MUSIC",                   TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[133]*/    { "SPELL_EFFECT_UNLEARN_SPECIALIZATION",       TARGET_TYPE_UNIT,           TARGET_NONE },
-    /*[134]*/    { "SPELL_EFFECT_KILL_CREDIT_GROUP",            TARGET_TYPE_UNIT,           TARGET_NONE },
+    /*[134]*/    { "SPELL_EFFECT_KILL_CREDIT_GROUP",            TARGET_TYPE_UNIT,           TARGET_UNIT_CASTER },
     /*[135]*/    { "SPELL_EFFECT_CALL_PET",                     TARGET_TYPE_LOCATION_DEST,  TARGET_NONE },
     /*[136]*/    { "SPELL_EFFECT_HEAL_PCT",                     TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[137]*/    { "SPELL_EFFECT_ENERGIZE_PCT",                 TARGET_TYPE_UNIT,           TARGET_NONE },
