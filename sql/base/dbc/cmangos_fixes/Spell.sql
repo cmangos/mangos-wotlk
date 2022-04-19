@@ -3002,9 +3002,6 @@ UPDATE spell_template SET EffectSpellClassMask1_1=0 WHERE Id IN(54278);
 -- Killing Spree - SPELL_ATTR_EX_REQUIRE_ALL_TARGETS
 UPDATE spell_template SET AttributesEx=AttributesEx|0x04000000 WHERE Id IN(51690);
 
--- Burn Body - missing reward creature id
-UPDATE spell_template SET EffectMiscValue3=24008 WHERE Id IN(42793);
-
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

@@ -924,6 +924,34 @@ struct GrapplingBeam : public SpellScript
     }
 };
 
+struct BurnBody : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || !target->IsCreature() || static_cast<Creature*>(target)->HasBeenHitBySpell(spell->m_spellInfo->Id))
+            return SPELL_FAILED_BAD_TARGETS;
+
+        if (target->GetEntry() != 24009 && target->GetEntry() != 24010)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+
+    void OnCast(Spell* spell) const override
+    {
+        if (Unit* target = spell->m_targets.getUnitTarget())
+        {
+            if (target->IsCreature())
+            {
+                static_cast<Creature*>(target)->RegisterHitBySpell(spell->m_spellInfo->Id);
+                target->CastSpell(spell->GetCaster(), 43297, TRIGGERED_OLD_TRIGGERED);
+                static_cast<Creature*>(target)->ForcedDespawn(16000);
+            }
+        }
+    }
+};
+
 void AddSC_howling_fjord()
 {
     Script* pNewScript = new Script;
@@ -977,4 +1005,5 @@ void AddSC_howling_fjord()
     RegisterSpellScript<FlyingMachineControls>("spell_flying_machine_controls");
     RegisterSpellScript<GrapplingHook>("spell_grappling_hook");
     RegisterSpellScript<GrapplingBeam>("spell_grappling_beam");
+    RegisterSpellScript<BurnBody>("spell_burn_body");
 }
