@@ -494,7 +494,7 @@ struct boss_kalecgos_humanoidAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        ResetTimer(KALEC_FORCEFIELD, 25000);
+        ResetTimer(KALEC_FORCEFIELD, 3000);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -597,7 +597,6 @@ struct SpectralRealm : public SpellScript
         unitTarget->CastSpell(nullptr, SPELL_SPECTRAL_REALM_AURA, TRIGGERED_OLD_TRIGGERED);
         unitTarget->CastSpell(nullptr, SPELL_SPECTRAL_REALM_NOTIFY, TRIGGERED_OLD_TRIGGERED);
         unitTarget->CastSpell(nullptr, SPELL_SPECTRAL_REALM_FORCE_F, TRIGGERED_OLD_TRIGGERED);
-        unitTarget->RemoveAurasDueToSpell(SPELL_ARCANE_BUFFET);
 
         if (auto instance = dynamic_cast<instance_sunwell_plateau*>(unitTarget->GetInstanceData()))
             if (Creature* sathrovarr = instance->GetSingleCreatureFromStorage(NPC_SATHROVARR))

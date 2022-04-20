@@ -1032,7 +1032,7 @@ struct npc_sinister_reflectionAI : public CombatAI
     npc_sinister_reflectionAI(Creature* creature) : CombatAI(creature, SINISTER_ACTION_MAX)
     {
         AddCustomAction(SINISTER_ATTACK_DELAY, 7000u, [&]() { HandleAttackDelay(); });
-        SetReactState(REACT_PASSIVE);
+        SetReactState(REACT_DEFENSIVE);
         SetCombatMovement(false);
         SetMeleeEnabled(false);
     }

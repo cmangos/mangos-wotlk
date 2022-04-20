@@ -315,7 +315,7 @@ struct boss_sacrolashAI : public CombatAI
         AddOnKillText(SAY_SACROLASH_KILL_1, SAY_SACROLASH_KILL_2);
         m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float) -> bool
         {
-            return x < 1800 && y < 580;
+            return (x < 1800 && y < 580) || (x > 1832 && y > 670);
         });
     }
 
