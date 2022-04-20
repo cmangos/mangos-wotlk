@@ -255,8 +255,8 @@ bool GOUse_go_harbinger_second_trial(Player* /*pPlayer*/, GameObject* pGO)
 ######*/
 enum
 {
-    SAY_ANVIL1            = -1000209,
-    SAY_ANVIL2            = -1000210,
+    SAY_ANVIL1            = 11734,
+    SAY_ANVIL2            = 11735,
 
     GOSSIP_ITEM_MOMENT    = -3000108,
     GOSSIP_ITEM_SHOW      = -3000110,
@@ -264,7 +264,7 @@ enum
     GOSSIP_TEXT_ID_MOMENT = 8239,
     GOSSIP_TEXT_ID_SHOW   = 8240,
 
-    FACTION_HOSTILE       = 24,
+    FACTION_HOSTILE       = 14,
 
     QUEST_THE_DWARVEN_SPY = 8483
 };
@@ -286,14 +286,11 @@ struct npc_prospector_anvilwardAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 1:
-                DoScriptText(SAY_ANVIL1, m_creature, pPlayer);
-                break;
-            case 7:
-                DoScriptText(SAY_ANVIL2, m_creature, pPlayer);
+            case 11:
+                DoBroadcastText(SAY_ANVIL2, m_creature, pPlayer);
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveIdle();
-                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
                 m_creature->AI()->SetReactState(REACT_DEFENSIVE);
                 m_creature->ForcedDespawn(60000);
                 break;
@@ -327,7 +324,10 @@ bool GossipSelect_npc_prospector_anvilward(Player* pPlayer, Creature* pCreature,
             pPlayer->CLOSE_GOSSIP_MENU();
 
             if (npc_prospector_anvilwardAI* pEscortAI = dynamic_cast<npc_prospector_anvilwardAI*>(pCreature->AI()))
+            {
+                DoBroadcastText(SAY_ANVIL1, pCreature, pPlayer);
                 pEscortAI->Start(false, pPlayer);
+            }
 
             break;
     }
