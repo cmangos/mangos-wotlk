@@ -2574,7 +2574,6 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
 43711, -- Headless Horseman - Start Fire Target Test (Guard)
 44869, -- SWP - Kalecgos - Spectral blast - 1 target
 44978,45001,45002,45004,45006,45010, -- Kalecgos - Wild Magic
-45027, -- SWP - Kalecgos - Revitalize - 1 target
 45032,45034, -- Curse of Boundless Agony
 45391, -- Summon Demonic Vapor (SWP, Felmyst)
 45680, -- KJ - Shield Orb - Shadow Bolt - only one target
@@ -2601,6 +2600,7 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 3 WHERE `Id` IN (
 40869, -- Fatal Attraction (BT, Mother Shahraz)
 41303, -- Soul Drain (BT, Reliquary of Souls)
 41357, -- Promenade Sentinel - L1 Arcane Charge should only hit 3 targets
+45027, -- SWP - Kalecgos - Revitalize - 3 targets
 41376 -- Spite (BT, Reliquary of Souls)
 );
 
