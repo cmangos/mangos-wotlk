@@ -5284,7 +5284,7 @@ bool Unit::IsAboveGround(float diff) const
 {
     float x, y, z;
     GetPosition(x, y, z);
-    float floorZ = GetMap()->GetHeight(x, y, z);
+    float floorZ = GetMap()->GetHeight(GetPhaseMask(), x, y, z);
     return std::abs(z - floorZ) > diff;
 }
 
