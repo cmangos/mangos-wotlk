@@ -6649,6 +6649,28 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 break;
             }
+            case SPELL_AURA_MOD_CONFUSE:
+            case SPELL_AURA_MOD_FEAR:
+            case SPELL_AURA_MOD_STUN:
+            {
+                if (expectedTarget)
+                {
+                    // flying players on mounts are immune to cc
+                    if (expectedTarget->IsMounted() && expectedTarget->IsFlying() && expectedTarget->IsPlayerControlled() && expectedTarget->IsAboveGround())
+                    {
+                        if (m_spellInfo->Mechanic)
+                            return SPELL_FAILED_IMMUNE;
+
+                        if (m_spellInfo->EffectMechanic[i])
+                        {
+                            SpellCastResult result = partialApplication(i);
+                            if (result != SPELL_CAST_OK)
+                                return SPELL_FAILED_IMMUNE;
+                        }
+                    }
+                }
+                break;
+            }
             case SPELL_AURA_MOUNTED:
             {
                 if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || static_cast<Player*>(m_caster)->IsInHighLiquid()))
