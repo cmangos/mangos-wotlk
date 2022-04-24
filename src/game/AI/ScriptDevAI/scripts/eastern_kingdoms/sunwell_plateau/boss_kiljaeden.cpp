@@ -1033,8 +1033,6 @@ struct npc_sinister_reflectionAI : public CombatAI
     {
         AddCustomAction(SINISTER_ATTACK_DELAY, 7000u, [&]() { HandleAttackDelay(); });
         SetReactState(REACT_DEFENSIVE);
-        SetCombatMovement(false);
-        SetMeleeEnabled(false);
     }
 
     uint8 m_class;
@@ -1087,8 +1085,6 @@ struct npc_sinister_reflectionAI : public CombatAI
     void HandleAttackDelay()
     {
         SetReactState(REACT_AGGRESSIVE);
-        SetCombatMovement(true);
-        SetMeleeEnabled(true);
         m_creature->SetInCombatWithZone();
         AttackStart(m_creature->GetSpawner());
     }
