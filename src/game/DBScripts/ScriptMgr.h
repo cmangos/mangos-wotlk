@@ -285,7 +285,7 @@ struct ScriptInfo
         struct                                              // SCRIPT_COMMAND_MOVEMENT (20)
         {
             uint32 movementType;                            // datalong
-            uint32 wanderORpathId;                          // datalong2
+            uint32 wanderORpathIdORRelayId;                          // datalong2
             uint32 timerOrPassTarget;                       // datalong3
         } movement;
 
@@ -483,6 +483,11 @@ struct ScriptInfo
 
     union
     {
+        struct                                              // SCRIPT_COMMAND_MOVEMENT (20)
+        {
+            float verticalSpeed;
+        } movementFloat;
+
         struct
         {
             float data[1];

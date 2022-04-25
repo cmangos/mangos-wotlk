@@ -522,7 +522,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_MOVEMENT:                   // 20
             {
-                if (tmp.movement.movementType >= MAX_DB_MOTION_TYPE)
+                if (tmp.movement.movementType >= MAX_DB_MOTION_TYPE && tmp.movement.movementType != EFFECT_MOTION_TYPE)
                 {
                     sLog.outErrorDb("Table `%s` SCRIPT_COMMAND_MOVEMENT has invalid MovementType %u for script id %u",
                                     tablename, tmp.movement.movementType, tmp.id);
@@ -2072,12 +2072,12 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     break;
                 case RANDOM_MOTION_TYPE:
                     if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
-                        source->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), float(m_script->movement.wanderORpathId), 0.f, m_script->movement.timerOrPassTarget);
+                        source->GetMotionMaster()->MoveRandomAroundPoint(pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ(), float(m_script->movement.wanderORpathIdORRelayId), 0.f, m_script->movement.timerOrPassTarget);
                     else
                     {
                         float respX, respY, respZ, respO, wander_distance;
                         source->GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);
-                        wander_distance = m_script->movement.wanderORpathId ? m_script->movement.wanderORpathId : wander_distance;
+                        wander_distance = m_script->movement.wanderORpathIdORRelayId ? m_script->movement.wanderORpathIdORRelayId : wander_distance;
                         source->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance, 0.f, m_script->movement.timerOrPassTarget);
                     }
                     break;
@@ -2085,24 +2085,29 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     source->StopMoving();
                     source->GetMotionMaster()->Clear(false, true);
                     if (!m_script->movement.timerOrPassTarget)
-                        source->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathId);
+                        source->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathIdORRelayId);
                     else
-                        source->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathId, 0, 0, 0, ForcedMovement(m_script->textId[0]), pTarget->GetObjectGuid());
+                        source->GetMotionMaster()->MoveWaypoint(m_script->movement.wanderORpathIdORRelayId, 0, 0, 0, ForcedMovement(m_script->textId[0]), pTarget->GetObjectGuid());
                     break;
                 case PATH_MOTION_TYPE:
                     source->StopMoving();
                     if (!m_script->movement.timerOrPassTarget)
-                        source->GetMotionMaster()->MovePath(m_script->movement.wanderORpathId);
+                        source->GetMotionMaster()->MovePath(m_script->movement.wanderORpathIdORRelayId);
                     else
-                        source->GetMotionMaster()->MovePath(m_script->movement.wanderORpathId, PATH_NO_PATH, ForcedMovement(m_script->textId[0]), false, 0.f, false, pTarget->GetObjectGuid());
+                        source->GetMotionMaster()->MovePath(m_script->movement.wanderORpathIdORRelayId, PATH_NO_PATH, ForcedMovement(m_script->textId[0]), false, 0.f, false, pTarget->GetObjectGuid());
                     break;
                 case LINEAR_WP_MOTION_TYPE:
                     source->StopMoving();
                     source->GetMotionMaster()->Clear(false, true);
                     if (!m_script->movement.timerOrPassTarget)
-                        source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathId);
+                        source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathIdORRelayId);
                     else
-                        source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathId, 0, 0, 0, ForcedMovement(m_script->textId[0]), pTarget->GetObjectGuid());
+                        source->GetMotionMaster()->MoveLinearWP(m_script->movement.wanderORpathIdORRelayId, 0, 0, 0, ForcedMovement(m_script->textId[0]), pTarget->GetObjectGuid());
+                    break;
+                case EFFECT_MOTION_TYPE:
+                    source->StopMoving();
+                    float speed = m_script->speed == 0.f ? source->GetSpeed(MOVE_RUN) : m_script->speed;
+                    source->GetMotionMaster()->MoveJumpFacing(Position(m_script->x, m_script->y, m_script->z, 100.f), speed, m_script->movementFloat.verticalSpeed, 10001u, pTarget->GetObjectGuid(), m_script->movement.wanderORpathIdORRelayId);
                     break;
             }
 

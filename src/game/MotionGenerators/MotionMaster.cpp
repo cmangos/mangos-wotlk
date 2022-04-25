@@ -602,7 +602,7 @@ void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, fl
     Mutate(new EffectMovementGenerator(init, id));
 }
 
-void MotionMaster::MoveJumpFacing(Position pos, float horizontalSpeed, float verticalSpeed, uint32 id/*= EVENT_JUMP*/)
+void MotionMaster::MoveJumpFacing(Position pos, float horizontalSpeed, float verticalSpeed, uint32 id/*= EVENT_JUMP*/, ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/* = 0*/)
 {
     float moveTimeHalf = verticalSpeed / Movement::gravity;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
@@ -613,7 +613,7 @@ void MotionMaster::MoveJumpFacing(Position pos, float horizontalSpeed, float ver
     init.SetVelocity(horizontalSpeed);
     if (pos.o != 100.f)
         init.SetFacing(pos.o);
-    Mutate(new EffectMovementGenerator(init, id));
+    Mutate(new EffectMovementGenerator(init, id, false, guid, relayId));
 }
 
 void MotionMaster::Mutate(MovementGenerator* m)
