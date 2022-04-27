@@ -1176,6 +1176,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (43763, 'spell_food_animation'),
 (45548, 'spell_food_animation'),
 (45618, 'spell_food_animation'),
+(46581, 'spell_food_animation'),
 (46683, 'spell_food_animation'),
 (46812, 'spell_food_animation'),
 (46898, 'spell_food_animation'),
