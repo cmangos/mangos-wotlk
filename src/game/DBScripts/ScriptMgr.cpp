@@ -872,6 +872,15 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 //}
                 break;
             }
+            case SCRIPT_COMMAND_SET_WORLDSTATE:             // 53
+            {
+                if (!sObjectMgr.HasWorldStateName(tmp.textId[0])) // must be named
+                {
+                    sLog.outErrorDb("Table `%s` has no worldstate name assigned for worldstate %d", tablename, tmp.textId[0]);
+                    continue;
+                }
+                break;
+            }
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -2915,6 +2924,11 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
 
             static_cast<Creature*>(pTarget)->SetDefaultGossipMenuId(m_script->setGossipMenu.gossipMenuId);
+            break;
+        }
+        case SCRIPT_COMMAND_SET_WORLDSTATE:                 // 53
+        {
+            m_map->GetVariableManager().SetVariable(m_script->textId[0], m_script->textId[1]);
             break;
         }
         default:
