@@ -186,7 +186,7 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`DurationInde
 
 -- Missing summon spell for mushroom
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`CastingTimeIndex`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`EffectMiscValueB1`) VALUES
-(38874,384,4,1,18,1,28,1,1,18,22335,2013,'Summon Mushoom Creature',1,64);
+(38874,384,4,1,18,1,28,1,0,18,22335,2013,'Summon Mushoom Creature',1,64);
 
 -- More missing SSC spells added from sniffs
 -- TODO: Frenzy Water and Summon Shadow need to have durationIndex rechecked as well as type due to using deprecated Effects
@@ -194,11 +194,11 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`CastingTimeIndex
 (37025,256,268435456,1,4718592,21,1,6,1,4,1,'Coilfang Water',1);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`CastingTimeIndex`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(37026,256,268435456,1,21,1,28,1,1,72,15,21508,64,1,'Frenzy Water',1);
+(37026,256,268435456,1,21,1,28,1,0,72,15,21508,64,1,'Frenzy Water',1);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(38922,256,1,6,1,28,1,1,18,22347,64,111,'Summon Colossus Lurkers',1),
-(38928,256,1,6,1,28,9,1,18,22352,64,111,'Summon Colossus Ragers',1);
+(38922,256,1,6,1,28,1,0,18,22347,64,111,'Summon Colossus Lurkers',1),
+(38928,256,1,6,1,28,9,0,18,22352,64,111,'Summon Colossus Ragers',1);
 
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`CastingTimeIndex`,`baseLevel`,`spellLevel`,`DurationIndex`,`rangeIndex`,`StackAmount`,`Effect1`,`Effect2`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`EffectAmplitude1`,`EffectMiscValue1`,`EffectTriggerSpell1`,`SpellIconID`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`SpellName`) VALUES
 (26567,0 ,448      ,0        ,0,0        ,1,0 , 0, 21, 1,  0, 6, 0,0,  0, 1, 0,23,10000,    0,26264, 191,0,0,1,0,0,'Despawn Self'),
@@ -206,38 +206,38 @@ INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`Att
 (38518,0 ,400      ,136      ,0,0        ,1,40,40, 21, 7,  0, 6, 0,0,  0, 1, 0,23, 1000,    0,    0, 314,2,2,1,1,1,'Cyclone'); -- Periodically triggers a Cyclone knockup if you're already in the air. - ToolTip: 	Whee!
 
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`CastingTimeIndex`,`baseLevel`,`spellLevel`,`DurationIndex`,`rangeIndex`,`StackAmount`,`Effect1`,`Effect2`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`EffectAmplitude1`,`EffectMiscValue1`,`EffectTriggerSpell1`,`SpellIconID`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`SpellName`,`EffectMiscValueB1`) VALUES
-(37545,0 ,384      ,0        ,0,0        ,1,0 , 0, 27, 1,  0,28, 0,1,1,  18,16, 0,    0,21812,    0,1552,0,0,1,1,1,'Summon Phantom',64),
-(37735,32,536871168,136      ,0,0        ,1,0 , 0,125, 1,  0,28, 0,1,1,  18,16, 0,    0,21857,    0,2138,0,0,1,0,0,'Summon Inner Demon',64),
-(37781,32,256      ,136      ,0,268435456,1,0 , 0,347, 1,  0,28, 0,1,1,  18,16, 0,    0,21875,    0,2027,0,0,1,0,0,'Summon Shadow',64);
+(37545,0 ,384      ,0        ,0,0        ,1,0 , 0, 27, 1,  0,28, 0,1,0,  18,16, 0,    0,21812,    0,1552,0,0,1,1,1,'Summon Phantom',64),
+(37735,32,536871168,136      ,0,0        ,1,0 , 0,125, 1,  0,28, 0,1,0,  18,16, 0,    0,21857,    0,2138,0,0,1,0,0,'Summon Inner Demon',64),
+(37781,32,256      ,136      ,0,268435456,1,0 , 0,347, 1,  0,28, 0,1,0,  18,16, 0,    0,21875,    0,2027,0,0,1,0,0,'Summon Shadow',64);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`Effect1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
 (26264,256,1,77,1,1,'Despawn',1);
 
 INSERT INTO `spell_template` (`Id`,`Category`,`Attributes`,`CastingTimeIndex`,`RecoveryTime`,`InterruptFlags`,`baseLevel`,`spellLevel`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`EffectMiscValueB1`) VALUES
-(38651,1152,256,1,5000,4,70,70,21,7,28,1,1,72,8,22250,1952,'Summon Rancid Mushroom',1,1,64); -- 	Summons a rancid mushroom.
+(38651,1152,256,1,5000,4,70,70,21,7,28,1,0,72,8,22250,1952,'Summon Rancid Mushroom',1,1,64); -- 	Summons a rancid mushroom.
 
 -- add removed serverside spell
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
 ('25676', '32','0', '0', '0', '536871168', '136', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '13', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '77', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '22', '0', '0', '15', '0', '0', '12', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Drain Mana', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`EquippedItemClass`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconId`,`SpellName`,`DmgMultiplier1`,`EffectMiscValueB1`) VALUES
-(38587, 256, 1, 101, 31, 12, -1, 28, 1, 1, 32, 16, 22210, 1, 'Summon Spirit of Redemption', 1, 64),
-(38188, 384, 1, 101, 21, 1, -1, 28, 1, 1, 44, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
-(38189, 384, 1, 101, 21, 1, -1, 28, 1, 1, 41, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
-(38190, 384, 1, 101, 21, 1, -1, 28, 1, 1, 42, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
-(38191, 384, 1, 101, 21, 1, -1, 28, 1, 1, 43, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
-(38198, 384, 1, 101, 21, 1, -1, 28, 1, 1, 41, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
-(38199, 384, 1, 101, 21, 1, -1, 28, 1, 1, 44, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
-(38200, 384, 1, 101, 21, 1, -1, 28, 1, 1, 42, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
-(38201, 384, 1, 101, 21, 1, -1, 28, 1, 1, 43, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
-(38019, 256, 1, 101, 21, 1, -1, 28, 1, 1, 63, 8, 21958, 1, 'Summon Wave A Mob', 1, 64),
-(38242, 256, 1, 101, 21, 1, -1, 28, 1, 1, 63, 8, 22056, 1, 'Summon Wave C Mob', 1, 64),
-(38244, 256, 1, 101, 21, 1, -1, 28, 1, 1, 63, 8, 22009, 1, 'Summon Wave D Mob', 1, 64),
-(38247, 256, 1, 101, 21, 1, -1, 28, 1, 1, 63, 8, 22055, 1, 'Summon Wave B Mob', 1, 64),
-(38489, 256, 1, 101, 21, 13, -1, 28, 1, 1, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64),
-(38490, 256, 1, 101, 21, 13, -1, 28, 1, 1, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64),
-(38492, 256, 1, 101, 21, 13, -1, 28, 1, 1, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64),
-(38493, 256, 1, 101, 21, 13, -1, 28, 1, 1, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64);
+(38587, 256, 1, 101, 31, 12, -1, 28, 1, 0, 32, 16, 22210, 1, 'Summon Spirit of Redemption', 1, 64),
+(38188, 384, 1, 101, 21, 1, -1, 28, 1, 0, 44, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
+(38189, 384, 1, 101, 21, 1, -1, 28, 1, 0, 41, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
+(38190, 384, 1, 101, 21, 1, -1, 28, 1, 0, 42, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
+(38191, 384, 1, 101, 21, 1, -1, 28, 1, 0, 43, 13, 22036, 2134, 'Summon Corrupted Spawn', 1, 64),
+(38198, 384, 1, 101, 21, 1, -1, 28, 1, 0, 41, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
+(38199, 384, 1, 101, 21, 1, -1, 28, 1, 0, 44, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
+(38200, 384, 1, 101, 21, 1, -1, 28, 1, 0, 42, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
+(38201, 384, 1, 101, 21, 1, -1, 28, 1, 0, 43, 13, 22035, 2134, 'Summon Purified Spawn', 1, 64),
+(38019, 256, 1, 101, 21, 1, -1, 28, 1, 0, 63, 8, 21958, 1, 'Summon Wave A Mob', 1, 64),
+(38242, 256, 1, 101, 21, 1, -1, 28, 1, 0, 63, 8, 22056, 1, 'Summon Wave C Mob', 1, 64),
+(38244, 256, 1, 101, 21, 1, -1, 28, 1, 0, 63, 8, 22009, 1, 'Summon Wave D Mob', 1, 64),
+(38247, 256, 1, 101, 21, 1, -1, 28, 1, 0, 63, 8, 22055, 1, 'Summon Wave B Mob', 1, 64),
+(38489, 256, 1, 101, 21, 13, -1, 28, 1, 0, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64),
+(38490, 256, 1, 101, 21, 13, -1, 28, 1, 0, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64),
+(38492, 256, 1, 101, 21, 13, -1, 28, 1, 0, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64),
+(38493, 256, 1, 101, 21, 13, -1, 28, 1, 0, 17, 28, 22140, 1, 'Summon Wave E Mob', 1, 64);
 
 -- ServerSide 'Fire Shield'
 INSERT INTO `spell_template` (`Id`,`Dispel`,`Attributes`,`CastingTimeIndex`,`ProcChance`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`RangeIndex`,`EquippedItemClass`,`EquippedItemSubClassMask`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectApplyAuraName1`,`EffectAmplitude1`,`EffectTriggerSpell1`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`SchoolMask`,`IsServerSide`,`SpellName`) VALUES
@@ -356,10 +356,10 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`CastingTimeIndex
 
 -- Mechano-Lord Capacitus - summon spells
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`AttributesEx3`,`AttributesEx4`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
-(35153,32,384,136,512,128,18,1,28,1,1,41,13,20405,64,143,'Summon Nether Charge NE',1,1),
-(35904,32,384,136,512,128,18,1,28,1,1,44,13,20405,64,143,'Summon Nether Charge NW',1,1),
-(35905,32,384,136,512,128,18,1,28,1,1,42,13,20405,64,143,'Summon Nether Charge SE',1,1),
-(35906,32,384,136,512,128,18,1,28,1,1,43,13,20405,64,143,'Summon Nether Charge SW',1,1);
+(35153,32,384,136,512,128,18,1,28,1,0,41,13,20405,64,143,'Summon Nether Charge NE',1,1),
+(35904,32,384,136,512,128,18,1,28,1,0,44,13,20405,64,143,'Summon Nether Charge NW',1,1),
+(35905,32,384,136,512,128,18,1,28,1,0,42,13,20405,64,143,'Summon Nether Charge SE',1,1),
+(35906,32,384,136,512,128,18,1,28,1,0,43,13,20405,64,143,'Summon Nether Charge SW',1,1);
 
 -- missing vanilla spell used in scripts
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
@@ -404,24 +404,24 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 -- Caverns of Time: Black Morass spells
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Dispel`,`Mechanic`,`Attributes`,`CastingTimeIndex`,`procFlags`,`procChance`,`baseLevel`,`spellLevel`,`DurationIndex`,`RangeIndex`,`speed`,`EquippedItemClass`,`EquippedItemSubClassMask`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`EffectMiscValue1`,`EffectTriggerSpell1`,`SpellIconID`,`SpellName`,`SpellFamilyName`,`DmgClass`,`EffectAmplitude1`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`EffectMiscValueB1`) VALUES
 (30982,8,4,11,786880,1,20,20,70,70,21,2,30,-1,-1,6,1,1,1,0,42,0,30981,163,'Crippling Poison',8,1,0,1,1,1,0),
-(31318,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,17835,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64),
-(31391,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17879,0,1,'Summon Black Morass Chrono Lord Deja',0,0,0,1,0,0,64),
-(31392,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17880,0,1,'Summon Black Morass Temporus',0,0,0,1,0,0,64),
-(31393,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17881,0,1,'Summon Black Morass Rift End Boss',0,0,0,1,0,0,64),
-(31421,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,17892,0,1,'Summon Infinite Chronomancer',0,0,0,1,0,0,64),
-(33363,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,18994,0,1,'Summon Infinite Executioner',0,0,0,1,0,0,64),
-(33364,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,18995,0,1,'Summon Infinite Vanquisher',0,0,0,1,0,0,64),
-(36229,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21137,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64),
-(36231,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21136,0,1,'Summon Infinite Chronomancer',0,0,0,1,0,0,64),
-(36232,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21138,0,1,'Summon Infinite Executioner',0,0,0,1,0,0,64),
-(36233,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,0,0,21139,0,1,'Summon Infinite Vanquisher',0,0,0,1,0,0,64),
-(36234,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21140,0,1,'Summon Black Morass Rift Lord Alt',0,0,0,1,0,0,64),
-(36235,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21104,0,1,'Summon Black Morass Rift Keeper',0,0,0,1,0,0,64),
-(36236,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21148,0,1,'Summon Black Morass Rift Keeper',0,0,0,1,0,0,64),
-(37606,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,72,7,0,21818,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64), -- Infinite Whelp
-(31321,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,17839,0,1,'Summon Black Morass Rift Lord',0,0,0,1,0,0,64),
-(37177,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21697,0,1,'Summon Black Morass Infinite Chrono-Lord',0,0,0,1,0,0,64),
-(37178,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,1,18,8,0,21698,0,1,'Summon Black Morass Infinite Timereaver',0,0,0,1,0,0,64);
+(31318,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,17835,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64),
+(31391,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,17879,0,1,'Summon Black Morass Chrono Lord Deja',0,0,0,1,0,0,64),
+(31392,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,17880,0,1,'Summon Black Morass Temporus',0,0,0,1,0,0,64),
+(31393,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,17881,0,1,'Summon Black Morass Rift End Boss',0,0,0,1,0,0,64),
+(31421,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,17892,0,1,'Summon Infinite Chronomancer',0,0,0,1,0,0,64),
+(33363,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,18994,0,1,'Summon Infinite Executioner',0,0,0,1,0,0,64),
+(33364,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,18995,0,1,'Summon Infinite Vanquisher',0,0,0,1,0,0,64),
+(36229,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,21137,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64),
+(36231,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,21136,0,1,'Summon Infinite Chronomancer',0,0,0,1,0,0,64),
+(36232,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,21138,0,1,'Summon Infinite Executioner',0,0,0,1,0,0,64),
+(36233,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,0,0,21139,0,1,'Summon Infinite Vanquisher',0,0,0,1,0,0,64),
+(36234,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,21140,0,1,'Summon Black Morass Rift Lord Alt',0,0,0,1,0,0,64),
+(36235,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,21104,0,1,'Summon Black Morass Rift Keeper',0,0,0,1,0,0,64),
+(36236,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,21148,0,1,'Summon Black Morass Rift Keeper',0,0,0,1,0,0,64),
+(37606,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,72,7,0,21818,0,1,'Summon Infinite Assassin',0,0,0,1,0,0,64), -- Infinite Whelp
+(31321,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,17839,0,1,'Summon Black Morass Rift Lord',0,0,0,1,0,0,64),
+(37177,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,21697,0,1,'Summon Black Morass Infinite Chrono-Lord',0,0,0,1,0,0,64),
+(37178,1,0,0,256,1,0,101,0,0,21,1,0,-1,0,28,1,0,18,8,0,21698,0,1,'Summon Black Morass Infinite Timereaver',0,0,0,1,0,0,64);
 
 -- To Legion Hold crate diguise missing spell
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx4`,`InterruptFlags`,`DurationIndex`,`Effect1`,`Effect2`,`EffectImplicitTargetA1`,`EffectApplyAuraName1`,`EffectMiscValue2`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
@@ -448,9 +448,9 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`
 
 -- Mekgineer Steamrigger gnome summoning spells
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`InterruptFlags`,`baseLevel`,`spellLevel`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(31528,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1),
-(31529,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1),
-(31530,272,268435456,4,15,60,60,6,28,1,1,17,16,17951,64,1,'Summon Gnome',1);
+(31528,272,268435456,4,15,60,60,6,28,1,0,17,16,17951,64,1,'Summon Gnome',1),
+(31529,272,268435456,4,15,60,60,6,28,1,0,17,16,17951,64,1,'Summon Gnome',1),
+(31530,272,268435456,4,15,60,60,6,28,1,0,17,16,17951,64,1,'Summon Gnome',1);
 
 -- Stonescythe Whelp serverside
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`baseLevel`,`spellLevel`,`DurationIndex`,`rangeIndex`,`Effect2`,`Effect3`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`SpellIconID`,`spellPriority`,`SpellName`,`StartRecoveryCategory`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
@@ -466,9 +466,9 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`
 
 -- Missing Blackwing defenders summon spells (Razorgore encounter)
 INSERT INTO `spell_template` (`Id`,`Category`,`Attributes`,`AttributesEx`,`AttributesEx3`,`AttributesEx4`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`ProcChance`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`EffectMiscValueB1`) VALUES
-(19826, 23, 256, 0, 0, 0, 1, 45000, 15000, 101, 21, 1, 28, 1, 1, 18, 16, 12416, 1, 'Summon Blackwing Legionnaire', 1, 0, 64),
-(19827, 23, 256, 0, 0, 0, 1, 45000, 15000, 101, 21, 1, 28, 1, 1, 18, 16, 12420, 1, 'Summon Blackwing Mage', 1, 0, 64),
-(19828, 23, 256, 0, 0, 0, 1, 75000, 15000, 101, 21, 1, 28, 1, 1, 18, 16, 12422, 1, 'Summon Death Talon Dragonspawn', 1, 0, 64);
+(19826, 23, 256, 0, 0, 0, 1, 45000, 15000, 101, 21, 1, 28, 1, 0, 18, 16, 12416, 1, 'Summon Blackwing Legionnaire', 1, 0, 64),
+(19827, 23, 256, 0, 0, 0, 1, 45000, 15000, 101, 21, 1, 28, 1, 0, 18, 16, 12420, 1, 'Summon Blackwing Mage', 1, 0, 64),
+(19828, 23, 256, 0, 0, 0, 1, 75000, 15000, 101, 21, 1, 28, 1, 0, 18, 16, 12422, 1, 'Summon Death Talon Dragonspawn', 1, 0, 64);
 
 -- Missing sub effect for Burning Adrenaline from Classic
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Attributes`,`AttributesEx`,`AttributesEx3`,`AttributesEx4`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`ProcChance`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
@@ -481,7 +481,7 @@ INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Dispel`,`Mechanic`,`
 ('26230', '1', '0', '0', '0', '256', '0', '8', '256', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',                   '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '13', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '98', '77', '0',  '1', '0', '0', '149', '0', '0',  '0', '0', '0', '0', '0', '0', '22', '22', '0', '7', '7', '0', '13', '13', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '500', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Exit Stomach', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0'),
 ('26648', '1', '0', '0', '0', '256', '0', '4', '256', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',                   '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',     '-1', '0', '0', '1', '0', '0',    '0', '0', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Port Out Stomach Effect', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0'),
 ('26092', '1', '0', '0', '0', '256', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',             '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '6', '0', '0',    '0', '0', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '23', '0', '0', '1000', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '26093', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Dirt Mound Passive', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0'),
-('26617', '1', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0',                     '0', '101', '0', '0', '0', '0', '3', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',     '-1', '0', '0', '28', '0', '0',   '1', '0', '0', '1', '0', '0',  '0', '0', '0', '0', '0', '0', '18', '0', '0', '0', '0', '0', '16', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15712', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Summon Ouro Mound', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '64'),
+('26617', '1', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0',                     '0', '101', '0', '0', '0', '0', '3', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',     '-1', '0', '0', '28', '0', '0',   '1', '0', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '18', '0', '0', '0', '0', '0', '16', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15712', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Summon Ouro Mound', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '64'),
 ('25994', '1', '0', '0', '0', '336', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',             '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '6', '0', '0',    '1', '0', '0', '-51', '0', '0',  '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '87', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '127', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Membrane of Viscidus', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0'),
 ('25926', '1', '0', '0', '0', '256', '268435456', '4', '335544320', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '139944','100', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '6', '0', '0',    '0', '0', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Viscidus Frost Weakness', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0'),
 ('25893', '1', '0', '0', '0', '8388864', '268435456', '5', '269484032', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '225', '0', '0', '0', '0', '0', '13', '0', '20', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0',    '1', '0', '0', '-5', '0', '0',  '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '61', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Viscidus Shrinks', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0'),
@@ -489,7 +489,7 @@ INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Dispel`,`Mechanic`,`
 ('25897', '1', '0', '0', '0', '256', '0', '4', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0',             '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '20', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '10', '77', '0',  '0', '0', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '25', '25', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Viscidus Grows', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0'),
 ('25885', '1', '0', '0', '0', '256', '0', '4', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',             '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',     '-1', '0', '0', '77', '0', '0',   '0', '0', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Summon Globs of Viscidus', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '0'),
 ('25904', '1', '0', '0', '0', '256', '0', '4', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',             '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '20', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '5', '0', '0',    '0', '0', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '1', '0', '0', '17', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Viscidus Teleport', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0'),
-('26564', '1', '0', '0', '0', '256', '0', '4', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',             '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '28', '77', '0',  '1', '1', '0', '1', '1', '0',  '0', '0', '0', '0', '0', '0', '18', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15922', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Summon Viscidus Trigger', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '64');
+('26564', '1', '0', '0', '0', '256', '0', '4', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0',             '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',    '-1', '0', '0', '28', '77', '0',  '1', '1', '0', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '18', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15922', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Summon Viscidus Trigger', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '64');
 
 -- C'Thun
 -- Ouro
@@ -512,9 +512,9 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 
 -- Used by Morcrush c.18690 to summon minions and rescale model at specific health percentages
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`StackAmount`,`EquippedItemClass`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectRadiusIndex1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectMiscValue1`,`EffectMiscValue3`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
-(38888,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,48,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1),
-(38889,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,42,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1),
-(38890,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,43,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1);
+(38888,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,0,1,1,48,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1),
+(38889,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,0,1,1,42,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1),
+(38890,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,0,1,1,43,1,1,29,61,79,22344,127,64,2154,'Summon Morcrush Shardling',1,1,1);
 
 -- Used by Alliance Peasants c.17931 in Hyjal Summit
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`EquippedItemClass`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectApplyAuraName1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
@@ -526,7 +526,7 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 
 -- Used by Mountain Colossus c.21844
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`StackAmount`,`EquippedItemClass`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectRadiusIndex1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectMiscValue1`,`EffectMiscValue3`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
-(39080,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,1,1,1,73,1,1,29,61,79,22390,127,64,2154,'Summon Mountain Shardling',1,1,1);
+(39080,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,0,1,1,73,1,1,29,61,79,22390,127,64,2154,'Summon Mountain Shardling',1,1,1);
 
 -- Used by invis trigger Flame Wave c.19381
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`CastingTimeIndex`,`procChance`,`baseLevel`,`spellLevel`,`rangeIndex`,`EquippedItemClass`,`EquippedItemSubClassMask`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectRadiusIndex1`,`SpellIconID`,`SpellName`,`SpellFamilyName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
@@ -534,20 +534,20 @@ INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`Cas
 
 -- Used by Crazed Colossus c.19823
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`StackAmount`,`EquippedItemClass`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectRadiusIndex1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectMiscValue1`,`EffectMiscValue3`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
-(37947,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,48,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1),
-(37948,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,42,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1),
-(37949,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,1,1,1,43,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1);
+(37947,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,0,1,1,48,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1),
+(37948,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,0,1,1,42,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1),
+(37949,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-31,0,1,1,43,1,1,29,61,79,21936,127,64,2154,'Summon Crazed Shardling',1,1,1);
 
 -- summoned creatures behave like wild summons and not like guardians per sniff data
 UPDATE `spell_template` SET `EffectMiscValueB1`=64 WHERE `Id` IN(33803,38611);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`StackAmount`,`EquippedItemClass`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectRadiusIndex1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectMiscValue1`,`EffectMiscValue3`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
-(36042,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,1,1,1,48,1,1,29,61,79,21077,127,64,2154,'Summon Farahlon Crumbler',1,1,1),
-(36043,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,1,1,1,48,1,1,29,61,79,21077,127,64,2154,'Summon Farahlon Crumbler',1,1,1),
-(36044,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,1,1,1,48,1,1,29,61,79,21077,127,64,2154,'Summon Farahlon Crumbler',1,1,1),
-(36045,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,1,1,1,48,1,1,29,61,79,21078,127,64,2154,'Summon Farahlon Shardling',1,1,1),
-(36046,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,1,1,1,48,1,1,29,61,79,21078,127,64,2154,'Summon Farahlon Shardling',1,1,1),
-(36047,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,1,1,1,48,1,1,29,61,79,21078,127,64,2154,'Summon Farahlon Shardling',1,1,1);
+(36042,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,0,1,1,48,1,1,29,61,79,21077,127,64,2154,'Summon Farahlon Crumbler',1,1,1),
+(36043,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,0,1,1,48,1,1,29,61,79,21077,127,64,2154,'Summon Farahlon Crumbler',1,1,1),
+(36044,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,0,1,1,48,1,1,29,61,79,21077,127,64,2154,'Summon Farahlon Crumbler',1,1,1),
+(36045,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,0,1,1,48,1,1,29,61,79,21078,127,64,2154,'Summon Farahlon Shardling',1,1,1),
+(36046,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,0,1,1,48,1,1,29,61,79,21078,127,64,2154,'Summon Farahlon Shardling',1,1,1),
+(36047,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,-31,-21,0,1,1,48,1,1,29,61,79,21078,127,64,2154,'Summon Farahlon Shardling',1,1,1);
 
 -- Used by Farahlon Giant c.18885
 -- Used by Farahlon Breaker c.18886
@@ -648,15 +648,15 @@ UPDATE `spell_template` SET `procFlags`=0 WHERE `Id`=29991;
 
 -- Used by Cragskaar c.20202 at certain health percentages
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`StackAmount`,`EquippedItemClass`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectRadiusIndex1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectMiscValue1`,`EffectMiscValue3`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
-(36048,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,1,-31,-21,48,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1),
-(36049,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,1,-31,-21,43,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1),
-(36050,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,1,-31,-21,42,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1);
+(36048,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,0,-31,-21,48,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1),
+(36049,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,0,-31,-21,43,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1),
+(36050,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1,0,-31,-21,42,1,1,29,61,79,21079,127,64,2154,'Summon Motherlode Shardling',1,1,1);
 
 -- Used by Netherock c.20772 at certain health percentages
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`StackAmount`,`EquippedItemClass`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectRadiusIndex1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectMiscValue1`,`EffectMiscValue3`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
-(36579,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1, 1,-31,-21,48,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1),
-(36584,384,268435456,1048576,1,101,4,1,3,-1,28,6,6, 1,1,1, 1,-31,-21,42,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1),
-(36585,384,268435456,1048576,1,101,4,1,3,-1,28,6,6, 1,1,1, 1,-31,-21,43,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1);
+(36579,384,268435456,1048576,1,101,21,1,3,-1,28,6,6,1,1,1, 0,-31,-21,48,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1),
+(36584,384,268435456,1048576,1,101,4,1,3,-1,28,6,6, 1,1,1, 0,-31,-21,42,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1),
+(36585,384,268435456,1048576,1,101,4,1,3,-1,28,6,6, 1,1,1, 0,-31,-21,43,1,1,29,61,79,21323,127,64,2154,'Summon Netherock Crumbler',1,1,1);
 
 -- Triggered by Demonic Frenzy 23257 - Stave of the Ancients quest
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`procFlags`,`procChance`,`procCharges`,`maxLevel`,`baseLevel`,`spellLevel`,`DurationIndex`,`powerType`,`manaCost`,`manaCostPerlevel`,`manaPerSecond`,`manaPerSecondPerLevel`,`rangeIndex`,`speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`activeIconID`,`spellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`SchoolMask`,`IsServerSide`) VALUES
@@ -712,11 +712,11 @@ UPDATE `spell_template` SET `EffectMechanic2`=12 WHERE `Id`=38509;
 
 -- blackheart the inciter mechanics
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`AttributesEx3`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(33677,256,4,256,9,1,28,1,1,18,16,19300,64,1,'Incite Chaos',1),
-(33680,256,4,256,9,1,28,1,1,18,16,19301,64,1,'Incite Chaos',1),
-(33681,256,4,256,9,1,28,1,1,18,16,19302,64,1,'Incite Chaos',1),
-(33682,256,4,256,9,1,28,1,1,18,16,19303,64,1,'Incite Chaos',1),
-(33683,256,4,256,9,1,28,1,1,18,16,19304,64,1,'Incite Chaos',1);
+(33677,256,4,256,9,1,28,1,0,18,16,19300,64,1,'Incite Chaos',1),
+(33680,256,4,256,9,1,28,1,0,18,16,19301,64,1,'Incite Chaos',1),
+(33681,256,4,256,9,1,28,1,0,18,16,19302,64,1,'Incite Chaos',1),
+(33682,256,4,256,9,1,28,1,0,18,16,19303,64,1,'Incite Chaos',1),
+(33683,256,4,256,9,1,28,1,0,18,16,19304,64,1,'Incite Chaos',1);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`AttributesEx3`,`rangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
 (33687,256,4,256,13,77,1,1,'Incite Chaos',1);
@@ -739,7 +739,7 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 (31770,0,0,0,256,0,4,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,101,0,0,0,0,0,0,0,0,0,0,13,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,0,0,7,0,0,28,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,'Guard Slip\'kik Trigger','','','','','','','','','','','','','','','',0,0,0,0,0,0,0,0,0,1,0,0,0);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(32114,384,136,30,1,28,1,1,73,25,17946,64,1,'Summon Wisp',1);
+(32114,384,136,30,1,28,1,0,73,25,17946,64,1,'Summon Wisp',1);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`RangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectItemType1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
 (39118,256,6,24,25,24494,1,'Summon Tears of the Goddess',1);
@@ -842,10 +842,10 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`
 (35881,256,268435456,4,0,13,3,25,0,12,1,'Nether Vapor',1,1,1);
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`DurationIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(35861,256,21,28,1,1,47,13,21002,64,1,'Summon Nether Vapor',1),
-(35862,256,21,28,1,1,50,13,21002,64,1,'Summon Nether Vapor',1),
-(35863,256,21,28,1,1,49,13,21002,64,1,'Summon Nether Vapor',1),
-(35864,256,21,28,1,1,48,13,21002,64,1,'Summon Nether Vapor',1);
+(35861,256,21,28,1,0,47,13,21002,64,1,'Summon Nether Vapor',1),
+(35862,256,21,28,1,0,50,13,21002,64,1,'Summon Nether Vapor',1),
+(35863,256,21,28,1,0,49,13,21002,64,1,'Summon Nether Vapor',1),
+(35864,256,21,28,1,0,48,13,21002,64,1,'Summon Nether Vapor',1);
 
 -- knockup when going near ground
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`AttributesEx4`,`AuraInterruptFlags`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
@@ -853,7 +853,7 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`AttributesEx4`,
 
 -- phoenix egg spell
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`Effect1`,`Effect2`,`EffectDieSides1`,`EffectDieSides2`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectApplyAuraName2`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
-(36724,256,268435456,21,28,6,1,1,1,9999,18,1,18,21364,4,64,1,'Summon Phoenix Egg',1,1);
+(36724,256,268435456,21,28,6,1,1,0,9999,18,1,18,21364,4,64,1,'Summon Phoenix Egg',1,1);
 
 -- Telonicus bomb should not be interruptible by damage, Sanguinar fear the same
 UPDATE `spell_template` SET `InterruptFlags`=InterruptFlags&~0x12 WHERE `Id` IN(37036,44863);
@@ -879,7 +879,7 @@ UPDATE `spell_template` SET `AttributesEx2`=AttributesEx2|0x80000000 WHERE `Id`=
 
 -- missing doomwalker overrun target summon spell
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(32632,256,1,3,1,28,1,1,47,27,18665,64,1,'Summon Overrun Target',1);
+(32632,256,1,3,1,28,1,0,47,27,18665,64,1,'Summon Overrun Target',1);
 
 -- missing transformation auras for Lunar Festival
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
@@ -890,7 +890,7 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 UPDATE `spell_template` SET `procCharges`=1 WHERE `Id`=36111;
 
 INSERT INTO `spell_template` (`Id`,`Category`,`Attributes`,`baseLevel`,`spellLevel`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
-(35256,1152,256,63,63,21,7,28,1,1,41,8,20479,64,1952,'Summon Unstable Mushroom',1,1);
+(35256,1152,256,63,63,21,7,28,1,0,41,8,20479,64,1952,'Summon Unstable Mushroom',1,1);
 
 -- Spell for Deathwail Fel Fireball
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`DurationIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectMiscValue1`,`SpellName`,`DmgMultiplier1`) VALUES
@@ -926,11 +926,11 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`procChance`,
 
 -- Used by Raging Colossus c.19188 at certain health percentages - multiple spawns issue to be resolved
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`StackAmount`,`EquippedItemClass`,`Effect1`,`Effect2`,`EffectDieSides1`,`EffectDieSides2`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectRadiusIndex1`,`EffectApplyAuraName2`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`IsServerSide`) VALUES
-(33903, 384, 268435456, 1048576, 1, 101, 4, 1, 3, -1, 28, 6, 1, 1, 1, -31, 48, 1, 29, 61, 19419, 64, 2154, 'Summon Crystalhide Rageling', 1, 1, 1);
+(33903, 384, 268435456, 1048576, 1, 101, 4, 1, 3, -1, 28, 6, 1, 1, 0, -31, 48, 1, 29, 61, 19419, 64, 2154, 'Summon Crystalhide Rageling', 1, 1, 1);
 
 -- Summon Destroyed Sentinel
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`AttributesEx5`,`AttributesEx6`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`FacingCasterFlags`,`CasterAuraState`,`TargetAuraState`,`CasterAuraStateNot`,`TargetAuraStateNot`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`procFlags`,`procChance`,`procCharges`,`maxLevel`,`baseLevel`,`spellLevel`,`DurationIndex`,`powerType`,`manaCost`,`manaCostPerlevel`,`manaPerSecond`,`manaPerSecondPerLevel`,`rangeIndex`,`speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectMiscValueB1`,`EffectMiscValueB2`,`EffectMiscValueB3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`activeIconID`,`spellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`SpellName9`,`SpellName10`,`SpellName11`,`SpellName12`,`SpellName13`,`SpellName14`,`SpellName15`,`SpellName16`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`Rank9`,`Rank10`,`Rank11`,`Rank12`,`Rank13`,`Rank14`,`Rank15`,`Rank16`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`TotemCategory1`,`TotemCategory2`,`AreaId`,`SchoolMask`,`IsServerSide`,`AttributesServerside`) VALUES
-('37394', '0', '0', '0', '8388992', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '85', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '28', '0', '0', '1', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '18', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '21761', '0', '0', '64', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1667', '0', '0', 'Summon Destroyed Sentinel', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '0', '0', '1', '0', '0');
+('37394', '0', '0', '0', '8388992', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '85', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '28', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '18', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '21761', '0', '0', '64', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1667', '0', '0', 'Summon Destroyed Sentinel', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '0', '0', '1', '0', '0');
 
 -- Vashj MC should target only players
 UPDATE `spell_template` SET `AttributesEx3`=0x00000100 WHERE `Id`=38511;
@@ -941,7 +941,7 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`CastingTimeIndex
 
 -- Spell used by GO - 179985 and npc 16287
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`AttributesEx5`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CasterAuraStateNot`,`TargetAuraStateNot`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`procFlags`,`procChance`,`procCharges`,`maxLevel`,`baseLevel`,`spellLevel`,`DurationIndex`,`powerType`,`manaCost`,`manaCostPerLevel`,`manaPerSecond`,`manaPerSecondPerLevel`,`rangeIndex`,`speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`activeIconID`,`spellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`TotemCategory1`,`TotemCategory2`,`AreaId`,`EffectMiscValueB1`) VALUES
-('24081', '1', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '28', '0', '0', '1', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '18', '0', '0', '0', '0', '0', '16', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15041', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Summon Spawn of Mar\'li', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0',64),
+('24081', '1', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '5', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '28', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '18', '0', '0', '0', '0', '0', '16', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15041', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Summon Spawn of Mar\'li', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0',64),
 ('37084', '1', '0', '0', '0', '384', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '24', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '25', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '30632', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Lament of the Highborne: Songbook', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0',0);
 
 -- Add missing server-side spell for Dream Fog (Emerald Dragons)
@@ -1000,7 +1000,7 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 
 -- Shirrak focus fire target summon spell
 INSERT INTO `spell_template` (`Id`,`Attributes`,`InterruptFlags`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
-(32283,384,15,1,12,28,1,1,18,16,18374,64,1,'Focus Fire',1);
+(32283,384,15,1,12,28,1,0,18,16,18374,64,1,'Focus Fire',1);
 
 -- Stun Self 25900 used by Fel Crystal 24722 - classic-db
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`AttributesEx5`,`AttributesEx6`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`FacingCasterFlags`,`CasterAuraState`,`TargetAuraState`,`CasterAuraStateNot`,`TargetAuraStateNot`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`procFlags`,`procChance`,`procCharges`,`maxLevel`,`baseLevel`,`spellLevel`,`DurationIndex`,`powerType`,`manaCost`,`manaCostPerlevel`,`manaPerSecond`,`manaPerSecondPerLevel`,`rangeIndex`,`speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectMiscValueB1`,`EffectMiscValueB2`,`EffectMiscValueB3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`activeIconID`,`spellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`SpellName9`,`SpellName10`,`SpellName11`,`SpellName12`,`SpellName13`,`SpellName14`,`SpellName15`,`SpellName16`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`Rank9`,`Rank10`,`Rank11`,`Rank12`,`Rank13`,`Rank14`,`Rank15`,`Rank16`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`TotemCategory1`,`TotemCategory2`,`AreaId`,`SchoolMask`,`IsServerSide`,`AttributesServerside`) VALUES
@@ -1547,7 +1547,7 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 
 -- MgT Kaelthas phoenix egg summoning spell - made by hand from TK version
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`IsServerSide`) VALUES
-(44195,256,268435456,21,28,1,1,18,24675,64,1,'Summon Phoenix Egg',1,1,2);
+(44195,256,268435456,21,28,1,0,18,24675,64,1,'Summon Phoenix Egg',1,1,2);
 
 -- Add Drowning Death 16563 used by Plague Ravager 8520
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
