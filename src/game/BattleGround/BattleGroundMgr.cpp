@@ -1799,7 +1799,7 @@ BattleGround* BattleGroundMgr::CreateNewBattleGround(BattleGroundTypeId bgTypeId
             return nullptr;
     }
 
-    // set before Map creating for let use proper difficulty
+    // must occur before CreateBgMap - used to detect difficulty of BG
     bg->SetBracket(bracketEntry);
 
     bgTypeId = isRandom ? BATTLEGROUND_RB : bgTypeId;
