@@ -3770,9 +3770,6 @@ void Spell::_handle_immediate_phase()
     // handle none targeted effects
     DoAllTargetlessEffects(false);
 
-    if (!IsDelayedSpell())
-        DoAllTargetlessEffects(true);
-
     // process items
     for (auto& ihit : m_UniqueItemInfo)
         DoAllEffectOnTarget(&ihit);
@@ -3793,6 +3790,10 @@ void Spell::_handle_immediate_phase()
             break;
         }
     }
+
+    // must be after self
+    if (!IsDelayedSpell())
+        DoAllTargetlessEffects(true);
 
     ProcSpellAuraTriggers();
 
