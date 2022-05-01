@@ -1459,6 +1459,11 @@ SpellAuraHolder const* Player::GetMirrorTimerBuff(MirrorTimer::Type timer) const
     }
 }
 
+bool Player::IsMirrorTimerActive(MirrorTimer::Type timer) const
+{
+    return m_mirrorTimers[timer].IsActive();
+}
+
 void Player::Update(const uint32 diff)
 {
     if (!IsInWorld())

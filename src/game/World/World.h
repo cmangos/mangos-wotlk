@@ -694,6 +694,7 @@ class World
 
         void StartLFGQueueThread();
         void BroadcastToGroup(ObjectGuid groupGuid, std::vector<WorldPacket> const& packets);
+        void BroadcastPersonalized(std::map<ObjectGuid, std::vector<WorldPacket>> const& personalizedPackets);
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters

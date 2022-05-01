@@ -35,6 +35,7 @@
 #include "Maps/InstanceData.h"
 #include "Cinematics/M2Stores.h"
 #include "Entities/Transports.h"
+#include "World/World.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -1912,5 +1913,11 @@ bool ChatHandler::HandleDebugDbscript(char* args)
         return false;
 
     player->GetMap()->ScriptsStart(sRelayScripts, chosenId, player, target);
+    return true;
+}
+
+bool ChatHandler::HandleDebugLfgCommand(char* /*args*/)
+{
+    sWorld.GetLFGQueue().ToggleTesting();
     return true;
 }

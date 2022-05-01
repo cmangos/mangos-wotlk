@@ -226,6 +226,15 @@ bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
     return true;
 }
 
+void Group::ConvertToLFG()
+{
+    m_groupFlags = GroupType(m_groupFlags | GROUP_FLAG_LFG | GROUP_FLAG_LFG_RESTRICTED);
+    m_lootMethod = NEED_BEFORE_GREED;
+    if (!IsBattleGroup())
+        CharacterDatabase.PExecute("UPDATE `groups` SET groupType = %u WHERE groupId='%u'", uint8(m_groupFlags), m_Id);
+    SendUpdate();
+}
+
 void Group::ConvertToRaid()
 {
     m_groupFlags = GroupType(m_groupFlags | GROUP_FLAG_RAID);

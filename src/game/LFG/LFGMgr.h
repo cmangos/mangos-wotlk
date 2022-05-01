@@ -96,8 +96,10 @@ class LFGMgr
         static uint32 FilterClassRoles(uint32 roles, uint32 classMask);
         static bool CheckGroupRoles(LfgPlayerInfoMap& groles);
 
-    private:
+        void TeleportPlayer(Player* player, bool out, bool fromOpcode);
+
         LFGDungeonData const* GetLFGDungeon(uint32 id);
+    private:
         void GetCompatibleDungeons(LfgDungeonSet& dungeons, GuidSet const& players, LfgLockPartyMap& lockMap, LfgInstanceSaveMap& savedMap, bool isContinue);
 
         std::unordered_map<uint32, LFGDungeonData> m_lfgDungeons;

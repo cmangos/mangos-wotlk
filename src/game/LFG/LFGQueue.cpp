@@ -22,15 +22,15 @@
 
 void LFGQueue::AddToQueue(LFGQueueData const& data)
 {
-	auto result = m_queueData.emplace(data.m_ownerGuid, data);
+    auto result = m_queueData.emplace(data.m_ownerGuid, data);
     LFGQueueData& queueData = result.first->second;
-	if (data.m_roleCheckState == LFG_ROLECHECK_INITIALITING)
-		queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
+    if (data.m_roleCheckState == LFG_ROLECHECK_INITIALITING)
+        queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
 }
 
 void LFGQueue::RemoveFromQueue(ObjectGuid owner)
 {
-	m_queueData.erase(owner);
+    m_queueData.erase(owner);
 }
 
 void LFGQueue::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles)
@@ -40,18 +40,90 @@ void LFGQueue::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles)
         itr->second.UpdateRoleCheck(player, roles, false);
 }
 
+void LFGQueue::UpdateProposal(ObjectGuid playerGuid, uint32 proposalId, bool accept)
+{
+    auto itr = m_proposals.find(proposalId); // protection against packet spamming
+    if (itr != m_proposals.end())
+    {
+        LfgProposal& proposal = itr->second;
+        proposal.UpdatePlayerProposal(playerGuid, accept);
+
+        // broadcast players proposal result to everyone
+        std::map<ObjectGuid, std::vector<WorldPacket>> personalizedPackets;
+        for (ObjectGuid queuedGroup : proposal.queues)
+        {
+            LFGQueueData& queueData = m_queueData[queuedGroup];
+            for (auto& playerData : queueData.m_playerInfoPerGuid)
+                personalizedPackets[playerData.first].emplace_back(WorldSession::BuildLfgUpdateProposal(proposal, queueData.m_randomDungeonId, playerData.first));
+        }
+
+        sWorld.GetMessager().AddMessage([=](World* world)
+        {
+            world->BroadcastPersonalized(personalizedPackets);
+        });
+    }
+}
+
+void LFGQueue::RemoveProposal(uint32 proposalId)
+{
+    m_proposalsForRemoval.push_back(proposalId);
+}
+
 void LFGQueue::Update()
 {
-	while (!World::IsStopped())
-	{
-		GetMessager().Execute(this);
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	}
+    uint32 counter = 1;
+    while (!World::IsStopped())
+    {
+        GetMessager().Execute(this);
+
+        if (IsTestingEnabled()) // in debug pop any queue regardless of eligibility
+        {
+            for (auto& queuedGroupData : m_queueData)
+            {
+                LFGQueueData& queueData = queuedGroupData.second;
+                if (queueData.GetState() == LFG_STATE_QUEUED)
+                {
+                    LfgProposal proposal;
+                    proposal.id = counter++;
+                    queueData.PopQueue(proposal);
+                    m_proposals[proposal.id] = proposal;
+                }
+            }
+        }
+
+        for (auto& proposalData : m_proposals)
+            proposalData.second.UpdateProposal(*this);
+
+        for (uint32 proposalId : m_proposalsForRemoval)
+            m_proposals.erase(proposalId);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
 }
 
 std::string LFGQueue::GetDebugPrintout()
 {
-	return std::string();
+    return std::string();
+}
+
+void LFGQueue::UpdateWaitTimeDps(int32 time, uint32 dungeonId)
+{
+    // TODO
+}
+
+void LFGQueue::UpdateWaitTimeHealer(int32 time, uint32 dungeonId)
+{
+    // TODO
+}
+
+void LFGQueue::UpdateWaitTimeTank(int32 time, uint32 dungeonId)
+{
+    // TODO
+}
+
+void LFGQueue::UpdateWaitTimeAvg(int32 time, uint32 dungeonId)
+{
+    // TODO
 }
 
 void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
@@ -90,19 +162,19 @@ void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
         packets.emplace_back(WorldSession::BuildLfgRoleChosen(guid, roles));
 
     packets.emplace_back(WorldSession::BuildLfgRoleCheckUpdate(*this));
-	switch (m_roleCheckState)
-	{
-		case LFG_ROLECHECK_INITIALITING:
-			break;
-		case LFG_ROLECHECK_FINISHED:
+    switch (m_roleCheckState)
+    {
+        case LFG_ROLECHECK_INITIALITING:
+            break;
+        case LFG_ROLECHECK_FINISHED:
             packets.emplace_back(WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_ADDED_TO_QUEUE,
-                m_raid ? LFG_STATE_RAIDBROWSER : LFG_STATE_NONE, dungeons, m_comment), true));
-			break;
-		default:
-			packets.emplace_back(WorldSession::BuildLfgJoinResult(joinData));
+                m_raid ? LFG_STATE_RAIDBROWSER : LFG_STATE_NONE, GetDungeons(), m_comment), true));
+            break;
+        default:
+            packets.emplace_back(WorldSession::BuildLfgJoinResult(joinData));
             packets.emplace_back(WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_ROLECHECK_FAILED), true));
-			break;
-	}
+            break;
+    }
 
     sWorld.GetMessager().AddMessage([groupGuid = m_ownerGuid, packets](World* world)
     {
@@ -118,6 +190,261 @@ void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
     }
     else if (m_roleCheckState != LFG_ROLECHECK_INITIALITING)
         m_state = LFG_STATE_FAILED;
+}
+
+void LFGQueueData::PopQueue(LfgProposal& proposal)
+{
+    auto itr = m_dungeons.begin();
+    std::advance(itr, urand(0, m_dungeons.size() - 1));
+    uint32 selectedDungeonId = *itr;
+    m_state = LFG_STATE_PROPOSAL;
+    std::vector<WorldPacket> packets;
+    packets.emplace_back(WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_PROPOSAL_BEGIN, GetDungeons(), ""), true));
+
+    proposal.dungeonId = selectedDungeonId;
+    proposal.state = LFG_PROPOSAL_INITIATING;
+    proposal.group = ObjectGuid(); // only filled when already lfg group
+    proposal.leader = m_leaderGuid;
+    proposal.cancelTime = sWorld.GetCurrentClockTime() + std::chrono::seconds(LFG_TIME_ROLECHECK);
+    proposal.encounters = 0;
+    proposal.isNew = true;
+    proposal.queues.push_back(m_ownerGuid);
+    
+    for (auto& playerData : m_playerInfoPerGuid)
+    {
+        uint8 roles = playerData.second.m_roles; // give one random role out of given ones
+        if (roles & PLAYER_ROLE_TANK)
+            roles = PLAYER_ROLE_TANK;
+        if (roles & PLAYER_ROLE_HEALER)
+            roles = PLAYER_ROLE_HEALER;
+        if (roles & PLAYER_ROLE_DAMAGE)
+            roles = PLAYER_ROLE_DAMAGE;
+        proposal.players[playerData.first] = LfgProposalPlayer(roles, LFG_ANSWER_PENDING, proposal.group, m_randomDungeonId);
+    }
+
+    std::map<ObjectGuid, std::vector<WorldPacket>> personalizedPackets;
+    for (auto& playerData : m_playerInfoPerGuid)
+    {
+        personalizedPackets[playerData.first] = packets;
+        personalizedPackets[playerData.first].emplace_back(WorldSession::BuildLfgUpdateProposal(proposal, m_randomDungeonId, playerData.first));
+    }
+
+    sWorld.GetMessager().AddMessage([=](World* world)
+    {
+        world->BroadcastPersonalized(personalizedPackets);
+    });
+}
+
+LfgDungeonSet LFGQueueData::GetDungeons() const
+{
+    if (m_randomDungeonId)
+    {
+        LfgDungeonSet set;
+        set.insert(m_randomDungeonId);
+        return set;
+    }
+    return m_dungeons;
+}
+
+void LfgProposal::UpdatePlayerProposal(ObjectGuid guid, bool accept)
+{
+    players[guid].answer = LfgAnswer(accept);
+}
+
+void LfgProposal::UpdateProposal(LFGQueue& queue)
+{
+    bool end = true;
+    bool fail = false;
+
+    for (auto& playerData : players)
+    {
+        if (playerData.second.answer == LFG_ANSWER_PENDING)
+        {
+            end = false;
+            break;
+        }
+
+        if (playerData.second.answer == LFG_ANSWER_DENY)
+            fail = true;
+    }
+
+    if (end)
+    {
+        if (fail)
+            FailProposal(queue);
+        else
+            AcceptProposal(queue);
+        return;
+    }
+
+    if (cancelTime < sWorld.GetCurrentClockTime())
+        FailProposal(queue);
+}
+
+void LfgProposal::FailProposal(LFGQueue& queue)
+{
+}
+
+void LfgProposal::AcceptProposal(LFGQueue& queue)
+{
+    bool sendUpdate = state != LFG_PROPOSAL_SUCCESS;
+    state = LFG_PROPOSAL_SUCCESS;
+    TimePoint joinTime = sWorld.GetCurrentClockTime();
+
+    std::map<ObjectGuid, std::vector<WorldPacket>> personalizedPackets;
+
+    std::map<ObjectGuid, ObjectGuid> m_groupPerPlayer;
+    std::map<ObjectGuid, uint8> m_rolesPerPlayer;
+
+    LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_GROUP_FOUND);
+    for (LfgProposalPlayerContainer::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        ObjectGuid pguid = itr->first;
+        ObjectGuid gguid = itr->second.group;
+        uint32 randomDungeonId = itr->second.group;
+        int32 waitTime = -1;
+
+        std::vector<WorldPacket>& packets = personalizedPackets[pguid];
+
+        packets.emplace_back(WorldSession::BuildLfgUpdateProposal(*this, randomDungeonId, pguid));
+
+        LFGQueueData& queueData = queue.GetQueueData(gguid ? gguid : pguid);
+        waitTime = int32((joinTime - queueData.GetJoinTime()).count());
+        packets.emplace_back(WorldSession::BuildLfgUpdate(updateData, true));
+        updateData.updateType = LFG_UPDATETYPE_REMOVED_FROM_QUEUE;
+        packets.emplace_back(WorldSession::BuildLfgUpdate(updateData, true));
+        packets.emplace_back(WorldSession::BuildLfgUpdate(updateData, false));
+
+        LFGQueuePlayer& playerInfo = queueData.m_playerInfoPerGuid[pguid];
+        // Update timers
+        uint8 role = playerInfo.m_roles;
+        role &= ~PLAYER_ROLE_LEADER;
+        switch (role)
+        {
+            case PLAYER_ROLE_DAMAGE:
+                queue.UpdateWaitTimeDps(waitTime, dungeonId);
+                break;
+            case PLAYER_ROLE_HEALER:
+                queue.UpdateWaitTimeHealer(waitTime, dungeonId);
+                break;
+            case PLAYER_ROLE_TANK:
+                queue.UpdateWaitTimeTank(waitTime, dungeonId);
+                break;
+            default:
+                queue.UpdateWaitTimeAvg(waitTime, dungeonId);
+                break;
+        }
+
+        // Store the number of players that were present in group when joining RFD, used for achievement purposes
+        queue.SetPartyMemberCountAtJoin(pguid, queueData.m_playerInfoPerGuid.size());
+
+        m_groupPerPlayer[pguid] = gguid;
+        m_rolesPerPlayer[pguid] = playerInfo.m_roles;
+        queueData.SetState(LFG_STATE_DUNGEON);
+    }
+
+    // Remove players/groups from Queue
+    for (GuidList::const_iterator it = queues.begin(); it != queues.end(); ++it)
+        queue.RemoveFromQueue(*it);
+
+    queue.RemoveProposal(id);
+
+    sWorld.GetMessager().AddMessage([=](World* world)
+    {
+        world->BroadcastPersonalized(personalizedPackets);
+    });
+
+    GuidList allPlayers, tankPlayers, healPlayers, dpsPlayers;
+    GuidList playersToTeleport;
+    std::map<ObjectGuid, uint32> randomDungeonPerPlayer;
+
+    for (LfgProposalPlayerContainer::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        ObjectGuid guid = itr->first;
+        if (guid == leader)
+            allPlayers.push_back(guid);
+        else
+            switch (itr->second.role & ~PLAYER_ROLE_LEADER)
+            {
+                case PLAYER_ROLE_TANK:
+                    tankPlayers.push_back(guid);
+                    break;
+                case PLAYER_ROLE_HEALER:
+                    healPlayers.push_back(guid);
+                    break;
+                case PLAYER_ROLE_DAMAGE:
+                    dpsPlayers.push_back(guid);
+                    break;
+                default:
+                    MANGOS_ASSERT(false); // "Invalid LFG role %u"
+                    break;
+            }
+
+        if (isNew || m_groupPerPlayer[guid] != group)
+            playersToTeleport.push_back(guid);
+
+        randomDungeonPerPlayer[guid] = itr->second.randomDungeonId;
+    }
+
+    allPlayers.splice(allPlayers.end(), tankPlayers);
+    allPlayers.splice(allPlayers.end(), healPlayers);
+    allPlayers.splice(allPlayers.end(), dpsPlayers);
+
+    // Set the dungeon difficulty
+    LFGDungeonData const* dungeon = sLFGMgr.GetLFGDungeon(dungeonId);
+    MANGOS_ASSERT(dungeon);
+
+    sWorld.GetMessager().AddMessage([allPlayers, group = group, dungeon, playersToTeleport, randomDungeonPerPlayer](World* world)
+    {
+        Group* grp = group ? sObjectMgr.GetGroupById(group.GetCounter()) : nullptr;
+        for (GuidList::const_iterator it = allPlayers.begin(); it != allPlayers.end(); ++it)
+        {
+            ObjectGuid pguid = (*it);
+            Player* player = ObjectAccessor::FindPlayer(pguid);
+            if (!player)
+                continue;
+
+            Group* group = player->GetGroup();
+            if (group && group != grp)
+                group->RemoveMember(player->GetObjectGuid(), 0);
+
+            if (!grp)
+            {
+                grp = new Group();
+                grp->Create(player->GetObjectGuid(), player->GetName());
+                grp->ConvertToLFG();
+                ObjectGuid gguid = grp->GetObjectGuid();
+                sObjectMgr.AddGroup(grp);
+            }
+            else if (group != grp)
+                grp->AddMember(player->GetObjectGuid(), player->GetName());
+
+            // Add the cooldown spell if queued for a random dungeon
+            auto randomItr = randomDungeonPerPlayer.find(player->GetObjectGuid());
+            if (uint32 randomDungeonId = randomItr->second)
+            {
+                LFGDungeonEntry const* dungeonEntry = sLFGDungeonStore.LookupEntry(randomDungeonId);
+                if (dungeonEntry && dungeonEntry->TypeID == LFG_TYPE_RANDOM_DUNGEON)
+                    player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+
+        MANGOS_ASSERT(grp);
+        grp->SetDungeonDifficulty(Difficulty(dungeon->difficulty));
+        ObjectGuid gguid = grp->GetObjectGuid();
+        grp->GetLfgData().SetDungeon(dungeon->id);
+        grp->GetLfgData().SetState(LFG_STATE_DUNGEON);
+
+        // _SaveToDB(gguid, grp->GetDbStoreId()); - not saving anything for now
+
+        // Teleport Player
+        for (GuidList::const_iterator it = playersToTeleport.begin(); it != playersToTeleport.end(); ++it)
+            if (Player* player = ObjectAccessor::FindPlayer(*it))
+                sLFGMgr.TeleportPlayer(player, false, false);
+
+        // Update group info
+        grp->SendUpdate();
+    });
 }
 
 void LFGQueueData::RecalculateRoles()

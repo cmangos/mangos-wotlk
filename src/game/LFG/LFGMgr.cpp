@@ -812,3 +812,91 @@ bool LFGMgr::CheckGroupRoles(LfgPlayerInfoMap& groles)
     }
     return (tank + healer + damage) == uint8(groles.size());
 }
+
+/**
+   Teleports the player in or out the dungeon
+
+   @param[in]     player Player to teleport
+   @param[in]     out Teleport out (true) or in (false)
+   @param[in]     fromOpcode Function called from opcode handlers? (Default false)
+*/
+void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*/)
+{
+    LFGDungeonData const* dungeon = nullptr;
+    Group* group = player->GetGroup();
+
+    if (group && group->IsLfgGroup())
+        dungeon = GetLFGDungeon(group->GetLfgData().GetDungeon());
+
+    if (!dungeon)
+    {
+        sLog.outDebug("Player %s not in group/lfggroup or dungeon not found!", player->GetName());
+        player->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_INVALID_LOCATION));
+        return;
+    }
+
+    if (out)
+    {
+        sLog.outDebug("Player %s is being teleported out. Current Map %u - Expected Map %u", player->GetName(), player->GetMapId(), uint32(dungeon->map));
+        if (player->GetMapId() == uint32(dungeon->map))
+            player->TeleportToBGEntryPoint();
+
+        return;
+    }
+
+    LfgTeleportError error = LFG_TELEPORTERROR_OK;
+
+    if (!player->IsAlive())
+        error = LFG_TELEPORTERROR_PLAYER_DEAD;
+    else if (player->IsFalling() || player->hasUnitState(UNIT_STAT_PROPELLED))
+        error = LFG_TELEPORTERROR_FALLING;
+    else if (player->IsMirrorTimerActive(MirrorTimer::FATIGUE))
+        error = LFG_TELEPORTERROR_FATIGUE;
+    else if (player->GetVehicleInfo())
+        error = LFG_TELEPORTERROR_IN_VEHICLE;
+    else if (player->GetCharm())
+        error = LFG_TELEPORTERROR_CHARMING;
+    else if (player->HasAura(9454)) // check Freeze debuff
+        error = LFG_TELEPORTERROR_INVALID_LOCATION;
+    else if (player->GetMapId() != uint32(dungeon->map))  // Do not teleport players in dungeon to the entrance
+    {
+        uint32 mapid = dungeon->map;
+        float x = dungeon->x;
+        float y = dungeon->y;
+        float z = dungeon->z;
+        float orientation = dungeon->o;
+
+        if (!fromOpcode)
+        {
+            // Select a player inside to be teleported to
+            for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            {
+                Player* plrg = itr->getSource();
+                if (plrg && plrg != player && plrg->GetMapId() == uint32(dungeon->map))
+                {
+                    mapid = plrg->GetMapId();
+                    x = plrg->GetPositionX();
+                    y = plrg->GetPositionY();
+                    z = plrg->GetPositionZ();
+                    orientation = plrg->GetOrientation();
+                    break;
+                }
+            }
+        }
+
+        if (!player->GetMap()->IsDungeon())
+            player->SetBattleGroundEntryPoint();
+
+        player->TaxiFlightInterrupt(true);
+
+        if (!player->TeleportTo(mapid, x, y, z, orientation))
+            error = LFG_TELEPORTERROR_INVALID_LOCATION;
+    }
+    else
+        error = LFG_TELEPORTERROR_INVALID_LOCATION;
+
+    if (error != LFG_TELEPORTERROR_OK)
+        player->GetSession()->SendLfgTeleportError(uint8(error));
+
+    sLog.outDebug("Player %s is being teleported in to map %u (x: %f, y: %f, z: %f) Result: %u", player->GetName(), dungeon->map, dungeon->x, dungeon->y, dungeon->z, error);
+}

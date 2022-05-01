@@ -256,6 +256,12 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
+    static ChatCommand debugLfgCommandTable[] =
+    {
+        { "",               0,                  false, &ChatHandler::HandleDebugLfgCommand,                 "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                             "", nullptr }
+    };
+
     static ChatCommand debugCommandTable[] =
     {
         { "anim",           SEC_GAMEMASTER,     false, &ChatHandler::HandleDebugAnimCommand,                "", nullptr },
@@ -297,6 +303,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "debugflags",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugObjectFlags,                "", nullptr },
         { "packetlog",      SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugPacketLog,                  "", nullptr },
         { "dbscript",       SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugDbscript,                   "", nullptr },
+        { "lfg",            SEC_ADMINISTRATOR,  true,  nullptr,                                             "", debugLfgCommandTable },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 

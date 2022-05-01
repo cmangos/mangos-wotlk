@@ -35,6 +35,7 @@ class LfgData
         LfgState GetState() const { return m_state; }
         void SetState(LfgState state) { m_state = state; }
         uint32 GetDungeon() const { return m_dungeon; }
+        void SetDungeon(uint32 dungeon) { m_dungeon = dungeon; }
         std::string GetComment() const { return m_comment; }
         void SetComment(std::string comment) { m_comment = comment; }
         LfgDungeonSet& GetListedDungeonSet() { return m_listedDungeonSet; }

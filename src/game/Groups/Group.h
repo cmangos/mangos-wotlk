@@ -214,6 +214,7 @@ class Group
 
         // some additional raid methods
         void ConvertToRaid();
+        void ConvertToLFG();
 
         void SetBattlegroundGroup(BattleGround* bg) { m_bgGroup = bg; }
         void SetBattlefieldGroup(Battlefield* bf) { m_bfGroup = bf; }

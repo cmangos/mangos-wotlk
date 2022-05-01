@@ -2568,6 +2568,8 @@ class Player : public Unit
         LfgData& GetLfgData() { return m_lfgData; }
 
         uint32 LookupHighestLearnedRank(uint32 spellId);
+
+        bool IsMirrorTimerActive(MirrorTimer::Type timer) const;
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

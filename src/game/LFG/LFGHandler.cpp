@@ -93,10 +93,15 @@ void WorldSession::HandleLfgLeaveOpcode(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recv_data)
 {
-    uint32 lfgGroupID; // Internal lfgGroupID
-    bool accept; // Accept to join?
-    recv_data >> lfgGroupID;
+    uint32 proposalId;
+    bool accept; // Accept to join
+    recv_data >> proposalId;
     recv_data >> accept;
+
+    sWorld.GetLFGQueue().GetMessager().AddMessage([playerGuid = GetPlayer()->GetObjectGuid(), proposalId, accept](LFGQueue* queue)
+    {
+        queue->UpdateProposal(playerGuid, proposalId, accept);
+    });
 }
 
 void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recv_data)
@@ -206,6 +211,9 @@ void WorldSession::HandleLfgTeleportOpcode(WorldPacket& recv_data)
 {
     bool out;
     recv_data >> out;
+
+    Player* player = GetPlayer();
+    sLFGMgr.TeleportPlayer(player, out, true);
 }
 
 void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
@@ -407,10 +415,18 @@ WorldPacket WorldSession::BuildLfgRoleCheckUpdate(LFGQueueData const& queueData)
 
     data << uint32(queueData.m_roleCheckState);               // Check result
     data << uint8(queueData.m_roleCheckState == LFG_ROLECHECK_INITIALITING);
-    data << uint8(queueData.m_dungeons.size());               // Number of dungeons
-    if (!queueData.m_dungeons.empty())
-        for (auto itr = queueData.m_dungeons.begin(); itr != queueData.m_dungeons.end(); ++itr)
-            data << uint32(sLFGMgr.GetLFGDungeonEntry(*itr)); // Dungeon
+    if (queueData.m_randomDungeonId)
+    {
+        data << uint8(1);
+        data << uint32(sLFGMgr.GetLFGDungeonEntry(queueData.m_randomDungeonId));
+    }
+    else
+    {
+        data << uint8(queueData.m_dungeons.size());               // Number of dungeons
+        if (!queueData.m_dungeons.empty())
+            for (auto itr = queueData.m_dungeons.begin(); itr != queueData.m_dungeons.end(); ++itr)
+                data << uint32(sLFGMgr.GetLFGDungeonEntry(*itr)); // Dungeon
+    }
 
     data << uint8(queueData.m_playerInfoPerGuid.size());      // Players in group
     if (!queueData.m_playerInfoPerGuid.empty())
@@ -424,6 +440,48 @@ WorldPacket WorldSession::BuildLfgRoleCheckUpdate(LFGQueueData const& queueData)
             data << uint8(playerData.m_level);             // Level
         }
     }
+    return data;
+}
+
+WorldPacket WorldSession::BuildLfgUpdateProposal(LfgProposal const& proposal, uint32 randomDungeonId, ObjectGuid guid)
+{
+    ObjectGuid gguid = proposal.players.find(guid)->second.group;
+    bool silent = !proposal.isNew && gguid == proposal.group;
+    uint32 dungeonEntry = proposal.dungeonId;
+
+    // show random dungeon if player selected random dungeon and it's not lfg group
+    if (!silent)
+        dungeonEntry = randomDungeonId;
+
+    dungeonEntry = sLFGMgr.GetLFGDungeonEntry(dungeonEntry);
+
+    WorldPacket data(SMSG_LFG_PROPOSAL_UPDATE, 4 + 1 + 4 + 4 + 1 + 1 + proposal.players.size() * (4 + 1 + 1 + 1 + 1 + 1));
+    data << uint32(dungeonEntry);                          // Dungeon
+    data << uint8(proposal.state);                         // Proposal state
+    data << uint32(proposal.id);                           // Proposal ID
+    data << uint32(proposal.encounters);                   // encounters done
+    data << uint8(silent);                                 // Show proposal window
+    data << uint8(proposal.players.size());                // Group size
+
+    for (LfgProposalPlayerContainer::const_iterator itr = proposal.players.begin(); itr != proposal.players.end(); ++itr)
+    {
+        LfgProposalPlayer const& player = itr->second;
+        data << uint32(player.role);                       // Role
+        data << uint8(itr->first == guid);                 // Self player
+        if (!player.group)                                 // Player not it a group
+        {
+            data << uint8(0);                              // Not in dungeon
+            data << uint8(0);                              // Not same group
+        }
+        else
+        {
+            data << uint8(player.group == proposal.group); // In dungeon (silent)
+            data << uint8(player.group == gguid);          // Same Group than player
+        }
+        data << uint8(player.answer != LFG_ANSWER_PENDING);// Answered
+        data << uint8(player.answer == LFG_ANSWER_AGREE);  // Accepted
+    }
+
     return data;
 }
 

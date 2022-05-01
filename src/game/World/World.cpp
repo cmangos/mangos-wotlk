@@ -2097,6 +2097,14 @@ void World::BroadcastToGroup(ObjectGuid groupGuid, std::vector<WorldPacket> cons
             group->BroadcastPacket(packet, false);
 }
 
+void World::BroadcastPersonalized(std::map<ObjectGuid, std::vector<WorldPacket>> const& personalizedPackets)
+{
+    for (auto& packets : personalizedPackets)
+        if (Player* player = ObjectAccessor::FindPlayer(packets.first)) // TODO: pass these along directly to worldsession
+            for (WorldPacket const& packet : packets.second)
+                player->GetSession()->SendPacket(packet);
+}
+
 /// Update the game time
 void World::_UpdateGameTime()
 {
