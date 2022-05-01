@@ -576,6 +576,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51769,'spell_emblazon_runeblade_aura'),
 (51770,'spell_emblazon_runeblade'),
 (51774,'spell_taunt_brann'),
+(51852,'spell_eye_of_acherus'),
 (51858,'spell_siphon_of_acherus'),
 (51859,'spell_siphon_of_acherus_aura'),
 (51904,'spell_summon_ghouls_scarlet_crusade'),

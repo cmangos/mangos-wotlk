@@ -734,7 +734,7 @@ bool EffectDummyCreature_npc_death_knight_initiate(Unit* pCaster, uint32 uiSpell
 
 enum
 {
-    // SPELL_EYE_CONTROL    = 51852,                        // apply phase aura: 2; summon creature 28511 and apply player control aura
+    SPELL_EYE_CONTROL       = 51852,                        // apply phase aura: 2; summon creature 28511 and apply player control aura
     SPELL_EYE_VISUAL        = 51892,                        // apply visual aura
     SPELL_EYE_FLIGHT        = 51890,                        // apply fly aura and change mounted speed; cast by the eye of acherus
     SPELL_EYE_FLIGHT_BOOST  = 51923,                        // apply fly aura and increase speed aura
@@ -2102,8 +2102,8 @@ struct spell_recall_eye_of_acherus : public SpellScript
         if (!charmer || charmer->GetTypeId() != TYPEID_PLAYER)
             return;
 
-        charmer->RemoveAurasDueToSpell(51852);
-        charmer->RemoveAurasDueToSpell(51923);
+        charmer->RemoveAurasDueToSpell(SPELL_EYE_CONTROL);
+        charmer->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
     }
 };
 
@@ -2336,6 +2336,15 @@ struct spell_death_gate : public SpellScript
     }
 };
 
+struct EyeOfAcherus : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0 && !apply)
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
+    }
+};
+
 void AddSC_ebon_hold()
 {
     Script* pNewScript = new Script;
@@ -2395,4 +2404,5 @@ void AddSC_ebon_hold()
     RegisterSpellScript<spell_acherus_deathcharger>("spell_acherus_deathcharger");
     RegisterSpellScript<spell_skeletal_gryphon_escape>("spell_skeletal_gryphon_escape");
     RegisterSpellScript<spell_death_gate>("spell_death_gate");
+    RegisterSpellScript<EyeOfAcherus>("spell_eye_of_acherus");
 }
