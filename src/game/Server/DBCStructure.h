@@ -1383,17 +1383,17 @@ struct LFGDungeonEntry
     m_typeid
 };*/
 
-/*struct LfgDungeonExpansionEntry
+struct LfgDungeonExpansionEntry
 {
-    m_ID
-    m_lfg_id
-    m_expansion_level
-    m_random_id
-    m_hard_level_min
-    m_hard_level_max
-    m_target_level_min
-    m_target_level_max
-};*/
+    uint32 ID;                                              // 0
+    uint32 LFGID;                                           // 1
+    uint32 ExpansionLevel;                                  // 2
+    uint32 RandomDungeonId;                                 // 3
+    uint32 MinLevel;                                        // 4
+    uint32 MaxLevel;                                        // 5
+    uint32 TargetLevelMin;                                  // 6
+    uint32 TargetLevelMax;                                  // 7
+};
 
 struct LightEntry
 {

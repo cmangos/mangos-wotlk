@@ -50,6 +50,34 @@ LFGDungeonData::LFGDungeonData(LFGDungeonEntry const* dbc) : id(dbc->ID), name(d
     minlevel(uint8(dbc->MinLevel)), maxlevel(uint8(dbc->MaxLevel)), difficulty(Difficulty(dbc->Difficulty)),
     seasonal((dbc->Flags & LFG_FLAG_HOLIDAY) != 0), x(0.0f), y(0.0f), z(0.0f), o(0.0f)
 {
+    for (uint32 i = 1; i < sLFGDungeonExpansionStore.GetNumRows(); ++i)
+    {
+        if (LfgDungeonExpansionEntry const* entry = sLFGDungeonExpansionStore.LookupEntry(i))
+        {
+            if (entry->LFGID == id)
+            {
+                expansionData.emplace(entry->ExpansionLevel, LFGDungeonExpansionData(entry->MinLevel, entry->MaxLevel));
+            }
+        }
+    }
+}
+
+bool LFGDungeonData::CheckMinLevel(uint8 expansion, uint8 playerLevel) const
+{
+    auto itr = expansionData.find(expansion);
+    if (itr != expansionData.end())
+        return itr->second.minLevel <= playerLevel;
+
+    return minlevel <= playerLevel;
+}
+
+bool LFGDungeonData::CheckMaxLevel(uint8 expansion, uint8 playerLevel) const
+{
+    auto itr = expansionData.find(expansion);
+    if (itr != expansionData.end())
+        return itr->second.maxLevel >= playerLevel;
+
+    return maxlevel >= playerLevel;
 }
 
 void LFGMgr::LoadRewards()
@@ -315,7 +343,7 @@ LfgDungeonSet LFGMgr::GetRandomAndSeasonalDungeons(uint8 level, uint8 expansion)
     {
         auto& dungeon = itr->second;
         if ((dungeon.type == LFG_TYPE_RANDOM_DUNGEON || (dungeon.seasonal && IsSeasonActive(dungeon.id)))
-            && dungeon.expansion <= expansion && dungeon.minlevel <= level && level <= dungeon.maxlevel)
+            && dungeon.expansion <= expansion && dungeon.CheckMinLevel(expansion, level) && dungeon.CheckMaxLevel(expansion, level))
             randomDungeons.insert(dungeon.Entry());
     }
     return randomDungeons;
@@ -348,9 +376,9 @@ LfgLockMap const LFGMgr::GetLockedDungeons(Player* player)
         else if ((dungeon->difficulty > DUNGEON_DIFFICULTY_NORMAL || dungeon->group >= 6)
             && player->GetBoundInstance(dungeon->map, Difficulty(dungeon->difficulty)))
             lockData = LFG_LOCKSTATUS_RAID_LOCKED;
-        else if (dungeon->minlevel > level)
+        else if (!dungeon->CheckMinLevel(expansion, level))
             lockData = LFG_LOCKSTATUS_TOO_LOW_LEVEL;
-        else if (dungeon->maxlevel < level)
+        else if (!dungeon->CheckMaxLevel(expansion, level))
             lockData = LFG_LOCKSTATUS_TOO_HIGH_LEVEL;
         else if (dungeon->seasonal && !IsSeasonActive(dungeon->id))
             lockData = LFG_LOCKSTATUS_NOT_IN_SEASON;

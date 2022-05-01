@@ -45,6 +45,14 @@ struct LfgReward
     uint32 otherQuest;
 };
 
+struct LFGDungeonExpansionData
+{
+    LFGDungeonExpansionData(uint8 minLevel, uint8 maxLevel) : minLevel(minLevel), maxLevel(maxLevel) {}
+
+    uint8 minLevel;
+    uint8 maxLevel;
+};
+
 struct LFGDungeonData
 {
     LFGDungeonData();
@@ -56,14 +64,20 @@ struct LFGDungeonData
     uint8 type;
     uint8 expansion;
     uint8 group;
-    uint8 minlevel;
-    uint8 maxlevel;
     Difficulty difficulty;
     bool seasonal;
     float x, y, z, o;
 
+    std::map<uint8, LFGDungeonExpansionData> expansionData;
+
     // Helpers
     uint32 Entry() const { return id + (type << 24); }
+    bool CheckMinLevel(uint8 expansion, uint8 playerLevel) const;
+    bool CheckMaxLevel(uint8 expansion, uint8 playerLevel) const;
+
+    private:
+        uint8 minlevel;
+        uint8 maxlevel;
 };
 
 class LFGMgr

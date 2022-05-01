@@ -134,6 +134,7 @@ DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomProp
 DBCStorage <ItemRandomSuffixEntry> sItemRandomSuffixStore(ItemRandomSuffixfmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <LFGDungeonEntry> sLFGDungeonStore(LFGDungeonEntryfmt);
+DBCStorage <LfgDungeonExpansionEntry> sLFGDungeonExpansionStore(LFGDungeonExpansionEntryfmt);
 DBCStorage <LightEntry> sLightStore(LightEntryfmt);
 DBCStorage <LiquidTypeEntry> sLiquidTypeStore(LiquidTypefmt);
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
@@ -505,6 +506,7 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemRandomSuffixStore,    dbcPath, "ItemRandomSuffix.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sItemSetStore,             dbcPath, "ItemSet.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLFGDungeonStore,          dbcPath, "LFGDungeons.dbc");
+    LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLFGDungeonExpansionStore, dbcPath, "LFGDungeonExpansion.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLightStore,               dbcPath, "Light.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLiquidTypeStore,          dbcPath, "LiquidType.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sLockStore,                dbcPath, "Lock.dbc");
