@@ -165,7 +165,8 @@ void VehicleInfo::Initialize()
     // TODO: Guesswork, but it looks correct
     if (vehicleFlags & VEHICLE_FLAG_PASSIVE)
     {
-        pVehicle->AI()->SetReactState(REACT_PASSIVE);
+        if (pVehicle->AI())
+            pVehicle->AI()->SetReactState(REACT_PASSIVE);
         pVehicle->SetCanEnterCombat(false);
     }
 
