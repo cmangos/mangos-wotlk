@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/TemporarySpawn.h"
+#include "LFG/LFGDefines.h"
 
 enum
 {
@@ -120,6 +121,7 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
     {
         DoCastSpellIfCan(m_creature, SPELL_AHUNE_DIES_ACHIEV, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, m_creature->GetMap()->IsRegularDifficulty() ? SPELL_AHUNE_LOOT : SPELL_AHUNE_LOOT_H, CAST_TRIGGERED);
+        m_creature->GetMap()->AwardLFGRewards(SEASONAL_AHUNE);
     }
 
     void JustReachedHome() override

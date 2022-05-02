@@ -228,6 +228,8 @@ class instance_blackrock_depths : public ScriptedInstance
 
         void Initialize() override;
 
+        void OnPlayerEnter(Player* player) override;
+
         void OnCreatureCreate(Creature* pCreature) override;
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;

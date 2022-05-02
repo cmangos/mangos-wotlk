@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "blackrock_depths.h"
+#include "World/WorldStateDefines.h"
 
 instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstance(pMap),
     m_bIsBarDoorOpen(false),
@@ -46,6 +47,12 @@ instance_blackrock_depths::instance_blackrock_depths(Map* pMap) : ScriptedInstan
 void instance_blackrock_depths::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+}
+
+void instance_blackrock_depths::OnPlayerEnter(Player* player)
+{
+    if (player->GetLfgData().GetDungeon() == SEASONAL_COREN_DIREBREW)
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_COREN_DIREBREW_DUNGEON, 1);
 }
 
 void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)

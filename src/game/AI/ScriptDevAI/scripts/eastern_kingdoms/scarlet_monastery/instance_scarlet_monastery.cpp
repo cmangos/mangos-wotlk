@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/include/sc_instance.h"
 #include "scarlet_monastery.h"
+#include "World/WorldStateDefines.h"
 
 instance_scarlet_monastery::instance_scarlet_monastery(Map* pMap) : ScriptedInstance(pMap)
 {
@@ -33,6 +34,12 @@ instance_scarlet_monastery::instance_scarlet_monastery(Map* pMap) : ScriptedInst
 void instance_scarlet_monastery::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+}
+
+void instance_scarlet_monastery::OnPlayerEnter(Player* player)
+{
+    if (player->GetLfgData().GetDungeon() == SEASONAL_HEADLESS_HORSEMAN)
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_HEADLESS_HORSEMAN_DUNGEON, 1);
 }
 
 void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)

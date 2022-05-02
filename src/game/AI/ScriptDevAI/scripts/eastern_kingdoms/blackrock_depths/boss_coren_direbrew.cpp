@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "LFG/LFGDefines.h"
 
 enum
 {
@@ -146,6 +147,7 @@ struct boss_coren_direbrewAI : public CombatAI
         GetCreatureListWithEntryInGrid(staticSpawns, m_creature, NPC_DARK_IRON_ANTAGONIST, 50.f);
         for (auto creature : staticSpawns)
             creature->ForcedDespawn();
+        m_creature->GetMap()->AwardLFGRewards(SEASONAL_COREN_DIREBREW);
     }
 
     void EnterEvadeMode() override

@@ -23,7 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "shadowfang_keep.h"
-
+#include "LFG/LFGDefines.h"
+#include "World/WorldStateDefines.h"
 
 static const DialogueEntry aArugalDialogue[] =
 {
@@ -61,6 +62,12 @@ void instance_shadowfang_keep::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
     InitializeDialogueHelper(this);
+}
+
+void instance_shadowfang_keep::OnPlayerEnter(Player* player)
+{
+    if (player->GetLfgData().GetDungeon() == SEASONAL_CROWN_CHEMICAL_CO)
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_CROWN_CHEMICAL_CO_DUNGEON, 1);
 }
 
 void instance_shadowfang_keep::OnCreatureCreate(Creature* creature)
@@ -286,6 +293,7 @@ void instance_shadowfang_keep::SetData(uint32 type, uint32 data)
                     }
 
                     SetData(TYPE_APOTHECARY, DONE);
+                    instance->AwardLFGRewards(SEASONAL_CROWN_CHEMICAL_CO);
                 }
             }
             // We don't want to store the SPECIAL data

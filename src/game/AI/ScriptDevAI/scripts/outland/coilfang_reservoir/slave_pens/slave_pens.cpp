@@ -23,8 +23,9 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "slave_pens.h"
+#include "World/WorldStateDefines.h"
 
-instance_slave_pens::instance_slave_pens(Map* map) : ScriptedInstance(map), m_naturalistYelled(false), m_quagmirranTimer(0)
+instance_slave_pens::instance_slave_pens(Map* map) : ScriptedInstance(map), m_naturalistYelled(false), m_quagmirranTimer(0), m_playerEnter(false)
 {
     Initialize();
 }
@@ -46,6 +47,12 @@ uint32 instance_slave_pens::GetData(uint32 type) const
         return uint32(m_naturalistYelled);
 
     return 0;
+}
+
+void instance_slave_pens::OnPlayerEnter(Player* player)
+{
+    if (player->GetLfgData().GetDungeon() == SEASONAL_AHUNE)
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_AHUNE_DUNGEON, 1);
 }
 
 void instance_slave_pens::OnCreatureCreate(Creature* creature)

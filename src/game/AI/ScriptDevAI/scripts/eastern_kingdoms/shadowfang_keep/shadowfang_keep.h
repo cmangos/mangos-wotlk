@@ -101,6 +101,8 @@ class instance_shadowfang_keep : public ScriptedInstance, public DialogueHelper
 
         void Initialize() override;
 
+        void OnPlayerEnter(Player* player) override;
+
         void OnCreatureCreate(Creature* creature) override;
         void OnCreatureDeath(Creature* creature) override;
         void OnObjectCreate(GameObject* go) override;

@@ -23,6 +23,8 @@ class instance_slave_pens : public ScriptedInstance
         void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 type) const override;
 
+        void OnPlayerEnter(Player* player) override;
+
         void OnCreatureCreate(Creature* creature) override;
 
         void Update(const uint32 diff) override;
@@ -31,6 +33,8 @@ class instance_slave_pens : public ScriptedInstance
         bool m_naturalistYelled;
 
         uint32 m_quagmirranTimer;
+
+        bool m_playerEnter;
 };
 
 #endif

@@ -25,6 +25,7 @@
 #include "Entities/TemporarySpawn.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "AI/ScriptDevAI/scripts/eastern_kingdoms/scarlet_monastery/scarlet_monastery.h"
+#include "LFG/LFGDefines.h"
 
 enum
 {
@@ -209,6 +210,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
         if (Creature* head = m_creature->GetMap()->GetCreature(m_headGuid))
             head->ForcedDespawn();
+        m_creature->GetMap()->AwardLFGRewards(SEASONAL_HEADLESS_HORSEMAN);
     }
 
     void JustReachedHome() override
