@@ -269,6 +269,7 @@ class WorldSession
         static WorldPacket BuildLfgRoleChosen(ObjectGuid guid, uint8 roles);
         static WorldPacket BuildLfgRoleCheckUpdate(LFGQueueData const& data);
         static WorldPacket BuildLfgUpdateProposal(LfgProposal const& proposal, uint32 randomDungeonId, ObjectGuid guid);
+        void SendLfgPlayerReward(LfgPlayerRewardData const& rewardData);
         void SendPartyResult(PartyOperation operation, const std::string& member, PartyResult res) const;
         void SendGroupInvite(Player* player, bool alreadyInGroup = false) const;
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);

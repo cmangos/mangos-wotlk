@@ -254,7 +254,7 @@ void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
         {
             data << uint8(done);
             data << uint32(quest->GetRewOrReqMoney());
-            data << uint32(quest->XPValue(GetPlayer()));
+            data << uint32(quest->GetXPReward(GetPlayer()));
             data << uint32(0); // money variance per missing member when queueing - not actually used back then
             data << uint32(0); // experience variance per missing member when queueing - not actually used back then
             data << uint8(quest->GetRewItemsCount());
@@ -483,6 +483,42 @@ WorldPacket WorldSession::BuildLfgUpdateProposal(LfgProposal const& proposal, ui
     }
 
     return data;
+}
+
+void WorldSession::SendLfgPlayerReward(LfgPlayerRewardData const& rewardData)
+{
+    if (!rewardData.rdungeonEntry || !rewardData.sdungeonEntry || !rewardData.quest)
+        return;
+
+    sLog.outDebug("SMSG_LFG_PLAYER_REWARD %s rdungeonEntry: %u, sdungeonEntry: %u, done: %u",
+        GetPlayer()->GetName(), rewardData.rdungeonEntry, rewardData.sdungeonEntry, rewardData.done);
+
+    uint8 itemNum = rewardData.quest->GetRewItemsCount();
+
+    WorldPacket data(SMSG_LFG_PLAYER_REWARD, 4 + 4 + 1 + 4 + 4 + 4 + 4 + 4 + 1 + itemNum * (4 + 4 + 4));
+    data << uint32(rewardData.rdungeonEntry);              // Random Dungeon Finished
+    data << uint32(rewardData.sdungeonEntry);              // Dungeon Finished
+    data << uint8(rewardData.done);
+    data << uint32(1);
+    data << uint32(rewardData.quest->GetRewOrReqMoney());
+    data << uint32(rewardData.quest->GetXPReward(GetPlayer()));
+    data << uint32(0);
+    data << uint32(0);
+    data << uint8(itemNum);
+    if (itemNum)
+    {
+        for (uint8 i = 0; i < QUEST_REWARDS_COUNT; ++i)
+        {
+            if (uint32 itemId = rewardData.quest->RewItemId[i])
+            {
+                ItemPrototype const* item = sObjectMgr.GetItemPrototype(itemId);
+                data << uint32(itemId);
+                data << uint32(item ? item->DisplayInfoID : 0);
+                data << uint32(rewardData.quest->RewItemCount[i]);
+            }
+        }
+    }
+    SendPacket(data);
 }
 
 void WorldSession::SendLfgDisabled()

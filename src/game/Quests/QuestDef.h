@@ -171,13 +171,14 @@ enum QuestSpecialFlags
     QUEST_SPECIAL_FLAG_REPEATABLE           = 0x001,        // |1 in SpecialFlags from DB
     QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT = 0x002,        // |2 in SpecialFlags from DB (if required area explore, spell SPELL_EFFECT_QUEST_COMPLETE casting, table `*_script` command SCRIPT_COMMAND_QUEST_EXPLORED use, set from script DLL)
     QUEST_SPECIAL_FLAG_MONTHLY              = 0x004,        // |4 in SpecialFlags. Quest reset for player at beginning of month.
+    QUEST_SPECIAL_FLAG_DUNGEON_FINDER_QUEST = 0x008,        // |8 in SpecialFlags. Quest used by dungeon finder.
 
     // Mangos flags for internal use only
-    QUEST_SPECIAL_FLAG_DELIVER              = 0x008,        // Internal flag computed only
-    QUEST_SPECIAL_FLAG_SPEAKTO              = 0x010,        // Internal flag computed only
-    QUEST_SPECIAL_FLAG_KILL_OR_CAST         = 0x020,        // Internal flag computed only
-    QUEST_SPECIAL_FLAG_TIMED                = 0x040,        // Internal flag computed only
-    QUEST_SPECIAL_FLAGS_PLAYER_KILL         = 0x080,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_DELIVER              = 0x010,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_SPEAKTO              = 0x020,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_KILL_OR_CAST         = 0x040,        // Internal flag computed only
+    QUEST_SPECIAL_FLAG_TIMED                = 0x080,        // Internal flag computed only
+    QUEST_SPECIAL_FLAGS_PLAYER_KILL         = 0x100,        // Internal flag computed only
 };
 
 #define QUEST_SPECIAL_FLAG_DB_ALLOWED (QUEST_SPECIAL_FLAG_REPEATABLE | QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT | QUEST_SPECIAL_FLAG_MONTHLY)
@@ -204,7 +205,7 @@ class Quest
         friend class ObjectMgr;
     public:
         Quest(Field* questRecord);
-        uint32 XPValue(Player* pPlayer) const;
+        uint32 GetXPReward(Player* pPlayer) const;
 
         uint32 GetQuestFlags() const { return m_QuestFlags; }
         bool HasQuestFlag(QuestFlags flag) const { return (m_QuestFlags & flag) != 0; }
@@ -276,14 +277,17 @@ class Quest
         bool   IsDaily() const { return (m_QuestFlags & QUEST_FLAGS_DAILY) != 0; }
         bool   IsWeekly() const { return (m_QuestFlags & QUEST_FLAGS_WEEKLY) != 0; }
         bool   IsMonthly() const { return (m_SpecialFlags & QUEST_SPECIAL_FLAG_MONTHLY) != 0; }
+        bool   IsSeasonal() const { return (ZoneOrSort == -QUEST_SORT_SEASONAL || ZoneOrSort == -QUEST_SORT_SPECIAL || ZoneOrSort == -QUEST_SORT_LUNAR_FESTIVAL || ZoneOrSort == -QUEST_SORT_MIDSUMMER || ZoneOrSort == -QUEST_SORT_BREWFEST || ZoneOrSort == -QUEST_SORT_LOVE_IS_IN_THE_AIR || ZoneOrSort == -QUEST_SORT_NOBLEGARDEN) && !IsRepeatable(); }
         bool   IsDailyOrWeekly() const { return (m_QuestFlags & (QUEST_FLAGS_DAILY | QUEST_FLAGS_WEEKLY)) != 0; }
         bool   IsAutoAccept() const { return (m_QuestFlags & QUEST_FLAGS_AUTO_ACCEPT) != 0; }
         bool   IsAllowedInRaid() const;
         bool   IsRaidQuest(Difficulty difficulty) const;
+        bool   IsDungeonFinderQuest() const { return (m_SpecialFlags & QUEST_SPECIAL_FLAG_DUNGEON_FINDER_QUEST) != 0; }
 
         // quest can be fully deactivated and will not be available for any player
         void SetQuestActiveState(bool state) { m_isActive = state; }
         bool IsActive() const { return m_isActive; }
+        bool CanIncreaseRewardedQuestCounters() const;
 
         uint32 CalculateRewardHonor(uint32 level) const;
 

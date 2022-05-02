@@ -161,7 +161,7 @@ class Group
         std::string GetGuidStr() const { return GetObjectGuid().GetString(); }
         bool IsFull() const { return (m_groupFlags == GROUP_FLAG_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
         bool IsRaidGroup() const { return (m_groupFlags & GROUP_FLAG_RAID) != 0; }
-        bool IsLfgGroup() const { return (m_groupFlags & GROUP_FLAG_LFG) != 0; }
+        bool IsLFGGroup() const { return (m_groupFlags & GROUP_FLAG_LFG) != 0; }
         bool IsBattleGroup() const { return m_bgGroup != nullptr || m_bfGroup != nullptr; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         ObjectGuid const& GetLeaderGuid() const { return m_leaderGuid; }
@@ -296,7 +296,7 @@ class Group
         InstanceGroupBind* GetBoundInstance(Map* aMap, Difficulty difficulty);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
 
-        LfgData& GetLfgData() { return m_lfgData; }
+        LFGData& GetLfgData() { return m_lfgData; }
 
     protected:
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
@@ -391,6 +391,6 @@ class Group
         BoundInstancesMap   m_boundInstances[MAX_DIFFICULTY];
         uint8*              m_subGroupsCounts;
 
-        LfgData             m_lfgData;
+        LFGData             m_lfgData;
 };
 #endif

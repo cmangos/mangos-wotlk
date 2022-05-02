@@ -4214,6 +4214,22 @@ Mail* Player::GetMail(uint32 id)
     return nullptr;
 }
 
+void Player::SendItemRetrievalMail(uint32 itemEntry, uint32 count)
+{
+    MailSender sender(MAIL_CREATURE, 34337u /* The Postmaster */);
+    MailDraft draft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cataclysm, it probably wasn't changed.
+    CharacterDatabase.BeginTransaction();
+
+    if (Item* item = Item::CreateItem(itemEntry, count, nullptr))
+    {
+        item->SaveToDB();
+        draft.AddItem(item);
+    }
+
+    draft.SendMailTo(MailReceiver(this, GetObjectGuid()), sender);
+    CharacterDatabase.CommitTransaction();
+}
+
 void Player::SaveItemToInventory(Item* item)
 {
     Bag* container = item->GetContainer();
@@ -14157,7 +14173,7 @@ bool Player::CanCompleteRepeatableQuest(Quest const* pQuest) const
 bool Player::CanRewardQuest(Quest const* pQuest, bool msg) const
 {
     // not auto complete quest and not completed quest (only cheating case, then ignore without message)
-    if (!pQuest->IsAutoComplete() && GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
+    if (!pQuest->IsDungeonFinderQuest() && !pQuest->IsAutoComplete() && !(pQuest->GetQuestFlags() & QUEST_FLAGS_AUTOCOMPLETE) && GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
         return false;
 
     // daily quest can't be rewarded (25 daily quest already completed)
@@ -14437,6 +14453,8 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
                     Item* item = StoreNewItem(dest, itemId, true, Item::GenerateItemRandomPropertyId(itemId));
                     SendNewItem(item, pQuest->RewItemCount[i], true, false, false, false);
                 }
+                else if (pQuest->IsDungeonFinderQuest())
+                    SendItemRetrievalMail(itemId, pQuest->RewItemCount[i]);
             }
         }
     }
@@ -14449,8 +14467,10 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     QuestStatusData& q_status = mQuestStatus[quest_id];
 
+    bool rewarded = q_status.m_rewarded && !pQuest->IsDungeonFinderQuest();
+
     // Used for client inform but rewarded only in case not max level
-    uint32 xp = uint32(pQuest->XPValue(this) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST));
+    uint32 xp = uint32(pQuest->GetXPReward(this) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST));
 
     if (GetLevel() < GetMaxAttainableLevel())
     {
@@ -14502,11 +14522,14 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     if (uint32 mail_template_id = pQuest->GetRewMailTemplateId())
         MailDraft(mail_template_id).SendMailTo(this, questGiver, MAIL_CHECK_MASK_HAS_BODY, pQuest->GetRewMailDelaySecs());
 
-    if (pQuest->IsDaily())
+    if (pQuest->IsDaily() || pQuest->IsDungeonFinderQuest())
     {
         SetDailyQuestStatus(quest_id);
-        GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST, 1);
-        GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY, quest_id);
+        if (pQuest->IsDaily())
+        {
+            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST, 1);
+            GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY, quest_id);
+        }
     }
 
     if (pQuest->IsWeekly())
@@ -14520,27 +14543,33 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     else
         SetQuestStatus(quest_id, QUEST_STATUS_NONE);
 
-    q_status.m_rewarded = true;
-    if (q_status.uState != QUEST_NEW)
-        q_status.uState = QUEST_CHANGED;
+    if (pQuest->CanIncreaseRewardedQuestCounters())
+    {
+        q_status.m_rewarded = true;
+        if (q_status.uState != QUEST_NEW)
+            q_status.uState = QUEST_CHANGED;
+    }
 
     if (announce)
         SendQuestReward(pQuest, xp, honor);
 
     bool handled = false;
 
-    switch (questGiver->GetTypeId())
+    if (questGiver)
     {
-        case TYPEID_UNIT:
-            handled = sScriptDevAIMgr.OnQuestRewarded(this, (Creature*)questGiver, pQuest);
-            break;
-        case TYPEID_GAMEOBJECT:
-            handled = sScriptDevAIMgr.OnQuestRewarded(this, (GameObject*)questGiver, pQuest);
-            break;
-    }
+        switch (questGiver->GetTypeId())
+        {
+            case TYPEID_UNIT:
+                handled = sScriptDevAIMgr.OnQuestRewarded(this, (Creature*)questGiver, pQuest);
+                break;
+            case TYPEID_GAMEOBJECT:
+                handled = sScriptDevAIMgr.OnQuestRewarded(this, (GameObject*)questGiver, pQuest);
+                break;
+        }
 
-    if (!handled && pQuest->GetQuestCompleteScript() != 0)
-        GetMap()->ScriptsStart(sQuestEndScripts, pQuest->GetQuestCompleteScript(), questGiver, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
+        if (!handled && pQuest->GetQuestCompleteScript() != 0)
+            GetMap()->ScriptsStart(sQuestEndScripts, pQuest->GetQuestCompleteScript(), questGiver, this, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE);
+    }
 
     // Find spell cast on spell reward if any, then find the appropriate caster and cast it
     uint32 spellId = pQuest->GetRewSpellCast();
@@ -15053,8 +15082,16 @@ bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const
 
 bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg) const
 {
-    if (!qInfo->IsDaily())
+    if (!qInfo->IsDaily() && !qInfo->IsDungeonFinderQuest())
         return true;
+
+    if (qInfo->IsDungeonFinderQuest())
+    {
+        if (m_serversideDailyQuests.find(qInfo->GetQuestId()) != m_serversideDailyQuests.end())
+            return false;
+
+        return true;
+    }
 
     bool have_slot = false;
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
@@ -17376,7 +17413,7 @@ void Player::_LoadQuestStatus(QueryResult* result)
                     sLog.outError("Player %s have invalid quest %d status (%d), replaced by QUEST_STATUS_NONE(0).", GetName(), quest_id, qstatus);
                 }
 
-                questStatusData.m_rewarded = (fields[2].GetUInt8() > 0);
+                questStatusData.m_rewarded = !pQuest->CanIncreaseRewardedQuestCounters() ? false : (fields[2].GetUInt8() > 0);
                 questStatusData.m_explored = (fields[3].GetUInt8() > 0);
 
                 time_t quest_time = time_t(fields[4].GetUInt64());
@@ -17465,6 +17502,8 @@ void Player::_LoadDailyQuestStatus(QueryResult* result)
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, 0);
 
+    m_serversideDailyQuests.clear();
+
     // QueryResult *result = CharacterDatabase.PQuery("SELECT quest FROM character_queststatus_daily WHERE guid = '%u'", GetGUIDLow());
 
     if (result)
@@ -17486,6 +17525,12 @@ void Player::_LoadDailyQuestStatus(QueryResult* result)
             Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest_id);
             if (!pQuest)
                 continue;
+
+            if (pQuest->IsDungeonFinderQuest())
+            {
+                m_serversideDailyQuests.insert(pQuest->GetQuestId());
+                continue;
+            }
 
             SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, quest_id);
             ++quest_daily_idx;
@@ -18680,6 +18725,10 @@ void Player::_SaveDailyQuestStatus()
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
         if (GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx))
             stmtIns.PExecute(GetGUIDLow(), GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx));
+
+    if (!m_serversideDailyQuests.empty())
+        for (uint32 serversideDaily : m_serversideDailyQuests)
+            stmtIns.PExecute(GetGUIDLow(), serversideDaily);
 
     m_DailyQuestChanged = false;
 }
@@ -21563,13 +21612,23 @@ void Player::SendAurasForTarget(Unit* target) const
 
 void Player::SetDailyQuestStatus(uint32 quest_id)
 {
-    for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+    if (Quest const* quest = sObjectMgr.GetQuestTemplate(quest_id))
     {
-        if (!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx))
+        if (quest->IsDungeonFinderQuest())
         {
-            SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, quest_id);
+            m_serversideDailyQuests.insert(quest_id);
             m_DailyQuestChanged = true;
-            break;
+            return;
+        }
+
+        for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
+        {
+            if (!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx))
+            {
+                SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, quest_id);
+                m_DailyQuestChanged = true;
+                break;
+            }
         }
     }
 }
@@ -21590,6 +21649,8 @@ void Player::ResetDailyQuestStatus()
 {
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, 0);
+
+    m_serversideDailyQuests.clear();
 
     // DB data deleted in caller
     m_DailyQuestChanged = false;

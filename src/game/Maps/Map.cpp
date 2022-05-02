@@ -42,6 +42,7 @@
 #include "Weather/Weather.h"
 #include "Grids/ObjectGridLoader.h"
 #include "Vmap/GameObjectModel.h"
+#include "LFG/LFGMgr.h"
 
 #ifdef BUILD_METRICS
  #include "Metric/Metric.h"
@@ -147,6 +148,25 @@ void Map::SetNavTile(uint32 tileX, uint32 tileY, uint32 tileNumber)
 {
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
     mmap->ChangeTile(GetId(), GetInstanceId(), tileX, tileY, tileNumber);
+}
+
+void Map::AwardLFGRewards(uint32 dungeonId)
+{
+    Map::PlayerList const& players = GetPlayers();
+    for (auto const& ref : players)
+    {
+        if (Player* player = ref.getSource())
+        {
+            if (Group* grp = player->GetGroup())
+            {
+                if (grp->IsLFGGroup())
+                {
+                    sLFGMgr.FinishDungeon(grp, dungeonId, this);
+                    return;
+                }
+            }
+        }
+    }
 }
 
 void Map::ChangeGOPathfinding(uint32 entry, uint32 displayId, bool apply)

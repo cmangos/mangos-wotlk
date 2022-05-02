@@ -410,6 +410,8 @@ class Map : public GridRefManager<NGridType>
         // Only loads one tile in one location - for testing only - also uses existing precomputed tiles
         void SetNavTile(uint32 tileX, uint32 tileY, uint32 tileNumber);
 
+        void AwardLFGRewards(uint32 dungeonId);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 

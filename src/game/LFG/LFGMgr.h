@@ -113,6 +113,8 @@ class LFGMgr
         void TeleportPlayer(Player* player, bool out, bool fromOpcode);
 
         LFGDungeonData const* GetLFGDungeon(uint32 id);
+
+        void FinishDungeon(Group* group, uint32 dungeonId, Map const* currMap);
     private:
         void GetCompatibleDungeons(LfgDungeonSet& dungeons, GuidSet const& players, LfgLockPartyMap& lockMap, LfgInstanceSaveMap& savedMap, bool isContinue);
 

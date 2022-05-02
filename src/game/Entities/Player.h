@@ -1647,6 +1647,8 @@ class Player : public Unit
         size_t GetMailSize() const { return m_mail.size(); }
         Mail* GetMail(uint32 id);
 
+        void SendItemRetrievalMail(uint32 itemEntry, uint32 count); // Item retrieval mails sent by The Postmaster (34337), used in multiple places.
+
         PlayerMails::iterator GetMailBegin() { return m_mail.begin();}
         PlayerMails::iterator GetMailEnd() { return m_mail.end();}
 
@@ -2565,7 +2567,7 @@ class Player : public Unit
 
         float GetAverageItemLevel() const;
 
-        LfgData& GetLfgData() { return m_lfgData; }
+        LFGData& GetLfgData() { return m_lfgData; }
 
         uint32 LookupHighestLearnedRank(uint32 spellId);
 
@@ -2923,10 +2925,12 @@ class Player : public Unit
         uint32 m_pendingBindId;
         uint32 m_pendingBindTimer;
 
-        LfgData m_lfgData;
+        LFGData m_lfgData;
 
         GuidSet m_controlled;
         std::map<uint32, ObjectGuid> m_followAngles;
+
+        std::set<uint32> m_serversideDailyQuests;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

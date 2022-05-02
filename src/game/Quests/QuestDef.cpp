@@ -183,7 +183,7 @@ Quest::Quest(Field* questRecord)
     }
 }
 
-uint32 Quest::XPValue(Player* pPlayer) const
+uint32 Quest::GetXPReward(Player* pPlayer) const
 {
     if (pPlayer)
     {
@@ -304,6 +304,13 @@ bool Quest::IsRaidQuest(Difficulty difficulty) const
         return true;
 
     return false;
+}
+
+bool Quest::CanIncreaseRewardedQuestCounters() const
+{
+    // Dungeon Finder/Daily/Repeatable (if not weekly, monthly or seasonal) quests are never considered rewarded serverside.
+    // This affects counters and client requests for completed quests.
+    return (!IsDungeonFinderQuest() && !IsDaily() && (!IsRepeatable() || IsWeekly() || IsMonthly() || IsSeasonal()));
 }
 
 uint32 Quest::CalculateRewardHonor(uint32 level) const

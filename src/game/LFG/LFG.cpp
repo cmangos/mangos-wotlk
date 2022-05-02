@@ -22,6 +22,6 @@
 
 #include <algorithm>
 
-LfgData::LfgData() : m_roles(ROLE_INDEX_COUNT)
+LFGData::LFGData() : m_roles(ROLE_INDEX_COUNT)
 {
 }

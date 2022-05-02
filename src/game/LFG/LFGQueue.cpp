@@ -106,6 +106,15 @@ std::string LFGQueue::GetDebugPrintout()
     return std::string();
 }
 
+uint32 LFGQueue::GetPartyMemberCountAtJoin(ObjectGuid guid) const
+{
+    auto itr = m_numberOfPartyMembersAtJoin.find(guid);
+    if (itr == m_numberOfPartyMembersAtJoin.end())
+        return 0;
+
+    return itr->second;
+}
+
 void LFGQueue::UpdateWaitTimeDps(int32 time, uint32 dungeonId)
 {
     // TODO
@@ -357,6 +366,7 @@ void LfgProposal::AcceptProposal(LFGQueue& queue)
     GuidList allPlayers, tankPlayers, healPlayers, dpsPlayers;
     GuidList playersToTeleport;
     std::map<ObjectGuid, uint32> randomDungeonPerPlayer;
+    std::map<ObjectGuid, uint32> partyCountPerPlayer;
 
     for (LfgProposalPlayerContainer::const_iterator itr = players.begin(); itr != players.end(); ++itr)
     {
@@ -384,6 +394,7 @@ void LfgProposal::AcceptProposal(LFGQueue& queue)
             playersToTeleport.push_back(guid);
 
         randomDungeonPerPlayer[guid] = itr->second.randomDungeonId;
+        partyCountPerPlayer[guid] = queue.GetPartyMemberCountAtJoin(guid);
     }
 
     allPlayers.splice(allPlayers.end(), tankPlayers);
@@ -394,7 +405,7 @@ void LfgProposal::AcceptProposal(LFGQueue& queue)
     LFGDungeonData const* dungeon = sLFGMgr.GetLFGDungeon(dungeonId);
     MANGOS_ASSERT(dungeon);
 
-    sWorld.GetMessager().AddMessage([allPlayers, group = group, dungeon, playersToTeleport, randomDungeonPerPlayer](World* world)
+    sWorld.GetMessager().AddMessage([allPlayers, group = group, dungeon, playersToTeleport, randomDungeonPerPlayer, partyCountPerPlayer](World* world)
     {
         Group* grp = group ? sObjectMgr.GetGroupById(group.GetCounter()) : nullptr;
         for (GuidList::const_iterator it = allPlayers.begin(); it != allPlayers.end(); ++it)
@@ -419,13 +430,19 @@ void LfgProposal::AcceptProposal(LFGQueue& queue)
             else if (group != grp)
                 grp->AddMember(player->GetObjectGuid(), player->GetName());
 
+            player->GetLfgData().SetCountAtJoin(partyCountPerPlayer.find(pguid)->second);
+            player->GetLfgData().SetDungeon(dungeon->id);
+
             // Add the cooldown spell if queued for a random dungeon
             auto randomItr = randomDungeonPerPlayer.find(player->GetObjectGuid());
             if (uint32 randomDungeonId = randomItr->second)
             {
                 LFGDungeonEntry const* dungeonEntry = sLFGDungeonStore.LookupEntry(randomDungeonId);
                 if (dungeonEntry && dungeonEntry->TypeID == LFG_TYPE_RANDOM_DUNGEON)
+                {
                     player->CastSpell(player, LFG_SPELL_DUNGEON_COOLDOWN, TRIGGERED_OLD_TRIGGERED);
+                    player->GetLfgData().SetDungeon(randomDungeonId);
+                }
             }
         }
 

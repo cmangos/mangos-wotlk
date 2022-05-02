@@ -423,7 +423,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         else
             data << uint32(pQuest->GetRewOrReqMoney());
 
-        data << uint32(pQuest->XPValue(GetMenuSession()->GetPlayer()));
+        data << uint32(pQuest->GetXPReward(GetMenuSession()->GetPlayer()));
     }
 
     // TODO: fixme. rewarded honor points
@@ -540,7 +540,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
         data << uint32(pQuest->GetRewOrReqMoney());
 
     // xp
-    data << uint32(pQuest->XPValue(GetMenuSession()->GetPlayer()));
+    data << uint32(pQuest->GetXPReward(GetMenuSession()->GetPlayer()));
 
     // TODO: fixme. rewarded honor points. Multiply with 10 to satisfy client
     data << uint32(10 * MaNGOS::Honor::hk_honor_at_level(GetMenuSession()->GetPlayer()->GetLevel(), pQuest->GetRewHonorAddition()));

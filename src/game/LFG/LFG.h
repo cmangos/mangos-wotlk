@@ -28,10 +28,10 @@
 
 class World;
 
-class LfgData
+class LFGData
 {
     public:
-        LfgData();
+        LFGData();
         LfgState GetState() const { return m_state; }
         void SetState(LfgState state) { m_state = state; }
         uint32 GetDungeon() const { return m_dungeon; }
@@ -42,12 +42,15 @@ class LfgData
         // players store everything in index 0 - groups use all values for counts
         void SetPlayerRoles(uint8 roles) { m_roles[ROLE_INDEX_PLAYER] = roles; }
         uint8 GetPlayerRoles() const { return m_roles[ROLE_INDEX_PLAYER]; }
+        void SetCountAtJoin(uint8 count) { m_countAtJoin = count; }
+        uint8 GetCountAtJoin() const { return m_countAtJoin; }
     private:
         LfgState m_state;
         uint32 m_dungeon;
         std::string m_comment;
         LfgDungeonSet m_listedDungeonSet;
         std::vector<uint8> m_roles;
+        uint8 m_countAtJoin;
 };
 
 #endif

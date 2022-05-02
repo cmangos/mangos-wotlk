@@ -22,6 +22,8 @@
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
 
+class Quest;
+
 enum LfgFlags
 {
     LFG_FLAG_XREALM                              = 0x1,
@@ -195,6 +197,14 @@ enum LFGEnum
     LFG_DPS_NEEDED                               = 3
 };
 
+enum SeasonalDungeons
+{
+    SEASONAL_HEADLESS_HORSEMAN  = 285,
+    SEASONAL_AHUNE              = 286,
+    SEASONAL_COREN_DIREBREW     = 287,
+    SEASONAL_CROWN_CHEMICAL_CO  = 288,
+};
+
 typedef std::map<uint32, uint32> LfgLockMap;
 typedef std::map<ObjectGuid, LfgLockMap> LfgLockPartyMap;
 typedef std::set<uint32> LfgDungeonSet;
@@ -230,6 +240,16 @@ struct LfgUpdateData
     bool partialClear;
     std::string comment;
     uint8 m_roles[ROLE_INDEX_COUNT];
+};
+
+struct LfgPlayerRewardData
+{
+    LfgPlayerRewardData(uint32 random, uint32 current, bool done, Quest const* quest) :
+        rdungeonEntry(random), sdungeonEntry(current), done(done), quest(quest) { }
+    uint32 rdungeonEntry;
+    uint32 sdungeonEntry;
+    bool done;
+    Quest const* quest;
 };
 
 #endif

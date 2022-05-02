@@ -132,6 +132,7 @@ class LFGQueue
         bool IsTestingEnabled() const { return m_testing; }
 
         void SetPartyMemberCountAtJoin(ObjectGuid guid, uint32 count) { m_numberOfPartyMembersAtJoin[guid] = count; }
+        uint32 GetPartyMemberCountAtJoin(ObjectGuid guid) const;
 
         void UpdateWaitTimeDps(int32 time, uint32 dungeonId);
         void UpdateWaitTimeHealer(int32 time, uint32 dungeonId);
