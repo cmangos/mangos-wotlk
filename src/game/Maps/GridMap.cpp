@@ -933,6 +933,8 @@ bool TerrainInfo::IsOutdoors(float x, float y, float z) const
             atEntry = areaEntry;
             foundWmoEntry = wmoEntry;
         }
+        if (!wmoEntry->areaId)
+            foundWmoEntry = wmoEntry;
     }
 
     return IsOutdoorWMO(mogpFlags, foundWmoEntry, atEntry);
@@ -977,6 +979,8 @@ uint16 TerrainInfo::GetAreaFlag(float x, float y, float z, bool* isOutdoors) con
                 atEntry = areaEntry;
                 foundWmoEntry = wmoEntry;
             }
+            if (!wmoEntry->areaId)
+                foundWmoEntry = wmoEntry;
         }
     }
 
