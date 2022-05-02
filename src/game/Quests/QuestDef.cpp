@@ -20,6 +20,7 @@
 #include "Entities/Player.h"
 #include "World/World.h"
 #include "Server/DBCStores.h"
+#include "Globals/SharedDefines.h"
 
 Quest::Quest(Field* questRecord)
 {
@@ -276,6 +277,11 @@ int32  Quest::GetRewOrReqMoney() const
         return RewOrReqMoney;
 
     return int32(RewOrReqMoney * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
+}
+
+bool Quest::IsSeasonal() const
+{
+    return (ZoneOrSort == -QUEST_SORT_SEASONAL || ZoneOrSort == -QUEST_SORT_SPECIAL || ZoneOrSort == -QUEST_SORT_LUNAR_FESTIVAL || ZoneOrSort == -QUEST_SORT_MIDSUMMER || ZoneOrSort == -QUEST_SORT_BREWFEST || ZoneOrSort == -QUEST_SORT_LOVE_IS_IN_THE_AIR || ZoneOrSort == -QUEST_SORT_NOBLEGARDEN) && !IsRepeatable();
 }
 
 bool Quest::IsAllowedInRaid() const
