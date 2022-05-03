@@ -37,7 +37,14 @@ void LFGQueue::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles)
 {
     auto itr = m_queueData.find(group);
     if (itr != m_queueData.end())
+    {
         itr->second.UpdateRoleCheck(player, roles, false);
+        if (itr->second.GetState() == LFG_STATE_FAILED)
+        {
+
+            m_queueData.erase(itr);
+        }
+    }
 }
 
 void LFGQueue::UpdateProposal(ObjectGuid playerGuid, uint32 proposalId, bool accept)
@@ -67,6 +74,32 @@ void LFGQueue::UpdateProposal(ObjectGuid playerGuid, uint32 proposalId, bool acc
 void LFGQueue::RemoveProposal(uint32 proposalId)
 {
     m_proposalsForRemoval.push_back(proposalId);
+}
+
+void LFGQueue::OnPlayerLogout(ObjectGuid guid, ObjectGuid groupGuid)
+{
+    ObjectGuid searchGuid = groupGuid ? groupGuid : guid;
+    auto itr = m_queueData.find(searchGuid);
+    if (itr != m_queueData.end())
+    {
+        LFGQueueData& data = itr->second;
+        if (data.m_roleCheckState == LFG_ROLECHECK_INITIALITING)
+            data.UpdateRoleCheck(guid, 0, true);
+        else if (data.GetState() == LFG_STATE_QUEUED)
+        {
+            LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_GROUP_MEMBER_OFFLINE);
+            std::vector<WorldPacket> packets;
+            packets.emplace_back(WorldSession::BuildLfgUpdate(updateData, searchGuid.IsGroup()));
+            std::map<ObjectGuid, std::vector<WorldPacket>> personalizedPackets;
+            for (auto& playerInfo : data.m_playerInfoPerGuid)
+                personalizedPackets.emplace(playerInfo.first, packets);
+            sWorld.GetMessager().AddMessage([personalizedPackets](World* world)
+            {
+                world->BroadcastPersonalized(personalizedPackets);
+            });
+        }
+        m_queueData.erase(itr);
+    }
 }
 
 void LFGQueue::Update()
@@ -143,7 +176,7 @@ void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
 
     if (abort)
         m_roleCheckState = LFG_ROLECHECK_ABORTED;
-    else if (m_playerInfoPerGuid.empty())                            // Player selected no role.
+    else if (m_playerInfoPerGuid.empty() || !roles) // Player selected no role.
         m_roleCheckState = LFG_ROLECHECK_NO_ROLE;
     else
     {

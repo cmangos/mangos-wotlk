@@ -350,7 +350,7 @@ WorldPacket WorldSession::BuildLfgUpdate(LfgUpdateData const& updateData, bool i
             }
             else
             {
-                queued = false;
+                queued = true;
             }
             break;
         case LFG_UPDATETYPE_ADDED_TO_QUEUE:                // Rolecheck Success

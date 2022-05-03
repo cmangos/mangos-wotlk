@@ -120,6 +120,8 @@ class LFGQueue
         void UpdateProposal(ObjectGuid playerGuid, uint32 proposalId, bool accept);
         void RemoveProposal(uint32 proposalId);
 
+        void OnPlayerLogout(ObjectGuid guid, ObjectGuid groupGuid);
+
         LFGQueueData& GetQueueData(ObjectGuid owner) { return m_queueData[owner]; }
 
         void Update();

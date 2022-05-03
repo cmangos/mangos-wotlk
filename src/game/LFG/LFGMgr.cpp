@@ -707,6 +707,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
                 queueData.m_playerInfoPerGuid[groupMember].m_level = (*itr).getSource()->GetLevel();
                 queueData.m_playerInfoPerGuid[groupMember].m_race = (*itr).getSource()->getRace();
                 queueData.m_playerInfoPerGuid[groupMember].m_class = (*itr).getSource()->getClass();
+                player->GetLfgData().SetState(LFG_STATE_QUEUED);
             }
             queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_roles = roles;
             queueData.m_raid = true;
@@ -760,6 +761,7 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
             queueData.m_groupGuids.push_back(groupMember);
             queueData.m_playerInfoPerGuid[groupMember].m_roles = 0;
             queueData.m_playerInfoPerGuid[groupMember].m_level = (*itr).getSource()->GetLevel();
+            player->GetLfgData().SetState(LFG_STATE_QUEUED);
         }
         queueData.m_playerInfoPerGuid[player->GetObjectGuid()].m_roles = roles;
         queueData.m_raid = false;

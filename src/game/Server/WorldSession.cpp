@@ -654,6 +654,15 @@ void WorldSession::LogoutPlayer()
             }
         }
 
+        if (_player->GetLfgData().GetState() == LFG_STATE_QUEUED)
+        {
+            ObjectGuid groupGuid = _player->GetGroup() ? _player->GetGroup()->GetObjectGuid() : ObjectGuid();
+            sWorld.GetLFGQueue().GetMessager().AddMessage([guid = _player->GetObjectGuid(), groupGuid](LFGQueue* queue)
+            {
+                queue->OnPlayerLogout(guid, groupGuid);
+            });
+        }
+
         ///- Reset the online field in the account table
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         // No SQL injection as AccountID is uint32
