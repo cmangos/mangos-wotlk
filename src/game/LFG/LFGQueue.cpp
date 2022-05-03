@@ -25,7 +25,7 @@ void LFGQueue::AddToQueue(LFGQueueData const& data)
     auto result = m_queueData.emplace(data.m_ownerGuid, data);
     LFGQueueData& queueData = result.first->second;
     if (data.m_roleCheckState == LFG_ROLECHECK_INITIALITING)
-        queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
+        queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false, false);
 }
 
 void LFGQueue::RemoveFromQueue(ObjectGuid owner)
@@ -38,7 +38,7 @@ void LFGQueue::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles)
     auto itr = m_queueData.find(group);
     if (itr != m_queueData.end())
     {
-        itr->second.UpdateRoleCheck(player, roles, false);
+        itr->second.UpdateRoleCheck(player, roles, false, false);
         if (itr->second.GetState() == LFG_STATE_FAILED)
         {
 
@@ -84,7 +84,7 @@ void LFGQueue::OnPlayerLogout(ObjectGuid guid, ObjectGuid groupGuid)
     {
         LFGQueueData& data = itr->second;
         if (data.m_roleCheckState == LFG_ROLECHECK_INITIALITING)
-            data.UpdateRoleCheck(guid, 0, true);
+            data.UpdateRoleCheck(guid, 0, true, false);
         else if (data.GetState() == LFG_STATE_QUEUED)
         {
             LfgUpdateData updateData = LfgUpdateData(LFG_UPDATETYPE_GROUP_MEMBER_OFFLINE);
@@ -108,6 +108,19 @@ void LFGQueue::Update()
     while (!World::IsStopped())
     {
         GetMessager().Execute(this);
+
+        TimePoint now = sWorld.GetCurrentClockTime();
+        for (auto itr = m_queueData.begin(); itr != m_queueData.end();)
+        {
+            LFGQueueData& queueData = itr->second;
+            if (queueData.m_roleCheckState == LFG_ROLECHECK_INITIALITING && queueData.m_cancelTime < now)
+            {
+                queueData.UpdateRoleCheck(ObjectGuid(), 0, true, true);
+                itr = m_queueData.erase(itr);
+            }
+            else
+                ++itr;
+        }
 
         if (IsTestingEnabled()) // in debug pop any queue regardless of eligibility
         {
@@ -168,14 +181,14 @@ void LFGQueue::UpdateWaitTimeAvg(int32 time, uint32 dungeonId)
     // TODO
 }
 
-void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort)
+void LFGQueueData::UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort, bool timeout)
 {
     LfgPlayerInfoMap check_roles;
 
     bool sendRoleChosen = m_roleCheckState != LFG_ROLECHECK_DEFAULT && abort;
 
     if (abort)
-        m_roleCheckState = LFG_ROLECHECK_ABORTED;
+        m_roleCheckState = timeout ? LFG_ROLECHECK_MISSING_ROLE : LFG_ROLECHECK_ABORTED;
     else if (m_playerInfoPerGuid.empty() || !roles) // Player selected no role.
         m_roleCheckState = LFG_ROLECHECK_NO_ROLE;
     else
@@ -689,7 +702,7 @@ void LfgRaidBrowser::AddListed(LFGQueueData const& data)
     if (queueData.m_state == LFG_STATE_RAIDBROWSER)
         ProcessDungeons(queueData.m_dungeons, queueData.m_team, queueData.m_ownerGuid);
     else
-        queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false);
+        queueData.UpdateRoleCheck(queueData.m_leaderGuid, queueData.m_playerInfoPerGuid[queueData.m_leaderGuid].m_roles, false, false);
 }
 
 void LfgRaidBrowser::RemoveListed(ObjectGuid guid)
@@ -725,7 +738,7 @@ void LfgRaidBrowser::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 r
 {
     auto itr = m_listed.find(group);
     if (itr != m_listed.end())
-        itr->second.UpdateRoleCheck(player, roles, false);
+        itr->second.UpdateRoleCheck(player, roles, false, false);
 }
 
 void LfgRaidBrowser::UpdateComment(ObjectGuid guid, std::string comment)

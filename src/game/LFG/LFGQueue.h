@@ -99,7 +99,7 @@ struct LFGQueueData
     LFGQueueData() { memset(m_roles, 0, sizeof(m_roles)); }
 
     void RecalculateRoles();
-    void UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort);
+    void UpdateRoleCheck(ObjectGuid guid, uint8 roles, bool abort, bool timeout);
     void PopQueue(LfgProposal& proposal);
     LfgDungeonSet GetDungeons() const;
     LfgState GetState() const { return m_state; }
