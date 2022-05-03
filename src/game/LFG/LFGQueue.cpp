@@ -40,10 +40,7 @@ void LFGQueue::SetPlayerRoles(ObjectGuid group, ObjectGuid player, uint8 roles)
     {
         itr->second.UpdateRoleCheck(player, roles, false, false);
         if (itr->second.GetState() == LFG_STATE_FAILED)
-        {
-
             m_queueData.erase(itr);
-        }
     }
 }
 
@@ -155,6 +152,14 @@ void LFGQueue::Update()
 
         for (auto& proposalData : m_proposals)
             proposalData.second.UpdateProposal(*this);
+
+        for (auto itr = m_queueData.begin(); itr != m_queueData.end();)
+        {
+            if (itr->second.GetState() == LFG_STATE_FAILED)
+                itr = m_queueData.erase(itr);
+            else
+                ++itr;
+        }
 
         for (uint32 proposalId : m_proposalsForRemoval)
             m_proposals.erase(proposalId);
@@ -290,7 +295,7 @@ void LFGQueueData::PopQueue(LfgProposal& proposal)
             roles = PLAYER_ROLE_HEALER;
         if (roles & PLAYER_ROLE_DAMAGE)
             roles = PLAYER_ROLE_DAMAGE;
-        proposal.players[playerData.first] = LfgProposalPlayer(roles, LFG_ANSWER_PENDING, proposal.group, m_randomDungeonId);
+        proposal.players[playerData.first] = LfgProposalPlayer(roles, LFG_ANSWER_PENDING, m_ownerGuid.IsGroup() ? m_ownerGuid : ObjectGuid(), m_randomDungeonId);
     }
 
     std::map<ObjectGuid, std::vector<WorldPacket>> personalizedPackets;
@@ -354,6 +359,49 @@ void LfgProposal::UpdateProposal(LFGQueue& queue)
 
 void LfgProposal::FailProposal(LFGQueue& queue)
 {
+    state = LFG_PROPOSAL_FAILED;
+    std::set<ObjectGuid> declinedSelectors;
+    std::set<ObjectGuid> failedSelectors;
+    for (auto& proposalPlayer : players)
+    {
+        LfgProposalPlayer& player = proposalPlayer.second;
+        if (player.answer == 0) // did not select or declined
+            declinedSelectors.insert(player.group ? player.group : proposalPlayer.first);
+        else if (player.answer == -1)
+            failedSelectors.insert(player.group ? player.group : proposalPlayer.first);
+    }
+
+    LfgUpdateData updateData(declinedSelectors.size() > 0 ? LFG_UPDATETYPE_PROPOSAL_DECLINED : LFG_UPDATETYPE_PROPOSAL_FAILED);
+    std::map<ObjectGuid, std::vector<WorldPacket>> personalizedPackets;
+    WorldPacket proposalFailed = WorldSession::BuildLfgUpdate(updateData, true);
+    for (auto& proposalPlayer : players)
+        personalizedPackets[proposalPlayer.first].push_back(proposalFailed);
+
+    updateData.updateType = LFG_UPDATETYPE_REMOVED_FROM_QUEUE;
+    std::set<ObjectGuid>& whoToKick = declinedSelectors.size() > 0 ? declinedSelectors : failedSelectors;
+    for (auto& queued : queues)
+    {
+        LFGQueueData& queueData = queue.GetQueueData(queued);
+        if (whoToKick.find(queueData.m_ownerGuid) != whoToKick.end())
+        {
+            // kick from queue
+            for (auto& playerInfo : queueData.m_playerInfoPerGuid)
+                personalizedPackets[playerInfo.first].push_back(WorldSession::BuildLfgUpdate(updateData, queueData.m_ownerGuid.IsGroup()));
+            queueData.SetState(LFG_STATE_FAILED);
+        }
+        else
+        {
+            // continue being queued - did nothing wrong
+            queueData.SetState(LFG_STATE_QUEUED);
+        }
+    }
+
+    sWorld.GetMessager().AddMessage([personalizedPackets](World* world)
+    {
+        world->BroadcastPersonalized(personalizedPackets);
+    });
+
+    queue.RemoveProposal(id);
 }
 
 void LfgProposal::AcceptProposal(LFGQueue& queue)
