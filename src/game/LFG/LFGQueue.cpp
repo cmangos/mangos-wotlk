@@ -136,6 +136,22 @@ void LFGQueue::Update()
                 }
             }
         }
+        else
+        {
+            // no actual matchmaking for now - enable entering for full groups - TODO: matchmaking
+            for (auto& queuedGroupData : m_queueData)
+            {
+                LFGQueueData& queueData = queuedGroupData.second;
+                // rolecheck makes sure integrity of correct group is held
+                if (queueData.GetState() == LFG_STATE_QUEUED && queueData.m_playerInfoPerGuid.size() == 5)
+                {
+                    LfgProposal proposal;
+                    proposal.id = counter++;
+                    queueData.PopQueue(proposal);
+                    m_proposals[proposal.id] = proposal;
+                }
+            }
+        }
 
         for (auto& proposalData : m_proposals)
             proposalData.second.UpdateProposal(*this);
