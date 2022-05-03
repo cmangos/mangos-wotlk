@@ -6295,6 +6295,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
             IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id, -1, level), m_trueCaster->GetMap(), phaseMask))
         {
             itr.creature = summon;
+            itr.processed = true;
 
             switch(m_spellInfo->Id)
             {
@@ -6808,6 +6809,8 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
         spawnCreature->ForcedDespawn();
         return false;
     }
+
+    list[0].processed = true;
     return true;
 }
 
