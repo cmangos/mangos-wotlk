@@ -334,6 +334,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     recv_data >> movementInfo;
     /*----------------*/
 
+    if (opcode == CMSG_MOVE_CHNG_TRANSPORT) // TODO: Should mark down pending transport change for anticheat purpose
+    {
+        if (guid != mover->GetObjectGuid() && _player->GetObjectGuid() == guid)
+            mover = _player;
+    }
+
     if (!ProcessMovementInfo(movementInfo, mover, plMover, recv_data))
         return;
 
