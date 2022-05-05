@@ -372,7 +372,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             // SMSG_PET_DISMISS_SOUND (?)
         }
 
-        if (passenger->IsRooted())
+        if (passenger->hasUnitState(UNIT_STAT_ROOT) && !passenger->HasAuraType(SPELL_AURA_MOD_ROOT))
             passenger->SetImmobilizedState(false);
 
         Movement::MoveSplineInit init(*passenger);
