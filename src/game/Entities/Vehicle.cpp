@@ -643,6 +643,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             }
         }
 
+        pVehicle->SendForcedObjectUpdate(); // TODO: both of these should be one packet
         pPlayer->SendForcedObjectUpdate();
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
