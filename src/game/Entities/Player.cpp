@@ -14738,7 +14738,8 @@ bool Player::SatisfyQuestCondition(Quest const* qInfo, bool msg) const
 
 bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
 {
-    if (GetLevel() < qInfo->GetMinLevel())
+    uint32 level = GetLevel();
+    if (level < qInfo->GetMinLevel() || level > qInfo->GetMaxLevel())
     {
         if (msg)
             SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);

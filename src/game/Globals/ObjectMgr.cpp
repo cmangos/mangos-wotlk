@@ -4777,8 +4777,8 @@ void ObjectMgr::LoadQuests()
                           "IncompleteEmote, IncompleteEmoteDelay, CompleteEmote, CompleteEmoteDelay, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
                           //   137                     138                     139                     140
                           "OfferRewardEmoteDelay1, OfferRewardEmoteDelay2, OfferRewardEmoteDelay3, OfferRewardEmoteDelay4,"
-                          //   141          142          143             144              145              146              147              148                149
-                          "StartScript, CompleteScript, RewMaxRepValue1, RewMaxRepValue2, RewMaxRepValue3, RewMaxRepValue4, RewMaxRepValue5, RequiredCondition, BreadcrumbForQuestId "
+                          //   141          142          143             144              145              146              147              148                149                   150
+                          "StartScript, CompleteScript, RewMaxRepValue1, RewMaxRepValue2, RewMaxRepValue3, RewMaxRepValue4, RewMaxRepValue5, RequiredCondition, BreadcrumbForQuestId, MaxLevel "
 
                           " FROM quest_template");
     if (!result)

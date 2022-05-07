@@ -28,6 +28,7 @@ Quest::Quest(Field* questRecord)
     QuestMethod = questRecord[1].GetUInt32();
     ZoneOrSort = questRecord[2].GetInt32();
     MinLevel = questRecord[3].GetUInt32();
+    MaxLevel = questRecord[150].GetUInt32();
     QuestLevel = questRecord[4].GetInt32();
     Type = questRecord[5].GetUInt32();
     RequiredClasses = questRecord[6].GetUInt32();

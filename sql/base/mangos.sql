@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14057_01_mangos_spawn_group_chanced_spawns` bit(1) DEFAULT NULL
+  `required_14058_01_mangos_quest_maxlevel` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -15816,6 +15816,7 @@ CREATE TABLE `quest_template` (
   `Method` tinyint(3) unsigned NOT NULL DEFAULT '2',
   `ZoneOrSort` smallint(6) NOT NULL DEFAULT '0',
   `MinLevel` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `MaxLevel` tinyint(3) unsigned NOT NULL DEFAULT '255',
   `QuestLevel` smallint(6) NOT NULL DEFAULT '0',
   `Type` smallint(5) unsigned NOT NULL DEFAULT '0',
   `RequiredClasses` smallint(5) unsigned NOT NULL DEFAULT '0',
