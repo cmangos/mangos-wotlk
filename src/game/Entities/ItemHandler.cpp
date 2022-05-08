@@ -820,6 +820,9 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid) const
                 data << uint32(pProto->MaxDurability);
                 data << uint32(pProto->BuyCount);
                 data << uint32(crItem->ExtendedCost);
+
+                if (count >= MAX_VENDOR_ITEMS)
+                    break;
             }
         }
     }
