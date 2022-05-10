@@ -16,8 +16,10 @@ env:
 
 jobs:
   build:
-
     runs-on: windows-2022
+    permissions:
+      contents: read
+
     strategy:
       matrix:
        include:
@@ -95,7 +97,10 @@ jobs:
 
   upload:
     runs-on: windows-2022
+    permissions:
+      contents: write  # for marvinpinto/action-automatic-releases to generate pre-release
     needs: build
+
     steps:
       - name: Download artifact snapshot-default
         uses: actions/download-artifact@v1
@@ -139,6 +144,8 @@ jobs:
   notify-success:
     name: Discord release successfully notification
     runs-on: ubuntu-20.04
+    permissions:
+      contents: none
     needs:
       - upload
 
@@ -179,6 +186,8 @@ jobs:
   notify:
     name: Discord Notification
     runs-on: ubuntu-20.04
+    permissions:
+      contents: none
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
       - build
     if: failure()

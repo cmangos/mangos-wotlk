@@ -79,10 +79,10 @@ jobs:
   notify:
     name: Discord Notification
     runs-on: ubuntu-20.04
-    needs: # make sure the notification is sent AFTER the jobs you want included have completed
-      - build
     permissions:
       contents: none
+    needs: # make sure the notification is sent AFTER the jobs you want included have completed
+      - build
     if: failure()
 
     steps:
