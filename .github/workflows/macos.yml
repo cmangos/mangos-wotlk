@@ -8,6 +8,9 @@ env:
   REPO_DIR : ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: macos-10.15
@@ -33,6 +36,8 @@ jobs:
         run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
 
   notify:
+    permissions:
+      contents: none
     name: Discord Notification
     runs-on: ubuntu-20.04
     needs: # make sure the notification is sent AFTER the jobs you want included have completed

@@ -92,6 +92,8 @@ jobs:
           path: "bin/${{env.ARCHIVE_FILENAME}}"
 
   upload:
+    permissions:
+      contents: write  # for marvinpinto/action-automatic-releases to generate pre-release
     runs-on: windows-2019
     needs: build
     steps:
@@ -135,6 +137,8 @@ jobs:
           files: all_snapshots
 
   notify:
+    permissions:
+      contents: none
     name: Discord Notification
     runs-on: ubuntu-20.04
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
