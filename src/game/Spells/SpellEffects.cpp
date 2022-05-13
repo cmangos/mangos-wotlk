@@ -8106,12 +8106,12 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
     map->Add(pGameObj);
     pGameObj->AIM_Initialize();
 
-    // Store the GO to the caster
-    m_caster->AddWildGameObject(pGameObj);
-
     // Notify Summoner
     if (!m_trueCaster->IsGameObject())
     {
+        // Store the GO to the caster
+        m_caster->AddWildGameObject(pGameObj);
+
         if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
             m_originalCaster->AI()->JustSummoned(pGameObj);
         else if (m_caster->AI())
