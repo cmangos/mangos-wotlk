@@ -271,6 +271,9 @@ namespace MMAP
             printf("* no solid vertices found\n");
             return;
         }
+
+        meshData.solidType.resize(meshData.solidTris.size() / 3);
+        std::fill(meshData.solidType.begin(), meshData.solidType.end(), NAV_AREA_GROUND);
         TerrainBuilder::cleanVertices(meshData.solidVerts, meshData.solidTris);
 
         // gather all mesh data for final data check, and bounds calculation
@@ -286,6 +289,7 @@ namespace MMAP
         int tVertCount = meshData.solidVerts.size() / 3;
         int* tTris = meshData.solidTris.getCArray();
         int tTriCount = meshData.solidTris.size() / 3;
+        uint8* tTriFlags = meshData.solidType.getCArray();
 
         // get bounds of current tile
         rcConfig config;
@@ -299,7 +303,7 @@ namespace MMAP
         rcCalcGridSize(config.bmin, config.bmax, config.cs, &config.width, &config.height);
 
         Tile tile;
-        buildCommonTile(modelName.data(), tile, config, tVerts, tVertCount, tTris, tTriCount, nullptr, nullptr, 0, nullptr, 0, nullptr);
+        buildCommonTile(modelName.data(), tile, config, tVerts, tVertCount, tTris, tTriCount, tTriFlags, nullptr, 0, nullptr, 0, nullptr);
 
         IntermediateValues iv;
         iv.polyMesh = tile.pmesh;
