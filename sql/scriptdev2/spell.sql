@@ -462,6 +462,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (46747,'spell_fling_torch'),
 (45671,'spell_juggle_torch_catch_quest'),
 (45693,'spell_torches_caught'),
+(45426,'spell_brazier_of_dancing_flames'),
 (40526,'spell_imp_in_a_bottle_say'),
 (49357,'spell_brewfest_mount_transformation'),
 (52845,'spell_brewfest_mount_transformation_faction_swap'),

@@ -402,6 +402,20 @@ struct TorchesCaught : public AuraScript
     }
 };
 
+struct BrazierOfDancingFlames : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 1.5f;
+    }
+
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Position pos = spell->m_targets.getDestination();
+        summon->CastSpell(pos.x, pos.y, pos.z - 1.5f, 45423, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_midsummer_festival()
 {
     Script* pNewScript = new Script;
@@ -429,4 +443,5 @@ void AddSC_midsummer_festival()
     RegisterSpellScript<FlignTorch>("spell_fling_torch");
     RegisterSpellScript<JuggleTorchCatchQuest>("spell_juggle_torch_catch_quest");
     RegisterSpellScript<TorchesCaught>("spell_torches_caught");
+    RegisterSpellScript<BrazierOfDancingFlames>("spell_brazier_of_dancing_flames");
 }
