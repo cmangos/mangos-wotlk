@@ -229,7 +229,7 @@ namespace MMAP
             return false;
         }
 
-        std::string filePath = std::string("mmaps/") + fileName;
+        std::string filePath = sWorld.GetDataPath() + std::string("mmaps/") + fileName;
         // load this tile
         FILE* file = fopen(filePath.c_str(), "rb");
         if (!file)
