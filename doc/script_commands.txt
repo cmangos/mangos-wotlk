@@ -359,11 +359,12 @@ Defining a buddy could be done in several way:
                                             * datalong2: AlternativeSenderEntry. Use as sender-Entry of the sent mail
                                             * dataint1: Delay (>= 0) in Seconds
 
-39 SCRIPT_COMMAND_SET_FLY                   * resultingSource = Creature
+39 SCRIPT_COMMAND_SET_HOVER                 * resultingSource = Creature
                                             * datalong = bool 0=off, 1=on
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL set/unset byte flag UNIT_BYTE1_FLAG_FLY_ANIM
 
-40 SCRIPT_COMMAND_DESPAWN_GO                * resultingTarget = GameObject. Please note that not all gameobject types support this command.
+40 SCRIPT_COMMAND_DESPAWN_GO                * resultingTarget = GameObject - if a GO doesnt work with this command - make a report - WIP
+                                            * datalong = despawnDelay
 
 41 SCRIPT_COMMAND_RESPAWN                   * resultingSource = Creature. Requires SCRIPT_FLAG_BUDDY_IS_DESPAWNED to find dead or despawned targets
 
@@ -377,7 +378,7 @@ Defining a buddy could be done in several way:
 44 SCRIPT_COMMAND_UPDATE_TEMPLATE           Update creature entry of the resultingSource
                                             * resultingSource = Creature
                                             * datalong = new creature entry. Must be different than the current one
-                                            * datalong2 = faction for which the entry is updated. 0 = Alliance, 1 = Horde
+
 45 SCRIPT_COMMAND_START_RELAY_SCRIPT        Launch dbscripts_on_relay script, either static one, or randomly chosen one from dbscript_random_templates
                                             * source and target of command define source and target of launched dbscript
                                             * datalong = dbscripts_on_relay id
