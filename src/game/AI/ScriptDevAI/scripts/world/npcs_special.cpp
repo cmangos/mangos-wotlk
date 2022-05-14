@@ -324,50 +324,6 @@ UnitAI* GetAI_npc_chicken_cluck(Creature* pCreature)
 }
 
 /*######
-## npc_dancing_flames
-######*/
-
-enum
-{
-    SPELL_FIERY_SEDUCTION = 47057
-};
-
-struct npc_dancing_flamesAI : public ScriptedAI
-{
-    npc_dancing_flamesAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
-
-    void Reset() override {}
-
-    void ReceiveEmote(Player* pPlayer, uint32 uiEmote) override
-    {
-        m_creature->SetFacingToObject(pPlayer);
-
-        if (pPlayer->HasAura(SPELL_FIERY_SEDUCTION))
-            pPlayer->RemoveAurasDueToSpell(SPELL_FIERY_SEDUCTION);
-
-        if (pPlayer->IsMounted())
-        {
-            pPlayer->Unmount();                             // doesnt remove mount aura
-            pPlayer->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-        }
-
-        switch (uiEmote)
-        {
-            case TEXTEMOTE_DANCE: DoCastSpellIfCan(pPlayer, SPELL_FIERY_SEDUCTION); break;// dance -> cast SPELL_FIERY_SEDUCTION
-            case TEXTEMOTE_WAVE:  m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);      break;// wave -> wave
-            case TEXTEMOTE_JOKE:  m_creature->HandleEmote(EMOTE_STATE_LAUGH);       break;// silly -> laugh(with sound)
-            case TEXTEMOTE_BOW:   m_creature->HandleEmote(EMOTE_ONESHOT_BOW);       break;// bow -> bow
-            case TEXTEMOTE_KISS:  m_creature->HandleEmote(TEXTEMOTE_CURTSEY);       break;// kiss -> curtsey
-        }
-    }
-};
-
-UnitAI* GetAI_npc_dancing_flames(Creature* pCreature)
-{
-    return new npc_dancing_flamesAI(pCreature);
-}
-
-/*######
 ## Triage quest
 ######*/
 
@@ -3098,11 +3054,6 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_chicken_cluck";
     pNewScript->GetAI = &GetAI_npc_chicken_cluck;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_dancing_flames";
-    pNewScript->GetAI = &GetAI_npc_dancing_flames;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
