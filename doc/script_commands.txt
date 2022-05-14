@@ -332,7 +332,7 @@ Defining a buddy could be done in several way:
                                                 data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL:  terminate when condition is false
 
 35 SCRIPT_COMMAND_SEND_AI_EVENT             * resultingSource = Creature, resultingTarget = Unit
-                                            * datalong = AIEventType - limited only to EventAI supported events
+                                            * datalong = AIEventType
                                             * datalong2 = radius. If radius isn't provided and the target is a creature, then send AIEvent to target
                                             * datalong3 = miscvalue - uint32 - for use in ReceiveAIEvent handler
 
