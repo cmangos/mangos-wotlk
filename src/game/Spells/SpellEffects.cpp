@@ -6011,6 +6011,10 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     if (summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_CONTROLLABLE)
         amount = 1;
 
+    // basepoints of summoned critters are unk - set amount to 1
+    if (summon_prop->Slot == SUMMON_PROP_SLOT_CRITTER)
+        amount = 1;
+
     // Expected Level
     WorldObject* petInvoker = responsibleCaster ? responsibleCaster : m_trueCaster;
     uint32 level = 0;
