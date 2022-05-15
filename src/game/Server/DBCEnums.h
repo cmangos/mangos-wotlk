@@ -447,6 +447,19 @@ enum UnitNameSummonTitle
 };
 
 // SummonProperties.dbc, col 4          == Slot             (m_slot)
+
+enum SummonPropSlot
+{
+    SUMMON_PROP_SLOT_NONE                   = 0,
+    SUMMON_PROP_SLOT_TOTEM_1                = 1,
+    SUMMON_PROP_SLOT_TOTEM_2                = 2,
+    SUMMON_PROP_SLOT_TOTEM_3                = 3,
+    SUMMON_PROP_SLOT_TOTEM_4                = 4,
+    SUMMON_PROP_SLOT_CRITTER                = 5,
+    SUMMON_PROP_SLOT_QUEST_PLAYERS_ONLY     = 6,
+    SUMMON_PROP_SLOT_ANY_AVAILABLE_TOTEM    = -1,
+};
+
 // SummonProperties.dbc, col 5          == Flags            (m_flags)
 enum SummonPropFlags
 {
