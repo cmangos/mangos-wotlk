@@ -450,7 +450,7 @@ WorldPacket WorldSession::BuildLfgUpdateProposal(LfgProposal const& proposal, ui
     uint32 dungeonEntry = proposal.dungeonId;
 
     // show random dungeon if player selected random dungeon and it's not lfg group
-    if (!silent)
+    if (!silent && randomDungeonId)
         dungeonEntry = randomDungeonId;
 
     dungeonEntry = sLFGMgr.GetLFGDungeonEntry(dungeonEntry);

@@ -771,14 +771,6 @@ void LFGMgr::JoinLfg(Player* player, uint8 roles, LfgDungeonSet& dungeons, std::
     }
     else
     {
-        if (!isContinue)
-        {
-            if (rDungeonId)
-            {
-                dungeons.clear();
-                dungeons.insert(rDungeonId);
-            }
-        }
         player->GetSession()->SendPacket(WorldSession::BuildLfgJoinResult(joinData));
         WorldPacket data = WorldSession::BuildLfgUpdate(LfgUpdateData(LFG_UPDATETYPE_JOIN_QUEUE, dungeons, comment), false);
         player->GetSession()->SendPacket(data);
