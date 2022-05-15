@@ -416,6 +416,82 @@ struct BrazierOfDancingFlames : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_JUGGLE_TORCH              = 45638,
+    SPELL_JUGGLE_TORCH_OTHER_SLOW   = 45792,
+    SPELL_JUGGLE_TORCH_OTHER_MEDIUM = 45806,
+    SPELL_JUGGLE_TORCH_OTHER_FAST   = 45816,
+
+    SPELL_TORCH_TOSS_SHADOW_FAST    = 46117,
+    SPELL_TORCH_TOSS_SHADOW_MEDIUM  = 46118,
+    SPELL_TORCH_TOSS_SHADOW_SLOW    = 46120,
+    SPELL_TORCH_TOSS_SHADOW_SELF    = 46121,
+
+    SPELL_JUGGLE_TORCH_EXPLOSION_VISUAL = 45690,
+
+    SPELL_GIVE_TORCH = 45280,
+};
+
+struct ThrowTorch : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        uint32 juggleSpell = 0;
+        uint32 shadowSpell = 0;
+        if (urand(0, 19) == 0) // 1/20 chance to missthrow
+        {
+            juggleSpell = SPELL_JUGGLE_TORCH;
+            shadowSpell = SPELL_TORCH_TOSS_SHADOW_SELF;
+        }
+        else
+        {
+            switch (urand(0, 2))
+            {
+                case 0:
+                    juggleSpell = SPELL_JUGGLE_TORCH_OTHER_SLOW;
+                    shadowSpell = SPELL_TORCH_TOSS_SHADOW_SLOW;
+                    break;
+                case 1:
+                    juggleSpell = SPELL_JUGGLE_TORCH_OTHER_MEDIUM;
+                    shadowSpell = SPELL_TORCH_TOSS_SHADOW_MEDIUM;
+                    break;
+                case 2:
+                    juggleSpell = SPELL_JUGGLE_TORCH_OTHER_FAST;
+                    shadowSpell = SPELL_TORCH_TOSS_SHADOW_FAST;
+                    break;
+            }
+        }
+
+        Position dest = spell->m_targets.getDestination();
+        spell->GetCaster()->CastSpell(dest.x, dest.y, dest.z, juggleSpell, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+        spell->GetCaster()->CastSpell(dest.x, dest.y, dest.z, shadowSpell, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+    }
+};
+
+struct JuggleTorchCatch : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (spell->GetTargetList().empty())
+        {
+            Position dest = spell->m_targets.getDestination();
+            spell->GetCaster()->CastSpell(dest.x, dest.y, dest.z, SPELL_JUGGLE_TORCH_EXPLOSION_VISUAL, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), SPELL_GIVE_TORCH, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_midsummer_festival()
 {
     Script* pNewScript = new Script;
@@ -444,4 +520,6 @@ void AddSC_midsummer_festival()
     RegisterSpellScript<JuggleTorchCatchQuest>("spell_juggle_torch_catch_quest");
     RegisterSpellScript<TorchesCaught>("spell_torches_caught");
     RegisterSpellScript<BrazierOfDancingFlames>("spell_brazier_of_dancing_flames");
+    RegisterSpellScript<ThrowTorch>("spell_throw_torch");
+    RegisterSpellScript<JuggleTorchCatch>("spell_juggle_torch_catch");
 }
