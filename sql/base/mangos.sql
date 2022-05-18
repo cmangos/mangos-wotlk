@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14058_01_mangos_quest_maxlevel` bit(1) DEFAULT NULL
+  `required_14059_01_mangos_vehicle_seat_accessory` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -5496,7 +5496,7 @@ DROP TABLE IF EXISTS `npc_spellclick_spells`;
 CREATE TABLE `npc_spellclick_spells` (
   `npc_entry` int(10) unsigned NOT NULL COMMENT 'reference to creature_template',
   `spell_id` int(10) unsigned NOT NULL COMMENT 'spell which should be casted ',
-  `quest_start` mediumint(8) unsigned NOT NULL COMMENT 'reference to quest_template',
+  `quest_start` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'reference to quest_template',
   `quest_start_active` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `quest_end` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `cast_flags` tinyint(3) unsigned NOT NULL COMMENT 'first bit defines caster: 1=player, 0=creature; second bit defines target, same mapping as caster bit',
@@ -20058,6 +20058,18 @@ LOCK TABLES `vehicle_accessory` WRITE;
 /*!40000 ALTER TABLE `vehicle_accessory` DISABLE KEYS */;
 /*!40000 ALTER TABLE `vehicle_accessory` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS vehicle_seat_addon;
+CREATE TABLE vehicle_seat_addon(
+`SeatEntry` INT(11) UNSIGNED NOT NULL,
+`SeatOrientation` FLOAT NOT NULL DEFAULT 0,
+`ExitParamX` FLOAT NOT NULL DEFAULT 0,
+`ExitParamY` FLOAT NOT NULL DEFAULT 0,
+`ExitParamZ` FLOAT NOT NULL DEFAULT 0,
+`ExitParamO` FLOAT NOT NULL DEFAULT 0,
+`ExitParamValue` TINYINT(1) NOT NULL DEFAULT 0,
+PRIMARY KEY(`SeatEntry`)
+);
 
 --
 -- Table structure for table `waypoint_path`

@@ -35,6 +35,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Globals/Conditions.h"
 #include "Maps/SpawnGroupDefines.h"
+#include "Entities/Vehicle.h"
 
 #include <map>
 #include <climits>
@@ -803,6 +804,7 @@ class ObjectMgr
         void LoadActiveEntities(Map* _map);
 
         void LoadVehicleAccessory();
+        void LoadVehicleSeatParameters();
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level) const;
@@ -1260,6 +1262,9 @@ class ObjectMgr
 
         // Transports
         std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
+
+        // Vehicles
+        VehicleSeatParameters const* GetVehicleSeatParameters(uint32 seatEntry) const;
     protected:
 
         // current locale settings
@@ -1433,6 +1438,8 @@ class ObjectMgr
 
         std::map<uint32, uint32> m_transportMaps;
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm
+
+        std::map<uint32, VehicleSeatParameters> m_seatParameters;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

@@ -3201,6 +3201,14 @@ float Position::GetDistance(Position const& other) const
     return distsq;
 }
 
+void Position::RelocateOffset(Position const& offset)
+{
+    x = GetPositionX() + (offset.GetPositionX() * std::cos(GetPositionO()) + offset.GetPositionY() * std::sin(GetPositionO() + float(M_PI)));
+    y = GetPositionY() + (offset.GetPositionY() * std::cos(GetPositionO()) + offset.GetPositionX() * std::sin(GetPositionO()));
+    z = GetPositionZ() + offset.GetPositionZ();
+    o = GetPositionO() + offset.GetPositionO();
+}
+
 std::string Position::to_string() const
 {
     return "X: " + std::to_string(x) + " Y: " + std::to_string(y) + " Z: " + std::to_string(z) + " O: " + std::to_string(o);

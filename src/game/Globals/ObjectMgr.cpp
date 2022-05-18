@@ -986,6 +986,15 @@ std::vector<std::pair<TypeID, uint32>> const& ObjectMgr::GetDbGuidsForTransport(
     return (*m_guidsForMap.find(mapId)).second;
 }
 
+VehicleSeatParameters const* ObjectMgr::GetVehicleSeatParameters(uint32 seatEntry) const
+{
+    auto itr = m_seatParameters.find(seatEntry);
+    if (itr == m_seatParameters.end())
+        return nullptr;
+
+    return &itr->second;
+}
+
 CreatureImmunityVector const* ObjectMgr::GetCreatureImmunitySet(uint32 entry, uint32 setId) const
 {
     auto itr = m_creatureImmunities.find(entry);

@@ -75,6 +75,52 @@ void ObjectMgr::LoadVehicleAccessory()
     sLog.outString();
 }
 
+void ObjectMgr::LoadVehicleSeatParameters()
+{
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT SeatEntry, SeatOrientation, ExitParamX, ExitParamY, ExitParamZ, ExitParamO, ExitParamValue FROM vehicle_seat_addon"));
+    if (!result)
+    {
+        BarGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString(">> Loaded `vehicle_seat_addon`, table is empty!");
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    uint32 count = 0;
+    do
+    {
+        bar.step();
+        Field* fields = result->Fetch();
+
+        VehicleSeatParameters params;
+        params.seatEntry = fields[0].GetUInt32();
+        params.seatOrientation = fields[1].GetFloat();
+        params.exitParamX = fields[2].GetFloat();
+        params.exitParamY = fields[3].GetFloat();
+        params.exitParamZ = fields[4].GetFloat();
+        params.exitParamO = fields[5].GetFloat();
+        params.exitParamValue = fields[6].GetUInt8();
+
+        if (!sVehicleSeatStore.LookupEntry(params.seatEntry))
+        {
+            sLog.outErrorDb("Table `vehicle_seat_addon` has nonexistent seat %u entry, ignore. ", params.seatEntry);
+            continue;
+        }
+
+        m_seatParameters.emplace(params.seatEntry, params);
+        
+        ++count;
+    } while (result->NextRow());
+
+    sLog.outString(">> Loaded %u vehicle seat parameters.", count);
+    sLog.outString();
+}
+
 /**
  * Constructor of VehicleInfo
  *
@@ -376,9 +422,27 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             passenger->SetImmobilizedState(false);
 
         Movement::MoveSplineInit init(*passenger);
-        // ToDo: Set proper unboard coordinates
-        Position pos = m_owner->GetPosition(m_owner->GetTransport());
-        init.MoveTo(pos.x, pos.y, pos.z);
+
+        Position exitPos = m_owner->GetPosition();
+        exitPos.o = passenger->GetOrientation();
+
+        if (VehicleSeatParameters const* params = sObjectMgr.GetVehicleSeatParameters(seatEntry->m_ID))
+        {
+            if (params->exitParamValue == SEAT_EXIT_PARAMS_OFFSET)
+            {
+                exitPos.RelocateOffset(Position(params->exitParamX, params->exitParamY, params->exitParamZ, params->exitParamO));
+            }
+            else if (params->exitParamValue == SEAT_EXIT_PARAMS_ABSOLUTE_POS)
+            {
+                exitPos.x = params->exitParamX;
+                exitPos.y = params->exitParamY;
+                exitPos.z = params->exitParamZ;
+                exitPos.o = params->exitParamZ;
+            }
+        }
+
+        init.MoveTo(exitPos.x, exitPos.y, exitPos.z);
+        init.SetFacing(exitPos.o);
         init.SetExitVehicle();
         init.Launch();
 

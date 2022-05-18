@@ -51,6 +51,23 @@ struct VehicleAccessory
     uint32 passengerEntry;
 };
 
+enum ExitParamType
+{
+    SEAT_EXIT_PARAMS_OFFSET       = 1,
+    SEAT_EXIT_PARAMS_ABSOLUTE_POS = 2,
+};
+
+struct VehicleSeatParameters
+{
+    uint32 seatEntry;
+    float seatOrientation;
+    float exitParamX;
+    float exitParamY;
+    float exitParamZ;
+    float exitParamO;
+    float exitParamValue;
+};
+
 typedef std::map<uint8 /*seatPosition*/, VehicleSeatEntry const*> VehicleSeatMap;
 
 /**
