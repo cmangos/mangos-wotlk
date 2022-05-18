@@ -99,6 +99,8 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
 
     ObjectGuid m_frozenCoreGuid;
 
+    GuidVector m_spawns;
+
     void Reset() override
     {
         m_uiPhase               = PHASE_GROUND;
@@ -121,7 +123,14 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
     {
         DoCastSpellIfCan(m_creature, SPELL_AHUNE_DIES_ACHIEV, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, m_creature->GetMap()->IsRegularDifficulty() ? SPELL_AHUNE_LOOT : SPELL_AHUNE_LOOT_H, CAST_TRIGGERED);
+        DespawnGuids(m_spawns);
         m_creature->GetMap()->AwardLFGRewards(SEASONAL_AHUNE);
+    }
+
+    void EnterEvadeMode() override
+    {
+        Scripted_NoMovementAI::EnterEvadeMode();
+        DespawnGuids(m_spawns);
     }
 
     void JustReachedHome() override
@@ -165,6 +174,8 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
                 m_frozenCoreGuid = pSummoned->GetObjectGuid();
                 break;
         }
+
+        m_spawns.push_back(pSummoned->GetObjectGuid());
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
