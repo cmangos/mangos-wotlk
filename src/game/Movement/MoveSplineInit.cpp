@@ -88,7 +88,8 @@ namespace Movement
         else
             moveFlags &= ~MOVEFLAG_WALK_MODE;
 
-        moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
+        if (!pathEmpty) // should not broadcast these flags on orientation change only
+            moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
 
         if (args.velocity == 0.f) // ignore swim speed and flight speed because its not used in generic scripting - always possible to override
             args.velocity = unit.GetSpeed(MovementInfo::GetSpeedType(MovementFlags(moveFlags &~ (MOVEFLAG_FLYING | MOVEFLAG_SWIMMING))));
