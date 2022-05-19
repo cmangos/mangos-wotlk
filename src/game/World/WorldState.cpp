@@ -2483,12 +2483,32 @@ void WorldState::StartSunsReachPhase(bool initial)
 {
     switch (m_sunsReachData.m_phase)
     {
-        case SUNS_REACH_PHASE_1_STAGING_AREA: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_1); break;
-        case SUNS_REACH_PHASE_2_SANCTUM: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_ONLY); sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_PERMANENT); break;
+        case SUNS_REACH_PHASE_1_STAGING_AREA:
+            sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_1);
+            if (Map* map = sMapMgr.FindMap(530))
+                map->GetMessager().AddMessage([](Map* map)
+                {
+                    map->SetZoneWeather(ZONEID_ISLE_OF_QUEL_DANAS, 4, 0.75f);
+                });
+            break;
+        case SUNS_REACH_PHASE_2_SANCTUM:
+            sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_ONLY);
+            sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_PERMANENT);
+            if (Map* map = sMapMgr.FindMap(530))
+                map->GetMessager().AddMessage([](Map* map)
+                {
+                    map->SetZoneWeather(ZONEID_ISLE_OF_QUEL_DANAS, 3, 0.5f);
+                });
+            break;
         case SUNS_REACH_PHASE_3_ARMORY:
             if (initial)
                 sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_PERMANENT);
             sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_ONLY); sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_PERMANENT);
+            if (Map* map = sMapMgr.FindMap(530))
+                map->GetMessager().AddMessage([](Map* map)
+                {
+                    map->SetZoneWeather(ZONEID_ISLE_OF_QUEL_DANAS, 2, 0.25f);
+                });
             break;
         case SUNS_REACH_PHASE_4_HARBOR:
             if (initial)
@@ -2497,6 +2517,11 @@ void WorldState::StartSunsReachPhase(bool initial)
                 sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_PERMANENT);
             }
             sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4);
+            if (Map* map = sMapMgr.FindMap(530))
+                map->GetMessager().AddMessage([](Map* map)
+                {
+                    map->SetZoneWeather(ZONEID_ISLE_OF_QUEL_DANAS, 0, 0.f);
+                });
             break;
         default: break;
     }
