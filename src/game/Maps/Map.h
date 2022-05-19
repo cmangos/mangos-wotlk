@@ -371,6 +371,7 @@ class Map : public GridRefManager<NGridType>
         void SetZoneMusic(uint32 zoneId, uint32 musicId);
         void SetZoneWeather(uint32 zoneId, uint32 weatherId, float weatherGrade);
         void SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime);
+        void SendZoneDynamicInfo(Player* player) const;
 
         void CreatePlayerOnClient(Player* player);
 
@@ -422,8 +423,6 @@ class Map : public GridRefManager<NGridType>
         void SendInitTransports(Player* player) const;
         void SendRemoveTransports(Player* player) const;
         void LoadTransports();
-
-        void SendZoneDynamicInfo(Player* player) const;
 
         bool CreatureCellRelocation(Creature* c, const Cell& new_cell);
 
@@ -533,7 +532,7 @@ class Map : public GridRefManager<NGridType>
         WorldStateVariableManager m_variableManager;
 
         ZoneDynamicInfoMap m_zoneDynamicInfo;
-        uint32 i_defaultLight;
+        uint32 m_defaultLight;
 
         TimePoint m_dynamicDifficultyCooldown;
 

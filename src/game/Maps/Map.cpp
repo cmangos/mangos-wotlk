@@ -211,7 +211,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(nullptr),
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
-      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), i_defaultLight(GetDefaultMapLight(id)), m_spawnManager(*this),
+      i_data(nullptr), i_script_id(0), m_transportsIterator(m_transports.begin()), m_defaultLight(GetDefaultMapLight(id)), m_spawnManager(*this),
       m_variableManager(this)
 {
     m_weatherSystem = new WeatherSystem(this);
@@ -487,7 +487,6 @@ bool Map::Add(Player* player)
 
     SendInitSelf(player);
     SendInitTransports(player);
-    SendZoneDynamicInfo(player);
 
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
@@ -2844,7 +2843,7 @@ void Map::SendZoneDynamicInfo(Player* player) const
     if (uint32 overrideLight = itr->second.overrideLightId)
     {
         WorldPacket data(SMSG_OVERRIDE_LIGHT, 4 + 4 + 1);
-        data << uint32(i_defaultLight);
+        data << uint32(m_defaultLight);
         data << uint32(overrideLight);
         data << uint32(itr->second.lightFadeInTime);
         player->GetSession()->SendPacket(data);
@@ -2926,7 +2925,7 @@ void Map::SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime)
     if (!pList.isEmpty())
     {
         WorldPacket data(SMSG_OVERRIDE_LIGHT, 4 + 4 + 1);
-        data << uint32(i_defaultLight);
+        data << uint32(m_defaultLight);
         data << uint32(lightId);
         data << uint32(fadeInTime);
 
