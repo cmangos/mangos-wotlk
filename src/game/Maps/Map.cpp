@@ -2842,7 +2842,7 @@ void Map::SendZoneDynamicInfo(Player* player) const
 
     if (uint32 overrideLight = itr->second.overrideLightId)
     {
-        WorldPacket data(SMSG_OVERRIDE_LIGHT, 4 + 4 + 1);
+        WorldPacket data(SMSG_OVERRIDE_LIGHT, 4 + 4 + 4);
         data << uint32(m_defaultLight);
         data << uint32(overrideLight);
         data << uint32(itr->second.lightFadeInTime);
@@ -2924,7 +2924,7 @@ void Map::SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime)
 
     if (!pList.isEmpty())
     {
-        WorldPacket data(SMSG_OVERRIDE_LIGHT, 4 + 4 + 1);
+        WorldPacket data(SMSG_OVERRIDE_LIGHT, 4 + 4 + 4);
         data << uint32(m_defaultLight);
         data << uint32(lightId);
         data << uint32(fadeInTime);
