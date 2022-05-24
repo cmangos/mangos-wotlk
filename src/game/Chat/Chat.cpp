@@ -258,7 +258,7 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand debugLfgCommandTable[] =
     {
-        { "",               0,                  false, &ChatHandler::HandleDebugLfgCommand,                 "", nullptr },
+        { "",               SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugLfgCommand,                 "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
