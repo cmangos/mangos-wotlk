@@ -4940,8 +4940,10 @@ void Unit::_UpdateSpells(uint32 time)
 
 void Unit::_UpdateAutoRepeatSpell()
 {
-    // check "real time" interrupts
-    if (IsMovingIgnoreFlying() || IsNonMeleeSpellCasted(false, false, true))
+    SpellEntry const* autoRepeatSpellInfo = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo;
+
+    // check "real time" interrupts - auto shot in wotlk clips through SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS
+    if (IsMovingIgnoreFlying() || IsNonMeleeSpellCasted(false, false, true, false, autoRepeatSpellInfo->Id == 75))
     {
         if (!IsNonMeleeSpellCasted(false, false, true, false, true)) // stricter check to see if we should introduce cooldown or just return
             return;
