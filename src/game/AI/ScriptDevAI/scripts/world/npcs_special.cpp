@@ -2843,6 +2843,9 @@ const std::vector<uint32> winterTextsHorde = { 16464, 24324, 24325 };
 const std::vector<uint32> brewfestTextsAlliance = { 23629, 23630 };
 const std::vector<uint32> brewfestTextsHorde = { 23627, 23628 };
 
+const std::vector<uint32> hallowsEndTextsAlliance = { 24346, 24348, 24338, 24339, 23287, 23293, 24347, 23357 };
+const std::vector<uint32> hallowsEndTextsHorde = { 23295, 24331, 23298, 24329, 24336, 23351, 24337, 24330 };
+
 uint32 GetRandomText(const std::vector<uint32> texts)
 {
     return texts[urand(0, texts.size() - 1)];
@@ -2879,7 +2882,37 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
 
         if (events == GOSSIP_EVENT_HALLOWS_END)
         {
-
+            std::vector<uint32> texts;
+            switch (spell->GetCaster()->GetEntry())
+            {
+                default:
+                case NPC_HUMAN_COMMONER: // 23358 human only
+                case NPC_DWARF_COMMONER: // 23359 prolly dwarf only
+                case NPC_GNOME_COMMONER: // 23361 gnome only
+                case NPC_NIGHT_ELF_COMMONER: // 23362
+                case NPC_DRAENEI_COMMONER: texts = hallowsEndTextsAlliance; break; // 23362
+                case NPC_BLOOD_ELF_COMMONER: // 23356
+                case NPC_ORC_COMMONER: // 23352
+                case NPC_TAUREN_COMMONER: // 23355
+                case NPC_TROLL_COMMONER: // 23354
+                case NPC_FORSAKEN_COMMONER: // 23353
+                case NPC_GOBLIN_COMMONER: texts = hallowsEndTextsHorde; break;
+            }
+            switch (spell->GetCaster()->GetEntry())
+            {
+                default:
+                case NPC_HUMAN_COMMONER: texts.push_back(23358); break;
+                case NPC_DWARF_COMMONER: texts.push_back(23359); break;
+                case NPC_GNOME_COMMONER: texts.push_back(23361); break;
+                case NPC_NIGHT_ELF_COMMONER: texts.push_back(23362); break;
+                case NPC_DRAENEI_COMMONER: texts.push_back(23362); break; 
+                case NPC_BLOOD_ELF_COMMONER: texts.push_back(23356); break;
+                case NPC_ORC_COMMONER: texts.push_back(23352); break; 
+                case NPC_TAUREN_COMMONER: texts.push_back(23355); break;
+                case NPC_TROLL_COMMONER: texts.push_back(23354); break;
+                case NPC_FORSAKEN_COMMONER: texts.push_back(23353); break;
+            }
+            textId = GetRandomText(texts);
         }
 
         if (events == GOSSIP_EVENT_LUNAR_FESTIVAL)
