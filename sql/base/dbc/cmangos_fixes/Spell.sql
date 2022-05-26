@@ -2683,6 +2683,9 @@ UPDATE spell_template SET DmgMultiplier1=0 WHERE Id IN(41039);
 -- Ahune - Cold Slap - all 3 effects should hit player
 UPDATE spell_template SET EffectImplicitTargetA2=25,EffectImplicitTargetA3=25 WHERE Id IN(46145);
 
+-- Ahune - Cold Slap - all 3 effects should hit player
+UPDATE spell_template SET EffectImplicitTargetA2=25,EffectImplicitTargetA3=25 WHERE Id IN(46145);
+
 -- ============================================================
 -- WOTLK section
 -- ============================================================
