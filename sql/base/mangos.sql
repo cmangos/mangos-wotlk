@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14059_01_mangos_vehicle_seat_accessory` bit(1) DEFAULT NULL
+  `required_14060_01_mangos_waypoint_path_name` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -20087,6 +20087,13 @@ CREATE TABLE `waypoint_path`  (
   `ScriptId` mediumint(8) UNSIGNED NOT NULL DEFAULT 0,
   `Comment` text NULL DEFAULT NULL,
   PRIMARY KEY (`PathId`, `Point`)
+);
+
+DROP TABLE IF EXISTS waypoint_path_name;
+CREATE TABLE waypoint_path_name(
+  `PathId` int(11) unsigned NOT NULL DEFAULT '0' COMMENT 'Path ID for entry',
+  `Name` VARCHAR(300) NOT NULL COMMENT 'Description of usage',
+  PRIMARY KEY(`PathId`)
 );
 
 --
