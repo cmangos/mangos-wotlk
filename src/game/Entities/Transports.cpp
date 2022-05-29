@@ -619,13 +619,9 @@ void ElevatorTransport::Update(const uint32 diff)
                 currentPos = posPrev;
             else
             {
-                uint32 timeElapsed = m_pathProgress - nodePrev->TimeSeg;
-                uint32 timeDiff = nodeNext->TimeSeg - nodePrev->TimeSeg;
-                G3D::Vector3 segmentDiff = posNext - posPrev;
-                float velocityX = float(segmentDiff.x) / timeDiff, velocityY = float(segmentDiff.y) / timeDiff, velocityZ = float(segmentDiff.z) / timeDiff;
+                float nodeProgress = float(m_pathProgress - nodePrev->TimeSeg) / float(nodeNext->TimeSeg - nodePrev->TimeSeg);
 
-                currentPos = G3D::Vector3(timeElapsed * velocityX, timeElapsed * velocityY, timeElapsed * velocityZ);
-                currentPos += posPrev;
+                currentPos = posPrev.lerp(posNext, nodeProgress);
             }
 
             TransportRotationEntry const* rotPrev = m_animationInfo->GetPrevRotation(m_pathProgress);
@@ -637,10 +633,12 @@ void ElevatorTransport::Update(const uint32 diff)
                     rotation = G3D::Quat(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
                 else
                 {
-                    uint32 timeElapsed = m_pathProgress - rotPrev->TimeSeg;
-                    uint32 timeDiff = rotNext->TimeSeg - rotPrev->TimeSeg;
-                    G3D::Quat quaternionDiff((rotNext->x - rotPrev->x) / timeDiff, (rotNext->y - rotPrev->y) / timeDiff, (rotNext->z - rotPrev->z) / timeDiff, (rotNext->w - rotPrev->w) / timeDiff);
-                    rotation = G3D::Quat(rotPrev->x + quaternionDiff.x * timeElapsed, rotPrev->y + quaternionDiff.y * timeElapsed, rotPrev->z + quaternionDiff.z * timeElapsed, rotPrev->w + quaternionDiff.w * timeElapsed);
+                    G3D::Quat quatPrev(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
+                    G3D::Quat quatNext(rotNext->x, rotNext->y, rotNext->z, rotNext->w);
+
+                    float nodeProgress = float(m_pathProgress - rotPrev->TimeSeg) / float(rotNext->TimeSeg - rotPrev->TimeSeg);
+
+                    rotation = quatPrev.slerp(quatNext, nodeProgress);
                 }
 
                 SetOrientation(std::asin(rotation.z) * 2);
