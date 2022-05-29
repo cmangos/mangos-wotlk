@@ -197,12 +197,11 @@ void Map::LoadMapAndVMap(int gx, int gy)
     if (m_bLoadedGrids[gx][gy])
         return;
 
-    if (m_TerrainData->Load(gx, gy))
-    {
+    if (m_TerrainData->Load(gx, gy)) // fails also on maps which have no tiles for everything except mmaps
         m_bLoadedGrids[gx][gy] = true;
-        if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(GetId(), GetInstanceId(), gx, gy))
-            MMAP::MMapFactory::createOrGetMMapManager()->loadMap(GetId(), GetInstanceId(), gx, gy, 0);
-    }
+
+    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(GetId(), GetInstanceId(), gx, gy))
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(GetId(), GetInstanceId(), gx, gy, 0);
 }
 
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)

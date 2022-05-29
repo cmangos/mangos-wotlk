@@ -841,7 +841,7 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
     if (useVmaps)
     {
         VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-        if (vmgr && vmgr->isHeightCalcEnabled())
+        if (vmgr->isHeightCalcEnabled())
         {
             float z2 = z + 2.0f;
 
