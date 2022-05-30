@@ -37,6 +37,11 @@ class Group;
 class BattleGround;
 class Map;
 
+namespace VMAP
+{
+    class IVMapManager;
+};
+
 class GridMap
 {
     private:
@@ -167,6 +172,8 @@ class TerrainInfo : public Referencable<std::atomic_long>
         // THIS METHOD IS NOT THREAD-SAFE!!!! AND IT SHOULDN'T BE THREAD-SAFE!!!!
         void CleanUpGrids(const uint32 diff);
 
+        bool CanCheckLiquidLevel(float x, float y) const;
+
     protected:
         friend class Map;
         friend class ObjectMgr;
@@ -187,10 +194,13 @@ class TerrainInfo : public Referencable<std::atomic_long>
         const uint32 m_mapId;
 
         GridMap* m_GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        bool m_GridMapsLoadAttempted[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
         int16 m_GridRef[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
         // global garbage collection timer
         ShortIntervalTimer i_timer;
+
+        VMAP::IVMapManager* m_vmgr;
 
         typedef std::mutex LOCK_TYPE;
         typedef std::lock_guard<LOCK_TYPE> LOCK_GUARD;
