@@ -151,7 +151,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         float GetWaterOrGroundLevel(float x, float y, float z, float& groundZ, bool swim = false, float minWaterDeep = DEFAULT_COLLISION_HEIGHT) const;
         bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr, float min_depth = 2.0f) const;
         bool IsSwimmable(float x, float y, float z, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
-        bool IsUnderWater(float x, float y, float z, float* pWaterZ = nullptr) const;
+        bool IsUnderWater(float x, float y, float z, float* waterZ = nullptr) const;
         bool IsAboveWater(float x, float y, float z, float* pWaterZ = nullptr) const;
 
         GridMapLiquidStatus getLiquidStatus(float x, float y, float z, uint8 ReqLiquidType, GridMapLiquidData* data = nullptr, float collisionHeight = 2.03128f) const;
