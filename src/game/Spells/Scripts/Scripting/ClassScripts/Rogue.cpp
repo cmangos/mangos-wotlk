@@ -101,6 +101,37 @@ struct SetupRogue : public AuraScript
     }
 };
 
+// 14082 - Dirty Deeds
+struct DirtyDeeds : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
+        else if (aura->GetEffIndex() == EFFECT_INDEX_2)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            return;
+
+        if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+        {
+            Aura* eff0 = aura->GetHolder()->m_auras[EFFECT_INDEX_0];
+            if (!eff0)
+            {
+                sLog.outError("Spell structure of DD (%u) changed.", aura->GetId());
+                return;
+            }
+
+            // effect 0 have expected value but in negative state
+            totalMod *= (-eff0->GetModifier()->m_amount + 100.0f) / 100.0f;
+        }
+    }
+};
+
 struct KillingSpreeStorage : public ScriptStorage
 {
     GuidSet targets;
@@ -185,6 +216,7 @@ void LoadRogueScripts()
     RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
     RegisterSpellScript<SetupRogue>("spell_setup_rogue");
+    RegisterSpellScript<DirtyDeeds>("spell_dirty_deeds");
     RegisterSpellScript<KillingSpree>("spell_killing_spree");
     RegisterSpellScript<PreyOnTheWeak>("spell_prey_on_the_weak");
 }
