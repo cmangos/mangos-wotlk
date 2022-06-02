@@ -320,7 +320,7 @@ enum SpellAttributesServerside
     SPELL_ATTR_SS_IGNORE_EVADE                 = 0x00000004,
 };
 
-enum SpellCastResult
+enum SpellCastResult : uint32
 {
     SPELL_FAILED_SUCCESS                        = 0,
     SPELL_FAILED_AFFECTING_COMBAT               = 1,
@@ -510,6 +510,8 @@ enum SpellCastResult
     SPELL_FAILED_PET_CAN_RENAME                 = 185,
     SPELL_FAILED_TARGET_CANNOT_BE_RESURRECTED   = 186,
     SPELL_FAILED_UNKNOWN                        = 187,                             // actually doesn't exist in client
+
+    SPELL_FAILED_CLIENT_MAX                     = 188,
 
     SPELL_NOT_FOUND = 254,                                  // custom value, don't must be send to client
     SPELL_CAST_OK = 255
@@ -730,5 +732,7 @@ enum TriggerCastFlags : uint32
     TRIGGERED_CHANNEL_ONLY                      = 0x00008000,   // Only starts channel and no effects - used for summoning portal GO anims
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
+
+const char* GetSpellCastResultString(SpellCastResult result);
 
 #endif
