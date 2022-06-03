@@ -529,7 +529,7 @@ Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags
     CleanupTargetList();
 
     m_spellLog.Initialize();
-    m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_HIDE_IN_COMBAT_LOG | SPELL_ATTR_DO_NOT_DISPLAY)) == 0;
+    m_needSpellLog = (m_spellInfo->Attributes & (SPELL_ATTR_DO_NOT_LOG | SPELL_ATTR_DO_NOT_DISPLAY)) == 0;
 
     m_travellingStart = UINT32_MAX;
 
@@ -850,7 +850,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
         default:
             if (IsPositiveEffectMask(m_spellInfo, effectMask, caster, target))           // Check for positive spell
             {
-                if (m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY))
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY))
                 {
                     procAttacker = PROC_FLAG_DEAL_HELPFUL_ABILITY;
                     procVictim = PROC_FLAG_TAKE_HELPFUL_ABILITY;
@@ -868,7 +868,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
             }
             else                                           // Negative spell
             {
-                if (m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY))
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY))
                 {
                     procAttacker = PROC_FLAG_DEAL_HARMFUL_ABILITY;
                     procVictim = PROC_FLAG_TAKE_HARMFUL_ABILITY;
@@ -3315,7 +3315,7 @@ void Spell::cancel()
                     ihit.processed = true;
                 }
             }
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
                 m_caster->RemoveSpellCooldown(*m_spellInfo, true); // need to clear cooldown in client
 
             SendChannelUpdate(0);
@@ -3876,7 +3876,7 @@ void Spell::SendSpellCooldown()
     if (m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) || m_channelOnly)
         return;
 
-    m_trueCaster->AddCooldown(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr, m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE));
+    m_trueCaster->AddCooldown(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr, m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT));
 }
 
 void Spell::update(uint32 difftime)
@@ -4164,7 +4164,7 @@ void Spell::finish(bool ok)
         CastTriggerSpells();
 
     // Stop Attack for some spells
-    if (m_caster && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET))
+    if (m_caster && m_spellInfo->HasAttribute(SPELL_ATTR_CANCELS_AUTO_ATTACK_COMBAT))
     {
         if (IsRangedSpell()) // blizzlike order
             m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
@@ -4224,7 +4224,7 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
     switch (result)
     {
         case SPELL_FAILED_NOT_READY:
-            if (spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            if (spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
                 data << uint32(caster->IsSpellOnPermanentCooldown(*spellInfo));
             break;
         case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
@@ -5338,10 +5338,10 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     if (m_caster)
     {
-        if (!m_caster->IsAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD) && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
+        if (!m_caster->IsAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_ALLOW_CAST_WHILE_DEAD) && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
             return SPELL_FAILED_CASTER_DEAD;
 
-        if (!m_IsTriggeredSpell && !m_caster->IsStandState() && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_SITTING))
+        if (!m_IsTriggeredSpell && !m_caster->IsStandState() && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !m_spellInfo->HasAttribute(SPELL_ATTR_ALLOW_WHILE_SITTING))
             return SPELL_FAILED_NOT_STANDING;
 
         if ((!m_IsTriggeredSpell || m_triggeredByAuraSpell) && IsNonCombatSpell(m_spellInfo) && m_caster->IsInCombat() && !m_caster->IsIgnoreUnitState(m_spellInfo, IGNORE_UNIT_COMBAT_STATE))
@@ -5357,11 +5357,11 @@ SpellCastResult Spell::CheckCast(bool strict)
             sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) &&
             VMAP::VMapFactory::createOrGetVMapManager()->isLineOfSightCalcEnabled())
         {
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_OUTDOORS_ONLY) &&
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_ONLY_OUTDOORS) &&
                 !m_caster->GetTerrain()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
                 return SPELL_FAILED_ONLY_OUTDOORS; // TODO: If at least one effect is SPELL_AURA_MOUNTED return mounts not allowed
 
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_INDOORS_ONLY) &&
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_ONLY_INDOORS) &&
                 m_caster->GetTerrain()->IsOutdoors(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()))
                 return SPELL_FAILED_ONLY_INDOORS;
         }
@@ -5645,7 +5645,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
 
             // Caster must be facing the targets front
-            if (((m_spellInfo->Attributes == (SPELL_ATTR_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DONT_AFFECT_SHEATH_STATE | SPELL_ATTR_STOP_ATTACK_TARGET)) && !m_trueCaster->IsFacingTargetsFront(target)))
+            if (((m_spellInfo->Attributes == (SPELL_ATTR_IS_ABILITY | SPELL_ATTR_NOT_SHAPESHIFT | SPELL_ATTR_DO_NOT_SHEATH | SPELL_ATTR_CANCELS_AUTO_ATTACK_COMBAT)) && !m_trueCaster->IsFacingTargetsFront(target)))
                 return SPELL_FAILED_NOT_INFRONT;
 
             // check if target is in combat
@@ -5784,7 +5784,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // not let players cast spells at mount (and let do it to creatures)
     if (m_trueCaster->IsPlayer() && m_caster->GetMountID() && !m_IsTriggeredSpell &&
-            !IsPassiveSpell(m_spellInfo) && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED))
+            !IsPassiveSpell(m_spellInfo) && !m_spellInfo->HasAttribute(SPELL_ATTR_ALLOW_WHILE_MOUNTED))
     {
         if (m_caster->IsTaxiFlying())
             return SPELL_FAILED_NOT_ON_TAXI;
@@ -7169,7 +7169,7 @@ std::pair<float, float> Spell::GetMinMaxRange(bool strict)
 
     if (caster)
     {
-        if (m_spellInfo->HasAttribute(SPELL_ATTR_RANGED) && caster->GetTypeId() == TYPEID_PLAYER)
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && caster->GetTypeId() == TYPEID_PLAYER)
             if (Item* ranged = static_cast<Player*>(caster)->GetWeaponForAttack(RANGED_ATTACK))
                 maxRange *= ranged->GetProto()->RangedModRange * 0.01f;
 
@@ -7335,7 +7335,7 @@ uint32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spel
         if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, powerCost, finalUse);
 
-    if (spellInfo->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION))
+    if (spellInfo->HasAttribute(SPELL_ATTR_SCALES_WITH_CREATURE_LEVEL))
     {
         GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(spellInfo->spellLevel - 1);
         GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(caster->GetLevel() - 1);
@@ -7526,6 +7526,10 @@ SpellCastResult Spell::CheckItems()
         if (!m_targets.getItemTarget()->IsFitToSpellRequirements(m_spellInfo))
             return m_IsTriggeredSpell  && !(m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM)
                    ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_EQUIPPED_ITEM_CLASS;
+
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_HELD_ITEM_ONLY) && m_targets.getItemTarget()->GetSlot() != EQUIPMENT_SLOT_MAINHAND)
+            return m_IsTriggeredSpell && !(m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM)
+                   ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_MAINHAND_EMPTY;
 
         // Do not enchant vellum with scroll
         if (isVellumTarget && isScrollItem)
@@ -8148,7 +8152,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         if (!IsAllowingDeadTarget(m_spellInfo) && !target->IsAlive())
         {
             if (m_trueCaster->IsPlayer())
-                if (target != m_trueCaster || !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD))
+                if (target != m_trueCaster || !m_spellInfo->HasAttribute(SPELL_ATTR_ALLOW_CAST_WHILE_DEAD))
                     return false;
 
             if (target != m_trueCaster)
@@ -9713,7 +9717,7 @@ SpellCastResult Spell::CheckVehicle(Unit const* caster, SpellEntry const& spellI
             checkMask = SEAT_FLAG_CAN_ATTACK;
 
         VehicleSeatEntry const* vehicleSeat = vehicle->GetSeatForPassenger(caster);
-        if (!spellInfo.HasAttribute(SPELL_ATTR_EX6_CASTABLE_WHILE_ON_VEHICLE) && !spellInfo.HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED)
+        if (!spellInfo.HasAttribute(SPELL_ATTR_EX6_CASTABLE_WHILE_ON_VEHICLE) && !spellInfo.HasAttribute(SPELL_ATTR_ALLOW_WHILE_MOUNTED)
             && (vehicleSeat->m_flags & checkMask) != checkMask)
             return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
 

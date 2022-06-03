@@ -249,7 +249,7 @@ struct SpellAbsorption : public AuraScript
 {
     bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
     {
-		return data.spell && !data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY);
+		return data.spell && !data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY);
     }
 
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override

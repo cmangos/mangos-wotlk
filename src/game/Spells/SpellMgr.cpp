@@ -150,7 +150,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
     castTime = std::max(castTime, spellCastTimeEntry->MinCastTime);
 
     // Hunter Ranged spells need cast time + 0.5s to reflect tooltips, excluding Auto Shot
-    if (spellInfo->HasAttribute(SPELL_ATTR_RANGED) && (!spell || !spell->IsAutoRepeat()))
+    if (spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT) && (!spell || !spell->IsAutoRepeat()))
         castTime += 500;
 
     if (spell)
@@ -161,7 +161,7 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
         if (caster->IsUnit())
         {
             Unit* unitCaster = static_cast<Unit*>(caster);
-            if (!spellInfo->HasAttribute(SPELL_ATTR_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_TRADESPELL) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
+            if (!spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY) && !spellInfo->HasAttribute(SPELL_ATTR_IS_TRADESKILL) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
                 castTime = int32(castTime * unitCaster->GetFloatValue(UNIT_MOD_CAST_SPEED));
             else if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
                 castTime = int32(castTime * unitCaster->m_modAttackSpeedPct[RANGED_ATTACK]);

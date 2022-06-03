@@ -3267,7 +3267,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, 
                      die.chance[UNIT_COMBAT_DIE_PARRY], die.chance[UNIT_COMBAT_DIE_DEFLECT], die.chance[UNIT_COMBAT_DIE_BLOCK]);
 
     // Memorize heartbeat resist chance if needed:
-    if (heartbeatResistChance && spell->HasAttribute(SPELL_ATTR_HEARTBEAT_RESIST_CHECK))
+    if (heartbeatResistChance && spell->HasAttribute(SPELL_ATTR_HEARTBEAT_RESIST))
         *heartbeatResistChance = (die.chance[UNIT_COMBAT_DIE_RESIST] + die.chance[UNIT_COMBAT_DIE_MISS]);
 
     const uint32 random = urand(1, 10000);
@@ -3298,7 +3298,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell, 
                      die.chance[UNIT_COMBAT_DIE_MISS], die.chance[UNIT_COMBAT_DIE_RESIST], die.chance[UNIT_COMBAT_DIE_DEFLECT]);
 
     // Memorize heartbeat resist chance if needed:
-    if (heartbeatResistChance && spell->HasAttribute(SPELL_ATTR_HEARTBEAT_RESIST_CHECK))
+    if (heartbeatResistChance && spell->HasAttribute(SPELL_ATTR_HEARTBEAT_RESIST))
         *heartbeatResistChance = (die.chance[UNIT_COMBAT_DIE_RESIST] + die.chance[UNIT_COMBAT_DIE_MISS]);
 
     const uint32 random = urand(1, 10000);
@@ -3566,7 +3566,7 @@ bool Unit::CanDazeInCombat(const Unit* victim) const
 
 bool Unit::CanReactOnAbility(const SpellEntry* ability) const
 {
-    return (ability && !ability->HasAttribute(SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK));
+    return (ability && !ability->HasAttribute(SPELL_ATTR_NO_ACTIVE_DEFENSE));
 }
 
 bool Unit::CanDodgeAbility(const Unit* attacker, const SpellEntry* ability) const
@@ -5802,7 +5802,8 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         const bool own = (holder->GetCasterGuid() == existing->GetCasterGuid());
 
         // early checks that spellId is passive non stackable spell
-        if (IsPassiveSpell(existingSpellProto) && (spellId != existingSpellId))
+        // Experimental: passive abilities dont stack with itself
+        if (IsPassiveSpell(existingSpellProto) && (spellId != existingSpellId || !spellProto->HasAttribute(SPELL_ATTR_IS_ABILITY)))
         {
             // passive non-stackable spells not stackable only for same caster
             if (!own)
@@ -6458,7 +6459,7 @@ void Unit::RemoveArenaAuras(bool onleave)
                 // don't remove stances, shadowform, pally/hunter auras
                 !iter->second->IsPassive() &&               // don't remove passive auras
                 (!iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_NO_IMMUNITIES) ||
-                 !iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_HIDE_IN_COMBAT_LOG)) &&
+                 !iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_DO_NOT_LOG)) &&
                 !HasAreaAuraEffect(iter->second->GetSpellProto()) &&
                 // not unaffected by invulnerability auras or not having that unknown flag (that seemed the most probable)
                 (iter->second->IsPositive() != onleave))   // remove positive buffs on enter, negative buffs on leave
@@ -6771,7 +6772,7 @@ void Unit::AddGameObject(GameObject* gameObj)
     {
         SpellEntry const* createBySpell = sSpellTemplate.LookupEntry<SpellEntry>(gameObj->GetSpellId());
         // Need disable spell use for owner
-        if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+        if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
             // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
             AddCooldown(*createBySpell);
     }
@@ -6810,7 +6811,7 @@ void Unit::RemoveGameObject(GameObject* gameObj, bool del)
         {
             SpellEntry const* createBySpell = sSpellTemplate.LookupEntry<SpellEntry>(spellid);
             // Need activate spell use for owner
-            if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+            if (createBySpell && createBySpell->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
                 // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
                 AddCooldown(*createBySpell);
         }
@@ -8006,7 +8007,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell)
     // Magic case
     if (spell && spell->m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
     {
-        if (spell->m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REDIRECTED) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
+        if (spell->m_spellInfo->HasAttribute(SPELL_ATTR_IS_ABILITY) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REDIRECTED) || spell->m_spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
             return nullptr;
 
         Unit::AuraList const& magnetAuras = victim->GetAurasByType(SPELL_AURA_SPELL_MAGNET);

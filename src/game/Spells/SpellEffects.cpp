@@ -5523,7 +5523,7 @@ bool Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype, bool reportE
 
 void Spell::EffectCreateItem(SpellEffectIndex eff_idx)
 {
-    if (DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx], !m_spellInfo->HasAttribute(SPELL_ATTR_HIDE_IN_COMBAT_LOG)))
+    if (DoCreateItem(eff_idx, m_spellInfo->EffectItemType[eff_idx], !m_spellInfo->HasAttribute(SPELL_ATTR_DO_NOT_LOG)))
         m_spellLog.AddLog(uint32(SPELL_EFFECT_CREATE_ITEM), m_spellInfo->EffectItemType[eff_idx]);
 }
 
@@ -12074,7 +12074,7 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
     // Players: charge against hostiles initiates auto-attack
     // TODO: This is executed after spell effects. Verify if this should be executed before spell effects
     if (m_caster->IsClientControlled() && m_caster->CanAttackNow(unitTarget) && m_caster->CanAttackSpell(unitTarget, m_spellInfo))
-        m_caster->Attack(unitTarget, !m_spellInfo->HasAttribute(SPELL_ATTR_RANGED));
+        m_caster->Attack(unitTarget, !m_spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT));
 }
 
 void Spell::EffectChargeDest(SpellEffectIndex /*eff_idx*/)
