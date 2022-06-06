@@ -2930,6 +2930,8 @@ class Player : public Unit
         GuidSet m_controlled;
         std::map<uint32, ObjectGuid> m_followAngles;
 
+        uint8 m_fishingSteps;
+
         std::set<uint32> m_serversideDailyQuests;
 };
 
