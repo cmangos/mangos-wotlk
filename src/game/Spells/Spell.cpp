@@ -734,6 +734,25 @@ void Spell::FillTargetMap()
                 break;
         }
     }
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_FAIL_ON_ALL_TARGETS_IMMUNE))
+    {
+        bool allImmune = true;
+        for (auto& ihit : m_UniqueTargetInfo)
+        {
+            if (ihit.missCondition != SPELL_MISS_IMMUNE && ihit.missCondition != SPELL_MISS_IMMUNE2)
+            {
+                allImmune = false;
+                break;
+            }
+        }
+
+        if (allImmune)
+        {
+            SendCastResult(SPELL_FAILED_IMMUNE); // guessed error
+            finish(false);
+        }
+    }
 }
 
 bool Spell::FillUnitTargets(TempTargetingData& targetingData, SpellTargetingData& data, uint32 i)
@@ -836,7 +855,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
             break;
         case SPELL_DAMAGE_CLASS_RANGED:
             // Auto attack
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTO_REPEAT))
             {
                 procAttacker = PROC_FLAG_DEAL_RANGED_ATTACK;
                 procVictim = PROC_FLAG_TAKE_RANGED_ATTACK;
@@ -861,7 +880,7 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
                     procVictim = PROC_FLAG_TAKE_HELPFUL_SPELL;
                 }
             }
-            else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))   // Wands auto attack
+            else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTO_REPEAT))   // Wands auto attack
             {
                 procAttacker = PROC_FLAG_DEAL_RANGED_ATTACK;
                 procVictim = PROC_FLAG_TAKE_RANGED_ATTACK;
@@ -2320,7 +2339,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 // Filling target map
                 UnitList tempAoeList;
                 {
-                    FillAreaTargets(tempAoeList, maxRadiusTarget, cone, PUSH_TARGET_CENTER, SPELL_TARGETS_ALL);
+                    FillAreaTargets(tempAoeList, maxRadiusTarget, cone, m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CHAIN_FROM_CASTER) ? PUSH_SELF_CENTER : PUSH_TARGET_CENTER, SPELL_TARGETS_ALL);
                     tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), newUnitTarget), tempAoeList.end());
                 }
 
@@ -2366,6 +2385,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 UnitList tempAoeList;
                 {
                     SpellNotifyPushType pushType = PUSH_TARGET_CENTER;
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CHAIN_FROM_CASTER))
+                        pushType = PUSH_SELF_CENTER;
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_CLEAVE_FRONT_TARGET))
                         pushType = PUSH_CONE;
                     FillAreaTargets(tempAoeList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
@@ -3222,7 +3243,8 @@ void Spell::Prepare()
 
     if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject())
     {
-        m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION, m_spellInfo);
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
+            m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION, m_spellInfo);
 
         // Orientation changes inside
         if (m_notifyAI && m_caster->AI())
@@ -3598,7 +3620,7 @@ SpellCastResult Spell::cast(bool skipCheck)
 
     OnCast();
 
-    if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject())
+    if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
         m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);
 
     // process immediate effects (items, ground, etc.) also initialize some variables
@@ -3756,7 +3778,7 @@ void Spell::_handle_immediate_phase()
 
     if (IsMeleeAttackResetSpell())
     {
-        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DO_NOT_RESET_COMBAT_TIMERS))
         {
             m_caster->resetAttackTimer(BASE_ATTACK);
             if (m_caster->hasOffhandWeaponForAttack())
@@ -3946,7 +3968,7 @@ void Spell::update(uint32 difftime)
                             cancel();
                     }
 
-                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST)) // these fail on lost target attention (aggro)
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_SPECIAL_TAMING_FLAG)) // these fail on lost target attention (aggro)
                     {
                         if (Unit* target = dynamic_cast<Unit*>(m_caster->GetChannelObject()))
                         {
@@ -4217,6 +4239,9 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
     if (result == SPELL_CAST_OK)
         return;
 
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX2_DO_NOT_REPORT_SPELL_FAILURE))
+        result = SPELL_FAILED_DONT_REPORT;
+
     WorldPacket data(isPetCastResult ? SMSG_PET_CAST_FAILED : SMSG_CAST_RESULT, (4 + 1 + 2));
     data << uint8(cast_count);                              // single cast or multi 2.3 (0/1)
     data << uint32(spellInfo->Id);
@@ -4400,6 +4425,8 @@ void Spell::SendSpellGo()
 
     if (m_CastItem)
         data << m_CastItem->GetPackGUID();
+    else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_RETAIN_ITEM_CAST) && m_forwardedCastItemGuid)
+        data << m_forwardedCastItemGuid.WriteAsPacked();
     else
         data << m_trueCaster->GetPackGUID();
 
@@ -4928,7 +4955,7 @@ void Spell::TakePower()
     m_caster->ModifyPower(powerType, -(int32)m_powerCost);
 
     // Set the five second timer
-    if (powerType == POWER_MANA && m_powerCost > 0)
+    if (powerType == POWER_MANA && m_powerCost > 0 && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DONT_BLOCK_MANA_REGEN))
         m_caster->SetLastManaUse();
 }
 
@@ -5552,13 +5579,14 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
                     // this case can be triggered if rank not found (too low-level target for first rank)
-                    if (!m_CastItem && !m_IsTriggeredSpell)
+                    if (!m_CastItem && !m_IsTriggeredSpell && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_LOW_LEVEL_BUFF))
                         // spell expected to be auto-downranking in cast handle, so must be same
                         if (m_spellInfo != sSpellMgr.SelectAuraRankForLevel(m_spellInfo, target->GetLevel()))
                             return SPELL_FAILED_LOWLEVEL;
 
                     // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
-                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
+                    // Checked here, for single target spells, checked in CheckTarget to take care of AoE spells
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANNOT_CAST_ON_TAPPED) && !IsAreaOfEffectSpell(m_spellInfo))
                         if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
                             if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy(static_cast<Player*>(m_trueCaster)))
                                 return SPELL_FAILED_CANT_CAST_ON_TAPPED;
@@ -5639,7 +5667,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_TARGET_AURASTATE;
 
             // Caster must be facing the targets back
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_FACING_TARGETS_BACK) && m_spellInfo->HasAttribute(SPELL_ATTR_EX_INITIATES_COMBAT_ENABLES_AUTO_ATTACK) && !m_trueCaster->IsFacingTargetsBack(target))
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_INITIATE_COMBAT_POST_CAST) && m_spellInfo->HasAttribute(SPELL_ATTR_EX_INITIATES_COMBAT_ENABLES_AUTO_ATTACK) && !m_trueCaster->IsFacingTargetsBack(target))
             {
                 // Exclusion for Pounce: Facing Limitation was removed in 2.0.1, but it still uses the same, old Ex-Flags
                 // Exclusion for Mutilate:Facing Limitation was removed in 2.0.1 and 3.0.3, but they still use the same, old Ex-Flags
@@ -6833,7 +6861,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NOT_TRADING;
     }
 
-    if (m_trueCaster->IsPlayer() && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST))
+    if (m_trueCaster->IsPlayer() && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NO_ACTIVE_PETS))
     {
         Player* player = static_cast<Player*>(m_caster);
         if (player->GetPetGuid() || player->HasCharm())
@@ -6909,7 +6937,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         // for target dead/target not valid
         if (_target && m_targets.m_targetMask & TARGET_FLAG_UNIT)
         {
-            if (_target->IsDead() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD))
+            if (_target->IsDead() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET))
                 return SPELL_FAILED_BAD_TARGETS;
 
             if (IsPositiveSpell(m_spellInfo->Id, m_caster, _target))
@@ -7706,6 +7734,9 @@ SpellCastResult Spell::CheckItems()
                 // Not allow enchant in trade slot for some enchant type
                 if (targetItem->GetOwner() != m_caster)
                 {
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ENCHANT_OWN_ITEM_ONLY))
+                        return SPELL_FAILED_NOT_TRADEABLE;
+
                     uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
                     SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                     if (!pEnchant)
@@ -7726,6 +7757,9 @@ SpellCastResult Spell::CheckItems()
                 // Not allow enchant in trade slot for some enchant type
                 if (item->GetOwner() != m_caster)
                 {
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_ENCHANT_OWN_ITEM_ONLY))
+                        return SPELL_FAILED_NOT_TRADEABLE;
+
                     uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
                     SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                     if (!pEnchant)
@@ -8080,7 +8114,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         if (affectiveCaster && affectiveCaster->IsPlayer())
         {
             // Do not allow these spells to target creatures not tapped by us (Banish, Polymorph, many quest spells)
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANT_TARGET_TAPPED))
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CANNOT_CAST_ON_TAPPED))
                 if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
                     if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy(static_cast<Player*>(affectiveCaster)))
                         return false;
