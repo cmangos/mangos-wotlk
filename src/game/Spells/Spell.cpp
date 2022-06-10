@@ -5605,7 +5605,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
             }
 
-            if ((m_targets.m_targetMask == TARGET_FLAG_SELF || m_trueCaster == target) && m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
+            if (!selfTargeting && (m_targets.m_targetMask == TARGET_FLAG_SELF || m_trueCaster == target) && m_spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_TARGET_SELF))
             {
                 if (IsOnlySelfTargeting(m_spellInfo))
                     sLog.outCustomLog("Spell ID %u cast at self explicitly even though it has SPELL_ATTR_EX_CANT_TARGET_SELF", m_spellInfo->Id);
