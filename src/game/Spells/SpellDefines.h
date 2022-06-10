@@ -171,16 +171,16 @@ enum SpellAttributesEx3
 
 enum SpellAttributesEx4
 {
-    SPELL_ATTR_EX4_IGNORE_RESISTANCES          = 0x00000001,// 0
-    SPELL_ATTR_EX4_PROC_ONLY_ON_CASTER         = 0x00000002,// 1 Only proc on self-cast
+    SPELL_ATTR_EX4_NO_CAST_LOG                 = 0x00000001,// 0
+    SPELL_ATTR_EX4_CLASS_TRIGGER_ONLY_ON_TARGET= 0x00000002,// 1
     SPELL_ATTR_EX4_AURA_EXPIRES_OFFLINE        = 0x00000004,// 2
-    SPELL_ATTR_EX4_UNK3                        = 0x00000008,// 3
-    SPELL_ATTR_EX4_UNK4                        = 0x00000010,// 4 This will no longer cause guards to attack on use??
-    SPELL_ATTR_EX4_UNK5                        = 0x00000020,// 5
-    SPELL_ATTR_EX4_NOT_STEALABLE               = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
-    SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING      = 0x00000080,// 7 In theory, can use this spell while another is channeled/cast/autocast
+    SPELL_ATTR_EX4_NO_HELPFUL_THREAT           = 0x00000008,// 3
+    SPELL_ATTR_EX4_NO_HARMFUL_THREAT           = 0x00000010,// 4
+    SPELL_ATTR_EX4_ALLOW_CLIENT_TARGETING      = 0x00000020,// 5
+    SPELL_ATTR_EX4_CANNOT_BE_STOLEN            = 0x00000040,// 6 although such auras might be dispellable, they cannot be stolen
+    SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING    = 0x00000080,// 7 Can use this spell while another is channeled/cast/autocast
     SPELL_ATTR_EX4_IGNORE_DAMAGE_TAKEN_MODIFIERS = 0x00000100,// 8
-    SPELL_ATTR_EX4_TRIGGER_ACTIVATE            = 0x00000200,// 9 initially disabled / trigger activate from event (Execute, Riposte, Deep Freeze end other)
+    SPELL_ATTR_EX4_COMBAT_FEEDBACK_WHEN_USABLE = 0x00000200,// 9 initially disabled / trigger activate from event (Execute, Riposte, Deep Freeze end other)
     SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST        = 0x00000400,// 10 Rogue Shiv have this flag
     SPELL_ATTR_EX4_UNK11                       = 0x00000800,// 11
     SPELL_ATTR_EX4_UNK12                       = 0x00001000,// 12
