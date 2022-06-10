@@ -608,6 +608,8 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     else // legacy compatibility
         SetSpellList(Entry * 100 + 0);
     UpdateImmunitiesSet(0);
+    if (IsCritter()) // meant to be also settable per creature immunity set
+        SetAOEImmune(true);
 
     SetVehicleId(GetCreatureInfo()->VehicleTemplateId, 0);
 

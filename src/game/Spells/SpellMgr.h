@@ -436,7 +436,7 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 
 inline bool IsSpellAffectedBySpellMods(SpellEntry const* spellInfo)
 {
-    return !(spellInfo->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED) && IsPassiveSpell(spellInfo));
+    return !(spellInfo->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_PROCS) && IsPassiveSpell(spellInfo));
 }
 
 inline bool IsAutocastable(SpellEntry const* spellInfo)
@@ -550,12 +550,12 @@ inline bool SpellCancelsAuraEffect(SpellEntry const* spellInfo, SpellEntry const
 
 inline bool IsDeathOnlySpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_EX3_CAST_ON_DEAD) || spellInfo->Id == 2584;
+    return spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_GHOSTS) || spellInfo->Id == 2584;
 }
 
 inline bool IsDeathPersistentSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_EX3_DEATH_PERSISTENT);
+    return spellInfo->HasAttribute(SPELL_ATTR_EX3_ALLOW_AURA_WHILE_DEAD);
 }
 
 inline bool IsNonCombatSpell(SpellEntry const* spellInfo)
@@ -2166,7 +2166,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
                 const bool attacktable = (entry->DmgClass && entry->DmgClass == entry2->DmgClass);
                 if ((attacktable || type) && !entry->SpellFamilyName && !entry2->SpellFamilyName)
                     return false; // Do not stack scrolls with other srolls and some procs (such as Hyjal ring)
-                if (player && related && siblings && entry->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
+                if (player && related && siblings && entry->HasAttribute(SPELL_ATTR_EX3_DOT_STACKING_RULE))
                     return true;
             }
             else
@@ -3155,13 +3155,13 @@ class SpellMgr
 
             // If spells are two instances of the same spell, check attribute first, and formal aura holder stacking rules after
             if (entry1 == entry2)
-                return (entry1->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS) || IsSpellStackableWithSpell(entry1, entry2));
+                return (entry1->HasAttribute(SPELL_ATTR_EX3_DOT_STACKING_RULE) || IsSpellStackableWithSpell(entry1, entry2));
 
             // If spells are in the same spell chain
             if (IsSpellAnotherRankOfSpell(entry1->Id, entry2->Id))
             {
                 // Both ranks have attribute, allow stacking
-                if (entry1->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS) && entry2->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
+                if (entry1->HasAttribute(SPELL_ATTR_EX3_DOT_STACKING_RULE) && entry2->HasAttribute(SPELL_ATTR_EX3_DOT_STACKING_RULE))
                     return true;
             }
 
