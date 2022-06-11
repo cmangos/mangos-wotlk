@@ -537,39 +537,29 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
     ProcExecutionData execData(argData, isVictim);
 
     ProcTriggeredList procTriggered;
-    std::vector<SpellAuraHolder*> removedHolders;
+    std::vector<SpellAuraHolder*> holdersForDeletion;
     // Fill procTriggered list
     for (SpellAuraHolderMap::const_iterator itr = GetSpellAuraHolderMap().begin(); itr != GetSpellAuraHolderMap().end(); ++itr)
     {
+        SpellAuraHolder* holder = itr->second;
         // skip deleted auras (possible at recursive triggered call
-        if (itr->second->GetState() != SPELLAURAHOLDER_STATE_READY || itr->second->IsDeleted())
+        if (holder->GetState() != SPELLAURAHOLDER_STATE_READY || holder->IsDeleted())
             continue;
 
         SpellProcEventEntry const* spellProcEvent = nullptr;
-        if (!IsTriggeredAtSpellProcEvent(execData, itr->second, spellProcEvent))
-        {
-            // spell seem not managed by proc system, although some case need to be handled
+        SpellProcEventTriggerCheck result = IsTriggeredAtSpellProcEvent(execData, holder, spellProcEvent);
+        if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE) &&
+            result == SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_ROLL_FAILED && holder->GetAuraCharges() > 0)
+            holdersForDeletion.push_back(holder);
 
-            // only process damage case on victim
-            if (!isVictim || !(execData.procFlags & PROC_FLAG_TAKE_ANY_DAMAGE) || (execData.spellInfo && execData.spellInfo->HasAttribute(SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS)))
-                continue;
-
-            const SpellEntry* se = itr->second->GetSpellProto();
-
-            // check if the aura is interruptible by damage and if its not just added by this spell (spell who is responsible for this damage is spellInfo)
-            if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE && (!execData.spellInfo || execData.spellInfo->Id != se->Id))
-            {
-                DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Reason: Damage received.", se->Id);
-                removedHolders.push_back(itr->second);
-            }
+        if (result != SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK)
             continue;
-        }
 
         procTriggered.push_back(ProcTriggeredData(spellProcEvent, itr->second));
     }
 
-    for (auto holder : removedHolders)
-        if (!holder->IsDeleted())
+    for (SpellAuraHolder* holder : holdersForDeletion)
+        if (holder->DropAuraCharge())
             RemoveSpellAuraHolder(holder);
 
     // Nothing found
@@ -661,7 +651,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
     }
 }
 
-bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent)
+Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder* holder, SpellProcEventEntry const*& spellProcEvent)
 {
     SpellEntry const* spellProto = holder->GetSpellProto();
 
@@ -676,11 +666,11 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
         EventProcFlag = spellProto->procFlags;       // else get from spell proto
     // Continue if no trigger exist
     if (!EventProcFlag)
-        return false;
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     // Check spellProcEvent data requirements
     if (!SpellMgr::IsSpellProcEventCanTriggeredBy(spellProcEvent, EventProcFlag, data.spellInfo, data.procFlags, data.procExtra))
-        return false;
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     // In most cases req get honor or XP from kill
     if (EventProcFlag & PROC_FLAG_KILL && GetTypeId() == TYPEID_PLAYER)
@@ -690,12 +680,12 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
         if (holder->GetId() == 32409)
             allow = true;
         if (!allow)
-            return false;
+            return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
     }
     // Aura added by spell can`t trigger from self (prevent drop charges/do triggers)
     // But except periodic triggers (can triggered from self)
     if (data.spellInfo && data.spellInfo->Id == spellProto->Id && !(EventProcFlag & PROC_FLAG_TAKE_HARMFUL_PERIODIC))
-        return false;
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     // Check if current equipment allows aura to proc
     if (!data.isVictim && GetTypeId() == TYPEID_PLAYER)
@@ -718,17 +708,22 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
             }
 
             if (!CanUseEquippedWeapon(data.attType))
-                return false;
+                return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
             if (!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((1 << item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
-                return false;
+                return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
         }
         else if (spellProto->EquippedItemClass == ITEM_CLASS_ARMOR)
         {
             // Check if player is wearing shield
             Item* item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+<<<<<<< HEAD
             if (!item || item->IsBroken() || !CanUseEquippedWeapon(OFF_ATTACK) || item->GetProto()->Class != ITEM_CLASS_ARMOR || !((1 << item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                 return false;
+=======
+            if (!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_ARMOR || !((1 << item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
+                return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+>>>>>>> fd807d15687... Spell: Also utilize SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE on roll chance fail
         }
     }
 
@@ -759,21 +754,24 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
         if (data.spell->m_IsTriggeredSpell && !spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED))
         {
             if (!data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TRIGGERED_CAN_TRIGGER_PROC) && !data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TRIGGERED_CAN_TRIGGER_SPECIAL))
-                return false;
+                return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
         }
 
         for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
             if (Aura* aura = holder->m_auras[i])
                 if (data.spell->IsAuraProcced(aura))
-                    return false;
+                    return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
     }
 
     for (uint8 i = 0; i < MAX_EFFECT_INDEX; ++i)
         if (Aura* aura = holder->m_auras[i])
             if (!aura->OnCheckProc(data))
-                return false;
+                return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
-    return roll_chance_f(chance);
+    if (roll_chance_f(chance))
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK;
+    else
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_ROLL_FAILED;
 }
 
 SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, uint32 triggeredSpellId, Item* castItem, Aura* triggeredByAura, uint32 cooldown, ObjectGuid originalCaster)
