@@ -7886,8 +7886,9 @@ void Unit::RemoveGuardians(bool force)
         ObjectGuid guid = *m_guardianPets.begin();
 
         if (Pet* pet = GetMap()->GetPet(guid))
-            if (force || !pet->IsInCombat())
-                pet->Unsummon(PET_SAVE_AS_DELETED, this); // can remove pet guid from m_guardianPets
+            if (!pet->IgnoresOwnersDeath())
+                if (force || !pet->IsInCombat())
+                    pet->Unsummon(PET_SAVE_AS_DELETED, this); // can remove pet guid from m_guardianPets
 
         m_guardianPets.erase(guid);
     }
@@ -9808,7 +9809,7 @@ void Unit::HandleExitCombat(bool pvpCombat)
     if (AI() && !GetClientControlling())
     {
         // guardians despawn on evade if their owner already despawned
-        if (IsCreature() && static_cast<Creature*>(this)->IsPet() && static_cast<Pet*>(this)->IsGuardian() && GetOwner() == nullptr)
+        if (IsCreature() && static_cast<Creature*>(this)->IsPet() && !static_cast<Pet*>(this)->IgnoresOwnersDeath() && GetOwner() == nullptr)
             static_cast<Pet*>(this)->Unsummon(PET_SAVE_AS_DELETED);
         else
             AI()->EnterEvadeMode();

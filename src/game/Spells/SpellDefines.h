@@ -86,9 +86,9 @@ enum SpellAttributesEx
     SPELL_ATTR_EX_FINISHING_MOVE_DAMAGE        = 0x00100000,// 20 Uses combo points
     SPELL_ATTR_EX_THREAT_ONLY_ON_MISS          = 0x00200000,// 21
     SPELL_ATTR_EX_FINISHING_MOVE_DURATION      = 0x00400000,// 22 Uses combo points
-    SPELL_ATTR_EX_UNK23                        = 0x00800000,// 23 Different in vanilla
+    SPELL_ATTR_EX_IGNORE_OWNERS_DEATH          = 0x00800000,// 23v
     SPELL_ATTR_EX_SPECIAL_SKILLUP              = 0x01000000,// 24
-    SPELL_ATTR_EX_AURA_STAYS_AFTER_COMBAT      = 0x02000000,// 25 possibly different in vanilla
+    SPELL_ATTR_EX_AURA_STAYS_AFTER_COMBAT      = 0x02000000,// 25
     SPELL_ATTR_EX_REQUIRE_ALL_TARGETS          = 0x04000000,// 26
     SPELL_ATTR_EX_DISCOUNT_POWER_ON_MISS       = 0x08000000,// 27
     SPELL_ATTR_EX_NO_AURA_ICON                 = 0x10000000,// 28
