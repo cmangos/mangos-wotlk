@@ -1586,8 +1586,18 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
 
 inline bool IsPositiveAuraEffect(const SpellEntry* entry, SpellEffectIndex effIndex, const WorldObject* /*caster*/ = nullptr, const WorldObject* /*target*/ = nullptr)
 {
-    return IsAuraApplyEffect(entry, effIndex) && !IsEffectTargetNegative(entry->EffectImplicitTargetA[effIndex], entry->EffectImplicitTargetB[effIndex])
-        && !entry->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF) && entry->Effect[effIndex] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
+    if (IsAuraApplyEffect(entry, effIndex))
+    {
+        if (entry->HasAttribute(SPELL_ATTR_EX4_AURA_IS_BUFF))
+            return true;
+
+        if (entry->HasAttribute(SPELL_ATTR_AURA_IS_DEBUFF))
+            return false;
+
+        return !IsEffectTargetNegative(entry->EffectImplicitTargetA[effIndex], entry->EffectImplicitTargetB[effIndex]) && entry->Effect[effIndex] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY;
+    }
+
+    return false;
 }
 
 inline bool IsPositiveSpellTargetModeForSpecificTarget(const SpellEntry* entry, uint8 effectMask, const WorldObject* caster = nullptr, const WorldObject* target = nullptr)

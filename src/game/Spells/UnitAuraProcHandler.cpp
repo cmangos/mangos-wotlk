@@ -497,7 +497,7 @@ void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
         // trigger weapon enchants for weapon based spells; exclude spells that stop attack, because may break CC
 		if (data.attacker->GetTypeId() == TYPEID_PLAYER && (data.procExtra & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) != 0)
             if ((data.procFlagsAttacker & PROC_FLAG_DEAL_HARMFUL_PERIODIC) == 0) // do not proc this on DOTs
-			    if (!data.spellInfo || (data.spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && !data.spellInfo->HasAttribute(SPELL_ATTR_CANCELS_AUTO_ATTACK_COMBAT)))
+			    if (!data.spellInfo || (data.spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && !data.spellInfo->HasAttribute(SPELL_ATTR_EX4_SUPPRESS_WEAPON_PROCS)))
 				    static_cast<Player*>(data.attacker)->CastItemCombatSpell(data.victim, data.attType, data.spellInfo ? !IsNextMeleeSwingSpell(data.spellInfo) : false);
 
         if (currentLevel)
@@ -735,6 +735,9 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     if (spellProto->HasAttribute(SPELL_ATTR_EX3_ONLY_PROC_ON_CASTER) && holder->GetTarget()->GetObjectGuid() != holder->GetCasterGuid())
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+
+    if (IsSitState() && !spellProto->HasAttribute(SPELL_ATTR_EX4_ALLOW_PROC_WHILE_SITTING))
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     // Get chance from spell
