@@ -423,7 +423,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
         Movement::MoveSplineInit init(*passenger);
 
-        Position exitPos = m_owner->GetPosition();
+        Position exitPos = m_owner->GetPosition(m_owner->GetTransport());
         exitPos.o = passenger->GetOrientation();
 
         if (VehicleSeatParameters const* params = sObjectMgr.GetVehicleSeatParameters(seatEntry->m_ID))
