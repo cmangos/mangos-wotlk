@@ -3867,7 +3867,7 @@ void Spell::SendSpellCooldown()
             // need in some way provided data for Spell::finish SendCooldownEvent
             casterPlayer->SetLastPotionId(m_CastItem->GetEntry());
 
-            m_caster->AddCooldown(*m_spellInfo, m_CastItem->GetProto(), true);   // add server side cooldown
+            casterPlayer->AddCooldown(*m_spellInfo, m_CastItem->GetProto(), true);   // add server side cooldown
             return;
         }
     }
