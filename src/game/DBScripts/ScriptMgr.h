@@ -64,7 +64,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_PLAY_MOVIE               = 19,           // target can only be a player, datalog = movie id
     SCRIPT_COMMAND_MOVEMENT                 = 20,           // resSource = Creature. datalong = MovementType (0:idle, 1:random, 2:waypoint, 3:path or 15:jump), datalong2 = wander-distance/pathId/relayId, datalong3 = timer/passTarget, dataint1 = forcedMovement
     // data_flags &  SCRIPT_FLAG_COMMAND_ADDITIONAL = Random-movement around current position
-    SCRIPT_COMMAND_SET_ACTIVEOBJECT         = 21,           // resSource = Creature
+    SCRIPT_COMMAND_SET_ACTIVEOBJECT         = 21,           // resSource = WorldObject
     // datalong=bool 0=off, 1=on
     SCRIPT_COMMAND_SET_FACTION              = 22,           // resSource = Creature
     // datalong=factionId, datalong2=faction_flags
