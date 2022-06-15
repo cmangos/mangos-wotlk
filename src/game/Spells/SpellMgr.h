@@ -1807,6 +1807,9 @@ inline bool IsReflectableSpell(SpellEntry const* spellInfo)
 // Mostly required by spells that target a creature inside GO
 inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
 {
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX5_ALWAYS_LINE_OF_SIGHT))
+        return false;
+
     switch (spellInfo->Id)
     {
         case 36795:                                 // Cannon Channel
@@ -1826,6 +1829,9 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
 
 inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
 {
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX5_ALWAYS_LINE_OF_SIGHT))
+        return false;
+
     // TODO: Move this to target logic
     switch (spellInfo->EffectImplicitTargetA[effIdx])
     {
@@ -3104,7 +3110,7 @@ class SpellMgr
 
         bool IsSingleTargetSpell(SpellEntry const* entry) const
         {
-            if (entry->HasAttribute(SPELL_ATTR_EX5_SINGLE_TARGET_SPELL))
+            if (entry->HasAttribute(SPELL_ATTR_EX5_LIMIT_N))
                 return true;
 
             // single target triggered spell.
@@ -3165,7 +3171,7 @@ class SpellMgr
 
             // If spells are two instances of the same spell, check attribute first, and formal aura holder stacking rules after
             if (entry1 == entry2)
-                return (entry1->HasAttribute(SPELL_ATTR_EX3_DOT_STACKING_RULE) || IsSpellStackableWithSpell(entry1, entry2));
+                return (entry1->HasAttribute(SPELL_ATTR_EX3_DOT_STACKING_RULE) || entry1->HasAttribute(SPELL_ATTR_EX5_AURA_UNIQUE_PER_CASTER) || IsSpellStackableWithSpell(entry1, entry2));
 
             // If spells are in the same spell chain
             if (IsSpellAnotherRankOfSpell(entry1->Id, entry2->Id))

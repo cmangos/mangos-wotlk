@@ -1166,7 +1166,7 @@ namespace MaNGOS
                         break;
                     case SPELL_TARGETS_AOE_ATTACKABLE:
                     {
-                        if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))
+                        if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, !i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX5_IGNORE_AREA_EFFECT_PVP_CHECK)))
                             continue;
                         break;
                     }

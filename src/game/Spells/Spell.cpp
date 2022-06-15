@@ -1480,7 +1480,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
 
     if (traveling && m_trueCaster != unit)
     {
-        if (m_trueCaster->CanAttackSpell(unit, m_spellInfo))
+        if (m_trueCaster->CanAttackSpell(unit, m_spellInfo, !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_IGNORE_AREA_EFFECT_PVP_CHECK)))
         {
             // for delayed spells ignore not visible explicit target, if caster is dead, nothing is visible for him
             if (unit == m_targets.getUnitTarget() && ((m_trueCaster->IsGameObject() && !unit->IsAlive()) || !unit->IsVisibleForOrDetect(m_caster, m_caster, false, false, true, true, m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT))))
@@ -2405,7 +2405,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                     SpellNotifyPushType pushType = PUSH_TARGET_CENTER;
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CHAIN_FROM_CASTER))
                         pushType = PUSH_SELF_CENTER;
-                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_CLEAVE_FRONT_TARGET))
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_MELEE_CHAIN_TARGETING))
                         pushType = PUSH_CONE;
                     FillAreaTargets(tempAoeList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
                     tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), newUnitTarget), tempAoeList.end());
@@ -2574,7 +2574,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                     tempUnitList.push_back(target);
                 else
                 {
-                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET))
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_IMPLIED_TARGETING))
                     {
                         if (Unit* targetOfUnitTarget = target->GetTarget(m_trueCaster))
                         {
@@ -3945,7 +3945,7 @@ void Spell::update(uint32 difftime)
         // always cancel for channeled spells
         if (m_spellState == SPELL_STATE_CHANNELING)
         {
-            if (m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVING && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING))
+            if (m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVING && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_ACTIONS_DURING_CHANNEL))
                 cancel();
         }            
         // don't cancel for melee, autorepeat, triggered and instant spells
@@ -5502,11 +5502,11 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     Unit* target = m_targets.getUnitTarget();
     uint32 affectedMask = GetCheckCastEffectMask(m_spellInfo);
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET) && target)
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_IMPLIED_TARGETING) && target)
     {
         if (!(m_trueCaster->CanAssistSpell(target, m_spellInfo)))
         {
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET))
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_IMPLIED_TARGETING))
             {
                 if (Unit* targetOfUnitTarget = target->GetTarget(m_trueCaster))
                 {
@@ -5561,7 +5561,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             // totem immunity for channeled spells(needs to be before spell cast)
             // spell attribs for player channeled spells
             if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_TRACK_TARGET_IN_CHANNEL) // TODO: Investigate this condition
-                && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_HASTE_AFFECT_DURATION)
+                && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_SPELL_HASTE_AFFECTS_PERIODIC)
                 && target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
                 return SPELL_FAILED_IMMUNE;
 
@@ -5590,8 +5590,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     }
                 }
 
-                if (!IsIgnoreLosSpellCast(m_spellInfo) && !m_IsTriggeredSpell && !m_trueCaster->IsWithinLOSInMap(target, true))
-                    return SPELL_FAILED_LINE_OF_SIGHT;
+                if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALWAYS_LINE_OF_SIGHT) ||
+                    (!IsIgnoreLosSpellCast(m_spellInfo) && !m_IsTriggeredSpell))
+                    if (!m_trueCaster->IsWithinLOSInMap(target, true))
+                        return SPELL_FAILED_LINE_OF_SIGHT;
 
                 if (m_trueCaster->IsPlayer())
                 {
@@ -5615,6 +5617,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
 
                 if (strict && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER) && target->GetTypeId() != TYPEID_PLAYER && !IsAreaOfEffectSpell(m_spellInfo))
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                if (strict && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_PLAYER) && target->GetTypeId() == TYPEID_PLAYER && !IsAreaOfEffectSpell(m_spellInfo))
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                if (strict && m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_PLAYER_CONTROLLED_NPC) && target->IsPlayerControlled() && target->GetTypeId() != TYPEID_PLAYER && !IsAreaOfEffectSpell(m_spellInfo))
                     return SPELL_FAILED_BAD_TARGETS;
             }
             else if (m_caster == target)
@@ -6995,17 +7003,17 @@ SpellCastResult Spell::CheckCasterAuras(uint32& param1) const
      // still they need to be checked against certain mechanics
 
      // SPELL_ATTR5_USABLE_WHILE_STUNNED by default only MECHANIC_STUN (ie no sleep, knockout, freeze, etc.)
-    bool usableWhileStunned = m_spellInfo->HasAttribute(SPELL_ATTR_EX5_USABLE_WHILE_STUNNED);
+    bool usableWhileStunned = m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_WHILE_STUNNED);
 
     // Pain Suppression (have SPELL_ATTR_EX5_USABLE_WHILE_STUNNED that must be used only with glyph)
     if (m_spellInfo->Id == 33206 && !m_caster->HasAura(63248))
         usableWhileStunned = false;
 
     // SPELL_ATTR5_USABLE_WHILE_FEARED by default only fear (ie no horror)
-    bool usableWhileFeared = m_spellInfo->HasAttribute(SPELL_ATTR_EX5_USABLE_WHILE_FEARED);
+    bool usableWhileFeared = m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_WHILE_FLEEING);
 
     // SPELL_ATTR5_USABLE_WHILE_CONFUSED by default only disorient (ie no polymorph)
-    bool usableWhileConfused = m_spellInfo->HasAttribute(SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED);
+    bool usableWhileConfused = m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_WHILE_CONFUSED);
 
     // Check whether the cast should be prevented by any state you might have.
     SpellCastResult result = SPELL_CAST_OK;
@@ -8166,7 +8174,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                 // all ok by some way or another, skip normal check
                 break;
             default:                                            // normal case
-                if (exception != EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff))
+                bool forceLos = false;
+                if (target != m_trueCaster && target != m_targets.getUnitTarget())
+                    forceLos = m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALWAYS_AOE_LINE_OF_SIGHT);
+                if (exception != EXCEPTION_MAGNET && (forceLos || !IsIgnoreLosSpellEffect(m_spellInfo, eff)))
                 {
                     float x, y, z;
                     switch (info.los)
@@ -8226,12 +8237,12 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
             return false;
     }    
 
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NOT_ON_AOE_IMMUNE)) // rest done in aoe code
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NOT_ON_AOE_IMMUNE) || m_spellInfo->HasAttribute(SPELL_ATTR_EX5_TREAT_AS_AREA_EFFECT)) // rest done in aoe code
         if (target->IsAOEImmune())
             return false;
 
     // If spell have ingore CC attr & unit is CC
-    if (m_spellInfo->AttributesEx6 & SPELL_ATTR_EX6_IGNORE_CC_TARGETS && target != m_targets.getUnitTarget() && target->IsCrowdControlled())
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_CC_TARGETS) && target != m_targets.getUnitTarget() && target->IsCrowdControlled())
         return false;
 
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_TRIVIAL) && target->IsTrivialForTarget(m_caster))
@@ -8239,6 +8250,12 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
 
     if (target->GetTypeId() != TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER)
         && targetType != TARGET_UNIT_CASTER)
+        return false;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_PLAYER) && target->GetTypeId() == TYPEID_PLAYER)
+        return false;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_PLAYER_CONTROLLED_NPC) && target->IsPlayerControlled() && target->GetTypeId() != TYPEID_PLAYER)
         return false;
 
     if (m_spellInfo->MaxTargetLevel && target->GetLevel() > m_spellInfo->MaxTargetLevel)

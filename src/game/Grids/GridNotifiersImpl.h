@@ -261,6 +261,12 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (spellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER) && target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_PLAYER) && target->GetTypeId() == TYPEID_PLAYER)
+        return;
+
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_PLAYER_CONTROLLED_NPC) && target->IsPlayerControlled() && target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     // Check target immune to spell or aura
     if (!spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES)) // confirmed 40657 - Ancient Flames goes through immunity
         if (target->IsImmuneToSpell(spellInfo, false, (1 << eff_index)) || target->IsImmuneToSpellEffect(spellInfo, eff_index, false))

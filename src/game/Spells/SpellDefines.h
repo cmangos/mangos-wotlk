@@ -207,38 +207,38 @@ enum SpellAttributesEx4
 
 enum SpellAttributesEx5
 {
-    SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING     = 0x00000001,// 0 don't interrupt channeling spells when moving
-    SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP       = 0x00000002,// 1 not need reagents if UNIT_FLAG_PREPARATION
-    SPELL_ATTR_EX5_REMOVE_ON_ARENA_ENTER       = 0x00000004,// 2 removed at enter arena (e.g. 31850 since 3.3.3)
-    SPELL_ATTR_EX5_USABLE_WHILE_STUNNED        = 0x00000008,// 3 usable while stunned
-    SPELL_ATTR_EX5_UNK4                        = 0x00000010,// 4
-    SPELL_ATTR_EX5_SINGLE_TARGET_SPELL         = 0x00000020,// 5 Only one target can be apply at a time
-    SPELL_ATTR_EX5_UNK6                        = 0x00000040,// 6
-    SPELL_ATTR_EX5_UNK7                        = 0x00000080,// 7
-    SPELL_ATTR_EX5_UNK8                        = 0x00000100,// 8
-    SPELL_ATTR_EX5_START_PERIODIC_AT_APPLY     = 0x00000200,// 9  begin periodic tick at aura apply
-    SPELL_ATTR_EX5_HIDE_DURATION               = 0x00000400,// 10
-    SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET = 0x00000800,// 11
-    SPELL_ATTR_EX5_CLEAVE_FRONT_TARGET         = 0x00001000,// 12 Cleave Generic chain damage front targets
-    SPELL_ATTR_EX5_HASTE_AFFECT_DURATION       = 0x00002000,// 13 haste affects duration
-    SPELL_ATTR_EX5_UNK14                       = 0x00004000,// 14
-    SPELL_ATTR_EX5_UNK15                       = 0x00008000,// 15
-    SPELL_ATTR_EX5_MOD_ALL_DAMAGE              = 0x00010000,// 16 (only affects protpally One-Handed Weapon Spec)
-    SPELL_ATTR_EX5_USABLE_WHILE_FEARED         = 0x00020000,// 17 usable while feared
-    SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED       = 0x00040000,// 18 usable while confused
+    SPELL_ATTR_EX5_ALLOW_ACTIONS_DURING_CHANNEL= 0x00000001,// 0 don't interrupt channeling spells when moving/melee attacking/casting
+    SPELL_ATTR_EX5_NO_REAGENT_COST_WITH_AURA   = 0x00000002,// 1 not need reagents if UNIT_FLAG_PREPARATION
+    SPELL_ATTR_EX5_REMOVE_ENTERING_ARENA       = 0x00000004,// 2 removed at enter arena (e.g. 31850 since 3.3.3)
+    SPELL_ATTR_EX5_ALLOW_WHILE_STUNNED         = 0x00000008,// 3
+    SPELL_ATTR_EX5_TRIGGERS_CHANNELING         = 0x00000010,// 4
+    SPELL_ATTR_EX5_LIMIT_N                     = 0x00000020,// 5 Only N targets can be apply at a time - dont of spells that have N>1 in tbc/wotlk
+    SPELL_ATTR_EX5_IGNORE_AREA_EFFECT_PVP_CHECK= 0x00000040,// 6
+    SPELL_ATTR_EX5_NOT_ON_PLAYER               = 0x00000080,// 7
+    SPELL_ATTR_EX5_NOT_ON_PLAYER_CONTROLLED_NPC= 0x00000100,// 8
+    SPELL_ATTR_EX5_EXTRA_INITIAL_PERIOD        = 0x00000200,// 9 begin periodic tick at aura apply
+    SPELL_ATTR_EX5_DO_NOT_DISPLAY_DURATION     = 0x00000400,// 10
+    SPELL_ATTR_EX5_IMPLIED_TARGETING           = 0x00000800,// 11 targets target of current hostile target if current hostile target is not eligible
+    SPELL_ATTR_EX5_MELEE_CHAIN_TARGETING       = 0x00001000,// 12 Cleave Generic chain damage front targets
+    SPELL_ATTR_EX5_SPELL_HASTE_AFFECTS_PERIODIC= 0x00002000,// 13 haste affects duration
+    SPELL_ATTR_EX5_NOT_AVAILABLE_WHILE_CHARMED = 0x00004000,// 14
+    SPELL_ATTR_EX5_TREAT_AS_AREA_EFFECT        = 0x00008000,// 15
+    SPELL_ATTR_EX5_AURA_AFFECTS_NOT_JUST_REQ_EQUIPPED_ITEM  = 0x00010000,// 16 (only affects protpally One-Handed Weapon Spec)
+    SPELL_ATTR_EX5_ALLOW_WHILE_FLEEING         = 0x00020000,// 17
+    SPELL_ATTR_EX5_ALLOW_WHILE_CONFUSED        = 0x00040000,// 18
     SPELL_ATTR_EX5_AI_DOESNT_FACE_TARGET       = 0x00080000,// 19
-    SPELL_ATTR_EX5_UNK20                       = 0x00100000,// 20
-    SPELL_ATTR_EX5_UNK21                       = 0x00200000,// 21
+    SPELL_ATTR_EX5_DO_NOT_ATTEMPT_A_PET_RESUMMON_WHEN_DISMOUNTING = 0x00100000,// 20 NYI - I think we do it innately for festive auras already
+    SPELL_ATTR_EX5_IGNORE_TARGET_REQUIREMENTS  = 0x00200000,// 21 NYI - unk what it skips
     SPELL_ATTR_EX5_NOT_ON_TRIVIAL              = 0x00400000,// 22
-    SPELL_ATTR_EX5_UNK23                       = 0x00800000,// 23
-    SPELL_ATTR_EX5_UNK24                       = 0x01000000,// 24
-    SPELL_ATTR_EX5_UNK25                       = 0x02000000,// 25
-    SPELL_ATTR_EX5_UNK26                       = 0x04000000,// 26
-    SPELL_ATTR_EX5_DONT_SHOW_AURA_IF_SELF_CAST = 0x08000000,// 27 Auras with this attribute are not visible on units that are the caster
-    SPELL_ATTR_EX5_DONT_SHOW_AURA_IF_NOT_SELF_CAST = 0x10000000,// 28 Auras with this attribute are not visible on units that are not the caster
-    SPELL_ATTR_EX5_UNK29                       = 0x20000000,// 29
-    SPELL_ATTR_EX5_UNK30                       = 0x40000000,// 30
-    SPELL_ATTR_EX5_USE_PHYSICAL_HIT_CHANCE     = 0x80000000,// 31 Introduced in patch 2.3: Taunt, Growl, etc spells use ability miss calculation (see implementation for details)
+    SPELL_ATTR_EX5_NO_PARTIAL_RESISTS          = 0x00800000,// 23
+    SPELL_ATTR_EX5_IGNORE_CASTER_REQUIREMENTS  = 0x01000000,// 24 NYI - unk what it skips
+    SPELL_ATTR_EX5_ALWAYS_LINE_OF_SIGHT        = 0x02000000,// 25
+    SPELL_ATTR_EX5_ALWAYS_AOE_LINE_OF_SIGHT    = 0x04000000,// 26
+    SPELL_ATTR_EX5_NO_CASTER_AURA_ICON         = 0x08000000,// 27
+    SPELL_ATTR_EX5_NO_TARGET_AURA_ICON         = 0x10000000,// 28
+    SPELL_ATTR_EX5_AURA_UNIQUE_PER_CASTER      = 0x20000000,// 29
+    SPELL_ATTR_EX5_ALWAYS_SHOW_GROUND_TEXTURE  = 0x40000000,// 30
+    SPELL_ATTR_EX5_ADD_MELEE_HIT_RATING        = 0x80000000,// 31 Introduced in patch 2.3: Taunt, Growl, etc spells use ability miss calculation (see implementation for details)
 };
 
 enum SpellAttributesEx6
