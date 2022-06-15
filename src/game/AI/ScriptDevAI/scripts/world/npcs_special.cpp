@@ -2614,6 +2614,15 @@ struct npc_imp_in_a_ball : public ScriptedAI
     }
 };
 
+struct HarvestSilithidEgg : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetEffectChance(75, EFFECT_INDEX_1);
+        spell->SetEffectChance(1, EFFECT_INDEX_2);
+    }
+};
+
 struct ImpInABottleSay : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -3203,6 +3212,7 @@ void AddSC_npcs_special()
     pNewScript->pGossipHello = &GossipHello_npc_gossip_npc;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<HarvestSilithidEgg>("spell_harvest_silithid_egg");
     RegisterSpellScript<ImpInABottleSay>("spell_imp_in_a_bottle_say");
     RegisterSpellScript<GossipNPCPeriodicTriggerFidget>("spell_gossip_npc_periodic_trigger_fidget");
     RegisterSpellScript<GossipNPCPeriodicTalk>("spell_gossip_npc_periodic_talk");
