@@ -717,13 +717,8 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
         {
             // Check if player is wearing shield
             Item* item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-<<<<<<< HEAD
-            if (!item || item->IsBroken() || !CanUseEquippedWeapon(OFF_ATTACK) || item->GetProto()->Class != ITEM_CLASS_ARMOR || !((1 << item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
-                return false;
-=======
             if (!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_ARMOR || !((1 << item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                 return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
->>>>>>> fd807d15687... Spell: Also utilize SPELL_ATTR_PROC_FAILURE_BURNS_CHARGE on roll chance fail
         }
     }
 

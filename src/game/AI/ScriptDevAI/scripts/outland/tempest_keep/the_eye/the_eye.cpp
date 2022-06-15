@@ -225,7 +225,7 @@ struct CounterCharge : public SpellScript
             caster->CastSpell(target, 35039, TRIGGERED_OLD_TRIGGERED);
             caster->RemoveAurasDueToSpell(35035);
         }
-        spell->SetTriggerChance(0, EFFECT_INDEX_1);
+        spell->SetEffectChance(0, EFFECT_INDEX_1);
     }
 };
 
