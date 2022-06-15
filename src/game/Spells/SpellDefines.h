@@ -243,24 +243,24 @@ enum SpellAttributesEx5
 
 enum SpellAttributesEx6
 {
-    SPELL_ATTR_EX6_DONT_DISPLAY_COOLDOWN       = 0x00000001,// 0 Only Move spell have this flag
-    SPELL_ATTR_EX6_ONLY_IN_ARENA               = 0x00000002,// 1 only usable in arena, not used in 3.2.0a and early
-    SPELL_ATTR_EX6_IGNORE_CASTER_AURAS         = 0x00000004,// 2
-    SPELL_ATTR_EX6_ASSIST_IGNORE_IMMUNE_FLAG   = 0x00000008,// 3
-    SPELL_ATTR_EX6_UNK4                        = 0x00000010,// 4
-    SPELL_ATTR_EX6_UNK5                        = 0x00000020,// 5
-    SPELL_ATTR_EX6_USE_SPELL_CAST_EVENT        = 0x00000040,// 6 Auras with this attribute trigger SPELL_CAST combat log event instead of SPELL_AURA_START (clientside attribute)
-    SPELL_ATTR_EX6_UNK7                        = 0x00000080,// 7
-    SPELL_ATTR_EX6_IGNORE_CC_TARGETS           = 0x00000100,// 8 ignores target with cc effects
-    SPELL_ATTR_EX6_UNK9                        = 0x00000200,// 9
-    SPELL_ATTR_EX6_UNK10                       = 0x00000400,// 10
-    SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCE        = 0x00000800,// 11 not usable in raid instance
-    SPELL_ATTR_EX6_CASTABLE_WHILE_ON_VEHICLE   = 0x00001000,// 12
+    SPELL_ATTR_EX6_NO_COOLDOWN_ON_TOOLTIP      = 0x00000001,// 0
+    SPELL_ATTR_EX6_DO_NOT_RESET_COOLDOWN_IN_ARENA = 0x00000002, // 1 Unused in tbc
+    SPELL_ATTR_EX6_NOT_AN_ATTACK               = 0x00000004,// 2 Likely has more meaning than just ignore caster auras
+    SPELL_ATTR_EX6_CAN_ASSIST_IMMUNE_PC        = 0x00000008,// 3
+    SPELL_ATTR_EX6_IGNORE_FOR_MOD_TIME_RATE    = 0x00000010,// 4 Unused in tbc
+    SPELL_ATTR_EX6_DO_NOT_CONSUME_RESOURCES    = 0x00000020,// 5 Requires resources but doesnt consume them - ritual of summoning child spell consumes
+    SPELL_ATTR_EX6_FLOATING_COMBAT_TEXT_ON_CAST= 0x00000040,// 6 Auras with this attribute trigger SPELL_CAST combat log event instead of SPELL_AURA_START (clientside attribute)
+    SPELL_ATTR_EX6_AURA_IS_WEAPON_PROC         = 0x00000080,// 7
+    SPELL_ATTR_EX6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS = 0x00000100,// 8 ignores target with cc effects
+    SPELL_ATTR_EX6_ALLOW_ON_CHARMED_TARGETS    = 0x00000200,// 9 Unused in tbc
+    SPELL_ATTR_EX6_NO_AURA_LOG                 = 0x00000400,// 10 Seems different in wotlk
+    SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCES       = 0x00000800,// 11
+    SPELL_ATTR_EX6_ALLOW_WHILE_RIDING_VEHICLE  = 0x00001000,// 12 Unused in tbc
     SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT          = 0x00002000,// 13 Can target in different phase
-    SPELL_ATTR_EX6_UNK14                       = 0x00004000,// 14
-    SPELL_ATTR_EX6_UNK15                       = 0x00008000,// 15 not set in 3.0.3
-    SPELL_ATTR_EX6_UNK16                       = 0x00010000,// 16
-    SPELL_ATTR_EX6_UNK17                       = 0x00020000,// 17
+    SPELL_ATTR_EX6_AI_PRIMARY_RANGED_ATTACK    = 0x00004000,// 14 NYI - Likely global flag alternative to flagging spells as main in creature spell list
+    SPELL_ATTR_EX6_NO_PUSHBACK                 = 0x00008000,// 15 Unused in tbc
+    SPELL_ATTR_EX6_NO_JUMP_PATHING             = 0x00010000,// 16 Unused in tbc
+    SPELL_ATTR_EX6_ALLOW_EQUIP_WHILE_CASTING   = 0x00020000,// 17
     SPELL_ATTR_EX6_UNK18                       = 0x00040000,// 18
     SPELL_ATTR_EX6_UNK19                       = 0x00080000,// 19
     SPELL_ATTR_EX6_UNK20                       = 0x00100000,// 20

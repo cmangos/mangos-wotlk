@@ -10843,7 +10843,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
                 if (GetSession()->isLogingOut())
                     return EQUIP_ERR_YOU_ARE_STUNNED;
 
-                if (IsNonMeleeSpellCasted(false))
+                if (IsNonMeleeSpellCasted(false, false, false, false, false, true))
                     return EQUIP_ERR_CANT_DO_RIGHT_NOW;
 
                 // prevent equip item in Spirit of Redemption (Aura: 27827)

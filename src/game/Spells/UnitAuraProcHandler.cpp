@@ -764,6 +764,9 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
 
     if (data.spell)
     {
+        if (spellProto->HasAttribute(SPELL_ATTR_EX6_AURA_IS_WEAPON_PROC) && data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_SUPPRESS_WEAPON_PROCS))
+            return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+
         if (data.spell->m_IsTriggeredSpell)
         {
             if (!data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NOT_A_PROC) && !spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_PROCS))
