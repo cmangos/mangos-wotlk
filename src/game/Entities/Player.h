@@ -2526,7 +2526,8 @@ class Player : public Unit
         void RemoveArenaSpellCooldowns();
         void _LoadSpellCooldowns(QueryResult* result);
         void _SaveSpellCooldowns();
-        void SetLastPotionId(uint32 item_id) { m_lastPotionId = item_id; }
+        void SetLastPotionId(uint32 itemId) { m_lastPotionId = itemId; }
+        void SetCooldownEventOnLeaveCombatSpellId(uint32 spellId) { m_triggerCoooldownOnLeaveCombatSpellId = spellId; }
         uint32 GetLastPotionId() const { return m_lastPotionId; }
         void UpdatePotionCooldown(Spell* spell = nullptr);
 
@@ -2713,6 +2714,7 @@ class Player : public Unit
         PlayerSpellMap m_spells;
         PlayerTalentMap m_talents[MAX_TALENT_SPEC_COUNT];
         uint32 m_lastPotionId;                              // last used health/mana potion in combat, that block next potion use
+        uint32 m_triggerCoooldownOnLeaveCombatSpellId;
 
         uint8 m_activeSpec;
         uint8 m_specsCount;

@@ -3898,17 +3898,23 @@ void Spell::SetCastItem(Item* item)
 
 void Spell::SendSpellCooldown()
 {
+    bool permanent = m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT);
     if (m_trueCaster->IsPlayer())
     {
         Player* casterPlayer = static_cast<Player*>(m_caster);
-        // mana/health/etc potions, disabled by client (until combat out as declarate)
-        if (m_CastItem && m_CastItem->IsPotion())
+        if (m_spellInfo->Category)
         {
-            // need in some way provided data for Spell::finish SendCooldownEvent
-            casterPlayer->SetLastPotionId(m_CastItem->GetEntry());
+            if (SpellCategoryEntry const* categoryEntry = sSpellCategoryStore.LookupEntry(m_spellInfo->Category))
+            {
+                if (categoryEntry->Flags & SPELL_CATEGORY_FLAG_EVENT_ON_LEAVE_COMBAT)
+                {
+                    // need in some way provided data for Spell::finish SendCooldownEvent
+                    if (m_CastItem && m_CastItem->IsPotion())
+                        casterPlayer->SetLastPotionId(m_CastItem->GetEntry());
 
-            casterPlayer->AddCooldown(*m_spellInfo, m_CastItem->GetProto(), true);   // add server side cooldown
-            return;
+                    permanent |= true;
+                }
+            }
         }
     }
 
@@ -3916,7 +3922,7 @@ void Spell::SendSpellCooldown()
     if (m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) || m_channelOnly)
         return;
 
-    m_trueCaster->AddCooldown(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr, m_spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT));
+    m_trueCaster->AddCooldown(*m_spellInfo, m_CastItem ? m_CastItem->GetProto() : nullptr, permanent);
 }
 
 void Spell::update(uint32 difftime)

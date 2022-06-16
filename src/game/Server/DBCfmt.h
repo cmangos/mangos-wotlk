@@ -109,6 +109,7 @@ const char SkillRaceClassInfofmt[] = "diiiiiix";
 const char SkillTiersfmt[] = "niiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char SoundEntriesfmt[] = "nxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char SpellCastTimefmt[] = "niii";
+const char SpellCategoryfmt[] = "ni";
 const char SpellDurationfmt[] = "niii";
 const char SpellDifficultyfmt[] = "niiii";
 const char SpellFocusObjectfmt[] = "nxxxxxxxxxxxxxxxxx";

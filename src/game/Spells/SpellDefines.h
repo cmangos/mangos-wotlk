@@ -320,6 +320,13 @@ enum SpellAttributesServerside
     SPELL_ATTR_SS_IGNORE_EVADE                 = 0x00000004,
 };
 
+enum SpellCategoryFlags
+{
+    SPELL_CATEGORY_FLAG_COOLDOWN_MODIFIES_ITEM = 0x1, // unused
+    SPELL_CATEGORY_FLAG_IS_GLOBAL              = 0x2, // unused
+    SPELL_CATEGORY_FLAG_EVENT_ON_LEAVE_COMBAT  = 0x4,
+};
+
 enum SpellCastResult : uint32
 {
     SPELL_FAILED_SUCCESS                        = 0,

@@ -634,6 +634,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
 
     m_lastPotionId = 0;
+    m_triggerCoooldownOnLeaveCombatSpellId = 0;
 
     m_activeSpec = 0;
     m_specsCount = 1;
@@ -20771,36 +20772,19 @@ void Player::UpdatePvPContested(bool state, bool overriding)
 void Player::UpdatePotionCooldown(Spell* spell)
 {
     // no potion used in combat or still in combat
-    if (!m_lastPotionId || IsInCombat())
+    if (!m_triggerCoooldownOnLeaveCombatSpellId || IsInCombat())
         return;
 
     ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(m_lastPotionId);
-    SpellEntry const* spellEntry = nullptr;
-    if (!itemProto)
-    {
-        m_lastPotionId = 0;
-        return;
-    }
-
-    // find spell entry of used potion
-    if (spell)
-        spellEntry = spell->m_spellInfo;
-    else
-    {
-        // Call not from spell cast, send cooldown event for item spells if no in combat
-        // spell/item pair let set proper cooldown (except nonexistent charged spell cooldown spellmods for potions)
-        for (const auto& Spell : itemProto->Spells)
-            if (Spell.SpellId && Spell.SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
-                spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId);
-    }
-
-    if (spellEntry)
-    {
-        // start cooldowns at server side, if any
-        AddCooldown(*spellEntry, itemProto);
-    }
-
+    SpellEntry const* spellEntry = sSpellTemplate.LookupEntry<SpellEntry>(m_triggerCoooldownOnLeaveCombatSpellId);
     m_lastPotionId = 0;
+    m_triggerCoooldownOnLeaveCombatSpellId = 0;
+
+    if (!spellEntry)
+        return;
+
+    // start cooldowns at server side, if any
+    AddCooldown(*spellEntry, itemProto);
 }
 
 // slot to be excluded while counting

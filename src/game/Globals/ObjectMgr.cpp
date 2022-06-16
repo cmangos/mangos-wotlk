@@ -8334,11 +8334,8 @@ void ObjectMgr::LoadSpellTemplate()
     for (uint32 i = 1; i < sSpellTemplate.GetMaxEntry(); ++i)
     {
         SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(i);
-        if (spell)
-        {
-            if (spell->Category)
-                sSpellCategoryStore[spell->Category].insert(i);
-        }
+        if (!spell)
+            continue;
 
         // DBC not support uint64 fields but SpellEntry have SpellFamilyFlags mapped at 2 uint32 fields
         // uint32 field already converted to bigendian if need, but must be swapped for correct uint64 bigendian view
