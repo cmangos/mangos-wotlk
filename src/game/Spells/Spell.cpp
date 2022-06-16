@@ -539,6 +539,18 @@ Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags
 
     m_ignoreRoot = IsIgnoreRootSpell(m_spellInfo);
 
+    if (m_caster)
+    {
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_ORIGINATE_FROM_CONTROLLER))
+        {
+            if (Player* controllingPlayer = const_cast<Player*>(m_caster->GetControllingPlayer()))
+            {
+                m_caster = controllingPlayer;
+                m_trueCaster = controllingPlayer;
+            }
+        }
+    }
+
     OnInit();
 }
 
@@ -3796,11 +3808,20 @@ void Spell::_handle_immediate_phase()
 
     if (IsMeleeAttackResetSpell())
     {
-        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DO_NOT_RESET_COMBAT_TIMERS))
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DOESNT_RESET_SWING_TIMER_IF_INSTANT) || GetCastTime() != 0)
         {
-            m_caster->resetAttackTimer(BASE_ATTACK);
-            if (m_caster->hasOffhandWeaponForAttack())
-                m_caster->resetAttackTimer(OFF_ATTACK);
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DELAY_COMBAT_TIMER_DURING_CAST))
+            {
+                m_caster->delayAttackTimer(BASE_ATTACK, GetCastTime());
+                if (m_caster->hasOffhandWeaponForAttack())
+                    m_caster->delayAttackTimer(OFF_ATTACK, GetCastTime());
+            }
+            else if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DO_NOT_RESET_COMBAT_TIMERS))
+            {
+                m_caster->resetAttackTimer(BASE_ATTACK);
+                if (m_caster->hasOffhandWeaponForAttack())
+                    m_caster->resetAttackTimer(OFF_ATTACK);
+            }
         }
     }
 
@@ -5679,7 +5700,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_BAD_TARGETS;
             }
 
-            if (!selfTargeting && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
+            if (!selfTargeting && !m_spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE) &&  target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
                 return SPELL_FAILED_BAD_TARGETS;
 
             // check creature type
@@ -6229,20 +6250,39 @@ SpellCastResult Spell::CheckCast(bool strict)
                 break;
             }
             case SPELL_EFFECT_CHARGE:
+            case SPELL_EFFECT_JUMP:
+            case SPELL_EFFECT_CHARGE_DEST:
+            case SPELL_EFFECT_JUMP_DEST:
             {
                 if (!m_ignoreRoot && m_caster->hasUnitState(UNIT_STAT_ROOT))
                     return SPELL_FAILED_ROOTED;
 
-                if (Unit* target = m_targets.getUnitTarget())
+                Position pos;
+                bool check = false;
+                switch (m_spellInfo->Effect[i])
+                {
+                    case SPELL_EFFECT_CHARGE:
+                    case SPELL_EFFECT_JUMP:
+                        if (Unit* target = m_targets.getUnitTarget())
+                        {
+                            target->GetFirstCollisionPosition(pos, target->GetCombatReach(), target->GetAngle(m_caster));
+                            check = true;
+                        }
+                        break;
+                    case SPELL_EFFECT_CHARGE_DEST:
+                    case SPELL_EFFECT_JUMP_DEST:
+                        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+                        {
+                            pos = m_targets.getDestination();
+                            check = true;
+                        }
+                        break;
+                }
+
+                if (check && !m_spellInfo->HasAttribute(SPELL_ATTR_EX6_NO_JUMP_PATHING))
                 {
                     float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
-                    Position pos;
-                    target->GetFirstCollisionPosition(pos, target->GetCombatReach(), target->GetAngle(m_caster));
-
-                    // TODO: Implement jumpin case check
-                    //if (!m_caster->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)) && (pos.coord_z < m_caster->GetPositionZ()) && (fabs(pos.coord_z - m_caster->GetPositionZ()) < 3.0f))
-                    //{
                     PathFinder pathFinder(m_caster);
                     pathFinder.setPathLengthLimit(range * 1.5f);
                     bool result = pathFinder.calculate(pos.x, pos.y, pos.z);
@@ -6251,8 +6291,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_OUT_OF_RANGE;
                     if (!result || pathFinder.getPathType() & PATHFIND_NOPATH)
                         return SPELL_FAILED_NOPATH;
-                    //}
-
                 }
                 break;
             }
@@ -7971,6 +8009,9 @@ void Spell::Delayed()
     if (isDelayableNoMore())                                // Spells may only be delayed twice
         return;
 
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_NO_PUSHBACK))
+        return;
+
     // spells not loosing casting time ( slam, dynamites, bombs.. )
     if (!(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE_PUSHBACK))
         return;
@@ -8236,7 +8277,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
 
     if (targetType != TARGET_UNIT_CASTER && targetType != TARGET_UNIT_CASTER_PET)
     {
-        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
+        if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
             return false;
         
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_ONLY_PEACEFUL_TARGETS) && target->IsInCombat())

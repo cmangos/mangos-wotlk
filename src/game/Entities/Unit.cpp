@@ -709,6 +709,13 @@ void Unit::resetAttackTimer(WeaponAttackType type)
     m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
 }
 
+void Unit::delayAttackTimer(WeaponAttackType type, uint32 castTime)
+{
+    uint32 timer = getAttackTimer(type) + castTime;
+    uint32 maxTimer = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
+    setAttackTimer(type, std::min(timer, maxTimer));
+}
+
 bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod /*= 0.0f*/) const
 {
     MANGOS_ASSERT(pVictim);
@@ -2339,6 +2346,9 @@ void Unit::HandleEmote(uint32 emote_id)
 
 uint32 Unit::CalcNotIgnoreAbsorbDamage(uint32 damage, SpellSchoolMask damageSchoolMask, SpellEntry const* spellInfo /*= nullptr*/) const
 {
+    if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_EX6_ABSORB_CANNOT_BE_IGNORE))
+        return damage;
+
     float absorb_affected_rate = 1.0f;
     Unit::AuraList const& ignoreAbsorbSchool = GetAurasByType(SPELL_AURA_MOD_IGNORE_ABSORB_SCHOOL);
     for (auto i : ignoreAbsorbSchool)
@@ -7075,6 +7085,11 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             target->SetInCombatWithAggressor(realCaster);
             realCaster->SetInCombatWithVictim(target);
             realCaster->GetCombatManager().TriggerCombatTimer(target);
+
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX6_TAPS_IMMEDIATELY))
+                if (Creature* creatureVictim = static_cast<Creature*>(target))
+                    if (!creatureVictim->IsPet() && !creatureVictim->HasLootRecipient())
+                        creatureVictim->SetLootRecipient(realCaster);
         }
 
         if (attack && spellInfo->HasAttribute(SPELL_ATTR_EX3_PVP_ENABLING))
@@ -8204,38 +8219,41 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
     float DoneTotalMod = 1.0f;
     int32 DoneTotal = 0;
 
-    // Creature damage
-    if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
-        DoneTotalMod *= Creature::_GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->Rank);
-
-    AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for (auto i : mModDamagePercentDone)
-    {
-        if ((i->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
-            i->GetSpellProto()->EquippedItemClass == -1 &&
-                // -1 == any item class (not wand then)
-            i->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
-            // 0 == any inventory type (not wand then)
-        {
-            DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-        }
-    }
-
     // Add flat bonus from spell damage versus
     DoneTotal += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);
-
-    // Add pct bonus from spell damage versus
-    DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, creatureTypeMask);
 
     // Add flat bonus from spell damage creature
     DoneTotal += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE, creatureTypeMask);
 
-    // Add pct bonus from spell damage versus aura state
-    AuraList const& mDamageDoneVersusAuraState = GetAurasByType(SPELL_AURA_DAMAGE_DONE_VERSUS_AURA_STATE_PCT);
-    for (auto i : mDamageDoneVersusAuraState)
+    if (spellProto->HasAttribute(SPELL_ATTR_EX6_IGNORE_CASTER_DAMAGE_MODIFIERS))
     {
-        if (victim->HasAuraState(AuraState(i->GetModifier()->m_miscvalue)))
-            DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+        // Creature damage
+        if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
+            DoneTotalMod *= Creature::_GetSpellDamageMod(((Creature*)this)->GetCreatureInfo()->Rank);
+
+        AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+        for (auto i : mModDamagePercentDone)
+        {
+            if ((i->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
+                i->GetSpellProto()->EquippedItemClass == -1 &&
+                // -1 == any item class (not wand then)
+                i->GetSpellProto()->EquippedItemInventoryTypeMask == 0)
+                // 0 == any inventory type (not wand then)
+            {
+                DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+            }
+        }
+
+        // Add pct bonus from spell damage versus
+        DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, creatureTypeMask);
+
+        // Add pct bonus from spell damage versus aura state
+        AuraList const& mDamageDoneVersusAuraState = GetAurasByType(SPELL_AURA_DAMAGE_DONE_VERSUS_AURA_STATE_PCT);
+        for (auto i : mDamageDoneVersusAuraState)
+        {
+            if (victim->HasAuraState(AuraState(i->GetModifier()->m_miscvalue)))
+                DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+        }
     }
 
     // done scripted mod (take it from owner)
@@ -8506,6 +8524,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
     DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
 
+    if (spellProto->HasAttribute(SPELL_ATTR_EX6_IGNORE_CASTER_DAMAGE_MODIFIERS))
+        DoneTotalMod = 1.f; // reset it
+
     float tmpDamage = (int32(pdamage) + DoneTotal * int32(stack)) * DoneTotalMod;
     // apply spellmod to Done damage (flat and pct)
     if (Player* modOwner = GetSpellModOwner())
@@ -8666,7 +8687,7 @@ int32 Unit::SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask) const
 uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
 {
     // Some spells don't benefit from done mods
-    if (spellProto->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS))
+    if (spellProto->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_MODIFIERS) || spellProto->HasAttribute(SPELL_ATTR_EX6_IGNORE_HEALING_MODIFIERS))
         return healamount;
 
     // For totems get healing bonus from owner (statue isn't totem in fact)
@@ -8815,6 +8836,9 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, i
  */
 uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto, int32 healamount, DamageEffectType damagetype, uint32 stack)
 {
+    if (spellProto->HasAttribute(SPELL_ATTR_EX6_IGNORE_HEALING_MODIFIERS))
+        return healamount;
+
     float TakenTotalMod = 1.0f;
 
     // Healing taken percent
@@ -9156,20 +9180,23 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     // ..done pct, already included in weapon damage based spells
     if (!isWeaponDamageBasedSpell)
     {
-        AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-        for (auto i : mModDamagePercentDone)
+        if (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX6_IGNORE_CASTER_DAMAGE_MODIFIERS))
         {
-            if (i->GetModifier()->m_miscvalue & schoolMask &&                         // schoolmask has to fit with the intrinsic spell school
-                i->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask(attType == BASE_ATTACK) &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
-                    ((i->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
-                     (pWeapon && pWeapon->IsFitToSpellRequirements(i->GetSpellProto()))))  // OR used weapon fits aura requirements
+            AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+            for (auto i : mModDamagePercentDone)
             {
-                DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+                if (i->GetModifier()->m_miscvalue & schoolMask &&                         // schoolmask has to fit with the intrinsic spell school
+                    i->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask(attType == BASE_ATTACK) &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+                    ((i->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
+                        (pWeapon && pWeapon->IsFitToSpellRequirements(i->GetSpellProto()))))  // OR used weapon fits aura requirements
+                {
+                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+                }
             }
-        }
 
-        if (attType == OFF_ATTACK)
-            DoneTotalMod *= GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT);                    // no school check required
+            if (attType == OFF_ATTACK)
+                DoneTotalMod *= GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT);                    // no school check required
+        }
     }
 
     // ..done pct (by creature type mask)
@@ -14335,7 +14362,7 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
 
     if (spellInfo)
     {
-        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2))
             return false;
 
         if (selectFlags & (SELECT_FLAG_HAS_AURA | SELECT_FLAG_NOT_AURA))

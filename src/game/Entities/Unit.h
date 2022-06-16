@@ -1232,6 +1232,7 @@ class Unit : public WorldObject
          * @return true if the Unit::m_attackTimer is zero for the given WeaponAttackType
          */
         bool isAttackReady(WeaponAttackType type = BASE_ATTACK) const { return m_attackTimer[type] == 0; }
+        void delayAttackTimer(WeaponAttackType type, uint32 castTime);
         /**
          * Checks if the current Unit has a weapon equipped at the moment
          * @return True if there is a weapon.
@@ -1455,7 +1456,7 @@ class Unit : public WorldObject
         bool CanAssist(Unit const* unit, bool ignoreFlags = false) const;
         bool CanAssist(Corpse const* corpse) const;
 
-        bool CanAttack(Unit const* unit) const;
+        bool CanAttack(Unit const* unit, bool ignoreUntargetable = false) const;
         bool CanAttackNow(Unit const* unit) const;
 
         bool CanCooperate(Unit const* unit) const;
@@ -1481,7 +1482,7 @@ class Unit : public WorldObject
         virtual bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const override;
 
         bool CanAttackOnSight(Unit const* target) const; // Used in MoveInLineOfSight checks
-        bool CanAttackInCombat(Unit const* target) const;
+        bool CanAttackInCombat(Unit const* target, bool ignoreUntargetable = false) const;
         bool CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const;
         bool CanJoinInAttacking(Unit const* enemy) const;
 

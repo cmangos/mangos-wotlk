@@ -24977,7 +24977,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     // blizzlike code for choosing which is recTime > categoryRecTime after spellmod application
     if (recTime)
         ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, recTime);
-    if (spellCategory && categoryRecTime)
+    if (spellCategory && categoryRecTime && !spellEntry.HasAttribute(SPELL_ATTR_EX6_NO_CATEGORY_COOLDOWN_MODS))
         ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, categoryRecTime);
 
     if (recTime || categoryRecTime || wasPermanent)

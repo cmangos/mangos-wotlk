@@ -244,37 +244,37 @@ enum SpellAttributesEx5
 enum SpellAttributesEx6
 {
     SPELL_ATTR_EX6_NO_COOLDOWN_ON_TOOLTIP      = 0x00000001,// 0
-    SPELL_ATTR_EX6_DO_NOT_RESET_COOLDOWN_IN_ARENA = 0x00000002, // 1 Unused in tbc
+    SPELL_ATTR_EX6_DO_NOT_RESET_COOLDOWN_IN_ARENA = 0x00000002, // 1 Unused in wotlk
     SPELL_ATTR_EX6_NOT_AN_ATTACK               = 0x00000004,// 2 Likely has more meaning than just ignore caster auras
     SPELL_ATTR_EX6_CAN_ASSIST_IMMUNE_PC        = 0x00000008,// 3
-    SPELL_ATTR_EX6_IGNORE_FOR_MOD_TIME_RATE    = 0x00000010,// 4 Unused in tbc
+    SPELL_ATTR_EX6_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX6_DO_NOT_CONSUME_RESOURCES    = 0x00000020,// 5 Requires resources but doesnt consume them - ritual of summoning child spell consumes
     SPELL_ATTR_EX6_FLOATING_COMBAT_TEXT_ON_CAST= 0x00000040,// 6 Auras with this attribute trigger SPELL_CAST combat log event instead of SPELL_AURA_START (clientside attribute)
     SPELL_ATTR_EX6_AURA_IS_WEAPON_PROC         = 0x00000080,// 7
     SPELL_ATTR_EX6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS = 0x00000100,// 8 ignores target with cc effects
-    SPELL_ATTR_EX6_ALLOW_ON_CHARMED_TARGETS    = 0x00000200,// 9 Unused in tbc
+    SPELL_ATTR_EX6_ALLOW_ON_CHARMED_TARGETS    = 0x00000200,// 9 NYI
     SPELL_ATTR_EX6_NO_AURA_LOG                 = 0x00000400,// 10 Seems different in wotlk
     SPELL_ATTR_EX6_NOT_IN_RAID_INSTANCES       = 0x00000800,// 11
-    SPELL_ATTR_EX6_ALLOW_WHILE_RIDING_VEHICLE  = 0x00001000,// 12 Unused in tbc
+    SPELL_ATTR_EX6_ALLOW_WHILE_RIDING_VEHICLE  = 0x00001000,// 12
     SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT          = 0x00002000,// 13 Can target in different phase
     SPELL_ATTR_EX6_AI_PRIMARY_RANGED_ATTACK    = 0x00004000,// 14 NYI - Likely global flag alternative to flagging spells as main in creature spell list
-    SPELL_ATTR_EX6_NO_PUSHBACK                 = 0x00008000,// 15 Unused in tbc
-    SPELL_ATTR_EX6_NO_JUMP_PATHING             = 0x00010000,// 16 Unused in tbc
+    SPELL_ATTR_EX6_NO_PUSHBACK                 = 0x00008000,// 15
+    SPELL_ATTR_EX6_NO_JUMP_PATHING             = 0x00010000,// 16
     SPELL_ATTR_EX6_ALLOW_EQUIP_WHILE_CASTING   = 0x00020000,// 17
-    SPELL_ATTR_EX6_UNK18                       = 0x00040000,// 18
-    SPELL_ATTR_EX6_UNK19                       = 0x00080000,// 19
-    SPELL_ATTR_EX6_UNK20                       = 0x00100000,// 20
-    SPELL_ATTR_EX6_UNK21                       = 0x00200000,// 21
-    SPELL_ATTR_EX6_UNK22                       = 0x00400000,// 22
-    SPELL_ATTR_EX6_UNK23                       = 0x00800000,// 23 not set in 3.0.3
-    SPELL_ATTR_EX6_UNK24                       = 0x01000000,// 24 not set in 3.0.3
-    SPELL_ATTR_EX6_UNK25                       = 0x02000000,// 25 not set in 3.0.3
-    SPELL_ATTR_EX6_UNK26                       = 0x04000000,// 26 not set in 3.0.3
-    SPELL_ATTR_EX6_UNK27                       = 0x08000000,// 27 not set in 3.0.3
-    SPELL_ATTR_EX6_UNK28                       = 0x10000000,// 28 not set in 3.0.3
-    SPELL_ATTR_EX6_NO_DMG_PERCENT_MODS         = 0x20000000,// 29 do not apply damage mods (usually in cases where it has already been applied)
-    SPELL_ATTR_EX6_UNK30                       = 0x40000000,// 30 not set in 3.0.3
-    SPELL_ATTR_EX6_UNK31                       = 0x80000000,// 31 not set in 3.0.3
+    SPELL_ATTR_EX6_ORIGINATE_FROM_CONTROLLER   = 0x00040000,// 18
+    SPELL_ATTR_EX6_DELAY_COMBAT_TIMER_DURING_CAST = 0x00080000,// 19
+    SPELL_ATTR_EX6_AURA_ICON_ONLY_FOR_CASTER_LIMIT_10 = 0x00100000,// 20
+    SPELL_ATTR_EX6_SHOW_MECHANIC_AS_COMBAT_TEXT= 0x00200000,// 21
+    SPELL_ATTR_EX6_ABSORB_CANNOT_BE_IGNORE     = 0x00400000,// 22
+    SPELL_ATTR_EX6_TAPS_IMMEDIATELY            = 0x00800000,// 23
+    SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE     = 0x01000000,// 24 Ignores UNIT_FLAG_NON_ATTACKABLE_2
+    SPELL_ATTR_EX6_DOESNT_RESET_SWING_TIMER_IF_INSTANT = 0x02000000, // 25
+    SPELL_ATTR_EX6_VEHICLE_IMMUNITY_CATEGORY   = 0x04000000,// 26 NYI
+    SPELL_ATTR_EX6_IGNORE_HEALING_MODIFIERS    = 0x08000000,// 27
+    SPELL_ATTR_EX6_DO_NOT_AUTO_SELECT_TARGET_WHICH_INITIATES_COMBAT = 0x10000000,// 28
+    SPELL_ATTR_EX6_IGNORE_CASTER_DAMAGE_MODIFIERS = 0x20000000,// 29
+    SPELL_ATTR_EX6_DISABLE_TIED_EFFECT_POINTS  = 0x40000000,// 30 NYI
+    SPELL_ATTR_EX6_NO_CATEGORY_COOLDOWN_MODS   = 0x80000000,// 31
 };
 
 enum SpellAttributesEx7
