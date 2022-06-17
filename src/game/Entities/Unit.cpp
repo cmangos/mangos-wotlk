@@ -3262,7 +3262,7 @@ void Unit::SendMeleeAttackStop(Unit* victim) const
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, uint32* heartbeatResistChance/* = nullptr*/)
 {
     Die<UnitCombatDieSide, UNIT_COMBAT_DIE_HIT, NUM_UNIT_COMBAT_DIE_SIDES> die;
-    if (!spell->HasAttribute(SPELL_ATTR_EX7_NO_ATTACK_DODGE))
+    if (!spell->HasAttribute(SPELL_ATTR_EX7_NO_ATTACK_MISS))
         die.set(UNIT_COMBAT_DIE_MISS, CalculateSpellMissChance(pVictim, SPELL_SCHOOL_MASK_NORMAL, spell));
     die.set(UNIT_COMBAT_DIE_RESIST, CalculateSpellResistChance(pVictim, SPELL_SCHOOL_MASK_NORMAL, spell));
     if (pVictim->CanReactOnAbility(spell))
