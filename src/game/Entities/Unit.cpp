@@ -8624,7 +8624,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
     if (IsAreaOfEffectSpell(spellProto) || spellProto->HasAttribute(SPELL_ATTR_EX5_TREAT_AS_AREA_EFFECT))
     {
         TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, schoolMask);
-        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
+        if (caster && !caster->IsPlayerControlled() || spellProto->HasAttribute(SPELL_ATTR_EX7_TREAT_AS_NPC_AOE))
             TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, schoolMask);
     }
 
@@ -9463,7 +9463,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
     if (spellProto && (IsAreaOfEffectSpell(spellProto) || spellProto->HasAttribute(SPELL_ATTR_EX5_TREAT_AS_AREA_EFFECT)))
     {
         TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, schoolMask);
-        if (spellProto->HasAttribute(SPELL_ATTR_EX7_TREAT_AS_NPC_AOE) || GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
+        if (caster && !caster->IsPlayerControlled() || spellProto->HasAttribute(SPELL_ATTR_EX7_TREAT_AS_NPC_AOE))
             TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, schoolMask);
     }
 
