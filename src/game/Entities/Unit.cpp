@@ -1293,7 +1293,7 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
 void Unit::InterruptOrDelaySpell(Unit* pVictim, DamageEffectType damagetype, SpellEntry const* spellProto)
 {
     bool dotDamage = (damagetype == DOT || spellProto && spellProto->HasAttribute(SPELL_ATTR_EX3_TREAT_AS_PERIODIC));
-    if (damagetype == NODAMAGE)
+    if (damagetype == NODAMAGE || (spellProto && spellProto->HasAttribute(SPELL_ATTR_EX7_DONT_CAUSE_SPELL_PUSHBACK)))
         return;
 
     for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
@@ -6016,8 +6016,16 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 dispellingS
         if (!casterGuid || holder->GetCasterGuid() == casterGuid)
         {
             uint32 originalStacks = holder->GetStackAmount();
-            if (holder->ModStackAmount(-int32(stackAmount), nullptr))
-                RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
+            if (holder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX7_DISPEL_REMOVES_CHARGES))
+            {
+                if (holder->DropAuraCharge())
+                    RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
+            }
+            else
+            {
+                if (holder->ModStackAmount(-int32(stackAmount), nullptr))
+                    RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DISPEL);
+            }
             holder->OnDispel(dispeller, dispellingSpellId, originalStacks);
             break;
         }

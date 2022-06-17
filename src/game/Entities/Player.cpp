@@ -6555,7 +6555,7 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
                 }
                     // current range for button of totem bar is from ACTION_BUTTON_SHAMAN_TOTEMS_BAR to (but not including) ACTION_BUTTON_SHAMAN_TOTEMS_BAR + 12
                 if (button >= ACTION_BUTTON_SHAMAN_TOTEMS_BAR && button < (ACTION_BUTTON_SHAMAN_TOTEMS_BAR + 12)
-                    && !spellProto->HasAttribute(SPELL_ATTR_EX7_TOTEM_SPELL))
+                    && !spellProto->HasAttribute(SPELL_ATTR_EX7_CAN_BE_MULTICAST))
                 {
                     if (msg)
                         sLog.outError("Spell action %u not added into button %u for player %s: attempt to add non totem spell to totem bar", action, button, player->GetName());

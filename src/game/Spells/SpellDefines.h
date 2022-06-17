@@ -279,21 +279,21 @@ enum SpellAttributesEx6
 
 enum SpellAttributesEx7
 {
-    SPELL_ATTR_EX7_UNK0                        = 0x00000001,// 0
-    SPELL_ATTR_EX7_UNK1                        = 0x00000002,// 1
-    SPELL_ATTR_EX7_PALADIN_AURA                = 0x00000004,// 2
-    SPELL_ATTR_EX7_UNK3                        = 0x00000008,// 3
-    SPELL_ATTR_EX7_UNK4                        = 0x00000010,// 4
-    SPELL_ATTR_EX7_TOTEM_SPELL                 = 0x00000020,// 5  shaman summon totem spells
-    SPELL_ATTR_EX7_UNK6                        = 0x00000040,// 6
-    SPELL_ATTR_EX7_UNK7                        = 0x00000080,// 7
-    SPELL_ATTR_EX7_UNK8                        = 0x00000100,// 8
-    SPELL_ATTR_EX7_UNK9                        = 0x00000200,// 9
-    SPELL_ATTR_EX7_UNK10                       = 0x00000400,// 10
-    SPELL_ATTR_EX7_UNK11                       = 0x00000800,// 11
-    SPELL_ATTR_EX7_UNK12                       = 0x00001000,// 12
-    SPELL_ATTR_EX7_UNK13                       = 0x00002000,// 13
-    SPELL_ATTR_EX7_UNK14                       = 0x00004000,// 14
+    SPELL_ATTR_EX7_UNK0                        = 0x00000001,// 0 Seems to have changed
+    SPELL_ATTR_EX7_NO_TARGET_DURATION_MODS     = 0x00000002,// 1 Unused in wotlk
+    SPELL_ATTR_EX7_DISABLE_AURA_WHILE_DEAD     = 0x00000004,// 2 NYI
+    SPELL_ATTR_EX7_DEBUG_SPELL                 = 0x00000008,// 3
+    SPELL_ATTR_EX7_UNK4                        = 0x00000010,// 4 Seems to have changed
+    SPELL_ATTR_EX7_CAN_BE_MULTICAST            = 0x00000020,// 5 NYI
+    SPELL_ATTR_EX7_DONT_CAUSE_SPELL_PUSHBACK   = 0x00000040,// 6
+    SPELL_ATTR_EX7_PREPARE_FOR_VEHICLE_CONTROL_END = 0x00000080,// 7 NYI
+    SPELL_ATTR_EX7_HORDE_SPECIFIC_SPELL        = 0x00000100,// 8
+    SPELL_ATTR_EX7_ALLIANCE_SPECIFIC_SPELL     = 0x00000200,// 9
+    SPELL_ATTR_EX7_DISPEL_REMOVES_CHARGES      = 0x00000400,// 10
+    SPELL_ATTR_EX7_CAN_CAUSE_INTERRUPT         = 0x00000800,// 11 TODO
+    SPELL_ATTR_EX7_CAN_CAUSE_SILENCE           = 0x00001000,// 12
+    SPELL_ATTR_EX7_NO_UI_NON_INTERRUPTIBLE     = 0x00002000,// 13
+    SPELL_ATTR_EX7_RECAST_ON_RESUMMON          = 0x00004000,// 14 TODO DK GHOUL
     SPELL_ATTR_EX7_UNK15                       = 0x00008000,// 15
     SPELL_ATTR_EX7_UNK16                       = 0x00010000,// 16
     SPELL_ATTR_EX7_UNK17                       = 0x00020000,// 17
