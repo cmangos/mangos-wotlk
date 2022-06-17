@@ -23147,14 +23147,14 @@ uint32 Player::CalculateTalentsPoints() const
     return uint32(talentPointsForLevel * sWorld.getConfig(CONFIG_FLOAT_RATE_TALENT));
 }
 
-bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
+bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area, bool ignoreColdWeather) const
 {
     if (IsGameMaster())
         return true;
     // continent checked in SpellMgr::GetSpellAllowedInLocationError at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
 
-    if (v_map == 571 && !HasSpell(54197))   // Cold Weather Flying
+    if (!ignoreColdWeather && v_map == 571 && !HasSpell(54197))   // Cold Weather Flying
         return false;
 
     // Disallow mounting in wintergrasp when battle is in progress

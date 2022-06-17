@@ -552,6 +552,7 @@ enum UnitFlags2
     UNIT_FLAG2_INTERACT_ANY_REACTION = 0x00004000,
     UNIT_FLAG2_UNK15                = 0x00008000,
     UNIT_FLAG2_UNK16                = 0x00010000,
+    UNIT_FLAG2_ALLOW_CHEAT_SPELLS   = 0x00040000,
 };
 
 /// Non Player Character flags

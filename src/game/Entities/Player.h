@@ -2325,7 +2325,7 @@ class Player : public Unit
         bool CanWalk() const override { return true; }
         bool IsFreeFlying() const { return HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED) || HasAuraType(SPELL_AURA_FLY); }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
-        bool CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const;
+        bool CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area, bool ignoreColdWeather) const;
 
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
 

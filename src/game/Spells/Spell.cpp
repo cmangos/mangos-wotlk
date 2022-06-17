@@ -933,8 +933,9 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_CASTER_PROCS))
         procAttacker = 0;
 
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS))
-        procVictim = 0;
+    // in wotlk SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS must be done in proc system due to SPELL_ATTR_EX7_CAN_PROC_FROM_SUPPRESSED_TARGET_PROCS
+    //if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS))
+    //    procVictim = 0;
 }
 
 void Spell::CleanupTargetList()
@@ -1074,8 +1075,10 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
                         notImmunedMask |= (1 << effIndex);
 
             targetInfo.effectHitMask = notImmunedMask;
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_REFLECTION_ONLY_DEFENDS))
+                targetInfo.reflectResult = SPELL_MISS_IMMUNE;
             // Calculate reflected spell result on caster
-            if (m_caster)
+            else if (m_caster)
                 targetInfo.reflectResult = Unit::SpellHitResult(m_caster, m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, true, &targetInfo.heartbeatResistChance);
             // Caster reflects back spell which was already reflected by victim
             if (targetInfo.reflectResult == SPELL_MISS_REFLECT || !m_caster)
@@ -1329,6 +1332,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         if (affectiveCaster && affectiveCaster != unit)
             m_caster->CasterHitTargetWithSpell(affectiveCaster, unit, m_spellInfo, m_IsTriggeredSpell, false);
     }
+
+    if (!unit->IsPlayer() && m_spellInfo->HasAttribute(SPELL_ATTR_EX7_CAN_CAUSE_INTERRUPT))
+        m_caster->CastSpell(unit, SPELL_INTERRUPT_NONPLAYER, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
 
     // All calculated do it!
     // Do healing and triggers
@@ -3276,6 +3282,16 @@ void Spell::Prepare()
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
             m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION, m_spellInfo);
 
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_RESET_SWING_TIMER_AT_SPELL_START))
+        {
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DOESNT_RESET_SWING_TIMER_IF_INSTANT) || m_casttime > 0)
+            {
+                m_caster->resetAttackTimer(BASE_ATTACK);
+                if (m_caster->hasOffhandWeaponForAttack())
+                    m_caster->resetAttackTimer(OFF_ATTACK);
+            }
+        }
+
         // Orientation changes inside
         if (m_notifyAI && m_caster->AI())
             m_caster->AI()->OnSpellCastStateChange(this, true, m_targets.getUnitTarget());
@@ -3806,7 +3822,7 @@ void Spell::_handle_immediate_phase()
 {
     m_spellState = SPELL_STATE_LANDING;
 
-    if (IsMeleeAttackResetSpell())
+    if (IsMeleeAttackResetSpell() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX7_RESET_SWING_TIMER_AT_SPELL_START))
     {
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DOESNT_RESET_SWING_TIMER_IF_INSTANT) || GetCastTime() != 0)
         {
@@ -4267,6 +4283,11 @@ void Spell::SendCastResult(SpellCastResult result) const
     else
         recipient = static_cast<Player*>(m_caster);
 
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_REPORT_SPELL_FAILURE_TO_UNIT_TARGET))
+        if (Unit* target = m_targets.getUnitTarget())
+            if (target->IsPlayer())
+                recipient = static_cast<Player*>(target);
+
     if (recipient->GetSession()->PlayerLoading()) // don't send cast results at loading time
         return;
 
@@ -4334,7 +4355,7 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
             data << param1;                                 // SpellMechanic.dbc id
             break;
         case SPELL_FAILED_CUSTOM_ERROR:
-            data << uint32(0);                              // custom error id (see enum SpellCastResultCustom)
+            data << param1;                                 // custom error id (see enum SpellCastResultCustom)
             break;
         case SPELL_FAILED_NEED_EXOTIC_AMMO:
             data << uint32(spellInfo->EquippedItemSubClassMask);// seems correct...
@@ -5518,6 +5539,12 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             default:
                 break;
+        }
+
+        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_DEBUG_SPELL) && !m_caster->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_ALLOW_CHEAT_SPELLS))
+        {
+            m_param1 = SPELL_FAILED_CUSTOM_ERROR_65;
+            return SPELL_FAILED_CUSTOM_ERROR;
         }
     }
 
@@ -6817,7 +6844,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 // allow always ghost flight spells
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->IsAlive())
                 {
-                    if (!((Player*)m_caster)->CanStartFlyInArea(m_caster->GetMapId(), zone, area))
+                    if (!((Player*)m_caster)->CanStartFlyInArea(m_caster->GetMapId(), zone, area, m_spellInfo->HasAttribute(SPELL_ATTR_EX7_IGNORES_COLD_WEATHER_FLYING_REQUIREMENT)))
                         return m_IsTriggeredSpell ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_HERE;
                 }
                 break;
@@ -8310,6 +8337,9 @@ bool Spell::IsNeedSendToClient() const
     if (m_channelOnly)
         return false;
 
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX7_ALWAYS_CAST_LOG))
+        return true;
+
     return m_spellInfo->SpellVisual[0] || m_spellInfo->SpellVisual[1] || IsChanneledSpell(m_spellInfo) ||
            m_spellInfo->speed > 0.0f || (!m_triggeredByAuraSpell && !m_IsTriggeredSpell);
 }
@@ -8740,7 +8770,7 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
         target->GetZoneAndAreaId(zone, area);
 
         SpellCastResult locRes = sSpellMgr.GetSpellAllowedInLocationError(pSpell, target->GetMapId(), zone, area, target->GetBeneficiaryPlayer());
-        if (locRes != SPELL_CAST_OK || !((Player*)target)->CanStartFlyInArea(target->GetMapId(), zone, area))
+        if (locRes != SPELL_CAST_OK || !((Player*)target)->CanStartFlyInArea(target->GetMapId(), zone, area, pSpell->HasAttribute(SPELL_ATTR_EX7_IGNORES_COLD_WEATHER_FLYING_REQUIREMENT)))
             target->CastSpell(target, spellId150, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
         else if (spellIdSpecial > 0)
         {

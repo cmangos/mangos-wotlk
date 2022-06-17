@@ -969,7 +969,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
             Player* killer = static_cast<Player*>(dealer);
 
             // in bg, count dmg if victim is also a player
-            if (victim->GetTypeId() == TYPEID_PLAYER)
+            if (victim->IsPlayer() && (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX7_DO_NOT_COUNT_FOR_PVP_SCOREBOARD)))
             {
                 if (BattleGround* bg = killer->GetBattleGround())
                 {
@@ -1197,7 +1197,7 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
             playerVictim->DuelComplete(DUEL_INTERRUPTED);
         }
 
-        if (responsiblePlayer)                         // PvP kill
+        if (responsiblePlayer && (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX7_DO_NOT_LOG_PVP_KILL))) // PvP kill
         {
             if (BattleGround* bg = playerVictim->GetBattleGround())
             {
@@ -3262,7 +3262,8 @@ void Unit::SendMeleeAttackStop(Unit* victim) const
 SpellMissInfo Unit::MeleeSpellHitResult(Unit* pVictim, SpellEntry const* spell, uint32* heartbeatResistChance/* = nullptr*/)
 {
     Die<UnitCombatDieSide, UNIT_COMBAT_DIE_HIT, NUM_UNIT_COMBAT_DIE_SIDES> die;
-    die.set(UNIT_COMBAT_DIE_MISS, CalculateSpellMissChance(pVictim, SPELL_SCHOOL_MASK_NORMAL, spell));
+    if (!spell->HasAttribute(SPELL_ATTR_EX7_NO_ATTACK_DODGE))
+        die.set(UNIT_COMBAT_DIE_MISS, CalculateSpellMissChance(pVictim, SPELL_SCHOOL_MASK_NORMAL, spell));
     die.set(UNIT_COMBAT_DIE_RESIST, CalculateSpellResistChance(pVictim, SPELL_SCHOOL_MASK_NORMAL, spell));
     if (pVictim->CanReactOnAbility(spell))
     {
@@ -3588,6 +3589,8 @@ bool Unit::CanDodgeAbility(const Unit* attacker, const SpellEntry* ability) cons
     // Can't dodge unavoidable and ranged attacks
     if (!CanReactOnAbility(ability) || ability->DmgClass != SPELL_DAMAGE_CLASS_MELEE)
         return false;
+    if (ability->HasAttribute(SPELL_ATTR_EX7_NO_ATTACK_DODGE))
+        return false;
     // Check if attacker can be dodged at the moment
     if (!CanDodgeInCombat(attacker))
         return false;
@@ -3611,6 +3614,8 @@ bool Unit::CanParryAbility(const Unit* attacker, const SpellEntry* ability) cons
         return false;
     // Only close range melee attacks can be parried, longer range abilities use deflect
     if (ability->rangeIndex != SPELL_RANGE_IDX_COMBAT && ability->rangeIndex != SPELL_RANGE_IDX_SELF_ONLY)
+        return false;
+    if (ability->HasAttribute(SPELL_ATTR_EX7_NO_ATTACK_PARRY))
         return false;
     // Check if attacker can be parried at the moment
     if (!CanParryInCombat(attacker))
@@ -8620,7 +8625,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
     {
         TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, schoolMask);
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
-            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE, schoolMask);
+            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, schoolMask);
     }
 
     // Taken fixed damage bonus auras
@@ -9458,8 +9463,8 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
     if (spellProto && (IsAreaOfEffectSpell(spellProto) || spellProto->HasAttribute(SPELL_ATTR_EX5_TREAT_AS_AREA_EFFECT)))
     {
         TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, schoolMask);
-        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
-            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE, schoolMask);
+        if (spellProto->HasAttribute(SPELL_ATTR_EX7_TREAT_AS_NPC_AOE) || GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
+            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, schoolMask);
     }
 
     // special dummys/class scripts and other effects

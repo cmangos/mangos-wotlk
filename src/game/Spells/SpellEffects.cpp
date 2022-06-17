@@ -12065,9 +12065,8 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
 
     m_caster->GetMotionMaster()->MoveCharge(*unitTarget, speed, m_spellInfo->Id);
 
-    // Players: charge against hostiles initiates auto-attack
     // TODO: This is executed after spell effects. Verify if this should be executed before spell effects
-    if (m_caster->IsClientControlled() && m_caster->CanAttackNow(unitTarget) && m_caster->CanAttackSpell(unitTarget, m_spellInfo))
+    if (m_caster->CanAttackNow(unitTarget) && m_caster->CanAttackSpell(unitTarget, m_spellInfo) && m_spellInfo->HasAttribute(SPELL_ATTR_EX7_ATTACK_ON_CHARGE_TO_UNIT))
         m_caster->Attack(unitTarget, !m_spellInfo->HasAttribute(SPELL_ATTR_USES_RANGED_SLOT));
 }
 

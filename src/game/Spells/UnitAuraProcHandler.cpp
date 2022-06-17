@@ -740,6 +740,9 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
     if (IsSitState() && !spellProto->HasAttribute(SPELL_ATTR_EX4_ALLOW_PROC_WHILE_SITTING))
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
+    if (data.isVictim && data.spellInfo && data.spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS) && !spellProto->HasAttribute(SPELL_ATTR_EX7_CAN_PROC_FROM_SUPPRESSED_TARGET_PROCS))
+        return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
+
     // Get chance from spell
     float chance = (float)spellProto->procChance;
     // If in spellProcEvent exist custom chance, chance = spellProcEvent->customChance;
