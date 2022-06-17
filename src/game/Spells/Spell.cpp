@@ -3810,13 +3810,7 @@ void Spell::_handle_immediate_phase()
     {
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DOESNT_RESET_SWING_TIMER_IF_INSTANT) || GetCastTime() != 0)
         {
-            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DELAY_COMBAT_TIMER_DURING_CAST))
-            {
-                m_caster->delayAttackTimer(BASE_ATTACK, GetCastTime());
-                if (m_caster->hasOffhandWeaponForAttack())
-                    m_caster->delayAttackTimer(OFF_ATTACK, GetCastTime());
-            }
-            else if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DO_NOT_RESET_COMBAT_TIMERS))
+            if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DO_NOT_RESET_COMBAT_TIMERS))
             {
                 m_caster->resetAttackTimer(BASE_ATTACK);
                 if (m_caster->hasOffhandWeaponForAttack())

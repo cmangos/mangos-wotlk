@@ -439,11 +439,14 @@ void Unit::Update(const uint32 diff)
     if (CanHaveThreatList())
         getThreatManager().UpdateForClient(diff);
 
-    if (uint32 base_att = getAttackTimer(BASE_ATTACK))
-        setAttackTimer(BASE_ATTACK, (diff >= base_att ? 0 : base_att - diff));
+    if (!IsDelayCombatTimerSpellCasted())
+    {
+        if (uint32 base_att = getAttackTimer(BASE_ATTACK))
+            setAttackTimer(BASE_ATTACK, (diff >= base_att ? 0 : base_att - diff));
 
-    if (uint32 base_att = getAttackTimer(OFF_ATTACK))
-        setAttackTimer(OFF_ATTACK, (diff >= base_att ? 0 : base_att - diff));
+        if (uint32 base_att = getAttackTimer(OFF_ATTACK))
+            setAttackTimer(OFF_ATTACK, (diff >= base_att ? 0 : base_att - diff));
+    }
 
     if (IsVehicle())
     {
@@ -707,13 +710,6 @@ void Unit::SendMoveRoot(bool state, bool/* broadcastOnly*/)
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
     m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
-}
-
-void Unit::delayAttackTimer(WeaponAttackType type, uint32 castTime)
-{
-    uint32 timer = getAttackTimer(type) + castTime;
-    uint32 maxTimer = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
-    setAttackTimer(type, std::min(timer, maxTimer));
 }
 
 bool Unit::CanReachWithMeleeAttack(Unit const* pVictim, float flat_mod /*= 0.0f*/) const
@@ -5221,6 +5217,20 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     // autorepeat spells may be finished or delayed, but they are still considered casted
     if (!skipAutorepeat && m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
         return true;
+
+    return false;
+}
+
+bool Unit::IsDelayCombatTimerSpellCasted() const
+{
+    if (Spell const* genericSpell = m_currentSpells[CURRENT_GENERIC_SPELL])
+        if (genericSpell->getState() == SPELL_STATE_CASTING && genericSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DELAY_COMBAT_TIMER_DURING_CAST))
+            return true;
+
+    // attribute also applies to channeling but no spell uses it with channel in wotlk
+    if (Spell const* genericSpell = m_currentSpells[CURRENT_CHANNELED_SPELL])
+        if (genericSpell->getState() == SPELL_STATE_CASTING && genericSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DELAY_COMBAT_TIMER_DURING_CAST))
+            return true;
 
     return false;
 }
