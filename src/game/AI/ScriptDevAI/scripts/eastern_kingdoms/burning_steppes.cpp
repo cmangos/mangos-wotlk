@@ -108,7 +108,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
 
             m_lSearscaleGuidList.clear();
 
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
     }
 
@@ -210,7 +210,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
                 m_creature->RemoveAllAurasOnDeath();
                 m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
                 m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->ClearAllReactives();
                 m_creature->GetMotionMaster()->Clear();
                 m_creature->GetMotionMaster()->MoveIdle();

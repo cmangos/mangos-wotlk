@@ -162,7 +162,7 @@ struct boss_ichoronAI : public CombatAI
 
             // reduce health and set unselectable
             m_creature->SetHealthPercent(m_creature->GetHealthPercent() - 30.0f);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             m_creature->SetFeignDeath(true);
 
@@ -224,7 +224,7 @@ struct boss_ichoronAI : public CombatAI
         ResetCombatAction(ICHORON_WATER_BLAST, urand(8000, 14000));
         ResetCombatAction(ICHORON_WATER_BOLT_VOLLEY, urand(7000, 12000));
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void ExecuteAction(uint32 action) override
@@ -325,7 +325,7 @@ struct spell_water_globule_missile : public SpellScript
 
         target->CastSpell(target, 54268, TRIGGERED_OLD_TRIGGERED);
 
-        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         static_cast<Creature*>(target)->SetWalk(false);
         target->GetMotionMaster()->MoveFollow(caster, 0, 0);
     }

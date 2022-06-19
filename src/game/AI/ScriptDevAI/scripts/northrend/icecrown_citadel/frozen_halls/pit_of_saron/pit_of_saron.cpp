@@ -385,7 +385,7 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
             }
             if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS))
             {
-                pTyrannus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pTyrannus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 pTyrannus->GetMotionMaster()->MoveFall();
             }
             break;

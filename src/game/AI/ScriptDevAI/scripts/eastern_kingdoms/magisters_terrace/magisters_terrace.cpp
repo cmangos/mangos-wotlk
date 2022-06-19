@@ -109,8 +109,8 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pTemp = instance->GetCreature(*itr))
                     {
-                        if (!pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                            pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        if (!pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
+                            pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                         if (pTemp->IsAlive())
                         {

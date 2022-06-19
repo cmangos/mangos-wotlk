@@ -74,7 +74,7 @@ struct npc_doomguard_punisherAI : public CombatAI
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
         m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
         if (Creature* demon = m_creature->GetMap()->GetCreature(m_demonGuid))
@@ -153,7 +153,7 @@ struct npc_shivan_assassinAI : public CombatAI
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
         m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
         if (Creature* demon = m_creature->GetMap()->GetCreature(m_demonGuid))
@@ -252,7 +252,7 @@ struct npc_eye_of_shartuulAI : public CombatAI
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
         if (Creature* demon = m_creature->GetMap()->GetCreature(m_demonGuid))
             AttackStart(demon);
@@ -348,7 +348,7 @@ struct npc_dreadmawAI : public CombatAI
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
         if (Creature* demon = m_creature->GetMap()->GetCreature(m_demonGuid))
             AttackStart(demon);
@@ -463,7 +463,7 @@ struct npc_shartuulAI : public CombatAI
             case 2:
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
                 m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
                 Unit* spawner = m_creature->GetSpawner();
@@ -605,7 +605,7 @@ struct MadnessRift : public SpellScript
         target->CastSpell(nullptr, SPELL_LEGION_RING_EYE_STALK_TRANSFORM, TRIGGERED_OLD_TRIGGERED);
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         static_cast<Creature*>(target)->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
     }
 };
@@ -870,7 +870,7 @@ struct BuildPortableFelCannon : public AuraScript
             target->CastSpell(nullptr, SPELL_LEGION_RING_FEL_CANNON_TRANSFORM, TRIGGERED_OLD_TRIGGERED);
             target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             static_cast<Creature*>(target)->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
         }
     }

@@ -134,8 +134,8 @@ void instance_steam_vault::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pDistiller = instance->GetCreature(*itr))
                     {
-                        if (!pDistiller->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-                            pDistiller->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        if (!pDistiller->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
+                            pDistiller->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     }
                 }
             }

@@ -44,7 +44,7 @@ void instance_blood_furnace::OnCreatureCreate(Creature* creature)
     switch (creature->GetEntry())
     {
         case NPC_BROGGOK:
-            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         case NPC_KELIDAN_THE_BREAKER:
         case NPC_MAGTHERIDON:
         case NPC_IN_COMBAT_TRIGGER:
@@ -174,7 +174,7 @@ void instance_blood_furnace::SetData(uint32 type, uint32 data)
                         {
                             if (Creature* pOrc = instance->GetCreature(*itr))
                             {
-                                pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                                 
                                 if (pOrc->IsAlive())
                                     pOrc->ForcedDespawn();
@@ -242,13 +242,13 @@ void instance_blood_furnace::OnPlayerEnter(Player* /*player*/)
                     {
                         if (pOrc->IsWithinDistInMap(pDoor, 15.0f) && pOrc->GetPositionZ() < 15.0f)
                         {
-                            pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); // ones in cages
+                            pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE); // ones in cages
                             pOrc->setFaction(14); // sniffed value
                         }
                     }
                 }
                 if (pOrc->GetPositionZ() > 20.0f) // ones above
-                    pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+                    pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_NPC);
             }
         }
     }
@@ -263,7 +263,7 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
 
         if (Creature* pBroggok = GetSingleCreatureFromStorage(NPC_BROGGOK))
         {
-            pBroggok->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pBroggok->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             pBroggok->SetWalk(false);
             pBroggok->GetMotionMaster()->Clear(false, true);
             pBroggok->GetMotionMaster()->MoveWaypoint();
@@ -282,7 +282,7 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
         {
             if (Creature* pOrc = instance->GetCreature(m_sSortedOrcGuid))
             {
-                pOrc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pOrc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 pOrc->SetInCombatWithZone();
             }
         }

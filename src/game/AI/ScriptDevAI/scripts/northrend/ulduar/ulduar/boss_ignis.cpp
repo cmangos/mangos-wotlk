@@ -259,8 +259,8 @@ struct npc_iron_constructAI : public ScriptedAI
     void JustReachedHome() override
     {
         // reset flags if necessary
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         DoCastSpellIfCan(m_creature, SPELL_STONED, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_CONSTRUCT_HITTING_YA, CAST_TRIGGERED);
@@ -276,7 +276,7 @@ struct npc_iron_constructAI : public ScriptedAI
                 DoCastSpellIfCan(m_creature, SPELL_SHATTER, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_STRENGTH_REMOVE, CAST_TRIGGERED);
 
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->GetMotionMaster()->MoveIdle();
                 m_bHasShattered = true;
             }

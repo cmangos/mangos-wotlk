@@ -274,7 +274,7 @@ struct boss_muruAI : public CombatAI
                     m_creature->RemoveAurasDueToSpell(SPELL_OPEN_PORTAL_PERIODIC);
                     m_creature->RemoveAurasDueToSpell(SPELL_DARKNESS_PERIODIC);
                     m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_BLOOD_ELVES_PERIODIC);
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     DisableCombatAction(action);
                     ResetTimer(MURU_SPAWN_ENTROPIUS, 6000);
                 }
@@ -641,7 +641,7 @@ struct DarkFiendDummy : public SpellScript
         target->AI()->SetCombatScriptStatus(true);
         target->AI()->SetMeleeEnabled(false);
         target->SetTarget(nullptr);
-        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         target->RemoveAurasDueToSpell(SPELL_DARK_FIEND_VISUAL);
         static_cast<Creature*>(target)->ForcedDespawn(5000);
     }

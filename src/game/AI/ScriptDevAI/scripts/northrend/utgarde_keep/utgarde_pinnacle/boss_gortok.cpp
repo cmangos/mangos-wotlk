@@ -58,7 +58,7 @@ struct spell_awaken_subboss_aura : public AuraScript
 
         if (apply)
         {
-            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             target->RemoveAurasDueToSpell(16245);
 
@@ -87,7 +87,7 @@ struct spell_awaken_gortok : public SpellScript
         if (!target)
             return;
 
-        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         target->RemoveAurasDueToSpell(16245);
 

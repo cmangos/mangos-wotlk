@@ -288,7 +288,7 @@ void instance_shadowfang_keep::SetData(uint32 type, uint32 data)
                 {
                     if (Creature* pHummel = GetSingleCreatureFromStorage(NPC_HUMMEL))
                     {
-                        pHummel->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pHummel->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                         pHummel->Suicide();
                     }
 

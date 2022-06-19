@@ -125,7 +125,7 @@ void instance_black_temple::OnCreatureCreate(Creature* creature)
         case NPC_SKY_STALKER:
         case NPC_WIND_REAVER:
             if (creature->GetPositionZ() > 160.0f)
-                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             break;
         case NPC_RELIQUARY_COMBAT_TRIGGER:
             creature->GetCombatManager().SetLeashingDisable(true);

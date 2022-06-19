@@ -412,7 +412,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
                 {
                     pTaretha->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    pTaretha->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pTaretha->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pTaretha->SetStandState(UNIT_STAND_STATE_STAND);
                 }
             }
@@ -667,7 +667,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
                 {
                     pTaretha->CastSpell(pTaretha, SPELL_SHADOW_SPIKE, TRIGGERED_OLD_TRIGGERED);
-                    pTaretha->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pTaretha->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pTaretha->SetStandState(UNIT_STAND_STATE_DEAD);
                 }
                 break;
@@ -1238,7 +1238,7 @@ struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
             if (m_pInstance->GetData(TYPE_EPOCH) == DONE && m_pInstance->GetData(TYPE_THRALL_EVENT) != DONE)
             {
                 m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_PRISON);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
                 Start(true);

@@ -890,7 +890,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 m_creature->RemoveAllAurasOnDeath();
                 m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
                 m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->ClearAllReactives();
                 m_creature->SetImmobilizedState(true, true);
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);

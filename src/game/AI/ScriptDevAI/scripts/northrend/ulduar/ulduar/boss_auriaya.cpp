@@ -279,7 +279,7 @@ struct boss_feral_defenderAI : public ScriptedAI
             m_creature->ClearComboPointHolders();
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->ClearAllReactives();
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveIdle();
@@ -325,7 +325,7 @@ struct boss_feral_defenderAI : public ScriptedAI
                 DoResetThreat();
                 m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                 m_uiPounceTimer = urand(9000, 10000);
                 m_uiFeralRushCount = 0;

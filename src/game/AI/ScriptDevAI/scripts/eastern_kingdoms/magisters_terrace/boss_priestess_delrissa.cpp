@@ -172,7 +172,7 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
 
         DoInitializeCompanions();
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         SetDeathPrevention(true);
     }
@@ -265,7 +265,7 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         if (m_instance)
             m_instance->SetData(TYPE_DELRISSA, DONE);

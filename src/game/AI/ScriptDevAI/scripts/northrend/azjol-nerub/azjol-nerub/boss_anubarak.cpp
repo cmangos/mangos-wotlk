@@ -100,7 +100,7 @@ struct boss_anubarakAI : public ScriptedAI
         m_uiDarterTimer         = 5000;
 
         // reset flags
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -192,7 +192,7 @@ struct boss_anubarakAI : public ScriptedAI
                 {
                     DoCastSpellIfCan(m_creature, SPELL_IMPALE_AURA, CAST_TRIGGERED);
                     DoScriptText(urand(0, 1) ? SAY_SUBMERGE_1 : SAY_SUBMERGE_2, m_creature);
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
                     m_uiPhase = PHASE_SUBMERGED;
                     m_uiSummonTimer = 5000;
 
@@ -248,7 +248,7 @@ struct boss_anubarakAI : public ScriptedAI
                 DoCastSpellIfCan(m_creature, SPELL_EMERGE, CAST_INTERRUPT_PREVIOUS);
                 m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
                 m_creature->RemoveAurasDueToSpell(SPELL_IMPALE_AURA);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
                 m_uiPhase = PHASE_GROUND;
             }
             else

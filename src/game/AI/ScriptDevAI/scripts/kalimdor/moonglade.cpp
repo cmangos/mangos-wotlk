@@ -115,7 +115,7 @@ struct npc_clintar_dw_spiritAI : public npc_escortAI
         if (CreatureInfo const* pTemp = GetCreatureTemplateStore(m_creature->GetEntry()))
             m_creature->SetDisplayId(Creature::ChooseDisplayId(pTemp));
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_NPC);
         m_creature->SetVisibility(VISIBILITY_OFF);
     }
 
@@ -127,7 +127,7 @@ struct npc_clintar_dw_spiritAI : public npc_escortAI
             return;
 
         m_creature->SetVisibility(VISIBILITY_ON);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_NPC);
         Start(false, pStarter && pStarter->GetTypeId() == TYPEID_PLAYER ? (Player*)pStarter : nullptr);
     }
 

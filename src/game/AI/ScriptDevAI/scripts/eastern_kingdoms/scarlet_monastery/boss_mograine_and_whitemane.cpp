@@ -111,7 +111,7 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
 
         // Incase wipe during phase that mograine fake death
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         SetDeathPrevention(true);
         SetCombatScriptStatus(false);
@@ -185,7 +185,7 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
             m_creature->PlayDistanceSound(SOUND_MOGRAINE_FAKE_DEATH);
 
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
             m_bHasDied = true;
@@ -262,7 +262,7 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
     void HandleRevivedTimer()
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         SetActionReadyStatus(MOGRAINE_ACTION_DIVINE_SHIELD, true);
 

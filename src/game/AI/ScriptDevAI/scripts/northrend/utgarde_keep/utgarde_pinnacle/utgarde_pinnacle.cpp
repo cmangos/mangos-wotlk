@@ -221,7 +221,7 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                         if (!pTemp->IsAlive())
                             pTemp->Respawn();
 
-                        pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     }
                 }
 
@@ -396,7 +396,7 @@ void instance_pinnacle::JustDidDialogueStep(int32 iEntry)
             if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA))
             {
                 pSvala->CastSpell(pSvala, SPELL_TRANSFORMING, TRIGGERED_NONE);
-                pSvala->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pSvala->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 pSvala->ForcedDespawn(2000);
 
                 if (Creature* pBoss = pSvala->SummonCreature(NPC_SVALA_SORROWGRAVE, aSvalaSpawnPos[0], aSvalaSpawnPos[1], aSvalaSpawnPos[2], aSvalaSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0))
@@ -430,7 +430,7 @@ void instance_pinnacle::OnCreatureEvade(Creature* pCreature)
         case NPC_JORMUNGAR:
         case NPC_RHINO:
         case NPC_GORTOK:
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             SetData(TYPE_GORTOK, FAIL);
             break;

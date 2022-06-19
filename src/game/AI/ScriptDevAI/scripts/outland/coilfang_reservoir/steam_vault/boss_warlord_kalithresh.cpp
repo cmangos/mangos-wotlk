@@ -175,7 +175,7 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
             if (Creature* Distiller = m_creature->GetMap()->GetCreature(m_distillerGuid))
             {
                 Distiller->CastSpell(Distiller, SPELL_WARLORDS_RAGE_NAGA, TRIGGERED_OLD_TRIGGERED);
-                Distiller->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                Distiller->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
         }
     }
@@ -268,7 +268,7 @@ struct mob_naga_distillerAI : public Scripted_NoMovementAI
 
     void Reset() override
     {
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void MoveInLineOfSight(Unit* /*pWho*/) override { }

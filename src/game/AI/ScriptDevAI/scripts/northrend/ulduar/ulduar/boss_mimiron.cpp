@@ -304,7 +304,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
         m_uiBerserkTimer    = 0;
         m_uiCurrentSeatAura = SPELL_RIDE_VEHICLE_MIMIRON_0;
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
@@ -373,11 +373,11 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                 {
                     pLeviathan->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
-                    pLeviathan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pLeviathan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pLeviathan->SetInCombatWithZone();
                 }
                 // Note: maybe the flags are handled by the vehicle seats. Set them manually for the moment.
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                 break;
 
             // Start phase 2 transition
@@ -419,7 +419,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 {
                     pVx001->SetHealth(pVx001->GetMaxHealth());
                     pVx001->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
-                    pVx001->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pVx001->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pVx001->SetInCombatWithZone();
                 }
                 break;
@@ -458,7 +458,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
             case NPC_MAGNETIC_CORE:
                 if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                 {
-                    pAerial->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pAerial->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pAerial->SetInCombatWithZone();
                 }
                 break;
@@ -511,18 +511,18 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                 if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                 {
                     SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pAerial);
-                    pAerial->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pAerial->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 }
                 if (Creature* pVx001 = m_pInstance->GetSingleCreatureFromStorage(NPC_VX001))
                 {
                     SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pVx001);
-                    pVx001->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pVx001->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pVx001->SetInCombatWithZone();
                 }
                 if (Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK))
                 {
                     SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pLeviathan);
-                    pLeviathan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pLeviathan->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 }
                 break;
 
@@ -905,7 +905,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
         }
 
         DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         // reset all the vehicle accessories
         m_uiMountTimer = 1000;
@@ -940,7 +940,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
             DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM_DEFEATED, CAST_TRIGGERED);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetFacingTo(afTankEvadePos[3]);
         }
     }
@@ -1150,7 +1150,7 @@ struct boss_vx001AI : public ScriptedAI
                     // m_creature->RemoveAllAurasOnEvade();
                     m_creature->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_HEAT_WAVE : SPELL_HEAT_WAVE_H);
                     m_creature->CombatStop();
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 }
             }
             else if (m_uiPhase == PHASE_FULL_ROBOT)
@@ -1432,7 +1432,7 @@ struct boss_aerial_unitAI : public ScriptedAI
                 // shut down the aerial unit and prepare for the final phase
                 DoCastSpellIfCan(m_creature, SPELL_CLEAR_DEBUFFS, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_HALF_HEAL, CAST_TRIGGERED);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                 m_creature->GetMotionMaster()->Clear();
                 m_creature->GetMotionMaster()->MovePoint(0, afAerialMovePos[0], afAerialMovePos[1], afAerialMovePos[2]);
@@ -1645,7 +1645,7 @@ struct npc_proximity_mineAI : public Scripted_NoMovementAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSION_H) == CAST_OK)
                     {
-                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                         m_creature->RemoveAurasDueToSpell(SPELL_PROXIMITY_MINE);
                         m_creature->ForcedDespawn(2000);
                         m_uiExplodeTimer = 0;

@@ -265,7 +265,7 @@ struct boss_brutallusAI : public CombatAI, private DialogueHelper
             target->RemoveAllAurasOnDeath();
             target->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
             target->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             target->ClearAllReactives();
             target->GetMotionMaster()->Clear();
             target->GetMotionMaster()->MoveIdle();

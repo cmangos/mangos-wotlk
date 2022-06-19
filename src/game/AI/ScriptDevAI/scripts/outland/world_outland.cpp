@@ -1292,7 +1292,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             {
                 spawn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 spawn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                spawn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                spawn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 spawn->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
                 if (Creature* demon = GetCurrentDemon())
                     spawn->AI()->AttackStart(demon);
@@ -1352,7 +1352,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 eyestalk->RemoveAurasDueToSpell(SPELL_LEGION_RING_EYE_STALK_TRANSFORM);
                 eyestalk->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 eyestalk->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                eyestalk->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                eyestalk->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 static_cast<Creature*>(eyestalk)->ClearTemporaryFaction();
                 eyestalk->ForcedDespawn();
             }
@@ -1659,7 +1659,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                     creature->CastSpell(nullptr, SPELL_LEGION_RING_EYE_STALK_TRANSFORM, TRIGGERED_OLD_TRIGGERED);
                     creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                     creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-                    creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     static_cast<Creature*>(creature)->SetFactionTemporary(SHARTUUL_FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_REACH_HOME);
                 }
                 creature->SetCorpseDelay(2);

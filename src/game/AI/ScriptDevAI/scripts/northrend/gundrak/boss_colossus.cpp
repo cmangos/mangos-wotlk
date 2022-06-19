@@ -178,7 +178,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
         // Reset unit flags
         SetCombatMovement(true);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -206,7 +206,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
         if (pSpell->Id == SPELL_MERGE)
         {
             // re-activate colossus here
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
 
@@ -255,7 +255,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
         {
             SetCombatMovement(false);
             m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED);
         }

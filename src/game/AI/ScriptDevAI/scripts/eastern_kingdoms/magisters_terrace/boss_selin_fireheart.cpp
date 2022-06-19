@@ -273,7 +273,7 @@ struct mob_fel_crystalAI : public ScriptedAI
     void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
     {
         if (spellInfo->Id == SPELL_FEL_CRYSTAL_DUMMY)
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 };
 

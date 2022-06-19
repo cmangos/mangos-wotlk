@@ -3598,7 +3598,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 56422:                                 // Nerubian Submerge
                 case 70733:                                 // Stoneform
                     // not known if there are other things todo, only flag are confirmed valid
-                    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE, apply);
+                    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE, apply);
                     return;
                 case 58204:                                 // LK Intro VO (1)
                     if (target->GetTypeId() == TYPEID_PLAYER)
@@ -6831,9 +6831,9 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool /*Real*/)
     if (GetId() == 40409)
     {
         if (apply)
-            GetTarget()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            GetTarget()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         else
-            GetTarget()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            GetTarget()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 }
 

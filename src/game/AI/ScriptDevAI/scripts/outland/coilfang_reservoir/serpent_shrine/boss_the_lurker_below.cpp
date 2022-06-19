@@ -187,7 +187,7 @@ struct boss_the_lurker_belowAI : public CombatAI
             }
             case 1:
             {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 timer = 1000;
                 break;
             }
@@ -234,7 +234,7 @@ struct boss_the_lurker_belowAI : public CombatAI
                 {
                     DoSummonCoilfangNaga();
                     SetCombatScriptStatus(true);
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE); // UNIT_STAND_STATE_CUSTOM
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE); // UNIT_STAND_STATE_CUSTOM
                     m_creature->SetStandState(UNIT_STAND_STATE_CUSTOM); // TODO investigate Submerge visual spell to see if it shouldnt do this instead in aura
                     m_submergePhases = 0;
                     ResetTimer(LURKER_SUBMERGE_ACTIONS, MINUTE * IN_MILLISECONDS);

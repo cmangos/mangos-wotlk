@@ -345,7 +345,7 @@ struct npc_akamaAI : public CombatAI, private DialogueHelper
                         shade->SetStandState(UNIT_STAND_STATE_STAND);
                     for (ObjectGuid guid : m_instance->GetChannelersGuidList())
                         if (Creature* channeler = m_creature->GetMap()->GetCreature(guid))
-                            channeler->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            channeler->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                     for (ObjectGuid guid : m_instance->GetGeneratorGuidVector()) // notify generators to start spawning
                         if (Creature* generator = m_creature->GetMap()->GetCreature(guid))
@@ -500,7 +500,7 @@ struct boss_shade_of_akamaAI : public ScriptedAI
     void Reset() override
     {
         SetCombatMovement(false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->HandleEmote(EMOTE_STATE_STUN);
     }
 
@@ -545,7 +545,7 @@ struct boss_shade_of_akamaAI : public ScriptedAI
         // Set in combat with Akama
         if (Creature* akama = m_instance->GetSingleCreatureFromStorage(NPC_AKAMA_SHADE))
         {
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             // Shade should move to Akama, not the other way around
             m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, akama);
@@ -588,7 +588,7 @@ struct mob_ashtongue_channelerAI : public ScriptedAI
     {
         m_uiBanishTimer = 5000;
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void JustDied(Unit* /*pKiller*/) override

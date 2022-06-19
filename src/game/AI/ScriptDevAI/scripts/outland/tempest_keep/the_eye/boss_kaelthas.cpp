@@ -431,7 +431,7 @@ struct boss_kaelthasAI : public ScriptedAI
             SetCombatScriptStatus(true);
             m_creature->SetInCombatWithZone();
 
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             if (m_instance)
                 m_instance->SetData(TYPE_KAELTHAS, IN_PROGRESS);
@@ -548,7 +548,7 @@ struct boss_kaelthasAI : public ScriptedAI
                 // ToDo: also start channeling to the giant crystals nearby
                 DoScriptText(SAY_PHASE5_NUTS, m_creature);
                 m_creature->SetFacingTo(3.176499f);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_phaseTransitionTimer = 2000;
 
                 if (m_worldTriggersFirstStage.empty())
@@ -581,7 +581,7 @@ struct boss_kaelthasAI : public ScriptedAI
                 m_creature->SetLevitate(false);
                 m_creature->SetHover(false);
                 SetCombatScriptStatus(false);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->RemoveAurasDueToSpell(SPELL_KAEL_FULL_POWER);
                 m_uiPhase = PHASE_5_GRAVITY;
                 SetCombatMovement(true);
@@ -986,7 +986,7 @@ struct boss_kaelthasAI : public ScriptedAI
                         case 1:
                         {
                             DoScriptText(SAY_PHASE4_INTRO2, m_creature);
-                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                             DoResetThreat();
                             SetCombatScriptStatus(false);
                             SetCombatMovement(true, true);
@@ -1382,7 +1382,7 @@ struct advisor_base_ai : public ScriptedAI
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         m_attackTimer = 0;
 
@@ -1434,7 +1434,7 @@ struct advisor_base_ai : public ScriptedAI
         m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->ClearAllReactives();
         m_creature->MeleeAttackStop(m_creature->GetVictim());
         SetCombatMovement(false);
@@ -1469,7 +1469,7 @@ struct advisor_base_ai : public ScriptedAI
             if (m_attackTimer <= uiDiff)
             {
                 m_attackTimer = 0;
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_bFakeDeath = false;
                 SetCombatScriptStatus(false);
                 m_creature->MeleeAttackStart(m_creature->GetVictim());

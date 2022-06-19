@@ -169,10 +169,10 @@ struct boss_ahuneAI : public CombatAI
             // Note: the following spell breaks the visual. Needs to be fixed!
             // DoCastSpellIfCan(m_creature, SPELL_AHUNE_SELF_STUN, CAST_TRIGGERED);
 
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
-                pCore->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                pCore->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         }
     }
 
@@ -219,13 +219,13 @@ struct boss_ahuneAI : public CombatAI
     {
         m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
         m_creature->RemoveAurasDueToSpell(SPELL_AHUNE_SELF_STUN);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         DoCastSpellIfCan(m_creature, SPELL_BIRTH);
         SpawnBunnies();
 
         if (Creature* pCore = m_creature->GetMap()->GetCreature(m_frozenCoreGuid))
-            pCore->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            pCore->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
 
         ResetCombatAction(AHUNE_FROSTWIND, urand(20000, 25000));
         ResetCombatAction(AHUNE_HAILSTONE, 1000);

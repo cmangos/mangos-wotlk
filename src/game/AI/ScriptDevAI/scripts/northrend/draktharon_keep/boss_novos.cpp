@@ -116,7 +116,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
         m_uiLostCrystals = 0;
         m_uiPhase = PHASE_IDLE;
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void LostOneCrystal()
@@ -150,7 +150,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
         DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_BLAST : SPELL_ARCANE_BLAST_H, CAST_TRIGGERED);
 
         DoCastSpellIfCan(m_creature, SPELL_IMMUNITY, CAST_TRIGGERED);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         DoCastSpellIfCan(m_creature, SPELL_ARCANE_FIELD);
         m_uiPhase = PHASE_SHIELDED;
@@ -263,7 +263,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
                 {
                     m_uiPhase = PHASE_NORMAL;
                     // Remove Immunity and Shield Aura
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     m_creature->RemoveAllAuras();
 
                     if (!m_bIsRegularMode)

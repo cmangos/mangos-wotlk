@@ -600,7 +600,7 @@ struct boss_kiljaedenAI : public CombatAI, private DialogueHelper
     void HandleAttackDelay()
     {
         SetReactState(REACT_AGGRESSIVE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         DoScriptText(SAY_EMERGE, m_creature);
         SetMeleeEnabled(true);
         AttackClosestEnemy();

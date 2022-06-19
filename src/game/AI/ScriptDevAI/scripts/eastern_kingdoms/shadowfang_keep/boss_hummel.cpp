@@ -97,7 +97,7 @@ struct boss_apothecary_hummelAI : public CombatAI
             DoScriptText(SAY_HUMMEL_DEATH, m_creature);
 
             DoCastSpellIfCan(m_creature, SPELL_PERMANENT_FEIGN_DEATH, CAST_TRIGGERED);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             SetCombatScriptStatus(true);
             m_creature->SetTarget(nullptr);

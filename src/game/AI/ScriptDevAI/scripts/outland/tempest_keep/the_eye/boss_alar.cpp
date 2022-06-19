@@ -178,7 +178,7 @@ struct boss_alarAI : public CombatAI
         m_uiCurrentPlatformId   = 0;
 
         m_creature->RemoveAurasDueToSpell(SPELL_FLIGHT_MODE);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         DespawnGuids(m_spawns);
 
@@ -322,7 +322,7 @@ struct boss_alarAI : public CombatAI
                 if (DoCastSpellIfCan(m_creature, SPELL_DIVE_BOMB_VISUAL) == CAST_OK)
                 {
                     m_diveBombState = 0;
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     ResetTimer(ALAR_DIVE_BOMB_TIMER, 5000);
                 }
                 break;
@@ -353,7 +353,7 @@ struct boss_alarAI : public CombatAI
         m_creature->ClearAllReactives();
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
         m_creature->SetIgnoreRangedTargets(false); // TODO: Use root for this
@@ -383,7 +383,7 @@ struct boss_alarAI : public CombatAI
         }
         else if (m_rebirthState == 1)
         {
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
             // cast rebirth and remove fake death
@@ -432,7 +432,7 @@ struct boss_alarAI : public CombatAI
             }
             case 2:
             {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->SetHover(false);
                 m_creature->SetLevitate(false);
                 SetCombatScriptStatus(false);

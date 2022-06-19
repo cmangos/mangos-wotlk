@@ -2205,7 +2205,7 @@ struct npc_saeed_escortAI : public npc_escortAI
                             {
                                 DoScriptText(EMOTE_DIMENSIUS_LAUGH, dimensius, m_creature);
                                 dimensius->SetDisplayId(dimensius->GetNativeDisplayId());
-                                dimensius->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                                dimensius->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                             }
 
                             m_uiEventTimer = 3000;
@@ -2367,7 +2367,7 @@ struct npc_dimensiusAI : public Scripted_NoMovementAI
         m_bSpawnsFeeding = false;
 
         m_creature->SetDisplayId(MODEL_ID_DIMENSIUS_CLOUD);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -2796,7 +2796,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
         }
         m_dontDoAnything = true;
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         if (m_negatron)
             if (Creature* negatron = m_creature->GetMap()->GetCreature(m_negatron))
                 DoScriptText(SAY_ON_DEATH, m_creature, negatron);

@@ -304,7 +304,7 @@ struct boss_freyaAI : public ScriptedAI
                 if (pElder->IsAlive())
                 {
                     pElder->AI()->EnterEvadeMode();
-                    pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 }
             }
             if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
@@ -312,7 +312,7 @@ struct boss_freyaAI : public ScriptedAI
                 if (pElder->IsAlive())
                 {
                     pElder->AI()->EnterEvadeMode();
-                    pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 }
             }
             if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
@@ -320,7 +320,7 @@ struct boss_freyaAI : public ScriptedAI
                 if (pElder->IsAlive())
                 {
                     pElder->AI()->EnterEvadeMode();
-                    pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 }
             }
         }
@@ -578,7 +578,7 @@ struct boss_freyaAI : public ScriptedAI
             if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
-                pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
         }
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
@@ -586,7 +586,7 @@ struct boss_freyaAI : public ScriptedAI
             if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
-                pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
         }
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
@@ -594,7 +594,7 @@ struct boss_freyaAI : public ScriptedAI
             if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
-                pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
         }
     }
@@ -832,7 +832,7 @@ struct three_nature_alliesAI : public ScriptedAI
             m_creature->ClearComboPointHolders();
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->ClearAllReactives();
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveIdle();
@@ -851,7 +851,7 @@ struct three_nature_alliesAI : public ScriptedAI
             DoResetThreat();
             m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
     }
 };

@@ -137,7 +137,7 @@ struct boss_xt_002AI : public ScriptedAI
 
         // reset flags and stand state
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -203,7 +203,7 @@ struct boss_xt_002AI : public ScriptedAI
     {
         DoScriptText(SAY_HEART_CLOSE, m_creature);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         DoStartMovement(m_creature->GetVictim());
 
@@ -234,7 +234,7 @@ struct boss_xt_002AI : public ScriptedAI
 
                     pHeart->AI()->EnterEvadeMode();
                     m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-                    pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
                 }
 
@@ -320,7 +320,7 @@ struct boss_xt_002AI : public ScriptedAI
                     DoScriptText(EMOTE_HEART, m_creature);
 
                     m_creature->SetStandState(UNIT_STAND_STATE_CUSTOM);
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                     m_uiHeartTimer = 30000;
                     m_uiPhase = PHASE_HEART;
@@ -342,7 +342,7 @@ struct boss_xt_002AI : public ScriptedAI
                     {
                         if (Creature* pHeart = m_pInstance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
                         {
-                            pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                             m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
                             pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
 
@@ -417,7 +417,7 @@ struct boss_heart_deconstructorAI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_XT002)
         {
             // remove flags and previous vehicle aura before applying the new one
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             pInvoker->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
 
             DoCastSpellIfCan(pInvoker, SPELL_RIDE_VEHICLE, CAST_TRIGGERED);

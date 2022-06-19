@@ -74,7 +74,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
         m_uiPyroBlastTimer      = 14000;
         m_uiGrowingStacks       = 0;
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
@@ -121,7 +121,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
                 m_pInstance->SetData(TYPE_EMBERSEER, IN_PROGRESS);
             }
 
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         }
     }

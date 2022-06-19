@@ -352,7 +352,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
 {
     npc_taelan_fordringAI(Creature* creature): npc_escortAI(creature), DialogueHelper(aScarletDialogue)
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         m_scarletComplete = false;
         m_fightStarted = false;
@@ -414,7 +414,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
             m_creature->RemoveAllAurasOnDeath();
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->ClearAllReactives();
             m_creature->SetImmobilizedState(true, true);
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);

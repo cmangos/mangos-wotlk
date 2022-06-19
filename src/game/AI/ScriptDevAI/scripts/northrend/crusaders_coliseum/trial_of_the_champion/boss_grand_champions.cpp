@@ -80,7 +80,7 @@ struct trial_companion_commonAI : public ScriptedAI
         m_bDefeated             = false;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void Aggro(Unit* pWho) override
@@ -139,7 +139,7 @@ struct trial_companion_commonAI : public ScriptedAI
             // second part of the champions challenge
             if (m_pInstance->GetData(TYPE_ARENA_CHALLENGE) == DONE)
             {
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->InterruptNonMeleeSpells(false);
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 m_creature->SetHealth(1);

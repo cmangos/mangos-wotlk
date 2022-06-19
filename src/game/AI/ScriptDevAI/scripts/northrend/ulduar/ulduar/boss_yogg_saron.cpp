@@ -1010,7 +1010,7 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
 
         DoCastSpellIfCan(m_creature, SPELL_MATCH_HEALTH);
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
@@ -1199,7 +1199,7 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
             DoCastSpellIfCan(m_creature, SPELL_BRAIN_HURT_VISUAL, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_SHATTERED_ILLUSION_REMOVE, CAST_TRIGGERED);
             m_creature->RemoveAurasDueToSpell(SPELL_MATCH_HEALTH);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
 
             if (m_pInstance)
             {

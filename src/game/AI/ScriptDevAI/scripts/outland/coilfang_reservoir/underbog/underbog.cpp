@@ -75,7 +75,7 @@ void instance_underbog::OnCreatureDeath(Creature* creature)
                 {
                     creature->CastSpell(nullptr, SPELL_PERMANENT_FEIGH_DEATH, TRIGGERED_OLD_TRIGGERED);
                     creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 }
             }
             break;

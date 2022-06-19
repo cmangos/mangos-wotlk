@@ -167,7 +167,7 @@ struct boss_jedogaAI : public ScriptedAI
     void JustReachedHome() override
     {
         SetCombatMovement(true);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_JEDOGA, FAIL);
@@ -283,7 +283,7 @@ struct boss_jedogaAI : public ScriptedAI
             // Prepare for combat
             case POINT_ID_PREPARE:
 
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->RemoveAurasDueToSpell(SPELL_LIGHTNING_VISUAL);
                 m_creature->RemoveAurasDueToSpell(SPELL_SPHERE_VISUAL);
                 m_creature->SetLevitate(false);
@@ -305,7 +305,7 @@ struct boss_jedogaAI : public ScriptedAI
 
                     pVolunteer->RemoveAurasDueToSpell(SPELL_VOLUNTEER_SPHERE);
                     pVolunteer->SetStandState(UNIT_STAND_STATE_STAND);
-                    pVolunteer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    pVolunteer->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     pVolunteer->CastSpell(pVolunteer, SPELL_PILLAR_LIGHTNING, TRIGGERED_NONE);
                     pVolunteer->SetWalk(true);
                     pVolunteer->GetMotionMaster()->MovePoint(POINT_ID_SACRIFICE, aJedogaLandingLoc[0], aJedogaLandingLoc[1], aJedogaLandingLoc[2]);
@@ -322,7 +322,7 @@ struct boss_jedogaAI : public ScriptedAI
             // Resume combat
             case POINT_ID_COMBAT:
                 m_creature->RemoveAurasDueToSpell(SPELL_HOVER_FALL);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                 m_bIsSacrificing = false;
                 SetCombatMovement(true);
@@ -367,7 +367,7 @@ struct boss_jedogaAI : public ScriptedAI
         if (m_creature->GetHealthPercent() < 50.0f && !m_bSacrifice)
         {
             SetCombatMovement(false);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->GetMotionMaster()->MovePoint(POINT_ID_SACRIFICE, aJedogaLandingLoc[0], aJedogaLandingLoc[1], aJedogaLandingLoc[2]);
             m_bSacrifice = true;
             m_bIsSacrificing = true;

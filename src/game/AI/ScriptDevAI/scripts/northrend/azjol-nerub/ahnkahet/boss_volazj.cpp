@@ -105,7 +105,7 @@ struct boss_volazjAI : public ScriptedAI
         m_bIsInsanityInProgress = false;
 
         SetCombatMovement(true);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -196,14 +196,14 @@ struct boss_volazjAI : public ScriptedAI
         if (pSpell->Id == SPELL_INSANITY && pTarget->GetTypeId() == TYPEID_PLAYER)
         {
             // Apply this only for the first target hit
-            if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            if (!m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
             {
                 DoCastSpellIfCan(m_creature, SPELL_INSANITY_VISUAL, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_WHISPER_INSANITY, CAST_TRIGGERED);
 
                 DoScriptText(SAY_INSANITY, m_creature);
 
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 SetCombatMovement(false);
 
                 if (m_pInstance)
@@ -233,7 +233,7 @@ struct boss_volazjAI : public ScriptedAI
         {
             if (!m_creature->HasAura(SPELL_INSANITY_VISUAL))
             {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 SetCombatMovement(true);
                 m_bIsInsanityInProgress = false;
             }

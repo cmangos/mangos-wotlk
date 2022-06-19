@@ -125,7 +125,7 @@ struct boss_black_knightAI : public ScriptedAI
         m_uiMarkedDeathTimer    = 0;
         m_uiDeathsBiteTimer     = 7000;
 
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_creature->SetDisplayId(m_creature->GetNativeDisplayId());
         SetEquipmentSlots(true);
@@ -211,7 +211,7 @@ struct boss_black_knightAI : public ScriptedAI
             m_creature->RemoveAllAurasOnDeath();
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
             m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->ClearAllReactives();
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveIdle();
@@ -229,7 +229,7 @@ struct boss_black_knightAI : public ScriptedAI
         // finish transition
         if (eventType == AI_EVENT_CUSTOM_A)
         {
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());

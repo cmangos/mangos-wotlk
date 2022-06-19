@@ -132,7 +132,7 @@ struct boss_skadiAI : public CombatAI
 
         // Set proper immunity
         m_creature->SetImmuneToPlayer(true);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void AttackStart(Unit* pWho) override
@@ -194,7 +194,7 @@ struct boss_skadiAI : public CombatAI
 
                 m_uiPhase = PHASE_NORMAL_COMBAT;
                 m_creature->SetImmuneToPlayer(false);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
         }
         else if (eventType == AI_EVENT_CUSTOM_B)
@@ -262,7 +262,7 @@ struct boss_skadiAI : public CombatAI
             if (DoCastSpellIfCan(pGrauf, SPELL_RIDE_VEHICLE) == CAST_OK)
             {
                 SendAIEvent(AI_EVENT_START_EVENT, m_creature, pGrauf);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
         }
     }

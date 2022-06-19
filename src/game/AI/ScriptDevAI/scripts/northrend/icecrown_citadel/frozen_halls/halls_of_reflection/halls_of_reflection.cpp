@@ -489,7 +489,7 @@ void instance_halls_of_reflection::DoSendNextSpiritWave()
             }
 
             pCreature->CastSpell(pCreature, SPELL_SPIRIT_ACTIVATE_VISUAL, TRIGGERED_NONE);
-            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
 
             m_lActiveSpiritsGuids.push_back(*iter);
             m_lRisenSpiritsGuids.remove(*iter);

@@ -188,7 +188,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
         {
             DoScriptText(SAY_INTRO, m_creature);
 
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
             m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
             DoCastSpellIfCan(m_creature, SPELL_EMERGE);
 
@@ -230,7 +230,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
     {
         if (pSpell->Id == SPELL_SUBMERGE)
         {
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             // Extra check here, because AnubArak must be submerged by default
             if (m_Phase != PHASE_SUBMERGING)
@@ -370,7 +370,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
                     DoDespawnPursuingSpikes();
 
                     m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
                     // Refresh spheres only on normal difficulty
                     if (m_pInstance && !m_pInstance->IsHeroicDifficulty())
@@ -582,7 +582,7 @@ struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
         m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->ClearAllReactives();
         m_creature->SetTarget(nullptr);
 
@@ -659,7 +659,7 @@ struct npc_nerubian_burrowerAI : public CombatAI
             case BURROWER_SUBMERGE:
                 if (DoCastSpellIfCan(nullptr, SPELL_BURROWER_SUBMERGE) == CAST_OK)
                 {
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     ResetCombatAction(action, urand(30 * IN_MILLISECONDS, 60 * IN_MILLISECONDS));
                     ResetTimer(BURROWER_EMERGE, 30 * IN_MILLISECONDS);
                 }
@@ -678,7 +678,7 @@ struct npc_nerubian_burrowerAI : public CombatAI
         if (DoCastSpellIfCan(nullptr, SPELL_EMERGE) == CAST_OK)
         {
             DoCastSpellIfCan(nullptr, SPELL_RECENTLY_AWAKENED, CAST_TRIGGERED);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
     }
 };

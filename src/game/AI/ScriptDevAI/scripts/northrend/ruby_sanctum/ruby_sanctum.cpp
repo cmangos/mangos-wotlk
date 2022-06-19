@@ -81,7 +81,7 @@ void instance_ruby_sanctum::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_ZARITHRIAN:
             if (m_auiEncounter[TYPE_SAVIANA] == DONE && m_auiEncounter[TYPE_BALTHARUS] == DONE)
-                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         // no break;
         case NPC_BALTHARUS:
         case NPC_HALION_REAL:
@@ -167,7 +167,7 @@ void instance_ruby_sanctum::DoHandleZarithrianDoor()
 
         // Also remove not_selectable unit flag
         if (Creature* pZarithrian = GetSingleCreatureFromStorage(NPC_ZARITHRIAN))
-            pZarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            pZarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 }
 

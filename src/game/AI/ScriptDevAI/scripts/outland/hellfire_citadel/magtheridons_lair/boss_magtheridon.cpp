@@ -138,7 +138,7 @@ struct boss_magtheridonAI : public CombatAI
         m_creature->SetStunned(false);
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         m_creature->GetCombatManager().SetLeashingDisable(true);
 
@@ -150,7 +150,7 @@ struct boss_magtheridonAI : public CombatAI
         if (eventType == AI_EVENT_CUSTOM_A)
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             DoScriptText(EMOTE_FREED, m_creature);
             DoScriptText(SAY_AGGRO, m_creature);

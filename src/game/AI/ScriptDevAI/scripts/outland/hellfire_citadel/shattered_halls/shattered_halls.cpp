@@ -141,7 +141,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
             {
                 // Make executioner attackable only after the final boss is dead
                 if (Creature* pExecutioner = GetSingleCreatureFromStorage(NPC_EXECUTIONER, true))
-                    pExecutioner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_SPAWNING);
+                    pExecutioner->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_SPAWNING);
             }
             break;
         case TYPE_EXECUTION:
@@ -156,7 +156,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
 
                     // Summon the executioner; Note: according to wowhead he shouldn't be targetable until Kargath encounter is finished
                     if (Creature* pExecutioner = pPlayer->SummonCreature(NPC_EXECUTIONER, afExecutionerLoc[0], afExecutionerLoc[1], afExecutionerLoc[2], afExecutionerLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true))
-                        pExecutioner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_SPAWNING);
+                        pExecutioner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_SPAWNING);
 
                     // cast the execution spell
                     DoCastGroupDebuff(SPELL_KARGATH_EXECUTIONER_1);

@@ -125,7 +125,7 @@ struct boss_telestraAI : public CombatAI
 
     void JustReachedHome() override
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
 
         if (m_instance)
@@ -161,7 +161,7 @@ struct boss_telestraAI : public CombatAI
         switch (eventType)
         {
             case AI_EVENT_CUSTOM_A:
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, 0);
                 break;
             case AI_EVENT_CUSTOM_B:
@@ -228,7 +228,7 @@ struct boss_telestraAI : public CombatAI
             m_creature->RemoveAurasDueToSpell(SPELL_ARCANE_DIES);
             m_creature->RemoveAurasDueToSpell(SPELL_FROST_DIES);
 
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
 
             DoScriptText(SAY_MERGE, m_creature);

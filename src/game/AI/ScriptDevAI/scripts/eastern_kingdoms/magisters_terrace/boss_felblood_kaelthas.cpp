@@ -305,7 +305,7 @@ struct boss_felblood_kaelthasAI : public CombatAI
                 break;
             case 5:
                 SetCombatScriptStatus(false);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->CastSpell(nullptr, SPELL_SUICIDE, TRIGGERED_NONE);
                 break;
         }

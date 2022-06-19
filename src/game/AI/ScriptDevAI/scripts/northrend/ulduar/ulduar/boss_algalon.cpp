@@ -305,7 +305,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
             else
                 StartNextDialogueText(SAY_DESPAWN_1);
 
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
         else
         {
@@ -646,7 +646,7 @@ struct npc_living_constellationAI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_A)
         {
             m_uiArcaneBarrageTimer = urand(5000, 7000);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
     }
 

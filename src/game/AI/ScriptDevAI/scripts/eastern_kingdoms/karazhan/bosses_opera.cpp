@@ -950,7 +950,7 @@ struct boss_julianneAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         if (m_instance)
             m_instance->SetData(TYPE_OPERA, DONE);
@@ -981,7 +981,7 @@ struct boss_julianneAI : public ScriptedAI
         m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->ClearAllReactives();
         m_creature->SetTarget(nullptr);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
@@ -994,7 +994,7 @@ struct boss_julianneAI : public ScriptedAI
         m_bIsFakingDeath = false;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         DoResetThreat();
         SetCombatMovement(true);
         DoStartMovement(m_creature->GetVictim());
@@ -1032,7 +1032,7 @@ struct boss_julianneAI : public ScriptedAI
                     if (Creature* pRomulo = m_instance->GetSingleCreatureFromStorage(NPC_ROMULO))
                     {
                         // if Romulos is dead, then self kill
-                        if (pRomulo->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                        if (pRomulo->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                         {
                             m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
                             pRomulo->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
@@ -1210,7 +1210,7 @@ struct boss_romuloAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
         if (m_instance)
             m_instance->SetData(TYPE_OPERA, DONE);
@@ -1242,7 +1242,7 @@ struct boss_romuloAI : public ScriptedAI
         m_creature->RemoveAllAurasOnDeath();
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->ClearAllReactives();
         m_creature->SetTarget(nullptr);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
@@ -1255,7 +1255,7 @@ struct boss_romuloAI : public ScriptedAI
         m_bIsFakingDeath = false;
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         DoResetThreat();
         SetCombatMovement(true);
         DoStartMovement(m_creature->GetVictim());
@@ -1291,7 +1291,7 @@ struct boss_romuloAI : public ScriptedAI
                     if (Creature* pJulianne = m_instance->GetSingleCreatureFromStorage(NPC_JULIANNE))
                     {
                         // if Julianne is dead, then self kill
-                        if (pJulianne->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+                        if (pJulianne->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                         {
                             m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
                             pJulianne->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);

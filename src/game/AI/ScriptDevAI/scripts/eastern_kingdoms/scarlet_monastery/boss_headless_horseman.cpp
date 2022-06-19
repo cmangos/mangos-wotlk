@@ -429,7 +429,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->CastSpell(nullptr, SPELL_RAIN_OF_TREATS, TRIGGERED_OLD_TRIGGERED);
     }
 
@@ -446,7 +446,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
             DoCastSpellIfCan(m_creature, SPELL_HORSEMAN_HEAD_LANDS, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_HEAD_VISUAL, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_HORSEMAN_SPEAKS, CAST_TRIGGERED);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             // run around the graveyard
             m_creature->SetWalk(false);
@@ -466,7 +466,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         DoCastSpellIfCan(m_creature, SPELL_REQUEST_BODY, CAST_TRIGGERED);
 
         // heal body only if head is not requested by force (Horseman healed)

@@ -598,7 +598,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
             SetCombatMovement(false);
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             m_uiPrevPhase = m_uiPhase;
             m_uiPhase = PHASE_SUBMERGED;
@@ -627,7 +627,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
         else if (eventType == AI_EVENT_CUSTOM_C)
         {
             DoCastSpellIfCan(m_creature, SPELL_HATE_TO_ZERO, CAST_TRIGGERED);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_uiPhase = m_uiNextPhase;
 
             // for mobile worm follow target

@@ -178,9 +178,9 @@ struct boss_professor_putricideAI : public ScriptedAI
         if (m_pInstance)
         {
             if (m_pInstance->GetData(TYPE_ROTFACE) != DONE || m_pInstance->GetData(TYPE_FESTERGUT) != DONE)
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
             else
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         }
     }
 
@@ -192,7 +192,7 @@ struct boss_professor_putricideAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         // no attacking during the Festergut / Rotface encounters
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
             return;
 
         if (m_pInstance)
@@ -225,7 +225,7 @@ struct boss_professor_putricideAI : public ScriptedAI
     void AttackStart(Unit* pWho) override
     {
         // no attacking during the Festergut / Rotface encounters
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
             return;
 
         ScriptedAI::AttackStart(pWho);
@@ -314,7 +314,7 @@ struct boss_professor_putricideAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // no attacking during the Festergut / Rotface encounters
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
             return;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())

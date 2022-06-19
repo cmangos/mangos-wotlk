@@ -171,7 +171,7 @@ bool GossipSelect_npc_barrett_ramsey(Player* pPlayer, Creature* pCreature, uint3
             pInstance->SetData(uiAction - GOSSIP_ACTION_INFO_DEF, SPECIAL);
 
         pPlayer->CLOSE_GOSSIP_MENU();
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
         pCreature->GetMotionMaster()->MovePoint(1, aRamsayPositions[1][0], aRamsayPositions[1][1], aRamsayPositions[1][2]);
 

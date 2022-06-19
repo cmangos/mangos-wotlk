@@ -649,7 +649,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
     Unit* pVehicle = (Unit*)m_owner;                        // Vehicles are alawys Unit
 
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
-        passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
     // ToDo: change passenger model id for SEAT_FLAG_HIDE_PASSENGER?
 
@@ -744,7 +744,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     Unit* pVehicle = (Unit*)m_owner;
 
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
-        passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
     // ToDo: reset passenger model id for SEAT_FLAG_HIDE_PASSENGER?
 

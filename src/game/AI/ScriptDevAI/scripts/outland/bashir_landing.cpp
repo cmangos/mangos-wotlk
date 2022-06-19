@@ -611,7 +611,7 @@ struct npc_grand_collectorAI : public ScriptedAI
                 Creature* tech = m_instance->GetSingleCreatureFromStorage(NPC_SKYGUARD_AETHER_TECH);
                 SetReactState(REACT_AGGRESSIVE);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 DoScriptText(SAY_COLLECTOR_ATTACK, m_creature);
                 AttackStart(tech);
                 break;

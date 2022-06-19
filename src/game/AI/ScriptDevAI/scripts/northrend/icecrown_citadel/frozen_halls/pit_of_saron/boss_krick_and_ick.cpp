@@ -150,7 +150,7 @@ struct boss_ickAI : public CombatAI
                 pKrick->AI()->EnterEvadeMode();
                 pKrick->SetImmuneToNPC(true);
                 pKrick->SetImmuneToPlayer(true);
-                pKrick->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pKrick->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
 
             // teleport Tyrannus for event

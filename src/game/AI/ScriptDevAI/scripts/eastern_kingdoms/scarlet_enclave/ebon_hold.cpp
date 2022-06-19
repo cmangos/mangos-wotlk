@@ -1594,7 +1594,7 @@ struct npc_highlord_darion_mograineAI : public CombatAI, private DialogueHelper
                     {
                         pChampion->GetMotionMaster()->Clear(false, true);
                         pChampion->GetMotionMaster()->MoveWaypoint(1);
-                        pChampion->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pChampion->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     }
                 }
 
@@ -1604,7 +1604,7 @@ struct npc_highlord_darion_mograineAI : public CombatAI, private DialogueHelper
                     {
                         pGuard->GetMotionMaster()->Clear(false, true);
                         pGuard->GetMotionMaster()->MoveIdle();
-                        pGuard->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pGuard->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                         pGuard->SetStandState(UNIT_STAND_STATE_DEAD);
                     }
                 }
