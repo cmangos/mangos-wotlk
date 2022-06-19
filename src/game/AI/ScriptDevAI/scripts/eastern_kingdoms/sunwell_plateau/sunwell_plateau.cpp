@@ -487,7 +487,7 @@ void instance_sunwell_plateau::Update(uint32 diff)
             if (!player->IsWithinDist(commander, 142.f))
                 continue;
 
-            if (player->IsAlive() && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !player->IsFeigningDeathSuccessfully() && !player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2) && !player->IsGameMaster())
+            if (player->IsAlive() && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !player->IsFeigningDeathSuccessfully() && !player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNTARGETABLE) && !player->IsGameMaster())
             {
                 found = true;
                 break;

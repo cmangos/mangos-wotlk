@@ -375,7 +375,7 @@ bool Unit::CanAttack(const Unit* unit, bool ignoreUntargetable) const
     uint32 mask = (UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_NOT_SELECTABLE);
     // serverside only part start
     if (ignoreUntargetable) // this ignore is present not in wotlk client - by default in mask
-        mask |= UNIT_FLAG_NON_ATTACKABLE_2;
+        mask |= UNIT_FLAG_UNTARGETABLE;
     // serverside only part end
     if (unit->HasFlag(UNIT_FIELD_FLAGS, mask))
         return false;

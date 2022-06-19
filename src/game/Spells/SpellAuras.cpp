@@ -8043,7 +8043,7 @@ void Aura::HandleModUnattackable(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE_2, apply);
+    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNTARGETABLE, apply);
 
     if (Real && apply)
     {
