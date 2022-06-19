@@ -51,7 +51,6 @@ struct Stealth : public AuraScript
         {
             switch (data.spell->m_spellInfo->Id)
             {
-                case SPELL_DISTRACT:
                 case SPELL_EARTHBIND:
                 case SPELL_MASS_DISPEL:
                 case SPELL_MASS_DISPEL_2:
@@ -89,6 +88,17 @@ struct VanishRogue : public SpellScript
     void OnCast(Spell* spell) const override
     {
         CastHighestStealthRank(spell->GetCaster());
+    }
+};
+
+// 6770 - Sap
+struct SapRogue : public SpellScript
+{
+    // SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS prevents sap to proc stealth normally
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
+    {
+        if (missInfo == SPELL_MISS_NONE && spell->GetUnitTarget())
+            spell->GetUnitTarget()->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
     }
 };
 
@@ -215,6 +225,7 @@ void LoadRogueScripts()
     RegisterSpellScript<Preparation>("spell_preparation");
     RegisterSpellScript<Stealth>("spell_stealth");
     RegisterSpellScript<VanishRogue>("spell_vanish");
+    RegisterSpellScript<SapRogue>("spell_sap");
     RegisterSpellScript<SetupRogue>("spell_setup_rogue");
     RegisterSpellScript<DirtyDeeds>("spell_dirty_deeds");
     RegisterSpellScript<KillingSpree>("spell_killing_spree");
