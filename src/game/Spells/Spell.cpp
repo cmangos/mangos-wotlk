@@ -3944,6 +3944,7 @@ void Spell::SendSpellCooldown()
                         casterPlayer->SetLastPotionId(m_CastItem->GetEntry());
 
                     permanent |= true;
+                    casterPlayer->SetCooldownEventOnLeaveCombatSpellId(m_spellInfo->Id);
                 }
             }
         }
