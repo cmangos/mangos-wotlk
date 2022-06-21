@@ -176,6 +176,58 @@ struct AncestralAwakeningSearch : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_STONECLAW_TOTEM_ABSORB = 55277,
+    SPELL_GLYPH_OF_STONECLAW_TOTEM = 63298,
+};
+
+// 5730 - Stoneclaw Totem
+struct StoneclawTotem : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        uint32 spellId = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case 5730: spellId = 55328; break;
+            case 6390: spellId = 55329; break;
+            case 6391: spellId = 55330; break;
+            case 6392: spellId = 55332; break;
+            case 10427: spellId = 55333; break;
+            case 10428: spellId = 55335; break;
+            case 25525: spellId = 55278; break;
+            case 58580: spellId = 58589; break;
+            case 58581: spellId = 58590; break;
+            case 58582: spellId = 58591; break;
+        }
+        if (spellId)
+            summon->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 55278, 55328, 55329, 55330, 55332, 55333, 55335, 58589, 58590, 58591 - Stoneclaw Totem
+struct StoneclawTotemAbsorb : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        int32 shieldStrength = spell->GetDamage();
+
+        for (uint8 i = TOTEM_SLOT_FIRE; i <= TOTEM_SLOT_AIR; ++i)
+            if (Totem* totem = spell->GetUnitTarget()->GetTotem(TotemSlot(i)))
+                spell->GetCaster()->CastCustomSpell(totem, SPELL_STONECLAW_TOTEM_ABSORB, &shieldStrength, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+
+        if (Aura* glyphAura = spell->GetUnitTarget()->GetAura(SPELL_GLYPH_OF_STONECLAW_TOTEM, EFFECT_INDEX_0)) // Glyph of Stoneclaw Totem
+        {
+            int32 playerShieldStrength = shieldStrength * glyphAura->GetAmount();
+            spell->GetCaster()->CastCustomSpell(spell->GetUnitTarget(), SPELL_STONECLAW_TOTEM_ABSORB, &playerShieldStrength, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -190,4 +242,6 @@ void LoadShamanScripts()
     RegisterSpellScript<LavaLash>("spell_lava_lash");
     RegisterSpellScript<AncestralAwakening>("spell_ancestral_awakening");
     RegisterSpellScript<AncestralAwakeningSearch>("spell_ancestral_awakening_search");
+    RegisterSpellScript<StoneclawTotem>("spell_stoneclaw_totem");
+    RegisterSpellScript<StoneclawTotemAbsorb>("spell_stoneclaw_totem_absorb");
 }
