@@ -3110,8 +3110,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 35079:                                     // Misdirection, triggered buff
             case 59628:                                     // Tricks of the Trade, triggered buff
             {
+                uint32 spellId = GetId() == 35079 ? 34477 : 57934;
                 if (Unit* pCaster = GetCaster())
-                    pCaster->getHostileRefManager().ResetThreatRedirection();
+                    pCaster->getHostileRefManager().ResetThreatRedirection(spellId);
                 return;
             }
             case 36301:                                     // On Fire
@@ -3766,7 +3767,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         // used for direct in code aura removes and spell proc event charges expire
                         if (m_removeMode != AURA_REMOVE_BY_DEFAULT)
-                            target->getHostileRefManager().ResetThreatRedirection();
+                            target->getHostileRefManager().ResetThreatRedirection(57934);
                     }
                     return;
                 }
@@ -3785,9 +3786,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         // used for direct in code aura removes and spell proc event charges expire
                         if (m_removeMode != AURA_REMOVE_BY_DEFAULT)
                         {
-                            if (Unit* misdirectTarget = target->getHostileRefManager().GetThreatRedirectionTarget())
+                            if (Unit* misdirectTarget = target->getHostileRefManager().GetThreatRedirectionTarget(34477))
                                 misdirectTarget->RemoveAurasDueToSpell(35079);
-                            target->getHostileRefManager().ResetThreatRedirection();
+                            target->getHostileRefManager().ResetThreatRedirection(34477);
                         }
                     }
                     return;
@@ -5883,7 +5884,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
                     target->CastSpell(caster, 59665, TRIGGERED_OLD_TRIGGERED);
             }
             else
-                target->getHostileRefManager().ResetThreatRedirection();
+                target->getHostileRefManager().ResetThreatRedirection(59665);
             break;
         default:
             break;

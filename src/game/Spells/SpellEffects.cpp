@@ -12914,7 +12914,7 @@ void Spell::EffectRedirectThreat(SpellEffectIndex /*eff_idx*/)
         if (Aura* glyph = unitTarget->GetDummyAura(63326))  // Glyph of Vigilance
             damage += glyph->GetModifier()->m_amount;
 
-    m_caster->getHostileRefManager().SetThreatRedirection(unitTarget->GetObjectGuid(), uint32(damage));
+    m_caster->getHostileRefManager().SetThreatRedirection(unitTarget->GetObjectGuid(), uint32(damage), m_spellInfo->Id);
 }
 
 void Spell::EffectTeachTaxiNode(SpellEffectIndex eff_idx)

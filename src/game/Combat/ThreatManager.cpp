@@ -489,16 +489,26 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
 
     if (calculatedThreat > 0.0f)
     {
-        if (float redirectedMod = victim->getHostileRefManager().GetThreatRedirectionMod())
+        float totalMod = 0.f;
+        auto& redirectionData = victim->getHostileRefManager().GetThreatRedirectionData();
+        for (auto& redirection : redirectionData)
         {
-            if (Unit* redirectedTarget = victim->getHostileRefManager().GetThreatRedirectionTarget())
+            float redirectedMod = redirection.second.mod;
+            Unit* redirectedTarget = iOwner->GetMap()->GetUnit(redirection.second.target);
+            if (!redirectedTarget)
+                continue;
+
+            if (redirectedTarget != getOwner() && redirectedTarget->IsAlive())
             {
-                if (redirectedTarget != getOwner() && redirectedTarget->IsAlive())
-                {
-                    float redirectedThreat = threat * redirectedMod;
-                    addThreatDirectly(redirectedTarget, redirectedThreat);
-                }
+                float redirectedThreat = threat * redirectedMod;
+                totalMod += redirectedMod;
+                addThreatDirectly(redirectedTarget, redirectedThreat);
             }
+        }
+        if (totalMod != 0.f)
+        {
+            totalMod = std::min(totalMod, 100.f);
+            calculatedThreat = (calculatedThreat * (100 - totalMod)) / 100;
         }
     }
 

@@ -28,6 +28,14 @@ class ThreatManager;
 class HostileReference;
 struct SpellEntry;
 
+struct RedirectionData
+{
+    float mod;
+    ObjectGuid target;
+
+    RedirectionData(float mod, ObjectGuid target) : mod(mod), target(target) {}
+};
+
 //=================================================
 
 class HostileRefManager : public RefManager<Unit, ThreatManager>
@@ -67,20 +75,12 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         void deleteReference(Unit* victim);
 
         // redirection threat data
-        void SetThreatRedirection(ObjectGuid guid, uint32 pct)
-        {
-            m_redirectionTargetGuid = guid;
-            m_redirectionMod = pct / 100.0f;
-        }
+        void SetThreatRedirection(ObjectGuid guid, uint32 pct, uint32 spellId);
 
-        void ResetThreatRedirection()
-        {
-            m_redirectionTargetGuid.Clear();
-            m_redirectionMod = 0.0f;
-        }
+        void ResetThreatRedirection(uint32 spellId);
 
-        float GetThreatRedirectionMod() const { return m_redirectionMod; }
-        Unit*  GetThreatRedirectionTarget() const;
+        std::map<uint32, RedirectionData> const& GetThreatRedirectionData() const { return m_redirectionData; }
+        Unit*  GetThreatRedirectionTarget(uint32 spellId) const;
 
         // Suppression
         void HandleSuppressed(bool apply, bool immunity = false);
@@ -88,8 +88,7 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
     private:
         Unit* iOwner;                                       // owner of manager variable, back ref. to it, always exist
 
-        float      m_redirectionMod;
-        ObjectGuid m_redirectionTargetGuid;
+        std::map<uint32, RedirectionData> m_redirectionData;
 };
 //=================================================
 #endif
