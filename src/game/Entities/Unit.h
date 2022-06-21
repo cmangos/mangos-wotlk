@@ -2526,6 +2526,7 @@ class Unit : public WorldObject
         virtual bool CanCheckForHelp() const { return true; }
 
         virtual std::vector<uint32> GetCharmSpells() const { return {}; }
+        void CharmCooldownInitialize(WorldPacket& data) const;
 
         FormationSlotDataSPtr GetFormationSlot() { return m_formationSlot; }
         void SetFormationSlot(FormationSlotDataSPtr fSlot) { m_formationSlot = fSlot; }

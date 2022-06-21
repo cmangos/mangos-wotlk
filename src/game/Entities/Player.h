@@ -1686,7 +1686,6 @@ class Player : public Unit
         void PossessSpellInitialize() const;
         void VehicleSpellInitialize() const;
         void CharmSpellInitialize() const;
-        void CharmCooldownInitialize(WorldPacket& data) const;
         void RemovePetActionBar() const;
         Unit* GetFirstControlled() const;
         std::pair<float, float> RequestFollowData(ObjectGuid guid);
