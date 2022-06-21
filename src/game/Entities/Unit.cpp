@@ -13518,6 +13518,11 @@ bool Unit::TakePossessOf(Unit* possessed)
             if (possessed->AI())
                 possessed->AI()->SetReactState(REACT_PASSIVE);
             charmInfo->SetCommandState(COMMAND_STAY);
+            player->PossessSpellInitialize(); // but still initialize pet bar for even own pet
+        }
+        else
+        {
+            charmInfo->InitPossessCreateSpells();
             player->PossessSpellInitialize();
         }
 

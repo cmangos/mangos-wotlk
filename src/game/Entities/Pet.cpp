@@ -2508,3 +2508,24 @@ bool Pet::IgnoresOwnersDeath() const
     }
     return true;
 }
+
+std::vector<uint32> Pet::GetCharmSpells() const
+{
+    if (getPetType() != HUNTER_PET) // this override is only for hunter pets with eye of the beast
+        return Creature::GetCharmSpells();
+
+    std::vector<uint32> spells(CREATURE_MAX_SPELLS, 0);
+    uint32 position = 0;
+    for (PetSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end() && position < CREATURE_MAX_SPELLS; ++itr)
+    {
+        if (itr->second.state == PETSPELL_REMOVED)
+            continue;
+
+        if (IsPassiveSpell(itr->first))
+            continue;
+
+        spells[position] = itr->first;
+        ++position;
+    }
+    return spells;
+}
