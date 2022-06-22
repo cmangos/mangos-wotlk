@@ -70,6 +70,7 @@ enum
     // SPELL_WARSTOMP                  = 28125,             // Not used in Wotlk Version
     SPELL_MAGNETIC_PULL_A           = 28338,
     SPELL_MAGNETIC_PULL_B           = 54517,                // used by Feugen (wotlk)
+    SPELL_MAGNETIC_PULL_EFFECT      = 30010,
     SPELL_STATIC_FIELD              = 28135,
     SPELL_STATIC_FIELD_H            = 54528,
     SPELL_POWERSURGE_H              = 28134,
@@ -116,6 +117,7 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN);
+        SetRootSelf(false, false);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -430,6 +432,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetHealth(m_creature->GetMaxHealth());
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+        SetDeathPrevention(true);
     }
 
     Creature* GetOtherAdd() const
@@ -592,24 +595,13 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 
-    void DamageTaken(Unit* pKiller, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void JustPreventedDeath(Unit* attacker) override
     {
-        if (damage < m_creature->GetHealth())
-            return;
-
-        // Prevent glitch if in fake death
-        if (m_bFakeDeath)
-        {
-            damage = std::min(damage, m_creature->GetHealth() - 1);
-            return;
-        }
-
         // prevent death
-        damage = std::min(damage, m_creature->GetHealth() - 1);
         m_bFakeDeath = true;
 
         m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetHealth(0);
+        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
@@ -621,7 +613,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
-        JustDied(pKiller);                                  // Texts
+        JustDied(attacker);                                  // Texts
     }
 };
 
@@ -723,6 +715,14 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
         }
         else
             m_uiStaticFieldTimer -= uiDiff;
+        
+        if (m_uiMagneticPullTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(GetOtherAdd(), SPELL_MAGNETIC_PULL_B))
+                m_uiMagneticPullTimer = 20 * IN_MILLISECONDS;
+        }
+        else
+            m_uiMagneticPullTimer -= uiDiff;
     }
 };
 
@@ -730,6 +730,34 @@ UnitAI* GetAI_boss_feugen(Creature* pCreature)
 {
     return new boss_feugenAI(pCreature);
 }
+
+struct HandleMagneticPull : public SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
+    {
+        Unit* pFeugen;
+        Unit* pStalagg;
+        pFeugen = spell->GetCaster();
+        pStalagg = spell->GetUnitTarget();
+
+        if (!pFeugen || !pStalagg)
+            return;
+        
+        if (pFeugen->GetEntry() != NPC_FEUGEN || pStalagg->GetEntry() != NPC_STALAGG)
+            return;
+
+        auto* pFeugenTank = pFeugen->getThreatManager().getCurrentVictim();
+        auto* pStalaggTank = pStalagg->getThreatManager().getCurrentVictim();
+
+        if (!pFeugenTank || !pStalaggTank)
+            return;
+        
+        pStalagg->CastSpell(pFeugenTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
+        pStalagg->getThreatManager().setCurrentVictimByTarget(pFeugenTank->getTarget());
+        pFeugen->CastSpell(pStalaggTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
+        pFeugen->getThreatManager().setCurrentVictimByTarget(pStalaggTank->getTarget());
+    }
+};
 
 void AddSC_boss_thaddius()
 {
@@ -747,6 +775,7 @@ void AddSC_boss_thaddius()
     pNewScript = new Script;
     pNewScript->Name = "boss_feugen";
     pNewScript->GetAI = &GetAI_boss_feugen;
+    pNewScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -754,4 +783,6 @@ void AddSC_boss_thaddius()
     pNewScript->GetAI = &GetAI_npc_tesla_coil;
     pNewScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<HandleMagneticPull>("handle_magnetic_pull");
 }
