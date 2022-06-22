@@ -784,5 +784,5 @@ void AddSC_boss_thaddius()
     pNewScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<HandleMagneticPull>("handle_magnetic_pull");
+    RegisterSpellScript<HandleMagneticPull>("spell_magnetic_pull");
 }

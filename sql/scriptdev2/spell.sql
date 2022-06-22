@@ -514,6 +514,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61830,'spell_drink'),
 (72623,'spell_drink'),
 (28728,'spell_feigh_death_pos_aura'),
+(30010,'spell_magnetic_pull'),
 (41253,'spell_greater_invisibility_mob'),
 (42672,'spell_frost_tomb_aura'),
 (42793,'spell_burn_body'),
