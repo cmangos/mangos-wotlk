@@ -259,13 +259,7 @@ bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*pCaster*/, uint32 uiSpellId
             return true;
         case SPELL_THADIUS_LIGHTNING_VISUAL:
             if (uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_THADDIUS)
-            {
-                if (instance_naxxramas* pInstance = (instance_naxxramas*)pCreatureTarget->GetInstanceData())
-                {
-                    if (Player* pPlayer = pInstance->GetPlayerInMap(true, false))
-                        pCreatureTarget->AI()->AttackStart(pPlayer);
-                }
-            }
+                pCreatureTarget->SetInCombatWithZone(false);
             return true;
     }
     return false;
