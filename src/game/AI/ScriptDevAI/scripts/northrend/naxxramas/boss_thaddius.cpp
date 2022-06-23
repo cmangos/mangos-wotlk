@@ -63,6 +63,12 @@ enum
     SPELL_CHAIN_LIGHTNING           = 28167,
     SPELL_CHAIN_LIGHTNING_H         = 54531,
     SPELL_POLARITY_SHIFT            = 28089,
+    SPELL_POSITIVE_CHARGE           = 28059,
+    SPELL_NEGATIVE_CHARGE           = 28084,
+    SPELL_POSITIVE_CHARGE_BUFF      = 29659,
+    SPELL_NEGATIVE_CHARGE_BUFF      = 29660,
+    SPELL_POSITIVE_CHARGE_DAMAGE    = 28062,
+    SPELL_NEGATIVE_CHARGE_DAMAGE    = 28085,
     SPELL_BESERK                    = 27680,
     SPELL_CLEAR_CHARGES             = 63133,                // TODO NYI, cast on death, most likely to remove remaining buffs
 
@@ -117,7 +123,6 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
         DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN);
-        SetRootSelf(false, false);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -731,7 +736,7 @@ UnitAI* GetAI_boss_feugen(Creature* pCreature)
     return new boss_feugenAI(pCreature);
 }
 
-struct HandleMagneticPull : public SpellScript
+struct MagneticPull : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
@@ -752,10 +757,86 @@ struct HandleMagneticPull : public SpellScript
         if (!pFeugenTank || !pStalaggTank)
             return;
         
+        float feugenThreat, stalaggThreat;
+
+        feugenThreat = pFeugenTank->getThreat();
+        stalaggThreat = pStalaggTank->getThreat();
+
+        pFeugenTank->addThreatPercent(-100);
+        pStalaggTank->addThreatPercent(-100);
+        pFeugen->AddThreat(pStalaggTank->getTarget(), stalaggThreat);
+        pStalagg->AddThreat(pFeugenTank->getTarget(), feugenThreat);
+
         pStalagg->CastSpell(pFeugenTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
-        pStalagg->getThreatManager().setCurrentVictimByTarget(pFeugenTank->getTarget());
         pFeugen->CastSpell(pStalaggTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
-        pFeugen->getThreatManager().setCurrentVictimByTarget(pStalaggTank->getTarget());
+    }
+};
+
+/****************
+** Polarity Shift
+****************/
+
+struct ThaddiusChargeDamage : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            switch (spell->m_spellInfo->Id)
+            {
+                case SPELL_POSITIVE_CHARGE_DAMAGE:                // Positive Charge
+                    if (target->HasAura(SPELL_POSITIVE_CHARGE))   // Only deal damage to targets without Positive Charge
+                        return false;
+                    break;
+                case SPELL_NEGATIVE_CHARGE_DAMAGE:                // Negative Charge
+                    if (target->HasAura(SPELL_NEGATIVE_CHARGE))   // Only deal damage to targets without Negative Charge
+                        return false;
+                    break;
+                default:
+                    break;
+            }
+        }
+        return true;
+    }
+};
+
+struct ThaddiusCharge : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (!target)
+                return;
+
+            // On Polarity Shift, remove the previous damage buffs
+            uint32 buffAuraIds[2] = { SPELL_POSITIVE_CHARGE_BUFF , SPELL_NEGATIVE_CHARGE_BUFF };
+            for (auto buffAura: buffAuraIds)
+                target->RemoveAurasDueToSpell(buffAura);
+        }
+    }
+
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        if (Unit* target = aura->GetTarget())
+        {
+
+            uint32 buffAuraId = aura->GetId() == SPELL_POSITIVE_CHARGE ? SPELL_POSITIVE_CHARGE_BUFF : SPELL_NEGATIVE_CHARGE_BUFF;
+            float range = 13.f; // Static value from DBC files. As the value is the same for both spells we can hardcode it instead of accessing is through sSpellRadiusStore
+
+            uint32 curCount = 0;
+            PlayerList playerList;
+            GetPlayerListWithEntryInWorld(playerList, target, range);
+            for (Player* player : playerList)
+                if (target != player && player->HasAura(aura->GetId()))
+                    ++curCount;
+
+            // Remove previous buffs in case we have less targets of the same charge near use than in previous tick
+            target->RemoveAurasDueToSpell(buffAuraId);
+                for (uint32 i = 0; i < curCount; i++)
+                    target->CastSpell(target, buffAuraId, TRIGGERED_OLD_TRIGGERED);
+        }
     }
 };
 
@@ -784,5 +865,7 @@ void AddSC_boss_thaddius()
     pNewScript->pEffectDummyNPC = &EffectDummyNPC_spell_thaddius_encounter;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<HandleMagneticPull>("spell_magnetic_pull");
+    RegisterSpellScript<MagneticPull>("spell_magnetic_pull");
+    RegisterSpellScript<ThaddiusChargeDamage>("spell_thaddius_charge_damage");
+    RegisterSpellScript<ThaddiusCharge>("spell_thaddius_charge_buff");
 }
