@@ -46,6 +46,20 @@ struct ArcaneConcentration : public AuraScript
     }
 };
 
+// 42208 - Blizzard
+struct Blizzard : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (spell->GetCaster()->HasOverrideScript(836)) // Improved Blizzard (Rank 1)
+            spell->AddPrecastSpell(12484);
+        if (spell->GetCaster()->HasOverrideScript(988)) // Improved Blizzard (Rank 2)
+            spell->AddPrecastSpell(12485);
+        if (spell->GetCaster()->HasOverrideScript(989)) // Improved Blizzard (Rank 3)
+            spell->AddPrecastSpell(12486);
+    }
+};
+
 struct MageIgnite : public AuraScript
 {
     // implemented this way because we do not support proccing in spellscript on empty aura slot
@@ -135,6 +149,7 @@ struct Polymorph : public AuraScript
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
+    RegisterSpellScript<Blizzard>("spell_blizzard");
     RegisterSpellScript<MageIgnite>("spell_mage_ignite");
     RegisterSpellScript<FingersOfFrostProc>("spell_fingers_of_frost_proc");
     RegisterSpellScript<FingersOfFrostIgnore>("spell_fingers_of_frost_ignore");
