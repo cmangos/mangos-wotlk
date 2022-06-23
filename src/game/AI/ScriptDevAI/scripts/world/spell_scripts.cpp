@@ -1309,16 +1309,37 @@ struct Drink : public DrinkAnimation
         if (!aura->GetTarget()->GetMap()->IsBattleArena())
             return;
 
-        //if (aura->GetAuraTicks() != 2) // todo: wait for 2nd tick to update regen in Arena only? (needs confirmation)
-        //    return;
+        Aura* regenAura = aura->GetHolder()->m_auras[EFFECT_INDEX_0];
+        if (!regenAura)
+            return;
 
-        aura->ForcePeriodicity(0);
+        // **********************************************
+        // This feature used only in arenas
+        // **********************************************
+        // Here need increase mana regen per tick (6 second rule)
+        // on 1 tick -   0  (handled in 2 second)
+        // on 2 tick - 166% (handled in 4 second)
+        // on 3 tick - 133% (handled in 6 second)
 
-        if (Aura* regenAura = aura->GetHolder()->GetAuraByEffectIndex((SpellEffectIndex)(aura->GetEffIndex() - 1)))
+        int32 resultingAmount = 0;
+        // Apply bonus for 1 - 4 tick
+        switch (aura->GetAuraTicks())
         {
-            regenAura->GetModifier()->m_amount = aura->GetModifier()->m_amount;
-            ((Player*)aura->GetTarget())->UpdateManaRegen();
+            case 1:   // 0%
+                resultingAmount = aura->GetAmount() * 5 / 3;
+                break;
+            case 2:   // 166%
+                resultingAmount = aura->GetAmount() * 4 / 3;
+                break;
+            default:  // 100% - normal regen
+                resultingAmount = aura->GetAmount();
+                // No need to update after 4th tick
+                aura->ForcePeriodicity(0);
+                break;
         }
+
+        regenAura->GetModifier()->m_amount = resultingAmount;
+        ((Player*)aura->GetTarget())->UpdateManaRegen();
     }
 };
 
