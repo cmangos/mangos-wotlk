@@ -517,6 +517,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28084,'spell_thaddius_charge_buff'),
 (28062,'spell_thaddius_charge_damage'),
 (28085,'spell_thaddius_charge_damage'),
+(28089,'spell_thaddius_polarity_shift'),
 (28728,'spell_feigh_death_pos_aura'),
 (41253,'spell_greater_invisibility_mob'),
 (42672,'spell_frost_tomb_aura'),

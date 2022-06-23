@@ -776,6 +776,44 @@ struct MagneticPull : public SpellScript
 ** Polarity Shift
 ****************/
 
+struct PolarityShift : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx ) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* unitTarget = spell->GetUnitTarget())
+            {
+                unitTarget->RemoveAurasDueToSpell(SPELL_POSITIVE_CHARGE);
+                unitTarget->RemoveAurasDueToSpell(SPELL_NEGATIVE_CHARGE);
+
+                uint64 scriptValue = spell->GetScriptValue();
+
+                // 28059 : Positive Charge, 28084 : Negative Charge
+                switch (scriptValue)
+                {
+                    case 0: // first target random
+                        scriptValue = urand(0, 1) ? SPELL_POSITIVE_CHARGE : SPELL_NEGATIVE_CHARGE;
+                        spell->SetScriptValue(scriptValue);
+                        unitTarget->CastSpell(unitTarget, scriptValue, TRIGGERED_INSTANT_CAST);
+                        break;
+                    case SPELL_POSITIVE_CHARGE: // second target the other
+                        spell->SetScriptValue(1);
+                        unitTarget->CastSpell(unitTarget, SPELL_NEGATIVE_CHARGE, TRIGGERED_INSTANT_CAST);
+                        break;
+                    case SPELL_NEGATIVE_CHARGE:
+                        spell->SetScriptValue(1);
+                        unitTarget->CastSpell(unitTarget, SPELL_POSITIVE_CHARGE, TRIGGERED_INSTANT_CAST);
+                        break;
+                    default: // third and later random
+                        unitTarget->CastSpell(unitTarget, urand(0, 1) ? SPELL_POSITIVE_CHARGE : SPELL_NEGATIVE_CHARGE, TRIGGERED_INSTANT_CAST);
+                        break;
+                }
+            }
+        }
+    }
+};
+
 struct ThaddiusChargeDamage : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
@@ -865,6 +903,7 @@ void AddSC_boss_thaddius()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<MagneticPull>("spell_magnetic_pull");
+    RegisterSpellScript<PolarityShift>("spell_thaddius_polarity_shift");
     RegisterSpellScript<ThaddiusChargeDamage>("spell_thaddius_charge_damage");
     RegisterSpellScript<ThaddiusCharge>("spell_thaddius_charge_buff");
 }
