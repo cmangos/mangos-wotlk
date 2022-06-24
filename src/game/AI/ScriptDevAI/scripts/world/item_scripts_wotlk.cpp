@@ -43,11 +43,12 @@ struct SwiftHandOfJustice : public AuraScript
 	}
 };
 
+// 59915 - Discerning Eye of the Beast
 struct DiscerningEyeOfTheBeast : public AuraScript
 {
 	SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
 	{
-		procData.triggeredSpellId = 59913;
+		procData.triggeredSpellId = 59914;
 		procData.triggerTarget = nullptr;
 		return SPELL_AURA_PROC_OK;
 	}
