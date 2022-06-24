@@ -54,8 +54,21 @@ struct DiscerningEyeOfTheBeast : public AuraScript
 	}
 };
 
+// 75475 -  Item - Chamber of Aspects 25 Tank Trinket
+struct ProcOnlyBelow35Percent : public AuraScript
+{
+	bool OnCheckProc(Aura* aura, ProcExecutionData& data) const override
+	{
+		if (data.victim->GetHealthPercent() < 35.f)
+            return true;
+
+		return false;
+	}
+};
+
 void AddSC_item_scripts_wotlk()
 {
 	RegisterSpellScript<SwiftHandOfJustice>("spell_swift_hand_of_justice");
 	RegisterSpellScript<DiscerningEyeOfTheBeast>("spell_discerning_eye_of_the_beast");
+	RegisterSpellScript<ProcOnlyBelow35Percent>("spell_proc_only_below_35_percent");
 }
