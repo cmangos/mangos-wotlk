@@ -3757,6 +3757,8 @@ bool ChatHandler::HandleAuraCommand(char* args)
     }
     if (!target->AddSpellAuraHolder(holder))
         delete holder;
+    else
+        holder->SetState(SPELLAURAHOLDER_STATE_READY);
 
     return true;
 }
