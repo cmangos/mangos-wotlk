@@ -987,7 +987,7 @@ enum SinisterReflectionSpells
     // generic
     SPELL_DUAL_WEILD_PASSIVE = 42459,
     // hunter
-    SPELL_WING_CLIP = 40652,
+    SPELL_WING_CLIP = 40652, // 47168 root used as prenerf
     // shaman
     SPELL_EARTH_SHOCK = 47071,
     // warrior
