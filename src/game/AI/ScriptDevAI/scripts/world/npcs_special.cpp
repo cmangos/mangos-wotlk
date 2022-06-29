@@ -2857,6 +2857,9 @@ struct GossipNPCPeriodicTalk : public AuraScript
 const std::vector<uint32> winterTextsAlliance = { 16422, 24341, 16032, 24342 };
 const std::vector<uint32> winterTextsHorde = { 16464, 24324, 24325 };
 
+const std::vector<uint32> midsummerTextsAlliance = { 24532, 24531 };
+const std::vector<uint32> midsummerTextsHorde = { 24533, 24534 };
+
 const std::vector<uint32> brewfestTextsAlliance = { 23629, 23630 };
 const std::vector<uint32> brewfestTextsHorde = { 23627, 23628 };
 
@@ -2956,9 +2959,23 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
             }
         }
 
-        if (events == GOSSIP_EVENT_SPIRIT_OF_COMPETITION)
+        if (events == GOSSIP_EVENT_MIDSUMMER)
         {
-
+            switch (spell->GetCaster()->GetEntry())
+            {
+                default:
+                case NPC_HUMAN_COMMONER:
+                case NPC_DWARF_COMMONER:
+                case NPC_GNOME_COMMONER:
+                case NPC_NIGHT_ELF_COMMONER:
+                case NPC_DRAENEI_COMMONER: textId = GetRandomText(midsummerTextsAlliance); break;
+                case NPC_BLOOD_ELF_COMMONER:
+                case NPC_ORC_COMMONER:
+                case NPC_TAUREN_COMMONER:
+                case NPC_TROLL_COMMONER:
+                case NPC_FORSAKEN_COMMONER:
+                case NPC_GOBLIN_COMMONER: textId = GetRandomText(midsummerTextsHorde); break;
+            }
         }
 
         if (events == GOSSIP_EVENT_PIRATES_DAY)
