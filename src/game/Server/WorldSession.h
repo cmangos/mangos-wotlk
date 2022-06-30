@@ -372,8 +372,6 @@ class WorldSession
         void SendGMTicketResponseResolve(bool survey) const;
         void SendGMTicketResponse(GMTicket *ticket) const;
 
-        void SendAttackStop(Unit const* enemy) const;
-
         void SendBattleGroundList(ObjectGuid guid, BattleGroundTypeId bgTypeId) const;
 
         void SendTradeStatus(const TradeStatusInfo& status) const;
