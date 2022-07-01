@@ -6013,7 +6013,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     WorldObject* petInvoker = responsibleCaster ? responsibleCaster : m_trueCaster;
     uint32 level = 0;
     // Everything considered as guardian or critter pets uses its creature template level by default (may change depending on SpellEffect params)
-    if (summon_prop->Title == UNITNAME_SUMMON_TITLE_COMPANION || summon_prop->Flags & SUMMON_PROP_FLAG_USE_CREATURE_LEVEL)
+    if (summon_prop->Title == UNITNAME_SUMMON_TITLE_COMPANION || m_ignoreOwnerLevel || summon_prop->Flags & SUMMON_PROP_FLAG_USE_CREATURE_LEVEL)
     {
         if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
             level = urand(cInfo->MinLevel, cInfo->MaxLevel);
@@ -7579,6 +7579,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
     // Level of pet summoned
     uint32 level = std::max(m_caster->GetLevel() + m_spellInfo->EffectMultipleValue[eff_idx], 1.0f);
+    if (m_ignoreOwnerLevel)
+        level = urand(cInfo->MinLevel, cInfo->MaxLevel);
     NewSummon->SetOwnerGuid(m_caster->GetObjectGuid());
     NewSummon->setFaction(m_caster->GetFaction());
     NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));

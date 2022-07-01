@@ -1275,6 +1275,14 @@ UnitAI* GetAI_npc_spring_rabbit(Creature* pCreature)
     return new npc_spring_rabbitAI(pCreature);
 }
 
+struct SilithidSwarm : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetIgnoreOwnerLevel(true);
+    }
+};
+
 /*######
 ## npc_redemption_target
 ######*/
@@ -3213,6 +3221,7 @@ void AddSC_npcs_special()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<HarvestSilithidEgg>("spell_harvest_silithid_egg");
+    RegisterSpellScript<SilithidSwarm>("spell_silithid_swarm");
     RegisterSpellScript<ImpInABottleSay>("spell_imp_in_a_bottle_say");
     RegisterSpellScript<GossipNPCPeriodicTriggerFidget>("spell_gossip_npc_periodic_trigger_fidget");
     RegisterSpellScript<GossipNPCPeriodicTalk>("spell_gossip_npc_periodic_talk");

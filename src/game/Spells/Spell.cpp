@@ -538,6 +538,7 @@ Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags
     m_overrideSpeed = false;
 
     m_ignoreRoot = IsIgnoreRootSpell(m_spellInfo);
+    m_ignoreOwnerLevel = false;
 
     if (m_caster)
     {

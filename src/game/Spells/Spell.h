@@ -610,6 +610,7 @@ class Spell
 
         // scriptable conditionals
         bool m_ignoreRoot; //
+        bool m_ignoreOwnerLevel; //
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }
@@ -833,6 +834,7 @@ class Spell
         // overrides
         void SetOverridenSpeed(float newSpeed);
         void SetIgnoreRoot(bool state) { m_ignoreRoot = state; }
+        void SetIgnoreOwnerLevel(bool state) { m_ignoreOwnerLevel = state; }
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
