@@ -879,6 +879,10 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
             SavePetToDB(mode, p_owner);
     }
 
+    if (isControlled())
+        if (owner->IsPlayer())
+            static_cast<Player*>(owner)->RemoveControllable(this);
+
     AddObjectToRemoveList();
     m_removed = true;
 }
