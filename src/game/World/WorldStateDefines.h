@@ -351,6 +351,8 @@ enum WorldStateID : int32
     // Custom Worldstates
     WORLD_STATE_CUSTOM_SPAWN_MALACRASS = 10000,
 
+    WORLD_STATE_CUSTOM_SPAWN_ANNORA = 20000,
+
     // Wotlk Custom Worldstates
     WORLD_STATE_CUSTOM_HEADLESS_HORSEMAN_DUNGEON    = 20000,
     WORLD_STATE_CUSTOM_AHUNE_DUNGEON                = 20001,
