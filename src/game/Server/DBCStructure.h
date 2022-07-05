@@ -2381,7 +2381,7 @@ struct WMOAreaTableEntry
     // uint32 field8;                                       // 8        m_IntroSound
     uint32 Flags;                                           // 9        m_flags (used for indoor/outdoor determination)
     uint32 areaId;                                          // 10       m_AreaTableID (AreaTable.dbc)
-    // char *Name[16];                                      //          m_AreaName_lang
+    char *Name[16];                                         //          m_AreaName_lang
     // uint32 nameFlags;
 };
 
