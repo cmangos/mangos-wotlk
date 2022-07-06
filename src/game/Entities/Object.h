@@ -27,6 +27,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Entities/EntitiesMgr.h"
 #include "Globals/SharedDefines.h"
+#include "Globals/Locales.h"
 #include "Entities/Camera.h"
 #include "Server/DBCStructure.h"
 #include "PlayerDefines.h"
@@ -1044,6 +1045,7 @@ class WorldObject : public Object
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;
+        char const* GetAreaName(LocaleConstant locale) const;
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid) const;
 
         InstanceData* GetInstanceData() const;
