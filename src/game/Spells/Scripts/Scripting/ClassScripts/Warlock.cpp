@@ -62,8 +62,8 @@ struct LifeTap : public SpellScript
         if (Player* modOwner = caster->GetSpellModOwner())
             modOwner->ApplySpellMod(spell->m_spellInfo->Id, SPELLMOD_COST, cost);
 
-        int32 dmg = caster->SpellDamageBonusDone(caster, spell->m_spellInfo, uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
-        dmg = caster->SpellDamageBonusTaken(caster, spell->m_spellInfo, dmg, SPELL_DIRECT_DAMAGE);
+        int32 dmg = caster->SpellDamageBonusDone(caster, SpellSchoolMask(spell->m_spellInfo->SchoolMask), spell->m_spellInfo, uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
+        dmg = caster->SpellDamageBonusTaken(caster, SpellSchoolMask(spell->m_spellInfo->SchoolMask), spell->m_spellInfo, dmg, SPELL_DIRECT_DAMAGE);
         spell->SetScriptValue(dmg);
     }
 
