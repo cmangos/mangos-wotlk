@@ -1620,13 +1620,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     basepoints[0] = damage * 15 / 100;
                     break;
                 }
-                // Fingers of Frost
-                case 74396:
-                {
-                    // Remove only single aura from stack and remove holder if its last stack
-                    RemoveAuraHolderFromStack(74396);
-                    return SPELL_AURA_PROC_OK;
-                }
             }
             break;
         }
