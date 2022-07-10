@@ -31,9 +31,8 @@ class Unit;
 
 struct ItemSetEffect
 {
-    uint32 setid;
-    uint32 item_count;
-    SpellEntry const* spells[8];
+    uint32 item_count = 0;
+    SpellEntry const* spells[8] = {};
 };
 
 enum InventoryResult
