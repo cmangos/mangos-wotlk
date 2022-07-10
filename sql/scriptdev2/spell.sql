@@ -108,6 +108,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26686,'spell_aq_whirlwind'),
 (26767,'spell_cthun_tentacles_summon'),
 (26769,'spell_cthun_periodic_eye_trigger'),
+(27360,'spell_instill_lord_valthalaks_spirit'),
 (27934,'spell_viscidus_shrinks'),
 (28282,'spell_ashbringer_item'),
 (28441,'spell_ab_effect_000'),

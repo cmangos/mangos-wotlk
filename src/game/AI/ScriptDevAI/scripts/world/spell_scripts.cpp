@@ -1480,6 +1480,14 @@ struct PreventSpellIfSameAuraOnCaster : public SpellScript
     }
 };
 
+struct InstillLordValthalaksSpirit : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        spell->GetCaster()->AddCreature(spell->m_spellInfo->Id, summon);
+    }
+};
+
 struct Stoned : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1588,6 +1596,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
     RegisterSpellScript<TribalDeath>("spell_tribal_death");
     RegisterSpellScript<PreventSpellIfSameAuraOnCaster>("spell_prevent_spell_if_same_aura_on_caster");
+    RegisterSpellScript<InstillLordValthalaksSpirit>("spell_instill_lord_valthalaks_spirit");
     RegisterSpellScript<RetaliationCreature>("spell_retaliation_creature");
     RegisterSpellScript<HateToHalf>("spell_hate_to_half");
     RegisterSpellScript<HateToZero>("spell_hate_to_zero");
