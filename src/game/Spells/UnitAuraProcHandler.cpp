@@ -737,7 +737,7 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
     if (spellProto->HasAttribute(SPELL_ATTR_EX3_ONLY_PROC_ON_CASTER) && holder->GetTarget()->GetObjectGuid() != holder->GetCasterGuid())
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
-    if (IsSitState() && !spellProto->HasAttribute(SPELL_ATTR_EX4_ALLOW_PROC_WHILE_SITTING))
+    if (IsSitState() && !spellProto->HasAttribute(SPELL_ATTR_ALLOW_WHILE_SITTING) && !spellProto->HasAttribute(SPELL_ATTR_EX4_ALLOW_PROC_WHILE_SITTING))
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     if (data.isVictim && data.spellInfo && data.spellInfo->HasAttribute(SPELL_ATTR_EX3_SUPPRESS_TARGET_PROCS) && !spellProto->HasAttribute(SPELL_ATTR_EX7_CAN_PROC_FROM_SUPPRESSED_TARGET_PROCS))
