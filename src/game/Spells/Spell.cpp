@@ -3400,6 +3400,7 @@ void Spell::cancel()
     {
         m_caster->RemoveDynObject(m_spellInfo->Id);
         m_caster->RemoveGameObject(m_spellInfo->Id, true);
+        m_caster->RemoveCreature(m_spellInfo->Id, true);
     }
 }
 
@@ -4079,8 +4080,7 @@ void Spell::update(uint32 difftime)
                         {
                             if (!m_caster->IsWithinCombatDistInMap(channelTarget, m_maxRange * 1.5f))
                             {
-                                SendChannelUpdate(0);
-                                finish();
+                                cancel();
                             }
                         }
                     }
@@ -4859,6 +4859,10 @@ void Spell::SendChannelStart(uint32 duration)
                 break;
             }
         }
+    }
+    else if (m_spellInfo->Id == 27360) // override for research - is not used in targeting but supplied as unittarget
+    {
+        target = m_targets.getUnitTarget();
     }
 
     // change channel duration to account for DR if neccessary, also store in caster's targetInfo to use later for setting aura duration
