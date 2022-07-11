@@ -6009,6 +6009,13 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     if (summon_prop->Slot == SUMMON_PROP_SLOT_CRITTER)
         amount = 1;
 
+    if (m_CastItem)
+    {
+        ItemPrototype const* proto = m_CastItem->GetProto();
+        if (proto && proto->RequiredSkill == SKILL_ENGINEERING && proto->InventoryType == INVTYPE_TRINKET)
+            amount = 1;
+    }
+
     // Expected Level
     WorldObject* petInvoker = responsibleCaster ? responsibleCaster : m_trueCaster;
     uint32 level = 0;
@@ -6046,20 +6053,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 level = resultLevel;
         }
 	}
-    // level of creature summoned using engineering item based at engineering skill level
-    else if (m_CastItem)
-    {
-        ItemPrototype const* proto = m_CastItem->GetProto();
-        if (proto && proto->RequiredSkill == SKILL_ENGINEERING && proto->InventoryType == INVTYPE_TRINKET)
-        {
-            if (uint16 engineeringSkill = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINEERING))
-            {
-                level = engineeringSkill / 5;
-                amount = 1;                                 // TODO HACK (needs a neat way of doing)
-            }
-        }
-        // other cases are covered above by using level from template
-    }
+    // engineering trinkets do not scale with skill in wotlk
 
     CreatureSummonPositions summonPositions;
     summonPositions.resize(amount, CreaturePosition());
