@@ -82,6 +82,8 @@ enum
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
     NPC_TESLA_COIL              = 16218,
+    NPC_NAXXRAMAS_TRIGGER       = 16082,
+    NPC_TOXIC_TUNNEL            = 16400,
 
     NPC_ZELIEK                  = 16063,
     NPC_THANE                   = 16064,

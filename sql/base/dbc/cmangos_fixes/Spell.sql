@@ -1172,7 +1172,6 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 ('19640', '0', '0', '0', '464', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '20', '100', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '42', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '19639', '0', '0', '0', '0', '0', '0', '756', '0', '0', 'Pummel', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0');
 
 -- Toxic Tunnel 16400 dont enter combat and move while "channeling" their aura
-UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00020000 WHERE `Id` = 28369; -- SPELL_ATTR_EX3_NO_INITIAL_AGGRO
 UPDATE `spell_template` SET `AttributesEx` = `AttributesEx`&~0x00000004 WHERE `Id` = 28370; -- SPELL_ATTR_EX_CHANNELED_1
 
 -- Root Self - used by Harrison Jones in Zul'Aman opening sequence
