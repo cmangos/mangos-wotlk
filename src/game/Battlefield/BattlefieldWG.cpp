@@ -518,8 +518,13 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+bool BattlefieldWG::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
+    if (!source->IsGameObject())
+        return false;
+
+    GameObject* go = static_cast<GameObject*>(source);
+
     if (GetDefender() == TEAM_NONE)
     {
         sLog.outError("Battlefield WG: Gameobject events cannot be handled when there is no zone defender.");
@@ -536,8 +541,8 @@ bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
     if (go->GetGoType() == GAMEOBJECT_TYPE_CAPTURE_POINT)
         returnValue = HandleCapturePointEvent(eventId, go);
     // handle destructible buildings
-    else if (go->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
-        returnValue = HandleDestructibleBuildingEvent(eventId, go, invoker);
+    else if (go->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING && target && target->IsUnit())
+        returnValue = HandleDestructibleBuildingEvent(eventId, go, static_cast<Unit*>(target));
 
     return returnValue;
 }

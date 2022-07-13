@@ -819,6 +819,8 @@ class Spell
         TargetList& GetTargetList() { return m_UniqueTargetInfo; }
         // enables customizing auras after creation - use only in OnEffectExecute and with aura effects
         SpellAuraHolder* GetSpellAuraHolder() { return m_spellAuraHolder; }
+        // sets event target object
+        void SetEventTarget(WorldObject* object) { m_eventTarget = object; }
         // enables fetching which runes were taken
         uint8 GetOldRuneState() const { return m_runesState; }
         uint8 GetNewRuneState() const { return m_runesStateAfterCast; }
@@ -899,7 +901,7 @@ class Spell
         int32 damage;
 
         // -------------------------------------------
-        GameObject* focusObject;
+        WorldObject* m_eventTarget;
 
         // Damage and healing in effects need just calculate
         int32 m_damage;                                     // Damage in effects count here

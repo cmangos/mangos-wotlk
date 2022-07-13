@@ -141,8 +141,12 @@ void OutdoorPvPTF::HandleObjectiveComplete(uint32 eventId, const PlayerList& pla
 }
 
 // process the capture events
-bool OutdoorPvPTF::HandleEvent(uint32 eventId, GameObject* go, Unit* /*invoker*/)
+bool OutdoorPvPTF::HandleEvent(uint32 eventId, Object* source, Object* /*target*/)
 {
+    if (!source->IsGameObject())
+        return true;
+
+    GameObject* go = static_cast<GameObject*>(source);
     for (uint8 i = 0; i < MAX_TF_TOWERS; ++i)
     {
         if (terokkarTowers[i] == go->GetEntry())

@@ -722,7 +722,7 @@ class BattleGroundIC : public BattleGround
         // Battleground event handlers
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
-        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+        bool HandleEvent(uint32 eventId, Object* source, Object* target) override;
         void HandleKillUnit(Creature* creature, Player* killer) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
         void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;

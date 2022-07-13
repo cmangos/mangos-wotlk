@@ -4550,7 +4550,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectDummy", m_spellInfo->Id);
-    m_caster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
+    m_trueCaster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_trueCaster, unitTarget);
 }
 
 void Spell::EffectTriggerSpellWithValue(SpellEffectIndex eff_idx)
@@ -5174,12 +5174,8 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
 
 void Spell::EffectSendEvent(SpellEffectIndex effectIndex)
 {
-    /*
-    we do not handle a flag dropping or clicking on flag in battleground by sendevent system
-    TODO: Actually, why not...
-    */
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[effectIndex], m_spellInfo->Id);
-    StartEvents_Event(m_caster->GetMap(), m_spellInfo->EffectMiscValue[effectIndex], m_caster, focusObject, true, m_caster);
+    StartEvents_Event(m_trueCaster->GetMap(), m_spellInfo->EffectMiscValue[effectIndex], m_trueCaster, m_eventTarget, true);
 }
 
 void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
@@ -8068,7 +8064,7 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
 
     GameObject* pGameObj = new GameObject;
 
-    WorldObject* target = focusObject;
+    WorldObject* target = m_eventTarget;
     if (!target)
         target = m_trueCaster;
 
@@ -11192,7 +11188,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart spellid %u in EffectScriptEffect", m_spellInfo->Id);
-    m_caster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
+    m_trueCaster->GetMap()->ScriptsStart(sSpellScripts, m_spellInfo->Id, m_trueCaster, unitTarget);
 }
 
 void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)

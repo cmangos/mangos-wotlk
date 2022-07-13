@@ -376,7 +376,7 @@ class BattleGroundSA : public BattleGround
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
         void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;
-        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+        bool HandleEvent(uint32 eventId, Object* source, Object* target) override;
         void HandleKillUnit(Creature* unit, Player* killer) override;
         void HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
 

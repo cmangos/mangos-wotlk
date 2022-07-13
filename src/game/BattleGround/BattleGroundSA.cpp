@@ -448,8 +448,13 @@ void BattleGroundSA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 }
 
 // process the gate and relic events
-bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+bool BattleGroundSA::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
+    if (!source->IsGameObject())
+        return false;
+
+    GameObject* go = static_cast<GameObject*>(source);
+
     // handle ships stop event
     if (eventId == BG_SA_EVENT_ID_SHIP_PAUSE_1 || eventId == BG_SA_EVENT_ID_SHIP_PAUSE_2)
     {
@@ -522,8 +527,8 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
                 SendBattlegroundWarning(i.messagedDestroyed);
                 PlaySoundToAll(GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_SOUND_WALL_DESTROYED_ALLIANCE : BG_SA_SOUND_WALL_DESTROYED_HORDE);
 
-                if (invoker->GetTypeId() == TYPEID_PLAYER)
-                    UpdatePlayerScore((Player*)invoker, SCORE_GATES_DESTROYED, 1);
+                if (target && target->IsPlayer())
+                    UpdatePlayerScore(static_cast<Player*>(target), SCORE_GATES_DESTROYED, 1);
 
                 // fail the achievement
                 m_defenseAncients = false;

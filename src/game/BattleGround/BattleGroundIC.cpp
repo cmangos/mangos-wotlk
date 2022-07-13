@@ -223,8 +223,13 @@ void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
 }
 
 // process the gate events
-bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+bool BattleGroundIC::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
+    if (!source->IsGameObject())
+        return false;
+
+    GameObject* go = static_cast<GameObject*>(source);
+
     DEBUG_LOG("BattleGroundIC: Handle event for gameobject entry %u.", go->GetEntry());
 
     for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)

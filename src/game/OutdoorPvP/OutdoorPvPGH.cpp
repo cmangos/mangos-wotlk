@@ -73,11 +73,16 @@ void OutdoorPvPGH::HandleGameObjectCreate(GameObject* go)
 }
 
 // process the capture events
-bool OutdoorPvPGH::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+bool OutdoorPvPGH::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
-    // If we are not using the lighthouse return
-    if (go->GetEntry() != GO_VENTURE_BAY_LIGHTHOUSE)
+    if (!source->IsGameObject())
         return false;
+
+    // If we are not using the lighthouse return
+    if (source->GetEntry() != GO_VENTURE_BAY_LIGHTHOUSE)
+        return false;
+
+    GameObject* go = static_cast<GameObject*>(source);
 
     bool eventHandled = true;
 

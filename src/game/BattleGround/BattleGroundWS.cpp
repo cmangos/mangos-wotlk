@@ -357,7 +357,8 @@ void BattleGroundWS::ProcessFlagPickUpFromBase(Player* player, Team attackerTeam
     UpdateFlagState(attackerTeam, BG_WS_FLAG_STATE_ON_PLAYER);
     UpdateWorldState(wsStateUpdateId[otherTeamIdx], 1);
 
-    player->CastSpell(player, wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP].spellId, TRIGGERED_OLD_TRIGGERED);
+    // not meant to be a triggered cast - clears a lot during cast like stealth
+    
     if (m_brutalAssaultActive)
         player->CastSpell(player, BG_WS_SPELL_BRUTAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
     else if (m_focusedAssaultActive)
@@ -535,18 +536,28 @@ void BattleGroundWS::HandleGameObjectCreate(GameObject* go)
 }
 
 // process click on dropped flag events
-bool BattleGroundWS::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+bool BattleGroundWS::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
-    if (invoker->GetTypeId() != TYPEID_PLAYER)
+    if (!target->IsGameObject())
         return true;
 
-    Player* srcPlayer = (Player*)invoker;
+    GameObject* go = static_cast<GameObject*>(target);
+    if (!source->IsPlayer())
+        return true;
+
+    Player* srcPlayer = static_cast<Player*>(source);
 
     switch (eventId)
     {
-        case WS_EVENT_ALLIACE_FLAG_PICKUP:
+        case WS_EVENT_ALLIANCE_FLAG_PICKUP:
         case WS_EVENT_HORDE_FLAG_PICKUP:
-            ProcessDroppedFlagActions(srcPlayer, go);
+            if (go->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)
+                ProcessDroppedFlagActions(srcPlayer, go);
+            else
+                HandlePlayerClickedOnFlag(srcPlayer, go);
+
+            // when clicked the flag despawns
+            go->SetLootState(GO_JUST_DEACTIVATED);
             break;
     }
 

@@ -116,7 +116,7 @@ class OutdoorPvPZM : public OutdoorPvP
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void SendRemoveWorldStates(Player* player) override;
 
-        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+        bool HandleEvent(uint32 eventId, Object* source, Object* target) override;
 
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;

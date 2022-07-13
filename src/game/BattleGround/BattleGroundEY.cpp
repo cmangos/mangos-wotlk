@@ -229,16 +229,19 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
 }
 
 // process the capture events
-bool BattleGroundEY::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+bool BattleGroundEY::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
     // event called when player picks up a dropped flag
-    if (eventId == EVENT_NETHERSTORM_FLAG_PICKUP && invoker->GetTypeId() == TYPEID_PLAYER)
+    if (eventId == EVENT_NETHERSTORM_FLAG_SPELL && source->IsPlayer() && target->IsGameObject())
     {
         DEBUG_LOG("BattleGroundEY: Handle flag pickup event id %u", eventId);
 
-        HandlePlayerClickedOnFlag((Player*)invoker, go);
+        HandlePlayerClickedOnFlag(static_cast<Player*>(source), static_cast<GameObject*>(target));
         return true;
     }
+
+    GameObject* go = dynamic_cast<GameObject*>(source);
+    MANGOS_ASSERT(go); // if not go, blow up so we can check why
 
     // events called from the capture points
     for (uint8 i = 0; i < EY_MAX_NODES; ++i)
