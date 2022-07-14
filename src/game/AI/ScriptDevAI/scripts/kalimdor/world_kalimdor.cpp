@@ -44,7 +44,6 @@ struct world_map_kalimdor : public ScriptedMap
     uint32 m_uiOmenResetTimer;
     uint32 m_uiOmenMoonlightTimer;
     uint8 m_uiRocketsCounter;
-    uint8 m_uiTheramoreMarksmenAlive;
     uint32 m_encounter[MAX_ENCOUNTER];
     bool b_isOmenSpellCreditDone;
     std::array<std::vector<ObjectGuid>, MAX_ELEMENTS> m_aElementalRiftGUIDs;
@@ -62,7 +61,6 @@ struct world_map_kalimdor : public ScriptedMap
         m_uiOmenResetTimer = 0;
         m_uiOmenMoonlightTimer = 0;
         m_uiRocketsCounter = 0;
-        m_uiTheramoreMarksmenAlive = 0;
         m_freedSpriteDarter = 0;
         b_isOmenSpellCreditDone = false;
         for (auto& riftList : m_aElementalRiftGUIDs)
@@ -71,6 +69,9 @@ struct world_map_kalimdor : public ScriptedMap
         memset(&m_encounter, 0, sizeof(m_encounter));
 
         m_shadeData.Reset();
+
+        instance->GetVariableManager().SetVariableData(WORLD_STATE_TETHYR_SHOW, true, 0, AREAID_THERAMORE_ISLE);
+        instance->GetVariableManager().SetVariableData(WORLD_STATE_TETHYR_COUNT, true, 0, AREAID_THERAMORE_ISLE);
     }
 
     bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override
@@ -400,17 +401,15 @@ struct world_map_kalimdor : public ScriptedMap
                 switch (uiData)
                 {
                     case NOT_STARTED:
-                        sWorldState.ExecuteOnAreaPlayers(AREAID_THERAMORE_ISLE, [=](Player* player)->void {player->SendUpdateWorldState(WORLD_STATE_TETHYR_SHOW, 0); });
+                        instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_SHOW, 0);
                         break;
                     case SPECIAL: // Archer slain
-                        --m_uiTheramoreMarksmenAlive;
-                        sWorldState.ExecuteOnAreaPlayers(AREAID_THERAMORE_ISLE, [=](Player* player)->void {player->SendUpdateWorldState(WORLD_STATE_TETHYR_COUNT, m_uiTheramoreMarksmenAlive); });
+                        instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_COUNT, instance->GetVariableManager().GetVariable(WORLD_STATE_TETHYR_COUNT) - 1);
                         break;
                     case IN_PROGRESS:
                         if (m_encounter[uiType] != IN_PROGRESS)
-                            m_uiTheramoreMarksmenAlive = 12;
-                        sWorldState.ExecuteOnAreaPlayers(AREAID_THERAMORE_ISLE, [=](Player* player)->void {player->SendUpdateWorldState(WORLD_STATE_TETHYR_SHOW, 1); });
-                        sWorldState.ExecuteOnAreaPlayers(AREAID_THERAMORE_ISLE, [=](Player* player)->void {player->SendUpdateWorldState(WORLD_STATE_TETHYR_COUNT, m_uiTheramoreMarksmenAlive); });
+                            instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_COUNT, 12);
+                        instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_SHOW, 1);
                         break;
                 }
             }
@@ -440,19 +439,6 @@ struct world_map_kalimdor : public ScriptedMap
                 break;
         }
         m_encounter[uiType] = uiData;
-    }
-
-    void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 /*zoneId*/, uint32 areaId) override
-    {
-        switch (areaId)
-        {
-            case AREAID_THERAMORE_ISLE:
-            {
-                FillInitialWorldStateData(data, count, WORLD_STATE_TETHYR_SHOW, uint32(GetData(TYPE_TETHYR) != NOT_STARTED));
-                FillInitialWorldStateData(data, count, WORLD_STATE_TETHYR_COUNT, m_uiTheramoreMarksmenAlive);
-                break;
-            }
-        }
     }
 
     uint32 GetData(uint32 type) const override
