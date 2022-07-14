@@ -95,6 +95,7 @@ struct CapturePointSlider
 class Player;
 class GameObject;
 class Creature;
+class Object;
 class OutdoorPvP;
 class Battlefield;
 
