@@ -2012,6 +2012,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
                     // handle spell data if available; this usually marks the player as the flag carrier in a battleground
                     spellId = info->flagdrop.pickupSpell;
+                    spellCaster = this;
                 }
             }
             break;
