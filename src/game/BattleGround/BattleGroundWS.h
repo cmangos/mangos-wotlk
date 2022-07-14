@@ -67,8 +67,8 @@ enum WSSpells
 
 enum WSWorldStates
 {
-    BG_WS_STATE_FLAG_UNK_ALLIANCE       = 1545,
-    BG_WS_STATE_FLAG_UNK_HORDE          = 1546,
+    BG_WS_STATE_FLAG_PICKED_UP_FLAG_STATE_ALLIANCE = 1545,
+    BG_WS_STATE_FLAG_PICKED_UP_FLAG_STATE_HORDE    = 1546,
 //  FLAG_UNK                            = 1547,
 
     BG_WS_STATE_CAPTURES_ALLIANCE       = 1581,             // count the flag captures for each team
@@ -94,12 +94,18 @@ enum WSFlagActions
     BG_WS_FLAG_ACTIONS_TOTAL            = 5,
 };
 
-enum WSFlagStates
+enum WSPickedUpFlagStates
 {
     BG_WS_FLAG_STATE_ON_BASE            = 0,
-    BG_WS_FLAG_STATE_WAIT_RESPAWN       = 1,
-    BG_WS_FLAG_STATE_ON_PLAYER          = 2,
-    BG_WS_FLAG_STATE_ON_GROUND          = 3
+    BG_WS_FLAG_STATE_ON_PLAYER          = 1,
+    BG_WS_FLAG_STATE_ON_GROUND          = -1
+};
+
+enum WSFlagIconStates
+{
+    BG_WS_FLAG_ICON_INACTIVE            = 0,
+    BG_WS_FLAG_ICON_INVISIBLE           = 1,
+    BG_WS_FLAG_ICON_VISIBLE             = 2,
 };
 
 enum WSGraveyards
@@ -154,7 +160,7 @@ enum WSScriptEvents
     WS_EVENT_SPIRITGUIDES_SPAWN         = 2
 };
 
-static const uint32 wsStateUpdateId[PVP_TEAM_COUNT] = { BG_WS_STATE_FLAG_UNK_ALLIANCE, BG_WS_STATE_FLAG_UNK_HORDE };
+static const uint32 wsFlagPickedUp[PVP_TEAM_COUNT] = { BG_WS_STATE_FLAG_PICKED_UP_FLAG_STATE_ALLIANCE, BG_WS_STATE_FLAG_PICKED_UP_FLAG_STATE_HORDE };
 
 static const uint32 wsDroppedFlagId[PVP_TEAM_COUNT] = { GO_WS_SILVERWING_FLAG_DROP, GO_WS_WARSONG_FLAG_DROP };
 
@@ -214,7 +220,6 @@ class BattleGroundWS : public BattleGround
 
         // General functions
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         Team GetPrematureWinner() override;
 
         // Battleground event handlers
@@ -246,7 +251,7 @@ class BattleGroundWS : public BattleGround
 
         void RespawnFlagAtBase(Team team, bool wasCaptured);
         void RespawnDroppedFlag(Team team);
-        uint8 GetFlagState(Team team) { return m_flagState[GetTeamIndexByTeamId(team)]; }
+        int32 GetFlagState(Team team);
 
         void ProcessFlagPickUpFromBase(Player* player, Team attackerTeam);
         void ProcessDroppedFlagActions(Player* player, GameObject* target);
@@ -254,19 +259,13 @@ class BattleGroundWS : public BattleGround
         // Get remaining time
         uint32 GetRemainingTimeInMinutes() const { return m_endTimer ? (m_endTimer - 1) / (MINUTE * IN_MILLISECONDS) + 1 : 0; }
 
-        // Update flag world state; BG_WS_FLAG_STATE_WAIT_RESPAWN (1) for no flag icon; BG_WS_FLAG_STATE_ON_PLAYER (2) for the flag icon
-        void UpdateFlagState(Team team, uint32 value) { UpdateWorldState(team == ALLIANCE ? BG_WS_STATE_FLAG_ALLIANCE : BG_WS_STATE_FLAG_HORDE, value); }
-
-        // Update team score
-        void UpdateTeamScore(Team team);
-
         // process score
         void ProcessPlayerFlagScoreEvent(Player* source);
 
         ObjectGuid m_droppedFlagGuid[PVP_TEAM_COUNT];
         ObjectGuid m_flagCarrier[PVP_TEAM_COUNT];
 
-        uint8 m_flagState[PVP_TEAM_COUNT];
+        bool m_flagOnRespawn[PVP_TEAM_COUNT];
         TimePoint m_flagPickupFromBaseTime[PVP_TEAM_COUNT];
         uint32 m_flagsTimer[PVP_TEAM_COUNT];
         uint32 m_flagsDropTimer[PVP_TEAM_COUNT];
