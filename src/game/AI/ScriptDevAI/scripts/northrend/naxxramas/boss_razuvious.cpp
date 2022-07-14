@@ -187,7 +187,7 @@ struct npc_obedience_crystalAI : public Scripted_NoMovementAI
     }
 };
 
-bool NpcSpellClick_npc_obedience_crystal(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
+bool spellclick_npc_obedience_crystal(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
 {
     if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
     {
@@ -220,6 +220,6 @@ void AddSC_boss_razuvious()
     pNewScript = new Script;
     pNewScript->Name = "npc_obedience_crystal";
     pNewScript->GetAI = &GetNewAIInstance<npc_obedience_crystalAI>;
-    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_obedience_crystal;
+    pNewScript->pNpcSpellClick = &spellclick_npc_obedience_crystal;
     pNewScript->RegisterSelf();
 }
