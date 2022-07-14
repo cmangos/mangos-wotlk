@@ -381,7 +381,6 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
                 DoTimeRunSay(RUN_DONE);
             m_auiEncounter[type] = data;
             instance->GetVariableManager().SetVariable(WORLD_STATE_ZUL_AMAN_EVENT_RUN_IS_ACTIVE, data == IN_PROGRESS);
-            instance->GetVariableManager().BroadcastVariable(WORLD_STATE_ZUL_AMAN_EVENT_RUN_IS_ACTIVE);
             break;
         case TYPE_AKILZON:
             if (data != IN_PROGRESS) // start is done with delay in boss script
@@ -484,7 +483,6 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
         case TYPE_RUN_EVENT_TIME:
             m_auiEncounter[type] = data;
             instance->GetVariableManager().SetVariable(WORLD_STATE_ZUL_AMAN_TIME_COUNTER, data);
-            instance->GetVariableManager().BroadcastVariable(WORLD_STATE_ZUL_AMAN_TIME_COUNTER);
             break;
         case TYPE_AKILZON_GAUNTLET:
             m_auiEncounter[type] = data;

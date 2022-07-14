@@ -34,7 +34,7 @@ EndScriptData */
 */
 
 instance_mount_hyjal::instance_mount_hyjal(Map* pMap) : ScriptedInstance(pMap),
-    m_hyjalOverheadEnable(0), m_hyjalEnemyCount(0), m_hyjalWaves(0), m_invasionWaves(0), m_hyjalWavesWorldstate(0), m_nextWaveTimer(0), m_nextInvasionWaveTimer(0), m_retreatTimer(0), m_infernalsTimer(0), m_failTimer(0), m_startCheck(false)
+    m_hyjalWaves(0), m_invasionWaves(0), m_nextWaveTimer(0), m_nextInvasionWaveTimer(0), m_retreatTimer(0), m_infernalsTimer(0), m_failTimer(0), m_startCheck(false)
 {
     Initialize();
 }
@@ -824,6 +824,9 @@ std::array<InvasionWave, MAX_INVASION_WAVES> instance_mount_hyjal::m_invasionWav
 void instance_mount_hyjal::Initialize()
 {
     memset(&m_encounter, 0, sizeof(m_encounter));
+    instance->GetVariableManager().SetVariableData(WORLD_STATE_MOUNT_HYJAL_ENABLE, true, 0, 0);
+    instance->GetVariableManager().SetVariableData(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, true, 0, 0);
+    instance->GetVariableManager().SetVariableData(WORLD_STATE_MOUNT_HYJAL_WAVES, true, 0, 0);
 }
 
 bool instance_mount_hyjal::IsEncounterInProgress() const
@@ -957,7 +960,8 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* creature)
         case NPC_STALK:
         {
             ObjectGuid spawner = creature->GetSpawnerGuid(); // not loaded in map - guid is enough
-            if (spawner && spawner.GetEntry() != NPC_HYJAL_DESPAWN_TRIGGER && m_hyjalOverheadEnable) // Overrun mobs are not counted
+            // Overrun mobs are not counted
+            if (spawner && spawner.GetEntry() != NPC_HYJAL_DESPAWN_TRIGGER && instance->GetVariableManager().GetVariable(WORLD_STATE_MOUNT_HYJAL_ENABLE))
                 m_waveSpawns.push_back(creature->GetObjectGuid());
             break;
         }
@@ -1124,12 +1128,13 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
             // Decrease counter, and update world-state
             if (creature->IsTemporarySummon()) // only for non-static spawns
             {
-                if (m_hyjalEnemyCount)
+                int32 enemyCount = 0;
+                if (enemyCount = instance->GetVariableManager().GetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT))
                 {
                     m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
-                    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_hyjalEnemyCount - 1);
+                    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, enemyCount - 1);
                 }
-                if (m_nextWaveTimer && m_hyjalEnemyCount == 0)
+                if (m_nextWaveTimer && enemyCount == 0)
                     SpawnNextWave();
             }
             break;
@@ -1167,9 +1172,9 @@ void instance_mount_hyjal::SetData(uint32 type, uint32 data)
             if (data != IN_PROGRESS)
             {
                 // HUD is cleared on death of any boss
-                DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
-                DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
-                DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
+                instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
+                instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
+                instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
             }
             break;
         case TYPE_ARCHIMONDE:
@@ -1273,25 +1278,6 @@ void instance_mount_hyjal::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_mount_hyjal::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 /*zoneId*/, uint32 /*areaId*/)
-{
-    FillInitialWorldStateData(data, count, WORLD_STATE_MOUNT_HYJAL_ENABLE, m_hyjalOverheadEnable);
-    FillInitialWorldStateData(data, count, WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_hyjalEnemyCount);
-    FillInitialWorldStateData(data, count, WORLD_STATE_MOUNT_HYJAL_WAVES, m_hyjalWavesWorldstate);
-}
-
-void instance_mount_hyjal::DoUpdateWorldState(uint32 stateId, uint32 stateData)
-{
-    switch (stateId)
-    {
-        case WORLD_STATE_MOUNT_HYJAL_ENABLE: if (m_hyjalOverheadEnable == stateData) return; m_hyjalOverheadEnable = stateData; break;
-        case WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT: if (m_hyjalEnemyCount == stateData) return; m_hyjalEnemyCount = stateData; break;
-        case WORLD_STATE_MOUNT_HYJAL_WAVES: if (m_hyjalWavesWorldstate == stateData) return; m_hyjalWavesWorldstate = stateData; break;
-    }
-
-    ScriptedInstance::DoUpdateWorldState(stateId, stateData);
-}
-
 void instance_mount_hyjal::SpawnArchimonde()
 {
     // Don't spawn him twice
@@ -1323,7 +1309,7 @@ void instance_mount_hyjal::SpawnWave(uint32 index, bool setTimer)
     spawner = GetSingleCreatureFromStorage(index > 17 ? NPC_THRALL : NPC_JAINA);
     if (!setTimer)
     {
-        if (m_hyjalEnemyCount + newSpawns >= MAX_CONCURRENT_SPAWNS)
+        if (instance->GetVariableManager().GetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT) + newSpawns >= MAX_CONCURRENT_SPAWNS)
         {
             if (UnitAI* ai = spawner->AI())
                 ai->SendAIEvent(AI_EVENT_CUSTOM_C, spawner, spawner);
@@ -1337,15 +1323,15 @@ void instance_mount_hyjal::SpawnWave(uint32 index, bool setTimer)
         case 17:
         case 26:
         case 35:
-            DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0); // Boss wave doesnt show as a wave
+            instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_WAVES, 0); // Boss wave doesnt show as a wave
             break;
         default:
             // Set world state for waves to 0 to disable it.
-            DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, index % 9 + 1);
-            DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 1);
+            instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_WAVES, index % 9 + 1);
+            instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENABLE, 1);
             break;
     }
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_hyjalEnemyCount + newSpawns);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, instance->GetVariableManager().GetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT) + newSpawns);
     for (HyjalWaveMob& mob : m_hyjalWavesData[index].waveMobs)
     {
         Creature* waveSpawn = spawner->SummonCreature(mob.mobEntry, mob.x, mob.y, mob.z, mob.ori, TEMPSPAWN_DEAD_DESPAWN, 0, true, GetRunningPerWaveMobEntry(mob.mobEntry, index), GetRandomWavePath(mob.path));
@@ -1519,9 +1505,9 @@ void instance_mount_hyjal::StartEvent(HyjalEvents eventId)
 
 void instance_mount_hyjal::DespawnWaveSpawns()
 {
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
     DespawnGuids(m_waveSpawns);
     DespawnGuids(m_additionalSpawns);
 }
@@ -1571,9 +1557,9 @@ void instance_mount_hyjal::SpawnBase(BaseArea index, bool spawnLeader = true)
 
 void instance_mount_hyjal::RetreatBase(BaseArea index)
 {
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
 
     for (ObjectGuid& guid : m_baseSpawns[index])
     {
@@ -1675,9 +1661,9 @@ void instance_mount_hyjal::FailEvent()
     else if (m_hyjalWaves <= 35)
         SetData(TYPE_AZGALOR, FAIL);
     DespawnWaveSpawns();
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
-    DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
     m_nextWaveTimer = 0;
     m_failTimer = 5 * 60 * 1000; // 5 minutes
 }

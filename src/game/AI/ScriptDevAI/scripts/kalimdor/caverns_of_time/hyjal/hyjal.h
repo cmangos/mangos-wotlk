@@ -185,7 +185,6 @@ class instance_mount_hyjal : public ScriptedInstance
         const char* Save() const override { return m_saveData.c_str(); }
         void Load(const char* chrIn) override;
 
-        void FillInitialWorldStates(ByteBuffer& /*data*/, uint32& /*count*/, uint32 /*zoneId*/, uint32 /*areaId*/) override;
         void DoUpdateWorldState(uint32 stateId, uint32 stateData) override;
 
         void Update(const uint32 diff) override;
@@ -227,11 +226,8 @@ class instance_mount_hyjal : public ScriptedInstance
 
         GuidVector m_additionalSpawns;
 
-        uint32 m_hyjalOverheadEnable;
-        uint32 m_hyjalEnemyCount;
         uint32 m_hyjalWaves; // Script value
         uint32 m_invasionWaves;
-        uint32 m_hyjalWavesWorldstate; // Worldstate value
 
         uint32 m_nextWaveTimer;
         uint32 m_nextInvasionWaveTimer;
