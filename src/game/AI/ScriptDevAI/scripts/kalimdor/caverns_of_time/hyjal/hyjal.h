@@ -185,8 +185,6 @@ class instance_mount_hyjal : public ScriptedInstance
         const char* Save() const override { return m_saveData.c_str(); }
         void Load(const char* chrIn) override;
 
-        void DoUpdateWorldState(uint32 stateId, uint32 stateData) override;
-
         void Update(const uint32 diff) override;
 
         void StartEvent(HyjalEvents eventId);
