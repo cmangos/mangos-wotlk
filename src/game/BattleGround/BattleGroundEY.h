@@ -308,7 +308,6 @@ class BattleGroundEY : public BattleGround
 
         // General functions
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         Team GetPrematureWinner() override;
 
         // Battleground event handlers
@@ -342,19 +341,16 @@ class BattleGroundEY : public BattleGround
         bool AreAllNodesControlledByTeam(Team team);
 
         // Process score and resources
-        void UpdateTeamScore(Team team);
+        void CheckVictory(Team team);
         void UpdateResources();
         void AddPoints(Team team, uint32 points);
+        void SetFlagState(EYFlagState state);
+        void SetTowerOwner(EYNodes node, Team team);
 
         EYFlagState m_flagState;
         ObjectGuid m_flagCarrier;
         ObjectGuid m_droppedFlagGuid;
         uint32 m_mainFlagDbGuid;
-
-        uint8 m_towersAlliance;
-        uint8 m_towersHorde;
-
-        uint32 m_towerWorldState[EY_MAX_NODES];
 
         Team m_towerOwner[EY_MAX_NODES];
         ObjectGuid m_towers[EY_MAX_NODES];

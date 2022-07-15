@@ -29,7 +29,7 @@
 #include "Maps/MapManager.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
-BattleGroundEY::BattleGroundEY(): m_flagState(), m_towersAlliance(0), m_towersHorde(0), m_honorTicks(0), m_flagRespawnTimer(0), m_resourceUpdateTimer(0), m_felReaverFlagTimer(0)
+BattleGroundEY::BattleGroundEY(): m_flagState(), m_honorTicks(0), m_flagRespawnTimer(0), m_resourceUpdateTimer(0), m_felReaverFlagTimer(0)
 {
     // set battleground start message id
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
@@ -109,7 +109,8 @@ void BattleGroundEY::StartingEventOpenDoors()
 void BattleGroundEY::AddPoints(Team team, uint32 points)
 {
     PvpTeamIndex team_index = GetTeamIndexByTeamId(team);
-    m_teamScores[team_index] += points;
+    int32 worldStateId = team == ALLIANCE ? WORLD_STATE_EY_RESOURCES_ALLIANCE : WORLD_STATE_EY_RESOURCES_HORDE;
+    GetBgMap()->GetVariableManager().SetVariable(worldStateId, GetBgMap()->GetVariableManager().GetVariable(worldStateId) + points);
     m_honorScoreTicks[team_index] += points;
 
     if (m_honorScoreTicks[team_index] >= m_honorTicks)
@@ -119,35 +120,76 @@ void BattleGroundEY::AddPoints(Team team, uint32 points)
     }
 }
 
+void BattleGroundEY::SetFlagState(EYFlagState state)
+{
+    m_flagState = state;
+
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_NETHERSTORM_FLAG_READY, m_flagState == EY_FLAG_STATE_ON_BASE);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, m_flagState == EY_FLAG_STATE_ON_ALLIANCE_PLAYER ? 2 : 1);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, m_flagState == EY_FLAG_STATE_ON_HORDE_PLAYER ? 2 : 1);
+}
+
+void BattleGroundEY::SetTowerOwner(EYNodes node, Team team)
+{
+    switch (node)
+    {
+        case NODE_BLOOD_ELF_TOWER:
+        {
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_BLOOD_ELF_TOWER_ALLIANCE, m_towerOwner[NODE_BLOOD_ELF_TOWER] == ALLIANCE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_BLOOD_ELF_TOWER_HORDE, m_towerOwner[NODE_BLOOD_ELF_TOWER] == HORDE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_BLOOD_ELF_TOWER_NEUTRAL, m_towerOwner[NODE_BLOOD_ELF_TOWER] == TEAM_NONE);
+            break;
+        }
+        case NODE_FEL_REAVER_RUINS:
+        {
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_FEL_REAVER_RUINS_ALLIANCE, m_towerOwner[NODE_FEL_REAVER_RUINS] == ALLIANCE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_FEL_REAVER_RUINS_HORDE, m_towerOwner[NODE_FEL_REAVER_RUINS] == HORDE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_FEL_REAVER_RUINS_NEUTRAL, m_towerOwner[NODE_FEL_REAVER_RUINS] == TEAM_NONE);
+            break;
+        }
+        case NODE_MAGE_TOWER:
+        {
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_MAGE_TOWER_ALLIANCE, m_towerOwner[NODE_MAGE_TOWER] == ALLIANCE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_MAGE_TOWER_HORDE, m_towerOwner[NODE_MAGE_TOWER] == HORDE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_MAGE_TOWER_NEUTRAL, m_towerOwner[NODE_MAGE_TOWER] == TEAM_NONE);
+            break;
+        }
+        case NODE_DRAENEI_RUINS:
+        {
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_DRAENEI_RUINS_ALLIANCE, m_towerOwner[NODE_DRAENEI_RUINS] == ALLIANCE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_DRAENEI_RUINS_HORDE, m_towerOwner[NODE_DRAENEI_RUINS] == HORDE);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_DRAENEI_RUINS_NEUTRAL, m_towerOwner[NODE_DRAENEI_RUINS] == TEAM_NONE);
+            break;
+        }
+    }
+}
+
 // Update resources by team based on the owned towers
 void BattleGroundEY::UpdateResources()
 {
-    if (m_towersAlliance > 0)
+    if (GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE) > 0)
     {
-        AddPoints(ALLIANCE, eyTickPoints[m_towersAlliance - 1]);
-        UpdateTeamScore(ALLIANCE);
+        AddPoints(ALLIANCE, eyTickPoints[GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE) - 1]);
+        CheckVictory(ALLIANCE);
     }
 
-    if (m_towersHorde > 0)
+    if (GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE) > 0)
     {
-        AddPoints(HORDE, eyTickPoints[m_towersHorde - 1]);
-        UpdateTeamScore(HORDE);
+        AddPoints(HORDE, eyTickPoints[GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE) - 1]);
+        CheckVictory(HORDE);
     }
 }
 
 // Update team score
-void BattleGroundEY::UpdateTeamScore(Team team)
+void BattleGroundEY::CheckVictory(Team team)
 {
-    uint32 score = m_teamScores[GetTeamIndexByTeamId(team)];
+    uint32 score = GetBgMap()->GetVariableManager().GetVariable(team == ALLIANCE ? WORLD_STATE_EY_RESOURCES_ALLIANCE : WORLD_STATE_EY_RESOURCES_HORDE);
 
     if (score >= EY_MAX_TEAM_SCORE)
     {
         score = EY_MAX_TEAM_SCORE;
         EndBattleGround(team);
     }
-
-    // Update world states
-    UpdateWorldState(team == ALLIANCE ? WORLD_STATE_EY_RESOURCES_ALLIANCE : WORLD_STATE_EY_RESOURCES_HORDE, score);
 }
 
 // Handle battleground end
@@ -274,8 +316,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
     if (team == ALLIANCE)
     {
         // update counter
-        ++m_towersAlliance;
-        UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE) + 1);
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
 
@@ -291,8 +332,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
     else if (team == HORDE)
     {
         // update counter
-        ++m_towersHorde;
-        UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE, GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE) + 1);
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
 
@@ -310,16 +350,14 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         if (m_towerOwner[towerId] == ALLIANCE)
         {
             // update counter
-            --m_towersAlliance;
-            UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE) - 1);
 
             SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
         }
         else
         {
             // update counter
-            --m_towersHorde;
-            UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
+            GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE, GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE) - 1);
 
             SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
         }
@@ -334,14 +372,9 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
             defender->ForcedDespawn();
     }
 
-    // update tower state
-    UpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
-    m_towerWorldState[towerId] = newWorldState;
-    UpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
-
     // update capture point owner
     Team oldTeam = m_towerOwner[towerId];
-    m_towerOwner[towerId] = team;
+    SetTowerOwner(EYNodes(towerId), team);
 
     if (oldTeam == ALLIANCE || oldTeam == HORDE) // only on going to grey
     {
@@ -400,17 +433,31 @@ void BattleGroundEY::Reset()
     // call parent's class reset
     BattleGround::Reset();
 
-    m_teamScores[TEAM_INDEX_ALLIANCE] = 0;
-    m_teamScores[TEAM_INDEX_HORDE] = 0;
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_CAPTURE_POINT_SLIDER_DISPLAY, WORLD_STATE_REMOVE);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_RESOURCES_ALLIANCE, 0);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_RESOURCES_HORDE, 0);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, 0);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE, 0);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_NETHERSTORM_FLAG_READY, 0);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, 0);
+    GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, 0);
 
-    m_towersAlliance = 0;
-    m_towersHorde = 0;
+
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_CAPTURE_POINT_SLIDER_DISPLAY, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_RESOURCES_ALLIANCE, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_RESOURCES_HORDE, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_TOWER_COUNT_HORDE, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_NETHERSTORM_FLAG_READY, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, true, 0, 0);
+
 
     m_honorTicks = BattleGroundMgr::IsBgWeekend(GetTypeId()) ? EY_WEEKEND_HONOR_INTERVAL : EY_NORMAL_HONOR_INTERVAL;
     m_honorScoreTicks[TEAM_INDEX_ALLIANCE] = 0;
     m_honorScoreTicks[TEAM_INDEX_HORDE] = 0;
 
-    m_flagState = EY_FLAG_STATE_ON_BASE;
+    SetFlagState(EY_FLAG_STATE_ON_BASE);
     m_flagCarrier.Clear();
     m_droppedFlagGuid.Clear();
 
@@ -418,14 +465,9 @@ void BattleGroundEY::Reset()
     m_resourceUpdateTimer = 0;
     m_felReaverFlagTimer = 0;
 
-    m_towerWorldState[NODE_BLOOD_ELF_TOWER] = WORLD_STATE_EY_BLOOD_ELF_TOWER_NEUTRAL;
-    m_towerWorldState[NODE_FEL_REAVER_RUINS] = WORLD_STATE_EY_FEL_REAVER_RUINS_NEUTRAL;
-    m_towerWorldState[NODE_MAGE_TOWER] = WORLD_STATE_EY_MAGE_TOWER_NEUTRAL;
-    m_towerWorldState[NODE_DRAENEI_RUINS] = WORLD_STATE_EY_DRAENEI_RUINS_NEUTRAL;
-
     for (uint8 i = 0; i < EY_MAX_NODES; ++i)
     {
-        m_towerOwner[i] = TEAM_NONE;
+        SetTowerOwner(EYNodes(i), TEAM_NONE);
         m_activeEvents[i] = TEAM_INDEX_NEUTRAL;
 
         GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(eyeGraveyardData[i].id, EY_ZONE_ID_MAIN, TEAM_INVALID);
@@ -444,7 +486,7 @@ void BattleGroundEY::RespawnFlagAtCenter(bool wasCaptured)
 {
     DEBUG_LOG("BattleGroundEY: Respawn flag at the center of the battleground.");
 
-    m_flagState = EY_FLAG_STATE_ON_BASE;
+    SetFlagState(EY_FLAG_STATE_ON_BASE);
 
     // will despawn captured flags at the node and spawn in center
     if (wasCaptured)
@@ -455,8 +497,6 @@ void BattleGroundEY::RespawnFlagAtCenter(bool wasCaptured)
 
     PlaySoundToAll(EY_SOUND_FLAG_RESET);
     SendMessageToAll(LANG_BG_EY_RESETED_FLAG, CHAT_MSG_BG_SYSTEM_NEUTRAL);
-
-    UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_READY, WORLD_STATE_ADD);
 }
 
 // Method that respawns dropped flag; called if nobody picks the dropped flag after 10 seconds
@@ -499,7 +539,7 @@ void BattleGroundEY::HandlePlayerDroppedFlag(Player* source)
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    m_flagState = EY_FLAG_STATE_ON_GROUND;
+    SetFlagState(EY_FLAG_STATE_ON_GROUND);
     m_flagRespawnTimer = EY_FLAG_RESPAWN_TIME;
 
     source->CastSpell(source, SPELL_RECENTLY_DROPPED_FLAG, TRIGGERED_OLD_TRIGGERED);
@@ -507,7 +547,6 @@ void BattleGroundEY::HandlePlayerDroppedFlag(Player* source)
 
     Team playerTeam = source->GetTeam();
 
-    UpdateWorldState(playerTeam == ALLIANCE ? WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE : WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, WORLD_STATE_ADD);
     SendMessageToAll(LANG_BG_EY_DROPPED_FLAG, playerTeam == ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE, nullptr);
 }
 
@@ -519,24 +558,18 @@ void BattleGroundEY::HandlePlayerClickedOnFlag(Player* source, GameObject* go)
 
     DEBUG_LOG("BattleGroundEY: Team %u has taken the flag, gameobject entry %u.", source->GetTeam(), go->GetEntry());
 
-    // remove world state for base flag
-    if (m_flagState == EY_FLAG_STATE_ON_BASE)
-        UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_READY, WORLD_STATE_REMOVE);
-
     // update for the team that picked up the flag
     if (source->GetTeam() == ALLIANCE)
     {
         PlaySoundToAll(EY_SOUND_FLAG_PICKED_UP_ALLIANCE);
 
-        m_flagState = EY_FLAG_STATE_ON_ALLIANCE_PLAYER;
-        UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, 2);
+        SetFlagState(EY_FLAG_STATE_ON_ALLIANCE_PLAYER);
     }
     else if (source->GetTeam() == HORDE)
     {
         PlaySoundToAll(EY_SOUND_FLAG_PICKED_UP_HORDE);
 
-        m_flagState = EY_FLAG_STATE_ON_HORDE_PLAYER;
-        UpdateWorldState(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, 2);
+        SetFlagState(EY_FLAG_STATE_ON_HORDE_PLAYER);
     }
 
     // Note: flag despawn and spell cast are handled in GameObject code
@@ -561,7 +594,7 @@ void BattleGroundEY::ProcessPlayerFlagScoreEvent(Player* source, EYNodes node)
 
     ClearFlagCarrier();
 
-    m_flagState = EY_FLAG_STATE_WAIT_RESPAWN;
+    SetFlagState(EY_FLAG_STATE_WAIT_RESPAWN);
     m_flagRespawnTimer = EY_FLAG_RESPAWN_TIME;
 
     source->RemoveAurasDueToSpell(EY_SPELL_NETHERSTORM_FLAG);
@@ -572,8 +605,8 @@ void BattleGroundEY::ProcessPlayerFlagScoreEvent(Player* source, EYNodes node)
     {
         PlaySoundToAll(EY_SOUND_FLAG_CAPTURED_ALLIANCE);
 
-        if (m_towersAlliance > 0)
-            AddPoints(ALLIANCE, eyFlagPoints[m_towersAlliance - 1]);
+        if (GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE) > 0)
+            AddPoints(ALLIANCE, eyFlagPoints[GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE) - 1]);
 
         SendMessageToAll(LANG_BG_EY_CAPTURED_FLAG_A, CHAT_MSG_BG_SYSTEM_ALLIANCE, source);
     }
@@ -581,8 +614,8 @@ void BattleGroundEY::ProcessPlayerFlagScoreEvent(Player* source, EYNodes node)
     {
         PlaySoundToAll(EY_SOUND_FLAG_CAPTURED_HORDE);
 
-        if (m_towersHorde > 0)
-            AddPoints(HORDE, eyFlagPoints[m_towersHorde - 1]);
+        if (GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE) > 0)
+            AddPoints(HORDE, eyFlagPoints[GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_TOWER_COUNT_HORDE) - 1]);
 
         SendMessageToAll(LANG_BG_EY_CAPTURED_FLAG_H, CHAT_MSG_BG_SYSTEM_HORDE, source);
     }
@@ -612,42 +645,6 @@ void BattleGroundEY::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     }
 }
 
-void BattleGroundEY::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    // counter states
-    FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
-
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_ALLIANCE, m_teamScores[TEAM_INDEX_ALLIANCE]);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_HORDE, m_teamScores[TEAM_INDEX_HORDE]);
-
-    // tower world states
-    FillInitialWorldState(data, count, WORLD_STATE_EY_BLOOD_ELF_TOWER_ALLIANCE, m_towerOwner[NODE_BLOOD_ELF_TOWER] == ALLIANCE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_BLOOD_ELF_TOWER_HORDE, m_towerOwner[NODE_BLOOD_ELF_TOWER] == HORDE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_BLOOD_ELF_TOWER_NEUTRAL, m_towerOwner[NODE_BLOOD_ELF_TOWER] == TEAM_NONE);
-
-    FillInitialWorldState(data, count, WORLD_STATE_EY_FEL_REAVER_RUINS_ALLIANCE, m_towerOwner[NODE_FEL_REAVER_RUINS] == ALLIANCE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_FEL_REAVER_RUINS_HORDE, m_towerOwner[NODE_FEL_REAVER_RUINS] == HORDE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_FEL_REAVER_RUINS_NEUTRAL, m_towerOwner[NODE_FEL_REAVER_RUINS] == TEAM_NONE);
-
-    FillInitialWorldState(data, count, WORLD_STATE_EY_MAGE_TOWER_ALLIANCE, m_towerOwner[NODE_MAGE_TOWER] == ALLIANCE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_MAGE_TOWER_HORDE, m_towerOwner[NODE_MAGE_TOWER] == HORDE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_MAGE_TOWER_NEUTRAL, m_towerOwner[NODE_MAGE_TOWER] == TEAM_NONE);
-
-    FillInitialWorldState(data, count, WORLD_STATE_EY_DRAENEI_RUINS_ALLIANCE, m_towerOwner[NODE_DRAENEI_RUINS] == ALLIANCE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_DRAENEI_RUINS_HORDE, m_towerOwner[NODE_DRAENEI_RUINS] == HORDE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_DRAENEI_RUINS_NEUTRAL, m_towerOwner[NODE_DRAENEI_RUINS] == TEAM_NONE);
-
-    // flag states
-    FillInitialWorldState(data, count, WORLD_STATE_EY_NETHERSTORM_FLAG_READY, m_flagState == EY_FLAG_STATE_ON_BASE);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, m_flagState == EY_FLAG_STATE_ON_ALLIANCE_PLAYER ? 2 : 1);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, m_flagState == EY_FLAG_STATE_ON_HORDE_PLAYER ? 2 : 1);
-
-    // capture point states
-    // if you leave the bg while being in capture point radius - and later join same type of bg the slider would still be displayed because the client caches it
-    FillInitialWorldState(data, count, WORLD_STATE_EY_CAPTURE_POINT_SLIDER_DISPLAY, WORLD_STATE_REMOVE);
-}
-
 bool BattleGroundEY::AreAllNodesControlledByTeam(Team team)
 {
     for (auto i : m_towerOwner)
@@ -671,8 +668,8 @@ bool BattleGroundEY::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
 
 Team BattleGroundEY::GetPrematureWinner()
 {
-    int32 hordeScore = m_teamScores[TEAM_INDEX_HORDE];
-    int32 allianceScore = m_teamScores[TEAM_INDEX_ALLIANCE];
+    int32 hordeScore = GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_RESOURCES_HORDE);
+    int32 allianceScore = GetBgMap()->GetVariableManager().GetVariable(WORLD_STATE_EY_RESOURCES_ALLIANCE);
 
     if (hordeScore > allianceScore)
         return HORDE;
