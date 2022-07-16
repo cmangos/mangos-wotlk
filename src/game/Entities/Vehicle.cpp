@@ -431,6 +431,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             if (params->exitParamValue == SEAT_EXIT_PARAMS_OFFSET)
             {
                 exitPos.RelocateOffset(Position(params->exitParamX, params->exitParamY, params->exitParamZ, params->exitParamO));
+                m_owner->UpdateAllowedPositionZ(exitPos.x, exitPos.y, exitPos.z);
             }
             else if (params->exitParamValue == SEAT_EXIT_PARAMS_ABSOLUTE_POS)
             {
@@ -441,7 +442,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             }
         }
 
-        init.MoveTo(exitPos.x, exitPos.y, exitPos.z);
+        init.MoveTo(exitPos.x, exitPos.y, exitPos.z, false, true);
         init.SetFacing(exitPos.o);
         init.SetExitVehicle();
         init.Launch();
