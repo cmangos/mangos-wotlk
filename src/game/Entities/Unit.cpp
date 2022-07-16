@@ -12825,7 +12825,7 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
     float fz = oz + 0.5f;
     GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, GetPhaseMask(), -0.5f);
     UpdateAllowedPositionZ(fx, fy, fz);
-    GetMotionMaster()->MoveJump(fx, fy, fz, horizontalSpeed, max_height);
+    GetMotionMaster()->MoveKnockback(fx, fy, fz, horizontalSpeed, max_height);
 }
 
 float Unit::GetCombatRatingReduction(CombatRating cr) const
