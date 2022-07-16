@@ -29,6 +29,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/TemporarySpawn.h"
+#include "Entities/Vehicle.h"
 
 /*######
 ## npc_gurgthock
