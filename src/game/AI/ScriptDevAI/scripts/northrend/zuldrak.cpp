@@ -270,6 +270,7 @@ bool EffectDummyCreature_npc_decaying_ghoul(Unit* pCaster, uint32 uiSpellId, Spe
     return false;
 }
 
+// 55430 - Gymer's Buddy
 struct GymersBuddy : public SpellScript
 {
     void OnCast(Spell* spell) const override
@@ -278,6 +279,23 @@ struct GymersBuddy : public SpellScript
         // this is required because effect 1 happens before effect 0 and at time of visibility update gymer needs to be in second phase in order for control not to malfunction
         if (target)
             target->SetPhaseMask(256, false);
+    }
+};
+
+// 55421 - Gymer's Throw
+struct GymersThrow : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (VehicleInfo* vehicle = caster->GetVehicleInfo())
+        {
+            if (Unit* vargul = vehicle->GetPassenger(1)) // gets vargul held in hand
+            {
+                vargul->RemoveAurasDueToSpell(43671); // removes from vehicle
+                caster->CastSpell(vargul, 55569, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+            }
+        }
     }
 };
 
@@ -301,4 +319,5 @@ void AddSC_zuldrak()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<GymersBuddy>("spell_gymers_buddy");
+    RegisterSpellScript<GymersThrow>("spell_gymers_throw");
 }

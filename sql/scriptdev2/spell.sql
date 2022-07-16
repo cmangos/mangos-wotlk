@@ -614,6 +614,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54269,'spell_water_globule_merge'),
 (54306,'spell_protective_bubble_aura'),
 (54361,'spell_void_shift_aura'),
+(55421,'spell_gymers_throw'),
 (55430,'spell_gymers_buddy'),
 (55814,'spell_eck_spit'),
 (55853,'spell_vortex_aura'),
