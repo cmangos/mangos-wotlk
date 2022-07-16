@@ -45,7 +45,7 @@ enum
 
     // Ground phase spells
     SPELL_CLEAVE                = 19983,
-    SPELL_TAIL_SWEEP            = 15847,
+    SPELL_TAIL_SWEEP            = 55697,
     SPELL_TAIL_SWEEP_H          = 55696,
     SPELL_LIFE_DRAIN            = 28542,
     SPELL_LIFE_DRAIN_H          = 55665,
