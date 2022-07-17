@@ -100,17 +100,6 @@ enum BattleGroundMarksCount
     ITEM_LOSER_COUNT                = 1
 };
 
-enum ArenaWorldStates
-{
-    WORLD_STATE_ARENA_COUNT_A       = 3601,
-    WORLD_STATE_ARENA_COUNT_H       = 3600,
-
-    WORLD_STATE_ARENA_MAIN_BE       = 2547,
-    WORLD_STATE_ARENA_MAIN_NA       = 2577,
-    WORLD_STATE_ARENA_MAIN_RL       = 3002,
-    WORLD_STATE_ARENA_MAIN          = 3610,
-};
-
 enum ArenaSpells : uint32
 {
     SPELL_LAST_MAN_STANDING         = 26549,
@@ -479,7 +468,7 @@ class BattleGround
 
         /* Packet Transfer */
         // method that should fill worldpacket with actual world states (not yet implemented for all battlegrounds!)
-        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/);
+        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
         void SendPacketToTeam(Team teamId, WorldPacket const& packet, Player* sender = nullptr, bool self = true);
         void SendPacketToAll(WorldPacket const& packet);
 

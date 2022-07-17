@@ -32,6 +32,7 @@
 #include "Tools/Formulas.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Chat/Chat.h"
+#include "World/WorldStateDefines.h"
 
 namespace MaNGOS
 {
@@ -770,42 +771,6 @@ void BattleGround::UpdateWorldStateForPlayer(uint32 field, uint32 value, Player*
 }
 
 /**
-  Method updates initial world states - main function used mainly for arenas
-
-  @param    data
-  @param    count
-*/
-void BattleGround::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    if (IsArena())
-    {
-        FillInitialWorldState(data, count, WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
-        FillInitialWorldState(data, count, WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
-
-        // the main arena world state is different for the old 2.x arenas
-        uint32 state = 0;
-        switch (GetTypeId())
-        {
-            case BATTLEGROUND_NA:
-                state = WORLD_STATE_ARENA_MAIN_NA;
-                break;
-            case BATTLEGROUND_BE:
-                state = WORLD_STATE_ARENA_MAIN_BE;
-                break;
-            case BATTLEGROUND_RL:
-                state = WORLD_STATE_ARENA_MAIN_RL;
-                break;
-            default:
-                state = WORLD_STATE_ARENA_MAIN;
-                break;
-        }
-
-        if (state)
-            FillInitialWorldState(data, count, state, WORLD_STATE_ADD);
-    }
-}
-
-/**
   Method that ends battleground
 
   @param    winner team
@@ -1460,6 +1425,34 @@ void BattleGround::Reset()
     for (BattleGroundScoreMap::const_iterator itr = m_playerScores.begin(); itr != m_playerScores.end(); ++itr)
         delete itr->second;
     m_playerScores.clear();
+
+    
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_ARENA_COUNT_A, true, 0, 0);
+    GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_ARENA_COUNT_H, true, 0, 0);
+
+    // the main arena world state is different for the old 2.x arenas
+    uint32 state = 0;
+    switch (GetTypeId())
+    {
+        case BATTLEGROUND_NA:
+            state = WORLD_STATE_ARENA_NA_HUD_ENABLED;
+            break;
+        case BATTLEGROUND_BE:
+            state = WORLD_STATE_ARENA_BE_HUD_ENABLED;
+            break;
+        case BATTLEGROUND_RL:
+            state = WORLD_STATE_ARENA_RL_HUD_ENABLED;
+            break;
+        default:
+            state = WORLD_STATE_ARENA_HUD_ENABLED;
+            break;
+    }
+
+    if (state)
+    {
+        GetBgMap()->GetVariableManager().SetVariable(state, WORLD_STATE_ADD);
+        GetBgMap()->GetVariableManager().SetVariableData(state, true, 0, 0);
+    }
 }
 
 /**
@@ -1559,8 +1552,8 @@ void BattleGround::AddPlayer(Player* player)
         m_playerScores[player->GetObjectGuid()] = score;
 
         // update world states on player enter
-        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
-        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
     }
     else
     {
@@ -1685,8 +1678,8 @@ void BattleGround::RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/)
         if (GetStatus() == STATUS_WAIT_LEAVE)
             return;
 
-        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
-        UpdateWorldState(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
 
         CheckArenaWinConditions();
     }
@@ -2210,8 +2203,8 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
     if (IsArena())
     {
         // update world states on player kill
-        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
-        UpdateWorldState(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
 
         // check win conditions
         CheckArenaWinConditions();
