@@ -868,6 +868,17 @@ void BattleGround::EndBattleGround(Team winner)
         }
     }
 
+    auto& objectStore = GetBgMap()->GetObjectsStore();
+    for (auto itr = objectStore.begin<Creature>(); itr != objectStore.end<Creature>(); ++itr)
+    {
+        Creature* creature = itr->second;
+        if (creature->IsClientControlled())
+            continue;
+        creature->SetImmuneToNPC(true);
+        creature->SetImmuneToPlayer(true);
+        creature->SetStunned(true);
+    }
+
     for (auto& m_Player : m_players)
     {
         Team team = m_Player.second.playerTeam;
