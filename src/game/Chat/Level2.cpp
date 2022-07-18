@@ -3535,7 +3535,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
         {
             uint32 pathEntry = wpOwner->GetEntry();
             if (targetCreature->GetCreatureGroup() && targetCreature->GetCreatureGroup()->GetFormationEntry())
-                pathEntry = targetCreature->GetCreatureGroup()->GetFormationEntry()->MovementID;
+                pathEntry = targetCreature->GetCreatureGroup()->GetFormationEntry()->MovementIdOrWander;
             if (WaypointMovementGenerator<Creature> const* wpMMGen = dynamic_cast<WaypointMovementGenerator<Creature> const*>(wpOwner->GetMotionMaster()->GetCurrent()))
             {
                 wpMMGen->GetPathInformation(wpPathId, wpOrigin);
