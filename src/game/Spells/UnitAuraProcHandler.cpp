@@ -2324,7 +2324,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         return SPELL_AURA_PROC_FAILED;
 
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    if ((procFlags & PROC_FLAG_DEAL_MELEE_ABILITY) || (spellInfo && spellInfo->Id == 53595))
+                    if ((procFlags & (PROC_FLAG_DEAL_MELEE_ABILITY | PROC_FLAG_DEAL_MELEE_SWING)) || (spellInfo && spellInfo->Id == 53595))
                         triggered_spell_id = 31803;         // Holy Vengeance
 
                     // Add 5-stack effect from Holy Vengeance
@@ -2375,7 +2375,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         return SPELL_AURA_PROC_FAILED;
 
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    if ((procFlags & PROC_FLAG_DEAL_MELEE_ABILITY) || (spellInfo && spellInfo->Id == 53595))
+                    if ((procFlags & (PROC_FLAG_DEAL_MELEE_ABILITY | PROC_FLAG_DEAL_MELEE_SWING)) || (spellInfo && spellInfo->Id == 53595))
                         triggered_spell_id = 53742;         // Blood Corruption
 
                     // Add 5-stack effect from Blood Corruption
