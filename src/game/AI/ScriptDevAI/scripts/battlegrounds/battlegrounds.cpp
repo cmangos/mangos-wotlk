@@ -127,7 +127,13 @@ struct FlagAuraBg : public AuraScript, public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx == EFFECT_INDEX_1)
-            spell->SetEventTarget(spell->GetAffectiveCasterObject());
+        {
+            // for EOS caster is player, for WSG caster is GO
+            if (spell->m_spellInfo->Id == 34976)
+                spell->SetEventTarget(spell->GetUnitTarget());
+            else
+                spell->SetEventTarget(spell->GetAffectiveCasterObject());
+        }
     }
 
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
@@ -141,6 +147,19 @@ struct FlagAuraBg : public AuraScript, public SpellScript
 
 struct FlagClickBg : public SpellScript
 {
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        switch (spell->m_spellInfo->Id)
+        {
+            case 23333:                                         // Warsong Flag
+            case 23335:                                         // Silverwing Flag
+                return spell->GetTrueCaster()->GetMapId() == 489 && spell->GetTrueCaster()->GetMap()->IsBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+            case 34976:                                         // Netherstorm Flag
+                return spell->GetTrueCaster()->GetMapId() == 566 && spell->GetTrueCaster()->GetMap()->IsBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_REQUIRES_AREA;
+        }
+        return SPELL_CAST_OK;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* target = spell->GetUnitTarget();

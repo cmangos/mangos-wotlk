@@ -131,6 +131,7 @@ void BattleGroundEY::SetFlagState(EYFlagState state)
 
 void BattleGroundEY::SetTowerOwner(EYNodes node, Team team)
 {
+    m_towerOwner[node] = team;
     switch (node)
     {
         case NODE_BLOOD_ELF_TOWER:
@@ -274,11 +275,11 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
 bool BattleGroundEY::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
     // event called when player picks up a dropped flag
-    if (eventId == EVENT_NETHERSTORM_FLAG_SPELL && source->IsPlayer() && target->IsGameObject())
+    if (eventId == EVENT_NETHERSTORM_FLAG_SPELL && target->IsPlayer() && source->IsGameObject())
     {
         DEBUG_LOG("BattleGroundEY: Handle flag pickup event id %u", eventId);
 
-        HandlePlayerClickedOnFlag(static_cast<Player*>(source), static_cast<GameObject*>(target));
+        HandlePlayerClickedOnFlag(static_cast<Player*>(target), static_cast<GameObject*>(source));
         return true;
     }
 
@@ -452,6 +453,9 @@ void BattleGroundEY::Reset()
     GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_ALLIANCE, true, 0, 0);
     GetBgMap()->GetVariableManager().SetVariableData(WORLD_STATE_EY_NETHERSTORM_FLAG_STATE_HORDE, true, 0, 0);
 
+    for (uint32 i = 0; i < EY_MAX_NODES; ++i)
+        for (uint32 k = 0; k < 4; ++k)
+            GetBgMap()->GetVariableManager().SetVariableData(eyTowerEvents[i][k].worldState, true, 0, 0);
 
     m_honorTicks = BattleGroundMgr::IsBgWeekend(GetTypeId()) ? EY_WEEKEND_HONOR_INTERVAL : EY_NORMAL_HONOR_INTERVAL;
     m_honorScoreTicks[TEAM_INDEX_ALLIANCE] = 0;
@@ -582,6 +586,9 @@ void BattleGroundEY::HandlePlayerClickedOnFlag(Player* source, GameObject* go)
         PSendMessageToAll(LANG_BG_EY_HAS_TAKEN_FLAG, CHAT_MSG_BG_SYSTEM_ALLIANCE, nullptr, source->GetName());
     else
         PSendMessageToAll(LANG_BG_EY_HAS_TAKEN_FLAG, CHAT_MSG_BG_SYSTEM_HORDE, nullptr, source->GetName());
+
+    // when clicked the flag despawns
+    go->SetLootState(GO_JUST_DEACTIVATED);
 }
 
 // Method that handles the player score when flag is captured at one of controlled nodes
