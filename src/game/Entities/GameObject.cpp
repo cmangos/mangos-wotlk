@@ -69,8 +69,7 @@ GameObject::GameObject() : WorldObject(),
     m_captureState(),
     m_goInfo(nullptr),
     m_displayInfo(nullptr),
-    m_AI(nullptr),
-    m_dbGuid(0)
+    m_AI(nullptr)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -182,7 +181,7 @@ void GameObject::RemoveFromWorld()
     WorldObject::RemoveFromWorld();
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, const QuaternionData& rotation, uint8 animprogress, GOState go_state)
+bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, const QuaternionData& rotation, uint8 animprogress, GOState go_state)
 {
     MANGOS_ASSERT(map);
     Relocate(x, y, z, ang);
@@ -193,24 +192,24 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 
     if (!IsPositionValid())
     {
-        sLog.outError("Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates are invalid (X: %f Y: %f)", guidlow, name_id, x, y);
+        sLog.outError("Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates are invalid (X: %f Y: %f)", dbGuid, name_id, x, y);
         return false;
     }
 
     GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(name_id);
     if (!goinfo)
     {
-        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u does not exist in `gameobject_template`. Map: %u  (X: %f Y: %f Z: %f) ang: %f", guidlow, name_id, map->GetId(), x, y, z, ang);
+        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u does not exist in `gameobject_template`. Map: %u  (X: %f Y: %f Z: %f) ang: %f", dbGuid, name_id, map->GetId(), x, y, z, ang);
         return false;
     }
 
-    Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+    Object::_Create(dbGuid, guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
 
     m_goInfo = goinfo;
 
     if (goinfo->type >= MAX_GAMEOBJECT_TYPE)
     {
-        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u has invalid type %u in `gameobject_template`. It may crash client if created.", guidlow, name_id, goinfo->type);
+        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u has invalid type %u in `gameobject_template`. It may crash client if created.", dbGuid, name_id, goinfo->type);
         return false;
     }
 
@@ -721,8 +720,8 @@ void GameObject::Update(const uint32 diff)
             else
             {
                 // if part of pool, let pool system schedule new spawn instead of just scheduling respawn
-                if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(m_dbGuid))
-                    sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, m_dbGuid);
+                if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(GetDbGuid()))
+                    sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetDbGuid());
             }
 
             // can be not in world at pool despawn
@@ -789,8 +788,8 @@ void GameObject::Delete()
     if (AI())
         AI()->JustDespawned();
 
-    if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(m_dbGuid))
-        sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, m_dbGuid);
+    if (uint16 poolid = sPoolMgr.IsPartOfAPool<GameObject>(GetDbGuid()))
+        sPoolMgr.UpdatePool<GameObject>(*GetMap()->GetPersistentState(), poolid, GetDbGuid());
     else
         AddObjectToRemoveList();
 
@@ -805,7 +804,7 @@ void GameObject::SaveToDB() const
 {
     // this should only be used when the gameobject has already been loaded
     // preferably after adding to map, because mapid may not be valid otherwise
-    GameObjectData const* data = sObjectMgr.GetGOData(m_dbGuid);
+    GameObjectData const* data = sObjectMgr.GetGOData(GetDbGuid());
     if (!data)
     {
         sLog.outError("GameObject::SaveToDB failed, cannot get gameobject data!");
@@ -907,12 +906,10 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     if ((goinfo && (goinfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_DYNGUID) != 0 || groupEntry) && dbGuid == newGuid)
         newGuid = map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT);
 
-    m_dbGuid = dbGuid;
-
-    if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(GetDbGuid()))
+    if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
         entry = randomEntry;
 
-    if (!Create(newGuid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
+    if (!Create(dbGuid, newGuid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
         return false;
 
     if (group)
@@ -932,13 +929,13 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
             m_spawnedByDefault = true;
             m_respawnDelay = data->GetRandomRespawnTime();
 
-            m_respawnTime  = map->GetPersistentState()->GetGORespawnTime(m_dbGuid);
+            m_respawnTime  = map->GetPersistentState()->GetGORespawnTime(GetDbGuid());
 
             // ready to respawn
             if (m_respawnTime && m_respawnTime <= time(nullptr))
             {
                 m_respawnTime = 0;
-                map->GetPersistentState()->SaveGORespawnTime(m_dbGuid, 0);
+                map->GetPersistentState()->SaveGORespawnTime(GetDbGuid(), 0);
             }
         }
         else
@@ -981,13 +978,13 @@ void GameObject::DeleteFromDB() const
         return;
     }
 
-    GameObjectRespawnDeleteWorker worker(m_dbGuid);
+    GameObjectRespawnDeleteWorker worker(GetDbGuid());
     sMapPersistentStateMgr.DoForAllStatesWithMapId(GetMapId(), worker);
 
-    sObjectMgr.DeleteGOData(m_dbGuid);
-    WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", m_dbGuid);
-    WorldDatabase.PExecuteLog("DELETE FROM game_event_gameobject WHERE guid = '%u'", m_dbGuid);
-    WorldDatabase.PExecuteLog("DELETE FROM gameobject_battleground WHERE guid = '%u'", m_dbGuid);
+    sObjectMgr.DeleteGOData(GetDbGuid());
+    WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", GetDbGuid());
+    WorldDatabase.PExecuteLog("DELETE FROM game_event_gameobject WHERE guid = '%u'", GetDbGuid());
+    WorldDatabase.PExecuteLog("DELETE FROM gameobject_battleground WHERE guid = '%u'", GetDbGuid());
 }
 
 void GameObject::SetOwnerGuid(ObjectGuid guid)
@@ -1075,7 +1072,7 @@ bool GameObject::IsMoTransport() const
 void GameObject::SaveRespawnTime()
 {
     if (m_respawnTime > time(nullptr) && m_spawnedByDefault)
-        GetMap()->GetPersistentState()->SaveGORespawnTime(m_dbGuid, m_respawnTime);
+        GetMap()->GetPersistentState()->SaveGORespawnTime(GetDbGuid(), m_respawnTime);
 }
 
 bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool /*inVisibleList*/) const
@@ -1176,7 +1173,7 @@ void GameObject::Respawn()
     if (m_spawnedByDefault && m_respawnTime > 0)
     {
         m_respawnTime = time(nullptr);
-        GetMap()->GetPersistentState()->SaveGORespawnTime(m_dbGuid, 0);
+        GetMap()->GetPersistentState()->SaveGORespawnTime(GetDbGuid(), 0);
     }
 }
 
@@ -1262,7 +1259,8 @@ GameObject* GameObject::SummonLinkedTrapIfAny() const
         return nullptr;
 
     GameObject* linkedGO = new GameObject;
-    if (!linkedGO->Create(GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, GetMap(),
+    uint32 lowGuid = GetMap()->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT);
+    if (!linkedGO->Create(lowGuid, lowGuid, linkedEntry, GetMap(),
                           GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation()))
     {
         delete linkedGO;
@@ -1452,7 +1450,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, m_dbGuid, spellCaster, this);
+                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
             return;
         }
         case GAMEOBJECT_TYPE_BUTTON:                        // 1
@@ -1475,7 +1473,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, m_dbGuid, spellCaster, this);
+                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
 
             return;
         }
@@ -1709,7 +1707,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             // activate script
             if (!scriptReturnValue)
-                GetMap()->ScriptsStart(sGameObjectScripts, m_dbGuid, spellCaster, this);
+                GetMap()->ScriptsStart(sGameObjectScripts, GetDbGuid(), spellCaster, this);
             else
                 return;
 
@@ -2366,7 +2364,7 @@ void GameObject::SpawnInMaps(uint32 db_guid, GameObjectData const* data)
 
 bool GameObject::HasStaticDBSpawnData() const
 {
-    return sObjectMgr.GetGOData(m_dbGuid) != nullptr;
+    return sObjectMgr.GetGOData(GetDbGuid()) != nullptr;
 }
 
 void GameObject::SetCapturePointSlider(float value, bool isLocked)

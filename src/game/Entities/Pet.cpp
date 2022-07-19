@@ -2227,7 +2227,7 @@ bool Pet::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* ci
     SetMap(cPos.GetMap());
     SetPhaseMask(cPos.GetPhaseMask(), false);
 
-    Object::_Create(guidlow, pet_number, HIGHGUID_PET);
+    Object::_Create(guidlow, guidlow, pet_number, HIGHGUID_PET);
 
     m_originalEntry = cinfo->Entry;
 

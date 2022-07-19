@@ -1171,7 +1171,7 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
 
     GameObject* pGameObj = GameObject::CreateGameObject(gInfo->id);
     QuaternionData data(0.f, 0.f, sin(o / 2), cos(o / 2));
-    if (!pGameObj->Create(db_lowGUID, gInfo->id, map, plr->GetPhaseMaskForSpawn(), x, y, z, o, data))
+    if (!pGameObj->Create(db_lowGUID, db_lowGUID, gInfo->id, map, plr->GetPhaseMaskForSpawn(), x, y, z, o, data))
     {
         delete pGameObj;
         return false;
@@ -1775,7 +1775,7 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
         return false;
     }
 
-    if (!pCreature->Create(lowguid, pos, cinfo))
+    if (!pCreature->Create(lowguid, lowguid, pos, cinfo))
     {
         delete pCreature;
         return false;
