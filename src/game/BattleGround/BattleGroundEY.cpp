@@ -275,7 +275,7 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
 bool BattleGroundEY::HandleEvent(uint32 eventId, Object* source, Object* target)
 {
     // event called when player picks up a dropped flag
-    if (eventId == EVENT_NETHERSTORM_FLAG_SPELL && target->IsPlayer() && source->IsGameObject())
+    if (eventId == EVENT_NETHERSTORM_FLAG_SPELL && target && target->IsPlayer() && source->IsGameObject())
     {
         DEBUG_LOG("BattleGroundEY: Handle flag pickup event id %u", eventId);
 
