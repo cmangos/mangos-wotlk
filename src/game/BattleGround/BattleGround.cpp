@@ -2167,11 +2167,12 @@ void BattleGround::SendBcdToTeam(int32 bcdEntry, Creature const* source, Team te
 {
     MaNGOS::BattleGroundBroadcastBuilder bg_builder(sObjectMgr.GetBroadcastText(bcdEntry), source);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundBroadcastBuilder> bg_do(bg_builder);
-    BroadcastWorker([&](Player* player)
+    auto lambda = [&](Player* player)
     {
         if (player->GetTeam() == team)
             bg_do(player);
-    });
+    };
+    BroadcastWorker(lambda);
 }
 
 /**
