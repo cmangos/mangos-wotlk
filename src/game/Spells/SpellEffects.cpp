@@ -6660,11 +6660,9 @@ bool Spell::DoSummonPet(CreatureSummonPositions& list, SummonPropertiesEntry con
             list[0].creature = spawnCreature;
             return true;
         }
-
-        spawnCreature->setPetType(SUMMON_PET);
     }
-    else
-        spawnCreature->setPetType(GUARDIAN_PET);
+
+    spawnCreature->setPetType(SUMMON_PET);
 
     // Summon in dest location
     CreatureCreatePos pos(m_caster->GetMap(), spawnPos.x, spawnPos.y, spawnPos.z, -m_caster->GetOrientation(), m_caster->GetPhaseMask());
@@ -6704,10 +6702,7 @@ bool Spell::DoSummonPet(CreatureSummonPositions& list, SummonPropertiesEntry con
     if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         spawnCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
-    if (spawnCreature->getPetType() == GUARDIAN_PET)
-        m_caster->AddGuardian(spawnCreature);
-    else
-        m_caster->SetPet(spawnCreature);
+    m_caster->SetPet(spawnCreature);
 
     if (m_caster->IsImmuneToNPC())
         spawnCreature->SetImmuneToNPC(true);
