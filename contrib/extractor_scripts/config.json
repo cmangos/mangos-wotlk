@@ -8,11 +8,16 @@
 		}
 	},
 	"530": {
-		"2029": {
-			"detailSampleDist": 1,
-			"detailSampleMaxError": 0.45
-		}
-	},
+        "2029": {
+            "detailSampleDist": 1,
+            "detailSampleMaxError": 0.45
+        },
+        "4320": {
+            "_Info": ".go c id 16209",
+            "walkableClimb": 6.0,
+            "walkableHeight": 5.0
+        }
+    },
 	"532": {
 		"3552": {
 			"maxSimplificationError": 1.0,
