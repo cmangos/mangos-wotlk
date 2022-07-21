@@ -44,7 +44,7 @@ struct ScourgeStrike : public SpellScript
     }
 };
 
-struct RaiseDead : public SpellScript
+struct RaiseDeadDk : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
@@ -555,7 +555,7 @@ struct GargoyleDeathKnightAI : public CombatAI
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
-    RegisterSpellScript<RaiseDead>("spell_dk_raise_dead");
+    RegisterSpellScript<RaiseDeadDk>("spell_dk_raise_dead");
     RegisterSpellScript<DeathCoilDK>("spell_dk_death_coil");
     RegisterSpellScript<UnholyBlightDK>("spell_dk_unholy_blight");
     RegisterSpellScript<DeathRuneDK>("spell_death_rune_dk");
