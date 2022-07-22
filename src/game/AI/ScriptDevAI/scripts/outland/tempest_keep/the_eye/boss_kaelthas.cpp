@@ -1918,12 +1918,12 @@ struct RemoveWeapons : public SpellScript
     }
 };
 
-struct spell_gravity_lapse_knockup : public AuraScript
+struct GravityLapseKnockup : public AuraScript
 {
     void OnPeriodicTickEnd(Aura* aura) const override
     {
         Unit* target = aura->GetTarget();
-        if (target->IsAboveGround(4.f)) // knock up player if he is too close to the ground
+        if (!target->IsAboveGround(4.f)) // knock up player if he is too close to the ground
             target->CastSpell(nullptr, 35938, TRIGGERED_OLD_TRIGGERED);
     }
 };
@@ -1965,5 +1965,5 @@ void AddSC_boss_kaelthas()
     RegisterSpellScript<NetherVaporSummon>("spell_nether_vapor_summon");
     RegisterSpellScript<NetherVaporSummonParent>("spell_nether_vapor_summon_parent");
     RegisterSpellScript<RemoveWeapons>("spell_remove_weapons");
-    RegisterSpellScript<spell_gravity_lapse_knockup>("spell_gravity_lapse_knockup");
+    RegisterSpellScript<GravityLapseKnockup>("spell_gravity_lapse_knockup");
 }
