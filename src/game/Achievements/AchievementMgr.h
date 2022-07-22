@@ -64,7 +64,7 @@ enum AchievementCriteriaRequirementType
     ACHIEVEMENT_CRITERIA_REQUIRE_T_TEAM              = 14,  // team                         HORDE(67), ALLIANCE(469)
     ACHIEVEMENT_CRITERIA_REQUIRE_S_DRUNK             = 15,  // drunken_state  0             (enum DrunkenState) of player
     ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY             = 16,  // holiday_id     0             event in holiday time
-    ACHIEVEMENT_CRITERIA_REQUIRE_BG_LOSS_TEAM_SCORE  = 17,  // min_score      max_score     player's team win bg and opposition team have team score in range
+    ACHIEVEMENT_CRITERIA_REQUIRE_UNUSED              = 17,  //
     ACHIEVEMENT_CRITERIA_REQUIRE_INSTANCE_SCRIPT     = 18,  // 0              0             maker instance script call for check current criteria requirements fit
     ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPPED_ITEM_LVL = 19,  // item_level     item_quality  fir equipped item in slot `misc1` to item level and quality
     ACHIEVEMENT_CRITERIA_REQUIRE_NTH_BIRTHDAY        = 20,  // N                            login on day of N-th Birthday
@@ -72,6 +72,7 @@ enum AchievementCriteriaRequirementType
     ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT          = 22,  // 0              0             maker battleground or outdoor pvp script call for check current criteria requirements fit
     ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE  = 23,  // creatureType
     ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID              = 24,  // mapId                        player must be in map
+    ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION= 25,  // condition_entry              player must be in map
 };
 
 class Player;
@@ -191,6 +192,11 @@ struct AchievementCriteriaRequirement
         {
             uint32 mapId;
         } mapId;
+        // ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION = 25
+        struct
+        {
+            uint32 conditionEntry;
+        } worldStateCondition;
         // ...
         struct
         {

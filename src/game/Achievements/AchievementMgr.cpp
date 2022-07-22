@@ -105,7 +105,6 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_REQUIRE_NONE:
         case ACHIEVEMENT_CRITERIA_REQUIRE_VALUE:
         case ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED:
-        case ACHIEVEMENT_CRITERIA_REQUIRE_BG_LOSS_TEAM_SCORE:
         case ACHIEVEMENT_CRITERIA_REQUIRE_INSTANCE_SCRIPT:
         case ACHIEVEMENT_CRITERIA_REQUIRE_NTH_BIRTHDAY:
         case ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT:
@@ -282,6 +281,16 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             }
             return true;
         }
+        case ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION:
+        {
+            if (!sConditionStorage.LookupEntry<ConditionEntry>(worldStateCondition.conditionEntry))
+            {
+                sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION (%u) have unknown condition_entry in value1 (%u), ignore.",
+                    criteria->ID, criteria->requiredType, requirementType, worldStateCondition.conditionEntry);
+                return false;
+            }
+            return true;
+        }
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
             return false;
@@ -349,13 +358,6 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
             return (uint32)Player::GetDrunkenstateByValue(source->GetDrunkValue()) >= drunk.state;
         case ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY:
             return sGameEventMgr.IsActiveHoliday(HolidayIds(holiday.id));
-        case ACHIEVEMENT_CRITERIA_REQUIRE_BG_LOSS_TEAM_SCORE:
-        {
-            BattleGround* bg = source->GetBattleGround();
-            if (!bg)
-                return false;
-            return bg->IsTeamScoreInRange(source->GetTeam() == ALLIANCE ? HORDE : ALLIANCE, bg_loss_team_score.min_score, bg_loss_team_score.max_score);
-        }
         case ACHIEVEMENT_CRITERIA_REQUIRE_INSTANCE_SCRIPT:
         {
             if (!source->IsInWorld())
@@ -424,6 +426,8 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
         }
         case ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID:
             return source->GetMapId() == mapId.mapId;
+        case ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION:
+            return IsConditionSatisfied(worldStateCondition.conditionEntry, nullptr, source->GetMap(), nullptr, CONDITION_FROM_WORLDSTATE);
     }
     return false;
 }
