@@ -144,6 +144,8 @@ enum WSAchievCriteria
 
     WS_ACHIEV_SAVE_THE_DAY_1            = 5605,
     WS_ACHIEV_SAVE_THE_DAY_2            = 5606,
+
+    WS_ACHIEV_IRONMAN                   = 1824,
 };
 
 enum WSAreaTriggers

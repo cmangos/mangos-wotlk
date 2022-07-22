@@ -675,6 +675,8 @@ bool BattleGroundWS::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
         case WS_ACHIEV_SAVE_THE_DAY_2:
             return (source->GetTeam() == HORDE && source->GetAreaId() == 4571 && target->HasAura(BG_WS_SPELL_WARSONG_FLAG) && GetBgMap()->GetVariableManager().GetVariable(wsFlagPickedUp[TEAM_INDEX_ALLIANCE]) == BG_WS_FLAG_STATE_ON_BASE) ||
                 (source->GetTeam() == ALLIANCE && source->GetAreaId() == 4572 && target->HasAura(BG_WS_SPELL_SILVERWING_FLAG) && GetBgMap()->GetVariableManager().GetVariable(wsFlagPickedUp[TEAM_INDEX_ALLIANCE]) == BG_WS_FLAG_STATE_ON_BASE);
+        case WS_ACHIEV_IRONMAN:
+            return (source->GetTeam() == HORDE && GetWinner() == WINNER_HORDE) || (source->GetTeam() == ALLIANCE && GetWinner() == WINNER_ALLIANCE);
     }
 
     return false;
