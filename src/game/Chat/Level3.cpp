@@ -4174,7 +4174,6 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     else
         PSendSysMessage(LANG_NPCINFO_CHAR, target->GetGuidStr().c_str(), faction, npcflags, Entry, displayid, nativeid);
 
-    PSendSysMessage("DbGuid: %u", target->GetDbGuid());
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->GetLevel());
     PSendSysMessage(LANG_NPCINFO_PHASEMASK, target->GetPhaseMask());
     PSendSysMessage(LANG_NPCINFO_HEALTH, target->GetCreateHealth(), target->GetMaxHealth(), target->GetHealth());
