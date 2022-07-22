@@ -73,15 +73,7 @@ void BattleGroundWS::Update(uint32 diff)
     // Count the renaining time; update world state and end battleground if timer is expired
     if (m_endTimer <= diff)
     {
-        if (m_teamScores[TEAM_INDEX_ALLIANCE] > m_teamScores[TEAM_INDEX_HORDE])
-            EndBattleGround(ALLIANCE);
-        else if (m_teamScores[TEAM_INDEX_ALLIANCE] < m_teamScores[TEAM_INDEX_HORDE])
-            EndBattleGround(HORDE);
-        else
-        {
-            // if 0 => tie
-            EndBattleGround(m_lastCapturedFlagTeam);
-        }
+        EndBattleGround(GetPrematureWinner());
     }
     else
     {
@@ -667,6 +659,9 @@ Team BattleGroundWS::GetPrematureWinner()
         return HORDE;
     if (allianceScore > hordeScore)
         return ALLIANCE;
+
+    if (m_lastCapturedFlagTeam)
+        return m_lastCapturedFlagTeam;
 
     // If the values are equal, fall back to number of players on each team
     return BattleGround::GetPrematureWinner();

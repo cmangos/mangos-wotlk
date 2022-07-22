@@ -2349,20 +2349,6 @@ void BattleGround::SetBgRaid(Team team, Group* bgRaid)
 }
 
 /**
-  Function that checkes if team score is in range
-
-  @param    team
-  @param    min score
-  @param    max score
-*/
-bool BattleGround::IsTeamScoreInRange(Team team, uint32 minScore, uint32 maxScore) const
-{
-    PvpTeamIndex team_idx = GetTeamIndexByTeamId(team);
-    uint32 score = (m_teamScores[team_idx] < 0) ? 0 : uint32(m_teamScores[team_idx]);
-    return score >= minScore && score <= maxScore;
-}
-
-/**
   Method that sets the battleground bracket
 
   @param    bracket entry

@@ -147,7 +147,7 @@ void BattleGroundAB::Update(uint32 diff)
             // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
             // horde will be a bit disadvantaged, but we can assume that points aren't updated for both team in same Update() call
             PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(PvpTeamIndex(teamIndex));
-            if (m_teamScores[teamIndex] > m_teamScores[otherTeamIdx] + 500)
+            if (newValue > GetBgMap()->GetVariableManager().GetVariable(otherTeamIdx == TEAM_INDEX_ALLIANCE ? BG_AB_OP_RESOURCES_ALLY : BG_AB_OP_RESOURCES_HORDE) + 500)
                 m_teamScores500Disadvantage[otherTeamIdx] = true;
         }
     }
@@ -559,7 +559,7 @@ bool BattleGroundAB::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
         case AB_ACHIEV_TERRITORIAL_DOMINANCE:
             return AreAllNodesControlledByTeam(source->GetTeam());
         case AB_ACHIEV_HAD_IT_ALL_ALONG:
-            return abs(m_teamScores[TEAM_INDEX_HORDE] - m_teamScores[TEAM_INDEX_ALLIANCE]) <= 10;
+            return abs(GetBgMap()->GetVariableManager().GetVariable(BG_AB_OP_RESOURCES_ALLY) - GetBgMap()->GetVariableManager().GetVariable(BG_AB_OP_RESOURCES_HORDE)) <= 10;
         case AB_ACHIEV_RESILIET_VICTORY_1:
         case AB_ACHIEV_RESILIET_VICTORY_2:
         case AB_ACHIEV_RESILIET_VICTORY_3:

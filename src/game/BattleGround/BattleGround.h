@@ -654,12 +654,6 @@ class BattleGround
         // function that start timed achievement
         void StartTimedAchievement(AchievementCriteriaTypes /*type*/, uint32 /*entry*/);
 
-        // Handle Team score for achievements
-        bool IsTeamScoreInRange(Team /*team*/, uint32 /*minScore*/, uint32 /*maxScore*/) const;
-
-        /* virtual score-array - get's used in bg-subclasses */
-        int32 m_teamScores[PVP_TEAM_COUNT];
-
         struct EventObjects
         {
             std::vector<uint32> gameobjects;
