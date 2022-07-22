@@ -7293,7 +7293,7 @@ std::pair<float, float> Spell::GetMinMaxRange(bool strict)
                     meleeRange = caster->GetCombinedCombatReach(target ? target : caster, true, 0.f);
             }
 
-            bool friendly = target ? target->CanAssistSpell(m_caster, m_spellInfo) : false;
+            bool friendly = target ? m_trueCaster->CanAssistSpell(target, m_spellInfo) : false;
             minRange = GetSpellMinRange(spellRange, friendly) + meleeRange;
             maxRange = GetSpellMaxRange(spellRange, friendly);
 
