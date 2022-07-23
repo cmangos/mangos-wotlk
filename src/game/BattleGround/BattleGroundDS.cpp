@@ -53,22 +53,25 @@ void BattleGroundDS::Update(uint32 diff)
                 if (Creature* trigger = GetBgMap()->GetCreature(guid))
                     trigger->CastSpell(trigger, BG_DS_SPELL_FLUSH, TRIGGERED_OLD_TRIGGERED);
 
-            // knockback players manually due to missing triggered spell 61698
-            for (const auto& itr : GetPlayers())
+            if (Creature* trigger = GetBgMap()->GetCreature(m_worldTriggerGuid))
             {
-                Player* plr = sObjectMgr.GetPlayer(itr.first);
-                if (!plr)
-                    continue;
+                // knockback players manually due to missing triggered spell 61698
+                for (const auto& itr : GetPlayers())
+                {
+                    Player* plr = sObjectMgr.GetPlayer(itr.first);
+                    if (!plr)
+                        continue;
 
-                if (plr->GetPositionZ() < 11.0f)
-                    continue;
+                    if (plr->GetPositionZ() < 11.0f)
+                        continue;
 
-                // knockback player depending on location
-                if (plr->IsWithinDist2d(1249.43f, 764.601f, 40))
-                    plr->KnockBackWithAngle(0, 55, 7);
+                    // knockback player depending on location
+                    if (plr->IsWithinDist2d(1249.43f, 764.601f, 40))
+                        trigger->CastSpell(plr, BG_DS_SPELL_TRACTOR_BEAM, TRIGGERED_NONE);
 
-                if (plr->IsWithinDist2d(1333.51f, 818.031f, 40))
-                    plr->KnockBackWithAngle(3.10f, 55, 7);
+                    if (plr->IsWithinDist2d(1333.51f, 818.031f, 40))
+                        trigger->CastSpell(plr, BG_DS_SPELL_TRACTOR_BEAM, TRIGGERED_NONE);
+                }
             }
 
             m_uiFlushTimer = 0;
@@ -171,6 +174,8 @@ void BattleGroundDS::HandleCreatureCreate(Creature* creature)
         else
             m_lGateTriggersGuids.push_back(creature->GetObjectGuid());
     }
+    else if (creature->GetEntry() == BG_DS_CREATURE_WORLD_TRIGGER)
+        m_worldTriggerGuid = creature->GetObjectGuid();
 }
 
 void BattleGroundDS::HandleGameObjectCreate(GameObject* go)

@@ -21,6 +21,7 @@
 enum
 {
     BG_DS_CREATURE_WATER_SPOUT        = 28567,
+    BG_DS_CREATURE_WORLD_TRIGGER      = 23472,
 
     // BG_DS_GO_DALARA_SEWERS_DOOR_1  = 192642,
     // BG_DS_GO_DALARA_SEWERS_DOOR_2  = 192643,
@@ -32,7 +33,9 @@ enum
     BG_DS_SPELL_FLUSH                 = 57405,    // Triggers 61698; Visual and target selector for the starting knockback from the pipe
     BG_DS_SPELL_WATER_SPOUT           = 58873,    // Knockback effect of the central waterfall
 
-    BG_DS_SPELL_DEMONIC_CIRCLE        = 48018     // Demonic Circle Summon
+    BG_DS_SPELL_DEMONIC_CIRCLE        = 48018,    // Demonic Circle Summon
+
+    BG_DS_SPELL_TRACTOR_BEAM          = 28266,
 };
 
 class BattleGround;
@@ -67,5 +70,6 @@ class BattleGroundDS : public BattleGround
         ObjectGuid m_waterfallTriggerGuid;
         ObjectGuid m_waterfallCollisionGuid;
         ObjectGuid m_waterfallAnimGuid;
+        ObjectGuid m_worldTriggerGuid;
 };
 #endif
