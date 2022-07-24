@@ -181,9 +181,9 @@ enum SASpells
     BG_SA_SPELL_SPLIT_TELEPORT_A_BOAT1          = 53464,
     BG_SA_SPELL_SPLIT_TELEPORT_A_BOAT2          = 53465,
 
-    // phasing auras implemented in DB in spell area
-    // BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT = 60027,                // phase 65 - alliance is defender
-    // BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT    = 60028,                // phase 129 - horde is defender
+    // phasing auras
+    BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT    = 60027,                // phase 65 - alliance is defender
+    BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT       = 60028,                // phase 129 - horde is defender
 };
 
 enum SAAchievCriteria
@@ -370,7 +370,6 @@ class BattleGroundSA : public BattleGround
 
         // General functions
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         // Battleground event handlers
         void HandleCreatureCreate(Creature* creature) override;
@@ -385,6 +384,8 @@ class BattleGroundSA : public BattleGround
 
         // Achievements
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
+
+        void AlterTeleportLocation(Player* player, ObjectGuid& transportGuid, float& x, float& y, float& z, float& ori) override;
 
     private:
         // Helper functions
@@ -402,6 +403,7 @@ class BattleGroundSA : public BattleGround
         void TeleportPlayerToStartArea(Player* player);
 
         PvpTeamIndex GetAttacker() { return m_defendingTeamIdx == TEAM_INDEX_ALLIANCE ? TEAM_INDEX_HORDE : TEAM_INDEX_ALLIANCE; }
+        void SetDefender(PvpTeamIndex teamIndex);
         PvpTeamIndex m_defendingTeamIdx;
 
         StrandGraveyardNode m_strandGraveyard[BG_SA_MAX_GRAVEYARDS];
@@ -418,20 +420,20 @@ class BattleGroundSA : public BattleGround
         uint8 m_scoreCount[PVP_TEAM_COUNT];
         uint8 m_battleStage;
 
+        // single spawn guid storages can be normal guids because they get overwritten on respawn
         ObjectGuid m_battlegroundMasterGuid;
-        ObjectGuid m_defenderTeleportStalkerGuid;
+        uint32 m_defenderTeleportStalkerGuid;
         ObjectGuid m_riggerGuid;
         ObjectGuid m_gorgrilGuid;
-
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
 
-        GuidList m_cannonsGuids;
-        GuidList m_demolishersGuids;
-        GuidList m_tempDemolishersGuids;
-        GuidList m_gatesGuids;
-        GuidList m_attackerTeleportStalkersGuids;
-        GuidVector m_triggerGuids;
-
-        GuidList m_transportShipGuids[PVP_TEAM_COUNT];
+        // guid sets need to be dbguid centric because dbguid does not change across respawns for static spawns
+        std::set<uint32> m_cannonsGuids;
+        std::set<uint32> m_demolishersGuids;
+        GuidList m_tempDemolishersGuids; // these use normal guids because they are tempspawns
+        std::set<uint32> m_gatesGuids;
+        std::set<uint32> m_attackerTeleportStalkersGuids;
+        std::set<uint32> m_triggerGuids;
+        std::set<uint32> m_transportShipGuids[PVP_TEAM_COUNT];
 };
 #endif
