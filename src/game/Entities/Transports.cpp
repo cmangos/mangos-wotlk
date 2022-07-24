@@ -579,6 +579,8 @@ bool ElevatorTransport::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Ma
         m_animationInfo = sTransportMgr.GetTransportAnimInfo(GetGOInfo()->id);
         m_currentSeg = 0;
         m_eventTriggered = false;
+        if (m_stopped) // only verified for SotA attacker ships for now
+            SetInt16Value(GAMEOBJECT_DYNAMIC, 1, -1);
         return true;
     }
     return false;
@@ -679,6 +681,9 @@ void ElevatorTransport::Update(const uint32 diff)
                 }
             }
         }
+
+        if (GetGOInfo()->transport.pause)
+            SetUInt16Value(GAMEOBJECT_DYNAMIC, 1, m_pathProgress);
     }
 
     if (AI())
