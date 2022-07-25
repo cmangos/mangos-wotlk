@@ -1082,7 +1082,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             }
             else
             {
-                sLog.outErrorDb("HUNTER PET levelstats missing in DB! 'Weakifying' pet");
+                sLog.outErrorDb("HUNTER PET levelstats missing in DB! 'Weakifying' pet. Entry: 1 PetLevel: %u.", petlevel);
 
                 for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
                     SetCreateStat(Stats(i), 1.0f);
@@ -1141,7 +1141,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             }
             else
             {
-                sLog.outErrorDb("SUMMON_PET levelstats missing in DB! 'Weakifying' pet and giving it mana to make it obvious");
+                sLog.outErrorDb("SUMMON_PET levelstats missing in DB! 'Weakifying' pet and giving it mana to make it obvious. Entry: %u Level: %u", cInfo->Entry, petlevel);
 
                 for (int i = STAT_STRENGTH; i < MAX_STATS; ++i)
                     SetCreateStat(Stats(i), 1.0f);
