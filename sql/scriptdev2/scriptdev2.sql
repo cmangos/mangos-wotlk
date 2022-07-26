@@ -624,6 +624,7 @@ UPDATE creature_template SET ScriptName='npc_mootoo_the_younger' WHERE entry=255
 UPDATE creature_template SET ScriptName='npc_storm_totem' WHERE entry=26048;
 UPDATE creature_template SET ScriptName='npc_proudhoof' WHERE entry=25335;
 UPDATE creature_template SET ScriptName='npc_orphaned_mammoth_calf' WHERE entry=25861;
+UPDATE gameobject_template SET ScriptName='go_mammoth_trap_borean' WHERE entry IN(188022,188024,188025,188026,188027,188028,188029,188030,188031,188032,188033,188034,188035,188036,188037,188038,188039,188040,188041,188042,188043,188044);
 
 /* BURNING STEPPES */
 UPDATE creature_template SET ScriptName='npc_grark_lorkrub' WHERE entry=9520;

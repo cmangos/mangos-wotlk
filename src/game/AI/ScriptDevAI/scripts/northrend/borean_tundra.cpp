@@ -1521,6 +1521,17 @@ UnitAI* GetAI_npc_orphaned_mammoth_calf(Creature* pCreature)
     return new npc_orphaned_mammoth_calfAI(pCreature);
 }
 
+struct MammothTrapBoreanAI : public GameObjectAI
+{
+    MammothTrapBoreanAI(GameObject* go) : GameObjectAI(go) {}
+
+    void OnLootStateChange(Unit* user) override
+    {
+        if (m_go->GetLootState() == GO_JUST_DEACTIVATED)
+            m_go->GetMap()->ScriptsStart(sGameObjectTemplateScripts, m_go->GetEntry(), m_go, user);
+    }
+};
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript = new Script;
@@ -1606,5 +1617,10 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_orphaned_mammoth_calf";
     pNewScript->GetAI = &GetAI_npc_orphaned_mammoth_calf;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_mammoth_trap_borean";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<MammothTrapBoreanAI>;
     pNewScript->RegisterSelf();
 }
