@@ -2046,7 +2046,7 @@ bool ProcessEventId_sedai_vision(uint32 /*eventId*/, Object* source, Object* /*t
 struct KaliriNest : public GameObjectAI
 {
     using GameObjectAI::GameObjectAI;
-    void OnLootStateChange() override
+    void OnLootStateChange(Unit* /*user*/) override
     {
         if (m_go->GetLootState() == GO_JUST_DEACTIVATED)
         {

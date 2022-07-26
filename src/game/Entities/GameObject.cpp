@@ -1346,13 +1346,13 @@ bool GameObject::IsCollisionEnabled() const
     }
 }
 
-void GameObject::ResetDoorOrButton()
+void GameObject::ResetDoorOrButton(Unit* user/*= nullptr*/)
 {
     if (m_lootState == GO_READY || m_lootState == GO_JUST_DEACTIVATED)
         return;
 
     SwitchDoorOrButton(false);
-    SetLootState(GO_JUST_DEACTIVATED);
+    SetLootState(GO_JUST_DEACTIVATED, user);
     m_cooldownTime = 0;
 }
 
@@ -2143,14 +2143,14 @@ void GameObject::SetLocalRotationAngles(float z_rot, float y_rot, float x_rot)
     SetLocalRotation(quat.x, quat.y, quat.z, quat.w);
 }
 
-void GameObject::SetLootState(LootState state)
+void GameObject::SetLootState(LootState state, Unit* user/*= nullptr*/)
 {
     m_lootState = state;
     UpdateCollisionState();
 
     // Call for GameObjectAI script
     if (m_AI)
-        m_AI->OnLootStateChange();
+        m_AI->OnLootStateChange(user);
 }
 
 void GameObject::SetGoState(GOState state)
