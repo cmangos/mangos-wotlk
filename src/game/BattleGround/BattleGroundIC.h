@@ -756,9 +756,9 @@ class BattleGroundIC : public BattleGround
 
         bool m_isKeepInvaded[PVP_TEAM_COUNT];
 
-        GuidList m_hangarPortalsGuids[PVP_TEAM_COUNT];
-        GuidList m_hangarAnimGuids[PVP_TEAM_COUNT];
-        GuidList m_seaforiumBombsGuids[PVP_TEAM_COUNT];
+        std::set<uint32> m_hangarPortalsGuids[PVP_TEAM_COUNT];
+        std::set<uint32> m_hangarAnimGuids[PVP_TEAM_COUNT];
+        std::set<uint32> m_seaforiumBombsGuids[PVP_TEAM_COUNT];
         GuidList m_towerGatesGuids;
         GuidList m_teleporterGuids;
         GuidList m_teleporterAnimGuids;
