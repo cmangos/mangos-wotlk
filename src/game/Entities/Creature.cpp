@@ -640,6 +640,9 @@ void Creature::ResetEntry(bool respawn)
         }
         else
             UpdateEntry(m_originalEntry, data, eventData, false);
+
+        if (data && data->spawnTemplate->relayId)
+            GetMap()->ScriptsStart(sRelayScripts, data->spawnTemplate->relayId, this, nullptr);
     }
     else
         UpdateEntry(m_originalEntry, data, eventData, false);
