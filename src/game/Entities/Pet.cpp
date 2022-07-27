@@ -1031,7 +1031,10 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     float mana = 0.f;
     float armor = 0.f;
 
-    switch (getPetType())
+    PetType petType = getPetType();
+    if (!GetOwnerGuid().IsPlayer())
+        petType = GUARDIAN_PET; // for purpose of pet scaling, NPC summoned SUMMON_PET scale as GUARDIAN_PET
+    switch (petType)
     {
         case HUNTER_PET:
         {
