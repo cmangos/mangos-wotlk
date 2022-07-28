@@ -1940,6 +1940,15 @@ UPDATE creature_template SET ScriptName='npc_eagle_trash_aggro_trigger' WHERE en
 UPDATE creature_template SET ScriptName='npc_gurgthock' WHERE entry=30007;
 UPDATE creature_template SET ScriptName='npc_ghoul_feeding_bunny' WHERE entry=28591;
 UPDATE creature_template SET ScriptName='npc_decaying_ghoul' WHERE entry=28565;
+INSERT INTO scripted_areatrigger VALUES
+(5056,'at_overlord_drakuru'),
+(5057,'at_overlord_drakuru'),
+(5058,'at_overlord_drakuru'),
+(5060,'at_overlord_drakuru'),
+(5095,'at_overlord_drakuru'),
+(5096,'at_overlord_drakuru'),
+(5097,'at_overlord_drakuru'),
+(5098,'at_overlord_drakuru');
 
 
 /* ZUL'FARRAK */

@@ -300,6 +300,39 @@ struct GymersThrow : public SpellScript
     }
 };
 
+enum
+{
+    QUEST_DARK_HORIZON = 12664,
+    QUEST_REUNITED      = 12663,
+    NPC_OVERLORD_DRAKURU = 28717,
+};
+
+bool AreaTrigger_at_overlord_drakuru(Player* player, AreaTriggerEntry const* at)
+{
+    if (!player->IsActiveQuest(QUEST_DARK_HORIZON) && !player->IsActiveQuest(QUEST_REUNITED))
+        return false;
+
+    int32 textId = 0;
+    uint32 entry = NPC_OVERLORD_DRAKURU;
+    switch (at->id)
+    {
+        case 5056: textId = 28691; break;
+        case 5057: textId = 28700; break;
+        case 5058: textId = 28701; break;
+        case 5060: textId = 28709; break;
+        case 5095: textId = 29281; break;
+        case 5096: textId = 29291; break;
+        case 5097: textId = 29292; break;
+        case 5098: textId = 29293; break;
+    }
+
+    Creature* overlord = GetClosestCreatureWithEntry(player, entry, 30.f);
+    if (overlord && textId)
+        DoBroadcastText(textId, overlord, player);
+
+    return true;
+}
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -317,6 +350,11 @@ void AddSC_zuldrak()
     pNewScript->Name = "npc_decaying_ghoul";
     pNewScript->GetAI = &GetAI_npc_decaying_ghoul;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_decaying_ghoul;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_overlord_drakuru";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_overlord_drakuru;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<GymersBuddy>("spell_gymers_buddy");
