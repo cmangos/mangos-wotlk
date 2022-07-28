@@ -319,6 +319,7 @@ bool AreaTrigger_at_overlord_drakuru(Player* player, AreaTriggerEntry const* at)
         case 5056: textId = 28691; break;
         case 5057: textId = 28700; break;
         case 5058: textId = 28701; break;
+        case 5059: textId = 28708; break;
         case 5060: textId = 28709; break;
         case 5095: textId = 29281; break;
         case 5096: textId = 29291; break;

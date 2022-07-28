@@ -1944,6 +1944,7 @@ INSERT INTO scripted_areatrigger VALUES
 (5056,'at_overlord_drakuru'),
 (5057,'at_overlord_drakuru'),
 (5058,'at_overlord_drakuru'),
+(5059,'at_overlord_drakuru'),
 (5060,'at_overlord_drakuru'),
 (5095,'at_overlord_drakuru'),
 (5096,'at_overlord_drakuru'),
