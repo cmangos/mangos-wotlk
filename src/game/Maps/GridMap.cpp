@@ -139,7 +139,7 @@ bool GridMap::loadData(char const* filename)
         return true;
     }
 
-    sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.", filename);
+    sLog.outError("Map file '%s' has the wrong version. Please extract the mapfiles again with the latest extractors.", filename);
     fclose(in);
     return false;
 }
@@ -666,7 +666,7 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
     FILE* pf = fopen(tmp, "rb");
     if (!pf)
     {
-        sLog.outError("Check existing of map file '%s': not exist!", tmp);
+        sLog.outError("Map file '%s': was not found!", tmp);
         delete[] tmp;
         return false;
     }
@@ -678,7 +678,7 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
             header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)) ||
             !IsAcceptableClientBuild(header.buildMagic))
     {
-        sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.", tmp);
+        sLog.outError("Map file '%s' is has the wrong version. Please extract the mapfiles again with the latest extractors.", tmp);
         delete[] tmp;
         fclose(pf);                                         // close file before return
         return false;
@@ -700,7 +700,7 @@ bool GridMap::ExistVMap(uint32 mapid, int gx, int gy)
             if (!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid, gx, gy);
-                sLog.outError("VMap file '%s' is missing or point to wrong version vmap file, redo vmaps with latest vmap_assembler.exe program", (sWorld.GetDataPath() + "vmaps/" + name).c_str());
+                sLog.outError("VMap file '%s' is missing or has the wrong version. Please extract the vmap files again with the latest extractors.", (sWorld.GetDataPath() + "vmaps/" + name).c_str());
                 return false;
             }
         }
@@ -1334,7 +1334,7 @@ GridMap* TerrainInfo::LoadMapAndVMap(const uint32 x, const uint32 y, bool mapOnl
 
             if (!map->loadData(tmp))
             {
-                sLog.outError("Error load map file: %s", tmp);
+                sLog.outError("Error loading map file: %s", tmp);
                 //assert(false);
             }
 
