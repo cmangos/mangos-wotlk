@@ -327,7 +327,7 @@ bool AreaTrigger_at_overlord_drakuru(Player* player, AreaTriggerEntry const* at)
         case 5098: textId = 29293; break;
     }
 
-    Creature* overlord = GetClosestCreatureWithEntry(player, entry, 30.f);
+    Creature* overlord = GetClosestCreatureWithEntry(player, entry, 50.f);
     if (overlord && textId)
         DoBroadcastText(textId, overlord, player);
 
