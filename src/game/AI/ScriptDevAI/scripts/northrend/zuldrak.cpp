@@ -334,6 +334,15 @@ bool AreaTrigger_at_overlord_drakuru(Player* player, AreaTriggerEntry const* at)
     return true;
 }
 
+// 55368 - Summon Stefan
+struct SummonStefan : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 20.f;
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -360,4 +369,5 @@ void AddSC_zuldrak()
 
     RegisterSpellScript<GymersBuddy>("spell_gymers_buddy");
     RegisterSpellScript<GymersThrow>("spell_gymers_throw");
+    RegisterSpellScript<SummonStefan>("spell_summon_stefan");
 }
