@@ -461,6 +461,7 @@ inline bool IsPossessCharmType(uint32 spellId)
     {
         case 30019: // Control Piece - Chess event
         case 39219: // Death's Door Fel Cannon
+        case 52244: // Charm Geist
             return true;
         default: return false;
     }
