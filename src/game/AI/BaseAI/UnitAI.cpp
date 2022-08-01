@@ -1186,6 +1186,9 @@ void UnitAI::UpdateSpellLists()
     {
         CreatureSpellListSpell const& spell = data.second;
 
+        if (spell.DisabledForAI)
+            continue;
+
         if (spell.Flags & SPELL_LIST_FLAG_SUPPORT_ACTION)
             if (supportActionRoll > spells.ChanceSupportAction)
                 continue;
