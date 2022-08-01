@@ -343,6 +343,32 @@ struct SummonStefan : public SpellScript
     }
 };
 
+// 52244 - Charm Geist
+struct CharmGeist : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0 || !apply)
+            return;
+
+        static_cast<Creature*>(aura->GetTarget())->SetSpellList(2875000);
+    }
+};
+
+// 52245 - Harvest Blight Crystal
+struct HarvestBlightCrystal : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            spell->GetCaster()->CastSpell(nullptr, 52247, TRIGGERED_OLD_TRIGGERED);
+            if (spell->GetCaster()->AI())
+                spell->GetCaster()->AI()->SetFollowMovement(false);
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -370,4 +396,6 @@ void AddSC_zuldrak()
     RegisterSpellScript<GymersBuddy>("spell_gymers_buddy");
     RegisterSpellScript<GymersThrow>("spell_gymers_throw");
     RegisterSpellScript<SummonStefan>("spell_summon_stefan");
+    RegisterSpellScript<CharmGeist>("spell_charm_geist");
+    RegisterSpellScript<HarvestBlightCrystal>("spell_harvest_blight_crystal");
 }
