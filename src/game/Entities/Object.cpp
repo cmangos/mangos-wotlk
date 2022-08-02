@@ -46,6 +46,7 @@
 #include "Loot/LootMgr.h"
 #include "Spells/SpellMgr.h"
 #include "MotionGenerators/PathFinder.h"
+#include "Movement/MoveSpline.h"
 
 Object::Object(): m_updateFlag(0), m_itsNewObject(false), m_dbGuid(0)
 {
@@ -298,7 +299,15 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             const_cast<Unit*>(unit)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
 
         // Write movement info
-        *data << unit->m_movementInfo;
+        // TODO: Move boarding and unboarding and root enable/disable to movement generator
+        if ((unit->m_movementInfo.GetMovementFlags() & MOVEFLAG_SPLINE_ENABLED) && unit->movespline->IsBoarding())
+        {
+            MovementInfo info = unit->m_movementInfo;
+            info.RemoveMovementFlag(MOVEFLAG_ROOT);
+            *data << info;
+        }
+        else
+            *data << unit->m_movementInfo;
 
         // Unit speeds
         *data << float(unit->GetSpeed(MOVE_WALK));

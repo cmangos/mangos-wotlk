@@ -97,8 +97,13 @@ namespace Movement
         if (!args.Validate(&unit))
             return 0;
 
+        bool removedRoot = false;
         if (args.flags.hasFlag(MoveSplineFlag::eFlags::BoardVehicle | MoveSplineFlag::eFlags::ExitVehicle))
+        {
+            if (moveFlags & MOVEFLAG_ROOT)
+                removedRoot = true;
             moveFlags &= ~MOVEFLAG_ROOT;
+        }
 
         if (moveFlags & MOVEFLAG_ROOT && !pathEmpty)
         {
@@ -109,7 +114,9 @@ namespace Movement
 
         args.splineId = splineCounter++;
 
-        unit.m_movementInfo.SetMovementFlags(MovementFlags(moveFlags));
+        if (args.flags.hasFlag(MoveSplineFlag::eFlags::BoardVehicle | MoveSplineFlag::eFlags::ExitVehicle))
+            unit.m_movementInfo.SetMovementFlags(MovementFlags(moveFlags));
+
         move_spline.Initialize(args);
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);
@@ -132,6 +139,9 @@ namespace Movement
 
         PacketBuilder::WriteMonsterMove(move_spline, data);
         unit.SendMessageToAllWhoSeeMe(data, true);
+
+        if (removedRoot)
+            unit.m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
 
         return move_spline.Duration();
     }

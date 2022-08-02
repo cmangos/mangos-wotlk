@@ -346,6 +346,11 @@ namespace Movement
         time_passed = Duration();
     }
 
+    bool MoveSpline::IsBoarding() const
+    {
+        return splineflags.boardVehicle || splineflags.exitVehicle;
+    }
+
     const Vector3 MoveSpline::FinalDestination() const
     {
         if (Initialized())
