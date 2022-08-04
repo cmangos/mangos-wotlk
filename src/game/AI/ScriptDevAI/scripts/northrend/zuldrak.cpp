@@ -363,9 +363,17 @@ struct HarvestBlightCrystal : public SpellScript
         if (effIdx == EFFECT_INDEX_0)
         {
             spell->GetCaster()->CastSpell(nullptr, 52247, TRIGGERED_OLD_TRIGGERED);
-            if (spell->GetCaster()->AI())
-                spell->GetCaster()->AI()->SetFollowMovement(false);
         }
+    }
+};
+
+// 52247 - Target Crystal
+struct TargetCrystal : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (spell->GetCaster()->AI())
+            spell->GetCaster()->AI()->SetFollowMovement(false);
     }
 };
 
@@ -398,4 +406,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<SummonStefan>("spell_summon_stefan");
     RegisterSpellScript<CharmGeist>("spell_charm_geist");
     RegisterSpellScript<HarvestBlightCrystal>("spell_harvest_blight_crystal");
+    RegisterSpellScript<TargetCrystal>("spell_target_crystal");
 }
