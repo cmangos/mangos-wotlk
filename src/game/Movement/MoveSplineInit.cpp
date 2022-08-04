@@ -114,8 +114,7 @@ namespace Movement
 
         args.splineId = splineCounter++;
 
-        if (args.flags.hasFlag(MoveSplineFlag::eFlags::BoardVehicle | MoveSplineFlag::eFlags::ExitVehicle))
-            unit.m_movementInfo.SetMovementFlags(MovementFlags(moveFlags));
+        unit.m_movementInfo.SetMovementFlags(MovementFlags(moveFlags));
 
         move_spline.Initialize(args);
 
