@@ -65,7 +65,10 @@ class TransportBase
         void RotateLocalPosition(float lx, float ly, float& rx, float& ry) const;
         void NormalizeRotatedPosition(float rx, float ry, float& lx, float& ly) const;
 
-        void CalculateGlobalPositionOf(float lx, float ly, float lz, float lo, float& gx, float& gy, float& gz, float& go) const;
+        void CalculatePassengerPosition(float& x, float& y, float& z, float* o = nullptr) const;
+
+        /// This method transforms supplied global coordinates into local offsets
+        void CalculatePassengerOffset(float& x, float& y, float& z, float* o = nullptr) const;
 
         // Helper function to check if a unit is boarded onto this transporter (or a transporter boarded onto this)*
         bool HasOnBoard(WorldObject const* passenger) const;
@@ -121,6 +124,15 @@ class TransportInfo
             ly = m_localPosition.y;
             lz = m_localPosition.z;
             lo = m_localPosition.o;
+        }
+
+        void CalculatePassengerPosition(float& x, float& y, float& z, float* o = nullptr) const
+        {
+            m_transport->CalculatePassengerPosition(x, y, z, o);
+        }
+        void CalculatePassengerOffset(float& x, float& y, float& z, float* o = nullptr) const
+        {
+            m_transport->CalculatePassengerOffset(x, y, z, o);
         }
 
     private:

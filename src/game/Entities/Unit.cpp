@@ -13240,6 +13240,11 @@ void Unit::UpdateSplinePosition(bool relocateOnly)
         m_movementInfo.UpdateTransportData(pos);
         transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
     }
+    if (TransportInfo* transportInfo = GetTransportInfo())
+    {
+        m_movementInfo.UpdateTransportData(pos);
+        transportInfo->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
+    }
 
     bool faced = false;
     if (movespline->isFacing())
@@ -13282,9 +13287,7 @@ void Unit::UpdateSplinePosition(bool relocateOnly)
         return;
     }
 
-    if (IsBoarded())
-       GetTransportInfo()->SetLocalPosition(pos.x, pos.y, pos.z, pos.o);
-    else if (IsPlayer())
+    if (IsPlayer())
         static_cast<Player*>(this)->SetPosition(pos.x, pos.y, pos.z, pos.o);
     else
         GetMap()->CreatureRelocation((Creature*)this, pos.x, pos.y, pos.z, pos.o);
