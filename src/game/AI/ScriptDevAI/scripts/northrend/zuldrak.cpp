@@ -386,7 +386,10 @@ struct CharmDrakuruServant : public AuraScript
             return;
 
         if (apply)
+        {
             static_cast<Creature*>(aura->GetTarget())->UpdateEntry(28805, nullptr, nullptr, false, false);
+            DoBroadcastText(28884, aura->GetTarget(), aura->GetCaster());
+        }
     }
 };
 
