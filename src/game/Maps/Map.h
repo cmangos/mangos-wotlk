@@ -368,10 +368,10 @@ class Map : public GridRefManager<NGridType>
         TimePoint GetCurrentClockTime() const;
         uint32 GetCurrentDiff() const;
 
-        void SetZoneMusic(uint32 zoneId, uint32 musicId);
-        void SetZoneWeather(uint32 zoneId, uint32 weatherId, float weatherGrade);
-        void SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime);
-        void SendZoneDynamicInfo(Player* player) const;
+        void SetZoneMusic(uint32 zoneId, uint32 areaId, uint32 musicId);
+        void SetZoneWeather(uint32 zoneId, uint32 areaId, uint32 weatherId, float weatherGrade);
+        void SetZoneOverrideLight(uint32 zoneId, uint32 areaId, uint32 lightId, uint32 fadeInTime);
+        void SendZoneDynamicInfo(Player* player, bool zoneUpdated, bool areaUpdated) const;
 
         void CreatePlayerOnClient(Player* player);
 
@@ -532,6 +532,7 @@ class Map : public GridRefManager<NGridType>
         WorldStateVariableManager m_variableManager;
 
         ZoneDynamicInfoMap m_zoneDynamicInfo;
+        ZoneDynamicInfoMap m_areaDynamicInfo;
         uint32 m_defaultLight;
 
         TimePoint m_dynamicDifficultyCooldown;

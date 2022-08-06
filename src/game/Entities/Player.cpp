@@ -7474,7 +7474,8 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
     if (!zone)
         return;
 
-    if (m_zoneUpdateId != newZone || force)
+    bool updateZone = m_zoneUpdateId != newZone || force;
+    if (updateZone)
     {
         // handle outdoor pvp zones
         sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
@@ -7487,17 +7488,19 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
             Weather* wth = GetMap()->GetWeatherSystem()->FindOrCreateWeather(newZone);
             wth->SendWeatherUpdateToPlayer(this);
         }
-
-        GetMap()->SendZoneDynamicInfo(this);
     }
 
-    if (m_areaUpdateId != newArea || force)
+    bool updateArea = m_areaUpdateId != newArea || force;
+    if (updateArea)
     {
         SendInitWorldStates(newZone, newArea); // only if really enters to new zone, not just area change, works strange...
 
         sWorldState.HandlePlayerLeaveArea(this, m_areaUpdateId);
         sWorldState.HandlePlayerEnterArea(this, newArea);
     }
+
+    if (updateZone || updateArea)
+        GetMap()->SendZoneDynamicInfo(this, updateZone, updateArea);
 
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
