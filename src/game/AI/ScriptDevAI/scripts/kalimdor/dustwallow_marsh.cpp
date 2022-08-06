@@ -1291,11 +1291,6 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
     }
 };
 
-UnitAI* GetAI_boss_tethyr(Creature* pCreature)
-{
-    return new boss_tethyrAI(pCreature);
-}
-
 /*######
 ## npc_major_mills
 ######*/
@@ -1981,7 +1976,7 @@ void AddSC_dustwallow_marsh()
 
     pNewScript = new Script;
     pNewScript->Name = "boss_tethyr";
-    pNewScript->GetAI = &GetAI_boss_tethyr;
+    pNewScript->GetAI = &GetNewAIInstance<boss_tethyrAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

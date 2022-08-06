@@ -402,6 +402,8 @@ struct world_map_kalimdor : public ScriptedMap
                 {
                     case NOT_STARTED:
                         instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_SHOW, 0);
+                        instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_COUNT, 0);
+                        instance->SetZoneWeather(0, AREAID_THERAMORE_ISLE, 0, 0.f);
                         break;
                     case SPECIAL: // Archer slain
                         instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_COUNT, instance->GetVariableManager().GetVariable(WORLD_STATE_TETHYR_COUNT) - 1);
@@ -410,6 +412,7 @@ struct world_map_kalimdor : public ScriptedMap
                         if (m_encounter[uiType] != IN_PROGRESS)
                             instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_COUNT, 12);
                         instance->GetVariableManager().SetVariable(WORLD_STATE_TETHYR_SHOW, 1);
+                        instance->SetZoneWeather(0, AREAID_THERAMORE_ISLE, 3, 0.5f);
                         break;
                 }
             }
