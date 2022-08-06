@@ -291,7 +291,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         SetCombatMovement(false);
 
         // reset lights
-        m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_DEFAULT, 0);
+        m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, 0, LIGHT_ID_DEFAULT, 0);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -339,7 +339,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
     void JustReachedHome() override
     {
-        m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_DEFAULT, 0);
+        m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, 0, LIGHT_ID_DEFAULT, 0);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, FAIL);
@@ -466,7 +466,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         switch (iEntry)
         {
             case LIGHT_ID_ARCANE_RUNES:
-                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_ARCANE_RUNES, 5);
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, 0, LIGHT_ID_ARCANE_RUNES, 5);
                 break;
             case PHASE_DISCS:
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_FLIGHT, aHoverMovePos[0], aHoverMovePos[1], aHoverMovePos[2]);
@@ -474,10 +474,10 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 DoSpawnAdds();
                 break;
             case LIGHT_ID_CHANGE_DIMENSIONS:
-                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_CHANGE_DIMENSIONS, 5);
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, 0, LIGHT_ID_CHANGE_DIMENSIONS, 5);
                 break;
             case LIGHT_ID_OBSCURE_SPACE:
-                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_OBSCURE_SPACE, 5);
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, 0, LIGHT_ID_OBSCURE_SPACE, 5);
                 break;
             case SPELL_DESTROY_PLATFORM_PRE:
                 DoCastSpellIfCan(m_creature, SPELL_DESTROY_PLATFORM_PRE);
@@ -510,7 +510,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_PHASE_3, aDragonsMovePos[0], aDragonsMovePos[1], aDragonsMovePos[2]);
                 break;
             case LIGHT_ID_OBSCURE_ARCANE_RUNES:
-                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_OBSCURE_ARCANE_RUNES, 5);
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, 0, LIGHT_ID_OBSCURE_ARCANE_RUNES, 5);
                 DoCastSpellIfCan(m_creature, SPELL_CLEAR_ALL_DEBUFFS, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_IMMUNE_CURSES, CAST_TRIGGERED);
                 m_uiArcaneStormTimer = 20000;
