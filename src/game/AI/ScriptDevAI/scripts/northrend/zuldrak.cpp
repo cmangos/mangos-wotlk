@@ -377,6 +377,19 @@ struct TargetCrystal : public SpellScript
     }
 };
 
+// 52390 - Charm Drakuru Servant
+struct CharmDrakuruServant : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsCreature())
+            return;
+
+        if (apply)
+            static_cast<Creature*>(aura->GetTarget())->UpdateEntry(28805);
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -407,4 +420,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<CharmGeist>("spell_charm_geist");
     RegisterSpellScript<HarvestBlightCrystal>("spell_harvest_blight_crystal");
     RegisterSpellScript<TargetCrystal>("spell_target_crystal");
+    RegisterSpellScript<CharmDrakuruServant>("spell_charm_drakuru_servant");
 }

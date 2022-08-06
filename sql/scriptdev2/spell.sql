@@ -593,6 +593,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51976,'spell_siphon_of_acherus_credit'),
 (51979,'spell_siphon_of_acherus_credit'),
 (51981,'spell_siphon_of_acherus_credit'),
+(52390,'spell_charm_drakuru_servant'),
 (52244,'spell_charm_geist'),
 (52245,'spell_harvest_blight_crystal'),
 (52247,'spell_target_crystal'),
