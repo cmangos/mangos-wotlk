@@ -605,6 +605,7 @@ struct CreatureEventAI_Event
     uint32 event_id;
 
     uint32 creature_id;
+    uint32 creature_guid;
 
     uint32 event_inverse_phase_mask;
 
