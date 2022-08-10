@@ -602,6 +602,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52519,'spell_ghoulplosion'),
 (52555,'spell_dispel_scarlet_ghoul_credit'),
 (52588,'spell_skeletal_gryphon_escape'),
+(52590,'spell_kill_credit_drakkari_skullcrusher'),
 (52694,'spell_recall_eye_of_acherus'),
 (52751,'spell_death_gate'),
 (52942,'spell_pulsing_shockwave'),

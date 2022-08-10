@@ -393,6 +393,33 @@ struct CharmDrakuruServant : public AuraScript
     }
 };
 
+// 52590 - Kill credit
+struct KillCreditDrakkariSkullcrusher : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (!spell->GetCaster()->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(spell->GetCaster());
+        spell->SetScriptValue(player->GetReqKillOrCastCurrentCount(12690, 29099));
+    }
+
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        if (!spell->GetCaster()->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(spell->GetCaster());
+        uint32 count = player->GetReqKillOrCastCurrentCount(12690, 29099);
+        if (count == spell->GetScriptValue()) // nothing changed, prevent spam at 60
+            return;
+
+        if (count % 20 == 0) // at 20, 40, 60 - spawn chieftain
+            spell->GetCaster()->CastSpell(nullptr, 52616, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -424,4 +451,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<HarvestBlightCrystal>("spell_harvest_blight_crystal");
     RegisterSpellScript<TargetCrystal>("spell_target_crystal");
     RegisterSpellScript<CharmDrakuruServant>("spell_charm_drakuru_servant");
+    RegisterSpellScript<KillCreditDrakkariSkullcrusher>("spell_kill_credit_drakkari_skullcrusher");
 }
