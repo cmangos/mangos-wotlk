@@ -175,7 +175,7 @@ void WorldState::Load()
                             }
                             for (uint32 i = 0; i < RESOURCE_MAX; ++i)
                                 loadStream >> m_aqData.m_WarEffortCounters[i];
-                            loadStream >> m_aqData.m_phase2Tier;
+                            loadStream >> m_aqData.m_phase2Tier >> m_aqData.m_killedBosses;
                         }
                         catch (std::exception& e)
                         {
@@ -1063,7 +1063,15 @@ void WorldState::StartWarEffortEvent()
         case PHASE_1_GATHERING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_1); break;
         case PHASE_2_TRANSPORTING_RESOURCES: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_2); break;
         case PHASE_3_GONG_TIME: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_3); break;
-        case PHASE_4_10_HOUR_WAR: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4); break;
+        case PHASE_4_10_HOUR_WAR:
+            sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4);
+            if (m_aqData.m_killedBosses & (1 << AQ_SILITHUS_BOSS_ASHI))
+                sGameEventMgr.StartEvent(GAME_EVENT_ASHI_DEAD);
+            if (m_aqData.m_killedBosses & (1 << AQ_SILITHUS_BOSS_REGAL))
+                sGameEventMgr.StartEvent(GAME_EVENT_REGAL_DEAD);
+            if (m_aqData.m_killedBosses & (1 << AQ_SILITHUS_BOSS_ZORA))
+                sGameEventMgr.StartEvent(GAME_EVENT_ZORA_DEAD);
+            break;
         case PHASE_5_DONE: sGameEventMgr.StartEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5); break;
         default: break;
     }
@@ -1076,7 +1084,12 @@ void WorldState::StopWarEffortEvent()
         case PHASE_1_GATHERING_RESOURCES: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_1); break;
         case PHASE_2_TRANSPORTING_RESOURCES: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_2); break;
         case PHASE_3_GONG_TIME: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_3); break;
-        case PHASE_4_10_HOUR_WAR: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4); break;
+        case PHASE_4_10_HOUR_WAR:
+            sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_4);
+            sGameEventMgr.StopEvent(GAME_EVENT_ASHI_DEAD);
+            sGameEventMgr.StopEvent(GAME_EVENT_REGAL_DEAD);
+            sGameEventMgr.StopEvent(GAME_EVENT_ZORA_DEAD);
+            break;
         case PHASE_5_DONE: sGameEventMgr.StopEvent(GAME_EVENT_AHN_QIRAJ_EFFORT_PHASE_5); break;
         default: break;
     }
@@ -1278,6 +1291,19 @@ void WorldState::DespawnWarEffortGuids(std::set<std::pair<uint32, Team>>& guids)
     }
 }
 
+void WorldState::SetSilithusBossKilled(AQSilithusBoss boss)
+{
+    std::lock_guard<std::mutex> guard(m_aqData.m_warEffortMutex);
+    m_aqData.m_killedBosses |= (1 << boss);
+    if (boss == AQ_SILITHUS_BOSS_ASHI)
+        sGameEventMgr.StartEvent(GAME_EVENT_ASHI_DEAD);
+    if (boss == AQ_SILITHUS_BOSS_REGAL)
+        sGameEventMgr.StartEvent(GAME_EVENT_REGAL_DEAD);
+    if (boss == AQ_SILITHUS_BOSS_ZORA)
+        sGameEventMgr.StartEvent(GAME_EVENT_ZORA_DEAD);
+    Save(SAVE_ID_AHN_QIRAJ);
+}
+
 std::pair<AQResourceGroup, Team> WorldState::GetResourceInfo(AQResources resource)
 {
     switch (resource)
@@ -1344,7 +1370,7 @@ std::string AhnQirajData::GetData()
     std::string output = std::to_string(m_phase) + " " + std::to_string(uint64(Clock::to_time_t(respawnTime)));
     for (uint32 value : m_WarEffortCounters)
         output += " " + std::to_string(value);
-    output += " " + std::to_string(m_phase2Tier);
+    output += " " + std::to_string(m_phase2Tier) + " " + std::to_string(m_killedBosses);
     return output;
 }
 
