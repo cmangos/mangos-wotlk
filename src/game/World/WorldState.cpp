@@ -1054,6 +1054,7 @@ void WorldState::HandleWarEffortPhaseTransition(uint32 newPhase)
         default: break;
     }
     StartWarEffortEvent();
+    Save(SAVE_ID_AHN_QIRAJ);
 }
 
 void WorldState::StartWarEffortEvent()
