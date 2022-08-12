@@ -2670,6 +2670,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
             }
 
             ((Creature*)pSource)->SetHover(m_script->fly.fly);
+            ((Creature*)pSource)->SetLevitate(m_script->fly.fly); // wotlk+ - enable setting only one if its needed in wotlk one day
             break;
         }
         case SCRIPT_COMMAND_DESPAWN_GO:                     // 40
