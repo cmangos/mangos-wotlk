@@ -420,6 +420,51 @@ struct KillCreditDrakkariSkullcrusher : public SpellScript
     }
 };
 
+// 52089 - Drakuramas Teleport Script 01
+struct DrakuramasTeleportScript01 : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetTarget()->CastSpell(nullptr, 52091, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+// 52239 - Drakuramas Teleport Script 02
+struct DrakuramasTeleportScript02 : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetTarget()->CastSpell(nullptr, 52240, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+// 52676 - Drakuramas Teleport Script 03
+struct DrakuramasTeleportScript03 : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetTarget()->CastSpell(nullptr, 52677, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -452,4 +497,7 @@ void AddSC_zuldrak()
     RegisterSpellScript<TargetCrystal>("spell_target_crystal");
     RegisterSpellScript<CharmDrakuruServant>("spell_charm_drakuru_servant");
     RegisterSpellScript<KillCreditDrakkariSkullcrusher>("spell_kill_credit_drakkari_skullcrusher");
+    RegisterSpellScript<DrakuramasTeleportScript01>("drakuramas_teleport_script_01");
+    RegisterSpellScript<DrakuramasTeleportScript02>("drakuramas_teleport_script_02");
+    RegisterSpellScript<DrakuramasTeleportScript03>("drakuramas_teleport_script_03");
 }
