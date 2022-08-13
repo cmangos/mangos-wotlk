@@ -465,6 +465,38 @@ struct DrakuramasTeleportScript03 : public AuraScript
     }
 };
 
+// 54089 - Drop Disguise
+struct DropDisguise : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetTarget()->CastSpell(nullptr, 52010, TRIGGERED_OLD_TRIGGERED);
+            DoBroadcastText(28552, aura->GetTarget(), aura->GetTarget());
+        }
+    }
+};
+
+// 52010 - Scourge Disguise Expiring
+struct ScourgeDisguiseExpiring : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+        {
+            aura->GetTarget()->RemoveAurasDueToSpell(51966);
+            DoBroadcastText(29886, aura->GetTarget(), aura->GetTarget());
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -497,7 +529,9 @@ void AddSC_zuldrak()
     RegisterSpellScript<TargetCrystal>("spell_target_crystal");
     RegisterSpellScript<CharmDrakuruServant>("spell_charm_drakuru_servant");
     RegisterSpellScript<KillCreditDrakkariSkullcrusher>("spell_kill_credit_drakkari_skullcrusher");
-    RegisterSpellScript<DrakuramasTeleportScript01>("drakuramas_teleport_script_01");
-    RegisterSpellScript<DrakuramasTeleportScript02>("drakuramas_teleport_script_02");
-    RegisterSpellScript<DrakuramasTeleportScript03>("drakuramas_teleport_script_03");
+    RegisterSpellScript<DrakuramasTeleportScript01>("spell_drakuramas_teleport_script_01");
+    RegisterSpellScript<DrakuramasTeleportScript02>("spell_drakuramas_teleport_script_02");
+    RegisterSpellScript<DrakuramasTeleportScript03>("spell_drakuramas_teleport_script_03");
+    RegisterSpellScript<DropDisguise>("spell_drop_disguise");
+    RegisterSpellScript<ScourgeDisguiseExpiring>("spell_scourge_disguise_expiring");
 }
