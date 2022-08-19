@@ -30,6 +30,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/TemporarySpawn.h"
 #include "Entities/Vehicle.h"
+#include "AI/EventAI/CreatureEventAI.h"
 
 /*######
 ## npc_gurgthock
@@ -497,6 +498,58 @@ struct ScourgeDisguiseExpiring : public AuraScript
     }
 };
 
+// 41928 - Argent Stand Unit: Ride Gargoyle
+struct ArgentStandUnitRideGargoyle : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            if (Unit* caster = aura->GetCaster())
+            {
+                if (caster->HasAura(53031)) // Crusader Parachute
+                    caster->CastSpell(nullptr, 53039, TRIGGERED_OLD_TRIGGERED);
+                caster->GetMotionMaster()->MoveFall();
+            }
+        }
+    }
+};
+
+// 53031 - Crusader Parachute
+struct CrusaderParachute : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->m_targets.getUnitTargetGuid().GetEntry() != 28028 && spell->m_targets.getUnitTargetGuid().GetEntry() != 28029)
+            return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+        return SPELL_CAST_OK;
+    }
+};
+
+// 53039 - Deploy Parachute
+struct DeployParachute : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        // Crusader Parachute
+        spell->GetCaster()->RemoveAurasDueToSpell(53031);
+    }
+};
+
+struct ArgentStandUnit : public CreatureEventAI
+{
+    ArgentStandUnit(Creature* creature) : CreatureEventAI(creature) {}
+
+    void MovementInform(uint32 moveType, uint32 pointId) override
+    {
+        if (moveType == EFFECT_MOTION_TYPE && pointId == EVENT_FALL)
+        {
+            if (!m_creature->HasAura(53039))
+                m_creature->FallSuicide();
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -521,6 +574,11 @@ void AddSC_zuldrak()
     pNewScript->pAreaTrigger = &AreaTrigger_at_overlord_drakuru;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "npc_argent_stand_unit";
+    pNewScript->GetAI = &GetNewAIInstance<ArgentStandUnit>;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<GymersBuddy>("spell_gymers_buddy");
     RegisterSpellScript<GymersThrow>("spell_gymers_throw");
     RegisterSpellScript<SummonStefan>("spell_summon_stefan");
@@ -534,4 +592,7 @@ void AddSC_zuldrak()
     RegisterSpellScript<DrakuramasTeleportScript03>("spell_drakuramas_teleport_script_03");
     RegisterSpellScript<DropDisguise>("spell_drop_disguise");
     RegisterSpellScript<ScourgeDisguiseExpiring>("spell_scourge_disguise_expiring");
+    RegisterSpellScript<ArgentStandUnitRideGargoyle>("spell_argent_stand_unit_ride_gargoyle");
+    RegisterSpellScript<CrusaderParachute>("spell_crusader_parachute");
+    RegisterSpellScript<DeployParachute>("spell_deploy_parachute");
 }

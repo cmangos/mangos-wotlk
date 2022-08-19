@@ -1951,6 +1951,7 @@ INSERT INTO scripted_areatrigger VALUES
 (5096,'at_overlord_drakuru'),
 (5097,'at_overlord_drakuru'),
 (5098,'at_overlord_drakuru');
+UPDATE creature_template SET ScriptName='npc_argent_stand_unit' WHERE entry IN(28028,28029);
 
 
 /* ZUL'FARRAK */

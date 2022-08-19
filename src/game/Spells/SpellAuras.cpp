@@ -3249,12 +3249,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
-            case 53039:                                     // Deploy Parachute
-            {
-                // Crusader Parachute
-                target->RemoveAurasDueToSpell(53031);
-                return;
-            }
             case 53790:                                     // Defensive Stance
             {
                 // Defensive Aura
