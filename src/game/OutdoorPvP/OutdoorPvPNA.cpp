@@ -286,7 +286,7 @@ void OutdoorPvPNA::UpdateWyvernsWorldState(uint32 value)
 bool OutdoorPvPNA::HandleEvent(uint32 eventId, Object* source, Object* /*target*/)
 {
     if (!source->IsGameObject())
-        return true;
+        return false;
 
     GameObject* go = static_cast<GameObject*>(source);
     // If we are not using the Halaa banner return

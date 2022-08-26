@@ -167,7 +167,7 @@ void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player, Unit* victim)
 bool OutdoorPvPZM::HandleEvent(uint32 eventId, Object* source, Object* /*target*/)
 {
     if (!source->IsGameObject())
-        return true;
+        return false;
 
     GameObject* go = static_cast<GameObject*>(source);
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
