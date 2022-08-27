@@ -21,24 +21,24 @@ SDComment: Intro text usage is not very clear. Requires additional research.
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
-
 enum
 {
-    SAY_GREET                   = -1533000,
-    SAY_AGGRO1                  = -1533001,
-    SAY_AGGRO2                  = -1533002,
-    SAY_AGGRO3                  = -1533003,
-    SAY_TAUNT1                  = -1533004,
-    SAY_TAUNT2                  = -1533005,
-    SAY_TAUNT3                  = -1533006,
-    SAY_TAUNT4                  = -1533007,
-    SAY_SLAY                    = -1533008,
+    SAY_GREET                   = 13004,
+    SAY_AGGRO1                  = 13000,
+    SAY_AGGRO2                  = 13002,
+    SAY_AGGRO3                  = 13003,
+    SAY_TAUNT1                  = 13006,
+    SAY_TAUNT2                  = 13007,
+    SAY_TAUNT3                  = 13008,
+    SAY_TAUNT4                  = 13009,
+    SAY_SLAY                    = 13005,
 
-    EMOTE_CRYPT_GUARD           = -1533153,
-    EMOTE_INSECT_SWARM          = -1533154,
-    EMOTE_CORPSE_SCARABS        = -1533155,
+    EMOTE_CRYPT_GUARD           = 29887,
+    EMOTE_INSECT_SWARM          = 13443,
+    EMOTE_CORPSE_SCARABS        = 32796,
 
     SPELL_DOUBLE_ATTACK         = 18943,
     SPELL_IMPALE                = 28783,                    // May be wrong spell id. Causes more dmg than I expect
@@ -46,193 +46,110 @@ enum
     SPELL_LOCUSTSWARM           = 28785,                    // This is a self buff that triggers the dmg debuff
     SPELL_LOCUSTSWARM_H         = 54021,
 
-    // spellId invalid
-    // SPELL_SUMMONGUARD         = 29508,                   // Summons 1 crypt guard at targeted location - spell doesn't exist in 3.x.x
+    SPELL_SUMMON_GUARD          = 29508,                    // Summons 1 crypt guard at targeted location
 
-    SPELL_SELF_SPAWN_5          = 29105,                    // This spawns 5 corpse scarabs ontop of us (most likely the pPlayer casts this on death)
-    SPELL_SELF_SPAWN_10         = 28864,                    // This is used by the crypt guards when they die
+    SPELL_SUMMON_CORPSE_SCARABS_5   = 29105,                // This spawns 5 corpse scarabs ontop of us (most likely the pPlayer casts this on death)
+    SPELL_SUMMON_CORPSE_SCARABS_10  = 28864,                // This is used by the crypt guards when they die
 
-    NPC_CRYPT_GUARD             = 16573
+    NPC_CRYPT_GUARD             = 16573,
+
+    SPELLSET_10N                = 1595601,
+    SPELLSET_25N                = 2924901,
 };
 
-static const DialogueEntry aIntroDialogue[] =
+enum AnubRekhanActions
 {
-    {SAY_GREET,   NPC_ANUB_REKHAN,  7000},
-    {SAY_TAUNT1,  NPC_ANUB_REKHAN,  13000},
-    {SAY_TAUNT2,  NPC_ANUB_REKHAN,  11000},
-    {SAY_TAUNT3,  NPC_ANUB_REKHAN,  10000},
-    {SAY_TAUNT4,  NPC_ANUB_REKHAN,  0},
-    {0, 0, 0}
+    ANUBREKHAN_ACTIONS_MAX,
+    ANUBREKHAN_SUMMON,
 };
 
-static const float aCryptGuardLoc[4] = {3333.5f, -3475.9f, 287.1f, 3.17f};
-
-struct boss_anubrekhanAI : public ScriptedAI
+struct boss_anubrekhanAI : public BossAI
 {
-    boss_anubrekhanAI(Creature* pCreature) : ScriptedAI(pCreature),
-        m_introDialogue(aIntroDialogue)
+    boss_anubrekhanAI(Creature* creature) : BossAI(creature, ANUBREKHAN_ACTIONS_MAX),
+        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()), m_hasTaunted(false)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_introDialogue.InitializeDialogueHelper(m_pInstance);
-        m_bHasTaunted = false;
-        Reset();
-
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        SetDataType(TYPE_ANUB_REKHAN);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
+        AddOnKillText(SAY_SLAY);
+        AddCustomAction(ANUBREKHAN_SUMMON, true, [&]()
+        {
+            DoCastSpellIfCan(nullptr, SPELL_SUMMON_GUARD);
+        });
     }
 
-    instance_naxxramas* m_pInstance;
-    DialogueHelper m_introDialogue;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiImpaleTimer;
-    uint32 m_uiLocustSwarmTimer;
-    uint32 m_uiSummonTimer;
-    bool   m_bHasTaunted;
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
+    bool m_hasTaunted;
 
     void Reset() override
     {
-        m_uiImpaleTimer      = 15000;
-        m_uiLocustSwarmTimer = 90000;
-        m_uiSummonTimer      = m_bIsRegularMode ? 20000 : 0;// spawn a guardian only after 20 seconds in normal mode; in heroic there are already 2 Guards spawned
+        m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void Aggro(Unit *who) override
     {
-        // Force the player to spawn corpse scarabs via spell
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+        BossAI::Aggro(who);
+        if (m_isRegularMode)
+            ResetTimer(ANUBREKHAN_SUMMON, 20s);
+    }
 
-        if (urand(0, 4))
+    void KilledUnit(Unit* victim) override
+    {
+        BossAI::KilledUnit(victim);
+        if (!victim)
             return;
 
-        DoScriptText(SAY_SLAY, m_creature);
+        // Force the player to spawn corpse scarabs via spell
+        if (victim->IsPlayer())
+            victim->CastSpell(nullptr, SPELL_SUMMON_CORPSE_SCARABS_5, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        switch (urand(0, 2))
+        if (!m_hasTaunted && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 110.0f) && m_creature->IsWithinLOSInMap(who))
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            switch (urand(0,4))
+            {
+                case 0: DoBroadcastText(SAY_GREET, m_creature); break;
+                case 1: DoBroadcastText(SAY_TAUNT1, m_creature); break;
+                case 2: DoBroadcastText(SAY_TAUNT2, m_creature); break;
+                case 3: DoBroadcastText(SAY_TAUNT3, m_creature); break;
+                case 4: DoBroadcastText(SAY_TAUNT4, m_creature); break;
+            }
+            m_hasTaunted = true;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, IN_PROGRESS);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, DONE);
+        if (summoned->GetEntry() == NPC_CRYPT_GUARD)
+            DoBroadcastText(EMOTE_CRYPT_GUARD, summoned);
+
+        summoned->AI()->AttackClosestEnemy();
     }
 
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUB_REKHAN, FAIL);
-
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110.0f) && m_creature->IsWithinLOSInMap(pWho))
-        {
-            m_introDialogue.StartNextDialogueText(SAY_GREET);
-            m_bHasTaunted = true;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
-            DoScriptText(EMOTE_CRYPT_GUARD, pSummoned);
-
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
-    }
-
-    void SummonedCreatureDespawn(Creature* pSummoned) override
+    void SummonedCreatureDespawn(Creature* summoned) override
     {
         // If creature despawns on out of combat, skip this
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (!m_creature->IsInCombat())
             return;
 
-        if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
+        if (summoned && summoned->GetEntry() == NPC_CRYPT_GUARD)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-            DoScriptText(EMOTE_CORPSE_SCARABS, pSummoned);
+            summoned->CastSpell(summoned, SPELL_SUMMON_CORPSE_SCARABS_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+            DoBroadcastText(EMOTE_CORPSE_SCARABS, summoned);
         }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        m_introDialogue.DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Impale
-        if (m_uiImpaleTimer < uiDiff)
-        {
-            // Cast Impale on a random target
-            // Do NOT cast it when we are afflicted by locust swarm
-            if (!m_creature->HasAura(SPELL_LOCUSTSWARM) && !m_creature->HasAura(SPELL_LOCUSTSWARM_H))
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H);
-            }
-
-            m_uiImpaleTimer = 15000;
-        }
-        else
-            m_uiImpaleTimer -= uiDiff;
-
-        // Locust Swarm
-        if (m_uiLocustSwarmTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LOCUSTSWARM : SPELL_LOCUSTSWARM_H) == CAST_OK)
-            {
-                DoScriptText(EMOTE_INSECT_SWARM, m_creature);
-
-                // Summon a crypt guard
-                m_uiSummonTimer = 3000;
-                m_uiLocustSwarmTimer = 100000;
-            }
-        }
-        else
-            m_uiLocustSwarmTimer -= uiDiff;
-
-        // Summon
-        if (m_uiSummonTimer)
-        {
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                // Workaround for the not existing spell
-                m_creature->SummonCreature(NPC_CRYPT_GUARD, aCryptGuardLoc[0], aCryptGuardLoc[1], aCryptGuardLoc[2], aCryptGuardLoc[3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
-                m_uiSummonTimer = 0;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_anubrekhan(Creature* pCreature)
-{
-    return new boss_anubrekhanAI(pCreature);
-}
 
 void AddSC_boss_anubrekhan()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubrekhan";
-    pNewScript->GetAI = &GetAI_boss_anubrekhan;
+    pNewScript->GetAI = &GetNewAIInstance<boss_anubrekhanAI>;
     pNewScript->RegisterSelf();
 }
