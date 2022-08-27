@@ -958,7 +958,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54051,'spell_shadow_bite'),
 (54052,'spell_shadow_bite'),
 (54053,'spell_shadow_bite'),
-(63108,'spell_siphon_life_wotlk');
+(63108,'spell_siphon_life_wotlk'),
+(48018,'spell_demonic_circle_summon'),
+(48020,'spell_demonic_circle_teleport');
 
 -- Pet Scaling
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
