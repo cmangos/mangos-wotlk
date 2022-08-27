@@ -27,12 +27,8 @@ Fallout slime 28218
 Mutating Injection 28169
 Enrages 26527*/
 
-#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "Common.h"
-#include "Entities/Unit.h"
-#include "Spells/SpellDefines.h"
 #include "naxxramas.h"
 
 enum
