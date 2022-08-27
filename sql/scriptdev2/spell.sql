@@ -566,6 +566,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (29283,'spell_web_wrap_message'),
 (29285,'spell_web_wrap_message'),
 (29287,'spell_web_wrap_message'),
+(29351,'spell_plague_wave_controller'),
+(30114,'spell_plague_wave_controller'),
 (36435,'spell_forget_36435'),
 (36436,'spell_forget_36436'),
 (36438,'spell_forget_36438'),
