@@ -100,6 +100,9 @@ enum
     NPC_MR_BIGGLESWORTH         = 16998,
     NPC_LIVING_POISON           = 16027,
 
+    NPC_OBEDIENCE_CRYSTAL       = 29912,
+    NPC_DEATHKNIGHT_UNDERSTUDY  = 16803,
+
     NPC_OLDWORLD_TRIGGER        = 15384,
 
     // Gothik
