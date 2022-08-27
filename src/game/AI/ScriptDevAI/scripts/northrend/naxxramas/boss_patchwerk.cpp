@@ -22,181 +22,81 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
+#include "Spells/SpellTargetDefines.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_AGGRO1            = -1533017,
-    SAY_AGGRO2            = -1533018,
-    SAY_SLAY              = -1533019,
-    SAY_DEATH             = -1533020,
+    SAY_AGGRO1            = 13068,
+    SAY_AGGRO2            = 13069,
+    SAY_DEATH             = 13070,
+    SAY_SLAY              = 13071,
 
-    EMOTE_GENERIC_BERSERK   = -1000004,
-    EMOTE_GENERIC_ENRAGED   = -1000003,
+    EMOTE_BERSERK         = 11694,
+    EMOTE_ENRAGE          = 7798,
 
-    SPELL_HATEFULSTRIKE   = 28308,
-    SPELL_HATEFULSTRIKE_H = 59192,
-    SPELL_ENRAGE          = 28131,
-    SPELL_BERSERK         = 26662,
-    SPELL_SLIMEBOLT       = 32309
+    SPELL_HATEFULSTRIKE_PRIMER  = 28307,
+    SPELL_HATEFULSTRIKE         = 28308,
+    SPELL_HATEFULSTRIKE_H       = 59192,
+    SPELL_ENRAGE                = 28131,
+    SPELL_BERSERK               = 26662,
+    SPELL_SLIMEBOLT             = 32309,
+
+    SPELLSET_NORMAL             = 1602801,
+    SPELLSET_BERSERK            = 1602802,
 };
 
-struct boss_patchwerkAI : public ScriptedAI
+enum PatchwerkActions
 {
-    boss_patchwerkAI(Creature* pCreature) : ScriptedAI(pCreature)
+    PATCHWERK_ENRAGE_LOW,
+    PATCHWERK_BERSERK,
+    PATCHWERK_ACTION_MAX,
+};
+
+struct boss_patchwerkAI : public BossAI
+{
+    boss_patchwerkAI(Creature* creature) : BossAI(creature, PATCHWERK_ACTION_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        SetDataType(TYPE_PATCHWERK);
+        AddOnKillText(SAY_SLAY);
+        AddOnDeathText(SAY_DEATH);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2);
+        AddTimerlessCombatAction(PATCHWERK_ENRAGE_LOW, true);
+        AddCombatAction(PATCHWERK_BERSERK, 6min);
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiHatefulStrikeTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiSlimeboltTimer;
-    bool   m_bEnraged;
-    bool   m_bBerserk;
+    ScriptedInstance* m_instance;
 
     void Reset() override
     {
-        m_uiHatefulStrikeTimer = 1000;                      // 1 second
-        m_uiBerserkTimer = MINUTE * 6 * IN_MILLISECONDS;    // 6 minutes
-        m_uiSlimeboltTimer = 10000;
-        m_bEnraged = false;
-        m_bBerserk = false;
+        CombatAI::Reset();
+        m_creature->SetSpellList(SPELLSET_NORMAL);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void ExecuteAction(uint32 action) override
     {
-        if (urand(0, 4))
-            return;
-
-        DoScriptText(SAY_SLAY, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PATCHWERK, DONE);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PATCHWERK, IN_PROGRESS);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PATCHWERK, FAIL);
-    }
-
-    void DoHatefulStrike()
-    {
-        // The ability is used on highest HP target choosen of the top 2 (3 heroic) targets on threat list being in melee range
-        Unit* pTarget = nullptr;
-        uint32 uiHighestHP = 0;
-        uint32 uiTargets = m_bIsRegularMode ? 1 : 2;
-
-        ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-        if (tList.size() > 1)                               // Check if more than two targets, and start loop with second-most aggro
+        switch (action)
         {
-            ThreatList::const_iterator iter = tList.begin();
-            std::advance(iter, 1);
-            for (; iter != tList.end(); ++iter)
-            {
-                if (!uiTargets)
-                    break;
-
-                if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
+            case PATCHWERK_ENRAGE_LOW:
+                if (m_creature->GetHealthPercent() <= 5.f)
                 {
-                    if (m_creature->CanReachWithMeleeAttack(pTempTarget))
+                    if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
                     {
-                        if (pTempTarget->GetHealth() > uiHighestHP)
-                        {
-                            uiHighestHP = pTempTarget->GetHealth();
-                            pTarget = pTempTarget;
-                        }
-                        --uiTargets;
+                        DoBroadcastText(EMOTE_ENRAGE, m_creature);
+                        DisableCombatAction(action);
                     }
                 }
-            }
+                break;
+            case PATCHWERK_BERSERK:
+                DoBroadcastText(EMOTE_BERSERK, m_creature);
+                m_creature->CastSpell(nullptr, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
+                m_creature->SetSpellList(SPELLSET_BERSERK);
+                break;
         }
-
-        if (!pTarget)
-            pTarget = m_creature->GetVictim();
-
-        DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_HATEFULSTRIKE : SPELL_HATEFULSTRIKE_H);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Hateful Strike
-        if (m_uiHatefulStrikeTimer < uiDiff)
-        {
-            DoHatefulStrike();
-            m_uiHatefulStrikeTimer = 1000;
-        }
-        else
-            m_uiHatefulStrikeTimer -= uiDiff;
-
-        // Soft Enrage at 5%
-        if (!m_bEnraged)
-        {
-            if (m_creature->GetHealthPercent() < 5.0f)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
-                    m_bEnraged = true;
-                }
-            }
-        }
-
-        // Berserk after 6 minutes
-        if (!m_bBerserk)
-        {
-            if (m_uiBerserkTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_GENERIC_BERSERK, m_creature);
-                    m_bBerserk = true;
-                }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-        else
-        {
-            // Slimebolt - casted only while Berserking to prevent kiting
-            if (m_uiSlimeboltTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SLIMEBOLT);
-                m_uiSlimeboltTimer = 5000;
-            }
-            else
-                m_uiSlimeboltTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_patchwerk(Creature* pCreature)
-{
-    return new boss_patchwerkAI(pCreature);
-}
 
 struct HatefulStrikePrimer : public SpellScript
 {
@@ -212,7 +112,7 @@ struct HatefulStrikePrimer : public SpellScript
 
         auto const& threatList = spell->GetCaster()->getThreatManager().getThreatList();
         uint32 i = 0;
-        for (auto itr = threatList.begin(); itr != threatList.end() && i < spell->GetCaster()->GetMap()->IsRegularDifficulty() ? 3 : 4; ++itr, ++i)
+        for (auto itr = threatList.begin(); itr != threatList.end() && i < spell->GetCaster()->GetMap()->IsRegularDifficulty() ? 2 : 3; ++itr, ++i)
             if ((*itr)->getTarget() == target)
                 return true;
         return false;
@@ -236,7 +136,7 @@ void AddSC_boss_patchwerk()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_patchwerk";
-    pNewScript->GetAI = &GetAI_boss_patchwerk;
+    pNewScript->GetAI = &GetNewAIInstance<boss_patchwerkAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<HatefulStrikePrimer>("spell_patchwerk_hatefulstrike");
