@@ -21,169 +21,138 @@ SDComment:
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum
 {
-    EMOTE_AURA_BLOCKING     = -1533143,
-    EMOTE_AURA_WANE         = -1533144,
-    EMOTE_AURA_FADING       = -1533145,
+    EMOTE_AURA_BLOCKING     = 32334,
+    EMOTE_AURA_WANE         = 32805,
+    EMOTE_AURA_FADING       = 32335,
 
     SPELL_DEATHBLOOM        = 29865,
     SPELL_DEATHBLOOM_H      = 55053,
     SPELL_INEVITABLE_DOOM   = 29204,
     SPELL_INEVITABLE_DOOM_H = 55052,
     SPELL_NECROTIC_AURA     = 55593,
+    SPELL_NECROTIC_PRE_WARN = 60929,
+    SPELL_NECROTIC_WARN     = 59481,
     SPELL_SUMMON_SPORE      = 29234,
     SPELL_BERSERK           = 26662,
 
-    NPC_SPORE               = 16286
+    NPC_SPORE               = 16286,
+    NPC_LOATHEB             = 16011,
+
+    SPELLSET_10N            = 1601101,
+    SPELLSET_10N_P2         = 1601102,
+    SPELLSET_25N            = 2971801,
+    SPELLSET_25N_P2         = 2971802,
 };
 
-struct boss_loathebAI : public ScriptedAI
+enum LoathebActions
 {
-    boss_loathebAI(Creature* pCreature) : ScriptedAI(pCreature)
+    LOATHEB_BERSERK,
+    LOATHEB_SOFT_ENRAGE,
+    LOATHEB_ACTIONS_MAX,
+};
+
+struct boss_loathebAI : public BossAI
+{
+    boss_loathebAI(Creature* creature) : BossAI(creature, LOATHEB_ACTIONS_MAX),
+        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetDataType(TYPE_LOATHEB);
+        AddCombatAction(LOATHEB_SOFT_ENRAGE, 5min);
+        if (!m_isRegularMode)
+            AddCombatAction(LOATHEB_BERSERK, 12min);
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiDeathbloomTimer;
-    uint32 m_uiNecroticAuraTimer;
-    uint32 m_uiInevitableDoomTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiBerserkTimer;
-    uint8  m_uiNecroticAuraCount;                           // Used for emotes, 5min check
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
 
     void Reset() override
     {
-        m_uiDeathbloomTimer = 5000;
-        m_uiNecroticAuraTimer = 12000;
-        m_uiInevitableDoomTimer = MINUTE * 2 * IN_MILLISECONDS;
-        m_uiSummonTimer = urand(10000, 15000);              // first seen in vid after approx 12s
-        m_uiBerserkTimer = MINUTE * 12 * IN_MILLISECONDS;   // only in heroic, after 12min
-        m_uiNecroticAuraCount = 0;
+        m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LOATHEB, NOT_STARTED);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() != NPC_SPORE)
+        if (summoned->GetEntry() != NPC_SPORE)
             return;
 
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AddThreat(pTarget);
+        summoned->AI()->AttackStart(m_creature);
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_SPORE && m_pInstance)
-            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
+        if (summoned->GetEntry() == NPC_SPORE && m_instance)
+            m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Berserk (only heroic)
-        if (!m_bIsRegularMode)
+        switch (action)
         {
-            if (m_uiBerserkTimer < uiDiff)
+            case LOATHEB_BERSERK:
             {
                 DoCastSpellIfCan(m_creature, SPELL_BERSERK);
-                m_uiBerserkTimer = 300000;
+                break;
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        // Inevitable Doom
-        if (m_uiInevitableDoomTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_INEVITABLE_DOOM : SPELL_INEVITABLE_DOOM_H);
-            m_uiInevitableDoomTimer = (m_uiNecroticAuraCount <= 40) ? 30000 : 15000;
-        }
-        else
-            m_uiInevitableDoomTimer -= uiDiff;
-
-        // Necrotic Aura
-        if (m_uiNecroticAuraTimer < uiDiff)
-        {
-            switch (m_uiNecroticAuraCount % 3)
+            case LOATHEB_SOFT_ENRAGE:
             {
-                case 0:
-                    DoCastSpellIfCan(m_creature, SPELL_NECROTIC_AURA);
-                    DoScriptText(EMOTE_AURA_BLOCKING, m_creature);
-                    m_uiNecroticAuraTimer = 14000;
-                    break;
-                case 1:
-                    DoScriptText(EMOTE_AURA_WANE, m_creature);
-                    m_uiNecroticAuraTimer = 3000;
-                    break;
-                case 2:
-                    DoScriptText(EMOTE_AURA_FADING, m_creature);
-                    m_uiNecroticAuraTimer = 3000;
-                    break;
+                m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N_P2 : SPELLSET_25N_P2);
+                DisableCombatAction(action);
+                return;
             }
-            ++m_uiNecroticAuraCount;
         }
-        else
-            m_uiNecroticAuraTimer -= uiDiff;
-
-        // Summon
-        if (m_uiSummonTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPORE);
-            m_uiSummonTimer = m_bIsRegularMode ? 36000 : 18000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
-
-        // Deathbloom
-        if (m_uiDeathbloomTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DEATHBLOOM : SPELL_DEATHBLOOM_H);
-            m_uiDeathbloomTimer = 30000;
-        }
-        else
-            m_uiDeathbloomTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, 5min);
     }
 };
 
-UnitAI* GetAI_boss_loatheb(Creature* pCreature)
+struct NecroticAura : public SpellScript
 {
-    return new boss_loathebAI(pCreature);
-}
+    void OnCast(Spell* spell) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+            if (caster->GetEntry() == NPC_LOATHEB)
+            {
+                caster->CastSpell(nullptr, SPELL_NECROTIC_PRE_WARN, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+                caster->CastSpell(nullptr, SPELL_NECROTIC_WARN, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+            }
+    }
+};
+
+struct AuraPreWarning : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            if (Unit* target = aura->GetTarget())
+                DoBroadcastText(EMOTE_AURA_WANE, target);
+    }
+};
+
+struct AuraWarning : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            if (Unit* target = aura->GetTarget())
+                DoBroadcastText(EMOTE_AURA_FADING, target);
+    }
+};
 
 void AddSC_boss_loatheb()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_loatheb";
-    pNewScript->GetAI = &GetAI_boss_loatheb;
+    pNewScript->GetAI = &GetNewAIInstance<boss_loathebAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<NecroticAura>("spell_loatheb_necrotic_aura");
+    RegisterSpellScript<AuraPreWarning>("spell_loatheb_prewarn");
+    RegisterSpellScript<AuraWarning>("spell_loatheb_warn");
 }
