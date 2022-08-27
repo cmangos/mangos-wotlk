@@ -363,25 +363,28 @@ struct DemonicCircleTeleport : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        Unit* caster = spell->GetCaster();
-        if (!caster)
+        Unit* warlock = spell->GetCaster();
+        if (!warlock)
             return;      
-        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        GameObject* circle = warlock->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
             return;
         Position circlePos = circle->GetPosition();
-        caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
+        warlock->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
     }
 
     SpellCastResult OnCheckCast(Spell* spell, bool) const override
     {
-        Unit* caster = spell->GetCaster();
-        if (!caster)
+        Unit* warlock = spell->GetCaster();
+        if (!warlock)
             return SPELL_FAILED_ERROR;
-        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        GameObject* circle = warlock->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
-            return SPELL_FAILED_NO_VALID_TARGETS;
-        if (caster->GetDistance(circle) > 40)
+        {
+            spell->SetParam1(SPELL_FAILED_CUSTOM_ERROR_75);
+            return SPELL_FAILED_CUSTOM_ERROR;
+        }
+        if (warlock->GetDistance(circle) > 40)
             return SPELL_FAILED_OUT_OF_RANGE;
         return SPELL_CAST_OK;
     }
@@ -393,10 +396,10 @@ struct DemonicCircleSummon : public AuraScript
     {
         if (apply)
             return;
-        Unit* caster = aura->GetCaster();
-        if (!caster)
+        Unit* warlock = aura->GetTarget();
+        if (!warlock)
             return;
-        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        GameObject* circle = warlock->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
             return;
         circle->ForcedDespawn();
@@ -404,19 +407,19 @@ struct DemonicCircleSummon : public AuraScript
 
     void OnPeriodicDummy(Aura* aura) const override
     {
-        Unit* caster = aura->GetCaster();
-        if (!caster)
+        Unit* warlock = aura->GetTarget();
+        if (!warlock)
             return;      
-        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        GameObject* circle = warlock->GetGameObject(DEMONIC_CIRCLE_SUMMON);
         if (!circle)
             return;
-        if (caster->GetDistance(circle) <= 40)
+        if (warlock->GetDistance(circle) <= 40)
         {
-            if (!caster->HasAura(DEMONIC_CIRCLE_IN_RANGE_AURA))
-                caster->CastSpell(caster, DEMONIC_CIRCLE_IN_RANGE_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
+            if (!warlock->HasAura(DEMONIC_CIRCLE_IN_RANGE_AURA))
+                warlock->CastSpell(warlock, DEMONIC_CIRCLE_IN_RANGE_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
         }
         else
-            caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_IN_RANGE_AURA);
+            warlock->RemoveAurasDueToSpell(DEMONIC_CIRCLE_IN_RANGE_AURA);
     }
 };
 

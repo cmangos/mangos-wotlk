@@ -833,6 +833,10 @@ class Spell
         WorldObject* GetTrueCaster() const { return m_trueCaster; }
         Unit* GetAffectiveCasterOrOwner() const;
 
+        //Custom Spell Cast Results
+        void SetParam1(uint32 param1) { m_param1 = param1; }
+        void SetParam2(uint32 param2) { m_param2 = param2; }
+
         // overrides
         void SetOverridenSpeed(float newSpeed);
         void SetIgnoreRoot(bool state) { m_ignoreRoot = state; }
