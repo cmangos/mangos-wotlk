@@ -54,6 +54,7 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiHorseMenKilled(0),
     m_uiLivingPoisonTimer(5000),
     m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS),
+    m_despawnKTTriggerTimer(0),
     m_dialogueHelper(aNaxxDialogue)
 {
     Initialize();
@@ -99,11 +100,38 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SAPPHIRON:
         case NPC_KELTHUZAD:
         case NPC_THE_LICHKING:
+        case NPC_GLUTH:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_ROTTING_MAGGOT:
+        case NPC_DISEASED_MAGGOT:
+        case NPC_EYE_STALK:
+            m_sHeiganBackroomAdds.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_GROBBULUS_CLOUD:
+            m_lGrobbulusClouds.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_CORPSE_SCARAB:
+            m_lCorpseScarabs.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_OLDWORLD_TRIGGER:
+        {
+            if (pCreature->GetPositionX() > 3250 && pCreature->GetPositionX() < 3322 && pCreature->GetPositionY() > -3190 && pCreature->GetPositionY() < -3115)
+                m_gluthTriggerVector.push_back(pCreature->GetObjectGuid());
+            break;
+        }
+        case NPC_ZOMBIE_CHOW_N:
+        case NPC_ZOMBIE_CHOW_H:
+        {
+            if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
+            {
+                if (!gluth->IsAlive())
+                    break;
+                pCreature->getThreatManager().addThreat(gluth, 2000.f);
+                pCreature->GetMotionMaster()->MoveChase(gluth);
+            }
+            break;
+        }
     }
 }
 
@@ -195,6 +223,10 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
             break;
         case GO_KELTHUZAD_EXIT_DOOR:
             break;
+        case GO_KELTHUZAD_TRIGGER:
+            if (m_auiEncounter[TYPE_KELTHUZAD] != NOT_STARTED) // Only spawn the visual trigger for Kel'Thuzad when encounter is not started
+                pGo->SetLootState(GO_JUST_DEACTIVATED);
+            break;
 
         // Eyes
         case GO_ARAC_EYE_RAMP:
@@ -270,6 +302,19 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
 {
     if (pCreature->GetEntry() == NPC_MR_BIGGLESWORTH && m_auiEncounter[TYPE_KELTHUZAD] != DONE)
         DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+
+    switch (pCreature->GetEntry())
+    {
+        case NPC_EYE_STALK:
+        case NPC_DISEASED_MAGGOT:
+        case NPC_ROTTING_MAGGOT:
+            m_sHeiganBackroomAdds.remove(pCreature->GetObjectGuid()); break;
+        case NPC_GROBBULUS_CLOUD:
+            m_lGrobbulusClouds.remove(pCreature->GetObjectGuid()); break;
+        case NPC_CORPSE_SCARAB:
+            m_lCorpseScarabs.remove(pCreature->GetObjectGuid()); break;
+        default: break;
+    }
 }
 
 bool instance_naxxramas::IsEncounterInProgress() const
@@ -291,6 +336,11 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
         case TYPE_ANUB_REKHAN:
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_ARAC_ANUB_DOOR);
+            if (!m_lCorpseScarabs.empty())
+                for (auto& creatureGuid : m_lCorpseScarabs)
+                    if (Creature* add = instance->GetCreature(creatureGuid))
+                        add->ForcedDespawn();
+            m_lCorpseScarabs.clear();
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_ARAC_ANUB_GATE);
@@ -349,6 +399,11 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoRespawnGameObject(GO_PLAG_PORTAL, 30 * MINUTE);
                 DoToggleGameObjectFlags(GO_PLAG_PORTAL, GO_FLAG_NO_INTERACT, false);
                 m_uiTauntTimer = 5000;
+                if (!m_sHeiganBackroomAdds.empty())
+                    for (auto& creatureGuid : m_sHeiganBackroomAdds)
+                        if (Creature* add = instance->GetCreature(creatureGuid))
+                            add->ForcedDespawn();
+                m_sHeiganBackroomAdds.clear();
             }
             break;
         case TYPE_RAZUVIOUS:
@@ -422,6 +477,13 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_GROBBULUS:
             m_auiEncounter[uiType] = uiData;
+            for (const auto& cloud : m_lGrobbulusClouds)
+            {
+                if (Creature* cloud_creature = instance->GetCreature(cloud))
+                {
+                    cloud_creature->ForcedDespawn();
+                }
+            }
             break;
         case TYPE_GLUTH:
             m_auiEncounter[uiType] = uiData;
@@ -439,9 +501,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             if (uiData != SPECIAL)
                 DoUseDoorOrButton(GO_CONS_THAD_DOOR, uiData);
-            // Uncomment when this achievement is implemented
-            // if (uiData == IN_PROGRESS)
-            //    SetSpecialAchievementCriteria(TYPE_ACHIEV_SHOCKING, true);
+            if (uiData == IN_PROGRESS)
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_SHOCKING, true);
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_CONS_EYE_RAMP);
@@ -453,9 +514,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_SAPPHIRON:
             m_auiEncounter[uiType] = uiData;
-            // Uncomment when achiev check implemented
-            // if (uiData == IN_PROGRESS)
-            //    SetSpecialAchievementCriteria(TYPE_ACHIEV_HUNDRED_CLUB, true);
+            if (uiData == IN_PROGRESS)
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_HUNDRED_CLUB, true);
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_KELTHUZAD_WATERFALL_DOOR);
@@ -469,7 +529,15 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_KELTHUZAD_EXIT_DOOR);
             if (uiData == IN_PROGRESS)
+            {
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_GET_ENOUGH, false);
+                DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
+                m_despawnKTTriggerTimer = 5 * IN_MILLISECONDS;
+            } else if (uiData == FAIL)
+            {
+                if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+                    trigger->Respawn();
+            }
             break;
         case TYPE_UNDYING_FAILED:
             m_auiEncounter[uiType] = uiData;
@@ -606,6 +674,22 @@ void instance_naxxramas::Update(uint32 uiDiff)
             m_uiLivingPoisonTimer -= uiDiff;
     }
 
+    if (m_despawnKTTriggerTimer)
+    {
+        if (m_despawnKTTriggerTimer < uiDiff)
+        {
+            if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+            {
+                trigger->ResetDoorOrButton();
+                trigger->SetLootState(GO_JUST_DEACTIVATED);
+                trigger->SetForcedDespawn();
+            }
+            m_despawnKTTriggerTimer = 0;
+        }
+        else
+            m_despawnKTTriggerTimer -= uiDiff;
+    }
+
     if (m_uiScreamsTimer && m_auiEncounter[TYPE_THADDIUS] != DONE)
     {
         if (m_uiScreamsTimer <= uiDiff)
@@ -651,6 +735,11 @@ void instance_naxxramas::Update(uint32 uiDiff)
     }
 
     m_dialogueHelper.DialogueUpdate(uiDiff);
+}
+
+const GuidVector instance_naxxramas::GetGluthTriggers()
+{
+    return m_gluthTriggerVector;
 }
 
 void instance_naxxramas::SetGothTriggers()
@@ -775,6 +864,150 @@ InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
     return new instance_naxxramas(pMap);
 }
 
+struct Location3DPoint
+{
+    float x, y, z;
+};
+
+static const Location3DPoint gargoyleResetCoords = {2963.f, -3476.f, 297.6f};
+
+enum
+{
+    SAY_GARGOYLE_NOISE      = -1533160, // %s emits a strange noise.
+
+    SPELL_STONEFORM         = 29154,
+    SPELL_STEALTH_DETECTION = 18950,
+    SPELL_STONESKIN         = 28995,
+    SPELL_ACID_VOLLEY       = 29325,
+    SPELL_ACID_VOLLEY_25    = 54714,
+};
+
+struct npc_stoneskin_gargoyleAI : public ScriptedAI
+{
+    npc_stoneskin_gargoyleAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return x > gargoyleResetCoords.x && y > gargoyleResetCoords.y && z > gargoyleResetCoords.z;
+        });
+        Reset();
+    }
+
+    uint32 acidVolleyTimer;
+    bool canCastVolley;
+
+    void Reset() override
+    {
+        acidVolleyTimer = 4000;
+        canCastVolley = false;
+        TryStoneForm();
+
+        DoCastSpellIfCan(m_creature, SPELL_STEALTH_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void TryStoneForm()
+    {
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
+            {
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                m_creature->SetImmuneToPlayer(true);
+            }
+        }
+    }
+
+    void JustReachedHome() override
+    {
+        TryStoneForm();
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
+        {
+            if (pWho->GetTypeId() == TYPEID_PLAYER
+                && !m_creature->IsInCombat()
+                && m_creature->IsWithinDistInMap(pWho, 17.0f)
+                && !pWho->HasAuraType(SPELL_AURA_FEIGN_DEATH)
+                && m_creature->IsWithinLOSInMap(pWho))
+            {
+                AttackStart(pWho);
+            }
+        }
+        else
+            ScriptedAI::MoveInLineOfSight(pWho);
+    }
+
+    void Aggro(Unit*) override
+    {
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_SPAWNING))
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+            m_creature->SetImmuneToPlayer(false);
+        }
+
+        // All Stoneskin Gargoyles cast Acid Volley but the first one encountered
+        float respawnX, respawnY, respawnZ;
+        m_creature->GetRespawnCoord(respawnX, respawnY, respawnZ);
+        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE || respawnZ < gargoyleResetCoords.z)
+            canCastVolley = true;
+    }
+
+    void UpdateAI(uint32 const diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        // Stoneskin at 30% HP
+        if (m_creature->GetHealthPercent() < 30.0f && !m_creature->HasAura(SPELL_STONESKIN))
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_STONESKIN) == CAST_OK)
+                DoScriptText(SAY_GARGOYLE_NOISE, m_creature);
+        }
+
+        // Acid Volley
+        if (canCastVolley)
+        {
+            if (acidVolleyTimer < diff)
+            {
+                if (DoCastSpellIfCan(m_creature, m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? SPELL_ACID_VOLLEY : SPELL_ACID_VOLLEY_25) == CAST_OK)
+                    acidVolleyTimer = 8000;
+            }
+            else
+                acidVolleyTimer -= diff;
+        }
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+/*###################
+#   npc_living_poison
+###################*/
+
+struct npc_living_poisonAI : public ScriptedAI
+{
+    npc_living_poisonAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+    void Reset() override
+    {
+        SetMeleeEnabled(false);
+    }
+
+    // Any time a player comes close to the Living Poison, it will explode and kill itself while doing heavy AoE damage to the player
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (!who->IsPlayer() || m_creature->GetDistance2d(who->GetPositionX(), who->GetPositionY(), DIST_CALC_BOUNDING_RADIUS) > 4.0f)
+            return;
+
+        DoCastSpellIfCan(m_creature, SPELL_EXPLODE, CAST_TRIGGERED);
+    }
+
+    void AttackStart(Unit* /*who*/) override {}
+};
+
+
 bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_KELTHUZAD)
@@ -825,6 +1058,16 @@ void AddSC_instance_naxxramas()
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_naxxramas";
     pNewScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_stoneskin_gargoyle";
+    pNewScript->GetAI = &GetNewAIInstance<npc_stoneskin_gargoyleAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_living_poison";
+    pNewScript->GetAI = &GetNewAIInstance<npc_living_poisonAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

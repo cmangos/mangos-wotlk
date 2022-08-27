@@ -5,6 +5,7 @@
 #ifndef DEF_NAXXRAMAS_H
 #define DEF_NAXXRAMAS_H
 
+#include "AI/ScriptDevAI/include/sc_instance.h"
 enum
 {
     MAX_ENCOUNTER               = 16,
@@ -77,7 +78,21 @@ enum
 
     NPC_ANUB_REKHAN             = 15956,
     NPC_FAERLINA                = 15953,
+    NPC_FAERLINA_WORSHIPPER     = 16506,
+    NPC_FAERLINA_WORSHIPPER_H   = 19274,
+    NPC_FAERLINA_FOLLOWER       = 16505,
+    NPC_FAERLINA_FOLLOWER_H     = 29273,
+    NPC_CORPSE_SCARAB           = 16698,
+    NPC_CORPSE_SCARAB_H         = 29267,
+    NPC_CRYPT_GUARD_N           = 16573,
+    NPC_CRYPT_GUARD_H           = 29256,
 
+    NPC_GROBBULUS_CLOUD         = 16363,
+    NPC_FALLOUT_SLIME_N         = 16290,
+    NPC_FALLOUT_SLIME_H         = 29388,
+    NPC_ZOMBIE_CHOW_N           = 16360,
+    NPC_ZOMBIE_CHOW_H           = 30303,
+    NPC_GLUTH                   = 15932,
     NPC_THADDIUS                = 15928,
     NPC_STALAGG                 = 15929,
     NPC_FEUGEN                  = 15930,
@@ -94,6 +109,10 @@ enum
     NPC_MR_BIGGLESWORTH         = 16998,
     NPC_LIVING_POISON           = 16027,
 
+    NPC_OBEDIENCE_CRYSTAL       = 29912,
+    NPC_DEATHKNIGHT_UNDERSTUDY  = 16803,
+    NPC_DEATHKNIGHT_UNDERSTUDY_H= 29941,
+
     // Gothik
     NPC_GOTHIK                  = 16060,
     NPC_SUB_BOSS_TRIGGER        = 16137,                    // summon locations
@@ -105,11 +124,22 @@ enum
     NPC_SPECT_RIDER             = 16150,
     NPC_SPECT_HORSE             = 16149,
 
+    // Heigan
+    NPC_DISEASED_MAGGOT         = 16056,
+    NPC_ROTTING_MAGGOT          = 16057,
+    NPC_EYE_STALK               = 16236,
+
     // Kel'Thuzad
     NPC_SOLDIER_FROZEN          = 16427,
+    NPC_SOLDIER_FROZEN_H        = 30015,
     NPC_UNSTOPPABLE_ABOM        = 16428,
+    NPC_UNSTOPPABLE_ABOM_H      = 30048,
     NPC_SOUL_WEAVER             = 16429,
+    NPC_SOUL_WEAVER_H           = 30018,
     NPC_GUARDIAN                = 16441,
+    NPC_GUARDIAN_H              = 30057,
+
+    NPC_OLDWORLD_TRIGGER        = 15384,
 
     // Arachnid Quarter
     GO_ARAC_ANUB_DOOR           = 181126,                   // encounter door
@@ -147,6 +177,9 @@ enum
     // Frostwyrm Lair
     GO_KELTHUZAD_WATERFALL_DOOR = 181225,                   // exit, open after sapphiron is dead
     GO_KELTHUZAD_EXIT_DOOR      = 181228,
+    GO_KELTHUZAD_TRIGGER        = 181444,
+
+    GO_ICEBLOCK                 = 181247,
 
     // Eyes
     GO_ARAC_EYE_RAMP            = 181212,
@@ -201,6 +234,8 @@ enum
     // Timed achievement criterias
     ACHIEV_START_PATCHWERK_ID   = 10286,
     ACHIEV_START_MAEXXNA_ID     = 9891,
+
+    SPELL_EXPLODE               = 28433,                    // Used by Living Poison blobs when players come in range
 };
 
 struct GothTrigger
@@ -264,6 +299,9 @@ class instance_naxxramas : public ScriptedInstance
         void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
 
+        // Gluth
+        const GuidVector GetGluthTriggers();
+
         // thaddius
         void GetThadTeslaCreatures(GuidList& lList) const { lList = m_lThadTeslaCoilList; };
 
@@ -280,9 +318,13 @@ class instance_naxxramas : public ScriptedInstance
 
         GuidList m_lThadTeslaCoilList;
         GuidList m_lGothTriggerList;
+        GuidVector m_gluthTriggerVector;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
+        GuidList m_sHeiganBackroomAdds;
+        GuidList m_lGrobbulusClouds;
+        GuidList m_lCorpseScarabs;
 
         float m_fChamberCenterX;
         float m_fChamberCenterY;
@@ -294,6 +336,7 @@ class instance_naxxramas : public ScriptedInstance
         uint8 m_uiHorseMenKilled;
         uint32 m_uiLivingPoisonTimer;
         uint32 m_uiScreamsTimer;
+        uint32 m_despawnKTTriggerTimer;
 
         DialogueHelper m_dialogueHelper;
 };
