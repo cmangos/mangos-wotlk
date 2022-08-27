@@ -352,6 +352,74 @@ struct ShadowBite : public SpellScript
     }
 };
 
+enum
+{
+    DEMONIC_CIRCLE_SUMMON        = 48018,
+    DEMONIC_CIRCLE_CLEAR         = 60854,
+    DEMONIC_CIRCLE_IN_RANGE_AURA = 62388,
+};
+
+struct DemonicCircleTeleport : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;      
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        if (!circle)
+            return;
+        Position circlePos = circle->GetPosition();
+        caster->NearTeleportTo(circlePos.GetPositionX(), circlePos.GetPositionY(), circlePos.GetPositionZ(), circlePos.GetPositionO());
+    }
+
+    SpellCastResult OnCheckCast(Spell* spell, bool) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return SPELL_FAILED_ERROR;
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        if (!circle)
+            return SPELL_FAILED_NO_VALID_TARGETS;
+        if (caster->GetDistance(circle) > 40)
+            return SPELL_FAILED_OUT_OF_RANGE;
+        return SPELL_CAST_OK;
+    }
+};
+
+struct DemonicCircleSummon : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        if (!circle)
+            return;
+        circle->ForcedDespawn();
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;      
+        GameObject* circle = caster->GetGameObject(DEMONIC_CIRCLE_SUMMON);
+        if (!circle)
+            return;
+        if (caster->GetDistance(circle) <= 40)
+        {
+            if (!caster->HasAura(DEMONIC_CIRCLE_IN_RANGE_AURA))
+                caster->CastSpell(caster, DEMONIC_CIRCLE_IN_RANGE_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_INSTANT_CAST);
+        }
+        else
+            caster->RemoveAurasDueToSpell(DEMONIC_CIRCLE_IN_RANGE_AURA);
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -367,4 +435,6 @@ void LoadWarlockScripts()
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
     RegisterSpellScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
     RegisterSpellScript<ShadowBite>("spell_shadow_bite");
+    RegisterSpellScript<DemonicCircleTeleport>("spell_demonic_circle_teleport");
+    RegisterSpellScript<DemonicCircleSummon>("spell_demonic_circle_summon");
 }
