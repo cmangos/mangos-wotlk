@@ -16,164 +16,158 @@
 
 /* ScriptData
 SDName: Boss_Razuvious
-SD%Complete: 85%
-SDComment: TODO: Timers and sounds need confirmation - orb handling for normal-mode is missing
+SD%Complete: 95%
+SDComment: TODO: Timers need confirmation
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_AGGRO1               = -1533120,
-    SAY_AGGRO2               = -1533121,
-    SAY_AGGRO3               = -1533122,
-    SAY_SLAY1                = -1533123,
-    SAY_SLAY2                = -1533124,
-    SAY_COMMAND1             = -1533125,
-    SAY_COMMAND2             = -1533126,
-    SAY_COMMAND3             = -1533127,
-    SAY_COMMAND4             = -1533128,
-    SAY_DEATH                = -1533129,
+    SAY_COMMAND1 = 13072,
+    SAY_COMMAND2 = 13073,
+    SAY_COMMAND3 = 13074,
+    SAY_AGGRO1   = 13075,
+    SAY_AGGRO2   = 13076,
+    SAY_AGGRO3   = 13077,
+    SAY_AGGRO4   = 13078,
+    SAY_DEATH    = 13079,
+    SAY_SLAY1    = 13080,
+    SAY_SLAY2    = 13081,
+    EMOTE_TRIUMPH= 13082,
 
     SPELL_UNBALANCING_STRIKE = 55470,
     SPELL_DISRUPTING_SHOUT   = 55543,
     SPELL_DISRUPTING_SHOUT_H = 29107,
     SPELL_JAGGED_KNIFE       = 55550,
-    SPELL_HOPELESS           = 29125
+    SPELL_HOPELESS           = 29125,
+    SPELL_FORCED_OBEDIENCE   = 55479,
+    SPELL_OBEDIENCE_CHAINS   = 55520,
+    
+    SPELL_TAUNT              = 29060,
+
+    SPELLSET_10N             = 1606101,
+    SPELLSET_25N             = 2835701,
 };
 
-struct boss_razuviousAI : public ScriptedAI
+static const float resetZ = 285.0f;         // Above this altitude, Razuvious is outside his combat area (in the stairs) and should reset (leashing)
+
+struct boss_razuviousAI : public BossAI
 {
-    boss_razuviousAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_razuviousAI(Creature* creature) : BossAI(creature, 0),
+    m_instance (static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z) { return z > resetZ; });
+        SetDataType(TYPE_RAZUVIOUS);
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3, SAY_AGGRO4);
+        AddOnDeathText(SAY_DEATH);
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiUnbalancingStrikeTimer;
-    uint32 m_uiDisruptingShoutTimer;
-    uint32 m_uiJaggedKnifeTimer;
-    uint32 m_uiCommandSoundTimer;
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
 
     void Reset() override
     {
-        m_uiUnbalancingStrikeTimer = 30000;                 // 30 seconds
-        m_uiDisruptingShoutTimer   = 15000;                 // 15 seconds
-        m_uiJaggedKnifeTimer       = urand(10000, 15000);
-        m_uiCommandSoundTimer      = 40000;                 // 40 seconds
-    }
-
-    void KilledUnit(Unit* /*Victim*/) override
-    {
-        if (urand(0, 3))
-            return;
-
-        switch (urand(0, 1))
-        {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-        }
+        m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
-
+        BossAI::JustDied();
         DoCastSpellIfCan(m_creature, SPELL_HOPELESS, CAST_TRIGGERED);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, DONE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
     {
-        switch (urand(0, 2))
+        // Every time a Deathknight Understudy taunts Razuvious, he will yell its disappointment
+        if (spell->Id == SPELL_TAUNT)
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
-        }
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, IN_PROGRESS);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_RAZUVIOUS, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Unbalancing Strike
-        if (m_uiUnbalancingStrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
-                m_uiUnbalancingStrikeTimer = 30000;
-        }
-        else
-            m_uiUnbalancingStrikeTimer -= uiDiff;
-
-        // Disrupting Shout
-        if (m_uiDisruptingShoutTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DISRUPTING_SHOUT : SPELL_DISRUPTING_SHOUT_H) == CAST_OK)
-                m_uiDisruptingShoutTimer = 25000;
-        }
-        else
-            m_uiDisruptingShoutTimer -= uiDiff;
-
-        // Jagged Knife
-        if (m_uiJaggedKnifeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            switch (urand(0, 2))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_JAGGED_KNIFE) == CAST_OK)
-                    m_uiJaggedKnifeTimer = 10000;
+                case 0: DoBroadcastText(SAY_COMMAND1, m_creature); break;
+                case 1: DoBroadcastText(SAY_COMMAND2, m_creature); break;
+                case 2: DoBroadcastText(SAY_COMMAND3, m_creature); break;
             }
         }
-        else
-            m_uiJaggedKnifeTimer -= uiDiff;
-
-        // Random say
-        if (m_uiCommandSoundTimer < uiDiff)
-        {
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_COMMAND1, m_creature); break;
-                case 1: DoScriptText(SAY_COMMAND2, m_creature); break;
-                case 2: DoScriptText(SAY_COMMAND3, m_creature); break;
-                case 3: DoScriptText(SAY_COMMAND4, m_creature); break;
-            }
-
-            m_uiCommandSoundTimer = 40000;
-        }
-        else
-            m_uiCommandSoundTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_razuvious(Creature* pCreature)
+struct npc_obedienceCrystalAI : public Scripted_NoMovementAI
 {
-    return new boss_razuviousAI(pCreature);
+    npc_obedienceCrystalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+
+    void Reset() override
+    {
+        m_creature->RemoveAllCooldowns();
+    }
+};
+
+bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
+{
+    if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
+    {
+        if (pClickedCreature->IsNonMeleeSpellCasted(true))
+            return false;
+
+        CreatureList understudies;
+        bool castSuccess = false;
+        GetCreatureListWithEntryInGrid(understudies, pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 60.f);
+        for (auto understudy : understudies)
+        {
+            if (!castSuccess)
+            {
+                pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
+                castSuccess = true;
+            }
+            if (understudy->GetCharmer() && understudy->GetCharmer()->GetObjectGuid() == pPlayer->GetObjectGuid())
+                pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
+        }
+        pClickedCreature->RemoveAllCooldowns();
+        return true;
+    }
+
+    return true;
 }
+
+struct ForcedObedience : public AuraScript, public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetFilteringScheme(EFFECT_INDEX_0, true, SCHEME_CLOSEST);
+    }
+
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex idx) const override
+    {
+        if (target->HasCharmer())
+            return false;
+        return true;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            if (aura->GetId() == SPELL_FORCED_OBEDIENCE)
+                aura->GetTarget()->RemoveAurasDueToSpell(SPELL_OBEDIENCE_CHAINS);
+    }
+};
 
 void AddSC_boss_razuvious()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_razuvious";
-    pNewScript->GetAI = &GetAI_boss_razuvious;
+    pNewScript->GetAI = &GetNewAIInstance<boss_razuviousAI>;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_obedienceCrystal";
+    pNewScript->GetAI = &GetNewAIInstance<npc_obedienceCrystalAI>;
+    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_obedienceCrystal;
+    pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ForcedObedience>("spell_forced_obedience");
 }
