@@ -554,6 +554,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (16836,'spell_brambles'),
 (16839,'spell_brambles'),
 (16840,'spell_brambles'),
+(28136,'spell_thaddius_lightning_visual'),
+(28159,'spell_shock_thaddius'),
 (28617,'spell_web_wrap_message'),
 (28622,'spell_web_wrap_damage'),
 (28673,'spell_web_wrap_maexxna'),
