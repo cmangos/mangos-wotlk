@@ -96,6 +96,8 @@ enum
     NPC_MR_BIGGLESWORTH         = 16998,
     NPC_LIVING_POISON           = 16027,
 
+    NPC_OLDWORLD_TRIGGER        = 15384,
+
     // Gothik
     NPC_GOTHIK                  = 16060,
     NPC_SUB_BOSS_TRIGGER        = 16137,                    // summon locations
@@ -106,6 +108,11 @@ enum
     NPC_SPECT_DEATH_KNIGHT      = 16148,
     NPC_SPECT_RIDER             = 16150,
     NPC_SPECT_HORSE             = 16149,
+
+    // Gluth
+    NPC_ZOMBIE_CHOW_N           = 16360,
+    NPC_ZOMBIE_CHOW_H           = 30303,
+    NPC_GLUTH                   = 15932,
 
     // Kel'Thuzad
     NPC_SOLDIER_FROZEN          = 16427,
@@ -243,6 +250,8 @@ class instance_naxxramas : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
+        void OnCreatureRespawn(Creature* creature) override;
+
         void OnPlayerDeath(Player* pPlayer) override;
         void OnCreatureDeath(Creature* pCreature) override;
 
@@ -265,6 +274,9 @@ class instance_naxxramas : public ScriptedInstance
         Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
         void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
+
+        // Gluth
+        const GuidVector& GetGluthTriggers() const { return m_gluthTriggers; }
 
         // thaddius
         void GetThadTeslaCreatures(GuidList& lList) const { lList = m_lThadTeslaCoilList; };
@@ -298,6 +310,8 @@ class instance_naxxramas : public ScriptedInstance
         uint32 m_uiScreamsTimer;
 
         DialogueHelper m_dialogueHelper;
+
+        GuidVector m_gluthTriggers;
 };
 
 #endif

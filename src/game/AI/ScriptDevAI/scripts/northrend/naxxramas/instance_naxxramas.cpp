@@ -99,14 +99,20 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SAPPHIRON:
         case NPC_KELTHUZAD:
         case NPC_THE_LICHKING:
+        case NPC_GLUTH:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
-
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TOXIC_TUNNEL:
             pCreature->SetCanEnterCombat(false);
             break;
+        case NPC_OLDWORLD_TRIGGER:
+        {
+            if (pCreature->GetPositionX() > 3250 && pCreature->GetPositionX() < 3322 && pCreature->GetPositionY() > -3190 && pCreature->GetPositionY() < -3115)
+                m_gluthTriggers.push_back(pCreature->GetObjectGuid());
+            break;
+        }
     }
 }
 
@@ -258,6 +264,25 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
             return;
     }
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_naxxramas::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_ZOMBIE_CHOW_N:
+        {
+            if (Creature* gluth = GetSingleCreatureFromStorage(NPC_GLUTH))
+            {
+                if (!gluth->IsAlive())
+                    break;
+
+                creature->AddThreat(gluth, 2000.f);
+                creature->AI()->AttackStart(gluth);
+            }
+            break;
+        }
+    }
 }
 
 void instance_naxxramas::OnPlayerDeath(Player* /*pPlayer*/)
