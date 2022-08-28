@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/SpellTargetDefines.h"
 #include "naxxramas.h"
