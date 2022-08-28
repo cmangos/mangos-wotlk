@@ -21,23 +21,24 @@ SDComment: Summons need verify, need better phase-switch support (unattackable?)
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_AGGRO1                          = -1533075,
-    SAY_AGGRO2                          = -1533076,
-    SAY_AGGRO3                          = -1533077,
-    SAY_SUMMON                          = -1533078,
-    SAY_SLAY1                           = -1533079,
-    SAY_SLAY2                           = -1533080,
-    SAY_DEATH                           = -1533081,
+    SAY_AGGRO1                          = 13061,
+    SAY_AGGRO2                          = 13062,
+    SAY_AGGRO3                          = 13063,
+    SAY_SUMMON                          = 13067,
+    SAY_SLAY1                           = 13065,
+    SAY_SLAY2                           = 13066,
+    SAY_DEATH                           = 13064,
 
-    EMOTE_WARRIOR                       = -1533130,
-    EMOTE_SKELETON                      = -1533131,
-    EMOTE_TELEPORT                      = -1533132,
-    EMOTE_TELEPORT_RETURN               = -1533133,
+    EMOTE_WARRIOR                       = 32974,
+    EMOTE_SKELETON                      = 32977,
+    EMOTE_TELEPORT                      = 32331,
+    EMOTE_TELEPORT_RETURN               = 32976,
 
     SPELL_TELEPORT                      = 29216,
     SPELL_TELEPORT_RETURN               = 29231,
@@ -84,250 +85,275 @@ enum
     PHASE_SKELETON_3                    = 3
 };
 
-struct boss_nothAI : public ScriptedAI
+enum NothAction
 {
-    boss_nothAI(Creature* pCreature) : ScriptedAI(pCreature)
+    NOTH_BLINK,
+    NOTH_CURSE,
+    NOTH_SUMMON,
+    NOTH_PHASE_BALCONY,
+    NOTH_PHASE_GROUND,
+    NOTH_ACTIONS_MAX,
+    SUMMONED_UNROOT,
+};
+
+struct boss_nothAI : public BossAI
+{
+    boss_nothAI(Creature* creature) : BossAI(creature, NOTH_ACTIONS_MAX),
+    m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetDataType(TYPE_NOTH);
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
+        AddOnDeathText(SAY_DEATH);
+        AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
+        AddCombatAction(NOTH_BLINK, true);
+        AddCombatAction(NOTH_CURSE, 4s);
+        AddCombatAction(NOTH_SUMMON, 12s);
+        AddCombatAction(NOTH_PHASE_BALCONY, 90s);
+        AddCombatAction(NOTH_PHASE_GROUND, true);
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
+    GuidList m_lUndeadSummonGuidList;
 
-    uint8 m_uiPhase;
-    uint8 m_uiPhaseSub;
-    uint32 m_uiPhaseTimer;
-
-    uint32 m_uiBlinkTimer;
-    uint32 m_uiCurseTimer;
-    uint32 m_uiSummonTimer;
+    uint8 m_uiPhase, m_uiPhaseSub;
 
     void Reset() override
     {
         m_uiPhase = PHASE_GROUND;
         m_uiPhaseSub = PHASE_GROUND;
-        m_uiPhaseTimer = 90000;
 
-        m_uiBlinkTimer = 25000;
-        m_uiCurseTimer = 4000;
-        m_uiSummonTimer = 12000;
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+        SetReactState(REACT_AGGRESSIVE);
+        SetRootSelf(false);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        switch (urand(0, 2))
+        if (!m_isRegularMode)
+            ResetCombatAction(NOTH_BLINK, 25s);
+        BossAI::Aggro();
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (m_instance->GetPlayerInMap(true, false))
+            return;
+        BossAI::EnterEvadeMode();
+        m_creature->ForcedDespawn();
+        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
+        m_creature->Respawn();
+
+        for (GuidList::const_iterator itr = m_lUndeadSummonGuidList.begin(); itr != m_lUndeadSummonGuidList.end(); ++itr)
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            if (Creature* summon = m_creature->GetMap()->GetCreature(*itr))
+            {
+                summon->ForcedDespawn(2000);
+            }
         }
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NOTH, IN_PROGRESS);
+        JustReachedHome();
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        pSummoned->SetInCombatWithZone();
+        if (!summoned->HasAura(384152)) //Custom spell for 30% increased difficulty. *NOT* accurate to 3.3.5a
+            summoned->CastSpell(summoned, 384152, TRIGGERED_OLD_TRIGGERED);
+        summoned->AI()->AddCustomAction(SUMMONED_UNROOT, 3s + 500ms, [summoned]()
+        {
+            if (summoned && summoned->AI())
+                summoned->AI()->SetRootSelf(false);
+        });
+        summoned->AI()->SetRootSelf(true);
+        summoned->SetInCombatWithZone();
+        m_lUndeadSummonGuidList.push_back(summoned->GetObjectGuid());
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void SummonedCreatureDespawn(Creature* summoned) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NOTH, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NOTH, FAIL);
+        m_lUndeadSummonGuidList.remove(summoned->GetObjectGuid());
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
         if (pCaster == m_creature && pSpell->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_LEAP)
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
+            DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_CRIPPLE : SPELL_CRIPPLE_H);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiPhase == PHASE_GROUND)
+        switch (action)
         {
-            if (m_uiPhaseTimer)                             // After PHASE_SKELETON_3 we won't have a balcony phase
+            case NOTH_BLINK: return 25s;
+            case NOTH_CURSE: return 28s;
+            case NOTH_SUMMON: return 30s;
+            case NOTH_PHASE_GROUND:
             {
-                if (m_uiPhaseTimer <= uiDiff)
+                switch (m_uiPhaseSub)               // Set Duration of Skeleton phase
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
+                    case PHASE_SKELETON_1: return 70s;
+                    case PHASE_SKELETON_2: return 97s;
+                    case PHASE_SKELETON_3: return 120s;
+                }
+            }
+            case NOTH_PHASE_BALCONY:
+            {
+                switch (m_uiPhaseSub)
+                {
+                    case PHASE_SKELETON_1: return 110s;
+                    case PHASE_SKELETON_2: return 180s;
+                    case PHASE_SKELETON_3:
                     {
-                        DoScriptText(EMOTE_TELEPORT, m_creature);
-                        m_creature->GetMotionMaster()->MoveIdle();
-                        m_uiPhase = PHASE_BALCONY;
-                        ++m_uiPhaseSub;
-
-                        switch (m_uiPhaseSub)               // Set Duration of Skeleton phase
-                        {
-                            case PHASE_SKELETON_1: m_uiPhaseTimer = 70000;  break;
-                            case PHASE_SKELETON_2: m_uiPhaseTimer = 97000;  break;
-                            case PHASE_SKELETON_3: m_uiPhaseTimer = 120000; break;
-                        }
-                        return;
+                        DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
+                        return -1ms;
                     }
                 }
-                else
-                    m_uiPhaseTimer -= uiDiff;
             }
-
-            if (!m_bIsRegularMode)                          // Blink is used only in 25man
-            {
-                if (m_uiBlinkTimer < uiDiff)
-                {
-                    static uint32 const auiSpellBlink[4] =
-                    {
-                        SPELL_BLINK_1, SPELL_BLINK_2, SPELL_BLINK_3, SPELL_BLINK_4
-                    };
-
-                    if (DoCastSpellIfCan(m_creature, auiSpellBlink[urand(0, 3)]) == CAST_OK)
-                    {
-                        DoResetThreat();
-                        m_uiBlinkTimer = 25000;
-                    }
-                }
-                else
-                    m_uiBlinkTimer -= uiDiff;
-            }
-
-            if (m_uiCurseTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CURSE_PLAGUEBRINGER : SPELL_CURSE_PLAGUEBRINGER_H);
-                m_uiCurseTimer = 28000;
-            }
-            else
-                m_uiCurseTimer -= uiDiff;
-
-            if (m_uiSummonTimer < uiDiff)
-            {
-                DoScriptText(SAY_SUMMON, m_creature);
-                DoScriptText(EMOTE_WARRIOR, m_creature);
-
-                if (m_bIsRegularMode)
-                {
-                    static uint32 const auiSpellSummonPlaguedWarrior[3] =
-                    {
-                        SPELL_SUMMON_WARRIOR_1, SPELL_SUMMON_WARRIOR_2, SPELL_SUMMON_WARRIOR_3
-                    };
-
-                    for (uint8 i = 0; i < 2; ++i)
-                        DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedWarrior[urand(0, 2)], CAST_TRIGGERED);
-                }
-                else
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_WARRIOR_THREE, CAST_TRIGGERED);
-                }
-
-                m_uiSummonTimer = 30000;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
-
-            DoMeleeAttackIfReady();
+            default: return 0s;
         }
-        else                                                // PHASE_BALCONY
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (m_uiPhaseTimer < uiDiff)
+            case NOTH_BLINK:
+            {
+                static uint32 const auiSpellBlink[4] =
+                {
+                    SPELL_BLINK_1, SPELL_BLINK_2, SPELL_BLINK_3, SPELL_BLINK_4
+                };
+
+                if (DoCastSpellIfCan(m_creature, auiSpellBlink[urand(0, 3)]) == CAST_OK)
+                {
+                    DoResetThreat();
+                    break;
+                }
+                return;
+            }
+            case NOTH_CURSE:
+            {
+                DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_CURSE_PLAGUEBRINGER : SPELL_CURSE_PLAGUEBRINGER_H);
+                break;
+            }
+            case NOTH_SUMMON:
+            {
+                if (m_uiPhase == PHASE_GROUND)
+                {
+                    DoBroadcastText(SAY_SUMMON, m_creature);
+                    DoBroadcastText(EMOTE_WARRIOR, m_creature);
+
+                    if (m_isRegularMode)
+                    {
+                        static uint32 const auiSpellSummonPlaguedWarrior[3] =
+                        {
+                            SPELL_SUMMON_WARRIOR_1, SPELL_SUMMON_WARRIOR_2, SPELL_SUMMON_WARRIOR_3
+                        };
+
+                        for (uint8 i = 0; i < 2; ++i)
+                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedWarrior[urand(0, 2)], CAST_TRIGGERED);
+                    }
+                    else
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_WARRIOR_THREE, CAST_TRIGGERED);
+                    }
+                    break;
+                }
+                else
+                {
+                    DoBroadcastText(EMOTE_SKELETON, m_creature);
+
+                    static uint32 const auiSpellSummonPlaguedChampion[10] =
+                    {
+                        SPELL_SUMMON_CHAMP01, SPELL_SUMMON_CHAMP02, SPELL_SUMMON_CHAMP03, SPELL_SUMMON_CHAMP04, SPELL_SUMMON_CHAMP05, SPELL_SUMMON_CHAMP06, SPELL_SUMMON_CHAMP07, SPELL_SUMMON_CHAMP08, SPELL_SUMMON_CHAMP09, SPELL_SUMMON_CHAMP10
+                    };
+
+                    static uint32 const auiSpellSummonPlaguedGuardian[4] =
+                    {
+                        SPELL_SUMMON_GUARD01, SPELL_SUMMON_GUARD02, SPELL_SUMMON_GUARD03, SPELL_SUMMON_GUARD04
+                    };
+
+                    // A bit unclear how many in each sub phase
+                    switch (m_uiPhaseSub)
+                    {
+                        case PHASE_SKELETON_1:
+                        {
+                            for (uint8 i = 0; i < (m_isRegularMode ? 2 : 4); ++i)
+                                DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampion[urand(0, 9)], CAST_TRIGGERED);
+
+                            break;
+                        }
+                        case PHASE_SKELETON_2:
+                        {
+                            for (uint8 i = 0; i < (m_isRegularMode ? 1 : 2); ++i)
+                            {
+                                DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampion[urand(0, 9)], CAST_TRIGGERED);
+                                DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardian[urand(0, 3)], CAST_TRIGGERED);
+                            }
+                            break;
+                        }
+                        case PHASE_SKELETON_3:
+                        {
+                            for (uint8 i = 0; i < (m_isRegularMode ? 2 : 4); ++i)
+                                DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardian[urand(0, 3)], CAST_TRIGGERED);
+
+                            break;
+                        }
+                    }
+                    break;
+                }
+            }
+            case NOTH_PHASE_BALCONY:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
+                {
+                    static const std::vector<uint32> GROUND_PHASE_ACTIONS = {NOTH_BLINK, NOTH_CURSE, NOTH_PHASE_BALCONY};
+                    for (uint32 action : GROUND_PHASE_ACTIONS)
+                        DisableCombatAction(action);
+
+                    DoBroadcastText(EMOTE_TELEPORT, m_creature);
+                    SetRootSelf(true);
+                    m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    SetMeleeEnabled(false);
+                    StopTargeting(true);
+                    m_creature->SetTarget(nullptr);
+                    ++m_uiPhaseSub;
+                    m_uiPhase = PHASE_BALCONY;
+
+                    ResetCombatAction(NOTH_PHASE_GROUND, GetSubsequentActionTimer(NOTH_PHASE_GROUND));
+                }
+                return;
+            }
+            case NOTH_PHASE_GROUND:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
-                    DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                    switch (m_uiPhaseSub)
-                    {
-                        case PHASE_SKELETON_1: m_uiPhaseTimer = 110000; break;
-                        case PHASE_SKELETON_2: m_uiPhaseTimer = 180000; break;
-                        case PHASE_SKELETON_3:
-                            m_uiPhaseTimer = 0;
-                            // Go Berserk after third Balcony Phase
-                            DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
-                            break;
-                    }
+                    DoBroadcastText(EMOTE_TELEPORT_RETURN, m_creature);
+                    SetRootSelf(false);
+                    m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    SetMeleeEnabled(true);
+                    HandleTargetRestoration();
                     m_uiPhase = PHASE_GROUND;
-
-                    return;
+                    ResetCombatAction(NOTH_PHASE_BALCONY, GetSubsequentActionTimer(NOTH_PHASE_BALCONY));
+                    ResetCombatAction(NOTH_CURSE, GetSubsequentActionTimer(NOTH_CURSE));
+                    if (!m_isRegularMode)
+                        ResetCombatAction(NOTH_BLINK, GetSubsequentActionTimer(NOTH_BLINK));
                 }
+                return;
             }
-            else
-                m_uiPhaseTimer -= uiDiff;
-
-            if (m_uiSummonTimer < uiDiff)
-            {
-                DoScriptText(EMOTE_SKELETON, m_creature);
-
-                static uint32 const auiSpellSummonPlaguedChampion[10] =
-                {
-                    SPELL_SUMMON_CHAMP01, SPELL_SUMMON_CHAMP02, SPELL_SUMMON_CHAMP03, SPELL_SUMMON_CHAMP04, SPELL_SUMMON_CHAMP05, SPELL_SUMMON_CHAMP06, SPELL_SUMMON_CHAMP07, SPELL_SUMMON_CHAMP08, SPELL_SUMMON_CHAMP09, SPELL_SUMMON_CHAMP10
-                };
-
-                static uint32 const auiSpellSummonPlaguedGuardian[4] =
-                {
-                    SPELL_SUMMON_GUARD01, SPELL_SUMMON_GUARD02, SPELL_SUMMON_GUARD03, SPELL_SUMMON_GUARD04
-                };
-
-                // A bit unclear how many in each sub phase
-                switch (m_uiPhaseSub)
-                {
-                    case PHASE_SKELETON_1:
-                    {
-                        for (uint8 i = 0; i < (m_bIsRegularMode ? 2 : 4); ++i)
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampion[urand(0, 9)], CAST_TRIGGERED);
-
-                        break;
-                    }
-                    case PHASE_SKELETON_2:
-                    {
-                        for (uint8 i = 0; i < (m_bIsRegularMode ? 1 : 2); ++i)
-                        {
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedChampion[urand(0, 9)], CAST_TRIGGERED);
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardian[urand(0, 3)], CAST_TRIGGERED);
-                        }
-                        break;
-                    }
-                    case PHASE_SKELETON_3:
-                    {
-                        for (uint8 i = 0; i < (m_bIsRegularMode ? 2 : 4); ++i)
-                            DoCastSpellIfCan(m_creature, auiSpellSummonPlaguedGuardian[urand(0, 3)], CAST_TRIGGERED);
-
-                        break;
-                    }
-                }
-
-                m_uiSummonTimer = 30000;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
-
-UnitAI* GetAI_boss_noth(Creature* pCreature)
-{
-    return new boss_nothAI(pCreature);
-}
 
 void AddSC_boss_noth()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_noth";
-    pNewScript->GetAI = &GetAI_boss_noth;
+    pNewScript->GetAI = &GetNewAIInstance<boss_nothAI>;
     pNewScript->RegisterSelf();
 }
