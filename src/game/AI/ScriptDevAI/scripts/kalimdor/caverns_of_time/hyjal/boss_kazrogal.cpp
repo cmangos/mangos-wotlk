@@ -23,9 +23,9 @@ enum
     SAY_ENTER = -1534060,
     SAY_MARK1 = -1534061,
     SAY_MARK2 = -1534062,
-    SAY_KILL1 = -1534063,
-    SAY_KILL2 = -1534064,
-    SAY_KILL3 = -1534065,
+    SAY_KILL1 = 18243,
+    SAY_KILL2 = 18244,
+    SAY_KILL3 = 18245,
     SOUND_DEATH = 11018,
 
     // abilities

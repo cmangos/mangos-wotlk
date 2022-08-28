@@ -40,8 +40,8 @@ enum
     SAY_SUMMON2                 = -1532059,
     SAY_EVOCATE                 = -1532060,
     SAY_ENRAGE                  = -1532061,
-    SAY_KILL1                   = -1532062,
-    SAY_KILL2                   = -1532063,
+    SAY_KILL1                   = 15335,
+    SAY_KILL2                   = 15336,
     SAY_DEATH                   = -1532064,
 
     // Flare

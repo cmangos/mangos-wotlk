@@ -34,8 +34,8 @@ enum
     SAY_SUMMON              = -1568027,
     SAY_SUMMON_ALT          = -1568028,
     SAY_ENRAGE              = -1568029,
-    SAY_SLAY1               = -1568030,
-    SAY_SLAY2               = -1568031,
+    SAY_SLAY1               = 23233,
+    SAY_SLAY2               = 23234,
     SAY_DEATH               = -1568032,
     EMOTE_STORM             = -1568033,
 

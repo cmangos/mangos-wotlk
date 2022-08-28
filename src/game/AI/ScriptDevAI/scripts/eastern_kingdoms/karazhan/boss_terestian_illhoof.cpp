@@ -31,8 +31,8 @@ EndScriptData */
 
 enum
 {
-    SAY_SLAY1                   = -1532065,
-    SAY_SLAY2                   = -1532066,
+    SAY_SLAY1                   = 15145,
+    SAY_SLAY2                   = 15146,
     SAY_DEATH                   = -1532067,
     SAY_AGGRO                   = -1532068,
     SAY_SACRIFICE1              = -1532069,

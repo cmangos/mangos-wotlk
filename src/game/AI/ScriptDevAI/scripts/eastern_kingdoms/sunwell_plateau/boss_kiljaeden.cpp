@@ -30,8 +30,8 @@ EndScriptData */
 enum
 {
     SAY_EMERGE                  = -1580069,
-    SAY_SLAY_1                  = -1580070,
-    SAY_SLAY_2                  = -1580071,
+    SAY_SLAY_1                  = 25549,
+    SAY_SLAY_2                  = 25550,
     SAY_REFLECTION_1            = -1580072,
     SAY_REFLECTION_2            = -1580073,
     SAY_DARKNESS_1              = -1580074,

@@ -34,15 +34,15 @@ enum
 
     SAY_SACROLASH_SHADOW_NOVA               = -1580052,
     SAY_SACROLASH_EMPOWER                   = -1580053,
-    SAY_SACROLASH_KILL_1                    = -1580054,
-    SAY_SACROLASH_KILL_2                    = -1580055,
+    SAY_SACROLASH_KILL_1                    = 25519,
+    SAY_SACROLASH_KILL_2                    = 25520,
     SAY_SACROLASH_DEAD                      = -1580056,
     SAY_SACROLASH_BERSERK                   = -1580057,
 
     SAY_ALYTHESS_CANFLAGRATION              = -1580058,
     SAY_ALYTHESS_EMPOWER                    = -1580059,
-    SAY_ALYTHESS_KILL_1                     = -1580060,
-    SAY_ALYTHESS_KILL_2                     = -1580061,
+    SAY_ALYTHESS_KILL_1                     = 25514,
+    SAY_ALYTHESS_KILL_2                     = 25515,
     SAY_ALYTHESS_DEAD                       = -1580062,
     SAY_ALYTHESS_BERSERK                    = -1580063,
 

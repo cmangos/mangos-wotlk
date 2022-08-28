@@ -30,7 +30,7 @@ enum
 {
     // Speech'n'Sounds
     SAY_GATH_AGGRO              = -1564069,
-    SAY_GATH_SLAY               = -1564085,
+    SAY_GATH_SLAY               = 21735,
     SAY_GATH_SLAY_COMNT         = -1564089,
     SAY_GATH_DEATH              = -1564093,
     SAY_GATH_SPECIAL1           = -1564077,
@@ -38,7 +38,7 @@ enum
     SAY_GATH_BERSERK            = -1564073,
 
     SAY_VERA_AGGRO              = -1564070,
-    SAY_VERA_SLAY               = -1564086,
+    SAY_VERA_SLAY               = 21699,
     SAY_VERA_COMNT              = -1564089,
     SAY_VERA_DEATH              = -1564094,
     SAY_VERA_SPECIAL1           = -1564078,
@@ -46,7 +46,7 @@ enum
     SAY_VERA_VANISH             = -1564074,
 
     SAY_MALA_AGGRO              = -1564071,
-    SAY_MALA_SLAY               = -1564087,
+    SAY_MALA_SLAY               = 21712,
     SAY_MALA_COMNT              = -1564090,
     SAY_MALA_DEATH              = -1564095,
     SAY_MALA_SPECIAL1           = -1564079,
@@ -54,7 +54,7 @@ enum
     SAY_MALA_BERSERK            = -1564075,
 
     SAY_ZERE_AGGRO              = -1564072,
-    SAY_ZERE_SLAY               = -1564088,
+    SAY_ZERE_SLAY               = 21725,
     SAY_ZERE_COMNT              = -1564091,
     SAY_ZERE_DEATH              = -1564096,
     SAY_ZERE_SPECIAL1           = -1564080,

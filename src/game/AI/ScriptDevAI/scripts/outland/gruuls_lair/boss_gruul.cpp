@@ -34,9 +34,9 @@ enum
     SAY_SLAM2                   = -1565012,
     SAY_SHATTER1                = -1565013,
     SAY_SHATTER2                = -1565014,
-    SAY_SLAY1                   = -1565015,
-    SAY_SLAY2                   = -1565016,
-    SAY_SLAY3                   = -1565017,
+    SAY_SLAY1                   = 20121,
+    SAY_SLAY2                   = 20122,
+    SAY_SLAY3                   = 20123,
     SAY_DEATH                   = -1565018,
 
     EMOTE_GROW                  = -1565019,

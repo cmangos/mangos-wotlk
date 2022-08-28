@@ -55,8 +55,8 @@ enum
     SAY_AGGRO1              = -1555011,
     SAY_INCITE_CHAOS        = -1555012,
     SAY_AGGRO2              = -1555013,
-    SAY_SLAY1               = -1555014,
-    SAY_SLAY2               = -1555015,
+    SAY_SLAY1               = 17573,
+    SAY_SLAY2               = 19528,
     SAY_HELP                = -1555016,
     SAY_DEATH               = -1555017,
 

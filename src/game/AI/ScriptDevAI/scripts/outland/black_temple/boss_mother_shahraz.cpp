@@ -35,8 +35,8 @@ enum
     SAY_BEAM_1                  = -1564022,
     SAY_BEAM_2                  = -1564023,
     SAY_BEAM_3                  = -1564024,
-    SAY_SLAY_1                  = -1564025,
-    SAY_SLAY_2                  = -1564026,
+    SAY_SLAY_1                  = 21774,
+    SAY_SLAY_2                  = 21775,
     SAY_ENRAGE                  = -1564027,
     SAY_DEATH                   = -1564028,
 

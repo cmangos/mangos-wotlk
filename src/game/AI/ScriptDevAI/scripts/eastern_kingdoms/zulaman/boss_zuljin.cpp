@@ -35,8 +35,8 @@ enum
     SAY_DRAGONHAWK_TRANSFORM        = -1568061,
     SAY_FIRE_BREATH                 = -1568062,
     SAY_BERSERK                     = -1568053,
-    SAY_KILL1                       = -1568064,
-    SAY_KILL2                       = -1568065,
+    SAY_KILL1                       = 23181,
+    SAY_KILL2                       = 23182,
     SAY_DEATH                       = -1568066,
 
     EMOTE_BEAR_SPIRIT               = -1568082,

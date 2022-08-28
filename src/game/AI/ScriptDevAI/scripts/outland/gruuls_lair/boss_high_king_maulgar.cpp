@@ -33,9 +33,9 @@ enum
     SAY_OGRE_DEATH2             = -1565003,
     SAY_OGRE_DEATH3             = -1565004,
     SAY_OGRE_DEATH4             = -1565005,
-    SAY_SLAY1                   = -1565006,
-    SAY_SLAY2                   = -1565007,
-    SAY_SLAY3                   = -1565008,
+    SAY_SLAY1                   = 20072,
+    SAY_SLAY2                   = 20073,
+    SAY_SLAY3                   = 20074,
     SAY_DEATH                   = -1565009,
 
     // High King Maulgar Spells

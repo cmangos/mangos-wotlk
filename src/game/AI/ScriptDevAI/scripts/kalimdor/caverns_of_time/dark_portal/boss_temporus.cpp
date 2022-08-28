@@ -30,8 +30,8 @@ enum
 {
     SAY_AGGRO               = -1269001,
     SAY_BANISH              = -1269002,
-    SAY_SLAY1               = -1269003,
-    SAY_SLAY2               = -1269004,
+    SAY_SLAY1               = 16825,
+    SAY_SLAY2               = 16826,
     SAY_DEATH               = -1269005,
 
     SPELL_HASTEN            = 31458,

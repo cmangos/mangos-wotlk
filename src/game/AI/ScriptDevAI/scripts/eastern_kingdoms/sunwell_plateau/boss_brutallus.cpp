@@ -41,9 +41,9 @@ enum
     YELL_MADR_DEATH                 = -1580035,
 
     YELL_AGGRO                      = -1580022,
-    YELL_KILL1                      = -1580023,
-    YELL_KILL2                      = -1580024,
-    YELL_KILL3                      = -1580025,
+    YELL_KILL1                      = 25629,
+    YELL_KILL2                      = 25630,
+    YELL_KILL3                      = 25631,
     YELL_LOVE1                      = -1580026,
     YELL_LOVE2                      = -1580027,
     YELL_LOVE3                      = -1580028,

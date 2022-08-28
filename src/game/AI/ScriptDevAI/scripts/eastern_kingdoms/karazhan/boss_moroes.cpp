@@ -34,9 +34,9 @@ enum
     SAY_AGGRO           = -1532011,
     SAY_SPECIAL_1       = -1532012,
     SAY_SPECIAL_2       = -1532013,
-    SAY_KILL_1          = -1532014,
-    SAY_KILL_2          = -1532015,
-    SAY_KILL_3          = -1532016,
+    SAY_KILL_1          = 13461,
+    SAY_KILL_2          = 15085,
+    SAY_KILL_3          = 15086,
     SAY_DEATH           = -1532017,
     SAY_FRENZY          = -1000002,
 

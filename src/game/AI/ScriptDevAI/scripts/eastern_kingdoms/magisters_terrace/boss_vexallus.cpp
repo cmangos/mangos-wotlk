@@ -31,7 +31,7 @@ enum
     SAY_AGGRO                       = -1585007,
     SAY_ENERGY                      = -1585008,
     SAY_OVERLOAD                    = -1585009,
-    SAY_KILL                        = -1585010,
+    SAY_KILL                        = 25627,
     EMOTE_DISCHARGE_ENERGY          = -1585011,
     EMOTE_OVERLOAD                  = -1585031,
 

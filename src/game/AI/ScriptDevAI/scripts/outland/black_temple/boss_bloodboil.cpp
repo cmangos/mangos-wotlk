@@ -30,8 +30,8 @@ enum
 {
     // Speech'n'Sound
     SAY_AGGRO                   = -1564029,
-    SAY_SLAY1                   = -1564030,
-    SAY_SLAY2                   = -1564031,
+    SAY_SLAY1                   = 21741,
+    SAY_SLAY2                   = 21742,
     SAY_SPECIAL1                = -1564032,
     SAY_SPECIAL2                = -1564033,
     SAY_ENRAGE1                 = -1564034,

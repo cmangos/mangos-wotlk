@@ -33,8 +33,8 @@ enum
     SAY_EVIL_AGGRO                  = -1580000,
     SAY_EVIL_SPELL_1                = -1580001,
     SAY_EVIL_SPELL_2                = -1580002,
-    SAY_EVIL_SLAY_1                 = -1580003,
-    SAY_EVIL_SLAY_2                 = -1580004,
+    SAY_EVIL_SLAY_1                 = 25499,
+    SAY_EVIL_SLAY_2                 = 25500,
     SAY_EVIL_ENRAGE                 = -1580005,
     SAY_EVIL_WIPE                   = -1580114,
 
@@ -50,8 +50,8 @@ enum
     SAY_SATH_DEATH                  = -1580011,
     SAY_SATH_SPELL_1                = -1580012,
     SAY_SATH_SPELL_2                = -1580013,
-    SAY_SATH_SLAY_1                 = -1580014,
-    SAY_SATH_SLAY_2                 = -1580015,
+    SAY_SATH_SLAY_1                 = 25508,
+    SAY_SATH_SLAY_2                 = 25509,
     SAY_SATH_ENRAGE                 = -1580016,
 
     // Kalecgos

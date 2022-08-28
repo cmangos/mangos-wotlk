@@ -32,8 +32,8 @@ enum
     // Speech'n'sound
     SAY_INTRO                = -1564037,
     SAY_AGGRO                = -1564038,
-    SAY_SLAY1                = -1564039,
-    SAY_SLAY2                = -1564040,
+    SAY_SLAY1                = 21099,
+    SAY_SLAY2                = 21100,
     SAY_SPELL1               = -1564041,
     SAY_SPELL2               = -1564042,
     SAY_SPECIAL1             = -1564043,

@@ -25,9 +25,9 @@ enum
     SAY_FROST_NOVA2 = -1534042,
     SAY_DND1        = -1534043,
     SAY_DND2        = -1534044,
-    SAY_KILL1       = -1534045,
-    SAY_KILL2       = -1534046,
-    SAY_KILL3       = -1534047,
+    SAY_KILL1       = 18226,
+    SAY_KILL2       = 18227,
+    SAY_KILL3       = 18228,
     SAY_DEATH       = -1534048,
     SAY_ENRAGE      = -1000004, // Generic Berserker Rage emote
 

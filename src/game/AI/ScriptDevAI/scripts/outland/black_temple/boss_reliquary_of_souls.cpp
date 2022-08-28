@@ -31,8 +31,8 @@ enum
     // Suffering
     SUFF_SAY_FREED                  = -1564047,
     SUFF_SAY_AGGRO                  = -1564048,
-    SUFF_SAY_SLAY1                  = -1564049,
-    SUFF_SAY_SLAY2                  = -1564050,
+    SUFF_SAY_SLAY1                  = 21761,
+    SUFF_SAY_SLAY2                  = 21762,
     SUFF_SAY_FRENZY                 = -1564051,
     SUFF_SAY_RECAP                  = -1564052,
     SUFF_SAY_AFTER                  = -1564053,
@@ -50,8 +50,8 @@ enum
     // Anger
     ANGER_SAY_FREED                 = -1564062,
     ANGER_SAY_FREED2                = -1564063,
-    ANGER_SAY_SLAY1                 = -1564064,
-    ANGER_SAY_SLAY2                 = -1564065,
+    ANGER_SAY_SLAY1                 = 21748,
+    ANGER_SOUND_SLAY2               = 11401, // only sound
     ANGER_SAY_SPEC                  = -1564066,
     ANGER_SAY_BEFORE                = -1564067,
     ANGER_SAY_DEATH                 = -1564068,
@@ -540,7 +540,8 @@ struct boss_essence_of_angerAI : public CombatAI
             if (!m_creature->GetVictim())
                 EnterEvadeMode();
         });
-        AddOnKillText(ANGER_SAY_SLAY1, ANGER_SAY_SLAY2);
+        AddOnKillText(ANGER_SAY_SLAY1);
+        AddOnKillSound(ANGER_SOUND_SLAY2);
     }
 
     ScriptedInstance* m_instance;

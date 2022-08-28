@@ -22,9 +22,9 @@
 enum
 {
     SAY_ENTER       = -1534049,
-    SAY_KILL1       = -1534050,
-    SAY_KILL2       = -1534051,
-    SAY_KILL3       = -1534052,
+    SAY_KILL1       = 18237,
+    SAY_KILL2       = 18238,
+    SAY_KILL3       = 18239,
     SAY_DEATH       = -1534053,
     SAY_SWARM1      = -1534054,
     SAY_SWARM2      = -1534055,

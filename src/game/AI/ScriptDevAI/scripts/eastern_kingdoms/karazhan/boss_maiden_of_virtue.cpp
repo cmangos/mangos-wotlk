@@ -28,9 +28,9 @@ EndScriptData */
 enum
 {
     SAY_AGGRO               = -1532018,
-    SAY_SLAY1               = -1532019,
-    SAY_SLAY2               = -1532020,
-    SAY_SLAY3               = -1532021,
+    SAY_SLAY1               = 15082,
+    SAY_SLAY2               = 15083,
+    SAY_SLAY3               = 15084,
     SAY_REPENTANCE1         = -1532022,
     SAY_REPENTANCE2         = -1532023,
     SAY_DEATH               = -1532024,

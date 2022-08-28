@@ -30,8 +30,8 @@ EndScriptData */
 enum
 {
     SAY_INTRO           = -1580036,
-    SAY_KILL_1          = -1580037,
-    SAY_KILL_2          = -1580038,
+    SAY_KILL_1          = 25640,
+    SAY_KILL_2          = 25641,
     SAY_DEATH           = -1580042,
     SAY_TAKEOFF         = -1580040,
     SAY_BREATH          = -1580039,
