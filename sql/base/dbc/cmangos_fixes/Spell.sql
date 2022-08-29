@@ -3133,6 +3133,7 @@ UPDATE `spell_template` SET `AttributesEx`=`AttributesEx`&~64 WHERE id=29422; --
 UPDATE `spell_template` SET `AttributesEx`=`AttributesEx`&~64 WHERE id=30122; -- Heigan Channel Effect
 REPLACE INTO `spell_target_position` VALUES
 (29508, 533, 3333.5, -3475.9, 287.1, 3.17);
+REPLACE INTO spell_target_position VALUES (72617, 533, 3498.111572, -5349.504395, 144.967743, 1.402669), (72613, 533, 2989.30172, -3434.382812, 295.461151, 3.13);
 REPLACE INTO `spell_script_target` VALUES (28523, 0, 181247, 0);
 REPLACE INTO `spell_script_target` VALUES (29682, 1, 16360, 0);
 

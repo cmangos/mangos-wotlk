@@ -1271,18 +1271,6 @@ UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
 -- BossAI Additions
 UPDATE creature_template SET ScriptName="npc_living_poison" WHERE Entry=16027;
 UPDATE creature_template SET ScriptName="npc_stoneskin_gargoyle" WHERE Entry=16168;
-UPDATE `creature_template` SET SpellList=1602801 WHERE entry IN (16028, 29324);
-UPDATE `creature_template` SET SpellList=1606101 WHERE entry=16061;
-UPDATE `creature_template` SET SpellList=2835701 WHERE entry=28357;
-UPDATE `creature_template` SET SpellList=1601101 WHERE entry=16011;
-UPDATE `creature_template` SET SpellList=2971801 WHERE entry=29718;
-UPDATE `creature_template` SET UnitFlags=33554432 WHERE Entry=17025;
-UPDATE `creature_template` SET SpellList=1598901 WHERE entry=15989;
-UPDATE `creature_template` SET SpellList=2999101 WHERE entry=29991;
-UPDATE `creature_template` SET SpellList=1595301 WHERE entry=15953;
-UPDATE `creature_template` SET SpellList=2926801 WHERE entry=29268;
-
-
 
 /* NETHERSTORM */
 INSERT INTO scripted_areatrigger VALUES
