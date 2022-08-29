@@ -222,8 +222,8 @@ struct boss_lady_blaumeuxAI : public BossAI
                 DoBroadcastText(SAY_BLAU_SPECIAL, m_creature);
                 break;
             }
-            ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
@@ -336,6 +336,7 @@ struct boss_rivendare_naxxAI : public BossAI
                 break;
             }
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
@@ -447,8 +448,8 @@ struct boss_thane_korthazzAI : public BossAI
                 DoBroadcastText(SAY_KORT_SPECIAL, m_creature);
                 break;
             }
-            ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
@@ -575,8 +576,8 @@ struct boss_sir_zeliekAI : public BossAI
                 DoBroadcastText(SAY_ZELI_SPECIAL, m_creature);
                 break;
             }
-            ResetCombatAction(action, GetSubsequentActionTimer(action));
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
