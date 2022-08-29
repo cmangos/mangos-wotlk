@@ -472,6 +472,7 @@ struct boss_gothikAI : public BossAI, private DialogueHelper
                 m_uiPhase = PHASE_STOP_SUMMONING;
             }
         }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 
     void UpdateAI(const uint32 diff) override
