@@ -282,9 +282,6 @@ class instance_naxxramas : public ScriptedInstance
         void DoTriggerHeiganTraps(Creature* pHeigan, uint32 uiAreaIndex);
 
         // goth
-        void SetGothTriggers();
-        Creature* GetClosestAnchorForGoth(Creature* pSource, bool bRightSide);
-        void GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide);
         bool IsInRightSideGothArea(Unit* pUnit);
 
         // Gluth
@@ -305,7 +302,6 @@ class instance_naxxramas : public ScriptedInstance
         std::string m_strInstData;
 
         GuidList m_lThadTeslaCoilList;
-        GuidList m_lGothTriggerList;
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];

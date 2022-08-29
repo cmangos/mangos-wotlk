@@ -102,7 +102,6 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_GLUTH:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
-        case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TOXIC_TUNNEL:
             pCreature->SetCanEnterCombat(false);
@@ -288,6 +287,16 @@ void instance_naxxramas::OnCreatureRespawn(Creature* creature)
             }
             break;
         }
+        case NPC_UNREL_TRAINEE:
+        case NPC_UNREL_DEATH_KNIGHT:
+        case NPC_UNREL_RIDER:
+        case NPC_SPECT_TRAINEE:
+        case NPC_SPECT_DEATH_KNIGHT:
+        case NPC_SPECT_RIDER:
+        case NPC_SPECT_HORSE:
+            if (Creature* gothik = GetSingleCreatureFromStorage(NPC_GOTHIK))
+                gothik->AI()->JustSummoned(creature);
+            break;
     }
 }
 
@@ -300,10 +309,25 @@ void instance_naxxramas::OnPlayerDeath(Player* /*pPlayer*/)
         SetSpecialAchievementCriteria(TYPE_ACHIEV_SAFETY_DANCE, false);
 }
 
-void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
+void instance_naxxramas::OnCreatureDeath(Creature* creature)
 {
-    if (pCreature->GetEntry() == NPC_MR_BIGGLESWORTH && m_auiEncounter[TYPE_KELTHUZAD] != DONE)
-        DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+    switch (creature->GetEntry())
+    {
+        case NPC_MR_BIGGLESWORTH:
+            if (GetData(TYPE_KELTHUZAD) != DONE)
+                DoOrSimulateScriptTextForThisInstance(SAY_KELTHUZAD_CAT_DIED, NPC_KELTHUZAD);
+            break;
+        case NPC_UNREL_TRAINEE:
+        case NPC_UNREL_DEATH_KNIGHT:
+        case NPC_UNREL_RIDER:
+        case NPC_SPECT_TRAINEE:
+        case NPC_SPECT_DEATH_KNIGHT:
+        case NPC_SPECT_RIDER:
+        case NPC_SPECT_HORSE:
+            if (Creature* gothik = GetSingleCreatureFromStorage(NPC_GOTHIK))
+                gothik->AI()->SummonedCreatureJustDied(creature);
+            break;
+    }
 }
 
 bool instance_naxxramas::IsEncounterInProgress() const
@@ -690,71 +714,11 @@ void instance_naxxramas::Update(uint32 uiDiff)
     m_dialogueHelper.DialogueUpdate(uiDiff);
 }
 
-void instance_naxxramas::SetGothTriggers()
-{
-    Creature* pGoth = GetSingleCreatureFromStorage(NPC_GOTHIK);
-
-    if (!pGoth)
-        return;
-
-    for (GuidList::const_iterator itr = m_lGothTriggerList.begin(); itr != m_lGothTriggerList.end(); ++itr)
-    {
-        if (Creature* pTrigger = instance->GetCreature(*itr))
-        {
-            GothTrigger pGt;
-            pGt.bIsAnchorHigh = (pTrigger->GetPositionZ() >= (pGoth->GetPositionZ() - 5.0f));
-            pGt.bIsRightSide = IsInRightSideGothArea(pTrigger);
-
-            m_mGothTriggerMap[pTrigger->GetObjectGuid()] = pGt;
-        }
-    }
-}
-
-Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bRightSide)
-{
-    std::list<Creature* > lList;
-
-    for (auto& itr : m_mGothTriggerMap)
-    {
-        if (!itr.second.bIsAnchorHigh)
-            continue;
-
-        if (itr.second.bIsRightSide != bRightSide)
-            continue;
-
-        if (Creature* pCreature = instance->GetCreature(itr.first))
-            lList.push_back(pCreature);
-    }
-
-    if (!lList.empty())
-    {
-        lList.sort(ObjectDistanceOrder(pSource));
-        return lList.front();
-    }
-
-    return nullptr;
-}
-
-void instance_naxxramas::GetGothSummonPointCreatures(CreatureList& lList, bool bRightSide)
-{
-    for (auto& itr : m_mGothTriggerMap)
-    {
-        if (itr.second.bIsAnchorHigh)
-            continue;
-
-        if (itr.second.bIsRightSide != bRightSide)
-            continue;
-
-        if (Creature* pCreature = instance->GetCreature(itr.first))
-            lList.push_back(pCreature);
-    }
-}
-
 // Right is right side from gothik (eastern)
-bool instance_naxxramas::IsInRightSideGothArea(Unit* pUnit)
+bool instance_naxxramas::IsInRightSideGothArea(Unit* unit)
 {
-    if (GameObject* pCombatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
-        return (pCombatGate->GetPositionY() >= pUnit->GetPositionY());
+    if (GameObject* combatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
+        return (combatGate->GetPositionY() >= unit->GetPositionY());
 
     script_error_log("left/right side check, Gothik combat area failed.");
     return true;

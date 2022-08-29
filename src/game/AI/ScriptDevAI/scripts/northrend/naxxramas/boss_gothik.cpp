@@ -22,21 +22,22 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_SPEECH_1                = -1533040,
-    SAY_SPEECH_2                = -1533140,
-    SAY_SPEECH_3                = -1533141,
-    SAY_SPEECH_4                = -1533142,
+    SAY_SPEECH_1                = 13030,
+    SAY_SPEECH_2                = 13031,
+    SAY_SPEECH_3                = 13032,
+    SAY_SPEECH_4                = 13033,
 
-    SAY_KILL                    = -1533041,
-    SAY_DEATH                   = -1533042,
-    SAY_TELEPORT                = -1533043,
+    SAY_KILL                    = 13027,
+    SAY_DEATH                   = 13026,
+    SAY_TELEPORT                = 13028,
 
-    EMOTE_TO_FRAY               = -1533138,
-    EMOTE_GATE                  = -1533139,
+    EMOTE_TO_FRAY               = 32306,
+    EMOTE_GATE                  = 32307,
 
     PHASE_SPEECH                = 0,
     PHASE_BALCONY               = 1,
@@ -51,9 +52,17 @@ enum
     SPELL_HARVESTSOUL           = 28679,
     SPELL_SHADOWBOLT            = 29317,
     SPELL_SHADOWBOLT_H          = 56405,
+
+    SPELL_SUMMON_TRAINEE_PERIODIC           = 28007,
+    SPELL_SUMMON_KNIGHT_PERIODIC            = 28009,
+    SPELL_SUMMON_MOUNTED_KNIGHT_PERIODIC    = 28011,
+
+    SPELL_SUMMON_SPECTRAL_TRAINEE   = 27921,
+    SPELL_SUMMON_SPECTRAL_KNIGHT    = 27932,
+    SPELL_SUMMON_SPECTRAL_RIVENDARE = 27939,
 };
 
-enum eSpellDummy
+enum SpellDummy
 {
     SPELL_A_TO_ANCHOR_1     = 27892,
     SPELL_B_TO_ANCHOR_1     = 27928,
@@ -65,481 +74,367 @@ enum eSpellDummy
 
     SPELL_A_TO_SKULL        = 27915,
     SPELL_B_TO_SKULL        = 27931,
-    SPELL_C_TO_SKULL        = 27937
+    SPELL_C_TO_SKULL        = 27937,
+
+    SPELL_CHOOSE_RANDOM_SKULL_PILE_A = 27896,
+    SPELL_CHOOSE_RANDOM_SKULL_PILE_B = 27930,
+    SPELL_CHOOSE_RANDOM_SKULL_PILE_C = 27938,
 };
 
-struct boss_gothikAI : public ScriptedAI
+enum GothikActions
 {
-    boss_gothikAI(Creature* pCreature) : ScriptedAI(pCreature)
+    GOTHIK_TELEPORT,
+    GOTHIK_STOP_TELE,
+    GOTHIK_ACTIONS_MAX,
+    GOTHIK_GROUND_PHASE,
+    GOTHIK_OPEN_GATES,
+    GOTHIK_SUMMON_TRAINEE,
+    GOTHIK_SUMMON_DEATH_KNIGHT,
+    GOTHIK_SUMMON_RIDER,
+    GOTHIK_SPEECH,
+};
+
+struct boss_gothikAI : public BossAI
+{
+    boss_gothikAI(Creature* creature) : BossAI(creature, GOTHIK_ACTIONS_MAX),
+        m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        SetCombatMovement(false);
-        Reset();
+        SetDataType(TYPE_GOTHIK);
+        AddOnKillText(SAY_KILL);
+        AddOnDeathText(SAY_DEATH);
+        AddTimerlessCombatAction(GOTHIK_STOP_TELE, true);
+        AddCustomAction(GOTHIK_SUMMON_TRAINEE, true, [&]() { StartTraineeSummons(); });
+        AddCustomAction(GOTHIK_SUMMON_DEATH_KNIGHT, true, [&]() { StartKnightSummons(); });
+        AddCustomAction(GOTHIK_SUMMON_RIDER, true, [&]() { StartRiderSummons(); });
+        AddCombatAction(GOTHIK_TELEPORT, true);
+        AddCustomAction(GOTHIK_GROUND_PHASE, true, [&]() { HandleGroundPhase(); });
+        AddCustomAction(GOTHIK_OPEN_GATES, true, [&]() { HandleOpenGates(); }); // in wotlk happens during phase 1
+        AddCustomAction(GOTHIK_SPEECH, true, [&]()
+        {
+            switch (m_speechStep)
+            {
+                case 0: DoBroadcastText(SAY_SPEECH_1, m_creature); DoPlaySoundToSet(m_creature, 8807); ResetTimer(GOTHIK_SPEECH, 4s); break;
+                case 1: DoBroadcastText(SAY_SPEECH_2, m_creature); ResetTimer(GOTHIK_SPEECH, 6s); break;
+                case 2: DoBroadcastText(SAY_SPEECH_3, m_creature); ResetTimer(GOTHIK_SPEECH, 5s); break;
+                case 3:
+                {
+                    DoBroadcastText(SAY_SPEECH_4, m_creature);
+                    m_uiPhase = PHASE_BALCONY;
+                    break;
+                }
+            }
+            ++m_speechStep;
+        });
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
 
-    GuidList m_lSummonedAddGuids;
-    GuidList m_lTraineeSummonPosGuids;
-    GuidList m_lDeathKnightSummonPosGuids;
-    GuidList m_lRiderSummonPosGuids;
+    GuidVector m_summonedAddGuids;
 
     uint8 m_uiPhase;
     uint8 m_uiSpeech;
-
-    uint32 m_uiTraineeTimer;
-    uint32 m_uiDeathKnightTimer;
-    uint32 m_uiRiderTimer;
-    uint32 m_uiTeleportTimer;
-    uint32 m_uiShadowboltTimer;
-    uint32 m_uiHarvestSoulTimer;
-    uint32 m_uiPhaseTimer;
-    uint32 m_uiControlZoneTimer;
-    uint32 m_uiSpeechTimer;
+    uint8 m_speechStep;
 
     void Reset() override
     {
+        BossAI::Reset();
         // Remove immunity
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+        SetMeleeEnabled(false);
+        SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
+        SetCombatScriptStatus(false);
 
         m_uiPhase = PHASE_SPEECH;
-        m_uiSpeech = 1;
-
-        m_uiTraineeTimer = 24 * IN_MILLISECONDS;
-        m_uiDeathKnightTimer = 74 * IN_MILLISECONDS;
-        m_uiRiderTimer = 134 * IN_MILLISECONDS;
-        m_uiTeleportTimer = 20 * IN_MILLISECONDS;
-        m_uiShadowboltTimer = 2 * IN_MILLISECONDS;
-        m_uiHarvestSoulTimer = 2500;
-        m_uiPhaseTimer = 4 * MINUTE * IN_MILLISECONDS + 7 * IN_MILLISECONDS; // last summon at 4:04, next would be 4:09
-        m_uiControlZoneTimer = urand(120 * IN_MILLISECONDS, 150 * IN_MILLISECONDS);
-        m_uiSpeechTimer = 1 * IN_MILLISECONDS;
+        m_speechStep = 0;
 
         // Despawn Adds
-        for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
-        {
-            if (Creature* pCreature = m_creature->GetMap()->GetCreature(*itr))
-                pCreature->ForcedDespawn();
-        }
-
-        m_lSummonedAddGuids.clear();
-        m_lTraineeSummonPosGuids.clear();
-        m_lDeathKnightSummonPosGuids.clear();
-        m_lRiderSummonPosGuids.clear();
+        DespawnGuids(m_summonedAddGuids);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void HandleGroundPhase()
     {
-        if (!m_pInstance)
-            return;
+        m_creature->CastSpell(nullptr, SPELL_TELEPORT_RIGHT, TRIGGERED_OLD_TRIGGERED);
+        m_uiPhase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
 
-        m_pInstance->SetData(TYPE_GOTHIK, IN_PROGRESS);
+        DoBroadcastText(SAY_TELEPORT, m_creature);
+        DoBroadcastText(EMOTE_TO_FRAY, m_creature);
+
+        // Remove Immunity
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+        SetMeleeEnabled(true);
+        SetCombatMovement(true);
+        SetReactState(REACT_AGGRESSIVE);
+
+        DoResetThreat();
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+        ResetCombatAction(GOTHIK_TELEPORT, 20s);
+        AddInitialCooldowns();
+    }
+
+    void Aggro(Unit* /*who*/) override
+    {
+        if (!m_instance)
+            return;
+        BossAI::Aggro();
+        m_creature->SetInCombatWithZone();
 
         // Make immune
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+        m_creature->SetTarget(nullptr);
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
 
-        m_pInstance->SetGothTriggers();
-        PrepareSummonPlaces();
+        ResetTimer(GOTHIK_SPEECH, 1s);
+
+        ResetTimer(GOTHIK_SUMMON_TRAINEE, 24s);
+        ResetTimer(GOTHIK_SUMMON_DEATH_KNIGHT, 74s);
+        ResetTimer(GOTHIK_SUMMON_RIDER, 134s);
+        ResetTimer(GOTHIK_GROUND_PHASE, 4min + 34s);
+        ResetTimer(GOTHIK_OPEN_GATES, 2min + 14s);
     }
 
     bool IsCentralDoorClosed() const
     {
-        return m_pInstance && m_pInstance->GetData(TYPE_GOTHIK) != SPECIAL;
+        return m_instance && m_instance->GetData(TYPE_GOTHIK) != SPECIAL;
     }
 
     void ProcessCentralDoor()
     {
         if (IsCentralDoorClosed())
         {
-            m_pInstance->SetData(TYPE_GOTHIK, SPECIAL);
-            DoScriptText(EMOTE_GATE, m_creature);
+            m_instance->SetData(TYPE_GOTHIK, SPECIAL);
+            DoBroadcastText(EMOTE_GATE, m_creature);
         }
     }
 
     bool HasPlayersInLeftSide() const
     {
-        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+        Map::PlayerList const& players = m_instance->instance->GetPlayers();
 
-        if (lPlayers.isEmpty())
+        if (players.isEmpty())
             return false;
 
-        for (const auto& lPlayer : lPlayers)
-        {
-            if (Player* pPlayer = lPlayer.getSource())
-            {
-                if (!m_pInstance->IsInRightSideGothArea(pPlayer) && pPlayer->IsAlive())
+        for (const auto& playerRef : players)
+            if (Player* player = playerRef.getSource())
+                if (!m_instance->IsInRightSideGothArea(player) && player->IsAlive())
                     return true;
-            }
-        }
 
         return false;
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void EnterEvadeMode() override
     {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_KILL, m_creature);
+        BossAI::EnterEvadeMode();
+        m_creature->SetRespawnDelay(30 * IN_MILLISECONDS, true);
+        m_creature->ForcedDespawn();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustSummoned(Creature* summoned) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOTHIK, DONE);
+        m_summonedAddGuids.push_back(summoned->GetObjectGuid());
     }
 
-    void JustReachedHome() override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOTHIK, FAIL);
-    }
-
-    void PrepareSummonPlaces()
-    {
-        CreatureList lSummonList;
-        m_pInstance->GetGothSummonPointCreatures(lSummonList, true);
-
-        if (lSummonList.empty())
-            return;
-
-        // Trainees and Rider
-        uint8 index = 0;
-        uint8 uiTraineeCount = m_bIsRegularMode ? 2 : 3;
-        lSummonList.sort(ObjectDistanceOrder(m_creature));
-        for (auto& itr : lSummonList)
+        switch (summoned->GetEntry())
         {
-            if (itr)
+            // Wrong caster, it expected to be pSummoned.
+            // Mangos deletes the spell event at caster death, so for delayed spell like this
+            // it's just a workaround. Does not affect other than the visual though (+ spell takes longer to "travel")
+            case NPC_UNREL_TRAINEE:         summoned->CastSpell(nullptr, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_UNREL_DEATH_KNIGHT:    summoned->CastSpell(nullptr, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_UNREL_RIDER:           summoned->CastSpell(nullptr, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED); break;
+        }
+    }
+
+    void StartTraineeSummons()
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_TRAINEE_PERIODIC, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+
+    void StartKnightSummons()
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_KNIGHT_PERIODIC, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+
+    void StartRiderSummons()
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_MOUNTED_KNIGHT_PERIODIC, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+
+    void HandleOpenGates()
+    {
+        ProcessCentralDoor();
+        Map::PlayerList const& players = m_instance->instance->GetPlayers();
+        for (const auto& playerRef : players)
+        {
+            if (Player* player = playerRef.getSource())
             {
-                if (uiTraineeCount == 0)
-                    break;
-                if (index == 1)
-                    m_lRiderSummonPosGuids.push_back(itr->GetObjectGuid());
-                else
+                for (ObjectGuid guid : m_summonedAddGuids)
                 {
-                    m_lTraineeSummonPosGuids.push_back(itr->GetObjectGuid());
-                    --uiTraineeCount;
-                }
-                index++;
-            }
-        }
-
-        // DeathKnights
-        uint8 uiDeathKnightCount = m_bIsRegularMode ? 1 : 2;
-        lSummonList.sort(ObjectDistanceOrderReversed(m_creature));
-        for (auto& itr : lSummonList)
-        {
-            if (itr)
-            {
-                if (uiDeathKnightCount == 0)
-                    break;
-                m_lDeathKnightSummonPosGuids.push_back(itr->GetObjectGuid());
-                --uiDeathKnightCount;
-            }
-        }
-    }
-
-    void SummonAdds(bool /*bRightSide*/, uint32 uiSummonEntry)
-    {
-        GuidList* plSummonPosGuids;
-        switch (uiSummonEntry)
-        {
-            case NPC_UNREL_TRAINEE:      plSummonPosGuids = &m_lTraineeSummonPosGuids;     break;
-            case NPC_UNREL_DEATH_KNIGHT: plSummonPosGuids = &m_lDeathKnightSummonPosGuids; break;
-            case NPC_UNREL_RIDER:        plSummonPosGuids = &m_lRiderSummonPosGuids;       break;
-            default:
-                return;
-        }
-        if (plSummonPosGuids->empty())
-            return;
-
-        for (auto& plSummonPosGuid : *plSummonPosGuids)
-        {
-            if (Creature* pPos = m_creature->GetMap()->GetCreature(plSummonPosGuid))
-                m_creature->SummonCreature(uiSummonEntry, pPos->GetPositionX(), pPos->GetPositionY(), pPos->GetPositionZ(), pPos->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        m_lSummonedAddGuids.push_back(pSummoned->GetObjectGuid());
-        if (!IsCentralDoorClosed())
-            pSummoned->SetInCombatWithZone();
-    }
-
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        m_lSummonedAddGuids.remove(pSummoned->GetObjectGuid());
-
-        if (!m_pInstance)
-            return;
-
-        if (Creature* pAnchor = m_pInstance->GetClosestAnchorForGoth(pSummoned, true))
-        {
-            switch (pSummoned->GetEntry())
-            {
-                // Wrong caster, it expected to be pSummoned.
-                // Mangos deletes the spell event at caster death, so for delayed spell like this
-                // it's just a workaround. Does not affect other than the visual though (+ spell takes longer to "travel")
-                case NPC_UNREL_TRAINEE:         m_creature->CastSpell(pAnchor, SPELL_A_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
-                case NPC_UNREL_DEATH_KNIGHT:    m_creature->CastSpell(pAnchor, SPELL_B_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
-                case NPC_UNREL_RIDER:           m_creature->CastSpell(pAnchor, SPELL_C_TO_ANCHOR_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pSummoned->GetObjectGuid()); break;
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        switch (m_uiPhase)
-        {
-            case PHASE_SPEECH:
-                if (m_uiSpeechTimer < uiDiff)
-                {
-                    switch (m_uiSpeech)
+                    if (Creature* add = m_creature->GetMap()->GetCreature(guid))
                     {
-                        case 1: DoScriptText(SAY_SPEECH_1, m_creature); m_uiSpeechTimer = 4 * IN_MILLISECONDS; break;
-                        case 2: DoScriptText(SAY_SPEECH_2, m_creature); m_uiSpeechTimer = 6 * IN_MILLISECONDS; break;
-                        case 3: DoScriptText(SAY_SPEECH_3, m_creature); m_uiSpeechTimer = 5 * IN_MILLISECONDS; break;
-                        case 4: DoScriptText(SAY_SPEECH_4, m_creature); m_uiPhase = PHASE_BALCONY; break;
-                    }
-                    m_uiSpeech++;
-                }
-                else
-                    m_uiSpeechTimer -= uiDiff;
-
-            // No break here
-
-            case PHASE_BALCONY:                            // Do summoning
-                if (m_uiTraineeTimer < uiDiff)
-                {
-                    SummonAdds(true, NPC_UNREL_TRAINEE);
-                    m_uiTraineeTimer = 20 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiTraineeTimer -= uiDiff;
-                if (m_uiDeathKnightTimer < uiDiff)
-                {
-                    SummonAdds(true, NPC_UNREL_DEATH_KNIGHT);
-                    m_uiDeathKnightTimer = 25 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiDeathKnightTimer -= uiDiff;
-                if (m_uiRiderTimer < uiDiff)
-                {
-                    SummonAdds(true, NPC_UNREL_RIDER);
-                    m_uiRiderTimer = 30 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiRiderTimer -= uiDiff;
-
-                if (m_uiPhaseTimer < uiDiff)
-                {
-                    m_uiPhase = PHASE_STOP_SUMMONING;
-                    m_uiPhaseTimer = 27 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiPhaseTimer -= uiDiff;
-
-                break;
-
-            case PHASE_STOP_SUMMONING:
-                if (m_uiPhaseTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RIGHT, CAST_TRIGGERED) == CAST_OK)
-                    {
-                        m_uiPhase = m_pInstance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
-
-                        DoScriptText(SAY_TELEPORT, m_creature);
-                        DoScriptText(EMOTE_TO_FRAY, m_creature);
-
-                        // Remove Immunity
-                        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
-
-                        DoResetThreat();
-                        m_creature->SetInCombatWithZone();
-                    }
-                }
-                else
-                    m_uiPhaseTimer -= uiDiff;
-
-                break;
-
-            case PHASE_TELEPORTING:                         // Phase is only reached if m_pInstance is valid
-                if (m_uiTeleportTimer < uiDiff)
-                {
-                    uint32 uiTeleportSpell = m_pInstance->IsInRightSideGothArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
-                    if (DoCastSpellIfCan(m_creature, uiTeleportSpell) == CAST_OK)
-                    {
-                        m_uiTeleportTimer = 20 * IN_MILLISECONDS;
-                        m_uiShadowboltTimer = 2 * IN_MILLISECONDS;
-                    }
-                }
-                else
-                    m_uiTeleportTimer -= uiDiff;
-
-                if (m_creature->GetHealthPercent() <= 30.0f)
-                {
-                    m_uiPhase = PHASE_STOP_TELEPORTING;
-                    ProcessCentralDoor();
-                    // as the doors now open, recheck whether mobs are standing around
-                    m_uiControlZoneTimer = 1;
-                }
-            // no break here
-
-            case PHASE_STOP_TELEPORTING:
-                if (m_uiHarvestSoulTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
-                        m_uiHarvestSoulTimer = 15 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiHarvestSoulTimer -= uiDiff;
-
-                if (m_uiShadowboltTimer)
-                {
-                    if (m_uiShadowboltTimer <= uiDiff)
-                        m_uiShadowboltTimer = 0;
-                    else
-                        m_uiShadowboltTimer -= uiDiff;
-                }
-                // Shadowbold cooldown finished, cast when ready
-                else if (!m_creature->IsNonMeleeSpellCasted(true))
-                {
-                    // Select valid target
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_SHADOWBOLT, SELECT_FLAG_IN_LOS))
-                        DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H);
-                }
-
-                break;
-        }
-
-        // Control Check, if Death zone empty
-        if (m_uiControlZoneTimer)
-        {
-            if (m_uiControlZoneTimer <= uiDiff)
-            {
-                m_uiControlZoneTimer = 0;
-
-                if (m_pInstance && !HasPlayersInLeftSide())
-                {
-                    ProcessCentralDoor();
-                    for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
-                    {
-                        if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
+                        // attack other side
+                        if (add->IsAlive() && m_instance->IsInRightSideGothArea(player) != m_instance->IsInRightSideGothArea(add))
                         {
-                            if (!pCreature->IsInCombat())
-                                pCreature->SetInCombatWithZone();
+                            add->AddThreat(player);
                         }
                     }
                 }
             }
-            else
-                m_uiControlZoneTimer -= uiDiff;
         }
+
+        for (ObjectGuid guid : m_summonedAddGuids)
+        {
+            if (Creature* add = m_creature->GetMap()->GetCreature(guid))
+            {
+                if (add->IsAlive() && !add->GetVictim()) // spawn that doesnt have target - attack closest
+                    add->AI()->AttackClosestEnemy();
+            }
+        }
+    }
+
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
+    {
+        switch (action)
+        {
+            case GOTHIK_TELEPORT: return 20s;
+        }
+        return 0s;
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case GOTHIK_STOP_TELE:
+            {
+                if (m_creature->GetHealthPercent() <= 30.0f)
+                {
+                    m_uiPhase = PHASE_STOP_TELEPORTING;
+                    DisableCombatAction(action);
+                }
+                return;
+            }
+            case GOTHIK_TELEPORT:
+            {
+                uint32 teleportSpell = m_instance->IsInRightSideGothArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
+                if (DoCastSpellIfCan(nullptr, teleportSpell) == CAST_OK)
+                    break;
+                return;
+            }
+        }
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
-UnitAI* GetAI_boss_gothik(Creature* pCreature)
+struct ToAnchorOne : public SpellScript
 {
-    return new boss_gothikAI(pCreature);
-}
-
-bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    if (uiEffIndex != EFFECT_INDEX_0 || pCreatureTarget->GetEntry() != NPC_SUB_BOSS_TRIGGER)
-        return true;
-
-    instance_naxxramas* pInstance = (instance_naxxramas*)pCreatureTarget->GetInstanceData();
-
-    if (!pInstance)
-        return true;
-
-    switch (uiSpellId)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        case SPELL_A_TO_ANCHOR_1:                           // trigger mobs at high right side
-        case SPELL_B_TO_ANCHOR_1:
-        case SPELL_C_TO_ANCHOR_1:
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(spell->GetCaster()->GetInstanceData());
+        if (!instance)
+            return;
+
+        uint32 nextAnchor = 0;
+        switch (spell->m_spellInfo->Id)
         {
-            if (Creature* pAnchor2 = pInstance->GetClosestAnchorForGoth(pCreatureTarget, false))
-            {
-                uint32 uiTriggered = SPELL_A_TO_ANCHOR_2;
-
-                if (uiSpellId == SPELL_B_TO_ANCHOR_1)
-                    uiTriggered = SPELL_B_TO_ANCHOR_2;
-                else if (uiSpellId == SPELL_C_TO_ANCHOR_1)
-                    uiTriggered = SPELL_C_TO_ANCHOR_2;
-
-                pCreatureTarget->CastSpell(pAnchor2, uiTriggered, TRIGGERED_OLD_TRIGGERED);
-            }
-
-            return true;
+            case SPELL_A_TO_ANCHOR_1: nextAnchor = SPELL_A_TO_ANCHOR_2; break;
+            case SPELL_B_TO_ANCHOR_1: nextAnchor = SPELL_B_TO_ANCHOR_2; break;
+            case SPELL_C_TO_ANCHOR_1: nextAnchor = SPELL_C_TO_ANCHOR_2; break;
         }
-        case SPELL_A_TO_ANCHOR_2:                           // trigger mobs at high left side
-        case SPELL_B_TO_ANCHOR_2:
-        case SPELL_C_TO_ANCHOR_2:
-        {
-            CreatureList lTargets;
-            pInstance->GetGothSummonPointCreatures(lTargets, false);
 
-            if (!lTargets.empty())
-            {
-                CreatureList::iterator itr = lTargets.begin();
-                uint32 uiPosition = urand(0, lTargets.size() - 1);
-                advance(itr, uiPosition);
-
-                if (Creature* pTarget = (*itr))
-                {
-                    uint32 uiTriggered = SPELL_A_TO_SKULL;
-
-                    if (uiSpellId == SPELL_B_TO_ANCHOR_2)
-                        uiTriggered = SPELL_B_TO_SKULL;
-                    else if (uiSpellId == SPELL_C_TO_ANCHOR_2)
-                        uiTriggered = SPELL_C_TO_SKULL;
-
-                    pCreatureTarget->CastSpell(pTarget, uiTriggered, TRIGGERED_OLD_TRIGGERED);
-                }
-            }
-            return true;
-        }
-        case SPELL_A_TO_SKULL:                              // final destination trigger mob
-        case SPELL_B_TO_SKULL:
-        case SPELL_C_TO_SKULL:
-        {
-            if (Creature* pGoth = pInstance->GetSingleCreatureFromStorage(NPC_GOTHIK))
-            {
-                uint32 uiNpcEntry = NPC_SPECT_TRAINEE;
-
-                if (uiSpellId == SPELL_B_TO_SKULL)
-                    uiNpcEntry = NPC_SPECT_DEATH_KNIGHT;
-                else if (uiSpellId == SPELL_C_TO_SKULL)
-                    uiNpcEntry = NPC_SPECT_RIDER;
-
-                pGoth->SummonCreature(uiNpcEntry, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
-
-                if (uiNpcEntry == NPC_SPECT_RIDER)
-                    pGoth->SummonCreature(NPC_SPECT_HORSE, pCreatureTarget->GetPositionX(), pCreatureTarget->GetPositionY(), pCreatureTarget->GetPositionZ(), pCreatureTarget->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0);
-            }
-            return true;
-        }
+        if (nextAnchor)
+            spell->GetUnitTarget()->CastSpell(nullptr, nextAnchor, TRIGGERED_OLD_TRIGGERED);
     }
+};
 
-    return true;
+struct ToAnchorTwo : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(spell->GetCaster()->GetInstanceData());
+        if (!instance)
+            return;
+
+        uint32 choiceId = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case SPELL_A_TO_ANCHOR_2: choiceId = SPELL_CHOOSE_RANDOM_SKULL_PILE_A; break;
+            case SPELL_B_TO_ANCHOR_2: choiceId = SPELL_CHOOSE_RANDOM_SKULL_PILE_B; break;
+            case SPELL_C_TO_ANCHOR_2: choiceId = SPELL_CHOOSE_RANDOM_SKULL_PILE_C; break;
+        }
+
+        if (choiceId)
+            spell->GetUnitTarget()->CastSpell(nullptr, choiceId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct ChooseRandomSkullPile : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        uint32 nextAnchor = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case SPELL_CHOOSE_RANDOM_SKULL_PILE_A: nextAnchor = SPELL_A_TO_SKULL; break;
+            case SPELL_CHOOSE_RANDOM_SKULL_PILE_B: nextAnchor = SPELL_B_TO_SKULL; break;
+            case SPELL_CHOOSE_RANDOM_SKULL_PILE_C: nextAnchor = SPELL_C_TO_SKULL; break;
+        }
+
+        if (nextAnchor)
+            spell->GetCaster()->CastSpell(spell->GetUnitTarget(), nextAnchor, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct AnchorToSkull : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget())
+            return;
+
+        instance_naxxramas* instance = dynamic_cast<instance_naxxramas*>(spell->GetCaster()->GetInstanceData());
+        if (!instance)
+            return;
+
+        uint32 summonSpellId = 0;
+        uint32 summonSpellId2 = 0;
+        switch (spell->m_spellInfo->Id)
+        {
+            case SPELL_A_TO_SKULL: summonSpellId = SPELL_SUMMON_SPECTRAL_TRAINEE; break;
+            case SPELL_B_TO_SKULL: summonSpellId = SPELL_SUMMON_SPECTRAL_KNIGHT; break;
+            case SPELL_C_TO_SKULL: summonSpellId = SPELL_SUMMON_SPECTRAL_RIVENDARE; break;
+        }
+
+        if (summonSpellId)
+            spell->GetUnitTarget()->CastSpell(nullptr, summonSpellId, TRIGGERED_OLD_TRIGGERED);
+    }
 };
 
 void AddSC_boss_gothik()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_gothik";
-    pNewScript->GetAI = &GetAI_boss_gothik;
+    pNewScript->GetAI = &GetNewAIInstance<boss_gothikAI>;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "spell_anchor";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_anchor;
-    pNewScript->RegisterSelf();
+    RegisterSpellScript<ToAnchorOne>("spell_to_anchor_one");
+    RegisterSpellScript<ToAnchorTwo>("spell_to_anchor_two");
+    RegisterSpellScript<ChooseRandomSkullPile>("spell_choose_random_skull_pile");
+    RegisterSpellScript<AnchorToSkull>("spell_anchor_to_skull");
 }
