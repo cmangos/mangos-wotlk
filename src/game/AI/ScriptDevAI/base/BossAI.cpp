@@ -35,7 +35,7 @@ void BossAI::AddOnAggroText(uint32 text)
 void BossAI::JustDied(Unit* killer)
 {
     if (!m_onKilledTexts.empty())
-        DoBroadcastText(m_onKilledTexts[urand(0, m_onAggroTexts.size() - 1)], m_creature, killer);
+        DoBroadcastText(m_onKilledTexts[urand(0, m_onKilledTexts.size() - 1)], m_creature, killer);
     if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
