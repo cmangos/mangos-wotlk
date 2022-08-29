@@ -22,46 +22,46 @@ SDCategory: Naxxramas
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
 {
     // ***** Yells *****
     // lady blaumeux
-    SAY_BLAU_AGGRO          = -1533044,
-    SAY_BLAU_SPECIAL        = -1533048,
-    SAY_BLAU_SLAY           = -1533049,
-    SAY_BLAU_DEATH          = -1533050,
-    EMOTE_UNYIELDING_PAIN   = -1533156,
+    SAY_BLAU_AGGRO          = 13010,
+    SAY_BLAU_SPECIAL        = 13013,
+    SAY_BLAU_SLAY           = 13012,
+    SAY_BLAU_DEATH          = 13011,
+    EMOTE_UNYIELDING_PAIN   = 33087,
 
     // baron rivendare
-    SAY_RIVE_AGGRO1         = -1533065,
-    SAY_RIVE_AGGRO2         = -1533066,
-    SAY_RIVE_AGGRO3         = -1533067,
-    SAY_RIVE_SLAY1          = -1533068,
-    SAY_RIVE_SLAY2          = -1533069,
-    SAY_RIVE_SPECIAL        = -1533070,
-    SAY_RIVE_DEATH          = -1533074,
+    SAY_RIVE_AGGRO1         = 13051,
+    SAY_RIVE_AGGRO2         = 13052,
+    SAY_RIVE_AGGRO3         = 13053,
+    SAY_RIVE_SLAY1          = 13055,
+    SAY_RIVE_SLAY2          = 13056,
+    SAY_RIVE_SPECIAL        = 13057,
+    SAY_RIVE_DEATH          = 33116,
 
     // thane korthazz
-    SAY_KORT_AGGRO          = -1533051,
-    SAY_KORT_SPECIAL        = -1533055,
-    SAY_KORT_SLAY           = -1533056,
-    SAY_KORT_DEATH          = -1533057,
+    SAY_KORT_AGGRO          = 13034,
+    SAY_KORT_SPECIAL        = 13037,
+    SAY_KORT_SLAY           = 13036,
+    SAY_KORT_DEATH          = 13035,
 
     // sir zeliek
-    SAY_ZELI_AGGRO          = -1533058,
-    SAY_ZELI_SPECIAL        = -1533062,
-    SAY_ZELI_SLAY           = -1533063,
-    SAY_ZELI_DEATH          = -1533064,
-    EMOTE_CONDEMATION       = -1533157,
+    SAY_ZELI_AGGRO          = 13097,
+    SAY_ZELI_SPECIAL        = 13100,
+    SAY_ZELI_SLAY           = 13099,
+    SAY_ZELI_DEATH          = 13098,
+    EMOTE_CONDEMATION       = 33088,
 
     MAX_MARK_STACKS         = 100,              // Berserk is applied once 100 marks are casted
 
     // ***** Spells *****
     // all horsemen
-    // SPELL_SHIELDWALL     = 29061,            // not used in 3.x.x
-    SPELL_BESERK            = 26662,
+    SPELL_BERSERK           = 26662,
     SPELL_ACHIEV_CHECK      = 59450,
 
     // lady blaumeux
@@ -70,7 +70,7 @@ enum
     SPELL_VOID_ZONE_H       = 57463,
     SPELL_SHADOW_BOLT       = 57374,
     SPELL_SHADOW_BOLT_H     = 57464,
-    SPELL_UNYILDING_PAIN    = 57381,
+    SPELL_UNYIELDING_PAIN    = 57381,
 
     // baron rivendare
     SPELL_MARK_OF_RIVENDARE = 28834,
@@ -89,12 +89,6 @@ enum
     SPELL_HOLY_BOLT         = 57376,
     SPELL_HOLY_BOLT_H       = 57465,
     SPELL_CONDEMNATION      = 57377,
-
-    // horseman spirits (not used in 3.x.x)
-    // NPC_SPIRIT_OF_BLAUMEUX = 16776,
-    // NPC_SPIRIT_OF_MOGRAINE = 16775,
-    // NPC_SPIRIT_OF_KORTHAZZ = 16778,
-    // NPC_SPIRIT_OF_ZELIREK  = 16777
 };
 
 static const float aHorseMenMoveCoords[4][3] =
@@ -105,523 +99,392 @@ static const float aHorseMenMoveCoords[4][3] =
     {2517.8f, -2896.6f,  241.28f},         // sir zeliek
 };
 
-struct boss_lady_blaumeuxAI : public ScriptedAI
+enum BlaumeuxActions
 {
-    boss_lady_blaumeuxAI(Creature* pCreature) : ScriptedAI(pCreature)
+    BLAUMEUX_UNYIELDING_PAIN,
+    BLAUMEUX_SPECIAL,
+    BLAUMEUX_ACTIONS_MAX,
+};
+
+struct boss_lady_blaumeuxAI : public BossAI
+{
+    boss_lady_blaumeuxAI(Creature* creature) : BossAI(creature, BLAUMEUX_ACTIONS_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        SetDataType(TYPE_FOUR_HORSEMEN);
+        AddOnKillText(SAY_BLAU_SLAY);
+        AddOnDeathText(SAY_BLAU_DEATH);
+        AddOnAggroText(SAY_BLAU_AGGRO);
+        AddCombatAction(BLAUMEUX_UNYIELDING_PAIN, 15s);
+        AddCombatAction(BLAUMEUX_SPECIAL, 5s, 120s);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    bool m_bIsCornerMovement;
-    uint32 m_uiMarkTimer;
-    uint32 m_uiVoidZoneTimer;
-    uint32 m_uiShadowBoltTimer;
-    uint32 m_uiMarkCounter;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
     void Reset() override
     {
-        m_uiMarkTimer       = 20000;
-        m_uiVoidZoneTimer   = 15000;
-        m_uiShadowBoltTimer = 10000;
-        m_uiMarkCounter     = 0;
-        m_bIsCornerMovement = true;
+        BossAI::Reset();
+        SetCombatScriptStatus(false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_BLAU_AGGRO, m_creature);
-
+        BossAI::Aggro();
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
         m_creature->SetWalk(false);
         m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[0][0], aHorseMenMoveCoords[0][1], aHorseMenMoveCoords[0][2]);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_BLAU_SLAY, m_creature);
-    }
+        DoBroadcastText(SAY_BLAU_DEATH, m_creature);
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_BLAU_DEATH, m_creature);
-
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
+            m_instance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
 
             // Cast achiev check for last boss killed
-            if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
+            if (m_instance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                m_creature->CastSpell(nullptr, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
-    void JustReachedHome() override
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
+        if (motionType != POINT_MOTION_TYPE || !pointId)
+            return;
+
+        SetCombatScriptStatus(false);
+        AttackClosestEnemy();
     }
 
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        // Stop moving when it reaches the corner
-        m_bIsCornerMovement = false;
-        m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MoveIdle();
+        switch (action)
+        {
+            case BLAUMEUX_SPECIAL: return RandomTimer(5s, 120s);
+            case BLAUMEUX_UNYIELDING_PAIN: return 5s;
+            default: return 0s;
+        }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Don't attack while moving
-        if (m_bIsCornerMovement)
-            return;
-
-        if (m_uiMarkTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_BLAUMEUX) == CAST_OK)
+            case BLAUMEUX_UNYIELDING_PAIN:
+                if (!m_creature->IsWithinCombatDist(m_creature->GetVictim(), 55.0f))
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_UNYIELDING_PAIN) == CAST_OK)
+                    {
+                        DoBroadcastText(EMOTE_UNYIELDING_PAIN, m_creature);
+                        break;
+                    }
+                }
+                return;
+            case BLAUMEUX_SPECIAL:
             {
-                m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
-                if (m_uiMarkCounter == MAX_MARK_STACKS)
-                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                DoBroadcastText(SAY_BLAU_SPECIAL, m_creature);
+                break;
             }
         }
-        else
-            m_uiMarkTimer -= uiDiff;
-
-        if (m_uiVoidZoneTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_VOID_ZONE, SELECT_FLAG_PLAYER);
-            if (pTarget)
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VOID_ZONE : SPELL_VOID_ZONE_H) == CAST_OK)
-                    m_uiVoidZoneTimer = 15000;
-            }
-        }
-        else
-            m_uiVoidZoneTimer -= uiDiff;
-
-        if (m_uiShadowBoltTimer < uiDiff)
-        {
-            // If we can find a target in range of 45.0f, then cast Shadowbolt
-            if (m_creature->IsWithinDist(m_creature->GetVictim(), 45.0f))
-                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
-            else
-            {
-                DoCastSpellIfCan(m_creature, SPELL_UNYILDING_PAIN);
-                DoScriptText(EMOTE_UNYIELDING_PAIN, m_creature);
-            }
-            m_uiShadowBoltTimer = urand(2000, 3000);
-        }
-        else
-            m_uiShadowBoltTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
-UnitAI* GetAI_boss_lady_blaumeux(Creature* pCreature)
+enum RivendareActions
 {
-    return new boss_lady_blaumeuxAI(pCreature);
-}
+    RIVENDARE_SPECIAL,
+    RIVENDARE_ACTIONS_MAX,
+};
 
-struct boss_rivendare_naxxAI : public ScriptedAI
+struct boss_rivendare_naxxAI : public BossAI
 {
-    boss_rivendare_naxxAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_rivendare_naxxAI(Creature* creature) : BossAI(creature, RIVENDARE_ACTIONS_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        SetDataType(TYPE_FOUR_HORSEMEN);
+        AddOnKillText(SAY_RIVE_SLAY1, SAY_RIVE_SLAY2);
+        AddOnDeathText(SAY_RIVE_DEATH);
+        AddOnAggroText(SAY_RIVE_AGGRO1, SAY_RIVE_AGGRO2, SAY_RIVE_AGGRO3);
+        AddCombatAction(RIVENDARE_SPECIAL, 5s, 120s);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
-    bool m_bIsCornerMovement;
-    uint32 m_uiMarkTimer;
-    uint32 m_uiUnholyShadowTimer;
     uint32 m_uiMarkCounter;
 
     void Reset() override
     {
-        m_uiMarkTimer         = 20000;
-        m_uiUnholyShadowTimer = 15000;
-        m_uiMarkCounter       = 0;
-        m_bIsCornerMovement   = true;
+        BossAI::Reset();
+        SetCombatScriptStatus(false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_RIVE_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_RIVE_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_RIVE_AGGRO3, m_creature); break;
-        }
-
+        BossAI::Aggro();
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
         m_creature->SetWalk(false);
         m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[1][0], aHorseMenMoveCoords[1][1], aHorseMenMoveCoords[1][2]);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_RIVE_SLAY1 : SAY_RIVE_SLAY2, m_creature);
-    }
+        DoBroadcastText(SAY_RIVE_DEATH, m_creature);
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_RIVE_DEATH, m_creature);
-
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
+            m_instance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
 
             // Cast achiev check for last boss killed
-            if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
+            if (m_instance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                m_creature->CastSpell(nullptr, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
-    void JustReachedHome() override
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+        if (motionType != POINT_MOTION_TYPE || !pointId)
             return;
 
         // Start moving when it reaches the corner
+        SetCombatScriptStatus(false);
         SetCombatMovement(true);
-        m_bIsCornerMovement = false;
-        m_creature->GetMotionMaster()->Clear();
-        if (m_creature->GetVictim())
-            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+        AttackClosestEnemy();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Don't attack while moving
-        if (m_bIsCornerMovement)
-            return;
-
-        if (m_uiMarkTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_RIVENDARE) == CAST_OK)
+            case RIVENDARE_SPECIAL: return RandomTimer(5s, 120s);
+            default: return 0s;
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case RIVENDARE_SPECIAL:
             {
-                m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
-                if (m_uiMarkCounter == MAX_MARK_STACKS)
-                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                DoBroadcastText(SAY_RIVE_SPECIAL, m_creature);
+                break;
             }
         }
-        else
-            m_uiMarkTimer -= uiDiff;
-
-        if (m_uiUnholyShadowTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_UNHOLY_SHADOW : SPELL_UNHOLY_SHADOW_H) == CAST_OK)
-                m_uiUnholyShadowTimer = 15000;
-        }
-        else
-            m_uiUnholyShadowTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
-UnitAI* GetAI_boss_rivendare_naxx(Creature* pCreature)
+enum KorthazActions
 {
-    return new boss_rivendare_naxxAI(pCreature);
-}
+    KORTHAZ_SPECIAL,
+    KORTHAZ_ACTIONS_MAX,
+};
 
-struct boss_thane_korthazzAI : public ScriptedAI
+struct boss_thane_korthazzAI : public BossAI
 {
-    boss_thane_korthazzAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_thane_korthazzAI(Creature* creature) : BossAI(creature, KORTHAZ_ACTIONS_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetMap()->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        SetDataType(TYPE_FOUR_HORSEMEN);
+        AddOnKillText(SAY_KORT_SLAY);
+        AddOnDeathText(SAY_KORT_DEATH);
+        AddOnAggroText(SAY_KORT_AGGRO);
+        AddCombatAction(KORTHAZ_SPECIAL, 5s, 120s);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    bool m_bIsCornerMovement;
-    uint32 m_uiMarkTimer;
-    uint32 m_uiMeteorTimer;
-    uint32 m_uiMarkCounter;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
     void Reset() override
     {
-        m_uiMarkTimer       = 20000;
-        m_uiMeteorTimer     = 30000;
-        m_uiMarkCounter     = 0;
-        m_bIsCornerMovement = true;
+        BossAI::Reset();
+        SetCombatScriptStatus(false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_KORT_AGGRO, m_creature);
-
+        BossAI::Aggro();
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
         m_creature->SetWalk(false);
         m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[2][0], aHorseMenMoveCoords[2][1], aHorseMenMoveCoords[2][2]);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_KORT_SLAY, m_creature);
-    }
+        DoBroadcastText(SAY_KORT_DEATH, m_creature);
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_KORT_DEATH, m_creature);
-
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
+            m_instance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
 
             // Cast achiev check for last boss killed
-            if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
+            if (m_instance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                m_creature->CastSpell(nullptr, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
-    void JustReachedHome() override
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+        if (motionType != POINT_MOTION_TYPE || !pointId)
             return;
 
         // Start moving when it reaches the corner
+        SetCombatScriptStatus(false);
         SetCombatMovement(true);
-        m_bIsCornerMovement = false;
-        m_creature->GetMotionMaster()->Clear();
-        if (m_creature->GetVictim())
-            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+        AttackClosestEnemy();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Don't attack while moving
-        if (m_bIsCornerMovement)
-            return;
-
-        if (m_uiMarkTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_KORTHAZZ) == CAST_OK)
+            case KORTHAZ_SPECIAL: return RandomTimer(5s, 120s);
+            default: return 0s;
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case KORTHAZ_SPECIAL:
             {
-                m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
-                if (m_uiMarkCounter == MAX_MARK_STACKS)
-                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                DoBroadcastText(SAY_KORT_SPECIAL, m_creature);
+                break;
             }
         }
-        else
-            m_uiMarkTimer -= uiDiff;
-
-        if (m_uiMeteorTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_METEOR : SPELL_METEOR_H) == CAST_OK)
-                m_uiMeteorTimer = 20000;
-        }
-        else
-            m_uiMeteorTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
-UnitAI* GetAI_boss_thane_korthazz(Creature* pCreature)
+enum ZeliekActions
 {
-    return new boss_thane_korthazzAI(pCreature);
-}
+    ZELIEK_CONDEMNATION,
+    ZELIEK_SPECIAL,
+    ZELIEK_ACTIONS_MAX,
+};
 
-struct boss_sir_zeliekAI : public ScriptedAI
+struct boss_sir_zeliekAI : public BossAI
 {
-    boss_sir_zeliekAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_sir_zeliekAI(Creature* creature) : BossAI(creature, ZELIEK_ACTIONS_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        SetDataType(TYPE_FOUR_HORSEMEN);
+        AddOnKillText(SAY_ZELI_SLAY);
+        AddOnDeathText(SAY_ZELI_DEATH);
+        AddOnAggroText(SAY_ZELI_AGGRO);
+        AddCombatAction(ZELIEK_CONDEMNATION, 15s);
+        AddCombatAction(ZELIEK_SPECIAL, 5s, 120s);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    bool m_bIsCornerMovement;
-    uint32 m_uiMarkTimer;
-    uint32 m_uiHolyWrathTimer;
-    uint32 m_uiHolyBoltTimer;
-    uint32 m_uiMarkCounter;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
     void Reset() override
     {
-        m_uiMarkTimer       = 20000;
-        m_uiHolyWrathTimer  = 12000;
-        m_uiHolyBoltTimer   = 10000;
-        m_uiMarkCounter     = 0;
-        m_bIsCornerMovement = true;
+        BossAI::Reset();
+        SetCombatScriptStatus(false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_ZELI_AGGRO, m_creature);
-
+        BossAI::Aggro();
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
         m_creature->SetWalk(false);
         m_creature->GetMotionMaster()->MovePoint(1, aHorseMenMoveCoords[3][0], aHorseMenMoveCoords[3][1], aHorseMenMoveCoords[3][2]);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_ZELI_SLAY, m_creature);
-    }
+        DoBroadcastText(SAY_ZELI_DEATH, m_creature);
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_ZELI_DEATH, m_creature);
-
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
+            m_instance->SetData(TYPE_FOUR_HORSEMEN, SPECIAL);
 
             // Cast achiev check for last boss killed
-            if (m_pInstance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
-                m_creature->CastSpell(m_creature, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
+            if (m_instance->GetData(TYPE_FOUR_HORSEMEN) == DONE)
+                m_creature->CastSpell(nullptr, SPELL_ACHIEV_CHECK, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
-    void JustReachedHome() override
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_FOUR_HORSEMEN, FAIL);
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+        if (motionType != POINT_MOTION_TYPE || !pointId)
             return;
 
         // Stop moving when it reaches the corner
-        m_bIsCornerMovement = false;
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MoveIdle();
+        SetCombatScriptStatus(false);
+        AttackClosestEnemy();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Don't attack while moving
-        if (m_bIsCornerMovement)
-            return;
-
-        if (m_uiMarkTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_OF_ZELIEK) == CAST_OK)
+            case ZELIEK_SPECIAL: return RandomTimer(5s, 120s);
+            case ZELIEK_CONDEMNATION: return 5s;
+            default: return 0s;
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case ZELIEK_CONDEMNATION:
+                if (!m_creature->IsWithinCombatDist(m_creature->GetVictim(), 55.0f))
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_CONDEMNATION) == CAST_OK)
+                    {
+                        DoBroadcastText(EMOTE_CONDEMATION, m_creature);
+                        break;
+                    }
+                }
+                return;
+            case ZELIEK_SPECIAL:
             {
-                m_uiMarkCounter++;
-                m_uiMarkTimer = 12000;
-                if (m_uiMarkCounter == MAX_MARK_STACKS)
-                    DoCastSpellIfCan(m_creature, SPELL_BESERK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                DoBroadcastText(SAY_ZELI_SPECIAL, m_creature);
+                break;
             }
         }
-        else
-            m_uiMarkTimer -= uiDiff;
-
-        if (m_uiHolyWrathTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_HOLY_WRATH) == CAST_OK)
-                    m_uiHolyWrathTimer = 15000;
-            }
-        }
-        else
-            m_uiHolyWrathTimer -= uiDiff;
-
-        if (m_uiHolyBoltTimer < uiDiff)
-        {
-            // If we can find a target in range of 45.0f, then cast Holy Bolt
-            if (m_creature->IsWithinDist(m_creature->GetVictim(), 45.0f))
-                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_HOLY_BOLT : SPELL_HOLY_BOLT_H);
-            else
-            {
-                DoCastSpellIfCan(m_creature, SPELL_CONDEMNATION);
-                DoScriptText(EMOTE_CONDEMATION, m_creature);
-            }
-            m_uiHolyBoltTimer = urand(2000, 3000);
-        }
-        else
-            m_uiHolyBoltTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
-
-UnitAI* GetAI_boss_sir_zeliek(Creature* pCreature)
-{
-    return new boss_sir_zeliekAI(pCreature);
-}
 
 void AddSC_boss_four_horsemen()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_lady_blaumeux";
-    pNewScript->GetAI = &GetAI_boss_lady_blaumeux;
+    pNewScript->GetAI = &GetNewAIInstance<boss_lady_blaumeuxAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_rivendare_naxx";
-    pNewScript->GetAI = &GetAI_boss_rivendare_naxx;
+    pNewScript->GetAI = &GetNewAIInstance<boss_rivendare_naxxAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_thane_korthazz";
-    pNewScript->GetAI = &GetAI_boss_thane_korthazz;
+    pNewScript->GetAI = &GetNewAIInstance<boss_thane_korthazzAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_sir_zeliek";
-    pNewScript->GetAI = &GetAI_boss_sir_zeliek;
+    pNewScript->GetAI = &GetNewAIInstance<boss_sir_zeliekAI>;
     pNewScript->RegisterSelf();
 }

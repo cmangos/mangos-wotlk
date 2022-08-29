@@ -21,8 +21,8 @@ SDComment:
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
