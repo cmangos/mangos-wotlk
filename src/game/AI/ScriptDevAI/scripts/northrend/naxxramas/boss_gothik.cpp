@@ -21,22 +21,24 @@ SDComment: Prevent Gothik from turning and "in combat state" while on balcony
 SDCategory: Naxxramas
 EndScriptData */
 
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/include/sc_creature.h"
 #include "naxxramas.h"
 
 enum
 {
-    SAY_SPEECH_1                = -1533040,
-    SAY_SPEECH_2                = -1533140,
-    SAY_SPEECH_3                = -1533141,
-    SAY_SPEECH_4                = -1533142,
+    SAY_SPEECH_1                = -1533040, // 13030
+    SAY_SPEECH_2                = -1533140, // 13031
+    SAY_SPEECH_3                = -1533141, // 13032
+    SAY_SPEECH_4                = -1533142, // 13033
 
-    SAY_KILL                    = -1533041,
-    SAY_DEATH                   = -1533042,
-    SAY_TELEPORT                = -1533043,
+    SAY_KILL                    = 13027,
+    SAY_DEATH                   = 13026,
+    SAY_TELEPORT                = 13028,
 
-    EMOTE_TO_FRAY               = -1533138,
-    EMOTE_GATE                  = -1533139,
+    EMOTE_TO_FRAY               = 32306,
+    EMOTE_GATE                  = 32307,
 
     PHASE_SPEECH                = 0,
     PHASE_BALCONY               = 1,
@@ -68,18 +70,56 @@ enum eSpellDummy
     SPELL_C_TO_SKULL        = 27937
 };
 
-struct boss_gothikAI : public ScriptedAI
+static const DialogueEntry aIntroDialogue[] =
 {
-    boss_gothikAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {NPC_GOTHIK,            0, 1000},
+    {SAY_SPEECH_1, NPC_GOTHIK, 4000},
+    {SAY_SPEECH_2, NPC_GOTHIK, 6000},
+    {SAY_SPEECH_3, NPC_GOTHIK, 5000},
+    {SAY_SPEECH_4, NPC_GOTHIK,    0},
+    {0, 0, 0},
+};
+
+enum GothikActions
+{
+    GOTHIK_SUMMON_TRAINEE,
+    GOTHIK_SUMMON_DEATH_KNIGHT,
+    GOTHIK_SUMMON_RIDER,
+    GOTHIK_SHADOW_BOLT,
+    GOTHIK_HARVEST_SOUL,
+    GOTHIK_TELEPORT,
+    GOTHIK_GROUND_PHASE,
+    GOTHIK_OPEN_GATES,
+    GOTHIK_ACTIONS_MAX,
+    GOTHIK_CONTROL_ZONES,
+    GOTHIK_START_PHASE,
+};
+
+struct boss_gothikAI : public BossAI, private DialogueHelper
+{
+    boss_gothikAI(Creature* creature) : BossAI(creature, GOTHIK_ACTIONS_MAX),
+    m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+    DialogueHelper(aIntroDialogue)
     {
-        m_pInstance = (instance_naxxramas*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        SetCombatMovement(false);
+        SetDataType(TYPE_GOTHIK);
+        AddOnKillText(SAY_KILL);
+        AddOnDeathText(SAY_DEATH);
+        AddCombatAction(GOTHIK_SUMMON_TRAINEE, 24s);
+        AddCombatAction(GOTHIK_SUMMON_DEATH_KNIGHT, 74s);
+        AddCombatAction(GOTHIK_SUMMON_RIDER, 134s);
+        AddCombatAction(GOTHIK_SHADOW_BOLT, true);
+        AddCombatAction(GOTHIK_HARVEST_SOUL, true);
+        AddCombatAction(GOTHIK_TELEPORT, true);
+        AddCombatAction(GOTHIK_GROUND_PHASE, 4min + 7s);
+        AddTimerlessCombatAction(GOTHIK_OPEN_GATES, true);
+        AddCustomAction(GOTHIK_CONTROL_ZONES, true, [&](){ HandleZoneCheck(); });
+        AddCustomAction(GOTHIK_START_PHASE, true, [&](){ HandlePhaseTransition(); });
         Reset();
     }
 
-    instance_naxxramas* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_naxxramas* m_instance;
+    bool m_isRegularMode;
 
     GuidList m_lSummonedAddGuids;
     GuidList m_lTraineeSummonPosGuids;
@@ -89,33 +129,60 @@ struct boss_gothikAI : public ScriptedAI
     uint8 m_uiPhase;
     uint8 m_uiSpeech;
 
-    uint32 m_uiTraineeTimer;
-    uint32 m_uiDeathKnightTimer;
-    uint32 m_uiRiderTimer;
-    uint32 m_uiTeleportTimer;
-    uint32 m_uiShadowboltTimer;
-    uint32 m_uiHarvestSoulTimer;
-    uint32 m_uiPhaseTimer;
-    uint32 m_uiControlZoneTimer;
     uint32 m_uiSpeechTimer;
+
+    void HandleZoneCheck()
+    {
+        if (m_instance && !HasPlayersInLeftSide())
+        {
+            ProcessCentralDoor();
+            for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
+            {
+                if (Creature* pCreature = m_instance->instance->GetCreature(*itr))
+                {
+                    if (!pCreature->IsInCombat())
+                        pCreature->SetInCombatWithZone();
+                }
+            }
+        }
+    }
+
+    void HandlePhaseTransition()
+    {
+        if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RIGHT, CAST_TRIGGERED) == CAST_OK)
+        {
+            m_uiPhase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
+
+            DoBroadcastText(SAY_TELEPORT, m_creature);
+            DoBroadcastText(EMOTE_TO_FRAY, m_creature);
+
+            // Remove Immunity
+            m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+            SetMeleeEnabled(true);
+            SetReactState(REACT_AGGRESSIVE);
+
+            DoResetThreat();
+            m_creature->SetInCombatWithZone();
+            ResetCombatAction(GOTHIK_HARVEST_SOUL, 2s + 500ms);
+            ResetCombatAction(GOTHIK_SHADOW_BOLT, 2s);
+            ResetCombatAction(GOTHIK_TELEPORT, 20s);
+        }
+        else
+        {
+            ResetTimer(GOTHIK_START_PHASE, 1s);
+        }
+    }
 
     void Reset() override
     {
         // Remove immunity
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+        SetMeleeEnabled(false);
+        SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
+        SetCombatScriptStatus(false);
 
         m_uiPhase = PHASE_SPEECH;
-        m_uiSpeech = 1;
-
-        m_uiTraineeTimer = 24 * IN_MILLISECONDS;
-        m_uiDeathKnightTimer = 74 * IN_MILLISECONDS;
-        m_uiRiderTimer = 134 * IN_MILLISECONDS;
-        m_uiTeleportTimer = 20 * IN_MILLISECONDS;
-        m_uiShadowboltTimer = 2 * IN_MILLISECONDS;
-        m_uiHarvestSoulTimer = 2500;
-        m_uiPhaseTimer = 4 * MINUTE * IN_MILLISECONDS + 7 * IN_MILLISECONDS; // last summon at 4:04, next would be 4:09
-        m_uiControlZoneTimer = urand(120 * IN_MILLISECONDS, 150 * IN_MILLISECONDS);
-        m_uiSpeechTimer = 1 * IN_MILLISECONDS;
 
         // Despawn Adds
         for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
@@ -132,35 +199,38 @@ struct boss_gothikAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
-
-        m_pInstance->SetData(TYPE_GOTHIK, IN_PROGRESS);
+        BossAI::Aggro();
 
         // Make immune
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+        m_creature->AttackStop(false, true);
+        m_creature->SetTarget(nullptr);
 
-        m_pInstance->SetGothTriggers();
+        m_instance->SetGothTriggers();
         PrepareSummonPlaces();
+        SetCombatScriptStatus(true);
+        StartNextDialogueText(NPC_GOTHIK);
     }
 
     bool IsCentralDoorClosed() const
     {
-        return m_pInstance && m_pInstance->GetData(TYPE_GOTHIK) != SPECIAL;
+        return m_instance && m_instance->GetData(TYPE_GOTHIK) != SPECIAL;
     }
 
     void ProcessCentralDoor()
     {
         if (IsCentralDoorClosed())
         {
-            m_pInstance->SetData(TYPE_GOTHIK, SPECIAL);
-            DoScriptText(EMOTE_GATE, m_creature);
+            m_instance->SetData(TYPE_GOTHIK, SPECIAL);
+            DoBroadcastText(EMOTE_GATE, m_creature);
         }
     }
 
     bool HasPlayersInLeftSide() const
     {
-        Map::PlayerList const& lPlayers = m_pInstance->instance->GetPlayers();
+        Map::PlayerList const& lPlayers = m_instance->instance->GetPlayers();
 
         if (lPlayers.isEmpty())
             return false;
@@ -169,7 +239,7 @@ struct boss_gothikAI : public ScriptedAI
         {
             if (Player* pPlayer = lPlayer.getSource())
             {
-                if (!m_pInstance->IsInRightSideGothArea(pPlayer) && pPlayer->IsAlive())
+                if (!m_instance->IsInRightSideGothArea(pPlayer) && pPlayer->IsAlive())
                     return true;
             }
         }
@@ -177,37 +247,40 @@ struct boss_gothikAI : public ScriptedAI
         return false;
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void EnterEvadeMode() override
     {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_KILL, m_creature);
-    }
+        if (!m_instance)
+            return;
+        Map::PlayerList const& lPlayers = m_instance->instance->GetPlayers();
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOTHIK, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GOTHIK, FAIL);
+        if (!lPlayers.isEmpty())
+        {
+            for (const auto& lPlayer : lPlayers)
+            {
+                if (Player* pPlayer = lPlayer.getSource())
+                {
+                    if (pPlayer->IsAlive() && !pPlayer->IsGameMaster() && pPlayer->IsInWorld())
+                        return;
+                }
+            }
+        }
+        BossAI::EnterEvadeMode();
+        m_creature->ForcedDespawn();
+        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
+        m_creature->Respawn();
     }
 
     void PrepareSummonPlaces()
     {
         CreatureList lSummonList;
-        m_pInstance->GetGothSummonPointCreatures(lSummonList, true);
+        m_instance->GetGothSummonPointCreatures(lSummonList, true);
 
         if (lSummonList.empty())
             return;
 
         // Trainees and Rider
         uint8 index = 0;
-        uint8 uiTraineeCount = m_bIsRegularMode ? 2 : 3;
+        uint8 uiTraineeCount = m_isRegularMode ? 2 : 3;
         lSummonList.sort(ObjectDistanceOrder(m_creature));
         for (auto& itr : lSummonList)
         {
@@ -227,7 +300,7 @@ struct boss_gothikAI : public ScriptedAI
         }
 
         // DeathKnights
-        uint8 uiDeathKnightCount = m_bIsRegularMode ? 1 : 2;
+        uint8 uiDeathKnightCount = m_isRegularMode ? 1 : 2;
         lSummonList.sort(ObjectDistanceOrderReversed(m_creature));
         for (auto& itr : lSummonList)
         {
@@ -267,16 +340,18 @@ struct boss_gothikAI : public ScriptedAI
         m_lSummonedAddGuids.push_back(pSummoned->GetObjectGuid());
         if (!IsCentralDoorClosed())
             pSummoned->SetInCombatWithZone();
+        if (!pSummoned->HasAura(384152)) // Custom Spell for +30% Health&Damage from 3.4.0
+            pSummoned->CastSpell(pSummoned, 384152, TRIGGERED_OLD_TRIGGERED);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         m_lSummonedAddGuids.remove(pSummoned->GetObjectGuid());
 
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        if (Creature* pAnchor = m_pInstance->GetClosestAnchorForGoth(pSummoned, true))
+        if (Creature* pAnchor = m_instance->GetClosestAnchorForGoth(pSummoned, true))
         {
             switch (pSummoned->GetEntry())
             {
@@ -290,164 +365,126 @@ struct boss_gothikAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        switch (m_uiPhase)
+        switch (action)
         {
-            case PHASE_SPEECH:
-                if (m_uiSpeechTimer < uiDiff)
-                {
-                    switch (m_uiSpeech)
-                    {
-                        case 1: DoScriptText(SAY_SPEECH_1, m_creature); m_uiSpeechTimer = 4 * IN_MILLISECONDS; break;
-                        case 2: DoScriptText(SAY_SPEECH_2, m_creature); m_uiSpeechTimer = 6 * IN_MILLISECONDS; break;
-                        case 3: DoScriptText(SAY_SPEECH_3, m_creature); m_uiSpeechTimer = 5 * IN_MILLISECONDS; break;
-                        case 4: DoScriptText(SAY_SPEECH_4, m_creature); m_uiPhase = PHASE_BALCONY; break;
-                    }
-                    m_uiSpeech++;
-                }
-                else
-                    m_uiSpeechTimer -= uiDiff;
+            case GOTHIK_SUMMON_TRAINEE: return 20s;
+            case GOTHIK_SUMMON_DEATH_KNIGHT: return 25s;
+            case GOTHIK_SUMMON_RIDER: return 30s;
+            case GOTHIK_SHADOW_BOLT: return m_uiPhase == PHASE_STOP_TELEPORTING ? 1s : 2s;
+            case GOTHIK_TELEPORT: return 20s;
+            case GOTHIK_HARVEST_SOUL: return 15s;
+        }
+        return 0s;
+    }
 
-            // No break here
+    void JustDidDialogueStep(int32 iEntry) override
+    {
+        if (!m_instance)
+            return;
+        if (iEntry == SAY_SPEECH_4)
+        {
+            SetCombatScriptStatus(false);
+            m_uiPhase = PHASE_BALCONY;
+            ResetTimer(GOTHIK_CONTROL_ZONES, 127s);
+        }
+    }
 
-            case PHASE_BALCONY:                            // Do summoning
-                if (m_uiTraineeTimer < uiDiff)
-                {
-                    SummonAdds(true, NPC_UNREL_TRAINEE);
-                    m_uiTraineeTimer = 20 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiTraineeTimer -= uiDiff;
-                if (m_uiDeathKnightTimer < uiDiff)
-                {
-                    SummonAdds(true, NPC_UNREL_DEATH_KNIGHT);
-                    m_uiDeathKnightTimer = 25 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiDeathKnightTimer -= uiDiff;
-                if (m_uiRiderTimer < uiDiff)
-                {
-                    SummonAdds(true, NPC_UNREL_RIDER);
-                    m_uiRiderTimer = 30 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiRiderTimer -= uiDiff;
-
-                if (m_uiPhaseTimer < uiDiff)
-                {
-                    m_uiPhase = PHASE_STOP_SUMMONING;
-                    m_uiPhaseTimer = 27 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiPhaseTimer -= uiDiff;
-
-                break;
-
-            case PHASE_STOP_SUMMONING:
-                if (m_uiPhaseTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RIGHT, CAST_TRIGGERED) == CAST_OK)
-                    {
-                        m_uiPhase = m_pInstance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
-
-                        DoScriptText(SAY_TELEPORT, m_creature);
-                        DoScriptText(EMOTE_TO_FRAY, m_creature);
-
-                        // Remove Immunity
-                        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
-
-                        DoResetThreat();
-                        m_creature->SetInCombatWithZone();
-                    }
-                }
-                else
-                    m_uiPhaseTimer -= uiDiff;
-
-                break;
-
-            case PHASE_TELEPORTING:                         // Phase is only reached if m_pInstance is valid
-                if (m_uiTeleportTimer < uiDiff)
-                {
-                    uint32 uiTeleportSpell = m_pInstance->IsInRightSideGothArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
-                    if (DoCastSpellIfCan(m_creature, uiTeleportSpell) == CAST_OK)
-                    {
-                        m_uiTeleportTimer = 20 * IN_MILLISECONDS;
-                        m_uiShadowboltTimer = 2 * IN_MILLISECONDS;
-                    }
-                }
-                else
-                    m_uiTeleportTimer -= uiDiff;
-
+    void ExecuteAction(uint32 action) override
+    {
+        if (!m_instance)
+        {
+            DisableCombatAction(action);
+            return;
+        }
+        switch (action)
+        {
+            case GOTHIK_OPEN_GATES:
+            {
                 if (m_creature->GetHealthPercent() <= 30.0f)
                 {
                     m_uiPhase = PHASE_STOP_TELEPORTING;
                     ProcessCentralDoor();
                     // as the doors now open, recheck whether mobs are standing around
-                    m_uiControlZoneTimer = 1;
+                    ResetCombatAction(GOTHIK_CONTROL_ZONES, 1s);
+                    DisableCombatAction(action);
                 }
-            // no break here
-
-            case PHASE_STOP_TELEPORTING:
-                if (m_uiHarvestSoulTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
-                        m_uiHarvestSoulTimer = 15 * IN_MILLISECONDS;
-                }
-                else
-                    m_uiHarvestSoulTimer -= uiDiff;
-
-                if (m_uiShadowboltTimer)
-                {
-                    if (m_uiShadowboltTimer <= uiDiff)
-                        m_uiShadowboltTimer = 0;
-                    else
-                        m_uiShadowboltTimer -= uiDiff;
-                }
-                // Shadowbold cooldown finished, cast when ready
-                else if (!m_creature->IsNonMeleeSpellCasted(true))
-                {
-                    // Select valid target
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_SHADOWBOLT, SELECT_FLAG_IN_LOS))
-                        DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H);
-                }
-
-                break;
-        }
-
-        // Control Check, if Death zone empty
-        if (m_uiControlZoneTimer)
-        {
-            if (m_uiControlZoneTimer <= uiDiff)
-            {
-                m_uiControlZoneTimer = 0;
-
-                if (m_pInstance && !HasPlayersInLeftSide())
-                {
-                    ProcessCentralDoor();
-                    for (GuidList::const_iterator itr = m_lSummonedAddGuids.begin(); itr != m_lSummonedAddGuids.end(); ++itr)
-                    {
-                        if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
-                        {
-                            if (!pCreature->IsInCombat())
-                                pCreature->SetInCombatWithZone();
-                        }
-                    }
-                }
+                return;
             }
-            else
-                m_uiControlZoneTimer -= uiDiff;
+            case GOTHIK_SUMMON_TRAINEE:
+            {
+                if (!PHASE_BALCONY)
+                {
+                    DisableCombatAction(action);
+                    return;
+                }
+                SummonAdds(true, NPC_UNREL_TRAINEE);
+                break;
+            }
+            case GOTHIK_SUMMON_DEATH_KNIGHT:
+            {
+                if (!PHASE_BALCONY)
+                {
+                    DisableCombatAction(action);
+                    return;
+                }
+                SummonAdds(true, NPC_UNREL_DEATH_KNIGHT);
+                break;
+            }
+            case GOTHIK_SUMMON_RIDER:
+            {
+                if (!PHASE_BALCONY)
+                {
+                    DisableCombatAction(action);
+                    return;
+                }
+                SummonAdds(true, NPC_UNREL_RIDER);
+                break;
+            }
+            case GOTHIK_SHADOW_BOLT:
+            {
+                if (!m_creature->IsNonMeleeSpellCasted(true))
+                {
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_SHADOWBOLT, SELECT_FLAG_IN_LOS))
+                        DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H);
+                }
+                break;
+            }
+            case GOTHIK_HARVEST_SOUL:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_HARVESTSOUL) == CAST_OK)
+                    break;
+            }
+            case GOTHIK_TELEPORT:
+            {
+                uint32 uiTeleportSpell = m_instance->IsInRightSideGothArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
+                if (DoCastSpellIfCan(m_creature, uiTeleportSpell) == CAST_OK)
+                {
+                    ResetCombatAction(GOTHIK_SHADOW_BOLT, 2s);
+                    break;
+                }
+                return;
+            }
+            case GOTHIK_GROUND_PHASE:
+            {
+                ResetTimer(GOTHIK_START_PHASE, 27s);
+                m_uiPhase = PHASE_STOP_SUMMONING;
+            }
         }
     }
-};
 
-UnitAI* GetAI_boss_gothik(Creature* pCreature)
-{
-    return new boss_gothikAI(pCreature);
-}
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_instance)
+            return;
+        // Update only the intro related stuff
+        if (m_uiPhase == PHASE_SPEECH)
+            DialogueUpdate(diff); // Dialogue updates outside of combat too
+
+        CombatAI::UpdateAI(diff);
+    }
+};
 
 bool EffectDummyCreature_spell_anchor(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
@@ -535,7 +572,7 @@ void AddSC_boss_gothik()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_gothik";
-    pNewScript->GetAI = &GetAI_boss_gothik;
+    pNewScript->GetAI = &GetNewAIInstance<boss_gothikAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
