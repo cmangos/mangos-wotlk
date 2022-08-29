@@ -342,6 +342,7 @@ struct boss_nothAI : public BossAI
                     ResetCombatAction(NOTH_CURSE, GetSubsequentActionTimer(NOTH_CURSE));
                     if (!m_isRegularMode)
                         ResetCombatAction(NOTH_BLINK, GetSubsequentActionTimer(NOTH_BLINK));
+                    DisableCombatAction(action);
                 }
                 return;
             }
