@@ -101,7 +101,7 @@ struct boss_gothikAI : public BossAI
         AddCombatAction(GOTHIK_SHADOW_BOLT, true);
         AddCombatAction(GOTHIK_HARVEST_SOUL, true);
         AddCombatAction(GOTHIK_TELEPORT, true);
-        AddCombatAction(GOTHIK_GROUND_PHASE, 4min + 3s);
+        AddCombatAction(GOTHIK_GROUND_PHASE, 4min + 5s);
         AddTimerlessCombatAction(GOTHIK_OPEN_GATES, true);
         AddCustomAction(GOTHIK_CONTROL_ZONES, true, [&](){ HandleZoneCheck(); });
         AddCustomAction(GOTHIK_START_PHASE, true, [&](){ HandlePhaseTransition(); });
@@ -453,7 +453,7 @@ struct boss_gothikAI : public BossAI
             }
             case GOTHIK_GROUND_PHASE:
             {
-                ResetTimer(GOTHIK_START_PHASE, 27s);
+                ResetTimer(GOTHIK_START_PHASE, 25s);
                 m_uiPhase = PHASE_STOP_SUMMONING;
                 DisableCombatAction(GOTHIK_GROUND_PHASE);
                 return;
