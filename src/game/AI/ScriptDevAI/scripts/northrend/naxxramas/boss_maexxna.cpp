@@ -23,11 +23,8 @@ SDComment: Web Wrap works incorrectly: The way it's supposed to work is Maexxna 
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
-#include "AI/ScriptDevAI/base/CombatAI.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "Entities/Unit.h"
 #include "naxxramas.h"
 
 enum
@@ -206,6 +203,7 @@ struct boss_maexxnaAI : public BossAI
     m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
     m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
+        SetDataType(TYPE_MAEXXNA);
         AddTimerlessCombatAction(MAEXXNA_ENRAGE_HP_CHECK, true);         // Soft enrage à 30%
         AddCombatAction(MAEXXNA_WEBWRAP, 20s);
         AddCombatAction(MAEXXNA_WEBSPRAY, 40s);
@@ -281,8 +279,12 @@ struct boss_maexxnaAI : public BossAI
 
     void SummonSpiderlings()
     {
+        float x, y, z;
         for (uint8 i = 0; i < MAX_SPIDERLINGS; ++i)
-            m_creature->SummonCreature(NPC_SPIDERLING, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+        {
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 3.f, x, y, z);
+            m_creature->SummonCreature(NPC_SPIDERLING, x, y, z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+        }
     }
 
     bool DoCastWebWrap()
