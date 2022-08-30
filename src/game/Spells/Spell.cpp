@@ -1408,12 +1408,13 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
                 if (m_spellSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
                     spellDamageInfo.damage = Unit::CalcArmorReducedDamage(affectiveCaster ? affectiveCaster : m_trueCaster, unitTarget, spellDamageInfo.damage);
             }
-        }
+        }              
 
         unitTarget->CalculateAbsorbResistBlock(affectiveCaster, &spellDamageInfo, m_spellInfo);
 
         Unit::DealDamageMods(affectiveCaster, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, m_spellInfo);
 
+        m_absorb = spellDamageInfo.absorb;
         m_damage = spellDamageInfo.damage; // update value so that script handler has access
         OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
 
@@ -1765,6 +1766,7 @@ void Spell::HandleImmediateEffectExecution(TargetInfo* target)
 
     // Reset damage/healing counter
     m_damage = 0;
+    m_absorb = 0;
     m_healing = 0; // healing maybe not needed at this point
 
     // keep damage amount for reflected spells

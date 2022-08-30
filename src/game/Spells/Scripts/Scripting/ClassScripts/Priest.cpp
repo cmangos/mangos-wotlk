@@ -47,7 +47,8 @@ struct ShadowWordDeath : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
-        int32 swdDamage = spell->GetTotalTargetDamage();
+        // ignores absorb - has to respect stuff like mitigation and partial resist
+        int32 swdDamage = spell->GetTotalTargetDamage() + spell->GetTotalTargetAbsorb();
         spell->GetCaster()->CastCustomSpell(nullptr, 32409, &swdDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 };
