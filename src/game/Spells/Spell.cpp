@@ -3845,7 +3845,7 @@ void Spell::_handle_immediate_phase()
 {
     m_spellState = SPELL_STATE_LANDING;
 
-    if (IsMeleeAttackResetSpell() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX7_RESET_SWING_TIMER_AT_SPELL_START))
+    if (m_caster && IsMeleeAttackResetSpell() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX7_RESET_SWING_TIMER_AT_SPELL_START))
     {
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX6_DOESNT_RESET_SWING_TIMER_IF_INSTANT) || GetCastTime() != 0)
         {
