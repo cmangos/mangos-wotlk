@@ -171,6 +171,15 @@ struct FlagClickBg : public SpellScript
             case 61266: spellId = 23333; eventId = 8505; break; // Horde Flag Pickup
         }
 
+        // flagstand and flagdrop share spells
+        if (spell->GetTrueCaster()->IsGameObject() && static_cast<GameObject*>(spell->GetTrueCaster())->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)
+        {
+            if (WorldObject* spawner = static_cast<GameObject*>(spell->GetTrueCaster())->GetSpawner())
+                if (spawner->IsPlayer() && target->IsPlayer())
+                    if (static_cast<Player*>(spawner)->GetTeam() != static_cast<Player*>(target)->GetTeam())
+                        return; // return of own flag already handled
+        }
+
         // misusing original caster to pass along original flag GO - if in future conflicts, substitute it for something else
         SpellCastResult result = target->CastSpell(target, spellId, TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL, nullptr, nullptr, spell->GetTrueCaster()->GetObjectGuid());
         if (result == SPELL_CAST_OK) // wotlk+ done like this
