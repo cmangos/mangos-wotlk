@@ -29,7 +29,6 @@ go_tele_to_dalaran_crystal
 go_tele_to_violet_stand
 go_andorhal_tower
 go_scourge_enclosure
-go_lab_work_reagents
 go_containment_coffer
 EndContentData */
 
@@ -396,45 +395,6 @@ bool GOUse_go_scourge_enclosure(Player* pPlayer, GameObject* pGo)
     }
     pPlayer->KilledMonsterCredit(NPC_GYMER_LOCK_DUMMY);
     return true;
-}
-
-/*######
-## go_lab_work_reagents
-######*/
-
-enum
-{
-    QUEST_LAB_WORK                          = 12557,
-
-    SPELL_WIRHERED_BATWING_KILL_CREDIT      = 51226,
-    SPELL_MUDDY_MIRE_MAGGOT_KILL_CREDIT     = 51227,
-    SPELL_AMBERSEED_KILL_CREDIT             = 51228,
-    SPELL_CHILLED_SERPENT_MUCUS_KILL_CREDIT = 51229,
-
-    GO_AMBERSEED                            = 190459,
-    GO_CHILLED_SERPENT_MUCUS                = 190462,
-    GO_WITHERED_BATWING                     = 190473,
-    GO_MUDDY_MIRE_MAGGOTS                   = 190478,
-};
-
-bool GOUse_go_lab_work_reagents(Player* pPlayer, GameObject* pGo)
-{
-    if (pPlayer->GetQuestStatus(QUEST_LAB_WORK) == QUEST_STATUS_INCOMPLETE)
-    {
-        uint32 uiCreditSpellId = 0;
-        switch (pGo->GetEntry())
-        {
-            case GO_AMBERSEED:              uiCreditSpellId = SPELL_AMBERSEED_KILL_CREDIT; break;
-            case GO_CHILLED_SERPENT_MUCUS:  uiCreditSpellId = SPELL_CHILLED_SERPENT_MUCUS_KILL_CREDIT; break;
-            case GO_WITHERED_BATWING:       uiCreditSpellId = SPELL_WIRHERED_BATWING_KILL_CREDIT; break;
-            case GO_MUDDY_MIRE_MAGGOTS:     uiCreditSpellId = SPELL_MUDDY_MIRE_MAGGOT_KILL_CREDIT; break;
-        }
-
-        if (uiCreditSpellId)
-            pPlayer->CastSpell(pPlayer, uiCreditSpellId, TRIGGERED_OLD_TRIGGERED);
-    }
-
-    return false;
 }
 
 /*####
@@ -1194,11 +1154,6 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_scourge_enclosure";
     pNewScript->pGOUse =          &GOUse_go_scourge_enclosure;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_lab_work_reagents";
-    pNewScript->pGOUse =          &GOUse_go_lab_work_reagents;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

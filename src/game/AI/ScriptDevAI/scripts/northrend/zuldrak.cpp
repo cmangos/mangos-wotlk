@@ -550,6 +550,66 @@ struct ArgentStandUnit : public CreatureEventAI
     }
 };
 
+// 51060 - Have Withered Batwing
+struct HaveWitheredBatwing : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetCaster()->CastSpell(aura->GetTarget(), 51226, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+// 51068 - Have Muddy Mire Maggot
+struct HaveMuddyMireMaggot : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetTarget()->CastSpell(aura->GetTarget(), 51227, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+// 51088 - Have Amberseed
+struct HaveAmberseed : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetCaster()->CastSpell(aura->GetTarget(), 51228, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+// 51094 - Have Chilled Serpent Mucus
+struct HaveChilledSerpentMucus : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            aura->GetCaster()->CastSpell(aura->GetTarget(), 51229, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -595,4 +655,8 @@ void AddSC_zuldrak()
     RegisterSpellScript<ArgentStandUnitRideGargoyle>("spell_argent_stand_unit_ride_gargoyle");
     RegisterSpellScript<CrusaderParachute>("spell_crusader_parachute");
     RegisterSpellScript<DeployParachute>("spell_deploy_parachute");
+    RegisterSpellScript<HaveWitheredBatwing>("spell_have_withered_batwing");
+    RegisterSpellScript<HaveMuddyMireMaggot>("spell_have_muddy_mire_maggot");
+    RegisterSpellScript<HaveAmberseed>("spell_have_amberseed");
+    RegisterSpellScript<HaveChilledSerpentMucus>("spell_have_chilled_serpent_mucus");
 }
