@@ -1558,6 +1558,103 @@ struct CallOfTheFalcon : public AuraScript
     }
 };
 
+// 36435 - Forget                                                               // Unlearn Armorsmith specialization
+struct ForgetArmorsmith : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Player* player = static_cast<Player*>(spell->GetUnitTarget());
+        player->removeSpell(36122);   // Earthforged Leggings
+        player->removeSpell(36129);   // Heavy Earthforged Breastplate
+        player->removeSpell(36130);   // Stormforged Hauberk
+        player->removeSpell(34533);   // Breastplate of Kings
+        player->removeSpell(34529);   // Nether Chain Shirt
+        player->removeSpell(34534);   // Bulwark of Kings
+        player->removeSpell(36257);   // Bulwark of the Ancient Kings
+        player->removeSpell(36256);   // Embrace of the Twisting Nether
+        player->removeSpell(34530);   // Twisting Nether Chain Shirt
+        player->removeSpell(36124);   // Windforged Leggings
+    }
+};
+
+// 36436 - Forget                                                               // Unlearn Weaponsmith specialization
+struct ForgetWeaponsmith : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Player* player = static_cast<Player*>(spell->GetUnitTarget());
+        player->removeSpell(36125);   // Light Earthforged Blade
+        player->removeSpell(36128);   // Light Emberforged Hammer
+        player->removeSpell(36126);   // Light Skyforged Axe
+    }
+};
+
+// 36438 - Forget                                                               // Unlearn Swordsmith specialization
+struct ForgetSwordsmith : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Player* player = static_cast<Player*>(spell->GetUnitTarget());
+        player->removeSpell(36258);   // Blazefury
+        player->removeSpell(34537);   // Blazeguard
+        player->removeSpell(34535);   // Fireguard
+        player->removeSpell(36131);   // Windforged Rapier
+        player->removeSpell(36133);   // Stoneforged Claymore
+        player->removeSpell(34538);   // Lionheart Blade
+        player->removeSpell(34540);   // Lionheart Champion
+        player->removeSpell(36259);   // Lionheart Executioner
+    }
+};
+
+// 36439 - Forget                                                               // Unlearn Axesmith specialization
+struct ForgetAxesmith : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Player* player = static_cast<Player*>(spell->GetUnitTarget());
+        player->removeSpell(36260);   // Wicked Edge of the Planes
+        player->removeSpell(34562);   // Black Planar Edge
+        player->removeSpell(34541);   // The Planar Edge
+        player->removeSpell(36134);   // Stormforged Axe
+        player->removeSpell(36135);   // Skyforged Great Axe
+        player->removeSpell(36261);   // Bloodmoon
+        player->removeSpell(34543);   // Lunar Crescent
+        player->removeSpell(34544);   // Mooncleaver
+    }
+};
+
+// 36441 - Forget                                                               // Unlearn Hammersmith specialization
+struct ForgetHammersmith : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Player* player = static_cast<Player*>(spell->GetUnitTarget());
+        player->removeSpell(36262);   // Dragonstrike
+        player->removeSpell(34546);   // Dragonmaw
+        player->removeSpell(34545);   // Drakefist Hammer
+        player->removeSpell(36136);   // Lavaforged Warhammer
+        player->removeSpell(34547);   // Thunder
+        player->removeSpell(34567);   // Deep Thunder
+        player->removeSpell(36263);   // Stormherald
+        player->removeSpell(36137);   // Great Earthforged Hammer
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1604,4 +1701,9 @@ void AddSC_spell_scripts()
     RegisterSpellScript<BirthNoVisualInstantSpawn>("spell_birth_no_visual_instant_spawn");
     RegisterSpellScript<SleepVisualFlavor>("spell_sleep_visual_flavor");
     RegisterSpellScript<CallOfTheFalcon>("spell_call_of_the_falcon");
+    RegisterSpellScript<ForgetArmorsmith>("spell_forget_36435");
+    RegisterSpellScript<ForgetWeaponsmith>("spell_forget_36436");
+    RegisterSpellScript<ForgetSwordsmith>("spell_forget_36438");
+    RegisterSpellScript<ForgetAxesmith>("spell_forget_36439");
+    RegisterSpellScript<ForgetHammersmith>("spell_forget_36441");
 }
