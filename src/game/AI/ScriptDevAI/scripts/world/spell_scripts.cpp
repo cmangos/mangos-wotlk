@@ -1558,6 +1558,98 @@ struct CallOfTheFalcon : public AuraScript
     }
 };
 
+// 36435 - Forget                                                               // Unlearn Armorsmith specialization
+struct Forget36435 : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36122);   // Earthforged Leggings
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36129);   // Heavy Earthforged Breastplate
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36130);   // Stormforged Hauberk
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34533);   // Breastplate of Kings
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34529);   // Nether Chain Shirt
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34534);   // Bulwark of Kings
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36257);   // Bulwark of the Ancient Kings
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36256);   // Embrace of the Twisting Nether
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34530);   // Twisting Nether Chain Shirt
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36124);   // Windforged Leggings
+        }
+    }
+};
+
+// 36436 - Forget                                                               // Unlearn Weaponsmith specialization
+struct Forget36436 : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36125);   // Light Earthforged Blade
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36128);   // Light Emberforged Hammer
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36126);   // Light Skyforged Axe
+        }
+    }
+};
+
+// 36438 - Forget                                                               // Unlearn Swordsmith specialization
+struct Forget36438 : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36258);   // Blazefury
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34537);   // Blazeguard
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34535);   // Fireguard
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36131);   // Windforged Rapier
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36133);   // Stoneforged Claymore
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34538);   // Lionheart Blade
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34540);   // Lionheart Champion
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36259);   // Lionheart Executioner
+        }
+    }
+};
+
+// 36439 - Forget                                                               // Unlearn Axesmith specialization
+struct Forget36439 : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36260);   // Wicked Edge of the Planes
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34562);   // Black Planar Edge
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34541);   // The Planar Edge
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36134);   // Stormforged Axe
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36135);   // Skyforged Great Axe
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36261);   // Bloodmoon
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34543);   // Lunar Crescent
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34544);   // Mooncleaver
+        }
+    }
+};
+
+// 36441 - Forget                                                               // Unlearn Hammersmith specialization
+struct Forget36441 : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36262);   // Dragonstrike
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34546);   // Dragonmaw
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34545);   // Drakefist Hammer
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36136);   // Lavaforged Warhammer
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34547);   // Thunder
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(34567);   // Deep Thunder
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36263);   // Stormherald
+            static_cast<Player*>(spell->GetUnitTarget())->removeSpell(36137);   // Great Earthforged Hammer
+        }
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1604,4 +1696,9 @@ void AddSC_spell_scripts()
     RegisterSpellScript<BirthNoVisualInstantSpawn>("spell_birth_no_visual_instant_spawn");
     RegisterSpellScript<SleepVisualFlavor>("spell_sleep_visual_flavor");
     RegisterSpellScript<CallOfTheFalcon>("spell_call_of_the_falcon");
+    RegisterSpellScript<Forget36435>("spell_forget_36435");
+    RegisterSpellScript<Forget36436>("spell_forget_36436");
+    RegisterSpellScript<Forget36438>("spell_forget_36438");
+    RegisterSpellScript<Forget36439>("spell_forget_36439");
+    RegisterSpellScript<Forget36441>("spell_forget_36441");
 }
