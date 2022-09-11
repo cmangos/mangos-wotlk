@@ -554,7 +554,8 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_AUCTION_ENEMY      = 0x0080,               // overwrite PLAYER_EXTRA_AUCTION_NEUTRAL
 
     // other states
-    PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
+    PLAYER_EXTRA_PVP_DEATH          = 0x0100,                // store PvP death status until corpse creating.
+    PLAYER_EXTRA_WHISP_RESTRICTION  = 0x0200,
 };
 
 // 2^n values
@@ -1144,6 +1145,9 @@ class Player : public Unit
         void SetPvPDeath(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
         bool isDebuggingAreaTriggers() { return m_isDebuggingAreaTriggers; }
         void SetDebuggingAreaTriggers(bool on) { m_isDebuggingAreaTriggers = on; }
+        bool isAllowedWhisperFrom(ObjectGuid guid);
+        bool isEnabledWhisperRestriction() const { return m_ExtraFlags & PLAYER_EXTRA_WHISP_RESTRICTION; }
+        void SetWhisperRestriction(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_WHISP_RESTRICTION; else m_ExtraFlags &= ~PLAYER_EXTRA_WHISP_RESTRICTION; }
 
         // 0 = own auction, -1 = enemy auction, 1 = goblin auction
         int GetAuctionAccessMode() const { return m_ExtraFlags & PLAYER_EXTRA_AUCTION_ENEMY ? -1 : (m_ExtraFlags & PLAYER_EXTRA_AUCTION_NEUTRAL ? 1 : 0); }
