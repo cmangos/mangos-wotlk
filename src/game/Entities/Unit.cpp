@@ -10966,15 +10966,13 @@ void Unit::ApplyDiminishingAura(DiminishingGroup group, bool apply)
         if (i.DRGroup != group)
             continue;
 
+        i.hitTime = WorldTimer::getMSTime();
+
         if (apply)
             i.stack += 1;
         else if (i.stack)
-        {
             i.stack -= 1;
-            // Remember time after last aura from group removed
-            if (i.stack == 0)
-                i.hitTime = WorldTimer::getMSTime();
-        }
+
         break;
     }
 }
