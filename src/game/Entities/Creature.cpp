@@ -1970,7 +1970,7 @@ void Creature::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
     SetHealth(0);                                           // just for nice GM-mode view
 }
 
-bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf, uint8 effectMask)
+bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf, uint8 effectMask, WorldObject const* caster)
 {
     if (!spellInfo)
         return false;
@@ -1984,7 +1984,7 @@ bool Creature::IsImmuneToSpell(SpellEntry const* spellInfo, bool castOnSelf, uin
             return true;
     }
 
-    return Unit::IsImmuneToSpell(spellInfo, castOnSelf, effectMask);
+    return Unit::IsImmuneToSpell(spellInfo, castOnSelf, effectMask, caster);
 }
 
 bool Creature::IsImmuneToDamage(SpellSchoolMask meleeSchoolMask)

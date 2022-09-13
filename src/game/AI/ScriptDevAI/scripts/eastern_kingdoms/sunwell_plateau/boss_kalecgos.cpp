@@ -643,7 +643,7 @@ struct CurseOfBoundlessAgony : public SpellScript, public AuraScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
-        if (target->IsImmuneToSpell(spell->m_spellInfo, false, (1 << eff)) || target->IsImmuneToSpellEffect(spell->m_spellInfo, eff, false))
+        if (target->IsImmuneToSpell(spell->m_spellInfo, false, (1 << eff), spell->GetCaster()) || target->IsImmuneToSpellEffect(spell->m_spellInfo, eff, false))
             return false;
 
         if (target->HasAura(SPELL_CURSE_OF_BOUNDLESS_AGONY) || target->HasAura(SPELL_CURSE_OF_BOUNDLESS_AGONY_FRIENDLY))
