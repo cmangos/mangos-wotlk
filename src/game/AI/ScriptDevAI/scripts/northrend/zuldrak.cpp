@@ -610,6 +610,33 @@ struct HaveChilledSerpentMucus : public AuraScript
     }
 };
 
+// 50664 - Summon Crusader LeCraft
+struct SummonCrusaderLeCraft : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->GetMotionMaster()->MoveFollow(spell->GetCaster(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
+    }
+};
+
+// 50678 - Summon Crusader Lamoof
+struct SummonCrusaderLamoof : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->GetMotionMaster()->MoveFollow(spell->GetCaster(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
+    }
+};
+
+// 50692 - Summon Crusader Josephine
+struct SummonCrusaderJosephine : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->GetMotionMaster()->MoveFollow(spell->GetCaster(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -659,4 +686,7 @@ void AddSC_zuldrak()
     RegisterSpellScript<HaveMuddyMireMaggot>("spell_have_muddy_mire_maggot");
     RegisterSpellScript<HaveAmberseed>("spell_have_amberseed");
     RegisterSpellScript<HaveChilledSerpentMucus>("spell_have_chilled_serpent_mucus");
+    RegisterSpellScript<SummonCrusaderLeCraft>("spell_summon_crusader_lecraft");
+    RegisterSpellScript<SummonCrusaderLamoof>("spell_summon_crusader_lamoof");
+    RegisterSpellScript<SummonCrusaderJosephine>("spell_summon_crusader_josephine");
 }
