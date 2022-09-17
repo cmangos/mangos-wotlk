@@ -2137,6 +2137,17 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 ('28266', '0', '0', '0', '538968448', '1024', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '135', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '124', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '25', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '300', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Tractor Beam', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0');
 
 -- ============================================================
+-- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
+-- ============================================================
+UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
+4044,  -- Target Dummy Passive
+11816, -- Land Mine Arming
+27791, -- Suicide (Suicide)
+21789, -- Hate to Half (Hate to Half)
+28330  -- Flameshocker - Immolate Visual
+);
+
+-- ============================================================
 -- TBC section
 -- ============================================================
 
@@ -2688,6 +2699,16 @@ UPDATE spell_template SET DmgMultiplier1=0 WHERE Id IN(41039);
 UPDATE spell_template SET EffectImplicitTargetA2=25,EffectImplicitTargetA3=25 WHERE Id IN(46145);
 
 -- ============================================================
+-- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
+-- ============================================================
+UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
+37248, -- Power Converters: Electromental Visual
+43119, -- Cyclone Visual
+43120, -- Cyclone
+43457  -- Ball of Energy
+);
+
+-- ============================================================
 -- WOTLK section
 -- ============================================================
 -- Removes aura interrupt flag 0x00001000-AURA_INTERRUPT_FLAG_MELEE_ATTACK - Player should be able to use male during fight with 3 mobs
@@ -3049,15 +3070,6 @@ UPDATE spell_template SET EffectDieSides1 = 0, EffectBasePoints1 = 0 WHERE id = 
 -- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
-4044,  -- Target Dummy Passive
-11816, -- Land Mine Arming
-27791, -- Suicide (Suicide)
-21789, -- Hate to Half (Hate to Half)
-28330, -- Flameshocker - Immolate Visual
-37248, -- Power Converters: Electromental Visual
-43119, -- Cyclone Visual
-43120, -- Cyclone
-43457, -- Ball of Energy
 50665, -- Bleeding Out
 50681, -- Bleeding Out
 50695, -- Bleeding Out
