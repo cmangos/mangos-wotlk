@@ -637,6 +637,15 @@ struct SummonCrusaderJosephine : public SpellScript
     }
 };
 
+// 54496 Summon Plague Spray
+struct SummonPlagueSpray : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, summon, spell->GetCaster());
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -689,4 +698,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<SummonCrusaderLeCraft>("spell_summon_crusader_lecraft");
     RegisterSpellScript<SummonCrusaderLamoof>("spell_summon_crusader_lamoof");
     RegisterSpellScript<SummonCrusaderJosephine>("spell_summon_crusader_josephine");
+    RegisterSpellScript<SummonPlagueSpray>("spell_summon_plague_spray");
 }
