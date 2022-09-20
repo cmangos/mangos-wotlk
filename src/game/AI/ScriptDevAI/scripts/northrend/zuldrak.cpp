@@ -646,6 +646,19 @@ struct SummonPlagueSpray : public SpellScript
     }
 };
 
+// 51173 - A Tangled Skein: Encasing Webs - Effect
+struct ATangledSkeinEncasingWebsEffect : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            spell->GetUnitTarget()->CastSpell(nullptr, 51168, TRIGGERED_OLD_TRIGGERED);
+            spell->GetUnitTarget()->GetMotionMaster()->MoveFall();
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -699,4 +712,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<SummonCrusaderLamoof>("spell_summon_crusader_lamoof");
     RegisterSpellScript<SummonCrusaderJosephine>("spell_summon_crusader_josephine");
     RegisterSpellScript<SummonPlagueSpray>("spell_summon_plague_spray");
+    RegisterSpellScript<ATangledSkeinEncasingWebsEffect>("spell_a_tangled_skein_encasing_webs_effect");
 }

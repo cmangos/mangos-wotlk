@@ -590,6 +590,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51068,'spell_have_muddy_mire_maggot'),
 (51088,'spell_have_amberseed'),
 (51094,'spell_have_chilled_serpent_mucus'),
+(51173,'spell_a_tangled_skein_encasing_webs_effect'),
 (51519,'spell_death_knight_initiate_visual'),
 (51769,'spell_emblazon_runeblade_aura'),
 (51770,'spell_emblazon_runeblade'),
