@@ -522,7 +522,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
             }
             case SCRIPT_COMMAND_MOVEMENT:                   // 20
             {
-                if (tmp.movement.movementType >= MAX_DB_MOTION_TYPE && tmp.movement.movementType != EFFECT_MOTION_TYPE)
+                if (tmp.movement.movementType >= MAX_DB_MOTION_TYPE && tmp.movement.movementType != EFFECT_MOTION_TYPE && tmp.movement.movementType != FALL_MOTION_TYPE)
                 {
                     sLog.outErrorDb("Table `%s` SCRIPT_COMMAND_MOVEMENT has invalid MovementType %u for script id %u",
                                     tablename, tmp.movement.movementType, tmp.id);
@@ -2173,6 +2173,12 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     source->StopMoving();
                     float speed = m_script->speed == 0.f ? source->GetSpeed(MOVE_RUN) : m_script->speed;
                     source->GetMotionMaster()->MoveJumpFacing(Position(m_script->x, m_script->y, m_script->z, 100.f), speed, m_script->movementFloat.verticalSpeed, 10001u, targetGuid, wanderORpathId);
+                    break;
+                }
+                case FALL_MOTION_TYPE:
+                {
+                    source->StopMoving();
+                    source->GetMotionMaster()->MoveFall();
                     break;
                 }
             }
