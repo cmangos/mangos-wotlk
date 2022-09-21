@@ -10845,18 +10845,21 @@ void Unit::IncrDiminishing(DiminishingGroup group, bool pvp)
     m_Diminishing.push_back(DiminishingReturn(group, GetMap()->GetCurrentMSTime(), DIMINISHING_LEVEL_2));
 }
 
-void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected, SpellEntry const* spellInfo)
+void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected, SpellEntry const* spellInfo, bool hasAuraScript)
 {
     if (duration == -1 || group == DIMINISHING_NONE || (!isReflected && caster->CanAssist(this)))
         return;
 
     const bool pvp = (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
 
-    // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
-    int32 limitduration = GetDiminishingReturnsLimitDuration(group, spellInfo);
-    if (limitduration > 0 && duration > limitduration)
-        if (pvp)
-            duration = limitduration;
+    if (!hasAuraScript) // Warning: A spell script will override this in GetAuraDuration and perform correct checks - all in the end should use this
+    {
+        // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
+        int32 limitduration = GetDiminishingReturnsLimitDuration(group, spellInfo);
+        if (limitduration > 0 && duration > limitduration)
+            if (pvp)
+                duration = limitduration;
+    }
 
     float mod = 1.0f;
 

@@ -68,6 +68,17 @@ struct ExposeWeakness : public AuraScript
     }
 };
 
+struct WyvernSting : public AuraScript
+{
+    int32 OnDurationCalculate(WorldObject const* caster, Unit const* target, int32 duration) const override
+    {
+        // PVP DR example
+        if (caster->IsControlledByPlayer() && target->IsPlayerControlled())
+            return 6000;
+        return duration;
+    }
+};
+
 struct Disengage : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -187,6 +198,7 @@ void LoadHunterScripts()
     RegisterSpellScript<KillCommand>("spell_kill_command");
     RegisterSpellScript<Misdirection>("spell_misdirection");
     RegisterSpellScript<ExposeWeakness>("spell_expose_weakness");
+    RegisterSpellScript<WyvernSting>("spell_wyvern_sting");
     RegisterSpellScript<Disengage>("spell_disengage");
     RegisterSpellScript<RoarOfSacrifice>("spell_roar_of_sacrifice");
     RegisterSpellScript<RapidRecuperationPeriodic>("spell_rapid_recuperation_periodic");
