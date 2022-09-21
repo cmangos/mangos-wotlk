@@ -1377,7 +1377,7 @@ std::string AhnQirajData::GetData()
 
 uint32 AhnQirajData::GetDaysRemaining() const
 {
-    return uint32(m_timer / (DAY * IN_MILLISECONDS));
+    return uint32(m_timer / (DAY * IN_MILLISECONDS)) + 1;
 }
 
 // Scourge invasion section
