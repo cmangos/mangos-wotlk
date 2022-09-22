@@ -3181,18 +3181,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 51333:                                 // Dig For Treasure
-                {
-                    if (!unitTarget)
-                        return;
-
-                    if (roll_chance_i(75))
-                        m_caster->CastSpell(unitTarget, 51370, TRIGGERED_OLD_TRIGGERED, m_CastItem);
-                    else
-                        m_caster->CastSpell(m_caster, 51345, TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
                 case 51336:                                 // Magic Pull
                 {
                     if (!unitTarget)
