@@ -3157,17 +3157,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 50439, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 51276:                                 // Incinerate Corpse
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 51278, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(m_caster, 51279, TRIGGERED_OLD_TRIGGERED);
-
-                    unitTarget->SetDeathState(JUST_DIED);
-                    return;
-                }
                 case 51330:                                 // Shoot RJR
                 {
                     if (!unitTarget)
