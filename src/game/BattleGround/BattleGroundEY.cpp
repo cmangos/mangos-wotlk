@@ -284,7 +284,8 @@ bool BattleGroundEY::HandleEvent(uint32 eventId, Object* source, Object* target)
     }
 
     GameObject* go = dynamic_cast<GameObject*>(source);
-    MANGOS_ASSERT(go); // if not go, blow up so we can check why
+    if (!go) // people can misuse various effects in bgs, need a whitelist not a blacklist - this fits the bill nicely
+        return true;
 
     // events called from the capture points
     for (uint8 i = 0; i < EY_MAX_NODES; ++i)
