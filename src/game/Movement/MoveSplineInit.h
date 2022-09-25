@@ -127,6 +127,8 @@ namespace Movement
             void SetExitVehicle();
 
             PointsArray& Path() { return args.path; }
+
+            void SetCombatSlowed() { args.slowed = true; }
         protected:
 
             MoveSplineInitArgs args;
