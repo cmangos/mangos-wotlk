@@ -2954,8 +2954,8 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
                 case NPC_ORC_COMMONER:
                 case NPC_TAUREN_COMMONER:
                 case NPC_TROLL_COMMONER:
-                case NPC_FORSAKEN_COMMONER:
-                case NPC_GOBLIN_COMMONER: textId = GetRandomText(brewfestTextsHorde); break;
+                case NPC_FORSAKEN_COMMONER: textId = GetRandomText(brewfestTextsHorde); break;
+                case NPC_GOBLIN_COMMONER: textId = 23631; break;
             }
         }
 
