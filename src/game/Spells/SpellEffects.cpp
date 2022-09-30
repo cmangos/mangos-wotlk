@@ -6261,6 +6261,10 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
     if (prop->Flags & SUMMON_PROP_FLAG_IGNORE_SUMMONERS_PHASE)
         phaseMask = GetPhaseMaskOverride();
 
+    Unit* summonInvoker = m_caster;
+    if (m_trueCaster->GetTypeId() == TYPEID_GAMEOBJECT)
+        summonInvoker = static_cast<GameObject*>(m_trueCaster)->GetOwner();
+
     for (auto& itr : list)
         if (Creature* summon = WorldObject::SummonCreature(TempSpawnSettings(m_trueCaster, creature_entry, itr.x, itr.y, itr.z, m_trueCaster->GetOrientation(), summonType, m_duration, false,
             IsSpellSetRun(m_spellInfo), 0, 0, 0, false, false, m_spellInfo->Id, -1, level), m_trueCaster->GetMap(), phaseMask))
@@ -6279,6 +6283,15 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
                     summon->CastSpell(nullptr, 22764, TRIGGERED_NONE); // aggro spell
                     break;
                 }
+            }
+
+            if (prop->Group == SUMMON_PROP_GROUP_FRIENDLY && summonInvoker) // for example 54359
+            {
+                if (summonInvoker->IsPlayerControlled())
+                    summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+                summon->setFaction(summonInvoker->GetFaction());
+                summon->SetOwnerGuid(summonInvoker->GetObjectGuid());
             }
         }
         else
