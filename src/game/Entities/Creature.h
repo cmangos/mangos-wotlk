@@ -869,6 +869,8 @@ class Creature : public Unit
         void ClearCreatureGroup();
         CreatureGroup* GetCreatureGroup() const { return m_creatureGroup; }
 
+        void StartCooldown(Unit* owner);
+
         bool IsOnlyVisibleTo(ObjectGuid guid) const override;
         void SetOnlyVisibleTo(ObjectGuid guid);
 
@@ -958,6 +960,8 @@ class Creature : public Unit
         CreatureGroup* m_creatureGroup;
 
         ObjectGuid m_killer;
+
+        bool m_imposedCooldown;
 
     private:
         GridReference<Creature> m_gridRef;

@@ -3957,9 +3957,21 @@ void Spell::SendSpellCooldown()
     if (m_trueCaster->IsPlayer())
     {
         Player* casterPlayer = static_cast<Player*>(m_caster);
-        if (m_spellInfo->Category)
+        uint32 category = m_spellInfo->Category;
+        if (m_CastItem)
         {
-            if (SpellCategoryEntry const* categoryEntry = sSpellCategoryStore.LookupEntry(m_spellInfo->Category))
+            for (const auto& spell : m_CastItem->GetProto()->Spells)
+            {
+                if (spell.SpellId == m_spellInfo->Id && spell.SpellCategory)
+                {
+                    category = spell.SpellCategory;
+                    break;
+                }
+            }
+        }
+        if (category)
+        {
+            if (SpellCategoryEntry const* categoryEntry = sSpellCategoryStore.LookupEntry(category))
             {
                 if (categoryEntry->Flags & SPELL_CATEGORY_FLAG_EVENT_ON_LEAVE_COMBAT)
                 {

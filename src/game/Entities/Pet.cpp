@@ -33,7 +33,7 @@ Pet::Pet(PetType type) :
     m_removed(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
     m_loading(false),
     m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false), m_dismissDisabled(false),
-    m_controllableGuardian(false), m_doNotFollowMounted(false), m_imposedCooldown(false)
+    m_controllableGuardian(false), m_doNotFollowMounted(false)
 {
     m_name = "Pet";
 
@@ -628,7 +628,6 @@ void Pet::SetDeathState(DeathState s)                       // overwrite virtual
 
         if (Unit* owner = GetOwner())
         {
-            StartCooldown(owner);
             if (getPetType() == GUARDIAN_PET)
                 owner->RemoveGuardian(this);
         }
@@ -2487,18 +2486,6 @@ void Pet::InitializeSpellsForControllableGuardian(bool load)
             UnitActionBarEntry const* bar = m_charmInfo->GetActionBarEntry(i);
             m_charmInfo->SetActionBar(i, bar->GetAction(), (ActiveStates)m_spells[bar->GetAction()].active);
         }
-    }
-}
-
-void Pet::StartCooldown(Unit* owner)
-{
-    if (!m_imposedCooldown)
-    {
-        m_imposedCooldown = true;
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(GetUInt32Value(UNIT_CREATED_BY_SPELL));
-        // Remove infinity cooldown
-        if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_COOLDOWN_ON_EVENT))
-            owner->AddCooldown(*spellInfo);
     }
 }
 

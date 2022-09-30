@@ -298,8 +298,6 @@ class Pet : public Creature
         bool IsSaveAutoCast() const { return m_saveAutocast; }
         void InitializeSpellsForControllableGuardian(bool load);
 
-        void StartCooldown(Unit* owner);
-
         bool IgnoresOwnersDeath() const;
 
         std::vector<uint32> GetCharmSpells() const;
@@ -319,7 +317,6 @@ class Pet : public Creature
         bool m_controllableGuardian;
         bool m_doNotFollowMounted;
         bool m_saveAutocast;
-        bool m_imposedCooldown;
 
         void SaveToDB(uint32, uint8, uint32) override       // overwrite of Creature::SaveToDB     - don't must be called
         {
