@@ -670,6 +670,7 @@ class BattleGround
         std::map<uint8, uint8> m_activeEvents;
 
         uint32 GetPlayerSkinRefLootId() const { return m_playerSkinReflootId; }
+        void SetPlayerSkinRefLootId(uint32 reflootId) { m_playerSkinReflootId = reflootId; }
 
         virtual void AlterTeleportLocation(Player* player, ObjectGuid& transportGuid, float& x, float& y, float& z, float& ori) {}
     protected:

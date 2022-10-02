@@ -1257,7 +1257,8 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadMailLevelRewards();
 
     sLog.outString("Loading Loot Tables...");
-    LoadLootTables();
+    LootIdSet ids_set;
+    LoadLootTables(ids_set);
     sLog.outString(">>> Loot Tables loaded");
     sLog.outString();
 
@@ -1459,6 +1460,7 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
     sBattleGroundMgr.InitAutomaticArenaPointDistribution();
+    CheckLootTemplates_Reference(ids_set);
 
     sLog.outString("Deleting expired bans...");
     LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");

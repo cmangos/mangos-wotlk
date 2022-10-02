@@ -28,6 +28,7 @@
 #include "Server/SQLStorages.h"
 #include "Entities/ItemEnchantmentMgr.h"
 #include "Tools/Language.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include <sstream>
 #include <iomanip>
 
@@ -1930,38 +1931,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
         m_clientLootType = CLIENT_LOOT_CORPSE;
         if (uint32 refLootId = player->GetBattleGround()->GetPlayerSkinRefLootId())
             FillLoot(refLootId, LootTemplates_Reference, player, true);
-
-        if (plr && player->InBattleGround() && player->GetBattleGroundTypeId() == BATTLEGROUND_AV)
-        {
-            // doable in refloot
-            uint32 questItem = 0;
-            if (plr->GetTeam() == ALLIANCE)
-                questItem = 17306;
-            else
-                questItem = 17423;
-
-            if (questItem)
-            {
-                LootStoreItem storeitem = LootStoreItem(questItem, 100, 0, 0, 1, 1);
-                AddItem(storeitem);
-            }
-            LootStoreItem storeitem = LootStoreItem(17422, 75, 0, 0, 0, 20);
-            AddItem(storeitem);
-
-            // Everyone can loot in AV.
-            for (auto& itr : player->GetBattleGround()->GetPlayers())
-            {
-                if (itr.second.playerTeam != player->GetTeam())
-                    continue;
-
-                for (auto lootItem : m_lootItems)
-                {
-                    if (lootItem->itemId == questItem)
-                        lootItem->allowedGuid.emplace(itr.first);
-                }
-            }
-        }
-        
+       
         // It may need a better formula
         // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
         m_gold = (uint32)(urand(50, 150) * 0.016f * pow(((float)pLevel) / 5.76f, 2.5f) * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY));
@@ -3064,11 +3034,13 @@ void LoadLootTemplates_Spell()
     LootTemplates_Spell.ReportUnusedIds(ids_set);
 }
 
-void LoadLootTemplates_Reference()
-{
-    LootIdSet ids_set;
+void LoadLootTemplates_Reference(LootIdSet& ids_set)
+{    
     LootTemplates_Reference.LoadAndCollectLootIds(ids_set);
+}
 
+void CheckLootTemplates_Reference(LootIdSet& ids_set)
+{
     // check references and remove used
     LootTemplates_Creature.CheckLootRefs(&ids_set);
     LootTemplates_Fishing.CheckLootRefs(&ids_set);
@@ -3082,6 +3054,9 @@ void LoadLootTemplates_Reference()
     LootTemplates_Mail.CheckLootRefs(&ids_set);
     LootTemplates_Reference.CheckLootRefs(&ids_set);
     LootTemplates_Spell.CheckLootRefs(&ids_set);
+    auto& usedIds = sBattleGroundMgr.GetUsedRefLootIds();
+    for (uint32 refLootId : usedIds)
+        ids_set.erase(refLootId);
 
     // output error for any still listed ids (not referenced from any loot table)
     LootTemplates_Reference.ReportUnusedIds(ids_set);
@@ -3264,4 +3239,9 @@ void LootMgr::CheckDropStats(ChatHandler& chat, uint32 amountOfCheck, uint32 loo
         chat.PSendSysMessage(LANG_ITEM_LIST_CHAT, itemId, itemId, name.c_str(), ss.str().c_str());
         sLog.outString("%6u - %-45s \tfound %6u/%-6u \tso %8s%% drop", itemStat.first, name.c_str(), itemStat.second, amountOfCheck, ss.str().c_str());
     }
+}
+
+bool LootMgr::ExistsRefLootTemplate(uint32 refLootId) const
+{
+    return LootTemplates_Reference.HaveLootFor(refLootId);
 }

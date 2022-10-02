@@ -105,7 +105,7 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_SUB_BOSS_TRIGGER:  m_lGothTriggerList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TESLA_COIL:        m_lThadTeslaCoilList.push_back(pCreature->GetObjectGuid()); break;
         case NPC_TOXIC_TUNNEL:
-            creature->SetCanEnterCombat(false);
+            pCreature->SetCanEnterCombat(false);
             break;
     }
 }

@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14062_01_mangos_eai_dbguid_support` bit(1) DEFAULT NULL
+  `required_14063_01_mangos_battleground_reflooot` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -525,6 +525,7 @@ CREATE TABLE `battleground_template` (
   `AllianceStartLoc` mediumint(8) unsigned NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
   `StartMaxDist` float NOT NULL,
+  `PlayerSkinReflootId` MEDIUMINT(8) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'reference_loot_template entry',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -535,19 +536,19 @@ CREATE TABLE `battleground_template` (
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
 INSERT INTO `battleground_template` VALUES
-(1,40,40,611,610,100),
-(2,10,10,769,770,75),
-(3,15,15,890,889,75),
-(4,5,5,929,936,0),
-(5,5,5,939,940,0),
-(6,5,5,0,0,0),
-(7,15,15,1103,1104,75),
-(8,5,5,1258,1259,0),
-(9,15,15,1367,1368,0),
-(10,5,5,1362,1363,0),
-(11,5,5,1364,1365,0),
-(30,40,40,1485,1486,200),
-(32,5,40,0,0,0);
+(1,40,40,611,610,100,0),
+(2,10,10,769,770,75,0),
+(3,15,15,890,889,75,0),
+(4,5,5,929,936,0,0),
+(5,5,5,939,940,0,0),
+(6,5,5,0,0,0,0),
+(7,15,15,1103,1104,75,0),
+(8,5,5,1258,1259,0,0),
+(9,15,15,1367,1368,0,0),
+(10,5,5,1362,1363,0,0),
+(11,5,5,1364,1365,0,0),
+(30,40,40,1485,1486,200,0),
+(32,5,40,0,0,0,0);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
