@@ -89,6 +89,7 @@ class Corpse : public WorldObject
         GridReference<Corpse>& GetGridRef() { return m_gridRef; }
 
         bool IsExpired(time_t t) const;
+        Team GetTeam() const;
     private:
         GridReference<Corpse> m_gridRef;
 

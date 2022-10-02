@@ -271,3 +271,8 @@ bool Corpse::IsExpired(time_t t) const
         return m_time < t - 60 * MINUTE;
     return m_time < t - 3 * DAY;
 }
+
+Team Corpse::GetTeam() const
+{
+    return Player::TeamForRace(getRace());
+}
