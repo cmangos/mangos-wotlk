@@ -8776,11 +8776,13 @@ void Player::RemovedInsignia(Player* looterPlr)
         return;
 
     // If not released spirit, do it !
+    bool repop = false;
     if (m_deathTimer > 0)
     {
         m_deathTimer = 0;
         BuildPlayerRepop();
         RepopAtGraveyard();
+        repop = true;
     }
 
     Corpse* corpse = GetCorpse();
@@ -8788,6 +8790,7 @@ void Player::RemovedInsignia(Player* looterPlr)
         return;
 
     WorldPacket data(SMSG_PLAYER_SKINNED, 0);
+    data << uint8(repop);
     GetSession()->SendPacket(data);
 
     // We have to convert player corpse to bones, not to be able to resurrect there
