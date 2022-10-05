@@ -28,6 +28,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "AI/ScriptDevAI//scripts/northrend/world_northrend.h"
 
 enum
 {
@@ -108,11 +109,119 @@ struct spell_teleporting_dalaran : public SpellScript
     }
 };
 
+/*######
+## at_underbelly_h
+######*/
+
+enum
+{
+    NPC_SILVER_COVENANT_AGENT = 36774,
+    ITEM_SILVER_COVENANT_ORDERS = 49872,
+    QUEST_THE_SILVER_COVENANTS_SCHEME = 24557,
+};
+
+static const Position m_silvercovenantagent = { 5816.17f, 760.211f, 640.561f, 1.75213f }; // guesed xyz - pls change when correct found
+
+bool AreaTrigger_at_underbelly_h(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    // Player is deaed, a GM, no quest or hasn't got item: do nothing
+    if (!player->IsAlive() || player->IsGameMaster() ||
+        player->GetQuestStatus(QUEST_THE_SILVER_COVENANTS_SCHEME) == QUEST_STATUS_NONE ||
+        !player->HasItemCount(ITEM_SILVER_COVENANT_ORDERS, 1))
+        return false;
+
+    if (world_map_northrend* northrend = dynamic_cast<world_map_northrend*>(player->GetInstanceData()))
+        if (northrend->IsDalaranCooldownForPlayer(player->GetObjectGuid()))
+            return false;
+
+    CreatureList agents;
+    GetCreatureListWithEntryInGrid(agents, player, NPC_SILVER_COVENANT_AGENT, 50.0f);
+    bool found = false;
+    for (Creature* agent : agents)
+    {
+        if (agent->GetSpawnerGuid() == player->GetObjectGuid())
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found) // Summon Sunreaver Agent
+    {
+        if (Creature* silvercovenantagent = player->SummonCreature(NPC_SILVER_COVENANT_AGENT, m_silvercovenantagent.x, m_silvercovenantagent.y, m_silvercovenantagent.z, m_silvercovenantagent.o, TEMPSPAWN_TIMED_OOC_DESPAWN, 5 * MINUTE * IN_MILLISECONDS))
+        {
+            if (world_map_northrend* northrend = dynamic_cast<world_map_northrend*>(player->GetInstanceData()))
+                northrend->SetDalaranCooldownTime(player->GetObjectGuid());
+            silvercovenantagent->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, player, silvercovenantagent);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*######
+## at_underbelly_a
+######*/
+
+enum
+{
+    NPC_SUNREAVER_AGENT = 36776,
+    ITEM_SUNREAVER_ORDERS = 49536,
+    QUEST_THE_SUNREAVER_PLAN = 14457,
+};
+
+static const Position m_sunreaveragent = { 5783.11f, 534.748f, 641.56f, 6.27889f };
+
+bool AreaTrigger_at_underbelly_a(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    // Player is deaed, a GM, no quest or hasn't got item: do nothing
+    if (!player->IsAlive() || player->IsGameMaster() ||
+        player->GetQuestStatus(QUEST_THE_SUNREAVER_PLAN) == QUEST_STATUS_NONE ||
+        !player->HasItemCount(ITEM_SUNREAVER_ORDERS, 1))
+        return false;
+
+    if (world_map_northrend* northrend = dynamic_cast<world_map_northrend*>(player->GetInstanceData()))
+        if (northrend->IsDalaranCooldownForPlayer(player->GetObjectGuid()))
+            return false;
+
+    CreatureList agents;
+    GetCreatureListWithEntryInGrid(agents, player, NPC_SUNREAVER_AGENT, 50.0f);
+    bool found = false;
+    for (Creature* agent : agents)
+    {
+        if (agent->GetSpawnerGuid() == player->GetObjectGuid())
+        {
+            found = true;
+            break;
+        }
+    }
+    if (!found) // Summon Sunreaver Agent
+    {
+        if (Creature* sunreaveragent = player->SummonCreature(NPC_SUNREAVER_AGENT, m_sunreaveragent.x, m_sunreaveragent.y, m_sunreaveragent.z, m_sunreaveragent.o, TEMPSPAWN_TIMED_OOC_DESPAWN, 5 * MINUTE * IN_MILLISECONDS))
+        {
+            if (world_map_northrend* northrend = dynamic_cast<world_map_northrend*>(player->GetInstanceData()))
+                northrend->SetDalaranCooldownTime(player->GetObjectGuid());
+            sunreaveragent->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, player, sunreaveragent);
+            return true;
+        }
+    }
+    return false;
+}
+
 void AddSC_dalaran()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_dalaran_guardian_mage";
     pNewScript->GetAI = &GetNewAIInstance<npc_dalaran_guardian_mageAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_underbelly_h";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_underbelly_h;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_underbelly_a";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_underbelly_a;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_teleporting_dalaran>("spell_teleporting_dalaran");

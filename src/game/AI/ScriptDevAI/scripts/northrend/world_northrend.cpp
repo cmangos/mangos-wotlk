@@ -18,37 +18,37 @@
 #include "world_northrend.h"
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 
-/* *********************************************************
- *                     NORTHREND
- */
-struct world_map_northrend : public ScriptedMap
+void world_map_northrend::OnCreatureCreate(Creature* creature)
 {
-    world_map_northrend(Map* pMap) : ScriptedMap(pMap) {}
-
-    void OnCreatureCreate(Creature* pCreature)
+    switch (creature->GetEntry())
     {
-        switch (pCreature->GetEntry())
-        {
-            case NPC_NARGO_SCREWBORE:
-            case NPC_HARROWMEISER:
-            case NPC_DRENK_SPANNERSPARK:
-                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-                break;
-        }
+        case NPC_NARGO_SCREWBORE:
+        case NPC_HARROWMEISER:
+        case NPC_DRENK_SPANNERSPARK:
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
+            break;
     }
+}
 
-    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) {}
-};
+void world_map_northrend::SetData(uint32 /*uiType*/, uint32 /*uiData*/) {}
 
-InstanceData* GetInstanceData_world_map_northrend(Map* pMap)
+void world_map_northrend::SetDalaranCooldownTime(ObjectGuid playerGuid)
 {
-    return new world_map_northrend(pMap);
+    m_dalaranAreatriggerCooldown.emplace(playerGuid, instance->GetCurrentClockTime());
+}
+
+bool world_map_northrend::IsDalaranCooldownForPlayer(ObjectGuid playerGuid) const
+{
+    auto itr = m_dalaranAreatriggerCooldown.find(playerGuid);
+    if (itr == m_dalaranAreatriggerCooldown.end())
+        return false;
+    return itr->second + std::chrono::minutes(5) > instance->GetCurrentClockTime();
 }
 
 void AddSC_world_northrend()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "world_map_northrend";
-    pNewScript->GetInstanceData = &GetInstanceData_world_map_northrend;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<world_map_northrend>;
     pNewScript->RegisterSelf();
 }

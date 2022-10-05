@@ -85,7 +85,10 @@ INSERT INTO scripted_areatrigger VALUES
 (5712,'at_hot_on_the_trail'),
 (5714,'at_hot_on_the_trail'),
 (5715,'at_hot_on_the_trail'),
-(5716,'at_hot_on_the_trail');
+(5716,'at_hot_on_the_trail'),
+-- DALARAN
+(5691,'at_underbelly_h'),
+(5693,'at_underbelly_a');
 
 /* BATTLEGROUNDS */
 UPDATE creature_template SET ScriptName='npc_spirit_guide' WHERE entry IN (13116, 13117);

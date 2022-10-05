@@ -39,6 +39,7 @@ at_huldar_miran                 171
 at_area_52                      4422, 4466, 4471, 4472
 at_twilight_grove               4017
 at_hive_tower                   3146
+at_at_underbelly                5693, 5691
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
