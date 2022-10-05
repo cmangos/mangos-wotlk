@@ -39,6 +39,7 @@ at_huldar_miran                 171
 at_area_52                      4422, 4466, 4471, 4472
 at_twilight_grove               4017
 at_hive_tower                   3146
+at_at_underbelly                5693, 5691
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -605,6 +606,72 @@ bool AreaTrigger_at_hive_tower(Player* player, AreaTriggerEntry const* /*pAt*/)
     return false;
 }
 
+/*######
+## at_underbelly_h
+######*/
+
+enum
+{
+    NPC_SILVER_COVENANT_AGENT = 36774,
+    ITEM_SILVER_COVENANT_ORDERS = 49872,
+    QUEST_THE_SILVER_COVENANTS_SCHEME = 24557,
+};
+
+static const Location m_silvercoveneatagent = { 5816.17f, 760.211f, 640.561f, 1.75213f }; // guesed xyz - pls change when correct found
+
+bool AreaTrigger_at_underbelly_h(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    // Player is deaed, a GM, no quest or hasn't got item: do nothing
+    if (!player->IsAlive() || player->IsGameMaster() ||
+        player->GetQuestStatus(QUEST_THE_SILVER_COVENANTS_SCHEME) == QUEST_STATUS_NONE ||
+        !player->HasItemCount(ITEM_SILVER_COVENANT_ORDERS, 1))
+        return false;
+
+    // Summon Sunreaver Agent
+    if (!GetClosestCreatureWithEntry(player, NPC_SILVER_COVENANT_AGENT, 50.0f))
+    {
+        if (Creature* silvercoveneatagent = player->SummonCreature(NPC_SILVER_COVENANT_AGENT, m_silvercoveneatagent.m_fX, m_silvercoveneatagent.m_fY, m_silvercoveneatagent.m_fZ, m_silvercoveneatagent.m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 5 * MINUTE * IN_MILLISECONDS))
+        {
+            silvercoveneatagent->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, silvercoveneatagent, silvercoveneatagent);
+            return true;
+        }
+    }
+    return false;
+}
+
+/*######
+## at_underbelly_a
+######*/
+
+enum
+{
+    NPC_SUNREAVER_AGENT = 36776,
+    ITEM_SUNREAVER_ORDERS = 49536,
+    QUEST_THE_SUNREAVER_PLAN = 14457,
+};
+
+static const Location m_sunreaveragent = { 5783.11f, 534.748f, 641.56f, 6.27889f };
+
+bool AreaTrigger_at_underbelly_a(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    // Player is deaed, a GM, no quest or hasn't got item: do nothing
+    if (!player->IsAlive() || player->IsGameMaster() ||
+        player->GetQuestStatus(QUEST_THE_SUNREAVER_PLAN) == QUEST_STATUS_NONE ||
+        !player->HasItemCount(ITEM_SUNREAVER_ORDERS, 1))
+        return false;
+
+    // Summon Sunreaver Agent
+    if (!GetClosestCreatureWithEntry(player, NPC_SUNREAVER_AGENT, 50.0f))
+    {
+        if (Creature* sunreaveragent = player->SummonCreature(NPC_SUNREAVER_AGENT, m_sunreaveragent.m_fX, m_sunreaveragent.m_fY, m_sunreaveragent.m_fZ, m_sunreaveragent.m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 5 * MINUTE * IN_MILLISECONDS))
+        {
+            sunreaveragent->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, sunreaveragent, sunreaveragent);
+            return true;
+        }
+    }
+    return false;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript = new Script;
@@ -695,5 +762,15 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_hive_tower";
     pNewScript->pAreaTrigger = &AreaTrigger_at_hive_tower;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_underbelly_h";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_underbelly_h;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_underbelly_a";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_underbelly_a;
     pNewScript->RegisterSelf();
 }
