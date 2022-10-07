@@ -666,6 +666,7 @@ std::vector<uint32> hardAuras = { 51093, 51095, 51097, 51100, 51102, 53150, 5315
 enum AlchemistsApprentice
 {
     QUEST_TROLL_PATROL_ALCHEMISTS_APPRENTICE = 12541,
+    SPELL_KILL_CREDIT_ALCHEMISTS_APPRENTICE  = 51111,
 };
 
 // 51015 - Random Ingredient Easy Aura
@@ -746,6 +747,13 @@ struct PotCheck : public SpellScript
         }
 
         player->RemoveAurasDueToSpell(foundAuraId);
+
+        if (stage == 4) // finished quest
+        {
+            alchemist->CastSpell(player, SPELL_KILL_CREDIT_ALCHEMISTS_APPRENTICE, TRIGGERED_OLD_TRIGGERED);
+            // TODO: Maybe victory text?
+            return;
+        }
 
         // TODO: Add more random texts - maybe based on stage?
         DoScriptText(27632, alchemist, target); // first text done in AI, subsequent are done here
