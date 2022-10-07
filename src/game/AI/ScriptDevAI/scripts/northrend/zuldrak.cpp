@@ -659,6 +659,126 @@ struct ATangledSkeinEncasingWebsEffect : public SpellScript
     }
 };
 
+std::vector<uint32> easyAuras = { 51018, 51055, 51057, 51059, 51062, 51064, 51067, 51069, 51072, 51077, 51079 };
+std::vector<uint32> mediumAuras = { 51081, 51083, 51085, 51087, 51089, 51091 };
+std::vector<uint32> hardAuras = { 51093, 51095, 51097, 51100, 51102, 53150, 53153, 53158 };
+
+enum AlchemistsApprentice
+{
+    QUEST_TROLL_PATROL_ALCHEMISTS_APPRENTICE = 12541,
+};
+
+// 51015 - Random Ingredient Easy Aura
+// 51154 - Random Ingredient Medium Aura
+// 51157 - Random Ingredient Hard Aura
+struct RandomIngredientAura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        Unit* target = aura->GetTarget();
+
+        uint32 spellId = 0;
+        switch (aura->GetId())
+        {
+            case 51015: // easy
+                spellId = easyAuras[urand(0, easyAuras.size() - 1)];
+                break;
+            case 51154: // medium
+                spellId = mediumAuras[urand(0, easyAuras.size() - 1)];
+                break;
+            case 51157: // hard
+                spellId = hardAuras[urand(0, easyAuras.size() - 1)];
+                break;
+        }
+
+        switch (spellId)
+        {
+            // TODO: Add all of the texts per spellid
+            case 51018: DoScriptText(27647, caster, target); break; // Knotroot
+            default: break;
+        }
+
+        caster->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+        if (Aura* newAura = target->GetAura(spellId, EFFECT_INDEX_0))
+            newAura->SetScriptValue(aura->GetScriptValue()); // pass stage
+    }
+};
+
+// 51046 - Pot Check
+struct PotCheck : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(target);
+
+        uint32 foundAuraId = 0;
+        uint32 stage = 0;
+        Unit* alchemist = nullptr;
+        for (uint32 auraId : easyAuras)
+        {
+            if (Aura* aura = target->GetAura(auraId, EFFECT_INDEX_0))
+            {
+                alchemist = aura->GetCaster();
+                stage = aura->GetScriptValue();
+                foundAuraId = auraId;
+                break;
+            }
+        }
+
+        uint32 itemId = 0;
+        switch (foundAuraId)
+        {
+            // TODO: Add all spell to item pairings
+            case 51018: itemId = 38338; break;
+        }
+
+        if (!player->HasItemCount(itemId, 1))
+        {
+            // fail quest
+            DoScriptText(urand(0, 1) ? 27632 : 27687, alchemist, target);
+            player->FailQuest(QUEST_TROLL_PATROL_ALCHEMISTS_APPRENTICE);
+            return;
+        }
+
+        player->RemoveAurasDueToSpell(foundAuraId);
+
+        // TODO: Add more random texts - maybe based on stage?
+        DoScriptText(27632, alchemist, target); // first text done in AI, subsequent are done here
+
+        uint32 spellId = 0;
+        switch (urand(0, 2))
+        {
+            case 0: spellId = 51015; break;
+            case 1: spellId = 51154; break;
+            case 2: spellId = 51157; break;
+        }
+        alchemist->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
+        if (Aura* newAura = target->GetAura(spellId, EFFECT_INDEX_0))
+            newAura->SetScriptValue(stage + 1); // pass stage and increment
+    }
+};
+
+// 51018 - Fetch ...
+struct FetchAlchemistsApprentice : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
+        {
+            // fail quest due to expiration
+            DoScriptText(27688, aura->GetCaster(), aura->GetTarget());
+            if (aura->GetTarget()->IsPlayer())
+                static_cast<Player*>(aura->GetTarget())->FailQuest(QUEST_TROLL_PATROL_ALCHEMISTS_APPRENTICE);
+            return;
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -713,4 +833,7 @@ void AddSC_zuldrak()
     RegisterSpellScript<SummonCrusaderJosephine>("spell_summon_crusader_josephine");
     RegisterSpellScript<SummonPlagueSpray>("spell_summon_plague_spray");
     RegisterSpellScript<ATangledSkeinEncasingWebsEffect>("spell_a_tangled_skein_encasing_webs_effect");
+    RegisterSpellScript<RandomIngredientAura>("spell_random_ingredient_aura");
+    RegisterSpellScript<PotCheck>("spell_pot_check");
+    RegisterSpellScript<FetchAlchemistsApprentice>("spell_fetch_alchemists_apprentice");
 }
