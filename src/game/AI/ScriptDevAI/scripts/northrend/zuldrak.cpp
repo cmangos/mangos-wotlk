@@ -660,7 +660,7 @@ struct ATangledSkeinEncasingWebsEffect : public SpellScript
 };
 
 std::vector<uint32> easyAuras = { 51018, 51055, 51057, 51059, 51062, 51064, 51067, 51069, 51072, 51077, 51079 };
-std::vector<uint32> mediumAuras = { 51081, 51083, 51085, 51087, 51089, 51091 };
+std::vector<uint32> mediumAuras = { 51081, 51083, 51085, 51087, 51091 };
 std::vector<uint32> hardAuras = { 51093, 51095, 51097, 51100, 51102, 53150, 53153, 53158 };
 
 enum AlchemistsApprentice
@@ -711,6 +711,9 @@ struct PotCheck : public SpellScript
 
         Player* player = static_cast<Player*>(target);
 
+        if (!player->IsCurrentQuest(QUEST_TROLL_PATROL_ALCHEMISTS_APPRENTICE, 1))
+            return;
+
         uint32 foundAuraId = 0;
         uint32 stage = 0;
         Unit* alchemist = nullptr;
@@ -734,6 +737,9 @@ struct PotCheck : public SpellScript
         if (!foundAuraId)
             helper(hardAuras);
 
+        if (!foundAuraId)
+            return;
+
         uint32 itemId = 0;
         switch (foundAuraId)
         {
@@ -752,7 +758,6 @@ struct PotCheck : public SpellScript
             case 51083: itemId = 38343; break; // Prismatic Mojo
             case 51085: itemId = 38370; break; // Raptor Claw
             case 51087: itemId = 38340; break; // Amberseed
-            // case 51089: itemId = ; break; // Burning Ice
             case 51091: itemId = 38344; break; // Shrunken Dragon's Claw
             case 51093: itemId = 38346; break; // Chilled Serpent Mucus
             case 51095: itemId = 38336; break; // Crystallized Hogsnot
