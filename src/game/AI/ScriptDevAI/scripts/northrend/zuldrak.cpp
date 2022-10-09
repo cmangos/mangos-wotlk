@@ -686,23 +686,17 @@ struct RandomIngredientAura : public AuraScript
                 spellId = easyAuras[urand(0, easyAuras.size() - 1)];
                 break;
             case 51154: // medium
-                spellId = mediumAuras[urand(0, easyAuras.size() - 1)];
+                spellId = mediumAuras[urand(0, mediumAuras.size() - 1)];
                 break;
             case 51157: // hard
-                spellId = hardAuras[urand(0, easyAuras.size() - 1)];
+                spellId = hardAuras[urand(0, hardAuras.size() - 1)];
                 break;
         }
 
-        switch (spellId)
-        {
-            // TODO: Add all of the texts per spellid
-            case 51018: DoScriptText(27647, caster, target); break; // Knotroot
-            default: break;
-        }
+        SpellCastArgs args;
+        args.SetTarget(target).SetScriptValue(aura->GetScriptValue());
 
-        caster->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
-        if (Aura* newAura = target->GetAura(spellId, EFFECT_INDEX_0))
-            newAura->SetScriptValue(aura->GetScriptValue()); // pass stage
+        caster->CastSpell(args, spellId, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -720,43 +714,99 @@ struct PotCheck : public SpellScript
         uint32 foundAuraId = 0;
         uint32 stage = 0;
         Unit* alchemist = nullptr;
-        for (uint32 auraId : easyAuras)
+        auto helper = [&](std::vector<uint32>& auras)
         {
-            if (Aura* aura = target->GetAura(auraId, EFFECT_INDEX_0))
+            for (uint32 auraId : auras)
             {
-                alchemist = aura->GetCaster();
-                stage = aura->GetScriptValue();
-                foundAuraId = auraId;
-                break;
+                if (Aura* aura = target->GetAura(auraId, EFFECT_INDEX_0))
+                {
+                    alchemist = aura->GetCaster();
+                    stage = aura->GetScriptValue();
+                    foundAuraId = auraId;
+                    break;
+                }
             }
-        }
+        };
+
+        helper(easyAuras);
+        if (!foundAuraId)
+            helper(mediumAuras);
+        if (!foundAuraId)
+            helper(hardAuras);
 
         uint32 itemId = 0;
         switch (foundAuraId)
         {
-            // TODO: Add all spell to item pairings
-            case 51018: itemId = 38338; break;
+            case 51018: itemId = 38338; break; // Knotroot
+            case 51055: itemId = 38341; break; // Pickled Eagle Egg
+            case 51057: itemId = 38337; break; // Speckled Guano
+            case 51059: itemId = 38339; break; // Withered Batwing
+            case 51062: itemId = 38381; break; // Seasoned Slider Cider
+            case 51064: itemId = 38384; break; // Pulverized Gargoyle Teeth
+            case 51067: itemId = 38386; break; // Muddy Mire Maggot
+            case 51069: itemId = 38393; break; // Spiky Spider Egg
+            case 51072: itemId = 38396; break; // Hairy Herring Head
+            case 51077: itemId = 38397; break; // Putrid Pirate Perspiration
+            case 51079: itemId = 38398; break; // Icecrown Bottled Water
+            case 51081: itemId = 38369; break; // Wasp's Wings
+            case 51083: itemId = 38343; break; // Prismatic Mojo
+            case 51085: itemId = 38370; break; // Raptor Claw
+            case 51087: itemId = 38340; break; // Amberseed
+            // case 51089: itemId = ; break; // Burning Ice
+            case 51091: itemId = 38344; break; // Shrunken Dragon's Claw
+            case 51093: itemId = 38346; break; // Chilled Serpent Mucus
+            case 51095: itemId = 38336; break; // Crystallized Hogsnot
+            case 51097: itemId = 38379; break; // Crushed Basilisk Crystals
+            case 51100: itemId = 38342; break; // Trollbane
+            case 51102: itemId = 38345; break; // Frozen Spider Ichor
+            case 53150: itemId = 39668; break; // Abomination Guts
+            case 53153: itemId = 39669; break; // Ghoul Drool
+            case 53158: itemId = 39670; break; // Blight Crystal
         }
 
         if (!player->HasItemCount(itemId, 1))
         {
             // fail quest
-            DoScriptText(urand(0, 1) ? 27632 : 27687, alchemist, target);
+            switch (urand(0, 2))
+            {
+                case 0: DoBroadcastText(27686, alchemist, target); break;
+                case 1: DoBroadcastText(27687, alchemist, target); break;
+                case 2: DoBroadcastText(27688, alchemist, target); break;
+            }
             player->FailQuest(QUEST_TROLL_PATROL_ALCHEMISTS_APPRENTICE);
             return;
         }
 
         player->RemoveAurasDueToSpell(foundAuraId);
+        player->DestroyItemCount(itemId, 1, true);
 
-        if (stage == 4) // finished quest
+        if (stage == 5) // finished quest
         {
             alchemist->CastSpell(player, SPELL_KILL_CREDIT_ALCHEMISTS_APPRENTICE, TRIGGERED_OLD_TRIGGERED);
-            // TODO: Maybe victory text?
             return;
         }
 
-        // TODO: Add more random texts - maybe based on stage?
-        DoScriptText(27632, alchemist, target); // first text done in AI, subsequent are done here
+        switch (urand(0, 17))
+        {
+            case 0: DoBroadcastText(27630, alchemist, target); break;
+            case 1: DoBroadcastText(27631, alchemist, target); break;
+            case 2: DoBroadcastText(27632, alchemist, target); break;
+            case 3: DoBroadcastText(27633, alchemist, target); break;
+            case 4: DoBroadcastText(27634, alchemist, target); break;
+            case 5: DoBroadcastText(27635, alchemist, target); break;
+            case 6: DoBroadcastText(27636, alchemist, target); break;
+            case 7: DoBroadcastText(27637, alchemist, target); break;
+            case 8: DoBroadcastText(27677, alchemist, target); break;
+            case 9: DoBroadcastText(27678, alchemist, target); break;
+            case 10: DoBroadcastText(27679, alchemist, target); break;
+            case 11: DoBroadcastText(27680, alchemist, target); break;
+            case 12: DoBroadcastText(27681, alchemist, target); break;
+            case 13: DoBroadcastText(27682, alchemist, target); break;
+            case 14: DoBroadcastText(27683, alchemist, target); break;
+            case 15: DoBroadcastText(27684, alchemist, target); break;
+            case 16: DoBroadcastText(27685, alchemist, target); break;
+            case 17: DoBroadcastText(27690, alchemist, target); break;
+        }
 
         uint32 spellId = 0;
         switch (urand(0, 2))
@@ -765,9 +815,11 @@ struct PotCheck : public SpellScript
             case 1: spellId = 51154; break;
             case 2: spellId = 51157; break;
         }
-        alchemist->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
-        if (Aura* newAura = target->GetAura(spellId, EFFECT_INDEX_0))
-            newAura->SetScriptValue(stage + 1); // pass stage and increment
+
+        SpellCastArgs args;
+        args.SetTarget(player).SetScriptValue(stage + 1);
+
+        alchemist->CastSpell(args, spellId, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -776,6 +828,8 @@ struct FetchAlchemistsApprentice : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
+        if (apply)
+            DoBroadcastText(aura->GetAmount(), aura->GetCaster(), aura->GetTarget());
         if (!apply && aura->GetRemoveMode() != AURA_REMOVE_BY_DEFAULT)
         {
             // fail quest due to expiration
