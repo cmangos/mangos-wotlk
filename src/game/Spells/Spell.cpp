@@ -154,6 +154,12 @@ void SpellCastTargets::setDestination(float x, float y, float z)
     m_targetMask |= TARGET_FLAG_DEST_LOCATION;
 }
 
+void SpellCastTargets::setDestination(Position position)
+{
+    m_destPos = position;
+    m_targetMask |= TARGET_FLAG_DEST_LOCATION;
+}
+
 void SpellCastTargets::setSource(float x, float y, float z)
 {
     m_srcPos.x = x;
