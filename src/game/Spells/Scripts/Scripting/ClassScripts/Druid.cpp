@@ -116,6 +116,33 @@ struct Brambles : public AuraScript
     }
 };
 
+// 1079 - Rip
+struct ShredDruid : public SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
+    {
+        if (missInfo == SPELL_MISS_NONE)
+        {
+            if (Aura* glyphOfShred = spell->GetCaster()->GetAura(54815, EFFECT_INDEX_0)) // Glyph of Shred
+            {
+                Unit* target = spell->GetUnitTarget();
+                if (Aura* rip = target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x0, 0x00200000, spell->GetCaster()->GetObjectGuid()))
+                {
+                    int32 increaseAmount = rip->GetAmount();
+                    int32 maxIncreaseAmount = spell->GetCaster()->CalculateSpellEffectValue(target, rip->GetSpellProto(), EFFECT_INDEX_1);
+                    if (rip->GetScriptValue() >= maxIncreaseAmount)
+                        return;
+                    SpellAuraHolder* holder = rip->GetHolder();
+                    holder->SetAuraMaxDuration(holder->GetAuraMaxDuration() + increaseAmount);
+                    holder->SetAuraDuration(holder->GetAuraDuration() + increaseAmount);
+                    holder->SendAuraUpdate(false);
+                    rip->SetScriptValue(rip->GetScriptValue() + increaseAmount);
+                }
+            }
+        }
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterSpellScript<Regrowth>("spell_regrowth");
@@ -124,4 +151,5 @@ void LoadDruidScripts()
     RegisterSpellScript<GuardianAggroSpell>("spell_guardian_aggro_spell");
     RegisterSpellScript<WildGrowth>("spell_wild_growth");
     RegisterSpellScript<Brambles>("spell_brambles");
+    RegisterSpellScript<ShredDruid>("spell_shred_druid");
 }

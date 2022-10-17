@@ -1151,7 +1151,16 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (48438,'spell_wild_growth'),
 (53248,'spell_wild_growth'),
 (53249,'spell_wild_growth'),
-(53251,'spell_wild_growth');
+(53251,'spell_wild_growth'),
+(5221,'spell_shred_druid'),
+(6800,'spell_shred_druid'),
+(8992,'spell_shred_druid'),
+(9829,'spell_shred_druid'),
+(9830,'spell_shred_druid'),
+(27001,'spell_shred_druid'),
+(27002,'spell_shred_druid'),
+(48571,'spell_shred_druid'),
+(48572,'spell_shred_druid');
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
