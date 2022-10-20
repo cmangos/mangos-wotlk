@@ -236,6 +236,135 @@ struct CastNetStormforgedPursuer : public SpellScript
     }
 };
 
+/*######
+## npc_ethereal_frostworg
+######*/
+
+enum
+{    // misc
+    SPELL_SUMMON_INFILTRATOR                 = 56325,
+    NPC_STORMFORGED_INFILTRATOR              = 30222,
+
+    FROSTWOLF_MOVE_NORMAL = 1,
+    FROSTWOLF_MOVE_FINAL = 2,
+
+};
+
+enum FrostwolfActions
+{
+    FROSTWOLF_CHANGE_DIRECTION,
+    FROSTWOLF_RESUME_SEARCH,
+    FROSTWOLF_FIND_INFILTRATOR,
+    FROSTWOLF_SUMMON_INFILTRATOR,
+};
+
+static const uint32 ethereal_frostworg_emotes[4][2] =
+{
+    {
+        30909,
+        30910
+    },
+    {
+        30911,
+        30912
+    },
+    {
+        30913,
+        30914
+    },
+    {
+        30915,
+        30915
+    }
+};
+
+struct npc_ethereal_frostworgAI : public ScriptedAI
+{
+    npc_ethereal_frostworgAI(Creature* pCreature) : ScriptedAI(pCreature) {
+        AddCustomAction(FROSTWOLF_FIND_INFILTRATOR, 45s, [&]()
+        {
+            DisableTimer(FROSTWOLF_CHANGE_DIRECTION);
+            MoveToNewPoint(FROSTWOLF_MOVE_FINAL);
+        });
+        AddCustomAction(FROSTWOLF_CHANGE_DIRECTION, 15s, [&]()
+        {
+            m_creature->GetMotionMaster()->Clear();
+            m_creature->GetMotionMaster()->MoveIdle();
+            ResetTimer(FROSTWOLF_RESUME_SEARCH, 3s);
+            if (m_emoteCounter < 3)
+                ResetTimer(FROSTWOLF_CHANGE_DIRECTION, 15s);
+        });
+        AddCustomAction(FROSTWOLF_RESUME_SEARCH, 0s, [&]()
+        {
+            if (m_emoteCounter >= 3)
+                return;
+            if (!m_creature->IsInCombat())
+                DoBroadcastText(ethereal_frostworg_emotes[m_emoteCounter++][urand(0,1)], m_creature);
+            MoveToNewPoint(FROSTWOLF_MOVE_NORMAL);
+        });
+    }
+
+    uint32 m_emoteCounter = 0;
+    bool m_summoned = false;
+
+    void MoveToNewPoint(uint32 type)
+    {
+        float dist = type == 1 ? 50.f : 20.f;
+        float x, y, z = 0.f;
+        while (abs(z - m_creature->GetPositionZ()) > 5)
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), dist, x, y, z, 10.f);
+        m_creature->GetMotionMaster()->MovePoint(type, Position(x, y, z), FORCED_MOVEMENT_RUN);
+    }
+
+    void Reset() override
+    {
+        MoveToNewPoint(FROSTWOLF_MOVE_NORMAL);
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_STORMFORGED_INFILTRATOR)
+            m_creature->ForcedDespawn();
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        summoned->AddSummonForOnDeathDespawn(m_creature->GetObjectGuid()); // hackfix
+        switch (urand(0,2))
+        {
+            case 0: DoBroadcastText(30916, summoned); break;
+            case 1: DoBroadcastText(30917, summoned); break;
+            case 2: DoBroadcastText(30918, summoned); break;
+        }
+    }
+
+    void MovementInform(uint32 movementType, uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+            case 1:
+            {
+                MoveToNewPoint(FROSTWOLF_MOVE_NORMAL);
+                break;
+            }
+            case 2:
+            {
+                if (m_summoned)
+                    return;
+                m_summoned = true;
+                m_creature->GetMotionMaster()->Clear(true, true);
+                DisableTimer(FROSTWOLF_RESUME_SEARCH);
+                DisableTimer(FROSTWOLF_CHANGE_DIRECTION);
+                DisableTimer(FROSTWOLF_FIND_INFILTRATOR);
+                AddCustomAction(FROSTWOLF_SUMMON_INFILTRATOR, 2s, [&]() { DoCastSpellIfCan(nullptr, SPELL_SUMMON_INFILTRATOR); });
+                DoBroadcastText(ethereal_frostworg_emotes[3][0], m_creature);
+                break;
+            }
+            default: break;
+        }
+    }
+};
+
 void AddSC_storm_peaks()
 {
     Script* pNewScript = new Script;
@@ -254,6 +383,11 @@ void AddSC_storm_peaks()
     pNewScript->pGossipHello = &GossipHello_npc_injured_miner;
     pNewScript->pGossipSelect = &GossipSelect_npc_injured_miner;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_injured_miner;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_ethereal_frostworg";
+    pNewScript->GetAI = &GetNewAIInstance<npc_ethereal_frostworgAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
