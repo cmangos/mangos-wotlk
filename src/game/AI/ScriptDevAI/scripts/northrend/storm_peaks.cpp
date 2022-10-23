@@ -279,8 +279,7 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveIdle();
             ResetTimer(FROSTWOLF_RESUME_SEARCH, 3s);
-            if (m_emoteCounter < 3)
-                ResetTimer(FROSTWOLF_CHANGE_DIRECTION, 15s);
+            ResetTimer(FROSTWOLF_CHANGE_DIRECTION, 15s);
         });
         AddCustomAction(FROSTWOLF_RESUME_SEARCH, 0s, [&]()
         {
