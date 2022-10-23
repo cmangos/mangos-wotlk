@@ -323,8 +323,7 @@ class instance_naxxramas : public ScriptedInstance
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
         GuidList m_sHeiganBackroomAdds;
-        GuidList m_lGrobbulusClouds;
-        GuidList m_lCorpseScarabs;
+        GuidVector m_corpseScarabs;
 
         float m_fChamberCenterX;
         float m_fChamberCenterY;

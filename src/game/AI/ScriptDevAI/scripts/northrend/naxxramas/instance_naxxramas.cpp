@@ -110,10 +110,8 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_DISEASED_MAGGOT:
         case NPC_EYE_STALK:
             m_sHeiganBackroomAdds.push_back(pCreature->GetObjectGuid()); break;
-        case NPC_GROBBULUS_CLOUD:
-            m_lGrobbulusClouds.push_back(pCreature->GetObjectGuid()); break;
         case NPC_CORPSE_SCARAB:
-            m_lCorpseScarabs.push_back(pCreature->GetObjectGuid()); break;
+            m_corpseScarabs.push_back(pCreature->GetObjectGuid()); break;
         case NPC_OLDWORLD_TRIGGER:
         {
             if (pCreature->GetPositionX() > 3250 && pCreature->GetPositionX() < 3322 && pCreature->GetPositionY() > -3190 && pCreature->GetPositionY() < -3115)
@@ -309,10 +307,8 @@ void instance_naxxramas::OnCreatureDeath(Creature* pCreature)
         case NPC_DISEASED_MAGGOT:
         case NPC_ROTTING_MAGGOT:
             m_sHeiganBackroomAdds.remove(pCreature->GetObjectGuid()); break;
-        case NPC_GROBBULUS_CLOUD:
-            m_lGrobbulusClouds.remove(pCreature->GetObjectGuid()); break;
         case NPC_CORPSE_SCARAB:
-            m_lCorpseScarabs.remove(pCreature->GetObjectGuid()); break;
+            m_corpseScarabs.erase(std::find(m_corpseScarabs.begin(), m_corpseScarabs.end(), pCreature->GetObjectGuid())); break;
         default: break;
     }
 }
@@ -336,11 +332,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
         case TYPE_ANUB_REKHAN:
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_ARAC_ANUB_DOOR);
-            if (!m_lCorpseScarabs.empty())
-                for (auto& creatureGuid : m_lCorpseScarabs)
-                    if (Creature* add = instance->GetCreature(creatureGuid))
-                        add->ForcedDespawn();
-            m_lCorpseScarabs.clear();
+            DespawnGuids(m_corpseScarabs);
+            m_corpseScarabs.clear();
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_ARAC_ANUB_GATE);
@@ -477,13 +470,6 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_GROBBULUS:
             m_auiEncounter[uiType] = uiData;
-            for (const auto& cloud : m_lGrobbulusClouds)
-            {
-                if (Creature* cloud_creature = instance->GetCreature(cloud))
-                {
-                    cloud_creature->ForcedDespawn();
-                }
-            }
             break;
         case TYPE_GLUTH:
             m_auiEncounter[uiType] = uiData;
