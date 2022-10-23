@@ -78,18 +78,18 @@ struct boss_loathebAI : public BossAI
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() != NPC_SPORE)
+        if (summoned->GetEntry() != NPC_SPORE)
             return;
 
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AddThreat(pTarget);
+        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            summoned->AddThreat(target);
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_SPORE && m_instance)
+        if (summoned->GetEntry() == NPC_SPORE && m_instance)
             m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, false);
     }
 
