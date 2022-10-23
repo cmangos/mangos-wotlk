@@ -260,27 +260,15 @@ enum FrostwolfActions
 
 static const uint32 ethereal_frostworg_emotes[4][2] =
 {
-    {
-        30909,
-        30910
-    },
-    {
-        30911,
-        30912
-    },
-    {
-        30913,
-        30914
-    },
-    {
-        30915,
-        30915
-    }
+    {30909, 30910},
+    {30911, 30912},
+    {30913, 30914},
+    {30915, 30915}
 };
 
 struct npc_ethereal_frostworgAI : public ScriptedAI
 {
-    npc_ethereal_frostworgAI(Creature* pCreature) : ScriptedAI(pCreature) {
+    npc_ethereal_frostworgAI(Creature* creature) : ScriptedAI(creature) {
         AddCustomAction(FROSTWOLF_FIND_INFILTRATOR, 45s, [&]()
         {
             DisableTimer(FROSTWOLF_CHANGE_DIRECTION);
@@ -296,10 +284,21 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
         });
         AddCustomAction(FROSTWOLF_RESUME_SEARCH, 0s, [&]()
         {
-            if (m_emoteCounter >= 3)
-                return;
-            if (!m_creature->IsInCombat())
-                DoBroadcastText(ethereal_frostworg_emotes[m_emoteCounter++][urand(0,1)], m_creature);
+            switch (m_emoteCounter)
+            {
+                case 0:
+                case 1:
+                case 2:
+                {
+                    if (!m_creature->IsInCombat())
+                        DoBroadcastText(ethereal_frostworg_emotes[m_emoteCounter][urand(0,1)], m_creature);
+                    break;
+                }
+                case 3: break;
+                default: m_creature->ForcedDespawn(); break;
+            }
+            ++m_emoteCounter;
+            
             MoveToNewPoint(FROSTWOLF_MOVE_NORMAL);
         });
     }
@@ -342,12 +341,12 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
     {
         switch (uiPointId)
         {
-            case 1:
+            case FROSTWOLF_MOVE_NORMAL:
             {
                 MoveToNewPoint(FROSTWOLF_MOVE_NORMAL);
                 break;
             }
-            case 2:
+            case FROSTWOLF_MOVE_FINAL:
             {
                 if (m_summoned)
                     return;
@@ -362,6 +361,12 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
             }
             default: break;
         }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->IsInCombat())
+            UpdateTimers(diff, false);
     }
 };
 
