@@ -104,10 +104,10 @@ struct boss_gluthAI : public BossAI
         return 0s;
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
         // Restore 5% hp when killing a zombie
-        if (pVictim->GetEntry() == NPC_ZOMBIE_CHOW)
+        if (victim->GetEntry() == NPC_ZOMBIE_CHOW)
             m_creature->SetHealth(m_creature->GetHealth() + m_creature->GetMaxHealth() * 0.05f);
     }
 
