@@ -367,6 +367,11 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
     {
         if (!m_creature->IsInCombat())
             UpdateTimers(diff, false);
+        
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        DoMeleeAttackIfReady();
     }
 };
 
