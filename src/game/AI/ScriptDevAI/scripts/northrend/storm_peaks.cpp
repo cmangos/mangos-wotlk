@@ -272,6 +272,7 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
         AddCustomAction(FROSTWOLF_FIND_INFILTRATOR, 45s, [&]()
         {
             DisableTimer(FROSTWOLF_CHANGE_DIRECTION);
+            DisableTimer(FROSTWOLF_RESUME_SEARCH);
             MoveToNewPoint(FROSTWOLF_MOVE_FINAL);
         });
         AddCustomAction(FROSTWOLF_CHANGE_DIRECTION, 15s, [&]()
@@ -350,9 +351,6 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
                     return;
                 m_summoned = true;
                 m_creature->GetMotionMaster()->Clear(true, true);
-                DisableTimer(FROSTWOLF_RESUME_SEARCH);
-                DisableTimer(FROSTWOLF_CHANGE_DIRECTION);
-                DisableTimer(FROSTWOLF_FIND_INFILTRATOR);
                 AddCustomAction(FROSTWOLF_SUMMON_INFILTRATOR, 2s, [&]() { DoCastSpellIfCan(nullptr, SPELL_SUMMON_INFILTRATOR); });
                 DoBroadcastText(ethereal_frostworg_emotes[3][0], m_creature);
                 break;
