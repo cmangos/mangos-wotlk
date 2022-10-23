@@ -846,6 +846,16 @@ struct FetchAlchemistsApprentice : public AuraScript
     }
 };
 
+// 51511 - Toss Ice Boulder
+struct TossIceBoulder : public SpellScript
+{
+    void OnRadiusCalculate(Spell* spell, SpellEffectIndex effIdx, bool targetB, float& radius) const override
+    {
+        if (effIdx == EFFECT_INDEX_0 && !targetB) // radius index supplied is for targetB not targetA
+            radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->m_spellInfo->rangeIndex));
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -903,4 +913,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<RandomIngredientAura>("spell_random_ingredient_aura");
     RegisterSpellScript<PotCheck>("spell_pot_check");
     RegisterSpellScript<FetchAlchemistsApprentice>("spell_fetch_alchemists_apprentice");
+    RegisterSpellScript<TossIceBoulder>("spell_toss_ice_boulder");
 }
