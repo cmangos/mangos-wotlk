@@ -89,6 +89,12 @@ struct boss_grobbulusAI : public BossAI
             m_creature->SummonCreature(NPC_FALLOUT_SLIME, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10 * IN_MILLISECONDS);
     }
 
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_POISON_CLOUD)
+            m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
+    }
+
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 id)
     {
         switch (id)
