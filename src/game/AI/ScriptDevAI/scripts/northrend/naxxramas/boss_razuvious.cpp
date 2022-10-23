@@ -73,6 +73,7 @@ struct boss_razuviousAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
     }
 
@@ -84,7 +85,7 @@ struct boss_razuviousAI : public BossAI
 
     void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
     {
-        // Every time a Deathknight Understudy taunts Razuvious, he will yell its disappointment
+        // Every time a Deathknight Understudy taunts Razuvious, he will yell his disappointment
         if (spell->Id == SPELL_TAUNT)
         {
             switch (urand(0, 2))
@@ -99,7 +100,7 @@ struct boss_razuviousAI : public BossAI
 
 struct npc_obedienceCrystalAI : public Scripted_NoMovementAI
 {
-    npc_obedienceCrystalAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { }
+    npc_obedienceCrystalAI(Creature* creature) : Scripted_NoMovementAI(creature) { }
 
     void Reset() override
     {
@@ -107,27 +108,27 @@ struct npc_obedienceCrystalAI : public Scripted_NoMovementAI
     }
 };
 
-bool NpcSpellClick_npc_obedienceCrystal(Player* pPlayer, Creature* pClickedCreature, uint32 uiSpellId)
+bool NpcSpellClick_npc_obedienceCrystal(Player* player, Creature* clickedCreature, uint32 spellId)
 {
-    if (pClickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
+    if (clickedCreature->GetEntry() == NPC_OBEDIENCE_CRYSTAL)
     {
-        if (pClickedCreature->IsNonMeleeSpellCasted(true))
+        if (clickedCreature->IsNonMeleeSpellCasted(true))
             return false;
 
         CreatureList understudies;
         bool castSuccess = false;
-        GetCreatureListWithEntryInGrid(understudies, pClickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 60.f);
+        GetCreatureListWithEntryInGrid(understudies, clickedCreature, NPC_DEATHKNIGHT_UNDERSTUDY, 60.f);
         for (auto understudy : understudies)
         {
             if (!castSuccess)
             {
-                pPlayer->CastSpell(nullptr, uiSpellId, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
                 castSuccess = true;
             }
-            if (understudy->GetCharmer() && understudy->GetCharmer()->GetObjectGuid() == pPlayer->GetObjectGuid())
-                pClickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
+            if (understudy->GetCharmer() && understudy->GetCharmer()->GetObjectGuid() == player->GetObjectGuid())
+                clickedCreature->CastSpell(understudy, SPELL_OBEDIENCE_CHAINS, TRIGGERED_OLD_TRIGGERED);
         }
-        pClickedCreature->RemoveAllCooldowns();
+        clickedCreature->RemoveAllCooldowns();
         return true;
     }
 
