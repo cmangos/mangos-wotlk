@@ -115,7 +115,7 @@ struct boss_sapphironAI : public BossAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        BossAI::Reset();
 
         m_iceboltCount = 0;
         m_blizzardCount = 0;
@@ -141,9 +141,9 @@ struct boss_sapphironAI : public BossAI
 
     void Aggro(Unit* /*who*/) override
     {
+        BossAI::Aggro();
         DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_FROST_AURA : SPELL_FROST_AURA_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         ResetCombatAction(SAPPHIRON_AIR_PHASE, GetSubsequentActionTimer(SAPPHIRON_AIR_PHASE));
-        BossAI::Aggro();
     }
 
     void JustSummoned(Creature* summoned) override
