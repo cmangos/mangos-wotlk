@@ -135,7 +135,7 @@ struct boss_thaddiusAI : public BossAI
         BossAI::Reset();
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         BossAI::Aggro();
         // Make Attackable
@@ -164,7 +164,7 @@ struct boss_thaddiusAI : public BossAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         BossAI::JustDied();
 
@@ -244,26 +244,26 @@ struct boss_thaddiusAI : public BossAI
     }
 };
 
-bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+bool EffectDummyNPC_spell_thaddius_encounter(Unit* /*pCaster*/, uint32 spellId, SpellEffectIndex uiEffIndex, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-    switch (uiSpellId)
+    switch (spellId)
     {
         case SPELL_SHOCK_OVERLOAD:
             if (uiEffIndex == EFFECT_INDEX_0)
             {
                 // Only do something to Thaddius, and on the first hit.
-                if (pCreatureTarget->GetEntry() != NPC_THADDIUS || !pCreatureTarget->HasAura(SPELL_THADIUS_SPAWN))
+                if (creatureTarget->GetEntry() != NPC_THADDIUS || !creatureTarget->HasAura(SPELL_THADIUS_SPAWN))
                     return true;
                 // remove Stun and then Cast
-                pCreatureTarget->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_THADIUS_LIGHTNING_VISUAL, TRIGGERED_NONE);
+                creatureTarget->RemoveAurasDueToSpell(SPELL_THADIUS_SPAWN);
+                creatureTarget->CastSpell(creatureTarget, SPELL_THADIUS_LIGHTNING_VISUAL, TRIGGERED_NONE);
             }
             return true;
         case SPELL_THADIUS_LIGHTNING_VISUAL:
-            if (uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_THADDIUS)
+            if (uiEffIndex == EFFECT_INDEX_0 && creatureTarget->GetEntry() == NPC_THADDIUS)
             {
-                pCreatureTarget->AI()->SetCombatScriptStatus(false);
-                pCreatureTarget->SetInCombatWithZone(false);
+                creatureTarget->AI()->SetCombatScriptStatus(false);
+                creatureTarget->SetInCombatWithZone(false);
             }
             return true;
     }
@@ -289,25 +289,25 @@ struct npc_tesla_coilAI : public Scripted_NoMovementAI
     }
 
     instance_naxxramas* m_instance;
-    bool m_bToFeugen = false;
+    bool m_toFeugen = false;
 
     void Reset() override {
         m_creature->SetImmuneToPlayer(true);
         EstablishTarget();
         if (!m_instance || m_instance->GetData(TYPE_THADDIUS) == DONE)
             return;
-        DoCastSpellIfCan(m_creature, m_bToFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, m_toFeugen ? SPELL_FEUGEN_TESLA_PASSIVE : SPELL_STALAGG_TESLA_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void EstablishTarget()
     {
         if (m_creature->GetPositionX() > 3500.f)
-            m_bToFeugen = true;
+            m_toFeugen = true;
     }
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
+    void MoveInLineOfSight(Unit* /*who*/) override {}
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoBroadcastText(EMOTE_LOSING_LINK, m_creature);
     }
@@ -388,7 +388,7 @@ struct boss_thaddiusAddsAI : public BossAI
     }
 
     Creature* GetOtherAdd() const
-    // For Stalagg returns pFeugen, for Feugen returns pStalagg
+    // For Stalagg returns feugen, for Feugen returns stalagg
     {
         switch (m_creature->GetEntry())
         {
@@ -399,14 +399,14 @@ struct boss_thaddiusAddsAI : public BossAI
         }
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
-        BossAI::Aggro(pWho);
+        BossAI::Aggro(who);
 
         if (Creature* pOtherAdd = GetOtherAdd())
         {
             if (!pOtherAdd->IsInCombat())
-                pOtherAdd->AI()->AttackStart(pWho);
+                pOtherAdd->AI()->AttackStart(who);
         }
     }
 
@@ -421,14 +421,14 @@ struct boss_thaddiusAddsAI : public BossAI
         if (!m_instance)
             return;
 
-        if (Creature* pOther = GetOtherAdd())
+        if (Creature* other = GetOtherAdd())
         {
-            if (boss_thaddiusAddsAI* pOtherAI = dynamic_cast<boss_thaddiusAddsAI*>(pOther->AI()))
+            if (boss_thaddiusAddsAI* pOtherAI = dynamic_cast<boss_thaddiusAddsAI*>(other->AI()))
             {
                 if (pOtherAI->IsCountingDead())
                 {
-                    pOther->ForcedDespawn();
-                    pOther->Respawn();
+                    other->ForcedDespawn();
+                    other->Respawn();
                 }
             }
         }
@@ -487,7 +487,7 @@ struct boss_thaddiusAddsAI : public BossAI
         SetCombatScriptStatus(true);
 
         JustDied(attacker);                                  // Texts
-        ResetTimer(THADDIUS_ADD_REVIVE, 5s);
+        ResetTimer(THADDIUS_ADD_REVIVE, 10s);
     }
 };
 
@@ -510,7 +510,7 @@ struct boss_stalaggAI : public boss_thaddiusAddsAI
         boss_thaddiusAddsAI::Reset();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoBroadcastText(SAY_STAL_DEATH, m_creature);
     }
@@ -551,7 +551,7 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
         boss_thaddiusAddsAI::Reset();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoBroadcastText(SAY_FEUG_DEATH, m_creature);
     }
@@ -582,35 +582,35 @@ struct MagneticPull : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
-        Unit* pFeugen;
-        Unit* pStalagg;
-        pFeugen = spell->GetCaster();
-        pStalagg = spell->GetUnitTarget();
+        Unit* feugen;
+        Unit* stalagg;
+        feugen = spell->GetCaster();
+        stalagg = spell->GetUnitTarget();
 
-        if (!pFeugen || !pStalagg)
+        if (!feugen || !stalagg)
             return;
         
-        if (pFeugen->GetEntry() != NPC_FEUGEN || pStalagg->GetEntry() != NPC_STALAGG)
+        if (feugen->GetEntry() != NPC_FEUGEN || stalagg->GetEntry() != NPC_STALAGG)
             return;
 
-        auto* pFeugenTank = pFeugen->getThreatManager().getCurrentVictim();
-        auto* pStalaggTank = pStalagg->getThreatManager().getCurrentVictim();
+        auto* feugenTank = feugen->getThreatManager().getCurrentVictim();
+        auto* stalaggTank = stalagg->getThreatManager().getCurrentVictim();
 
-        if (!pFeugenTank || !pStalaggTank)
+        if (!feugenTank || !stalaggTank)
             return;
         
         float feugenThreat, stalaggThreat;
 
-        feugenThreat = pFeugenTank->getThreat();
-        stalaggThreat = pStalaggTank->getThreat();
+        feugenThreat = feugenTank->getThreat();
+        stalaggThreat = stalaggTank->getThreat();
 
-        pFeugenTank->addThreatPercent(-100);
-        pStalaggTank->addThreatPercent(-100);
-        pFeugen->AddThreat(pStalaggTank->getTarget(), stalaggThreat);
-        pStalagg->AddThreat(pFeugenTank->getTarget(), feugenThreat);
+        feugenTank->addThreatPercent(-100);
+        stalaggTank->addThreatPercent(-100);
+        feugen->AddThreat(stalaggTank->getTarget(), stalaggThreat);
+        stalagg->AddThreat(feugenTank->getTarget(), feugenThreat);
 
-        pStalagg->CastSpell(pFeugenTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
-        pFeugen->CastSpell(pStalaggTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
+        stalagg->CastSpell(feugenTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
+        feugen->CastSpell(stalaggTank->getTarget(), SPELL_MAGNETIC_PULL_EFFECT, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -703,9 +703,14 @@ struct ThaddiusCharge : public AuraScript
     {
         if (Unit* target = aura->GetTarget())
         {
-
             uint32 buffAuraId = aura->GetId() == SPELL_POSITIVE_CHARGE ? SPELL_POSITIVE_CHARGE_BUFF : SPELL_NEGATIVE_CHARGE_BUFF;
             float range = 13.f; // Static value from DBC files. As the value is the same for both spells we can hardcode it instead of accessing is through sSpellRadiusStore
+
+            if (!aura->GetCaster()->IsAlive())
+            {
+                target->RemoveAurasDueToSpell(buffAuraId);
+                return;
+            }
 
             uint32 curCount = 0;
             PlayerList playerList;
