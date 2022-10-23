@@ -58,8 +58,7 @@ struct boss_faerlinaAI : public BossAI
 {
     boss_faerlinaAI(Creature* creature) : BossAI(creature, 0),
     m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())),
-    m_hasTaunted(false),
-    m_inGracePeriod(false)
+    m_hasTaunted(false)
     {
         SetDataType(TYPE_FAERLINA);
         AddOnAggroText(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3, SAY_AGGRO_4);
@@ -69,16 +68,6 @@ struct boss_faerlinaAI : public BossAI
 
     instance_naxxramas* m_instance;
     bool m_hasTaunted;
-    bool m_inGracePeriod;
-
-    void Aggro(Unit* who) override
-    {
-        BossAI::Aggro(who);
-        m_inGracePeriod = true;
-        AddCustomAction(FAERLINA_GRACE_TIMER, 30s, [&](){
-            m_inGracePeriod = false;
-        });
-    }
 
     void Reset() override
     {
@@ -86,24 +75,24 @@ struct boss_faerlinaAI : public BossAI
         m_creature->SetSpellList(m_creature->GetMap()->IsRegularDifficulty() ? SPELLSET_10N : SPELLSET_25N);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_hasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 80.0f) &&  m_creature->IsWithinLOSInMap(pWho))
+        if (!m_hasTaunted && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 80.0f) &&  m_creature->IsWithinLOSInMap(who))
         {
             DoBroadcastText(SAY_GREET, m_creature);
             m_hasTaunted = true;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpellEntry) override
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spellEntry) override
     {
         // Check if we hit with Widow's Embrave
-        if (pSpellEntry->Id == SPELL_WIDOWS_EMBRACE || pSpellEntry->Id == SPELL_WIDOWS_EMBRACE_H)
+        if (spellEntry->Id == SPELL_WIDOWS_EMBRACE || spellEntry->Id == SPELL_WIDOWS_EMBRACE_H)
         {
             // Achievement 'Momma said Knock you out': If we removed OR delayed the frenzy, the criteria is failed
-            if ((!m_inGracePeriod) && m_instance)
+            if (TimeSinceEncounterStart() >= 30s)
                 m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_KNOCK_YOU_OUT, false);
         }
     }
