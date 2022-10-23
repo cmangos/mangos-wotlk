@@ -91,25 +91,24 @@ struct boss_anubrekhanAI : public BossAI
 
     void Aggro(Unit *who) override
     {
+        BossAI::Aggro(who);
         if (m_isRegularMode)
             ResetTimer(ANUBREKHAN_SUMMON, 20s);
-        BossAI::Aggro(who);
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        if (!pVictim)
+        BossAI::KilledUnit(victim);
+        if (!victim)
             return;
         // Force the player to spawn corpse scarabs via spell
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            pVictim->CastSpell(pVictim, SPELL_SELF_SPAWN_5, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-
-        BossAI::KilledUnit(pVictim);
+        if (victim->GetTypeId() == TYPEID_PLAYER)
+            victim->CastSpell(victim, SPELL_SELF_SPAWN_5, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_hasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 110.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_hasTaunted && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 110.0f) && m_creature->IsWithinLOSInMap(who))
         {
             switch (urand(0,4))
             {
@@ -122,28 +121,28 @@ struct boss_anubrekhanAI : public BossAI
             m_hasTaunted = true;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
-            DoBroadcastText(EMOTE_CRYPT_GUARD, pSummoned);
+        if (summoned->GetEntry() == NPC_CRYPT_GUARD)
+            DoBroadcastText(EMOTE_CRYPT_GUARD, summoned);
 
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+            summoned->AI()->AttackStart(pTarget);
     }
 
-    void SummonedCreatureDespawn(Creature* pSummoned) override
+    void SummonedCreatureDespawn(Creature* summoned) override
     {
         // If creature despawns on out of combat, skip this
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (pSummoned && pSummoned->GetEntry() == NPC_CRYPT_GUARD)
+        if (summoned && summoned->GetEntry() == NPC_CRYPT_GUARD)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-            DoBroadcastText(EMOTE_CORPSE_SCARABS, pSummoned);
+            summoned->CastSpell(summoned, SPELL_SELF_SPAWN_10, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+            DoBroadcastText(EMOTE_CORPSE_SCARABS, summoned);
         }
     }
 };
