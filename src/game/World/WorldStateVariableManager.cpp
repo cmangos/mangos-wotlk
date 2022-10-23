@@ -36,7 +36,10 @@ void WorldStateVariableManager::Initialize(uint32 completedEncounterMask)
         if (m_owner->GetDifficulty() != encounter->Difficulty)
             continue;
 
-        SetEncounterVariable(encounter->Id, ((1 << encounter->encounterIndex) & completedEncounterMask) == 1);
+        if (encounter->CompleteWorldStateID) // use official data whenever available
+            SetVariable(encounter->CompleteWorldStateID, ((1 << encounter->encounterIndex) & completedEncounterMask) == 1);
+        else // phase this out eventually
+            SetEncounterVariable(encounter->Id, ((1 << encounter->encounterIndex) & completedEncounterMask) == 1);
     }
 }
 

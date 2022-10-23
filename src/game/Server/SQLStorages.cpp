@@ -43,7 +43,7 @@ const char VehicleAccessoryDstFmt[] = "iii";
 const char SpellScriptTargetFmt[] = "iiii";
 const char SpellEntryfmt[] = "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiiissssssssssssssssssssssssssssssssiiiiiLiiiiifffiiiiiiiiiifffiiii";
 const char SpellConefmt[] = "ii";
-const char DungeonEncounterFmt[] = "iiiiissssssssssssssssxx";
+const char DungeonEncounterFmt[] = "iiiiiissssssssssssssssii";
 const char AreaGroupEntryFmt[] = "iiiiiiii";
 const char WorldSafeLocsFmt[] = "iiffffs";
 
