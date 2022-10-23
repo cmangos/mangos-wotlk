@@ -328,7 +328,6 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
 
     void JustSummoned(Creature* summoned) override
     {
-        summoned->AddSummonForOnDeathDespawn(m_creature->GetObjectGuid()); // hackfix
         switch (urand(0,2))
         {
             case 0: DoBroadcastText(30916, summoned); break;
