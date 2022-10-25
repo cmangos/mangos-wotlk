@@ -46,7 +46,7 @@ enum
     SPELL_LOCUSTSWARM           = 28785,                    // This is a self buff that triggers the dmg debuff
     SPELL_LOCUSTSWARM_H         = 54021,
 
-    SPELL_SUMMON_GUARD          = 29508,                   // Summons 1 crypt guard at targeted location - spell doesn't exist in 3.x.x
+    SPELL_SUMMON_GUARD          = 29508,                   // Summons 1 crypt guard at targeted location
 
     SPELL_SELF_SPAWN_5          = 29105,                    // This spawns 5 corpse scarabs ontop of us (most likely the pPlayer casts this on death)
     SPELL_SELF_SPAWN_10         = 28864,                    // This is used by the crypt guards when they die
