@@ -36,7 +36,6 @@ spell 44935
 spell 45109
 spell 45111
 spell 46023
-spell 46770
 spell 47575
 spell 50630
 spell 50706
@@ -182,16 +181,6 @@ enum
     SPELL_INOCULATE_OWLKIN              = 29528,
     NPC_OWLKIN                          = 16518,
     NPC_OWLKIN_INOC                     = 16534,
-
-    // target for quest 12166)
-    SPELL_LIQUID_FIRE                   = 46770,
-    SPELL_LIQUID_FIRE_AURA              = 47972,
-
-    NPC_ELK                             = 26616,
-    NPC_GRIZZLY                         = 26643,
-
-    NPC_ELK_BUNNY                       = 27111,
-    NPC_GRIZZLY_BUNNY                   = 27112,
 
     // for quest 12516
     SPELL_MODIFIED_MOJO                 = 50706,
@@ -622,30 +611,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 // set despawn timer, since we want to remove creature after a short time
                 pCreatureTarget->ForcedDespawn(15000);
 
-                return true;
-            }
-            return true;
-        }
-        case SPELL_LIQUID_FIRE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (pCreatureTarget->HasAura(SPELL_LIQUID_FIRE_AURA))
-                        return true;
-
-                    if (pCreatureTarget->GetEntry() == NPC_ELK)
-                    {
-                        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_LIQUID_FIRE_AURA, TRIGGERED_OLD_TRIGGERED);
-                        ((Player*)pCaster)->KilledMonsterCredit(NPC_ELK_BUNNY);
-                    }
-                    else if (pCreatureTarget->GetEntry() == NPC_GRIZZLY)
-                    {
-                        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_LIQUID_FIRE_AURA, TRIGGERED_OLD_TRIGGERED);
-                        ((Player*)pCaster)->KilledMonsterCredit(NPC_GRIZZLY_BUNNY);
-                    }
-                }
                 return true;
             }
             return true;
