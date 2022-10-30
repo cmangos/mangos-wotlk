@@ -425,6 +425,17 @@ struct LiquidFireOfElune : public SpellScript
     }
 };
 
+struct HourglassOfEternity : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->GetCaster()->HasAura(50867)) // Hourglass of Eternity Nearby
+            return SPELL_FAILED_FIZZLE;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -453,4 +464,5 @@ void AddSC_dragonblight()
     RegisterSpellScript<spell_ley_line_focus_item>("spell_ley_line_focus_ring");
     RegisterSpellScript<spell_ley_line_focus_item_trigger>("spell_ley_line_focus_item_trigger");
     RegisterSpellScript<LiquidFireOfElune>("spell_liquid_fire_of_elune");
+    RegisterSpellScript<HourglassOfEternity>("spell_hourglass_of_eternity");
 }

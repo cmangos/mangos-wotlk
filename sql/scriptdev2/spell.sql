@@ -569,6 +569,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (49462,'spell_call_oculus_drake'),
 (49464,'spell_ride_oculus_drake_saddle'),
 (49546,'spell_eagle_eyes'),
+(49890,'spell_hourglass_of_eternity'),
 (50255,'spell_poisoned_spear'),
 (50442,'spell_crystal_spike_visual_aura'),
 (50471,'spell_escape_from_silverbrook_credit_master'),
