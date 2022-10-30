@@ -4249,8 +4249,8 @@ void Player::SendItemRetrievalMail(uint32 itemEntry, uint32 count)
         draft.AddItem(item);
     }
 
-    draft.SendMailTo(MailReceiver(this, GetObjectGuid()), sender);
     CharacterDatabase.CommitTransaction();
+    draft.SendMailTo(MailReceiver(this, GetObjectGuid()), sender);
 }
 
 void Player::SaveItemToInventory(Item* item)
