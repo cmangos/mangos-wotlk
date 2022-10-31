@@ -6232,8 +6232,28 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 creature->AI()->AttackStart(m_caster);
 
         if (summon_prop->Flags & SUMMON_PROP_FLAG_HELP_WHEN_SUMMONED_IN_COMBAT && m_caster)
-            if (m_caster->CanEnterCombat() && creature->CanEnterCombat() && creature->CanAssist(m_caster) && m_caster->GetVictim())
-                creature->AI()->AttackStart(m_caster->GetVictim()); // maybe needs to help with everything around not just main target
+        {
+            if (m_caster->CanEnterCombat() && creature->CanEnterCombat() && creature->CanAssist(m_caster))
+            {
+                if (!m_caster->CanHaveThreatList())
+                {
+                    for (auto& ref : m_caster->getHostileRefManager())
+                        if (Unit* victim = ref.getSource()->getOwner())
+                            if (creature->CanAttack(victim))
+                                creature->AddThreat(victim);
+                }
+                else
+                {
+                    for (auto ref : m_caster->getThreatManager().getThreatList())
+                        if (Unit* victim = ref->getTarget())
+                            if (creature->CanAttack(victim))
+                                creature->AddThreat(victim);
+                }
+
+                if (!creature->getThreatManager().isThreatListEmpty())
+                    creature->AI()->AttackClosestEnemy();
+            }
+        }
 
         if (summon_prop->Flags & SUMMON_PROP_FLAG_ONLY_VISIBLE_TO_SUMMONER)
             creature->SetOnlyVisibleTo(m_trueCaster->GetObjectGuid());
