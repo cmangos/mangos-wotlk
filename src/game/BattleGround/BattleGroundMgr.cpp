@@ -1994,7 +1994,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
         float startMaxDist = fields[5].GetFloat();
 
-        uint32 playerSkinReflootId = fields[9].GetUInt32();
+        uint32 playerSkinReflootId = fields[6].GetUInt32();
         if (playerSkinReflootId && !sLootMgr.ExistsRefLootTemplate(playerSkinReflootId))
         {
             playerSkinReflootId = 0;
