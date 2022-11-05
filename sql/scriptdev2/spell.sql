@@ -44,7 +44,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12948,'spell_hakkar_summoned'),
 (13278,'spell_gdr_channel'),
 (13493,'spell_gdr_periodic'),
-(11886,'spell_capture_wildkin'),
+(11886,'spell_capture_beast'),
 (11887,'spell_capture_hippogryph'),
 (11888,'spell_capture_faerie_dragon'),
 (11885,'spell_capture_treant'),

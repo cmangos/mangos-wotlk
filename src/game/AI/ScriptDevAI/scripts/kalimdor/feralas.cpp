@@ -589,9 +589,9 @@ struct SpecificTargetScript : public SpellScript
     }
 };
 
-struct CaptureWildkin : public SpecificTargetScript // 11886
+struct CaptureBeast : public SpecificTargetScript // 11886
 {
-    std::set<uint32> m_targets = { 2927, 2928, 7808 };
+    std::set<uint32> m_targets = { 5268, 5286 };
 
     std::set<uint32> const& GetRequiredTargets() const override { return m_targets; }
 };
@@ -655,7 +655,7 @@ void AddSC_feralas()
     pNewScript->pGOUse = &GOUse_go_cage_door;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<CaptureWildkin>("spell_capture_wildkin");
+    RegisterSpellScript<CaptureBeast>("spell_capture_beast");
     RegisterSpellScript<CaptureHippogryph>("spell_capture_hippogryph");
     RegisterSpellScript<CaptureFaerieDragon>("spell_capture_faerie_dragon");
     RegisterSpellScript<CaptureTreant>("spell_capture_treant");
