@@ -779,8 +779,12 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
     if (!VerifyMovementInfo(movementInfo, mover, recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK))
         return false;
 
+    // TODO: if root becomes problem during spline again - recheck sniffs
     if (!mover->movespline->Finalized())
-        return false;
+    {
+        if (!mover->movespline->IsBoarding() || (recv_data.GetOpcode() != CMSG_FORCE_MOVE_UNROOT_ACK && recv_data.GetOpcode() != CMSG_FORCE_MOVE_ROOT_ACK))
+			return false;
+    }
 
     // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
     if (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
