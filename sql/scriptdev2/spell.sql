@@ -653,6 +653,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52676,'spell_drakuramas_teleport_script_03'),
 (52694,'spell_recall_eye_of_acherus'),
 (52751,'spell_death_gate'),
+(52812,'spell_molten_fury_flamebringer'),
 (52942,'spell_pulsing_shockwave'),
 (53031,'spell_crusader_parachute'),
 (53035,'spell_summon_anubar_periodic_aura'),

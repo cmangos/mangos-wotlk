@@ -703,6 +703,18 @@ struct spell_assemble_cage : public SpellScript
     }
 };
 
+// 52812 - Molten Fury
+struct MoltenFuryFlamebringer : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0 || !spell->GetUnitTarget() || !spell->GetUnitTarget()->IsStunned())
+            return;
+
+        spell->SetDamage(spell->GetDamage() * 2);
+    }
+};
+
 void AddSC_grizzly_hills()
 {
     Script* pNewScript = new Script;
@@ -728,4 +740,5 @@ void AddSC_grizzly_hills()
     RegisterSpellScript<spell_tag_troll>("spell_tag_troll");
     RegisterSpellScript<spell_out_cold>("spell_out_cold");
     RegisterSpellScript<spell_assemble_cage>("spell_assemble_cage");
+    RegisterSpellScript<MoltenFuryFlamebringer>("spell_molten_fury_flamebringer");
 }
