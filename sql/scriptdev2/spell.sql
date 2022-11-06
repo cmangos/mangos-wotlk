@@ -673,6 +673,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54306,'spell_protective_bubble_aura'),
 (54361,'spell_void_shift_aura'),
 (54496,'spell_summon_plague_spray'),
+(54997,'spell_cast_net_stormforged_pursuer'),
 (55368,'spell_summon_stefan'),
 (55421,'spell_gymers_throw'),
 (55430,'spell_gymers_buddy'),

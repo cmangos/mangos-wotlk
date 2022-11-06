@@ -223,6 +223,19 @@ bool QuestAccept_npc_injured_miner(Player* pPlayer, Creature* pCreature, const Q
     return false;
 }
 
+// 54997 - Cast Net
+struct CastNetStormforgedPursuer : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const
+    {
+        if (ObjectGuid target = spell->m_targets.getUnitTargetGuid()) // can be cast only on this target
+            if (target.GetEntry() != 29696) // Stormforged Pursuer
+                return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_storm_peaks()
 {
     Script* pNewScript = new Script;
@@ -242,4 +255,6 @@ void AddSC_storm_peaks()
     pNewScript->pGossipSelect = &GossipSelect_npc_injured_miner;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_injured_miner;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
 }
