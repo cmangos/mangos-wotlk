@@ -75,10 +75,35 @@ struct StoicismAbsorb : public AuraScript
     }
 };
 
+// 64568 - Blood Reserve
+struct BloodReserveEnchant : public AuraScript
+{
+    bool OnCheckProc(Aura* aura, ProcExecutionData& /*data*/) const override
+    {
+        if (aura->GetTarget()->GetHealthPercent() >= 35.f)
+            return false;
+        return true;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        procData.triggeredSpellId = 64569;
+        procData.triggerTarget = nullptr;
+
+        // need scale damage base at stack size
+        if (SpellEntry const* trigEntry = sSpellTemplate.LookupEntry<SpellEntry>(procData.triggeredSpellId))
+            procData.basepoints[EFFECT_INDEX_0] = trigEntry->CalculateSimpleValue(EFFECT_INDEX_0) * aura->GetStackAmount();
+
+        aura->GetTarget()->RemoveAurasDueToSpell(64568); // uses stacks so wont autoremove itself
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void AddSC_spell_scripts_wotlk()
 {
     RegisterSpellScript<Replenishment>("spell_replenishment");
     RegisterSpellScript<RetaliationDummyCreature>("spell_retaliation_dummy_creature");
     RegisterSpellScript<Shadowmeld>("spell_shadowmeld");
     RegisterSpellScript<StoicismAbsorb>("spell_stoicism");
+    RegisterSpellScript<BloodReserveEnchant>("spell_blood_reserve_enchant");
 }
