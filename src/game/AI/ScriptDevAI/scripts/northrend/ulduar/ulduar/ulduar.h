@@ -65,7 +65,7 @@ enum
 
     // The siege of ulduar
     NPC_LEVIATHAN               = 33113,
-    // NPC_IGNIS                = 33118,
+    NPC_IGNIS                   = 33118,
     NPC_RAZORSCALE              = 33186,
     NPC_XT002                   = 33293,
     NPC_HEART_DECONSTRUCTOR     = 33329,
@@ -88,6 +88,9 @@ enum
     NPC_SALVAGED_CHOPPER        = 33062,
     NPC_SALVAGED_DEMOLISHER     = 33109,
     // NPC_LIQUID_PYRITE        = 33189,
+
+    // Ignis adds
+    NPC_IRON_CONSTRUCT          = 33121,
 
     // Razorscale helper npcs
     NPC_EXPEDITION_COMMANDER    = 33210,

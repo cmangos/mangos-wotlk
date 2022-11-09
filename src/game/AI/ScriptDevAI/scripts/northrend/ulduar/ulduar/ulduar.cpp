@@ -181,6 +181,7 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_EXPLORER_DELLORAH:
         case NPC_BRANN_BRONZEBEARD:
         case NPC_ORBITAL_SUPPORT:
+        case NPC_IGNIS:
         case NPC_RAZORSCALE:
         case NPC_EXPEDITION_COMMANDER:
         case NPC_XT002:
