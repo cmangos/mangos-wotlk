@@ -5760,17 +5760,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1603024','Such a waste.','15502','1','0','0','34130','stonebark SAY_SLAY_2_STONE'),
 ('-1603025','Matron, flee! They are ruthless....','15503','1','0','0','34132','stonebark SAY_DEATH_STONE'),
 
-('-1603026','Insolent whelps! Your blood will temper the weapons used to reclaim this world!','15564','1','0','0','34306','ignis SAY_AGGRO'),
-('-1603027','Let the inferno consume you!','15567','1','0','0','34309','ignis SAY_SCORCH_1'),
-('-1603028','BURN! Burn in the makers fire!','15568','1','0','0','34310','ignis SAY_SCORCH_2'),
-('-1603029','I will burn away your impurities!','15566','1','0','0','34308','ignis SAY_SLAGPOT'),
-('-1603030','Arise, soldiers of the Iron Crucible! The Makers'' will be done!','15565','1','0','0','34307','ignis SAY_ADDS'),
-('-1603031','More scraps for the scrapheap!','15569','1','0','0','34311','ignis SAY_SLAY_1'),
-('-1603032','Your bones will serve as kindling!','15570','1','0','0','34312','ignis SAY_SLAY_2'),
-('-1603033','Let it be finished!','15571','1','0','0','33871','ignis SAY_BERSERK'),
-('-1603034','I. Have. Failed.','15572','1','0','0','34313','ignis SAY_DEATH'),
-('-1603035','Ignis the Furnace Master begins to cast Flame Jets!','0','3','0','0','0','ignis EMOTE_FLAME_JETS'),
-
 ('-1603036','Welcome, champions! All of our attempts at grounding her have failed. We could use a hand in bring her down with these harpoon guns.','15647','0','0','0','0','razorscale SAY_INTRO_WELCOME'),
 ('-1603037','Give us a moment to prepare to build the turrets.','0','1','0','0','33820','razorscale SAY_INTRO_1'),
 ('-1603038','Be on the lookout! Mole machines will be surfacing soon with those nasty Iron dwarves aboard!','0','1','0','0','33607','razorscale SAY_INTRO_2'),

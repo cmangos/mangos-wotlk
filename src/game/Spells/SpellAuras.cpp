@@ -9011,15 +9011,6 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 62593, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 62717:                                 // Slag Pot
-                {
-                    target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 65722 : 65723, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-
-                    // cast Slag Imbued if the target survives up to the last tick
-                    if (GetAuraTicks() == 10)
-                        target->CastSpell(target, 63536, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    return;
-                }
                 case 63050:                                 // Sanity
                 {
                     if (GetHolder()->GetStackAmount() <= 25 && !target->HasAura(63752))

@@ -10091,19 +10091,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 62382, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 62488:                                 // Activate Construct
-                {
-                    if (!unitTarget || !unitTarget->HasAura(62468))
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(62468);
-                    unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-                    unitTarget->CastSpell(unitTarget, 64474, TRIGGERED_OLD_TRIGGERED);
-
-                    if (m_caster->GetVictim())
-                        ((Creature*)unitTarget)->AI()->AttackStart(m_caster->GetVictim());
-                    return;
-                }
                 case 62524:                                 // Attuned to Nature 2 Dose Reduction
                 case 62525:                                 // Attuned to Nature 10 Dose Reduction
                 case 62521:                                 // Attuned to Nature 25 Dose Reduction
@@ -10150,14 +10137,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     for (uint32 i = 0; i < 10; ++i)
                         m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
 
-                    return;
-                }
-                case 62707:                                 // Grab
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 62708, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 63010:                                 // Charge
@@ -10345,14 +10324,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(unitTarget, m_caster->GetMap()->IsRegularDifficulty() ? 64468 : 64486, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 64475:                                 // Strength of the Creator
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAuraHolderFromStack(64473);
                     return;
                 }
                 case 64623:                                 // Frost Bomb
