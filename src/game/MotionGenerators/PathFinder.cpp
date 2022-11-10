@@ -575,7 +575,7 @@ void PathFinder::BuildPointPath(const float* startPoint, const float* endPoint)
 
             // little optimization
             m_pathPoints.clear();
-            m_pathPoints.resize(stepCount + 2);
+            m_pathPoints.reserve(stepCount + 2);
 
             // first point
             m_pathPoints.push_back(startVec);
@@ -1130,7 +1130,7 @@ void PathFinder::ComputePathToRandomPoint(Vector3 const& startPoint, float maxRa
     }
 
     // navmesh queries do not work in water - need to supplement with los check and just build a shortcut
-    if (fail && m_sourceUnit->IsInWater() && m_sourceUnit->CanSwim() && m_sourceUnit->GetMap()->IsInLineOfSight(currPos.x, currPos.y, currPos.z + m_sourceUnit->GetCollisionHeight(), endPoint.x, endPoint.y, endPoint.z + m_sourceUnit->GetCollisionHeight(), false))
+    if (fail && m_sourceUnit->IsInWater() && m_sourceUnit->CanSwim() && m_sourceUnit->GetMap()->IsInLineOfSight(currPos.x, currPos.y, currPos.z + m_sourceUnit->GetCollisionHeight(), endPoint.x, endPoint.y, endPoint.z + m_sourceUnit->GetCollisionHeight(), m_sourceUnit->GetPhaseMask(), false))
     {
         BuildShortcut();
     }
