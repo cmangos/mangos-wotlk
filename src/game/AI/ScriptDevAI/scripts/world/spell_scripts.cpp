@@ -1636,6 +1636,32 @@ struct GameobjectCallForHelpOnUsage : public SpellScript
     }
 };
 
+struct Submerged : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        unitTarget->SetStandState(UNIT_STAND_STATE_CUSTOM);
+        unitTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+    }
+};
+
+struct Stand : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        unitTarget->SetStandState(UNIT_STAND_STATE_STAND);
+        unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1688,4 +1714,6 @@ void AddSC_spell_scripts()
     RegisterSpellScript<ForgetSwordsmith>("spell_forget_36438");
     RegisterSpellScript<ForgetAxesmith>("spell_forget_36439");
     RegisterSpellScript<ForgetHammersmith>("spell_forget_36441");
+    RegisterSpellScript<Submerged>("spell_submerged");
+    RegisterSpellScript<Stand>("spell_stand");
 }
