@@ -264,6 +264,20 @@ void Transport::SpawnPassengers()
     }
 }
 
+void Transport::DespawnPassengers()
+{
+    auto passengerCopy = m_staticPassengers;
+    for (ObjectGuid guid : passengerCopy)
+    {
+        if (WorldObject* passenger = GetMap()->GetWorldObject(guid))
+        {
+            RemovePassenger(passenger);
+            passenger->AddObjectToRemoveList();
+        }
+    }
+    m_staticPassengers.clear();
+}
+
 void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, float o)
 {
     Map* oldMap = GetMap();
@@ -378,6 +392,9 @@ bool GenericTransport::AddPassenger(WorldObject* passenger, bool adjustCoords)
             if (Pet* miniPet = unitPassenger->GetMiniPet())
                 AddPetToTransport(unitPassenger, miniPet);
         }
+
+        if (passenger->GetDbGuid())
+            m_staticPassengers.insert(passenger->GetObjectGuid());
     }
     return true;
 }
@@ -421,6 +438,9 @@ bool GenericTransport::RemovePassenger(WorldObject* passenger)
                 pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
             }
         }
+
+        if (passenger->GetDbGuid())
+            m_staticPassengers.erase(passenger->GetObjectGuid());
     }
     return true;
 }
@@ -528,6 +548,14 @@ void Transport::Update(const uint32 diff)
             m_currentFrame->Spline->evaluate_percent(m_currentFrame->Index, t, pos);
             m_currentFrame->Spline->evaluate_derivative(m_currentFrame->Index, t, dir);
             UpdatePosition(pos.x, pos.y, pos.z, atan2(dir.y, dir.x) + M_PI);
+        }
+        if (IsInWorld())
+        {
+            bool gridActive = GetMap()->IsLoaded(GetPositionX(), GetPositionY());
+            if (!gridActive && !m_staticPassengers.empty())
+                DespawnPassengers();
+            else if (gridActive && m_staticPassengers.empty())
+                SpawnPassengers();
         }
     }
 
