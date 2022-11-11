@@ -1595,7 +1595,6 @@ struct npc_burster_wormAI : public CombatAI
         m_creature->CastSpell(nullptr, SPELL_SUBMERGED, TRIGGERED_NONE);
         if (passive)
             DoCastSpellIfCan(nullptr, m_uiBorePassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spellInfo) override
@@ -1645,7 +1644,6 @@ struct npc_burster_wormAI : public CombatAI
             case 1: // after teleport
             {
                 // come up
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                 m_creature->RemoveAurasDueToSpell(SPELL_SANDWORM_SUBMERGE_VISUAL);
                 DoCastSpellIfCan(nullptr, SPELL_STAND);
                 timer = 1000;
