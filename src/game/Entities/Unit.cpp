@@ -9877,7 +9877,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 InterruptSpell(CurrentSpellTypes(i), false);
 
     if (notInCombat)
+    {
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTERING_COMBAT_CANCELS);
+        GetCombatManager().OnCombatStart();
+    }
 
     if (creatureNotInCombat)
     {
