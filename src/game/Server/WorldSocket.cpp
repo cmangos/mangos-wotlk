@@ -374,7 +374,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                              "mutetime, "                //8
                              "locale, "                  //9
                              "os, "                      //10
-                             "flags "                    //11
+                             "flags, "                   //11
+                             "platform "                 //12
                              "FROM account a "
                              "WHERE username = '%s'",
                              safe_account.c_str());
@@ -448,6 +449,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     os = fields[10].GetString();
 
     uint32 accountFlags = fields[11].GetUInt32();
+	std::string platform = fields[12].GetString();
 
     delete result;
 
@@ -535,6 +537,13 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     m_crypt.Init(&K);
 
     m_session = sWorld.FindSession(id);
+
+    ClientPlatformType clientPlatform;
+    if (platform == "x86")
+        clientPlatform = CLIENT_PLATFORM_X86;
+    else if (platform == "PPC" && clientOS == CLIENT_OS_MAC)
+        clientPlatform = CLIENT_PLATFORM_PPC;
+
     if (m_session)
     {
         // Session exist so player is reconnecting
@@ -557,6 +566,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
         m_session->SetGameBuild(ClientBuild);
         m_session->SetOS(clientOS);
+        m_session->SetPlatform(clientPlatform);
 
         m_session->SendAuthOk();
 
@@ -607,6 +617,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         m_session->LoadTutorialsData();
         m_session->SetGameBuild(ClientBuild);
         m_session->SetOS(clientOS);
+        m_session->SetPlatform(clientPlatform);
         m_session->InitializeAnticheat(K);
 
         m_session->SendAuthOk();
