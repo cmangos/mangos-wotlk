@@ -856,6 +856,30 @@ struct TossIceBoulder : public SpellScript
     }
 };
 
+// Tails Up : Summon Female Frost Leopard 62108
+struct TailsUpSummonFemaleFrostLeopard : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Player* caster = static_cast<Player*>(spell->GetCaster());
+        auto data = static_cast<Player*>(caster)->RequestFollowData(summon->GetObjectGuid());
+        summon->GetMotionMaster()->MoveFollow(caster, data.second, data.first, true);
+    }
+};
+
+// Tails Up: Summon Female Icepaw Bear 62116
+struct TailsUpSummonFemaleIcepawBear : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Player* caster = static_cast<Player*>(spell->GetCaster());
+        auto data = static_cast<Player*>(caster)->RequestFollowData(summon->GetObjectGuid());
+        summon->GetMotionMaster()->MoveFollow(caster, data.second, data.first, true);
+    }
+};
+
+
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -914,4 +938,6 @@ void AddSC_zuldrak()
     RegisterSpellScript<PotCheck>("spell_pot_check");
     RegisterSpellScript<FetchAlchemistsApprentice>("spell_fetch_alchemists_apprentice");
     RegisterSpellScript<TossIceBoulder>("spell_toss_ice_boulder");
+    RegisterSpellScript<TailsUpSummonFemaleFrostLeopard>("spell_tails_up_summon_female_frost_leopard");
+    RegisterSpellScript<TailsUpSummonFemaleIcepawBear>("spell_tails_up_summon_female_icepaw_bear");
 }
