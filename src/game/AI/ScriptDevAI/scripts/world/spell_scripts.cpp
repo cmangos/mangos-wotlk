@@ -770,7 +770,11 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                     case NPC_FROST_LEOPARD:
                     {
                         if (isMale)
+                        {
                             pCreatureTarget->CastSpell(pCreatureTarget, SPELL_TAILS_UP_AURA, TRIGGERED_OLD_TRIGGERED);
+                            pCreatureTarget->RemoveAurasDueToSpell(62248);
+                            pCreatureTarget->AI()->AttackStart(pPlayer);
+                        }
                         else
                         {
                             pPlayer->KilledMonsterCredit(NPC_LEOPARD_KILL_CREDIT, pCreatureTarget->GetObjectGuid());
@@ -783,7 +787,11 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                     case NPC_ICEPAW_BEAR:
                     {
                         if (isMale)
+                        {
                             pCreatureTarget->CastSpell(pCreatureTarget, SPELL_TAILS_UP_AURA, TRIGGERED_OLD_TRIGGERED);
+                            pCreatureTarget->RemoveAurasDueToSpell(62248);
+                            pCreatureTarget->AI()->AttackStart(pPlayer);
+                        }
                         else
                         {
                             pPlayer->KilledMonsterCredit(NPC_BEAR_KILL_CREDIT, pCreatureTarget->GetObjectGuid());

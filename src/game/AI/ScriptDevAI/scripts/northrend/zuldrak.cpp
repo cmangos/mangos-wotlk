@@ -818,6 +818,26 @@ struct RandomRadiusPicker : public SpellScript
     }
 };
 
+// 62108 - Tails Up : Summon Female Frost Leopard 
+struct TailsUpSummonFemaleFrostLeopard : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (summon->AI())
+            summon->AI()->RequestFollow(spell->GetCaster());
+    }
+};
+
+// 62116 - Tails Up: Summon Female Icepaw Bear
+struct TailsUpSummonFemaleIcepawBear : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (summon->AI())
+            summon->AI()->RequestFollow(spell->GetCaster());
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -872,4 +892,6 @@ void AddSC_zuldrak()
     RegisterSpellScript<TossIceBoulder>("spell_toss_ice_boulder");
     RegisterSpellScript<Ghostly>("spell_ghostly");
     RegisterSpellScript<RandomRadiusPicker>("spell_random_radius_picker");
+    RegisterSpellScript<TailsUpSummonFemaleFrostLeopard>("spell_tails_up_summon_female_frost_leopard");
+    RegisterSpellScript<TailsUpSummonFemaleIcepawBear>("spell_tails_up_summon_female_icepaw_bear");
 }
