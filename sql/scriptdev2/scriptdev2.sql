@@ -127,6 +127,7 @@ UPDATE gameobject_template SET ScriptName='go_unadorned_spike' WHERE entry IN(17
 UPDATE gameobject_template SET ScriptName='go_containment_coffer' WHERE entry=122088;
 UPDATE gameobject_template SET ScriptName='go_large_jack_o_lantern' WHERE entry=186887;
 UPDATE gameobject_template SET ScriptName='go_imp_in_a_ball' WHERE entry=185898;
+UPDATE gameobject_template SET ScriptName='go_aura_generator' WHERE entry IN(182524,183333,183791,185324,193579,193982,194029);
 
 /* Outdoor PVP*/
 -- si
@@ -1179,7 +1180,6 @@ UPDATE creature_template SET ScriptName='npc_orc_necrolyte' WHERE entry=21747;
 INSERT INTO scripted_event_id VALUES
 (10591,'event_spell_summon_nightbane'),
 (10951,'event_spell_medivh_journal');
-UPDATE gameobject_template SET ScriptName='go_chessboard' WHERE entry IN(185324);
 
 /* LOCH MODAN */
 UPDATE creature_template SET ScriptName='npc_miran' WHERE entry=1379;
