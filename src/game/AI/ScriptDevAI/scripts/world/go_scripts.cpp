@@ -1097,8 +1097,8 @@ GameObjectAI* GetAI_go_containment(GameObject* go)
 // note - conditions are likely some form of unit or ai condition, currently only chess event has one so using this overly simplified system of enabling it on encounter start
 struct go_aura_generator : public GameObjectAI
 {
-    go_aura_generator(GameObject* go) : GameObjectAI(go), m_auraSearchTimer(1000), m_spellInfo(sSpellTemplate.LookupEntry<SpellEntry>(go->GetGOInfo()->auraGenerator.auraID1)), m_started(!go->GetGOInfo()->auraGenerator.conditionID1 && !go->GetGOInfo()->auraGenerator.conditionID2),
-                                        m_radius(GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_0]))) {}
+    go_aura_generator(GameObject* go) : GameObjectAI(go), m_auraSearchTimer(1000), m_spellInfo(sSpellTemplate.LookupEntry<SpellEntry>(go->GetGOInfo()->auraGenerator.auraID1)), m_started(m_spellInfo && !go->GetGOInfo()->auraGenerator.conditionID1 && !go->GetGOInfo()->auraGenerator.conditionID2),
+                                        m_radius(m_spellInfo ? GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_0])) : 0.f) {}
 
     uint32 m_auraSearchTimer;
     SpellEntry const* m_spellInfo;
