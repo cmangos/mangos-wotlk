@@ -606,6 +606,22 @@ bool AreaTrigger_at_hive_tower(Player* player, AreaTriggerEntry const* /*pAt*/)
     return false;
 }
 
+/*######
+## at_quetzlun
+######*/
+
+enum
+{
+    QUEST_I_SENSE_A_DISTURBANCE = 12665,
+};
+
+bool AreaTrigger_at_quetzlun(Player* player, AreaTriggerEntry const* /*at*/)
+{
+    if (player->GetQuestStatus(QUEST_I_SENSE_A_DISTURBANCE) == QUEST_STATUS_INCOMPLETE)
+        player->RewardPlayerAndGroupAtEventExplored(QUEST_I_SENSE_A_DISTURBANCE, player);
+    return true;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript = new Script;
@@ -696,5 +712,10 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_hive_tower";
     pNewScript->pAreaTrigger = &AreaTrigger_at_hive_tower;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_quetzlun";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_quetzlun;
     pNewScript->RegisterSelf();
 }
