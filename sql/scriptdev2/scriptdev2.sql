@@ -75,6 +75,7 @@ INSERT INTO scripted_areatrigger VALUES
 (5030,'at_spearborn_encampment'),
 (5046,'at_waygate'),
 (5047,'at_waygate'),
+(5052,'at_quetzlun'),
 (5108,'at_stormwright_shelf'),
 (5284,'at_aldurthar_gate'),
 (5285,'at_aldurthar_gate'),
