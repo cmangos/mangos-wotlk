@@ -856,6 +856,15 @@ struct TossIceBoulder : public SpellScript
     }
 };
 
+// 51671 - Ghostly
+struct Ghostly : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->GetCaster()->CastSpell(nullptr, 51717, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -914,4 +923,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<PotCheck>("spell_pot_check");
     RegisterSpellScript<FetchAlchemistsApprentice>("spell_fetch_alchemists_apprentice");
     RegisterSpellScript<TossIceBoulder>("spell_toss_ice_boulder");
+    RegisterSpellScript<Ghostly>("spell_ghostly");
 }
