@@ -3120,6 +3120,12 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 61574  -- Banner of the Horde
 );
 
+-- missing spell
+-- Fix error: Aura::TriggerSpell: Spell 52381 have 0 in EffectTriggered[0], not handled custom case?
+-- 52380: You Reap What You Sow: Reclaim Power - Efffect
+-- custom - forces source to run script spellid and name from official data - author Grz3s
+INSERT INTO spell_template(Id,SpellName,Effect1,EffectDieSides1,EffectBasePoints1,EffectImplicitTargetA1,EffectMiscValue1,IsServerSide) VALUES
+(52380,'You Reap What You Sow: Reclaim Power - Effect',77,0,0,25,0,1);
 
 -- ============================================================
 -- Missing WotLK Achievement Spells
