@@ -673,8 +673,9 @@ bool ChaseMovementGenerator::IsReachablePositionToTarget(Unit& owner, float x, f
     if (this->i_offset == 0.f)
     {
         float reach = owner.GetCombinedCombatReach(&target, true);
-        float dx = x - target.GetPositionX();
-        float dy = y - target.GetPositionY();
+        Position targetPos = target.GetPosition(target.GetTransport());
+        float dx = x - targetPos.x;
+        float dy = y - targetPos.y;
         if (dx * dx + dy * dy > reach * reach)
         {
             if (!target.IsFalling())
@@ -683,7 +684,7 @@ bool ChaseMovementGenerator::IsReachablePositionToTarget(Unit& owner, float x, f
         else if (this->i_target->IsFlying() && !owner.CanFly())
         {
             // if npc cant fly and target flies too high up, need to evade
-            if (std::max(std::fabs(target.GetPositionZ() - z) - owner.GetCombatReach() - target.GetCombatReach(), float(0))  > CREATURE_Z_ATTACK_RANGE_MELEE)
+            if (std::max(std::fabs(targetPos.z - z) - owner.GetCombatReach() - target.GetCombatReach(), float(0))  > CREATURE_Z_ATTACK_RANGE_MELEE)
                 return false;
         }
     }
