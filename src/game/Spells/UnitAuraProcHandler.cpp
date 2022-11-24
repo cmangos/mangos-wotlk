@@ -2083,13 +2083,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
         {
             switch (dummySpell->Id)
             {
-                // Clean Escape
-                case 23582:
-                    // triggered spell have same masks and etc with main Vanish spell
-                    if (!spellInfo || spellInfo->Effect[EFFECT_INDEX_0] == SPELL_EFFECT_NONE)
-                        return SPELL_AURA_PROC_FAILED;
-                    triggered_spell_id = 23583;
-                    break;
                 // Deadly Throw Interrupt
                 case 32748:
                 {
