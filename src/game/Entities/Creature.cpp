@@ -2989,6 +2989,14 @@ void Creature::ResetSpellHitCounter()
     m_hitBySpells.clear();
 }
 
+void Creature::Heartbeat()
+{
+    Unit::Heartbeat();
+
+    if (GetDetectionRange() > MAX_CREATURE_ATTACK_RADIUS && CanAggro())
+        ScheduleAINotify(0);
+}
+
 bool Creature::IsSlowedInCombat() const
 {
     return !IsNoWoundedSlowdown() && HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT);
