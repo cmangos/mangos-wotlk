@@ -3,5 +3,5 @@
  #define REVISION_DB_REALMD "required_14064_01_realmd_platform"
  #define REVISION_DB_LOGS "required_14039_01_logs_anticheat"
  #define REVISION_DB_CHARACTERS "required_14061_01_characters_fishingSteps"
- #define REVISION_DB_MANGOS "required_14063_01_mangos_battleground_reflooot"
+ #define REVISION_DB_MANGOS "required_14065_01_mangos_aggro_range"
 #endif // __REVISION_SQL_H__
