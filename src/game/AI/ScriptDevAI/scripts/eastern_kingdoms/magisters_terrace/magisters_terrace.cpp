@@ -86,7 +86,10 @@ void instance_magisters_terrace::OnObjectCreate(GameObject* pGo)
             break;
         case GO_SELIN_ENCOUNTER_DOOR:
         case GO_KAEL_DOOR:
+            break;
         case GO_ESCAPE_QUEL_DANAS:
+            if (m_auiEncounter[TYPE_KAELTHAS] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
             break;
 
         default:
