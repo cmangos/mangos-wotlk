@@ -410,10 +410,13 @@ namespace MMAP
     {
         bool success = false;
         // unload all maps with given mapId
-        for (auto itr = m_loadedMMaps.begin(); itr != m_loadedMMaps.end(); ++itr)
+        for (auto itr = m_loadedMMaps.begin(); itr != m_loadedMMaps.end();)
         {
             if (itr->first != uint64(mapId) << 32)
+            {
+                itr++;
                 continue;
+            }
 
             // unload all tiles from given map
             MMapData* mmap = (*itr).second;
@@ -432,7 +435,7 @@ namespace MMAP
             }
 
             delete mmap;
-            m_loadedMMaps.erase(itr);
+            itr = m_loadedMMaps.erase(itr);
             DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:unloadMap: Unloaded %03i.mmap", mapId);
             success = true;
         }
