@@ -1936,7 +1936,6 @@ UPDATE gameobject_template SET ScriptName='go_wooden_door' WHERE entry=186306;
 UPDATE creature_template SET ScriptName='npc_eagle_trash_aggro_trigger' WHERE entry IN(24223);
 
 /* ZUL'DRAK */
-UPDATE creature_template SET ScriptName='npc_gurgthock' WHERE entry=30007;
 UPDATE creature_template SET ScriptName='npc_ghoul_feeding_bunny' WHERE entry=28591;
 UPDATE creature_template SET ScriptName='npc_decaying_ghoul' WHERE entry=28565;
 INSERT INTO scripted_areatrigger VALUES
