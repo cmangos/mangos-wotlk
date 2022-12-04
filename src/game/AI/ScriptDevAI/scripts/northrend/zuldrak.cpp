@@ -799,7 +799,7 @@ struct Ghostly : public SpellScript
 
 void AddSC_zuldrak()
 {
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_ghoul_feeding_bunny";
     pNewScript->GetAI = &GetAI_npc_ghoul_feeding_bunny;
     pNewScript->RegisterSelf();
