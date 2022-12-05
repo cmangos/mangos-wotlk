@@ -797,6 +797,24 @@ struct Ghostly : public SpellScript
     }
 };
 
+// 55882 - Orb of Storms
+struct OrbofStorms : public SpellScript
+{
+    void OnRadiusCalculate(Spell* spell, SpellEffectIndex effIdx, bool targetB, float& radius) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (targetB)
+            {
+                SpellRangeEntry const* entry = sSpellRangeStore.LookupEntry(spell->m_spellInfo->rangeIndex);
+                radius = frand(GetSpellMinRange(entry), GetSpellMaxRange(entry));
+            }
+            else
+                radius = 100.f; // guesswork
+        }
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -850,4 +868,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<FetchAlchemistsApprentice>("spell_fetch_alchemists_apprentice");
     RegisterSpellScript<TossIceBoulder>("spell_toss_ice_boulder");
     RegisterSpellScript<Ghostly>("spell_ghostly");
+    RegisterSpellScript<OrbofStorms>("spell_orb_of_storms");
 }
