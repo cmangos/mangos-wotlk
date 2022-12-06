@@ -715,6 +715,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (55430,'spell_gymers_buddy'),
 (55814,'spell_eck_spit'),
 (55853,'spell_vortex_aura'),
+(55882,'spell_orb_of_storms'),
 (55931,'spell_conjure_flame_sphere'),
 (56072,'spell_ride_red_dragon_buddy'),
 (56105,'spell_vortex'),
