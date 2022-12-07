@@ -798,7 +798,10 @@ struct Ghostly : public SpellScript
 };
 
 // 55882 - Orb of Storms
-struct OrbofStorms : public SpellScript
+// 55872 - Orb of Flame
+// 55886 - Boulder
+// 55888 - Orb of Water
+struct RandomRadiusPicker : public SpellScript
 {
     void OnRadiusCalculate(Spell* spell, SpellEffectIndex effIdx, bool targetB, float& radius) const override
     {
@@ -868,5 +871,5 @@ void AddSC_zuldrak()
     RegisterSpellScript<FetchAlchemistsApprentice>("spell_fetch_alchemists_apprentice");
     RegisterSpellScript<TossIceBoulder>("spell_toss_ice_boulder");
     RegisterSpellScript<Ghostly>("spell_ghostly");
-    RegisterSpellScript<OrbofStorms>("spell_orb_of_storms");
+    RegisterSpellScript<RandomRadiusPicker>("spell_random_radius_picker");
 }
