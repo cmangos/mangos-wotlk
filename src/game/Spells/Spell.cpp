@@ -4335,7 +4335,10 @@ void Spell::SendCastResult(SpellCastResult result) const
     if (recipient->GetSession()->PlayerLoading()) // don't send cast results at loading time
         return;
 
-    SendCastResult(recipient, m_spellInfo, m_cast_count, result, m_petCast, m_param1, m_param2);
+    uint32 param1 = m_param1, param2 = m_param2;
+    if (m_spellScript)
+        m_spellScript->OnSpellCastResultOverride(result, param1, param2);
+    SendCastResult(recipient, m_spellInfo, m_cast_count, result, m_petCast, param1, param2);
 }
 
 void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result, bool isPetCastResult /*=false*/, uint32 param1 /*=0*/, uint32 param2 /*=0*/)
