@@ -590,6 +590,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47941,'spell_crystal_spike_aura'),
 (48095,'spell_intense_cold_aura'),
 (48268,'spell_container_of_rats'),
+(48363,'spell_rescue_villager'),
 (48385,'spell_create_spirit_fount_beam_aura'),
 (48397,'spell_drop_off_villager'),
 (48590,'spell_avenging_spirits'),

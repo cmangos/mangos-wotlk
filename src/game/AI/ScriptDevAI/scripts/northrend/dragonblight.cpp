@@ -436,6 +436,19 @@ struct HourglassOfEternity : public SpellScript
     }
 };
 
+// 48363 - Rescue Villager
+struct RescueVillager : public SpellScript
+{
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_OUT_OF_RANGE || result == SPELL_FAILED_BAD_TARGETS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_35;
+        }
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -465,4 +478,5 @@ void AddSC_dragonblight()
     RegisterSpellScript<spell_ley_line_focus_item_trigger>("spell_ley_line_focus_item_trigger");
     RegisterSpellScript<LiquidFireOfElune>("spell_liquid_fire_of_elune");
     RegisterSpellScript<HourglassOfEternity>("spell_hourglass_of_eternity");
+    RegisterSpellScript<RescueVillager>("spell_rescue_villager");
 }
