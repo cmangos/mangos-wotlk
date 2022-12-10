@@ -985,7 +985,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54171,'spell_divine_storm_heal'),
 (70769,'spell_divine_storm_cooldown'),
 (31789,'spell_righteous_defense'),
-(40470,'spell_paladin_tier_6_trinket');
+(40470,'spell_paladin_tier_6_trinket'),
+(31850,'spell_ardent_defender'),
+(31851,'spell_ardent_defender'),
+(31852,'spell_ardent_defender');
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
