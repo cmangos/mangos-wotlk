@@ -239,6 +239,34 @@ struct JudgementsOfTheWiseEnergize : public SpellScript
     }
 };
 
+struct ArdentDefender : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath) const override
+    {
+        currentAbsorb = 0;
+        Player* player = dynamic_cast<Player*>(aura->GetCaster());
+        if (!player)
+            return;
+        if (int32(player->GetHealth()) - remainingDamage > (player->GetMaxHealth() * 0.35))
+            return;
+        int32 reduction = 0;
+        int32 healMod = 0;
+        if (Aura* aur = aura->GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_0))
+            reduction = aur->GetBasePoints();
+        if (Aura* aur = aura->GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1))
+            healMod = aur->GetBasePoints();
+        remainingDamage *= (100 - reduction) / 100.f;
+        if (int32(player->GetHealth()) - remainingDamage > 0 || player->HasAura(66233))
+            return;
+        float defenseFactor = (player->GetDefenseSkillValue() - player->GetLevel() * 5) / 140.f;
+        healMod *= defenseFactor;
+        healMod = player->GetMaxHealth() * (healMod / 100.f);
+        remainingDamage = 0;
+        player->CastCustomSpell(nullptr, 66235, &healMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        player->CastSpell(nullptr, 66233, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadPaladinScripts()
 {
     RegisterSpellScript<IncreasedHolyLightHealing>("spell_increased_holy_light_healing");
@@ -250,4 +278,5 @@ void LoadPaladinScripts()
     RegisterSpellScript<DivineStormCooldown>("spell_divine_storm_cooldown");
     RegisterSpellScript<JudgementsOfTheWise>("spell_judgements_of_the_wise");
     RegisterSpellScript<JudgementsOfTheWiseEnergize>("spell_judgements_of_the_wise_energize");
+    RegisterSpellScript<ArdentDefender>("spell_ardent_defender");
 }
