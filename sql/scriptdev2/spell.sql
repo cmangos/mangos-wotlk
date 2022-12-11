@@ -1279,7 +1279,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (58589,'spell_stoneclaw_totem_absorb'),
 (58590,'spell_stoneclaw_totem_absorb'),
 (58591,'spell_stoneclaw_totem_absorb'),
-(70811,'spell_item_shaman_t10_elemental_2p_bonus');
+(70811,'spell_item_shaman_t10_elemental_2p_bonus')
+(2825,'spell_heroism_bloodlust'),
+(32182,'spell_heroism_bloodlust');
 
 -- Food and Drink
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

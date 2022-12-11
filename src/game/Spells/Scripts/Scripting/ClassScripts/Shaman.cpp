@@ -228,6 +228,16 @@ struct StoneclawTotemAbsorb : public SpellScript
     }
 };
 
+struct HeroismBloodlust : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const
+    {
+        if (!target || !target->IsAlive() || target->HasAura(57724) || target->HasAura(57723))
+            return false;
+        return true;
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -244,4 +254,5 @@ void LoadShamanScripts()
     RegisterSpellScript<AncestralAwakeningSearch>("spell_ancestral_awakening_search");
     RegisterSpellScript<StoneclawTotem>("spell_stoneclaw_totem");
     RegisterSpellScript<StoneclawTotemAbsorb>("spell_stoneclaw_totem_absorb");
+    RegisterSpellScript<HeroismBloodlust>("spell_heroism_bloodlust");
 }
