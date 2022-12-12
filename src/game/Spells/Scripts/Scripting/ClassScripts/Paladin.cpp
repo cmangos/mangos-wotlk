@@ -262,6 +262,7 @@ struct ArdentDefender : public AuraScript
         healMod *= defenseFactor;
         healMod = player->GetMaxHealth() * (healMod / 100.f);
         remainingDamage = 0;
+        preventedDeath = true;
         player->CastCustomSpell(nullptr, 66235, &healMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         player->CastSpell(nullptr, 66233, TRIGGERED_OLD_TRIGGERED);
     }

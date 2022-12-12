@@ -501,6 +501,8 @@ enum
     ACHIEV_CRIT_CONQ_FREYA      = 10583,
     ACHIEV_CRIT_CONQ_COUNCIL    = 10599,
     ACHIEV_CRIT_CONQ_HODIR      = 10719,
+
+    TIMER_HODIRS_PROTECTIVE_GAZE = 0,
 };
 
 struct UlduarSpawn
@@ -588,6 +590,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         void OnPlayerDeath(Player* pPlayer) override;
 
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
