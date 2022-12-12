@@ -304,6 +304,22 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
     m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
+void instance_ulduar::OnCreatureRespawn(Creature* creature)
+{
+    if (creature->GetEntry() == NPC_HODIR_HELPER)
+    {
+        creature->AI()->AddCustomAction(TIMER_HODIRS_PROTECTIVE_GAZE, true, [&]()
+        {
+            Creature* hodirHelper = GetSingleCreatureFromStorage(NPC_HODIR_HELPER);
+            if (!hodirHelper || hodirHelper->HasAura(64174))
+                return;
+            if (GetData(TYPE_YOGGSARON) != IN_PROGRESS)
+                return;
+            hodirHelper->CastSpell(hodirHelper, 64174, TRIGGERED_NONE);
+        });
+    }
+}
+
 void instance_ulduar::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
