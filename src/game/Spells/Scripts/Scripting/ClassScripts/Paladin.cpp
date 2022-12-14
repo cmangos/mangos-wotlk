@@ -241,7 +241,7 @@ struct JudgementsOfTheWiseEnergize : public SpellScript
 
 struct ArdentDefender : public AuraScript
 {
-    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath) const override
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath, bool& /*dropCharge*/) const override
     {
         currentAbsorb = 0;
         Player* player = dynamic_cast<Player*>(aura->GetCaster());
