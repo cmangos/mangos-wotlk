@@ -135,6 +135,8 @@ struct boss_moorabiAI : public CombatAI
                 m_instance->SetLessRabiAchievementCriteria(false);
 
             m_creature->SetSpellList(m_isRegularMode ? MOORABI_SPELL_LIST_TROLL_HC : MOORABI_SPELL_LIST_MAMMOTH_HC);
+
+            DisableCombatAction(MOORABI_TRANSFORM);
         }
     }
 
@@ -154,7 +156,7 @@ struct boss_moorabiAI : public CombatAI
                 DoScriptText(EMOTE_TRANSFORM, m_creature);
                 DoCastSpellIfCan(nullptr, SPELL_SUMMON_PHANTOM);
                 m_previousTimer *= 0.8;
-                ResetTimer(action, m_previousTimer);
+                ResetCombatAction(action, m_previousTimer);
             }
         }
     }
