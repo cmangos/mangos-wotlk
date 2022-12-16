@@ -37,6 +37,8 @@ enum
     EMOTE_TRANSFORM             = -1604018,
     EMOTE_TRANSFORMED           = -1604029,
 
+    SPELL_SUMMON_PHANTOM_OOC = 55205,
+
     // Troll form
     SPELL_DETERMINED_STAB   = 55104,
     SPELL_MOJO_FRENZY       = 55163,
@@ -59,6 +61,7 @@ enum MoorabiActions
 {
     MOORABI_TRANSFORM,
     MOORABI_ACTION_MAX,
+    MOORABI_OOC_ANIM,
 };
 
 /*######
@@ -70,6 +73,11 @@ struct boss_moorabiAI : public CombatAI
     boss_moorabiAI(Creature* creature) : CombatAI(creature, MOORABI_ACTION_MAX), m_instance(static_cast<instance_gundrak*>(creature->GetInstanceData())),
                                          m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
+        AddCustomAction(MOORABI_OOC_ANIM, 60000u, 120000u, [&]()
+        {
+            DoCastSpellIfCan(nullptr, SPELL_SUMMON_PHANTOM_OOC);
+            ResetTimer(MOORABI_OOC_ANIM, urand(60000u, 120000u));
+        }, TIMER_COMBAT_OOC);
         AddCombatAction(MOORABI_TRANSFORM, 10000u);
         Reset();
     }
