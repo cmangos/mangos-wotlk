@@ -138,6 +138,12 @@ struct boss_moorabiAI : public CombatAI
         }
     }
 
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    {
+        if (spellInfo->Id == SPELL_QUAKE || spellInfo->Id == SPELL_GROUND_TREMOR)
+            DoScriptText(SAY_QUAKE, m_creature);
+    }
+
     void ExecuteAction(uint32 action) override
     {
         if (action == MOORABI_TRANSFORM)
