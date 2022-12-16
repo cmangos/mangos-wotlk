@@ -274,14 +274,14 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
             DisableTimer(FROSTWOLF_CHANGE_DIRECTION);
             DisableTimer(FROSTWOLF_RESUME_SEARCH);
             MoveToNewPoint(FROSTWOLF_MOVE_FINAL);
-        });
+        }, TIMER_COMBAT_OOC);
         AddCustomAction(FROSTWOLF_CHANGE_DIRECTION, 15s, [&]()
         {
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveIdle();
             ResetTimer(FROSTWOLF_RESUME_SEARCH, 3s);
             ResetTimer(FROSTWOLF_CHANGE_DIRECTION, 15s);
-        });
+        }, TIMER_COMBAT_OOC);
         AddCustomAction(FROSTWOLF_RESUME_SEARCH, 0s, [&]()
         {
             switch (m_emoteCounter)
@@ -300,7 +300,7 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
             ++m_emoteCounter;
             
             MoveToNewPoint(FROSTWOLF_MOVE_NORMAL);
-        });
+        }, TIMER_COMBAT_OOC);
     }
 
     uint32 m_emoteCounter = 0;
@@ -357,17 +357,6 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
             }
             default: break;
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_creature->IsInCombat())
-            UpdateTimers(diff, false);
-        
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
     }
 };
 
