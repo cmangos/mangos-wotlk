@@ -53,8 +53,10 @@ enum
     SPELL_QUAKE             = 55101,
     SPELL_NUMBING_ROAR      = 55100,
 
-    MOORABI_SPELL_LIST_NORMAL  = 0,
-    MOORABI_SPELL_LIST_MAMMOTH = 0,
+    MOORABI_SPELL_LIST_TROLL_NORMAL = 0,
+    MOORABI_SPELL_LIST_TROLL_HC     = 0,
+    MOORABI_SPELL_LIST_MAMMOTH_NORMAL = 0,
+    MOORABI_SPELL_LIST_MAMMOTH_HC     = 0,
 };
 
 enum MoorabiActions
@@ -71,7 +73,7 @@ enum MoorabiActions
 struct boss_moorabiAI : public CombatAI
 {
     boss_moorabiAI(Creature* creature) : CombatAI(creature, MOORABI_ACTION_MAX), m_instance(static_cast<instance_gundrak*>(creature->GetInstanceData())),
-                                         m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty())
+                                         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddCustomAction(MOORABI_OOC_ANIM, 60000u, 120000u, [&]()
         {
@@ -83,7 +85,7 @@ struct boss_moorabiAI : public CombatAI
     }
 
     instance_gundrak* m_instance;
-    bool m_bIsRegularMode;
+    bool m_isRegularMode;
 
     uint32 m_previousTimer;
 
@@ -91,7 +93,7 @@ struct boss_moorabiAI : public CombatAI
     {
         CombatAI::Reset();
 
-        m_creature->SetSpellList(MOORABI_SPELL_LIST_NORMAL);
+        m_creature->SetSpellList(m_creature->GetCreatureInfo()->SpellList);
         m_previousTimer = 10000;
     }
 
@@ -132,7 +134,7 @@ struct boss_moorabiAI : public CombatAI
             if (m_instance)
                 m_instance->SetLessRabiAchievementCriteria(false);
 
-            m_creature->SetSpellList(MOORABI_SPELL_LIST_MAMMOTH);
+            m_creature->SetSpellList(m_isRegularMode ? MOORABI_SPELL_LIST_TROLL_HC : MOORABI_SPELL_LIST_MAMMOTH_HC);
         }
     }
 
