@@ -53,10 +53,10 @@ enum
     SPELL_QUAKE             = 55101,
     SPELL_NUMBING_ROAR      = 55100,
 
-    MOORABI_SPELL_LIST_TROLL_NORMAL = 0,
-    MOORABI_SPELL_LIST_TROLL_HC     = 0,
-    MOORABI_SPELL_LIST_MAMMOTH_NORMAL = 0,
-    MOORABI_SPELL_LIST_MAMMOTH_HC     = 0,
+    MOORABI_SPELL_LIST_TROLL_NORMAL = 2930501,
+    MOORABI_SPELL_LIST_TROLL_HC     = 3053001,
+    MOORABI_SPELL_LIST_MAMMOTH_NORMAL = 2930502,
+    MOORABI_SPELL_LIST_MAMMOTH_HC     = 3053002,
 };
 
 enum MoorabiActions
@@ -160,10 +160,25 @@ struct boss_moorabiAI : public CombatAI
     }
 };
 
+struct MojoFrenzy : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        SpellCastArgs args;
+        float percent = aura->GetTarget()->GetHealthPercent();
+        // stacking cast speed with missing health
+        int32 value = (100 - percent) * 2;
+        args.SetBasePoints(&value, nullptr, nullptr);
+        aura->GetTarget()->CastSpell(args, 55096, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_moorabi()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_moorabi";
     pNewScript->GetAI = &GetNewAIInstance<boss_moorabiAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<MojoFrenzy>("spell_mojo_frenzy");
 }
