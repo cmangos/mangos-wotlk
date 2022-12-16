@@ -268,7 +268,8 @@ static const uint32 ethereal_frostworg_emotes[4][2] =
 
 struct npc_ethereal_frostworgAI : public ScriptedAI
 {
-    npc_ethereal_frostworgAI(Creature* creature) : ScriptedAI(creature) {
+    npc_ethereal_frostworgAI(Creature* creature) : ScriptedAI(creature)
+    {
         AddCustomAction(FROSTWOLF_FIND_INFILTRATOR, 45s, [&]()
         {
             DisableTimer(FROSTWOLF_CHANGE_DIRECTION);
