@@ -86,19 +86,6 @@ void instance_gundrak::OnCreatureCreate(Creature* pCreature)
     }
 }
 
-/* TODO: Reload case need some love!
-*  Problem is to get the bridge/ collision work correct in relaod case.
-*  To provide correct functionality(expecting testers to activate all altars in reload case), the Keys aren't loaded, too
-*  TODO: When fixed, also remove the SPECIAL->DONE data translation in Load().
-*
-*  For the Keys should be used something like this, and for bridge and collision similar
-*
-*   if (m_auiEncounter[0] == SPECIAL && m_auiEncounter[1] == SPECIAL && m_auiEncounter[2] == SPECIAL)
-*       pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
-*   else
-*       pGo->SetGoState(GO_STATE_READY);
-*/
-
 void instance_gundrak::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
@@ -192,10 +179,6 @@ void instance_gundrak::Load(const char* chrIn)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;
-
-        // TODO: REMOVE when bridge/ collision reloading correctly working
-        if (i == SPECIAL)
-            i = DONE;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -445,9 +428,9 @@ void instance_gundrak::Update(uint32 uiDiff)
                 // Use Key
                 switch (itr->first)
                 {
-                    case TYPE_SLADRAN: DoUseDoorOrButton(GO_SNAKE_KEY); break;
-                    case TYPE_MOORABI: DoUseDoorOrButton(GO_MAMMOTH_KEY); break;
-                    case TYPE_COLOSSUS: DoUseDoorOrButton(GO_TROLL_KEY); break;
+                    case TYPE_SLADRAN: DoUseOpenableObject(GO_SNAKE_KEY, 0, false); break;
+                    case TYPE_MOORABI: DoUseOpenableObject(GO_MAMMOTH_KEY, 0, false); break;
+                    case TYPE_COLOSSUS: DoUseOpenableObject(GO_TROLL_KEY, 0, false); break;
                 }
                 // Set Timer for Beam-Duration
                 m_mKeyInProgress.insert(TypeTimerPair(itr->first, TIMER_VISUAL_KEY));
@@ -483,9 +466,8 @@ void instance_gundrak::Update(uint32 uiDiff)
                     if (GameObject* pSnakeKey = GetSingleGameObjectFromStorage(GO_SNAKE_KEY))
                         pSnakeKey->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
 
-                    // GO_BRIDGE is type 35 (TRAP_DOOR) and needs to be handled directly
-                    // Real Use of this GO is unknown, but this change of state is expected
-                    DoUseDoorOrButton(GO_BRIDGE);
+                    // GO_BRIDGE is type 35 (TRAP_DOOR) and needs to be handled directly - creates a path for players
+                    DoUseOpenableObject(GO_BRIDGE, 0, false);
                 }
                 // Remove this timer, as processed
                 m_mKeyInProgress.erase(itr++);
