@@ -558,7 +558,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             if (spellProcEvent && spellProcEvent->cooldown)
                 cooldown = spellProcEvent->cooldown;
             if (cooldown)
-                AddCooldown(*holder->GetSpellProto(), nullptr, false, cooldown * IN_MILLISECONDS);
+                holder->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
         }
 
         if (result != SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK)
@@ -649,6 +649,9 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
 
             anyAuraProc = true;
         }
+
+        if (procSuccess && execData.cooldown)
+            triggeredByHolder->SetProcCooldown(std::chrono::seconds(execData.cooldown), GetMap()->GetCurrentClockTime());
 
         // Remove charge (aura can be removed by triggers)
         if (useCharges && procSuccess && anyAuraProc && !triggeredByHolder->IsDeleted())
@@ -815,7 +818,7 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MA
     if (target && (target != this && !target->IsAlive()))
         return SPELL_AURA_PROC_FAILED;
 
-    if (!IsSpellReady(*spellInfo))
+    if (!triggeredByAura->GetHolder()->IsProcReady(GetMap()->GetCurrentClockTime()))
         return SPELL_AURA_PROC_FAILED;
 
     if (basepoints[EFFECT_INDEX_0] || basepoints[EFFECT_INDEX_1] || basepoints[EFFECT_INDEX_2])
@@ -828,7 +831,7 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MA
         CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST | TRIGGERED_DO_NOT_RESET_LEASH, castItem, triggeredByAura, originalCaster);
 
     if (cooldown)
-        AddCooldown(*spellInfo, nullptr, false, cooldown * IN_MILLISECONDS);
+        triggeredByAura->GetHolder()->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
 
     return SPELL_AURA_PROC_OK;
 }
@@ -1889,7 +1892,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         return SPELL_AURA_PROC_FAILED;
 
                     // check explicitly only to prevent mana cast when halth cast cooldown
-                    if (cooldown && !IsSpellReady(34299))
+                    if (cooldown && !triggeredByAura->GetHolder()->IsProcReady(GetMap()->GetCurrentClockTime()))
                         return SPELL_AURA_PROC_FAILED;
 
                     // health
@@ -2539,8 +2542,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     if (castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND && procFlags & PROC_FLAG_MAIN_HAND_WEAPON_SWING)
                         return SPELL_AURA_PROC_FAILED;
 
-                    // custom cooldown processing case
-                    if (cooldown && !IsSpellReady(*dummySpell))
+                    if (cooldown && !triggeredByAura->GetHolder()->IsProcReady(GetMap()->GetCurrentClockTime()))
                         return SPELL_AURA_PROC_FAILED;
 
                     // Now amount of extra power stored in 1 effect of Enchant spell
@@ -2596,13 +2598,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         basepoints[0] = int32(extra_attack_power / 14.0f * GetAttackTime(BASE_ATTACK) / 1000);
                         triggered_spell_id = 25504;
                     }
-
-                    if (cooldown && !IsSpellReady(triggered_spell_id))
-                        return SPELL_AURA_PROC_FAILED;
-
-                    // apply cooldown before cast to prevent processing itself
-                    if (cooldown)
-                        AddCooldown(*dummySpell, nullptr, false, cooldown * IN_MILLISECONDS);
 
                     // Attack Twice
                     for (uint32 i = 0; i < 2; ++i)
@@ -2806,7 +2801,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     return SPELL_AURA_PROC_FAILED;
 
                 // custom cooldown processing case
-                if (cooldown && !IsSpellReady(*dummySpell))
+                if (cooldown && !triggeredByAura->GetHolder()->IsProcReady(GetMap()->GetCurrentClockTime()))
                     return SPELL_AURA_PROC_FAILED;
 
                 uint32 spellId;
@@ -2842,14 +2837,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         return SPELL_AURA_PROC_FAILED;
                 }
 
-                // Remove cooldown (Chain Lightning - have Category Recovery time)
-                if (spellInfo->SpellFamilyFlags & uint64(0x0000000000000002))
-                    RemoveSpellCooldown(spellId);
-
                 CastSpell(pVictim, spellId, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
-
-                if (cooldown)
-                    AddCooldown(*dummySpell, nullptr, false, cooldown * IN_MILLISECONDS);
 
                 return SPELL_AURA_PROC_OK;
             }
@@ -4369,23 +4357,29 @@ SpellAuraProcResult Unit::HandleModDamagePercentDoneAuraProc(ProcExecutionData& 
     Item* castItem = triggeredByAura->GetCastItemGuid() && GetTypeId() == TYPEID_PLAYER
                      ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : nullptr;
 
+    std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
+    int32 triggeredSpellId = data.triggeredSpellId;
+
     // Aspect of the Viper
     if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellFamilyFlags & uint64(0x4000000000000))
     {
         uint32 maxmana = GetMaxPower(POWER_MANA);
-        int32 bp = int32(maxmana * GetAttackTime(RANGED_ATTACK) / 1000.0f / 100.0f);
+        basepoints[0] = int32(maxmana * GetAttackTime(RANGED_ATTACK) / 1000.0f / 100.0f);
+        if (Aura* aura = GetAura(56851, EFFECT_INDEX_0)) // Glyph of the Aspect of the Viper
+            basepoints[0] = basepoints[0] + basepoints[0] * aura->GetAmount() / 100;
 
         if (GetPowerPercent() == 100.f)
             return SPELL_AURA_PROC_FAILED;
-        if (cooldown && !IsSpellReady(34075))
-            return SPELL_AURA_PROC_FAILED;
 
-        CastCustomSpell(nullptr, 34075, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
+        triggeredSpellId = 34075;
     }
     // Arcane Blast
     else if (spellProto->Id == 36032 && spellProto->SpellFamilyName == SPELLFAMILY_MAGE && spellProto->SpellIconID == 2294)
         // prevent proc from self(spell that triggered this aura)
         return SPELL_AURA_PROC_FAILED;
+
+    if (triggeredSpellId)
+        TriggerProccedSpell(nullptr, basepoints, triggeredSpellId, castItem, triggeredByAura, data.cooldown, ObjectGuid());
 
     return SPELL_AURA_PROC_OK;
 }

@@ -203,6 +203,9 @@ class SpellAuraHolder
 
         void SetCreationDelayFlag();
 
+        bool IsProcReady(TimePoint const& now) const;
+        void SetProcCooldown(std::chrono::milliseconds cooldown, TimePoint const& now);
+
         bool IsReducedProcChancePast60() { return m_reducedProcChancePast60; }
         void SetReducedProcChancePast60() { m_reducedProcChancePast60 = true; }
 
@@ -248,6 +251,8 @@ class SpellAuraHolder
         bool m_isRemovedOnShapeLost: 1;
         bool m_deleted: 1;
         bool m_skipUpdate: 1;
+
+        TimePoint m_procCooldown;
 
         bool m_reducedProcChancePast60;
 

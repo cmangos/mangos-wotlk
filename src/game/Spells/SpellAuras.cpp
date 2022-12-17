@@ -11404,6 +11404,16 @@ void SpellAuraHolder::SetCreationDelayFlag()
     m_skipUpdate = true;
 }
 
+bool SpellAuraHolder::IsProcReady(TimePoint const& now) const
+{
+    return m_procCooldown < now;
+}
+
+void SpellAuraHolder::SetProcCooldown(std::chrono::milliseconds cooldown, TimePoint const& now)
+{
+    m_procCooldown = now + cooldown;
+}
+
 void SpellAuraHolder::SetHeartbeatResist(uint32 chance, int32 originalDuration, uint32 drLevel)
 {
     // NOTE: This is an experimental approximation of heartbeat resist mechanics, more research is required
