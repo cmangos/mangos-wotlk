@@ -828,6 +828,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (70903,'spell_dark_adherent_martyrdom_aura'),
 (71236,'spell_dark_fanatic_martyrdom_aura'),
 (71281,'spell_slave_trigger_closest'),
+(71519,'spell_icecrown_25_melee_trinket'),
+(71562,'spell_icecrown_25_melee_trinket'),
 (72088,'spell_bone_spike_graveyard'),
 (72089,'spell_bone_spike_graveyard'),
 (72180,'spell_aggro_nearest_slave'),

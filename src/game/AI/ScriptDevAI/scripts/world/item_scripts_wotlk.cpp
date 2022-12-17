@@ -66,9 +66,84 @@ struct ProcOnlyBelow35Percent : public AuraScript
     }
 };
 
+enum
+{
+    SPELL_STRENGTH_OF_THE_TAUNKA = 71484, // STR
+    SPELL_SPEED_OF_THE_VRYKUL = 71492, // HASTE
+    SPELL_POWER_OF_THE_TAUNKA = 71486, // AP
+    SPELL_AIM_OF_THE_IRON_DWARVES = 71491, // CRIT
+    SPELL_AGILITY_OF_THE_VRYKUL = 71485, // AGI
+
+    SPELL_STRENGTH_OF_THE_TAUNKA_H = 71561, // STR
+    SPELL_SPEED_OF_THE_VRYKUL_H = 71560, // HASTE
+    SPELL_POWER_OF_THE_TAUNKA_H = 71558, // AP
+    SPELL_AIM_OF_THE_IRON_DWARVES_H = 71559, // CRIT
+    SPELL_AGILITY_OF_THE_VRYKUL_H = 71556, // AGI
+};
+
+const std::unordered_map<Classes, const std::vector<uint32>> classMap =
+{
+    {CLASS_WARRIOR, {SPELL_STRENGTH_OF_THE_TAUNKA, SPELL_SPEED_OF_THE_VRYKUL, SPELL_AIM_OF_THE_IRON_DWARVES}},
+    {CLASS_DEATH_KNIGHT, {SPELL_STRENGTH_OF_THE_TAUNKA, SPELL_SPEED_OF_THE_VRYKUL, SPELL_AIM_OF_THE_IRON_DWARVES}},
+    {CLASS_PALADIN, {SPELL_STRENGTH_OF_THE_TAUNKA, SPELL_SPEED_OF_THE_VRYKUL, SPELL_AIM_OF_THE_IRON_DWARVES}},
+    {CLASS_SHAMAN, {SPELL_SPEED_OF_THE_VRYKUL, SPELL_AGILITY_OF_THE_VRYKUL, SPELL_POWER_OF_THE_TAUNKA}},
+    {CLASS_DRUID, {SPELL_SPEED_OF_THE_VRYKUL, SPELL_AGILITY_OF_THE_VRYKUL, SPELL_POWER_OF_THE_TAUNKA, SPELL_AIM_OF_THE_IRON_DWARVES}},
+    {CLASS_ROGUE, {SPELL_SPEED_OF_THE_VRYKUL, SPELL_AGILITY_OF_THE_VRYKUL, SPELL_POWER_OF_THE_TAUNKA}},
+    {CLASS_HUNTER, {SPELL_POWER_OF_THE_TAUNKA, SPELL_AIM_OF_THE_IRON_DWARVES, SPELL_AGILITY_OF_THE_VRYKUL}}
+};
+
+const std::unordered_map<Classes, const std::vector<uint32>> classMapHeroic =
+{
+    {CLASS_WARRIOR, {SPELL_STRENGTH_OF_THE_TAUNKA_H, SPELL_SPEED_OF_THE_VRYKUL_H, SPELL_AIM_OF_THE_IRON_DWARVES_H}},
+    {CLASS_DEATH_KNIGHT, {SPELL_STRENGTH_OF_THE_TAUNKA_H, SPELL_SPEED_OF_THE_VRYKUL_H, SPELL_AIM_OF_THE_IRON_DWARVES_H}},
+    {CLASS_PALADIN, {SPELL_STRENGTH_OF_THE_TAUNKA_H, SPELL_SPEED_OF_THE_VRYKUL_H, SPELL_AIM_OF_THE_IRON_DWARVES_H}},
+    {CLASS_SHAMAN, {SPELL_SPEED_OF_THE_VRYKUL_H, SPELL_AGILITY_OF_THE_VRYKUL_H, SPELL_POWER_OF_THE_TAUNKA_H}},
+    {CLASS_DRUID, {SPELL_SPEED_OF_THE_VRYKUL_H, SPELL_AGILITY_OF_THE_VRYKUL_H, SPELL_POWER_OF_THE_TAUNKA_H, SPELL_AIM_OF_THE_IRON_DWARVES_H}},
+    {CLASS_ROGUE, {SPELL_SPEED_OF_THE_VRYKUL_H, SPELL_AGILITY_OF_THE_VRYKUL_H, SPELL_POWER_OF_THE_TAUNKA_H}},
+    {CLASS_HUNTER, {SPELL_POWER_OF_THE_TAUNKA_H, SPELL_AIM_OF_THE_IRON_DWARVES_H, SPELL_AGILITY_OF_THE_VRYKUL_H}}
+};
+
+struct Icecrown25MeleeTrinket : public AuraScript
+{
+    void OnAuraInit(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        aura->SetScriptValue(classMap.find(Classes(target->getClass())) == classMap.end());
+        if (aura->GetScriptValue() == 1)
+            sLog.outError("Icecrown25MeleeTrinket called for unknown class %u", target->getClass());
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (aura->GetScriptValue() == 1)
+            return SPELL_AURA_PROC_FAILED;
+
+        bool heroic = false;
+        if (aura->GetSpellProto()->Id == 71562)
+            heroic = true;
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return SPELL_AURA_PROC_FAILED;
+        Classes characterClass = Classes(caster->getClass());        
+        std::unordered_map<Classes, const std::vector<uint32>>::const_iterator itr;
+        if (heroic)
+            itr = classMapHeroic.find(characterClass);
+        else
+            itr = classMap.find(characterClass);
+        const std::vector<uint32>& spellArray = itr->second;
+        if (!caster->IsAlive() || spellArray.empty())
+            return SPELL_AURA_PROC_FAILED;
+        uint32 spellToCast = spellArray[urand(0, spellArray.size() - 1)];
+        procData.triggeredSpellId = spellToCast;
+        procData.cooldown = std::chrono::seconds(1min + 45s).count();
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void AddSC_item_scripts_wotlk()
 {
     RegisterSpellScript<SwiftHandOfJustice>("spell_swift_hand_of_justice");
     RegisterSpellScript<DiscerningEyeOfTheBeast>("spell_discerning_eye_of_the_beast");
     RegisterSpellScript<ProcOnlyBelow35Percent>("spell_proc_only_below_35_percent");
+    RegisterSpellScript<Icecrown25MeleeTrinket>("spell_icecrown_25_melee_trinket");
 }
