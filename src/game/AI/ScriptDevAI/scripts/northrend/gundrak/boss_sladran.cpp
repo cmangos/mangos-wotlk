@@ -245,5 +245,5 @@ void AddSC_boss_sladran()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<GripOfSladran>("spell_grip_of_sladran");
-    RegisterSpellScript<SnakeWrap>("spell_snake_wrap");
+    RegisterSpellScript<SnakeWrap>("spell_gundrak_snake_wrap");
 }
