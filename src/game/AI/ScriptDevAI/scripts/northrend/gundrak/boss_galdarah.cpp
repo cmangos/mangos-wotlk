@@ -69,15 +69,14 @@ enum
 
 struct boss_galdarahAI : public ScriptedAI
 {
-    boss_galdarahAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_galdarahAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_gundrak*>(creature->GetInstanceData())),
+                                          m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    instance_gundrak* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
     bool m_bIsTrollPhase;
 
     uint32 m_uiStampedeTimer;
@@ -99,15 +98,15 @@ struct boss_galdarahAI : public ScriptedAI
         m_uiAbilityCount        = 0;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GALDARAH, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_GALDARAH, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         switch (urand(0, 2))
         {
@@ -119,31 +118,31 @@ struct boss_galdarahAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GALDARAH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_GALDARAH, FAIL);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GALDARAH, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_GALDARAH, DONE);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_RHINO_SPIRIT)
+        if (summoned->GetEntry() == NPC_RHINO_SPIRIT)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
             {
-                pSummoned->CastSpell(m_creature, SPELL_STAMPEDE_EFFECT, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->CastSpell(pSummoned, SPELL_STAMPEDE_PROC, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->CastSpell(pTarget, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+                summoned->CastSpell(m_creature, SPELL_STAMPEDE_EFFECT, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_STAMPEDE_PROC, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(pTarget, m_isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
 
                 // Store the player guid in order to count it for the achievement
-                if (m_pInstance)
-                    m_pInstance->SetData(TYPE_ACHIEV_SHARE_LOVE, pTarget->GetGUIDLow());
+                if (m_instance)
+                    m_instance->SetData(TYPE_ACHIEV_SHARE_LOVE, pTarget->GetGUIDLow());
             }
         }
     }
@@ -156,11 +155,11 @@ struct boss_galdarahAI : public ScriptedAI
         m_bIsTrollPhase = !m_bIsTrollPhase;
 
         if (m_bIsTrollPhase)
-            DoCastSpellIfCan(m_creature, SPELL_TROLL_TRANSFORM);
+            DoCastSpellIfCan(nullptr, SPELL_TROLL_TRANSFORM);
         else
         {
             DoScriptText(urand(0, 1) ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_RHINO_TRANSFORM);
+            DoCastSpellIfCan(nullptr, SPELL_RHINO_TRANSFORM);
 
             m_uiEnrageTimer = 4000;
             m_uiStompTimer  = 1000;
@@ -176,7 +175,7 @@ struct boss_galdarahAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (m_uiAbilityCount == 2)
+        if (m_uiAbilityCount >= 2)
         {
             if (m_uiPhaseChangeTimer < uiDiff)
                 DoPhaseSwitch();
@@ -188,7 +187,7 @@ struct boss_galdarahAI : public ScriptedAI
         {
             if (m_uiPunctureTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PUNCTURE : SPELL_PUNCTURE_H);
+                DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_PUNCTURE : SPELL_PUNCTURE_H);
                 m_uiPunctureTimer = 25000;
             }
             else
@@ -211,7 +210,7 @@ struct boss_galdarahAI : public ScriptedAI
 
             if (m_uiSpecialAbilityTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_WHIRLING_SLASH : SPELL_WHIRLING_SLASH_H) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_WHIRLING_SLASH : SPELL_WHIRLING_SLASH_H) == CAST_OK)
                     m_uiSpecialAbilityTimer = 12000;
 
                 ++m_uiAbilityCount;
@@ -223,7 +222,7 @@ struct boss_galdarahAI : public ScriptedAI
         {
             if (m_uiEnrageTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
+                DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
                 m_uiEnrageTimer = 15000;
             }
             else
@@ -231,7 +230,7 @@ struct boss_galdarahAI : public ScriptedAI
 
             if (m_uiStompTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STOMP : SPELL_STOMP_H);
+                DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_STOMP : SPELL_STOMP_H);
                 m_uiStompTimer = 10000;
             }
             else
@@ -243,7 +242,7 @@ struct boss_galdarahAI : public ScriptedAI
                 if (!pTarget)
                     pTarget = m_creature->GetVictim();
 
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALING_CHARGE : SPELL_IMPALING_CHARGE_H) == CAST_OK)
+                if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_IMPALING_CHARGE : SPELL_IMPALING_CHARGE_H) == CAST_OK)
                 {
                     DoScriptText(EMOTE_IMPALED, m_creature, pTarget);
                     m_uiSpecialAbilityTimer = 12000;
@@ -259,15 +258,10 @@ struct boss_galdarahAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_galdarah(Creature* pCreature)
-{
-    return new boss_galdarahAI(pCreature);
-}
-
 void AddSC_boss_galdarah()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_galdarah";
-    pNewScript->GetAI = &GetAI_boss_galdarah;
+    pNewScript->GetAI = &GetNewAIInstance<boss_galdarahAI>;
     pNewScript->RegisterSelf();
 }
