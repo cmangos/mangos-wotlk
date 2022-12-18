@@ -177,10 +177,73 @@ struct boss_sladranAI : public BossAI
     }
 };
 
+struct npc_snakeWrapAI : public Scripted_NoMovementAI
+{
+    npc_snakeWrapAI(Creature* creature) : Scripted_NoMovementAI(creature),
+    instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    owner(creature->GetMap()->GetPlayer(creature->GetOwnerGuid())),
+    isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    {
+        SetReactState(REACT_PASSIVE);
+        SetRootSelf(true);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        if (owner && owner->IsAlive())
+            owner->RemoveAurasDueToSpell(isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H);
+    }
+
+    instance_gundrak* instance;
+    Player* owner;
+    bool isRegularMode;
+};
+struct GripOfSladran : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Player* target = dynamic_cast<Player*>(aura->GetTarget());
+        if (!target)
+            return;
+        bool isRegularMode = target->GetMap()->IsRegularDifficulty();
+        if (aura->GetStackAmount() == 5)
+        {
+            target->CastSpell(target, isRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H, TRIGGERED_OLD_TRIGGERED);
+            target->RemoveAura(aura);
+        }
+    }
+};
+
+struct SnakeWrap : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        if (apply)
+            return;
+        Player* target = dynamic_cast<Player*>(aura->GetTarget());
+        if (!target)
+            return;
+        bool isRegularMode = target->GetMap()->IsRegularDifficulty();
+        target->CastSpell(target, isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H, TRIGGERED_OLD_TRIGGERED);
+        instance_gundrak* instance = dynamic_cast<instance_gundrak*>(target->GetMap()->GetInstanceData());
+        if (!instance)
+            return;
+        instance->SetData(TYPE_ACHIEV_WHY_SNAKES, target->GetGUIDLow());
+    }
+};
+
 void AddSC_boss_sladran()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_sladran";
     pNewScript->GetAI = &GetNewAIInstance<boss_sladranAI>;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_gundrak_snake_wrap";
+    pNewScript->GetAI = &GetNewAIInstance<npc_snakeWrapAI>;
+    pNewScript->RegisterSelf();
+
+    RegisterSpellScript<GripOfSladran>("spell_grip_of_sladran");
+    RegisterSpellScript<SnakeWrap>("spell_snake_wrap");
 }

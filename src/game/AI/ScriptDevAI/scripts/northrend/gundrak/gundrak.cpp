@@ -284,19 +284,18 @@ uint32 instance_gundrak::GetData(uint32 uiType) const
     return 0;
 }
 
-bool instance_gundrak::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
+bool instance_gundrak::CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
 {
-    switch (uiCriteriaId)
+    switch (criteriaId)
     {
         case ACHIEV_CRIT_LESS_RABI:
             return m_bLessRabi;
         case ACHIEV_CRIT_SHARE_LOVE:
             // Return true if all the players in the group got stampeled
             return m_uisShareLoveAchievPlayers.size() == MIN_LOVE_SHARE_PLAYERS;
-        // ToDo: enable this criteria when the script will be implemented
-        // case ACHIEV_CRIT_WHY_SNAKES:
-        //    // Return true if not found in the set
-        //    return m_uisWhySnakesAchievPlayers.find(pSource->GetGUIDLow()) == m_uisWhySnakesAchievPlayers.end();
+        case ACHIEV_CRIT_WHY_SNAKES:
+            // Return true if not found in the set
+            return m_uisWhySnakesAchievPlayers.find(source->GetGUIDLow()) == m_uisWhySnakesAchievPlayers.end();
 
         default:
             return false;
