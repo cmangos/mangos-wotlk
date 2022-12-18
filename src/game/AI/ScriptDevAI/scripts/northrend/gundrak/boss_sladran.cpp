@@ -198,6 +198,7 @@ struct npc_snakeWrapAI : public Scripted_NoMovementAI
     instance_gundrak* instance;
     bool isRegularMode;
 };
+
 struct GripOfSladran : public AuraScript, public SpellScript
 {
     bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
