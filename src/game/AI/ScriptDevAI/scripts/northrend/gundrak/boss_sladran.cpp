@@ -181,7 +181,6 @@ struct npc_snakeWrapAI : public Scripted_NoMovementAI
 {
     npc_snakeWrapAI(Creature* creature) : Scripted_NoMovementAI(creature),
     instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
-    owner(creature->GetMap()->GetPlayer(creature->GetOwnerGuid())),
     isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetReactState(REACT_PASSIVE);
@@ -190,16 +189,24 @@ struct npc_snakeWrapAI : public Scripted_NoMovementAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        if (owner && owner->IsAlive())
-            owner->RemoveAurasDueToSpell(isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H);
+        Player* spawner = dynamic_cast<Player*>(m_creature->GetSpawner());
+        if (spawner && spawner->IsAlive())
+            spawner->RemoveAurasDueToSpell(isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H);
+        m_creature->ForcedDespawn(std::chrono::milliseconds(1s).count());
     }
 
     instance_gundrak* instance;
-    Player* owner;
     bool isRegularMode;
 };
-struct GripOfSladran : public AuraScript
+struct GripOfSladran : public AuraScript, public SpellScript
 {
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->HasAura(SPELL_SNAKE_WRAP_SUMMON) || target->HasAura(SPELL_SNAKE_WRAP_SUMMON_H))
+            return false;
+        return true;
+    }
+
     void OnPeriodicDummy(Aura* aura) const override
     {
         Player* target = dynamic_cast<Player*>(aura->GetTarget());
@@ -208,8 +215,8 @@ struct GripOfSladran : public AuraScript
         bool isRegularMode = target->GetMap()->IsRegularDifficulty();
         if (aura->GetStackAmount() == 5)
         {
-            target->CastSpell(target, isRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H, TRIGGERED_OLD_TRIGGERED);
-            target->RemoveAura(aura);
+            target->CastSpell(nullptr, isRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H, TRIGGERED_OLD_TRIGGERED);
+            target->RemoveAurasDueToSpell(aura->GetSpellProto()->Id);
         }
     }
 };
@@ -220,11 +227,13 @@ struct SnakeWrap : public AuraScript
     {
         if (apply)
             return;
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
         Player* target = dynamic_cast<Player*>(aura->GetTarget());
         if (!target)
             return;
         bool isRegularMode = target->GetMap()->IsRegularDifficulty();
-        target->CastSpell(target, isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(nullptr, isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H, TRIGGERED_OLD_TRIGGERED);
         instance_gundrak* instance = dynamic_cast<instance_gundrak*>(target->GetMap()->GetInstanceData());
         if (!instance)
             return;
