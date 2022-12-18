@@ -106,12 +106,6 @@ struct boss_sladranAI : public BossAI
         summoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
     }
 
-    void KilledUnit(Unit* victim) override
-    {
-        BossAI::KilledUnit(victim);
-        victim->CastSpell(nullptr, SPELL_SNAKE_WRAP_SNAKES, TRIGGERED_OLD_TRIGGERED);
-    }
-
     std::chrono::milliseconds GetSubsequentActionTimer(SladranActions action)
     {
         switch (action)

@@ -162,6 +162,12 @@ void instance_gundrak::OnCreatureDeath(Creature* creature)
     }
 }
 
+void instance_gundrak::OnPlayerDeath(Player* player)
+{
+    if (GetData(TYPE_SLADRAN) == IN_PROGRESS)
+        player->CastSpell(nullptr, 55127, TRIGGERED_OLD_TRIGGERED);
+}
+
 void instance_gundrak::Load(const char* chrIn)
 {
     if (!chrIn)
