@@ -23,21 +23,22 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "gundrak.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
 {
-    SAY_AGGRO                  = -1604019,
-    SAY_TRANSFORM_1            = -1604020,
-    SAY_TRANSFORM_2            = -1604021,
-    SAY_SUMMON_1               = -1604022,
-    SAY_SUMMON_2               = -1604023,
-    SAY_SUMMON_3               = -1604024,
-    SAY_SLAY_1                 = -1604025,
-    SAY_SLAY_2                 = -1604026,
-    SAY_SLAY_3                 = -1604027,
-    SAY_DEATH                  = -1604028,
+    SAY_AGGRO                  = 32534,
+    SAY_TRANSFORM_1            = 32535,
+    SAY_TRANSFORM_2            = 32536,
+    SAY_SUMMON_1               = 32537,
+    SAY_SUMMON_2               = 32538,
+    SAY_SUMMON_3               = 32539,
+    SAY_SLAY_1                 = 32540,
+    SAY_SLAY_2                 = 32541,
+    SAY_SLAY_3                 = 32542,
+    SAY_DEATH                  = 32543,
 
-    EMOTE_IMPALED              = -1604030,
+    EMOTE_IMPALED              = 30718,
 
     NPC_RHINO_SPIRIT           = 29791,
     SPELL_STAMPEDE_RHINO       = 55220,
@@ -67,194 +68,174 @@ enum
 ## boss_galdarah
 ######*/
 
-struct boss_galdarahAI : public ScriptedAI
+enum GaldarahActions
 {
-    boss_galdarahAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_gundrak*>(creature->GetInstanceData())),
-                                          m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    GALDARAH_STAMPEDE,
+    GALDARAH_SPECIAL,
+    GALDARAH_PUNCTURE,
+    GALDARAH_STOMP,
+    GALDARAH_ENRAGE,
+    GALDARAH_PHASE_CHECK,
+    GALDARAH_PHASE_CHANGE,
+    GALDARAH_ACTIONS_MAX,
+};
+
+struct boss_galdarahAI : public BossAI
+{
+    boss_galdarahAI(Creature* creature) : BossAI(creature, GALDARAH_ACTIONS_MAX),
+    instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        Reset();
+        SetDataType(TYPE_GALDARAH);
+        AddOnAggroText(SAY_AGGRO);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3);
+        AddOnDeathText(SAY_DEATH);
+        AddCombatAction(GALDARAH_STAMPEDE, 10s);
+        AddCombatAction(GALDARAH_SPECIAL, 12s);
+        AddCombatAction(GALDARAH_PUNCTURE, 25s);
+        AddCombatAction(GALDARAH_PHASE_CHECK, 1s);
+        AddCombatAction(GALDARAH_PHASE_CHANGE, true);
+        AddCombatAction(GALDARAH_STOMP, true);
+        AddCombatAction(GALDARAH_ENRAGE, true);
     }
 
-    instance_gundrak* m_instance;
-    bool m_isRegularMode;
-    bool m_bIsTrollPhase;
+    instance_gundrak* instance;
+    bool isRegularMode;
+    bool isTrollPhase;
 
-    uint32 m_uiStampedeTimer;
-    uint32 m_uiPhaseChangeTimer;
-    uint32 m_uiSpecialAbilityTimer;                         // Impaling Charge and Whirling Slash
-    uint32 m_uiPunctureTimer;
-    uint32 m_uiStompTimer;
-    uint32 m_uiEnrageTimer;
-    uint8 m_uiAbilityCount;
+    uint8 abilityCount;
 
     void Reset() override
     {
-        m_bIsTrollPhase         = true;
-
-        m_uiStampedeTimer       = 10000;
-        m_uiSpecialAbilityTimer = 12000;
-        m_uiPunctureTimer       = 25000;
-        m_uiPhaseChangeTimer    = 7000;
-        m_uiAbilityCount        = 0;
-    }
-
-    void Aggro(Unit* /*who*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_GALDARAH, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
-        }
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_GALDARAH, FAIL);
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_GALDARAH, DONE);
+        isTrollPhase         = true;
+        abilityCount         = 0;
     }
 
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_RHINO_SPIRIT)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
             {
                 summoned->CastSpell(m_creature, SPELL_STAMPEDE_EFFECT, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_STAMPEDE_PROC, TRIGGERED_OLD_TRIGGERED);
-                summoned->CastSpell(pTarget, m_isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+                summoned->CastSpell(pTarget, isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
 
                 // Store the player guid in order to count it for the achievement
-                if (m_instance)
-                    m_instance->SetData(TYPE_ACHIEV_SHARE_LOVE, pTarget->GetGUIDLow());
+                if (instance)
+                    instance->SetData(TYPE_ACHIEV_SHARE_LOVE, pTarget->GetGUIDLow());
             }
         }
     }
 
     void DoPhaseSwitch()
     {
-        if (!m_bIsTrollPhase)
+        if (!isTrollPhase)
             m_creature->RemoveAurasDueToSpell(SPELL_RHINO_TRANSFORM);
 
-        m_bIsTrollPhase = !m_bIsTrollPhase;
+        isTrollPhase = !isTrollPhase;
 
-        if (m_bIsTrollPhase)
+        if (isTrollPhase)
+        {
             DoCastSpellIfCan(nullptr, SPELL_TROLL_TRANSFORM);
+            DisableCombatAction(GALDARAH_ENRAGE);
+            DisableCombatAction(GALDARAH_STOMP);
+            ResetCombatAction(GALDARAH_STAMPEDE, 15s);
+            ResetCombatAction(GALDARAH_PUNCTURE, 25s);
+        }
         else
         {
-            DoScriptText(urand(0, 1) ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2, m_creature);
             DoCastSpellIfCan(nullptr, SPELL_RHINO_TRANSFORM);
-
-            m_uiEnrageTimer = 4000;
-            m_uiStompTimer  = 1000;
+            DisableCombatAction(GALDARAH_STAMPEDE);
+            DisableCombatAction(GALDARAH_PUNCTURE);
+            ResetCombatAction(GALDARAH_ENRAGE, 4s);
+            ResetCombatAction(GALDARAH_STOMP, 1s);
         }
 
-        m_uiAbilityCount        = 0;
-        m_uiPhaseChangeTimer    = 7000;
-        m_uiSpecialAbilityTimer = 12000;
+        abilityCount        = 0;
+        ResetCombatAction(GALDARAH_PHASE_CHECK, 1s);
+        ResetCombatAction(GALDARAH_SPECIAL, 12s);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiAbilityCount >= 2)
+        switch (action)
         {
-            if (m_uiPhaseChangeTimer < uiDiff)
-                DoPhaseSwitch();
-            else
-                m_uiPhaseChangeTimer -= uiDiff;
-        }
-
-        if (m_bIsTrollPhase)
-        {
-            if (m_uiPunctureTimer < uiDiff)
+            case GALDARAH_PUNCTURE:
             {
-                DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_PUNCTURE : SPELL_PUNCTURE_H);
-                m_uiPunctureTimer = 25000;
+                DoCastSpellIfCan(m_creature->GetVictim(), isRegularMode ? SPELL_PUNCTURE : SPELL_PUNCTURE_H);
+                ResetCombatAction(action, 25s);
+                return;
             }
-            else
-                m_uiPunctureTimer -= uiDiff;
-
-            if (m_uiStampedeTimer < uiDiff)
+            case GALDARAH_STAMPEDE:
             {
                 switch (urand(0, 2))
                 {
-                    case 0: DoScriptText(SAY_SUMMON_1, m_creature); break;
-                    case 1: DoScriptText(SAY_SUMMON_2, m_creature); break;
-                    case 2: DoScriptText(SAY_SUMMON_3, m_creature); break;
+                    case 0: DoBroadcastText(SAY_SUMMON_1, m_creature); break;
+                    case 1: DoBroadcastText(SAY_SUMMON_2, m_creature); break;
+                    case 2: DoBroadcastText(SAY_SUMMON_3, m_creature); break;
                 }
 
                 DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STAMPEDE);
-                m_uiStampedeTimer = 15000;
+                ResetCombatAction(action, 15s);
+                return;
             }
-            else
-                m_uiStampedeTimer -= uiDiff;
-
-            if (m_uiSpecialAbilityTimer < uiDiff)
+            case GALDARAH_ENRAGE:
             {
-                if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_WHIRLING_SLASH : SPELL_WHIRLING_SLASH_H) == CAST_OK)
-                    m_uiSpecialAbilityTimer = 12000;
-
-                ++m_uiAbilityCount;
+                DoCastSpellIfCan(nullptr, isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
+                ResetCombatAction(action, 15s);
+                return;
             }
-            else
-                m_uiSpecialAbilityTimer -= uiDiff;
-        }
-        else
-        {
-            if (m_uiEnrageTimer < uiDiff)
+            case GALDARAH_STOMP:
             {
-                DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
-                m_uiEnrageTimer = 15000;
+                DoCastSpellIfCan(nullptr, isRegularMode ? SPELL_STOMP : SPELL_STOMP_H);
+                ResetCombatAction(action, 10s);
+                return;
             }
-            else
-                m_uiEnrageTimer -= uiDiff;
-
-            if (m_uiStompTimer < uiDiff)
+            case GALDARAH_SPECIAL:
             {
-                DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_STOMP : SPELL_STOMP_H);
-                m_uiStompTimer = 10000;
-            }
-            else
-                m_uiStompTimer -= uiDiff;
-
-            if (m_uiSpecialAbilityTimer < uiDiff)
-            {
-                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
-                if (!pTarget)
-                    pTarget = m_creature->GetVictim();
-
-                if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_IMPALING_CHARGE : SPELL_IMPALING_CHARGE_H) == CAST_OK)
+                if (isTrollPhase)
                 {
-                    DoScriptText(EMOTE_IMPALED, m_creature, pTarget);
-                    m_uiSpecialAbilityTimer = 12000;
+                    if (DoCastSpellIfCan(nullptr, isRegularMode ? SPELL_WHIRLING_SLASH : SPELL_WHIRLING_SLASH_H) == CAST_OK)
+                        ResetCombatAction(action, 12s);
 
-                    ++m_uiAbilityCount;
+                    ++abilityCount;
                 }
-            }
-            else
-                m_uiSpecialAbilityTimer -= uiDiff;
-        }
+                else
+                {
+                    Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+                    if (!pTarget)
+                        pTarget = m_creature->GetVictim();
 
-        DoMeleeAttackIfReady();
+                    if (DoCastSpellIfCan(pTarget, isRegularMode ? SPELL_IMPALING_CHARGE : SPELL_IMPALING_CHARGE_H) == CAST_OK)
+                    {
+                        DoBroadcastText(EMOTE_IMPALED, m_creature, pTarget);
+                        ResetCombatAction(action, 12s);
+
+                        ++abilityCount;
+                    }
+                }
+                return;
+            }
+            case GALDARAH_PHASE_CHECK:
+            {
+                if (abilityCount < 2)
+                {
+                    ResetCombatAction(action, 1s);
+                    return;
+                }
+                ResetCombatAction(GALDARAH_PHASE_CHANGE, 7s);
+                DisableCombatAction(action);
+                return;
+            }
+            case GALDARAH_PHASE_CHANGE:
+            {
+                DoPhaseSwitch();
+                DisableCombatAction(action);
+                return;
+            }
+        }
     }
 };
 
