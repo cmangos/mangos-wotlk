@@ -427,13 +427,13 @@ void PetAI::UpdateAllies()
 void PetAI::OnUnsummon()
 {
     CreatureAI::OnUnsummon();
-    RelinquishFollow();
+    RelinquishFollow(m_unit->GetOwnerGuid());
 }
 
 void PetAI::JustDied(Unit* killer)
 {
     CreatureAI::JustDied(killer);
-    RelinquishFollow();
+    RelinquishFollow(m_unit->GetOwnerGuid());
 }
 
 void PetAI::AttackedBy(Unit* attacker)

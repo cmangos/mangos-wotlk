@@ -22,7 +22,7 @@
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 
-GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature), m_followAngle(PET_FOLLOW_ANGLE), m_followDist(PET_FOLLOW_DIST)
+GuardianAI::GuardianAI(Creature* creature) : CreatureEventAI(creature)
 {
     Unit* owner = creature->GetOwner();
     MANGOS_ASSERT(owner);
@@ -87,13 +87,13 @@ void GuardianAI::CombatStop()
 void GuardianAI::JustDied(Unit* killer)
 {
     CreatureEventAI::JustDied(killer);
-    RelinquishFollow();
+    RelinquishFollow(m_unit->GetOwnerGuid());
 }
 
 void GuardianAI::OnUnsummon()
 {
     CreatureEventAI::OnUnsummon();
-    RelinquishFollow();
+    RelinquishFollow(m_unit->GetOwnerGuid());
 }
 
 void GuardianAI::EnterEvadeMode()
