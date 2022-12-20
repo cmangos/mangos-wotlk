@@ -75,6 +75,7 @@ enum SladranActions
     SLADRAN_POISON_NOVA,
     SLADRAN_POWERFUL_BITE,
     SLADRAN_VENOM_BOLT,
+    SLADRAN_HEALTH_CHECK,
     SLADRAN_ACTIONS_MAX,
 };
 
@@ -88,10 +89,11 @@ struct boss_sladranAI : public BossAI
         AddOnAggroText(SAY_AGGRO);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3);
         AddOnDeathText(SAY_DEATH);
-        AddCombatAction(SLADRAN_SUMMON, isRegularMode ? 5s: 3s);
+        AddCombatAction(SLADRAN_SUMMON, true);
         AddCombatAction(SLADRAN_POISON_NOVA, 22s);
         AddCombatAction(SLADRAN_POWERFUL_BITE, 10s);
         AddCombatAction(SLADRAN_VENOM_BOLT, 15s);
+        AddTimerlessCombatAction(SLADRAN_HEALTH_CHECK, true);
     }
 
     instance_gundrak* instance;
@@ -122,6 +124,15 @@ struct boss_sladranAI : public BossAI
     {
         switch (action)
         {
+            case SLADRAN_HEALTH_CHECK:
+            {
+                if (m_creature->GetHealthPercent() <= 90.f)
+                {
+                    ResetCombatAction(SLADRAN_SUMMON, 0s);
+                    DisableCombatAction(SLADRAN_HEALTH_CHECK);
+                }
+                return;
+            }
             case SLADRAN_POISON_NOVA:
             {
                 if (DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_POISON_NOVA : SPELL_POISON_NOVA_H) == CAST_OK)
