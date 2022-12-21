@@ -153,6 +153,14 @@ class BossAI : public CombatAI
             });
         }
 
+        void AddCastOnDeath(QueuedCast cast);
+        template <typename... Targs>
+        void AddCastOnDeath(QueuedCast cast, Targs... fargs)
+        {
+            AddCastOnDeath(cast);
+            AddCastOnDeath(fargs...);
+        }
+
         std::chrono::seconds TimeSinceEncounterStart()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
@@ -173,6 +181,8 @@ class BossAI : public CombatAI
         std::vector<QueuedCast> m_castOnDeath;
 
         std::vector<std::function<void()>> m_resetValues;
+
+        std::vector<QueuedCast> m_castOnDeath;
 
         uint32 m_instanceDataType = -1;
 

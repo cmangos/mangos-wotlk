@@ -132,3 +132,8 @@ void BossAI::DespawnSubordinateOnEvade(ObjectGuid guid)
 {
     m_despawnSubordinateOnEvade.push_back(guid);
 }
+
+void BossAI::AddCastOnDeath(QueuedCast cast)
+{
+    m_castOnDeath.push_back(cast);
+}
