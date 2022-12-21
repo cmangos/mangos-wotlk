@@ -18,8 +18,8 @@
 #define BOSS_AI_H
 
 #include "AI/ScriptDevAI/include/sc_instance.h"
-#include "Entities/Creature.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
+#include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum InstanceActions
@@ -112,6 +112,10 @@ class BossAI : public CombatAI
         void SetGateDelay(std::chrono::milliseconds delay) { m_gateDelay = delay; }
         void EnterEvadeMode() override;
 
+        /**
+        * Adds one or more Spells to cast with CastSpell on creature death
+        * @param cast Initialized struct of QueuedCast type
+        */
         void AddCastOnDeath(QueuedCast cast);
         template <typename... Targs>
         void AddCastOnDeath(QueuedCast cast, Targs... fargs)
@@ -120,6 +124,10 @@ class BossAI : public CombatAI
             AddCastOnDeath(fargs...);
         }
 
+        /**
+        * Adds a timer to respawn the Creature on Evade (instead of walking back to spawn)
+        * @param delay The amount of time until the Creature is supposed to respawn as a std::chrono literal
+        */
         void AddRespawnOnEvade(std::chrono::seconds delay);
 
         std::chrono::seconds TimeSinceEncounterStart()
