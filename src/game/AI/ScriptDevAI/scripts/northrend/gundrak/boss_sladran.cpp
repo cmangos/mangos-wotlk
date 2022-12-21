@@ -72,9 +72,6 @@ enum
 enum SladranActions
 {
     SLADRAN_SUMMON,
-    SLADRAN_POISON_NOVA,
-    SLADRAN_POWERFUL_BITE,
-    SLADRAN_VENOM_BOLT,
     SLADRAN_HEALTH_CHECK,
     SLADRAN_ACTIONS_MAX,
 };
@@ -90,9 +87,6 @@ struct boss_sladranAI : public BossAI
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3);
         AddOnDeathText(SAY_DEATH);
         AddCombatAction(SLADRAN_SUMMON, true);
-        AddCombatAction(SLADRAN_POISON_NOVA, 22s);
-        AddCombatAction(SLADRAN_POWERFUL_BITE, 10s);
-        AddCombatAction(SLADRAN_VENOM_BOLT, 15s);
         AddTimerlessCombatAction(SLADRAN_HEALTH_CHECK, true);
     }
 
@@ -105,17 +99,19 @@ struct boss_sladranAI : public BossAI
             return;
 
         summoned->SetWalk(false);
-        summoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+        summoned->SetInCombatWithZone();
+        if (summoned->GetEntry() == NPC_SLADRAN_VIPER)
+            return;
+        summoned->SetIgnoreMMAP(true);
+        summoned->GetMotionMaster()->Clear();
+        summoned->GetMotionMaster()->MoveFall();
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(SladranActions action)
     {
         switch (action)
         {
-            case SLADRAN_POISON_NOVA: return 22s;
             case SLADRAN_SUMMON: return isRegularMode ? 5s : 3s;
-            case SLADRAN_POWERFUL_BITE: return 10s;
-            case SLADRAN_VENOM_BOLT: return 15s;
             default: return 0s;
         }
     }
@@ -133,15 +129,6 @@ struct boss_sladranAI : public BossAI
                 }
                 return;
             }
-            case SLADRAN_POISON_NOVA:
-            {
-                if (DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_POISON_NOVA : SPELL_POISON_NOVA_H) == CAST_OK)
-                {
-                    DoBroadcastText(EMOTE_NOVA, m_creature);
-                    break;
-                }
-                return;
-            }
             case SLADRAN_SUMMON:
             {
                 if (!instance)
@@ -149,7 +136,7 @@ struct boss_sladranAI : public BossAI
 
                 if (Creature* summonTarget = m_creature->GetMap()->GetCreature(instance->SelectRandomSladranTargetGuid()))
                 {
-                    if (urand(0, 3))
+                    if (summonTarget->GetPositionZ() > 132)
                     {
                         // we don't want to get spammed
                         if (!urand(0, 4))
@@ -167,21 +154,6 @@ struct boss_sladranAI : public BossAI
                     }
                 }
                 break;
-            }
-            case SLADRAN_POWERFUL_BITE:
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), isRegularMode ? SPELL_POWERFUL_BITE : SPELL_POWERFUL_BITE_H) == CAST_OK)
-                    break;
-                return;
-            }
-            case SLADRAN_VENOM_BOLT:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(target, isRegularMode ? SPELL_VENOM_BOLT : SPELL_VENOM_BOLT_H) == CAST_OK)
-                        break;
-                }
-                return;
             }
         }
         ResetCombatAction(action, GetSubsequentActionTimer(SladranActions(action)));
