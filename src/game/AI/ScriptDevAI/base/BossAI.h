@@ -21,11 +21,19 @@
 #include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 
+struct QueuedCast
+{
+    ObjectGuid target;
+    uint32 spellId;
+    uint32 flags;
+};
+
 class BossAI : public CombatAI
 {
     public:
         BossAI(Creature* creature, uint32 combatActions) : CombatAI(creature, combatActions)
         {}
+
         /**
         * Adds one or more Broadcast Texts to possibly emit when Unit dies
         * This function is not called if JustDied is overridden. Add CombatAI::JustDied(); to your overriding function.
@@ -53,9 +61,18 @@ class BossAI : public CombatAI
 
         void SetDataType(uint32 type) { m_instanceDataType = type; }
 
+        void Reset() override;
         void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
         void Aggro(Unit* who = nullptr) override;
+
+        void AddCastOnDeath(QueuedCast cast);
+        template <typename... Targs>
+        void AddCastOnDeath(QueuedCast cast, Targs... fargs)
+        {
+            AddCastOnDeath(cast);
+            AddCastOnDeath(fargs...);
+        }
 
         std::chrono::seconds TimeSinceEncounterStart()
         {
@@ -69,6 +86,8 @@ class BossAI : public CombatAI
     private:
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
+
+        std::vector<QueuedCast> m_castOnDeath;
 
         uint32 m_instanceDataType = -1;
 

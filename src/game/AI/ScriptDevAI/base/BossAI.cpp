@@ -32,15 +32,26 @@ void BossAI::AddOnAggroText(uint32 text)
     m_onAggroTexts.push_back(text);
 }
 
+void BossAI::Reset()
+{
+    CombatAI::Reset();
+    m_creature->SetSpellList(m_creature->GetCreatureInfo()->SpellList);
+}
+
 void BossAI::JustDied(Unit* killer)
 {
+    CombatAI::JustDied(killer);
     if (!m_onKilledTexts.empty())
         DoBroadcastText(m_onKilledTexts[urand(0, m_onKilledTexts.size() - 1)], m_creature, killer);
+    for (QueuedCast& cast : m_castOnDeath)
+    {
+        Unit* target = m_creature->GetMap()->GetUnit(cast.target);
+        DoCastSpellIfCan(target, cast.spellId, cast.flags);
+    }
     if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, DONE);
-    CombatAI::JustDied(killer);
 }
 
 void BossAI::JustReachedHome()
@@ -61,4 +72,9 @@ void BossAI::Aggro(Unit* who)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, IN_PROGRESS);
+}
+
+void BossAI::AddCastOnDeath(QueuedCast cast)
+{
+    m_castOnDeath.push_back(cast);
 }
