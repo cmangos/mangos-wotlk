@@ -568,7 +568,7 @@ void MotionMaster::MoveCharge(Unit& target, float speed, uint32 id/* = EVENT_CHA
     Mutate(new EffectMovementGenerator(init, id, false));
 }
 
-bool MotionMaster::MoveFall()
+bool MotionMaster::MoveFall(ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/* = 0*/)
 {
     const float x = m_owner->GetPositionX(), y = m_owner->GetPositionY(), z = m_owner->GetPositionZ();
 
@@ -588,7 +588,7 @@ bool MotionMaster::MoveFall()
     Movement::MoveSplineInit init(*m_owner);
     init.MoveTo(x, y, tz);
     init.SetFall();
-    Mutate(new FallMovementGenerator(init, EVENT_FALL));
+    Mutate(new FallMovementGenerator(init, EVENT_FALL, false, guid, relayId));
     return true;
 }
 
