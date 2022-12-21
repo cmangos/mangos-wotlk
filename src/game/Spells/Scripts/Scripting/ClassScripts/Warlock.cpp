@@ -228,7 +228,7 @@ struct SeedOfCorruption : public AuraScript
             return;
         if (aura->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
             if (Unit* caster = aura->GetCaster())
-                caster->CastSpell(aura->GetTarget(), GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+                caster->CastSpell(aura->GetTarget(), GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_CASTER_AURA_STATE | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
     }
 
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
@@ -247,7 +247,7 @@ struct SeedOfCorruption : public AuraScript
 
             // Cast finish spell (triggeredByAura already not exist!)
             if (Unit* caster = procData.triggeredByAura->GetCaster())
-                caster->CastSpell(procData.victim, GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+                caster->CastSpell(procData.victim, GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_CASTER_AURA_STATE | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
             return SPELL_AURA_PROC_OK;              // no hidden cooldown
         }
 
@@ -262,7 +262,7 @@ struct SeedOfCorruptionDamage : public SpellScript
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         if (target->GetObjectGuid() == spell->m_targets.getUnitTargetGuid()) // in TBC skip target of initial aura
-            return false;
+            return true; // in WotLK Seed of Corruption also damages the initial target
         return true;
     }
 };
