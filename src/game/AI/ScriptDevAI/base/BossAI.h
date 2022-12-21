@@ -122,6 +122,14 @@ class BossAI : public CombatAI
 
         void AddRespawnOnEvade(std::chrono::seconds delay);
 
+        void AddCastOnDeath(QueuedCast cast);
+        template <typename... Targs>
+        void AddCastOnDeath(QueuedCast cast, Targs... fargs)
+        {
+            AddCastOnDeath(cast);
+            AddCastOnDeath(fargs...);
+        }
+
         std::chrono::seconds TimeSinceEncounterStart()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
