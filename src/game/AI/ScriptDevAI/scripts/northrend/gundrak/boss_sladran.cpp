@@ -104,9 +104,13 @@ struct boss_sladranAI : public BossAI
             summoned->SetInCombatWithZone();
             return;
         }
+        if (summoned->AI())
+            summoned->AI()->SetReactState(REACT_DEFENSIVE);
         summoned->SetIgnoreMMAP(true);
-        summoned->GetMotionMaster()->Clear();
-        summoned->GetMotionMaster()->MoveFall(summoned->GetObjectGuid(), 29001);
+        Unit* spawner = summoned->GetSpawner();
+        if (!spawner)
+            return;
+        summoned->GetMotionMaster()->MovePoint(0, Position(spawner->GetPosition().x, spawner->GetPosition().y, spawner->GetPosition().z - 2.7f), FORCED_MOVEMENT_FLIGHT, 0.f, true, ObjectGuid(), 29002);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(SladranActions action)
