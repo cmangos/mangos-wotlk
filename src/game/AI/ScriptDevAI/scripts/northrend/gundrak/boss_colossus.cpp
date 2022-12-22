@@ -59,7 +59,6 @@ enum
 
 enum ElementalActions
 {
-    ELEMENTAL_SURGE,
     ELEMENTAL_MOJO_VOLLEY,
     ELEMENTAL_MERGE,
     ELEMENTAL_ACTIONS_MAX,
@@ -71,7 +70,6 @@ struct boss_drakkari_elementalAI : public BossAI
     instance (dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
     isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddCombatAction(ELEMENTAL_SURGE, 9s, 13s);
         AddTimerlessCombatAction(ELEMENTAL_MOJO_VOLLEY, true);
         AddTimerlessCombatAction(ELEMENTAL_MERGE, true);
     }
@@ -126,15 +124,6 @@ struct boss_drakkari_elementalAI : public BossAI
                     DisableCombatAction(action);
                 return;
             }
-            case ELEMENTAL_SURGE:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(target, SPELL_SURGE) == CAST_OK)
-                        ResetCombatAction(action, std::chrono::seconds(urand(12,17)));
-                }
-                return;
-            }
         }
     }
 };
@@ -145,7 +134,6 @@ struct boss_drakkari_elementalAI : public BossAI
 
 enum ColossusActions
 {
-    COLOSSUS_MIGHTY_BLOW,
     COLOSSUS_MORTAL_STRIKES,
     COLOSSUS_EMERGE,
     COLOSSUS_START_COMBAT,
@@ -159,7 +147,6 @@ struct boss_drakkari_colossusAI : public BossAI
     isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_COLOSSUS);
-        AddCombatAction(COLOSSUS_MIGHTY_BLOW, 10s);
         AddTimerlessCombatAction(COLOSSUS_MORTAL_STRIKES, true);
         AddTimerlessCombatAction(COLOSSUS_EMERGE, true);
         AddCustomAction(COLOSSUS_START_COMBAT, true, [&]()
@@ -200,7 +187,6 @@ struct boss_drakkari_colossusAI : public BossAI
             SetCombatMovement(true);
             m_creature->GetMotionMaster()->Clear();
             m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-            ResetCombatAction(COLOSSUS_MIGHTY_BLOW, 10s);
             ((Creature*)caster)->ForcedDespawn();
         }
     }
@@ -247,6 +233,11 @@ struct boss_drakkari_colossusAI : public BossAI
             ResetTimer(COLOSSUS_START_COMBAT, 1s);
     }
 
+    void JustPreventedDeath(Unit* /*attacker*/) override
+    {
+        DoEmergeElemental();
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -259,12 +250,6 @@ struct boss_drakkari_colossusAI : public BossAI
                     DoEmergeElemental();
                     DisableCombatAction(action);
                 }
-                return;
-            }
-            case COLOSSUS_MIGHTY_BLOW:
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_BLOW);
-                ResetCombatAction(action, 10s);
                 return;
             }
             case COLOSSUS_MORTAL_STRIKES:
