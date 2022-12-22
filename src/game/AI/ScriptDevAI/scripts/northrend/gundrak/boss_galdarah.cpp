@@ -82,8 +82,8 @@ enum GaldarahActions
 struct boss_galdarahAI : public BossAI
 {
     boss_galdarahAI(Creature* creature) : BossAI(creature, GALDARAH_ACTIONS_MAX),
-    instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
-    isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_GALDARAH);
         AddOnAggroText(SAY_AGGRO);
@@ -92,17 +92,17 @@ struct boss_galdarahAI : public BossAI
         AddCombatAction(GALDARAH_PHASE_CHANGE, true);
     }
 
-    instance_gundrak* instance;
-    bool isRegularMode;
-    bool isTrollPhase;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
+    bool m_isTrollPhase;
 
-    uint8 abilityCount;
+    uint8 m_abilityCount;
 
     void Reset() override
     {
         BossAI::Reset();
-        isTrollPhase = true;
-        abilityCount = 0;
+        m_isTrollPhase = true;
+        m_abilityCount = 0;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
@@ -111,9 +111,9 @@ struct boss_galdarahAI : public BossAI
             return;
         if (m_creature->GetObjectGuid() != sender->GetObjectGuid())
             return;
-        if (abilityCount < 2)
+        if (m_abilityCount < 2)
         {
-            ++abilityCount;
+            ++m_abilityCount;
             return;
         }
         ResetCombatAction(GALDARAH_PHASE_CHANGE, 7s);
@@ -121,40 +121,35 @@ struct boss_galdarahAI : public BossAI
 
     void JustSummoned(Creature* summoned) override
     {
-        if (summoned->GetEntry() == NPC_RHINO_SPIRIT)
+        if (summoned->GetEntry() != NPC_RHINO_SPIRIT)
+            return;
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
-            {
-                summoned->CastSpell(m_creature, SPELL_STAMPEDE_EFFECT, TRIGGERED_OLD_TRIGGERED);
-                summoned->CastSpell(summoned, SPELL_STAMPEDE_PROC, TRIGGERED_OLD_TRIGGERED);
-                summoned->CastSpell(pTarget, isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
-
-                // Store the player guid in order to count it for the achievement
-                if (instance)
-                    instance->SetData(TYPE_ACHIEV_SHARE_LOVE, pTarget->GetGUIDLow());
-            }
+            summoned->CastSpell(m_creature, SPELL_STAMPEDE_EFFECT, TRIGGERED_OLD_TRIGGERED);
+            summoned->CastSpell(summoned, SPELL_STAMPEDE_PROC, TRIGGERED_OLD_TRIGGERED);
+            summoned->CastSpell(pTarget, m_isRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
         }
     }
 
     void DoPhaseSwitch()
     {
-        if (!isTrollPhase)
+        if (!m_isTrollPhase)
             m_creature->RemoveAurasDueToSpell(SPELL_RHINO_TRANSFORM);
 
-        isTrollPhase = !isTrollPhase;
+        m_isTrollPhase = !m_isTrollPhase;
 
-        if (isTrollPhase)
+        if (m_isTrollPhase)
         {
             DoCastSpellIfCan(nullptr, SPELL_TROLL_TRANSFORM);
-            m_creature->SetSpellList(isRegularMode ? SPELLSET_TROLL_NHC : SPELLSET_TROLL_HC);
+            m_creature->SetSpellList(m_isRegularMode ? SPELLSET_TROLL_NHC : SPELLSET_TROLL_HC);
         }
         else
         {
             DoBroadcastText(urand(0, 1) ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2, m_creature);
             DoCastSpellIfCan(nullptr, SPELL_RHINO_TRANSFORM);
-            m_creature->SetSpellList(isRegularMode ? SPELLSET_RHINO_NHC : SPELLSET_RHINO_HC);
+            m_creature->SetSpellList(m_isRegularMode ? SPELLSET_RHINO_NHC : SPELLSET_RHINO_HC);
         }
-        abilityCount = 0;
+        m_abilityCount = 0;
     }
 
     void ExecuteAction(uint32 action) override
@@ -180,6 +175,9 @@ struct ImpalingCharge : SpellScript
         if (!rhino || !player)
             return;
         player->CastSpell(rhino, 54958, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        // Store the player guid in order to count it for the achievement
+        if (instance_gundrak* instance = dynamic_cast<instance_gundrak*>(rhino->GetInstanceData()))
+            instance->SetData(TYPE_ACHIEV_SHARE_LOVE, player->GetGUIDLow());
     }
 };
 
