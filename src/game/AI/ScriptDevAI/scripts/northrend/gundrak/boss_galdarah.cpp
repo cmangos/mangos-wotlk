@@ -171,10 +171,24 @@ struct boss_galdarahAI : public BossAI
     }
 };
 
+struct ImpalingCharge : SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
+    {
+        Unit* rhino = spell->GetCaster();
+        Unit* player = spell->GetUnitTarget();
+        if (!rhino || !player)
+            return;
+        player->CastSpell(rhino, 54958, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+    }
+};
+
 void AddSC_boss_galdarah()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_galdarah";
     pNewScript->GetAI = &GetNewAIInstance<boss_galdarahAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ImpalingCharge>("spell_impaling_charge");
 }
