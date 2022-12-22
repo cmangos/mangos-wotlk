@@ -17,7 +17,6 @@
  */
 
 #include "Auth/SARC4.h"
-#include <openssl/sha.h>
 
 SARC4::SARC4(uint8 len)
 {

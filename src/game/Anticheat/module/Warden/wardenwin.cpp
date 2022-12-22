@@ -18,6 +18,7 @@
 #include "Chat/Chat.h"
 #include "Server/WorldSession.h"
 #include "Auth/BigNumber.h"
+#include "Auth/CryptoHash.h"
 #include "Auth/HMACSHA1.h"
 #include "ByteBuffer.h"
 #include "Database/DatabaseEnv.h"
