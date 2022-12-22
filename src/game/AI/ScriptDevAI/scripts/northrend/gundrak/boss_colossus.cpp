@@ -164,6 +164,7 @@ struct boss_drakkari_colossusAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
         m_firstEmerge     = true;
         m_mojosGathered   = 0;
 
