@@ -750,7 +750,7 @@ struct SummonVoidSentinelSummoner : public SpellScript
     {
         float x, y, z;
         spell->m_targets.getDestination(x, y, z);
-        spell->m_targets.m_destPos.z = spell->GetCaster()->GetMap()->GetHeight(x, y, z, false);
+        spell->m_targets.m_destPos.z = spell->GetCaster()->GetMap()->GetHeight(spell->GetTrueCaster()->GetPhaseMask(), x, y, z, false);
     }
 };
 
