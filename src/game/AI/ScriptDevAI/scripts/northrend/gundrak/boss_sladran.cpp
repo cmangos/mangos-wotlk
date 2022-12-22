@@ -79,8 +79,8 @@ enum SladranActions
 struct boss_sladranAI : public BossAI
 {
     boss_sladranAI(Creature* creature) : BossAI(creature, SLADRAN_ACTIONS_MAX),
-    instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
-    isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_SLADRAN);
         AddOnAggroText(SAY_AGGRO);
@@ -90,8 +90,8 @@ struct boss_sladranAI : public BossAI
         AddTimerlessCombatAction(SLADRAN_HEALTH_CHECK, true);
     }
 
-    instance_gundrak* instance;
-    bool isRegularMode;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
 
     void JustSummoned(Creature* summoned) override
     {
@@ -117,7 +117,7 @@ struct boss_sladranAI : public BossAI
     {
         switch (action)
         {
-            case SLADRAN_SUMMON: return isRegularMode ? 5s : 3s;
+            case SLADRAN_SUMMON: return m_isRegularMode ? 5s : 3s;
             default: return 0s;
         }
     }
@@ -137,10 +137,10 @@ struct boss_sladranAI : public BossAI
             }
             case SLADRAN_SUMMON:
             {
-                if (!instance)
+                if (!m_instance)
                     return;
 
-                if (Creature* summonTarget = m_creature->GetMap()->GetCreature(instance->SelectRandomSladranTargetGuid()))
+                if (Creature* summonTarget = m_creature->GetMap()->GetCreature(m_instance->SelectRandomSladranTargetGuid()))
                 {
                     if (summonTarget->GetPositionZ() > 132)
                     {
@@ -169,8 +169,8 @@ struct boss_sladranAI : public BossAI
 struct npc_snakeWrapAI : public Scripted_NoMovementAI
 {
     npc_snakeWrapAI(Creature* creature) : Scripted_NoMovementAI(creature),
-    instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
-    isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetReactState(REACT_PASSIVE);
         SetRootSelf(true);
@@ -180,12 +180,12 @@ struct npc_snakeWrapAI : public Scripted_NoMovementAI
     {
         Player* spawner = dynamic_cast<Player*>(m_creature->GetSpawner());
         if (spawner && spawner->IsAlive())
-            spawner->RemoveAurasDueToSpell(isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H);
+            spawner->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H);
         m_creature->ForcedDespawn(std::chrono::milliseconds(1s).count());
     }
 
-    instance_gundrak* instance;
-    bool isRegularMode;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
 };
 
 struct GripOfSladran : public AuraScript, public SpellScript
