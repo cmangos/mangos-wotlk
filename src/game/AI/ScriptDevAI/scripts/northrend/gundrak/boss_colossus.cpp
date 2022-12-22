@@ -120,7 +120,7 @@ struct boss_drakkari_elementalAI : public BossAI
             }
             case ELEMENTAL_MOJO_VOLLEY:
             {
-                if (DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_MOJO_VOLLEY : SPELL_MOJO_VOLLEY_H))
+                if (DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_MOJO_VOLLEY : SPELL_MOJO_VOLLEY_H) == CAST_OK)
                     DisableCombatAction(action);
                 return;
             }
@@ -173,6 +173,7 @@ struct boss_drakkari_colossusAI : public BossAI
         SetCombatMovement(true);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
     }
 
     void SpellHit(Unit* caster, const SpellEntry* spell) override
@@ -182,6 +183,7 @@ struct boss_drakkari_colossusAI : public BossAI
             // re-activate colossus here
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
 
             SetCombatMovement(true);
@@ -220,6 +222,7 @@ struct boss_drakkari_colossusAI : public BossAI
             m_creature->GetMotionMaster()->MoveIdle();
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED);
         }
     }
@@ -246,7 +249,6 @@ struct boss_drakkari_colossusAI : public BossAI
             {
                 if (firstEmerge && m_creature->GetHealthPercent() < 50.0f)
                 {
-                    firstEmerge = false;
                     DoEmergeElemental();
                     DisableCombatAction(action);
                 }
