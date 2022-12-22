@@ -111,6 +111,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27360,'spell_instill_lord_valthalaks_spirit'),
 (27934,'spell_viscidus_shrinks'),
 (28282,'spell_ashbringer_item'),
+(28307,'spell_patchwerk_hatefulstrike'),
 (28441,'spell_ab_effect_000'),
 (28265,'spell_scourge_strike'),
 (28091,'spell_despawner_self'),

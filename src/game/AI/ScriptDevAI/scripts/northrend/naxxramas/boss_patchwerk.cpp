@@ -198,10 +198,46 @@ UnitAI* GetAI_boss_patchwerk(Creature* pCreature)
     return new boss_patchwerkAI(pCreature);
 }
 
+struct HatefulStrikePrimer : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetFilteringScheme(EFFECT_INDEX_0, true, SCHEME_HIGHEST_HP);
+    }
+
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!spell->GetCaster()->CanReachWithMeleeAttack(target))
+            return false;
+
+        auto const& threatList = spell->GetCaster()->getThreatManager().getThreatList();
+        uint32 i = 0;
+        for (auto itr = threatList.begin(); itr != threatList.end() && i < spell->GetCaster()->GetMap()->IsRegularDifficulty() ? 3 : 4; ++itr, ++i)
+            if ((*itr)->getTarget() == target)
+                return true;
+        return false;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                // Target is filtered in Spell::FilterTargetMap
+                if (Unit* unitTarget = spell->GetUnitTarget())
+                    caster->CastSpell(unitTarget, SPELL_HATEFULSTRIKE, TRIGGERED_NONE);
+            }
+        }
+    }
+};
+
 void AddSC_boss_patchwerk()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_patchwerk";
     pNewScript->GetAI = &GetAI_boss_patchwerk;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<HatefulStrikePrimer>("spell_patchwerk_hatefulstrike");
 }
