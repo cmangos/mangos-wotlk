@@ -67,35 +67,33 @@ enum ElementalActions
 struct boss_drakkari_elementalAI : public BossAI
 {
     boss_drakkari_elementalAI(Creature* creature) : BossAI(creature, ELEMENTAL_ACTIONS_MAX),
-    instance (dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
-    isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddTimerlessCombatAction(ELEMENTAL_MOJO_VOLLEY, true);
         AddTimerlessCombatAction(ELEMENTAL_MERGE, true);
     }
 
-    instance_gundrak* instance;
-    bool isRegularMode;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
 
     void JustReachedHome() override
     {
-        if (instance)
-        {
-            if (Creature* colossus = instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
-                colossus->AI()->EnterEvadeMode();
-        }
-
         m_creature->ForcedDespawn();
+        if (!m_instance)
+            return;
+        if (Creature* colossus = m_instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
+            colossus->AI()->EnterEvadeMode();
+
     }
 
     void JustDied(Unit* /*killer*/) override
     {
-        if (instance)
-        {
-            // kill colossus on death - this will finish the encounter
-            if (Creature* colossus = instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
-                colossus->Suicide();
-        }
+        if (!m_instance)
+            return;
+        // kill colossus on death - this will finish the encounter
+        if (Creature* colossus = m_instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
+            colossus->Suicide();
     }
 
     // Set the second emerge of the Elemental
@@ -120,7 +118,7 @@ struct boss_drakkari_elementalAI : public BossAI
             }
             case ELEMENTAL_MOJO_VOLLEY:
             {
-                if (DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_MOJO_VOLLEY : SPELL_MOJO_VOLLEY_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_MOJO_VOLLEY : SPELL_MOJO_VOLLEY_H) == CAST_OK)
                     DisableCombatAction(action);
                 return;
             }
@@ -143,8 +141,8 @@ enum ColossusActions
 struct boss_drakkari_colossusAI : public BossAI
 {
     boss_drakkari_colossusAI(Creature* creature) : BossAI(creature, COLOSSUS_ACTIONS_MAX),
-    instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
-    isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_COLOSSUS);
         AddTimerlessCombatAction(COLOSSUS_MORTAL_STRIKES, true);
@@ -158,16 +156,16 @@ struct boss_drakkari_colossusAI : public BossAI
         SetDeathPrevention(true);
     }
 
-    instance_gundrak* instance;
-    bool isRegularMode;
-    bool firstEmerge;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
+    bool m_firstEmerge;
 
-    uint8 mojosGathered;
+    uint8 m_mojosGathered;
 
     void Reset() override
     {
-        firstEmerge     = true;
-        mojosGathered   = 0;
+        m_firstEmerge     = true;
+        m_mojosGathered   = 0;
 
         // Reset unit flags
         SetCombatMovement(true);
@@ -198,13 +196,13 @@ struct boss_drakkari_colossusAI : public BossAI
         if (summoned->GetEntry() == NPC_ELEMENTAL)
         {
             // If this is the second summon, then set the health to half
-            if (!firstEmerge)
+            if (!m_firstEmerge)
             {
                 if (boss_drakkari_elementalAI* elementalAI = dynamic_cast<boss_drakkari_elementalAI*>(summoned->AI()))
                     elementalAI->DoPrepareSecondEmerge();
             }
 
-            firstEmerge = false;
+            m_firstEmerge = false;
             if (m_creature->GetVictim())
                 summoned->AI()->AttackStart(m_creature->GetVictim());
         }
@@ -230,9 +228,9 @@ struct boss_drakkari_colossusAI : public BossAI
     // Wrapper to prepare the Colossus
     void DoPrepareColossus()
     {
-        ++mojosGathered;
+        ++m_mojosGathered;
 
-        if (mojosGathered == MAX_COLOSSUS_MOJOS)
+        if (m_mojosGathered == MAX_COLOSSUS_MOJOS)
             ResetTimer(COLOSSUS_START_COMBAT, 1s);
     }
 
@@ -247,7 +245,7 @@ struct boss_drakkari_colossusAI : public BossAI
         {
             case COLOSSUS_EMERGE:
             {
-                if (firstEmerge && m_creature->GetHealthPercent() < 50.0f)
+                if (m_firstEmerge && m_creature->GetHealthPercent() < 50.0f)
                 {
                     DoEmergeElemental();
                     DisableCombatAction(action);
@@ -256,7 +254,7 @@ struct boss_drakkari_colossusAI : public BossAI
             }
             case COLOSSUS_MORTAL_STRIKES:
             {
-                DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_MORTAL_STRIKES : SPELL_MORTAL_STRIKES_H);
+                DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_MORTAL_STRIKES : SPELL_MORTAL_STRIKES_H);
                 DisableCombatAction(action);
                 return;
             }
@@ -277,15 +275,15 @@ enum LivingMojoActions
 struct npc_living_mojoAI : public CombatAI
 {
     npc_living_mojoAI(Creature* creature) : CombatAI(creature, MOJO_ACTIONS_MAX),
-    instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
-    isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         isPartOfColossus = creature->GetPositionX() > 1650.0f;
         AddCombatAction(MOJO_MOJO_WAVE, 10s, 13s);
     }
 
-    instance_gundrak* instance;
-    bool isRegularMode;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
     bool isPartOfColossus;
 
     void AttackStart(Unit* who) override
@@ -302,54 +300,52 @@ struct npc_living_mojoAI : public CombatAI
         if (type != POINT_MOTION_TYPE)
             return;
 
-        if (pointId)
-        {
-            m_creature->ForcedDespawn(std::chrono::milliseconds(1s).count());
+        if (!pointId)
+            return;
 
-            if (instance)
-            {
-                // Prepare to set the Colossus in combat
-                if (Creature* colossus = instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
-                {
-                    if (boss_drakkari_colossusAI* colossusAI = dynamic_cast<boss_drakkari_colossusAI*>(colossus->AI()))
-                        colossusAI->DoPrepareColossus();
-                }
-            }
+        m_creature->ForcedDespawn(std::chrono::milliseconds(1s).count());
+
+        if (!m_instance)
+            return;
+
+        // Prepare to set the Colossus in combat
+        if (Creature* colossus = m_instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
+        {
+            if (boss_drakkari_colossusAI* colossusAI = dynamic_cast<boss_drakkari_colossusAI*>(colossus->AI()))
+                colossusAI->DoPrepareColossus();
         }
     }
 
     void EnterEvadeMode() override
     {
         if (!isPartOfColossus)
-            CombatAI::EnterEvadeMode();
-        // Force the Mojo to move to the Colossus position
-        else
         {
-            if (instance)
-            {
-                float fX, fY, fZ;
-                m_creature->GetPosition(fX, fY, fZ);
-
-                if (Creature* colossus = instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
-                    colossus->GetPosition(fX, fY, fZ);
-
-                m_creature->SetWalk(false);
-                m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-            }
+            CombatAI::EnterEvadeMode();
+            return;
         }
+        // Force the Mojo to move to the Colossus position
+        if (!m_instance)
+            return;
+        float fX, fY, fZ;
+        m_creature->GetPosition(fX, fY, fZ);
+
+        if (Creature* colossus = m_instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
+            colossus->GetPosition(fX, fY, fZ);
+
+        m_creature->SetWalk(false);
+        m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
     }
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_MOJO_PUDDLE : SPELL_MOJO_PUDDLE_H, CAST_TRIGGERED);
-        if (instance && isPartOfColossus)
+        DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_MOJO_PUDDLE : SPELL_MOJO_PUDDLE_H, CAST_TRIGGERED);
+        if (!m_instance || !isPartOfColossus)
+            return;
+        // Prepare to set the Colossus in combat
+        if (Creature* colossus = m_instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
         {
-            // Prepare to set the Colossus in combat
-            if (Creature* colossus = instance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
-            {
-                if (boss_drakkari_colossusAI* colossusAI = dynamic_cast<boss_drakkari_colossusAI*>(colossus->AI()))
-                    colossusAI->DoPrepareColossus();
-            }
+            if (boss_drakkari_colossusAI* colossusAI = dynamic_cast<boss_drakkari_colossusAI*>(colossus->AI()))
+                colossusAI->DoPrepareColossus();
         }
     }
 
@@ -359,7 +355,7 @@ struct npc_living_mojoAI : public CombatAI
             DisableCombatAction(action);
         else if (action == MOJO_MOJO_WAVE && !isPartOfColossus)
         {
-            if (DoCastSpellIfCan(m_creature, isRegularMode ? SPELL_MOJO_WAVE : SPELL_MOJO_WAVE_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_MOJO_WAVE : SPELL_MOJO_WAVE_H) == CAST_OK)
             {
                 ResetCombatAction(action, std::chrono::seconds(urand(15,18)));
                 return;
