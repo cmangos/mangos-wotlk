@@ -99,12 +99,14 @@ struct boss_sladranAI : public BossAI
             return;
 
         summoned->SetWalk(false);
-        summoned->SetInCombatWithZone();
         if (summoned->GetEntry() == NPC_SLADRAN_VIPER)
+        {
+            summoned->SetInCombatWithZone();
             return;
+        }
         summoned->SetIgnoreMMAP(true);
         summoned->GetMotionMaster()->Clear();
-        summoned->GetMotionMaster()->MoveFall();
+        summoned->GetMotionMaster()->MoveFall(summoned->GetObjectGuid(), 29001);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(SladranActions action)
