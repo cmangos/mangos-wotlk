@@ -58,7 +58,11 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
         Reset(); 
     }
 
-    void Reset() override {}
+    void Reset() override
+    {
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+    }
 
     void Aggro(Unit* pWho) override
     {
