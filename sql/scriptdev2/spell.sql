@@ -767,6 +767,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61546,'spell_shatter'),
 (61830,'spell_drink'),
 (61916,'spell_lightning_whirl'),
+(61964,'spell_thorim_circle_of_healing'),
 (62108,'spell_tails_up_summon_female_frost_leopard'),
 (62116,'spell_tails_up_summon_female_icepaw_bear'),
 (62138,'spell_teleport_inside_violet_hold'),

@@ -1049,6 +1049,28 @@ UnitAI* GetAI_npc_thunder_orb(Creature* pCreature)
     return new npc_thunder_orbAI(pCreature);
 }
 
+struct ThorimCircleOfHealing : SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!target || !target->IsCreature())
+            return false;
+        switch (target->GetEntry())
+        {
+            case NPC_JORMUNGAR_BEHEMOTH:
+            case NPC_DARK_RUNE_ACOLYTE:
+            case NPC_SOLDIER_ALLIANCE:
+            case NPC_CAPTAIN_ALLIANCE:
+            case NPC_SOLDIER_HORDE:
+            case NPC_CAPTAIN_HORDE:
+                return true;
+            default:
+                return false;
+        }
+        return false;
+    }
+};
+
 void AddSC_boss_thorim()
 {
     Script* pNewScript = new Script;
@@ -1070,4 +1092,6 @@ void AddSC_boss_thorim()
     pNewScript->Name = "npc_thunder_orb";
     pNewScript->GetAI = GetAI_npc_thunder_orb;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ThorimCircleOfHealing>("spell_thorim_circle_of_healing");
 }
