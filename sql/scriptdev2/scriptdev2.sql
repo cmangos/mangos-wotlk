@@ -946,6 +946,7 @@ UPDATE creature_template SET ScriptName='npc_living_mojo' WHERE entry=29830;
 UPDATE creature_template SET ScriptName='boss_galdarah' WHERE entry=29306;
 UPDATE creature_template SET ScriptName='boss_moorabi' WHERE entry=29305;
 UPDATE creature_template SET ScriptName='boss_sladran' WHERE entry=29304;
+UPDATE creature_template SET ScriptName='npc_gundrak_snake_wrap' WHERE entry=29742;
 UPDATE gameobject_template SET ScriptName='go_gundrak_altar' WHERE entry IN (192518, 192519, 192520);
 UPDATE instance_template SET ScriptName='instance_gundrak' WHERE map=604;
 

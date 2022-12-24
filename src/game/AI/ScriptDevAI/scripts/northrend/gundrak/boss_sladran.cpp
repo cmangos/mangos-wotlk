@@ -23,17 +23,18 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "gundrak.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
 {
-    SAY_AGGRO                 = -1604000,
-    SAY_SUMMON_SNAKE          = -1604001,
-    SAY_SUMMON_CONSTRICTOR    = -1604002,
-    SAY_SLAY_1                = -1604003,
-    SAY_SLAY_2                = -1604004,
-    SAY_SLAY_3                = -1604005,
-    SAY_DEATH                 = -1604006,
-    EMOTE_NOVA                = -1604007,
+    SAY_AGGRO                 = 31711,
+    SAY_SUMMON_SNAKE          = 30369,
+    SAY_SUMMON_CONSTRICTOR    = 30370,
+    SAY_SLAY_1                = 31712,
+    SAY_SLAY_2                = 31713,
+    SAY_SLAY_3                = 31714,
+    SAY_DEATH                 = 31715,
+    EMOTE_NOVA                = 30757,
 
     // Slad'Ran spells
     SPELL_POISON_NOVA         = 55081,
@@ -68,150 +69,196 @@ enum
 ## boss_sladran
 ######*/
 
-struct boss_sladranAI : public ScriptedAI
+enum SladranActions
 {
-    boss_sladranAI(Creature* pCreature) : ScriptedAI(pCreature)
+    SLADRAN_SUMMON,
+    SLADRAN_HEALTH_CHECK,
+    SLADRAN_ACTIONS_MAX,
+};
+
+struct boss_sladranAI : public BossAI
+{
+    boss_sladranAI(Creature* creature) : BossAI(creature, SLADRAN_ACTIONS_MAX),
+        m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        SetDataType(TYPE_SLADRAN);
+        AddOnAggroText(SAY_AGGRO);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3);
+        AddOnDeathText(SAY_DEATH);
+        AddCombatAction(SLADRAN_SUMMON, true);
+        AddTimerlessCombatAction(SLADRAN_HEALTH_CHECK, true);
     }
 
-    instance_gundrak* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiSummonTimer;
-    uint32 m_uiPoisonNovaTimer;
-    uint32 m_uiPowerfulBiteTimer;
-    uint32 m_uiVenomBoltTimer;
-
-    void Reset() override
+    void JustSummoned(Creature* summoned) override
     {
-        m_uiSummonTimer       = m_bIsRegularMode ? 5000 : 3000;
-        m_uiPoisonNovaTimer   = 22000;
-        m_uiPowerfulBiteTimer = 10000;
-        m_uiVenomBoltTimer    = 15000;
-    }
+        if (summoned->GetEntry() != NPC_SLADRAN_CONSTRICTOR && summoned->GetEntry() != NPC_SLADRAN_VIPER)
+            return;
 
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
+        summoned->SetWalk(false);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SLADRAN, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
+        if (summoned->GetEntry() == NPC_SLADRAN_VIPER)
         {
-            case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
+            summoned->SetInCombatWithZone();
+            return;
+        }
+
+        if (summoned->AI())
+            summoned->AI()->SetReactState(REACT_DEFENSIVE);
+
+        summoned->SetInCombatWithZone();
+        summoned->AI()->AttackClosestEnemy();
+    }
+
+    std::chrono::milliseconds GetSubsequentActionTimer(SladranActions action)
+    {
+        switch (action)
+        {
+            case SLADRAN_SUMMON: return m_isRegularMode ? 5s : 3s;
+            default: return 0s;
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void ExecuteAction(uint32 action) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SLADRAN, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SLADRAN, FAIL);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() != NPC_SLADRAN_CONSTRICTOR && pSummoned->GetEntry() != NPC_SLADRAN_VIPER)
-            return;
-
-        pSummoned->SetWalk(false);
-        pSummoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiPoisonNovaTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_POISON_NOVA : SPELL_POISON_NOVA_H) == CAST_OK)
+            case SLADRAN_HEALTH_CHECK:
             {
-                DoScriptText(EMOTE_NOVA, m_creature);
-                m_uiPoisonNovaTimer = 22000;
-            }
-        }
-        else
-            m_uiPoisonNovaTimer -= uiDiff;
-
-        if (m_uiSummonTimer < uiDiff)
-        {
-            if (!m_pInstance)
+                if (m_creature->GetHealthPercent() <= 90.f)
+                {
+                    ResetCombatAction(SLADRAN_SUMMON, 0s);
+                    DisableCombatAction(SLADRAN_HEALTH_CHECK);
+                }
                 return;
-
-            if (Creature* pSummonTarget = m_creature->GetMap()->GetCreature(m_pInstance->SelectRandomSladranTargetGuid()))
-            {
-                if (urand(0, 3))
-                {
-                    // we don't want to get spammed
-                    if (!urand(0, 4))
-                        DoScriptText(SAY_SUMMON_CONSTRICTOR, m_creature);
-
-                    pSummonTarget->CastSpell(pSummonTarget, SPELL_SUMMON_CONSTRICTOR, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
-                }
-                else
-                {
-                    // we don't want to get spammed
-                    if (!urand(0, 4))
-                        DoScriptText(SAY_SUMMON_SNAKE, m_creature);
-
-                    pSummonTarget->CastSpell(pSummonTarget, SPELL_SUMMON_VIPER, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
-                }
             }
-
-            m_uiSummonTimer = m_bIsRegularMode ? 5000 : 3000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
-
-        if (m_uiPowerfulBiteTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_POWERFUL_BITE : SPELL_POWERFUL_BITE_H) == CAST_OK)
-                m_uiPowerfulBiteTimer = 10000;
-        }
-        else
-            m_uiPowerfulBiteTimer -= uiDiff;
-
-        if (m_uiVenomBoltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            case SLADRAN_SUMMON:
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VENOM_BOLT : SPELL_VENOM_BOLT_H) == CAST_OK)
-                    m_uiVenomBoltTimer = 15000;
+                if (!m_instance)
+                    return;
+
+                if (Creature* summonTarget = m_creature->GetMap()->GetCreature(m_instance->SelectRandomSladranTargetGuid()))
+                {
+                    if (summonTarget->GetPositionZ() > 132)
+                    {
+                        // we don't want to get spammed
+                        if (!urand(0, 4))
+                            DoBroadcastText(SAY_SUMMON_CONSTRICTOR, m_creature);
+
+                        summonTarget->CastSpell(nullptr, SPELL_SUMMON_CONSTRICTOR, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+                    }
+                    else
+                    {
+                        // we don't want to get spammed
+                        if (!urand(0, 4))
+                            DoBroadcastText(SAY_SUMMON_SNAKE, m_creature);
+
+                        summonTarget->CastSpell(nullptr, SPELL_SUMMON_VIPER, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+                    }
+                }
+                break;
             }
         }
-        else
-            m_uiVenomBoltTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(SladranActions(action)));
     }
 };
 
-UnitAI* GetAI_boss_sladran(Creature* pCreature)
+struct npc_snakeWrapAI : public Scripted_NoMovementAI
 {
-    return new boss_sladranAI(pCreature);
-}
+    npc_snakeWrapAI(Creature* creature) : Scripted_NoMovementAI(creature),
+        m_instance(dynamic_cast<instance_gundrak*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    {
+        SetReactState(REACT_PASSIVE);
+        SetRootSelf(true);
+    }
+
+    instance_gundrak* m_instance;
+    bool m_isRegularMode;
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        Player* spawner = dynamic_cast<Player*>(m_creature->GetSpawner());
+        if (spawner && spawner->IsAlive())
+            spawner->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H);
+        m_creature->ForcedDespawn(std::chrono::milliseconds(1s).count());
+    }
+};
+
+struct GripOfSladran : public AuraScript, public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->HasAura(SPELL_SNAKE_WRAP_SUMMON) || target->HasAura(SPELL_SNAKE_WRAP_SUMMON_H))
+            return false;
+        return true;
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Player* target = dynamic_cast<Player*>(aura->GetTarget());
+        if (!target)
+            return;
+
+        bool isRegularMode = target->GetMap()->IsRegularDifficulty();
+        if (aura->GetStackAmount() == 5)
+        {
+            target->CastSpell(nullptr, isRegularMode ? SPELL_SNAKE_WRAP : SPELL_SNAKE_WRAP_H, TRIGGERED_OLD_TRIGGERED);
+            target->RemoveAurasDueToSpell(aura->GetSpellProto()->Id);
+        }
+    }
+};
+
+struct SnakeWrap : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        if (apply)
+            return;
+
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Player* target = dynamic_cast<Player*>(aura->GetTarget());
+        if (!target)
+            return;
+
+        bool isRegularMode = target->GetMap()->IsRegularDifficulty();
+        target->CastSpell(nullptr, isRegularMode ? SPELL_SNAKE_WRAP_SUMMON : SPELL_SNAKE_WRAP_SUMMON_H, TRIGGERED_OLD_TRIGGERED);
+        instance_gundrak* instance = dynamic_cast<instance_gundrak*>(target->GetMap()->GetInstanceData());
+        if (!instance)
+            return;
+
+        instance->SetData(TYPE_ACHIEV_WHY_SNAKES, target->GetGUIDLow());
+    }
+};
+
+struct SummonConstrictorSladran : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        // rough constant to force actual floor picking
+        // confirmed src pos is on caster Z and dest pos is on floor Z
+        spell->m_targets.m_destPos.z = spell->GetTrueCaster()->GetMap()->GetHeight(spell->GetTrueCaster()->GetPhaseMask(), spell->m_targets.m_destPos.x, spell->m_targets.m_destPos.y, spell->m_targets.m_destPos.z - 8.f);
+    }
+};
 
 void AddSC_boss_sladran()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_sladran";
-    pNewScript->GetAI = &GetAI_boss_sladran;
+    pNewScript->GetAI = &GetNewAIInstance<boss_sladranAI>;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_gundrak_snake_wrap";
+    pNewScript->GetAI = &GetNewAIInstance<npc_snakeWrapAI>;
+    pNewScript->RegisterSelf();
+
+    RegisterSpellScript<GripOfSladran>("spell_grip_of_sladran");
+    RegisterSpellScript<SnakeWrap>("spell_gundrak_snake_wrap");
+    RegisterSpellScript<SummonConstrictorSladran>("spell_summon_constrictor_sladran");
 }

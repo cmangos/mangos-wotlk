@@ -84,6 +84,7 @@ class instance_gundrak : public ScriptedInstance
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnPlayerDeath(Player*) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
