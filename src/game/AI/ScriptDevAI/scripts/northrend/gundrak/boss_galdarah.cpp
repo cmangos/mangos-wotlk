@@ -116,7 +116,7 @@ struct boss_galdarahAI : public BossAI
             ++m_abilityCount;
             return;
         }
-        ResetCombatAction(GALDARAH_PHASE_CHANGE, 7s);
+        ResetIfNotStarted(GALDARAH_PHASE_CHANGE, 7s);
     }
 
     void JustSummoned(Creature* summoned) override
