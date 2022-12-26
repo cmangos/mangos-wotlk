@@ -17,10 +17,10 @@
  */
 
 #include "AuthCrypt.h"
-#include "CryptoHash.h"
-#include "HMACSHA1.h"
+#include "Auth/CryptoHash.h"
+#include "Auth/HMACSHA1.h"
 #include "Log.h"
-#include "BigNumber.h"
+#include "Auth/BigNumber.h"
 
 AuthCrypt::AuthCrypt() : _clientDecrypt(Sha1Hash::GetLength()), _serverEncrypt(Sha1Hash::GetLength()), _initialized(false) {}
 

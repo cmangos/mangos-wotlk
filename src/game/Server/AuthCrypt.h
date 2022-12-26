@@ -20,7 +20,7 @@
 #define _AUTHCRYPT_H
 
 #include <Common.h>
-#include "SARC4.h"
+#include "Auth/SARC4.h"
 
 class BigNumber;
 
