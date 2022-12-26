@@ -25,11 +25,13 @@
 class SARC4
 {
     public:
-        SARC4(uint8 len);
-        SARC4(uint8* seed, uint8 len);
+        SARC4(size_t len);
+        SARC4(const uint8 *seed, size_t len);
         ~SARC4();
-        void Init(uint8 const* seed);
-        void UpdateData(int len, uint8* data);
+
+        void Init(const uint8 *seed);
+        void UpdateData(uint8 *data, size_t len);
+
     private:
         EVP_CIPHER_CTX* m_ctx;
 };

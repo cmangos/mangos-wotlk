@@ -45,13 +45,13 @@ void AuthCrypt::Init(BigNumber* K)
 
     memset(syncBuf, 0, 1024);
 
-    _serverEncrypt.UpdateData(1024, syncBuf);
-    //_clientEncrypt.UpdateData(1024, syncBuf);
+    _serverEncrypt.UpdateData(syncBuf, 1024);
+    //_clientEncrypt.UpdateData(syncBuf, 1024));
 
     memset(syncBuf, 0, 1024);
 
-    //_serverDecrypt.UpdateData(1024, syncBuf);
-    _clientDecrypt.UpdateData(1024, syncBuf);
+    //_serverDecrypt.UpdateData(syncBuf, 1024));
+    _clientDecrypt.UpdateData(syncBuf, 1024);
 
     _initialized = true;
 }
@@ -61,7 +61,7 @@ void AuthCrypt::DecryptRecv(uint8* data, size_t len)
     if (!_initialized)
         return;
 
-    _clientDecrypt.UpdateData(len, data);
+    _clientDecrypt.UpdateData(data, len);
 }
 
 void AuthCrypt::EncryptSend(uint8* data, size_t len)
@@ -69,5 +69,5 @@ void AuthCrypt::EncryptSend(uint8* data, size_t len)
     if (!_initialized)
         return;
 
-    _serverEncrypt.UpdateData(len, data);
+    _serverEncrypt.UpdateData(data, len);
 }

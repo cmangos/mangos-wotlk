@@ -307,12 +307,12 @@ void Warden::SendPacket(const ByteBuffer &buff)
 
 void Warden::DecryptData(uint8* buffer, size_t size)
 {
-    _inputCrypto.UpdateData(size, buffer);
+    _inputCrypto.UpdateData(buffer, size);
 }
 
 void Warden::EncryptData(uint8* buffer, size_t size)
 {
-    _outputCrypto.UpdateData(size, buffer);
+    _outputCrypto.UpdateData(buffer, size);
 }
 
 void Warden::BeginTimeoutClock()
