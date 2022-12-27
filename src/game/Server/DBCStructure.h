@@ -1232,7 +1232,7 @@ struct HolidaysEntry
     uint32 Id;                                              // 0
     uint32 Duration[MAX_HOLIDAY_DURATIONS];                 // 1-10
     uint32 Date[MAX_HOLIDAY_DATES];                         // 11-36 dates in unix time starting at January, 1, 2000
-    uint32 Region;                                          // 37 WoW region
+    uint32 Region;                                          // 37 region
     uint32 Looping;                                         // 38
     uint32 CalendarFlags[MAX_HOLIDAY_FLAGS];                // 39-48
     //uint32 HolidayNameID;                                 // 49 HolidayNames.dbc

@@ -4460,7 +4460,7 @@ void Spell::SendSpellStart() const
         castFlags |= CAST_FLAG_PERSISTENT_AA;
 
     if (m_spellInfo->runeCostID && m_spellInfo->powerType == POWER_RUNE)
-        castFlags |= CAST_FLAG_NO_GCD; // not needed, but Blizzard sends it
+        castFlags |= CAST_FLAG_NO_GCD; // not needed, but B sends it
 
     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && (m_targets.getSpeed() > 0.0f))
         castFlags |= CAST_FLAG_ADJUST_MISSILE;              // spell has trajectory

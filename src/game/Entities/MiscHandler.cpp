@@ -1443,7 +1443,7 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recv_data)
     result << uint8(isHeroic);
     group->BroadcastPacketInMap(_player, result);
 
-    map->ChangeMapDifficulty(difficulty); // blizzard likely doesnt do this in-place        
+    map->ChangeMapDifficulty(difficulty); // B likely doesnt do this in-place
 
     result = WorldPacket(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
     result << uint32(RESULT_COMPLETE);

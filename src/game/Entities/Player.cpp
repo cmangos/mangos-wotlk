@@ -4240,7 +4240,7 @@ Mail* Player::GetMail(uint32 id)
 void Player::SendItemRetrievalMail(uint32 itemEntry, uint32 count)
 {
     MailSender sender(MAIL_CREATURE, 34337u /* The Postmaster */);
-    MailDraft draft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cataclysm, it probably wasn't changed.
+    MailDraft draft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cata, it probably wasn't changed.
     CharacterDatabase.BeginTransaction();
 
     if (Item* item = Item::CreateItem(itemEntry, count, nullptr))
