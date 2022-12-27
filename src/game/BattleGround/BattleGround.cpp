@@ -28,7 +28,7 @@
 #include "Entities/ObjectGuid.h"
 #include "Globals/ObjectMgr.h"
 #include "Mails/Mail.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Tools/Formulas.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Chat/Chat.h"

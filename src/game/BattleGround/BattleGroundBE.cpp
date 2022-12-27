@@ -20,7 +20,7 @@
 #include "Entities/Player.h"
 #include "BattleGround.h"
 #include "BattleGroundBE.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Tools/Language.h"
 
 BattleGroundBE::BattleGroundBE()

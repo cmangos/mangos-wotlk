@@ -20,7 +20,7 @@
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "Server/Opcodes.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
 #include "World/World.h"

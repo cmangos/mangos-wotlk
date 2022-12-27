@@ -19,7 +19,7 @@
 #include "Server/WorldSession.h"
 #include "Log.h"
 #include "Entities/Player.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Globals/ObjectAccessor.h"
 #include "LFG/LFGMgr.h"
 #include "World/World.h"

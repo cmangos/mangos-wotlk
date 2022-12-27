@@ -22,7 +22,7 @@
 #include "BattleGroundDS.h"
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 
 BattleGroundDS::BattleGroundDS(): m_uiFlushTimer(0), m_uiWaterfallTimer(0), m_uiWaterfallSpellTimer(0), m_uiWaterfallStage(0)
 {

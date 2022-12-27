@@ -17,7 +17,7 @@
  */
 
 #include "OutdoorPvPHP.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "World/World.h"
 #include "Entities/Object.h"
 #include "Entities/Creature.h"

@@ -28,7 +28,7 @@
 #include "Log.h"
 #include "Server/Opcodes.h"
 #include "Server/WorldSession.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Entities/Player.h"
 #include "Skills/SkillExtraItems.h"
 #include "Skills/SkillDiscovery.h"

@@ -20,7 +20,7 @@
 #include "Achievements/AchievementMgr.h"
 #include "Server/DBCStores.h"
 #include "Entities/Player.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/DBCEnums.h"
 #include "GameEvents/GameEventMgr.h"
 #include "Globals/ObjectMgr.h"

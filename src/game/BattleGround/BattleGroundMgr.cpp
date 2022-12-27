@@ -38,7 +38,7 @@
 #include "Chat/Chat.h"
 #include "Arena/ArenaTeam.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "GameEvents/GameEventMgr.h"
 #include "Tools/Formulas.h"
 #include "Mails/Mail.h"

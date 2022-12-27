@@ -20,7 +20,7 @@
 #include "Server/WorldSession.h"
 #include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "Battlefield/Battlefield.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Log.h"
 #include "Server/Opcodes.h"
 #include "Entities/Player.h"

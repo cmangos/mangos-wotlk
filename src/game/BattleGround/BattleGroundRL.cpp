@@ -21,7 +21,7 @@
 #include "BattleGround.h"
 #include "BattleGroundRL.h"
 #include "Tools/Language.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 
 BattleGroundRL::BattleGroundRL()
 {

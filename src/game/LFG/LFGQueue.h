@@ -22,7 +22,7 @@
 #include "Common.h"
 #include "LFG/LFGDefines.h"
 #include "Multithreading/Messager.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 
 #include <string>
 

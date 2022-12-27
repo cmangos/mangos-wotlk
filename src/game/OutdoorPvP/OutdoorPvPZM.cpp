@@ -17,7 +17,7 @@
  */
 
 #include "OutdoorPvPZM.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "World/World.h"
 #include "Globals/ObjectMgr.h"
 #include "Entities/Object.h"

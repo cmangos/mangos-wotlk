@@ -22,7 +22,7 @@
 #include "BattleGroundRV.h"
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 
 BattleGroundRV::BattleGroundRV(): m_uiPillarTimer(0)
 {

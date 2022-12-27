@@ -23,7 +23,7 @@
 #include "Server/Opcodes.h"
 #include "Spells/SpellMgr.h"
 #include "World/World.h"
-#include "WorldPacket.h"
+#include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "UpdateMask.h"
 #include "Skills/SkillDiscovery.h"
