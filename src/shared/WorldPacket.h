@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "ByteBuffer.h"
 #include "Server/Opcodes.h"
+#include <chrono>
 
 // Note: m_opcode and size stored in platfom dependent format
 // ignore endianess until send, and converted at receive
@@ -35,6 +36,10 @@ class WorldPacket : public ByteBuffer
         explicit WorldPacket(Opcodes opcode, size_t res = 200) : ByteBuffer(res), m_opcode(opcode) { }
         // copy constructor
         WorldPacket(const WorldPacket& packet)              : ByteBuffer(packet), m_opcode(packet.m_opcode)
+        {
+        }
+        WorldPacket(const WorldPacket& packet, std::chrono::steady_clock::time_point receivedTime) : ByteBuffer(packet),
+            m_opcode(packet.m_opcode), m_receivedTime(receivedTime)
         {
         }
 
