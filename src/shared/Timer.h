@@ -69,10 +69,7 @@ class WorldTimer
         // tick world timer
         static uint32 tick();
 
-        WorldTimer();
-        WorldTimer(const WorldTimer&);
-
-    private:
+     private:
         static uint32 m_iTime;
         static uint32 m_iPrevTime;
 };
