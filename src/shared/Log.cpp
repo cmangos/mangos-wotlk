@@ -24,10 +24,10 @@
 #include "ByteBuffer.h"
 #include "ProgressBar.h"
 
-#include <stdarg.h>
 #include <fstream>
 #include <iostream>
 #include <thread>
+#include <cstdarg>
 
 #include <boost/stacktrace.hpp>
 
