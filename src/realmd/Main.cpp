@@ -47,7 +47,7 @@
 #include <thread>
 
 #ifdef _WIN32
-#include "ServiceWin32.h"
+#include "Platform/ServiceWin32.h"
 char serviceName[] = "realmd";
 char serviceLongName[] = "MaNGOS realmd service";
 char serviceDescription[] = "Massive Network Game Object Server";
@@ -59,7 +59,7 @@ char serviceDescription[] = "Massive Network Game Object Server";
  */
 int m_ServiceStatus = -1;
 #else
-#include "PosixDaemon.h"
+#include "Platform/PosixDaemon.h"
 #endif
 
 bool StartDB();

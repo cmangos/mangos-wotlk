@@ -31,7 +31,7 @@
 #define WORLD_SLEEP_CONST 50
 
 #ifdef _WIN32
-#include "ServiceWin32.h"
+#include "Platform/ServiceWin32.h"
 extern int m_ServiceStatus;
 #endif
 
