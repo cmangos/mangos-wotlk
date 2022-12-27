@@ -40,7 +40,7 @@
 #include "Loot/LootMgr.h"
 #include "Vmap/VMapFactory.h"
 #include "BattleGround/BattleGround.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Chat/Chat.h"
 #include "Entities/Vehicle.h"
 #include "Entities/TemporarySpawn.h"

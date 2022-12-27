@@ -22,7 +22,7 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "AI/EventAI/CreatureEventAI.h"
 #include "Entities/ObjectGuid.h"
-#include "Timer.h"
+#include "Util/Timer.h"
 
 class Creature;
 class Totem;

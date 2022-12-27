@@ -18,10 +18,10 @@
 
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Policies/Singleton.h"
 #include "World/World.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Skills/SkillDiscovery.h"
 #include "Spells/SpellMgr.h"
 #include "Entities/Player.h"

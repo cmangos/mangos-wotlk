@@ -30,7 +30,7 @@
 #include "World/World.h"
 #include "Spells/SpellMgr.h"
 #include "Arena/ArenaTeam.h"
-#include "ProgressBar.h"
+#include "Util/ProgressBar.h"
 #include "Mails/Mail.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"

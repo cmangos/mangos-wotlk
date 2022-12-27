@@ -32,7 +32,7 @@
 #include "Server/WorldSession.h"
 #include "Entities/Pet.h"
 #include "Maps/MapReference.h"
-#include "Util.h"                                           // for Tokens typedef
+#include "Util/Util.h"                                           // for Tokens typedef
 #include "Achievements/AchievementMgr.h"
 #include "Reputation/ReputationMgr.h"
 #include "BattleGround/BattleGround.h"

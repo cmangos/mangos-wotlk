@@ -34,7 +34,7 @@
 #include "Tools/PlayerDump.h"
 #include "Social/SocialMgr.h"
 #include "GMTickets/GMTicketMgr.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Tools/Language.h"
 #include "Spells/SpellMgr.h"
 #include "Calendar/Calendar.h"

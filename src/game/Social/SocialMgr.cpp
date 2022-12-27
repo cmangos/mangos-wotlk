@@ -24,7 +24,7 @@
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
 #include "World/World.h"
-#include "Util.h"
+#include "Util/Util.h"
 
 INSTANTIATE_SINGLETON_1(SocialMgr);
 

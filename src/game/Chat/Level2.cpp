@@ -41,7 +41,7 @@
 #include "Accounts/AccountMgr.h"
 #include "GMTickets/GMTicketMgr.h"
 #include "MotionGenerators/WaypointManager.h"
-#include "Util.h"
+#include "Util/Util.h"
 #include "Grids/GridNotifiers.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Grids/CellImpl.h"
