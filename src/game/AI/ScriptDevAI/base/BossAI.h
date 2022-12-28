@@ -65,6 +65,7 @@ class BossAI : public CombatAI
         void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
         void Aggro(Unit* who = nullptr) override;
+        void EnterEvadeMode() override;
 
         void AddCastOnDeath(QueuedCast cast);
         template <typename... Targs>
@@ -73,6 +74,8 @@ class BossAI : public CombatAI
             AddCastOnDeath(cast);
             AddCastOnDeath(fargs...);
         }
+
+        void AddRespawnOnEvade(std::chrono::milliseconds delay);
 
         std::chrono::seconds TimeSinceEncounterStart()
         {
@@ -90,6 +93,8 @@ class BossAI : public CombatAI
         std::vector<QueuedCast> m_castOnDeath;
 
         uint32 m_instanceDataType = -1;
+
+        uint32 m_respawnDelay = -1;
 
         std::chrono::steady_clock::time_point m_combatStartTimestamp;
 };
