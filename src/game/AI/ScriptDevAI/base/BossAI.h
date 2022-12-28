@@ -109,6 +109,7 @@ class BossAI : public CombatAI
             AddExitObject(fargs...);
         }
         void SetGateDelay(std::chrono::milliseconds delay) { m_gateDelay = delay; }
+        void EnterEvadeMode() override;
 
         void AddCastOnDeath(QueuedCast cast);
         template <typename... Targs>
@@ -117,6 +118,8 @@ class BossAI : public CombatAI
             AddCastOnDeath(cast);
             AddCastOnDeath(fargs...);
         }
+
+        void AddRespawnOnEvade(std::chrono::milliseconds delay);
 
         std::chrono::seconds TimeSinceEncounterStart()
         {
@@ -137,6 +140,8 @@ class BossAI : public CombatAI
         std::vector<QueuedCast> m_castOnDeath;
 
         uint32 m_instanceDataType = -1;
+
+        uint32 m_respawnDelay = -1;
 
         std::chrono::steady_clock::time_point m_combatStartTimestamp;
 };
