@@ -2794,6 +2794,9 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- Interaction range for MtG translocation orb
 UPDATE `spell_template` SET `RangeIndex` = 12 WHERE `Id` IN (46841);
 
+-- GO spell has channel attributes - GOs cant channel
+UPDATE spell_template SET AttributesEx=AttributesEx&~0x00004004 WHERE Id IN(29420);
+
 -- ============================================================
 -- WOTLK section
 -- ============================================================
