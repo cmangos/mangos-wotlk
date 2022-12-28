@@ -67,6 +67,10 @@ class BossAI : public CombatAI
         void Aggro(Unit* who = nullptr) override;
         void EnterEvadeMode() override;
 
+        /**
+        * Adds one or more Spells to cast with DoCastSpellIfCan on creature death
+        * @param cast Initialized struct of QueuedCast type
+        */
         void AddCastOnDeath(QueuedCast cast);
         template <typename... Targs>
         void AddCastOnDeath(QueuedCast cast, Targs... fargs)
@@ -75,7 +79,24 @@ class BossAI : public CombatAI
             AddCastOnDeath(fargs...);
         }
 
+        /**
+        * Adds a timer to respawn the Creature on Evade (instead of walking back to spawn)
+        * @param delay The amount of time until the Creature is supposed to respawn as a std::chrono literal
+        */
         void AddRespawnOnEvade(std::chrono::milliseconds delay);
+
+        /**
+        * Adds one or more Creatures to despawn alongside this Creature on Evade
+        * Uses the same timer for respawn as was set in AddRespawnOnEvade
+        * @param guid ObjectGuid of the creature to respawn
+        */
+        void DespawnSubordinateOnEvade(ObjectGuid guid);
+        template <typename... Targs>
+        void DespawnSubordinateOnEvade(ObjectGuid guid, Targs... fargs)
+        {
+            DespawnSubordinateOnEvade(guid);
+            DespawnSubordinateOnEvade(fargs...);
+        }
 
         std::chrono::seconds TimeSinceEncounterStart()
         {
@@ -89,6 +110,7 @@ class BossAI : public CombatAI
     private:
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
+        std::vector<ObjectGuid> m_despawnSubordinateOnEvade;
 
         std::vector<QueuedCast> m_castOnDeath;
 
