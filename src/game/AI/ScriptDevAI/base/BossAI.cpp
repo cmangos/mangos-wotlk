@@ -100,6 +100,18 @@ void BossAI::EnterEvadeMode()
     }
     m_creature->SetRespawnDelay(m_respawnDelay);
     m_creature->ForcedDespawn();
+    for (ObjectGuid& guid : m_despawnSubordinateOnEvade)
+    {
+        Creature* addToDespawn = m_creature->GetMap()->GetCreature(guid);
+        if (!addToDespawn)
+            continue;
+        addToDespawn->SetRespawnDelay(m_respawnDelay);
+        addToDespawn->ForcedDespawn();
+    }
+    if (m_instanceDataType == -1)
+        return;
+    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+        instance->SetData(m_instanceDataType, FAIL);
 }
 
 void BossAI::AddCastOnDeath(QueuedCast cast)
@@ -110,4 +122,9 @@ void BossAI::AddCastOnDeath(QueuedCast cast)
 void BossAI::AddRespawnOnEvade(std::chrono::milliseconds delay)
 {
     m_respawnDelay = delay.count();
+}
+
+void BossAI::DespawnSubordinateOnEvade(ObjectGuid guid)
+{
+    m_despawnSubordinateOnEvade.push_back(guid);
 }
