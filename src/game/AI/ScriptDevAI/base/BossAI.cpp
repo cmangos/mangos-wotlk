@@ -91,7 +91,23 @@ void BossAI::AddExitObject(uint32 value)
     m_exitObjects.push_back(value);
 }
 
+void BossAI::EnterEvadeMode()
+{
+    if (m_respawnDelay == -1)
+    {
+        CombatAI::EnterEvadeMode();
+        return;
+    }
+    m_creature->SetRespawnDelay(m_respawnDelay);
+    m_creature->ForcedDespawn();
+}
+
 void BossAI::AddCastOnDeath(QueuedCast cast)
 {
     m_castOnDeath.push_back(cast);
+}
+
+void BossAI::AddRespawnOnEvade(std::chrono::milliseconds delay)
+{
+    m_respawnDelay = delay.count();
 }
