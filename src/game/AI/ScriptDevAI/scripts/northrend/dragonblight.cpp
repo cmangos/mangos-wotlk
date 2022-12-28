@@ -449,6 +449,19 @@ struct RescueVillager : public SpellScript
     }
 };
 
+// 49109 - Drop off Gnome
+struct DropOffGnome : public SpellScript
+{
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_OUT_OF_RANGE || result == SPELL_FAILED_BAD_TARGETS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_5;
+        }
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -479,4 +492,5 @@ void AddSC_dragonblight()
     RegisterSpellScript<LiquidFireOfElune>("spell_liquid_fire_of_elune");
     RegisterSpellScript<HourglassOfEternity>("spell_hourglass_of_eternity");
     RegisterSpellScript<RescueVillager>("spell_rescue_villager");
+    RegisterSpellScript<DropOffGnome>("spell_drop_off_gnome");
 }
