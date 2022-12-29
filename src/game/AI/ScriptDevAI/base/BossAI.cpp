@@ -36,6 +36,10 @@ void BossAI::Reset()
 {
     CombatAI::Reset();
     m_creature->SetSpellList(m_creature->GetCreatureInfo()->SpellList);
+    for (auto& func : m_resetValues)
+    {
+        func();
+    }
 }
 
 void BossAI::JustDied(Unit* killer)
