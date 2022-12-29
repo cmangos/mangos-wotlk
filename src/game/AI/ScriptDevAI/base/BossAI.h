@@ -180,6 +180,17 @@ class BossAI : public CombatAI
             DespawnSubordinateOnEvade(fargs...);
         }
 
+        template<typename T, typename W>
+        void ResetValueTo(T& var, W val)
+        {
+            static_assert(std::is_convertible<W, T>::value, "Value must be of castable type to the variable!");
+            T* ptr = &var;
+            m_resetValues.emplace_back([&]()
+            {
+                *ptr = static_cast<T>(val);
+            });
+        }
+
         std::chrono::seconds TimeSinceEncounterStart()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
@@ -202,6 +213,8 @@ class BossAI : public CombatAI
         std::vector<std::function<void()>> m_resetValues;
 
         std::vector<QueuedCast> m_castOnDeath;
+
+        std::vector<std::function<void()>> m_resetValues;
 
         uint32 m_instanceDataType = -1;
 
