@@ -352,7 +352,7 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
         return;
 
     SpellEntry const* spellInfo = spell->m_spellInfo;
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING) || spellInfo->HasAttribute(SPELL_ATTR_EX5_AI_DOESNT_FACE_TARGET))
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX4_ALLOW_CAST_WHILE_CASTING) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING))
         return;
 
     // Creature should always stop before it will cast a non-instant spell
@@ -391,7 +391,7 @@ void UnitAI::OnSpellCastStateChange(Spell const* spell, bool state, WorldObject*
 
     if (state)
     {
-        if (target && (m_unit != target || forceTarget))
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX5_AI_DOESNT_FACE_TARGET) && target && (m_unit != target || forceTarget))
         {
             m_unit->SetTarget(target);
             if (m_unit != target)
