@@ -107,6 +107,8 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
         case NPC_TOXIC_TUNNEL:
             pCreature->SetCanEnterCombat(false);
             break;
+        case NPC_CORPSE_SCARAB:
+            m_corpseScarabs.push_back(pCreature->GetObjectGuid()); break;
         case NPC_OLDWORLD_TRIGGER:
         {
             if (pCreature->GetPositionX() > 3250 && pCreature->GetPositionX() < 3322 && pCreature->GetPositionY() > -3190 && pCreature->GetPositionY() < -3115)
@@ -324,6 +326,8 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(GO_ARAC_ANUB_GATE);
                 DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MAEXXNA_ID);
             }
+            if (uiData == DONE || uiData == FAIL)
+                DespawnGuids(m_corpseScarabs);
             break;
         case TYPE_FAERLINA:
             DoUseDoorOrButton(GO_ARAC_FAER_WEB);
