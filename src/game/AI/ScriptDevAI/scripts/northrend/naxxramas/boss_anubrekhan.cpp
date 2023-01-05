@@ -51,7 +51,7 @@ enum
     SPELL_SUMMON_CORPSE_SCARABS_5   = 29105,                // This spawns 5 corpse scarabs ontop of us (most likely the pPlayer casts this on death)
     SPELL_SUMMON_CORPSE_SCARABS_10  = 28864,                // This is used by the crypt guards when they die
 
-    NPC_CRYPT_GUARD             = 16573,
+    // NPC_CRYPT_GUARD             = 16573,
 
     SPELLSET_10N                = 1595601,
     SPELLSET_25N                = 2924901,
