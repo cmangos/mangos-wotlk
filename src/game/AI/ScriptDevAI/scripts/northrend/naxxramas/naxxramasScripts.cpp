@@ -51,7 +51,7 @@ struct npc_stoneskin_gargoyleAI : public CombatAI
 {
     npc_stoneskin_gargoyleAI(Creature* creature) : CombatAI(creature, GARGOYLE_ACTION_MAX)
     {
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z) -> bool
         {
             return x > gargoyleResetCoords.x && y > gargoyleResetCoords.y && z > gargoyleResetCoords.z;
         });

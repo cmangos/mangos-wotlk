@@ -333,6 +333,7 @@ extern void AddSC_boss_razuvious();
 extern void AddSC_boss_sapphiron();
 extern void AddSC_boss_thaddius();
 extern void AddSC_instance_naxxramas();
+extern void AddSC_naxxramas();
 extern void AddSC_boss_malygos();                           // nexus, eye_of_eternity
 extern void AddSC_instance_eye_of_eternity();
 extern void AddSC_boss_anomalus();                          // nexus, nexus
@@ -833,6 +834,7 @@ void AddScripts()
     AddSC_boss_sapphiron();
     AddSC_boss_thaddius();
     AddSC_instance_naxxramas();
+    AddSC_naxxramas();
     AddSC_boss_malygos();                                   // nexus, eye_of_eternity
     AddSC_instance_eye_of_eternity();
     AddSC_boss_anomalus();                                  // nexus, nexus
