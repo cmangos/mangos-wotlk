@@ -530,7 +530,7 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
     }
 };
 
-struct MagneticPull : public SpellScript
+struct MagneticPullThaddius : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
@@ -782,7 +782,7 @@ void AddSC_boss_thaddius()
 
     RegisterSpellScript<ShockThaddius>("spell_shock_thaddius");
     RegisterSpellScript<ThaddiusLightningVisual>("spell_thaddius_lightning_visual");
-    RegisterSpellScript<MagneticPull>("spell_magnetic_pull");
+    RegisterSpellScript<MagneticPullThaddius>("spell_magnetic_pull_thaddius");
     RegisterSpellScript<PolarityShift>("spell_thaddius_polarity_shift");
     RegisterSpellScript<ThaddiusChargeDamage>("spell_thaddius_charge_damage");
     RegisterSpellScript<ThaddiusCharge>("spell_thaddius_charge_buff");
