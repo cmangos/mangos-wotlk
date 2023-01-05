@@ -115,6 +115,10 @@ void instance_naxxramas::OnCreatureCreate(Creature* pCreature)
                 m_gluthTriggers.push_back(pCreature->GetObjectGuid());
             break;
         }
+        case NPC_ROTTING_MAGGOT:
+        case NPC_DISEASED_MAGGOT:
+        case NPC_EYE_STALK:
+            m_heiganBackroomAdds.push_back(pCreature->GetObjectGuid()); break;
     }
 }
 
@@ -381,6 +385,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoRespawnGameObject(GO_PLAG_PORTAL, 30 * MINUTE);
                 DoToggleGameObjectFlags(GO_PLAG_PORTAL, GO_FLAG_NO_INTERACT, false);
                 m_uiTauntTimer = 5000;
+                DespawnGuids(m_heiganBackroomAdds);
             }
             break;
         case TYPE_RAZUVIOUS:

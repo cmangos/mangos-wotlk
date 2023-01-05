@@ -113,6 +113,11 @@ enum
     NPC_SPECT_RIDER             = 16150,
     NPC_SPECT_HORSE             = 16149,
 
+    // Heigan
+    NPC_DISEASED_MAGGOT         = 16056,
+    NPC_ROTTING_MAGGOT          = 16057,
+    NPC_EYE_STALK               = 16236,
+
     // Gluth
     NPC_ZOMBIE_CHOW_N           = 16360,
     NPC_ZOMBIE_CHOW_H           = 30303,
@@ -301,6 +306,7 @@ class instance_naxxramas : public ScriptedInstance
 
         std::unordered_map<ObjectGuid, GothTrigger> m_mGothTriggerMap;
         GuidList m_alHeiganTrapGuids[MAX_HEIGAN_TRAP_AREAS];
+        GuidVector m_heiganBackroomAdds;
         GuidVector m_corpseScarabs;
 
         float m_fChamberCenterX;
