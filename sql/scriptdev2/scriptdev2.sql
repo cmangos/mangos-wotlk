@@ -1491,6 +1491,7 @@ UPDATE gameobject_template SET ScriptName = 'go_covert_ops' WHERE entry=19590;
 UPDATE creature_template SET ScriptName='npc_floating_spirit' WHERE entry IN (30141,30143,30145);
 UPDATE creature_template SET ScriptName='npc_restless_frostborn' WHERE entry IN (29974,30135,30144);
 UPDATE creature_template SET ScriptName='npc_injured_miner' WHERE entry=29434;
+UPDATE creature_template SET ScriptName='npc_ethereal_frostworg' WHERE entry=30219;
 
 /* STORMWIND CITY */
 UPDATE creature_template SET ScriptName='npc_bartleby' WHERE entry=6090;
