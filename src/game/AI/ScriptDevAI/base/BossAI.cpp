@@ -123,7 +123,7 @@ void BossAI::AddCastOnDeath(QueuedCast cast)
     m_castOnDeath.push_back(cast);
 }
 
-void BossAI::AddRespawnOnEvade(std::chrono::milliseconds delay)
+void BossAI::AddRespawnOnEvade(std::chrono::seconds delay)
 {
     m_respawnDelay = delay.count();
 }
