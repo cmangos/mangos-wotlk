@@ -127,7 +127,7 @@ class BossAI : public CombatAI
         * Adds a timer to respawn the Creature on Evade (instead of walking back to spawn)
         * @param delay The amount of time until the Creature is supposed to respawn as a std::chrono literal
         */
-        void AddRespawnOnEvade(std::chrono::milliseconds delay);
+        void AddRespawnOnEvade(std::chrono::seconds delay);
 
         /**
         * Adds one or more Creatures to despawn alongside this Creature on Evade
