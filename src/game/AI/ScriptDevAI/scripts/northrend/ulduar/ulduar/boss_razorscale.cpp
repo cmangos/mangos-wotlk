@@ -315,8 +315,9 @@ struct boss_razorscaleAI : public BossAI
         }
     }
 
-    void JustKilledUnit(Unit* who) override
+    void KilledUnit(Unit* who) override
     {
+        BossAI::KilledUnit(who);
         if (!who || who->GetEntry() != NPC_DARK_RUNE_GUARDIAN)
             return;
         for (auto& playerRef : m_creature->GetMap()->GetPlayers())
