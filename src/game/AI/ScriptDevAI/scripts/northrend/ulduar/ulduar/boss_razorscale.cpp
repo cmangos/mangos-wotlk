@@ -27,16 +27,16 @@ EndScriptData */
 
 enum
 {
-    SAY_INTRO_WELCOME                   = -1603036,
-    SAY_INTRO_1                         = -1603037,
-    SAY_INTRO_2                         = -1603038,
-    SAY_INTRO_3                         = -1603039,
-    SAY_GROUNDED                        = -1603040,
-    SAY_EXTINGUISH_FIRE                 = -1603042,
+    SAY_INTRO_WELCOME                   = 33351,
+    SAY_INTRO_1                         = 33820,
+    SAY_INTRO_2                         = 33607,
+    SAY_INTRO_3                         = 33816,
+    SAY_GROUNDED                        = 33606,
+    SAY_EXTINGUISH_FIRE                 = 33821,
 
-    EMOTE_BREATH                        = -1603041,
-    EMOTE_HARPOON_READY                 = -1603043,
-    EMOTE_GROUNDED                      = -1603044,
+    EMOTE_BREATH                        = 33657,
+    EMOTE_HARPOON_READY                 = 33857,
+    EMOTE_GROUNDED                      = 33931,
 
     // general spells (used in both ground and air phases)
     SPELL_BERSERK                       = 47008,
@@ -138,9 +138,9 @@ enum RazorscaleActions
 struct boss_razorscaleAI : public BossAI
 {
     boss_razorscaleAI(Creature* creature) : BossAI(creature, RAZORSCALE_ACTIONS_MAX),
-    m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
-    m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
-    m_maxHarpoons(m_isRegularMode ? 2 : 4)
+        m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_maxHarpoons(m_isRegularMode ? 2 : 4)
     {
         SetDataType(TYPE_RAZORSCALE);
         AddCustomAction(RAZORSCALE_GROUNDED_FLAME_BREATH, true, [&]()
@@ -200,7 +200,7 @@ struct boss_razorscaleAI : public BossAI
             }
 
             // make the Trappers evade or move to home position
-            for (GuidList::const_iterator itr = m_lTrappersGuids.begin(); itr != m_lTrappersGuids.end(); ++itr)
+            for (GuidList::const_iterator itr = m_trapperGuids.begin(); itr != m_trapperGuids.end(); ++itr)
             {
                 if (Creature* pTrapper = m_creature->GetMap()->GetCreature(*itr))
                     pTrapper->AI()->EnterEvadeMode();
@@ -209,7 +209,7 @@ struct boss_razorscaleAI : public BossAI
         AddCustomAction(RAZORSCALE_TRANSITION_TO_GROUND, true, [&]()
         {
             // cast trap visual
-            for (GuidList::const_iterator itr = m_lTrappersGuids.begin(); itr != m_lTrappersGuids.end(); ++itr)
+            for (GuidList::const_iterator itr = m_trapperGuids.begin(); itr != m_trapperGuids.end(); ++itr)
             {
                 if (Creature* pTrapper = m_creature->GetMap()->GetCreature(*itr))
                     pTrapper->CastSpell(m_creature, SPELL_SHACKLE, TRIGGERED_NONE);
@@ -253,16 +253,14 @@ struct boss_razorscaleAI : public BossAI
     bool m_isGrounded;
     bool m_enterEvadeMode;
 
-    uint8 m_uiGroundedStep;
-
     uint8 m_maxHarpoons;
     uint8 m_currentHarpoon;
     uint8 m_harpoonsUsed;
     uint8 m_airPhaseCount;
 
-    GuidList m_lEngineersGuids;
-    GuidList m_lTrappersGuids;
-    GuidVector m_vHarpoonsGuids;
+    GuidList m_engineerGuids;
+    GuidList m_trapperGuids;
+    GuidVector m_harpoonGuids;
 
     void Reset() override
     {
@@ -294,9 +292,9 @@ struct boss_razorscaleAI : public BossAI
         if (!m_instance)
             return;
         // load engineers and harpoon data
-        m_instance->GetEngineersGuids(m_lEngineersGuids);
-        m_instance->GetTrappersGuids(m_lTrappersGuids);
-        m_instance->GetHarpoonsGuids(m_vHarpoonsGuids);
+        m_instance->GetEngineersGuids(m_engineerGuids);
+        m_instance->GetTrappersGuids(m_trapperGuids);
+        m_instance->GetHarpoonsGuids(m_harpoonGuids);
     }
 
     void JustReachedHome() override
@@ -337,8 +335,7 @@ struct boss_razorscaleAI : public BossAI
                 uint32 speedRate = m_creature->GetSpeedRate(MOVE_RUN);
                 m_creature->SetWalk(false);
                 m_creature->SetSpeedRate(MOVE_RUN, SPEED_RATE_RAZORSCALE);
-                //m_creature->GetMotionMaster()->MovePointTOL(1, afRazorscaleGroundPos[0], afRazorscaleGroundPos[1], afRazorscaleGroundPos[2], false);
-                m_creature->GetMotionMaster()->MovePoint(1, afRazorscaleGroundPos[0], afRazorscaleGroundPos[1], afRazorscaleGroundPos[2], FORCED_MOVEMENT_FLIGHT, false);
+                m_creature->GetMotionMaster()->MovePointTOL(1, afRazorscaleGroundPos[0], afRazorscaleGroundPos[1], afRazorscaleGroundPos[2], false);
                 m_creature->SetSpeedRate(MOVE_RUN, speedRate);
                 ResetTimer(RAZORSCALE_TRANSITION_TO_GROUND, 5s);
                 DisableCombatAction(RAZORSCALE_SPAWN_ADDS);
@@ -350,7 +347,7 @@ struct boss_razorscaleAI : public BossAI
                 {
                     if (Creature* controller = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE_CONTROLLER))
                     {
-                        for (GuidList::const_iterator itr = m_lTrappersGuids.begin(); itr != m_lTrappersGuids.end(); ++itr)
+                        for (GuidList::const_iterator itr = m_trapperGuids.begin(); itr != m_trapperGuids.end(); ++itr)
                         {
                             if (Creature* pTrapper = m_creature->GetMap()->GetCreature(*itr))
                             {
@@ -381,12 +378,15 @@ struct boss_razorscaleAI : public BossAI
         uint8 index = 1;
 
         // get the current harpoon and move the engineers in front of it
-        if (GameObject* harpoon = m_creature->GetMap()->GetGameObject(m_vHarpoonsGuids[m_currentHarpoon]))
+        if (GameObject* harpoon = m_creature->GetMap()->GetGameObject(m_harpoonGuids[m_currentHarpoon]))
         {
-            for (GuidList::const_iterator itr = m_lEngineersGuids.begin(); itr != m_lEngineersGuids.end(); ++itr)
+            for (GuidList::const_iterator itr = m_engineerGuids.begin(); itr != m_engineerGuids.end(); ++itr)
             {
                 if (Creature* engineer = m_creature->GetMap()->GetCreature(*itr))
                 {
+                    engineer->SetImmuneToNPC(false);
+                    if (engineer->AI())
+                        engineer->AI()->SetReactState(REACT_PASSIVE);
                     harpoon->GetNearPoint(harpoon, fX, fY, fZ, 0, INTERACTION_DISTANCE, M_PI_F / 4 * index);
 
                     // ToDo: maybe there should be some emotes here
@@ -482,7 +482,7 @@ struct boss_razorscaleAI : public BossAI
                     DoBroadcastText(EMOTE_HARPOON_READY, m_creature);
 
                     // despawn the current broken harpoon and spawn the repaired one
-                    if (GameObject* harpoon = m_creature->GetMap()->GetGameObject(m_vHarpoonsGuids[m_currentHarpoon - 1]))
+                    if (GameObject* harpoon = m_creature->GetMap()->GetGameObject(m_harpoonGuids[m_currentHarpoon - 1]))
                     {
                         harpoon->SetRespawnTime(HOUR);
                         harpoon->SetLootState(GO_JUST_DEACTIVATED);
@@ -494,7 +494,7 @@ struct boss_razorscaleAI : public BossAI
                     // if all harpoons have been repaired stop
                     if (m_currentHarpoon == m_maxHarpoons)
                     {
-                        for (GuidList::const_iterator itr = m_lEngineersGuids.begin(); itr != m_lEngineersGuids.end(); ++itr)
+                        for (GuidList::const_iterator itr = m_engineerGuids.begin(); itr != m_engineerGuids.end(); ++itr)
                         {
                             if (Creature* engineer = m_creature->GetMap()->GetCreature(*itr))
                             {
@@ -542,13 +542,13 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
     {
         m_instance = (instance_ulduar*)creature->GetInstanceData();
         InitializeDialogueHelper(m_instance);
-        m_bIntroDone = false;
+        m_introDone = false;
         Reset();
     }
 
     instance_ulduar* m_instance;
 
-    bool m_bIntroDone;
+    bool m_introDone;
 
     ObjectGuid m_playerGuid;
 
@@ -557,10 +557,10 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
     void MoveInLineOfSight(Unit* who) override
     {
         // ToDo: verify if all this is correct. There may other parts of the intro which are currently missing
-        if (!m_bIntroDone && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 20.0f))
+        if (!m_introDone && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 20.0f))
         {
             DoBroadcastText(SAY_INTRO_WELCOME, m_creature);
-            m_bIntroDone = true;
+            m_introDone = true;
         }
 
         ScriptedAI::MoveInLineOfSight(who);
@@ -581,27 +581,30 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
                 if (Creature* engineer = GetClosestCreatureWithEntry(m_creature, NPC_EXPEDITION_ENGINEER, 15.0f))
                     DoBroadcastText(SAY_INTRO_1, engineer);
 
-                GuidList m_lDefenderGuids;
-                m_instance->GetDefenderGuids(m_lDefenderGuids);
+                GuidList m_defenderGuids;
+                m_instance->GetDefenderGuids(m_defenderGuids);
 
                 // move the defenders into attack position
-                for (GuidList::const_iterator itr = m_lDefenderGuids.begin(); itr != m_lDefenderGuids.end(); ++itr)
+                for (GuidList::const_iterator itr = m_defenderGuids.begin(); itr != m_defenderGuids.end(); ++itr)
                 {
-                    if (Creature* pDefender = m_creature->GetMap()->GetCreature(*itr))
+                    if (Creature* defender = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        pDefender->CastSpell(pDefender, SPELL_THREAT, TRIGGERED_OLD_TRIGGERED);
-                        pDefender->SetWalk(false);
-                        pDefender->GetMotionMaster()->MoveWaypoint();
+                        defender->SetImmuneToNPC(false);
+                        if (defender->AI())
+                            defender->AI()->SetReactState(REACT_AGGRESSIVE);
+                        defender->CastSpell(defender, SPELL_THREAT, TRIGGERED_OLD_TRIGGERED);
+                        defender->SetWalk(false);
+                        defender->GetMotionMaster()->MoveWaypoint();
                     }
                 }
                 break;
             }
             case NPC_RAZORSCALE:
-                if (Creature* pRazorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
+                if (Creature* razorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
                 {
-                    if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                        pRazorscale->AI()->AttackStart(pPlayer);
-                    pRazorscale->SetInCombatWithZone(false);
+                    if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                        razorscale->AI()->AttackStart(player);
+                    razorscale->SetInCombatWithZone(false);
                 }
                 break;
             case NPC_EXPEDITION_DEFENDER:
@@ -609,8 +612,8 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
                     DoBroadcastText(SAY_INTRO_3, engineer);
 
                 // inform Razorscale about the start of the harpoon event
-                if (Creature* pRazorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
-                    m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pRazorscale);
+                if (Creature* razorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
+                    m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, razorscale);
                 break;
         }
     }
@@ -628,28 +631,28 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
     void UpdateAI(const uint32 diff) override { DialogueUpdate(diff); }
 };
 
-bool GossipHello_npc_expedition_commander(Player* pPlayer, Creature* creature)
+bool GossipHello_npc_expedition_commander(Player* player, Creature* creature)
 {
-    if (ScriptedInstance* pInstance = (ScriptedInstance*)creature->GetInstanceData())
+    if (ScriptedInstance* instance = (ScriptedInstance*)creature->GetInstanceData())
     {
-        if (pInstance->GetData(TYPE_RAZORSCALE) == NOT_STARTED || pInstance->GetData(TYPE_RAZORSCALE) == FAIL)
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START_RAZORSCALE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        if (instance->GetData(TYPE_RAZORSCALE) == NOT_STARTED || instance->GetData(TYPE_RAZORSCALE) == FAIL)
+            player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START_RAZORSCALE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-        pPlayer->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_WELCOME, creature->GetObjectGuid());
+        player->SEND_GOSSIP_MENU(GOSSIP_MENU_ID_WELCOME, creature->GetObjectGuid());
         return true;
     }
 
     return false;
 }
 
-bool GossipSelect_npc_expedition_commander(Player* pPlayer, Creature* creature, uint32 /*uiSender*/, uint32 uiAction)
+bool GossipSelect_npc_expedition_commander(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1)
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
     {
         // start intro dialogue
-        creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, creature);
+        creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, player, creature);
         creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        pPlayer->CLOSE_GOSSIP_MENU();
+        player->CLOSE_GOSSIP_MENU();
     }
 
     return true;
@@ -662,7 +665,7 @@ bool GossipSelect_npc_expedition_commander(Player* pPlayer, Creature* creature, 
 struct npc_razorscale_spawnerAI : public Scripted_NoMovementAI
 {
     npc_razorscale_spawnerAI(Creature* creature) : Scripted_NoMovementAI(creature),
-    m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData()))
+        m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData()))
     {
         AddCustomAction(0, true, [&]()
         {
@@ -694,32 +697,9 @@ struct npc_razorscale_spawnerAI : public Scripted_NoMovementAI
     void JustSummoned(Creature* summoned) override
     {
         summoned->SetInCombatWithZone();
+        if (summoned->AI())
+            summoned->AI()->AttackClosestEnemy();
         summoned->SetIgnoreMMAP(true);
-        if (!m_instance)
-            return;
-        GuidList dwarves;
-        m_instance->GetEngineersGuids(dwarves);
-        for (ObjectGuid& guid : dwarves)
-        {
-            Creature* dwarf = m_creature->GetMap()->GetCreature(guid);
-            if (!dwarf)
-                continue;
-            dwarf->SetImmuneToNPC(false);
-            if (dwarf->AI())
-                dwarf->AI()->SetReactState(REACT_PASSIVE);
-            m_creature->getThreatManager().addThreat(dwarf, 2000.f);
-        }
-        m_instance->GetDefenderGuids(dwarves);
-        for (ObjectGuid& guid : dwarves)
-        {
-            Creature* dwarf = m_creature->GetMap()->GetCreature(guid);
-            if (!dwarf)
-                continue;
-            dwarf->SetImmuneToNPC(false);
-            if (dwarf->AI())
-                dwarf->AI()->SetReactState(REACT_AGGRESSIVE);
-            m_creature->getThreatManager().addThreat(dwarf, 2000.f);
-        }
     }
 
     void JustSummoned(GameObject* pGo) override
@@ -763,10 +743,10 @@ struct npc_harpoon_fire_stateAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*diff*/) override { }
 };
 
-bool EffectDummyCreature_npc_harpoon_fire_state(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
+bool EffectDummyCreature_npc_harpoon_fire_state(Unit* /*caster*/, uint32 spellId, SpellEffectIndex effIdx, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
-    if (uiSpellId == SPELL_FIREBOLT && uiEffIndex == EFFECT_INDEX_0 && creatureTarget->GetEntry() == NPC_HARPOON_FIRE_STATE)
+    if (spellId == SPELL_FIREBOLT && effIdx == EFFECT_INDEX_0 && creatureTarget->GetEntry() == NPC_HARPOON_FIRE_STATE)
     {
         creatureTarget->CastSpell(creatureTarget, SPELL_HARPOON_FIRE, TRIGGERED_OLD_TRIGGERED);
 
@@ -794,8 +774,8 @@ bool EffectDummyCreature_npc_harpoon_fire_state(Unit* /*pCaster*/, uint32 uiSpel
         }
 
         // force reset for harpoon trigger npcs
-        if (Creature* pTrigger = GetClosestCreatureWithEntry(creatureTarget, NPC_RAZORSCALE_CONTROLLER, 5.0f))
-            pTrigger->InterruptNonMeleeSpells(false);
+        if (Creature* trigger = GetClosestCreatureWithEntry(creatureTarget, NPC_RAZORSCALE_CONTROLLER, 5.0f))
+            trigger->InterruptNonMeleeSpells(false);
 
         // always return true when we are handling this spell and effect
         return true;
@@ -808,21 +788,21 @@ bool EffectDummyCreature_npc_harpoon_fire_state(Unit* /*pCaster*/, uint32 uiSpel
 ## event_spell_harpoon_shot
 ######*/
 
-bool ProcessEventId_event_spell_harpoon_shot(uint32 /*uiEventId*/, Object* source, Object* /*pTarget*/, bool /*bIsStart*/)
+bool ProcessEventId_event_spell_harpoon_shot(uint32 /*eventId*/, Object* source, Object* /*target*/, bool /*isStart*/)
 {
-    if (((Creature*)source)->GetEntry() == NPC_RAZORSCALE_CONTROLLER)
-    {
-        if (instance_ulduar* pInstance = (instance_ulduar*)((Creature*)source)->GetInstanceData())
-        {
-            // event doesn't have target, so we need to give an explicit one
-            if (Creature* pRazorscale = pInstance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
-                ((Creature*)source)->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, (Creature*)source, pRazorscale);
+    Creature* sourceCreature = static_cast<Creature*>(source);
+    if (!sourceCreature)
+        return false;
+    if (sourceCreature->GetEntry() != NPC_RAZORSCALE_CONTROLLER)
+        return false;
+    instance_ulduar* instance = dynamic_cast<instance_ulduar*>(sourceCreature->GetInstanceData());
+    if (!instance)
+        return false;
+    // event doesn't have target, so we need to give an explicit one
+    if (Creature* razorscale = instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
+        sourceCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, sourceCreature, razorscale);
 
-            return true;
-        }
-    }
-
-    return false;
+    return true;;
 }
 
 struct DevouringFlameRazorscale : public SpellScript
