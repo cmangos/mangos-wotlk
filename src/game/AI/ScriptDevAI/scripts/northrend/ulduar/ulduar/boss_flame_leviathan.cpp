@@ -252,6 +252,7 @@ struct boss_flame_leviathanAI : public BossAI
 
     void JustSummoned(Creature* summoned) override
     {
+        m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
         switch (summoned->GetEntry())
         {
             case NPC_THORIM_HAMMER_VEHICLE:
@@ -303,17 +304,6 @@ struct boss_flame_leviathanAI : public BossAI
 
         // set boss in combat (if not already)
         m_creature->SetInCombatWithZone();
-    }
-
-    void SpellHitTarget(Unit* target, SpellEntry const* spellEntry) override
-    {
-        if (target->IsVehicle() && spellEntry->Id == SPELL_PURSUED)
-        {
-            m_creature->FixateTarget(target);
-
-            if (Player* player = target->GetBeneficiaryPlayer())
-                DoBroadcastText(EMOTE_PURSUE, m_creature, player);
-        }
     }
 
     void HandleHardmode()
