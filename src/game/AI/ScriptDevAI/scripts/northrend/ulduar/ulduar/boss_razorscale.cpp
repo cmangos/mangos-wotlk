@@ -302,9 +302,8 @@ struct boss_razorscaleAI : public BossAI
 
     void EnterEvadeMode() override
     {
-        if (m_creature->GetMap()->GetPlayersCountExceptGMs() > 0)
-            return;
-        BossAI::EnterEvadeMode();
+        if (!m_instance->GetPlayerInMap(true, false))
+            BossAI::EnterEvadeMode();
     }
 
     void Aggro(Unit* who) override
@@ -417,6 +416,8 @@ struct boss_razorscaleAI : public BossAI
     // function to enable harpoon repair animation
     void DoMoveEngineersToHarpoon()
     {
+        if (!m_creature->IsAlive())
+            return;
         float fX, fY, fZ;
         uint8 index = 1;
 
@@ -752,6 +753,10 @@ struct npc_razorscale_spawnerAI : public Scripted_NoMovementAI
 
     void JustSummoned(Creature* summoned) override
     {
+        if (Unit* razorscale = m_creature->GetSpawner())
+            if (razorscale->GetEntry() == NPC_RAZORSCALE)
+                razorscale->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
+
         summoned->SetInCombatWithZone();
         summoned->SetIgnoreMMAP(true);
         if (summoned->AI())
