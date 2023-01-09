@@ -329,6 +329,7 @@ struct boss_razorscaleAI : public BossAI
     {
         if (summoned->GetEntry() == NPC_RAZORSCALE_SPAWNER)
         {
+            m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
             summoned->CastSpell(summoned, SPELL_SUMMON_MOLE_MACHINE, TRIGGERED_OLD_TRIGGERED);
 
             // for central spawners inform that they should spawn a sentinel
