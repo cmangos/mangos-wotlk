@@ -22,8 +22,6 @@ SDCategory: Ulduar
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "Globals/SharedDefines.h"
-#include "Spells/SpellDefines.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 
@@ -205,7 +203,7 @@ struct boss_razorscaleAI : public BossAI
                 // reset timers
                 m_currentHarpoon      = 0;
                 m_harpoonsUsed        = 0;
-                ResetTimer(RAZORSCALE_REPAIR_HARPOONS, 20s);
+                ResetCombatAction(RAZORSCALE_REPAIR_HARPOONS, 20s);
                 ResetCombatAction(RAZORSCALE_SPAWN_ADDS, 1s);
                 ++m_airPhaseCount;
 
@@ -263,6 +261,8 @@ struct boss_razorscaleAI : public BossAI
         AddRespawnOnEvade(30s);
         m_creature->SetIgnoreMMAP(true);
         SetMeleeEnabled(false);
+        //if (m_instance->GetPlayerInMap())
+        m_creature->SetActiveObjectState(true);
 
         //m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
         Reset();
@@ -641,7 +641,7 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
                         defender->GetMotionMaster()->MoveWaypoint();
                         if (Creature* razorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
                         {
-                            defender->SetInCombatWith(razorscale);
+                            //defender->SetInCombatWith(razorscale);
                         }
                     }
                 }
