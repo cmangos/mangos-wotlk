@@ -22,6 +22,8 @@ SDCategory: Ulduar
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Globals/SharedDefines.h"
+#include "Spells/SpellDefines.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 
@@ -145,6 +147,8 @@ struct boss_razorscaleAI : public BossAI
         SetDataType(TYPE_RAZORSCALE);
         AddCustomAction(RAZORSCALE_GROUNDED_FLAME_BREATH, true, [&]()
         {
+            if (!m_creature->IsAlive())
+                return;
             m_creature->RemoveAurasDueToSpell(SPELL_STUN);
             if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_FLAME_BREATH : SPELL_FLAME_BREATH_H, CAST_FORCE_CAST | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
             {
@@ -154,19 +158,26 @@ struct boss_razorscaleAI : public BossAI
         });
         AddCustomAction(RAZORSCALE_GROUNDED_WING_BUFFET, true, [&]()
         {
+            if (!m_creature->IsAlive())
+                return;
             if (DoCastSpellIfCan(m_creature, SPELL_WING_BUFFET, CAST_FORCE_CAST | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                 ResetTimer(RAZORSCALE_GROUNDED_FIREBOLT, 1s + 510ms);
         });
         AddCustomAction(RAZORSCALE_GROUNDED_FIREBOLT, true, [&]()
         {
+            if (!m_creature->IsAlive())
+                return;
             if (DoCastSpellIfCan(m_creature, SPELL_FIREBOLT, CAST_TRIGGERED) == CAST_OK)
                 ResetTimer(RAZORSCALE_GROUNDED_LIFTOFF, 2s);
         });
         AddCustomAction(RAZORSCALE_GROUNDED_LIFTOFF, true, [&]()
         {
+            if (!m_creature->IsAlive())
+                return;
             if (m_isGrounded)
             {
                 SetCombatMovement(true);
+                SetMeleeEnabled(true);
                 DoResetThreat();
                 DoStartMovement(m_creature->GetVictim());
                 m_creature->SetSpellList(m_isRegularMode ? RAZORSCALE_SPELLSET_10N_GROUND : RAZORSCALE_SPELLSET_25N_GROUND);
@@ -179,7 +190,11 @@ struct boss_razorscaleAI : public BossAI
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
                 float fX, fY, fZ;
-                m_creature->GetRespawnCoord(fX, fY, fZ);
+                //m_creature->GetRespawnCoord(fX, fY, fZ);
+                const Position combatPosition = Position(580.63556, -175.46675, 475.54114);
+                fX=combatPosition.GetPositionX();
+                fY=combatPosition.GetPositionY();
+                fZ=combatPosition.GetPositionZ();
 
                 // use upgraded speed rate for FlyOrLand. This isn't supported by DB but it's confirmed to happen on retail
                 uint32 speedRate = m_creature->GetSpeedRate(MOVE_RUN);
@@ -202,17 +217,19 @@ struct boss_razorscaleAI : public BossAI
             // make the Trappers evade or move to home position
             for (GuidList::const_iterator itr = m_trapperGuids.begin(); itr != m_trapperGuids.end(); ++itr)
             {
-                if (Creature* pTrapper = m_creature->GetMap()->GetCreature(*itr))
-                    pTrapper->AI()->EnterEvadeMode();
+                if (Creature* trapper = m_creature->GetMap()->GetCreature(*itr))
+                    trapper->AI()->EnterEvadeMode();
             }
         });
         AddCustomAction(RAZORSCALE_TRANSITION_TO_GROUND, true, [&]()
         {
+            if (!m_creature->IsAlive())
+                return;
             // cast trap visual
             for (GuidList::const_iterator itr = m_trapperGuids.begin(); itr != m_trapperGuids.end(); ++itr)
             {
-                if (Creature* pTrapper = m_creature->GetMap()->GetCreature(*itr))
-                    pTrapper->CastSpell(m_creature, SPELL_SHACKLE, TRIGGERED_NONE);
+                if (Creature* trapper = m_creature->GetMap()->GetCreature(*itr))
+                    trapper->CastSpell(m_creature, SPELL_SHACKLE, TRIGGERED_NONE);
             }
 
             // stun Razorscale
@@ -225,8 +242,10 @@ struct boss_razorscaleAI : public BossAI
                 ResetTimer(RAZORSCALE_GROUNDED_FLAME_BREATH, 30s);
             }
         });
-        AddCustomAction(RAZORSCALE_HEALTH_CHECK, 1s, [&]()
+        AddCustomAction(RAZORSCALE_HEALTH_CHECK, true, [&]()
         {
+            if (!m_creature->IsAlive())
+                return;
             if (m_creature->GetHealthPercent() <= 50.f)
             {
                 DoBroadcastText(EMOTE_GROUNDED, m_creature);
@@ -241,9 +260,11 @@ struct boss_razorscaleAI : public BossAI
         AddCombatAction(RAZORSCALE_REPAIR_HARPOONS, true);
         AddCombatAction(RAZORSCALE_BERSERK, 10min);
         AddCombatAction(RAZORSCALE_SPAWN_ADDS, 1s);
+        AddRespawnOnEvade(30s);
         m_creature->SetIgnoreMMAP(true);
+        SetMeleeEnabled(false);
 
-        m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
+        //m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
         Reset();
     }
 
@@ -295,12 +316,14 @@ struct boss_razorscaleAI : public BossAI
         m_instance->GetEngineersGuids(m_engineerGuids);
         m_instance->GetTrappersGuids(m_trapperGuids);
         m_instance->GetHarpoonsGuids(m_harpoonGuids);
+        ResetTimer(RAZORSCALE_HEALTH_CHECK, 1s);
     }
 
     void JustReachedHome() override
     {
         BossAI::JustReachedHome();
-        m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
+        m_creature->GetMotionMaster()->MovePath(0);
+        //m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -313,6 +336,16 @@ struct boss_razorscaleAI : public BossAI
             if (summoned->GetPositionY() > -220.0f)
                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, summoned);
         }
+    }
+
+    void MovementInform(uint32 motionType, uint32 pointId) override
+    {
+        if (motionType != POINT_MOTION_TYPE)
+            return;
+        m_creature->GetMotionMaster()->MoveIdle();
+
+        if (pointId == 2)
+            m_creature->CastSpell(nullptr, SPELL_STUN, TRIGGERED_OLD_TRIGGERED);
     }
 
     void KilledUnit(Unit* who) override
@@ -345,7 +378,7 @@ struct boss_razorscaleAI : public BossAI
                 uint32 speedRate = m_creature->GetSpeedRate(MOVE_RUN);
                 m_creature->SetWalk(false);
                 m_creature->SetSpeedRate(MOVE_RUN, SPEED_RATE_RAZORSCALE);
-                m_creature->GetMotionMaster()->MovePointTOL(1, afRazorscaleGroundPos[0], afRazorscaleGroundPos[1], afRazorscaleGroundPos[2], false);
+                m_creature->GetMotionMaster()->MovePointTOL(2, afRazorscaleGroundPos[0], afRazorscaleGroundPos[1], afRazorscaleGroundPos[2], false);
                 m_creature->SetSpeedRate(MOVE_RUN, speedRate);
                 ResetTimer(RAZORSCALE_TRANSITION_TO_GROUND, 5s);
                 DisableCombatAction(RAZORSCALE_SPAWN_ADDS);
@@ -359,15 +392,15 @@ struct boss_razorscaleAI : public BossAI
                     {
                         for (GuidList::const_iterator itr = m_trapperGuids.begin(); itr != m_trapperGuids.end(); ++itr)
                         {
-                            if (Creature* pTrapper = m_creature->GetMap()->GetCreature(*itr))
+                            if (Creature* trapper = m_creature->GetMap()->GetCreature(*itr))
                             {
                                 controller->GetNearPoint(controller, fX, fY, fZ, 0, 50.0f, M_PI_F / 4 * index);
 
-                                pTrapper->SetWalk(false);
-                                speedRate = pTrapper->GetSpeedRate(MOVE_RUN);
-                                pTrapper->SetSpeedRate(MOVE_RUN, SPEED_RATE_HELPERS);
-                                pTrapper->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-                                pTrapper->SetSpeedRate(MOVE_RUN, speedRate);
+                                trapper->SetWalk(false);
+                                speedRate = trapper->GetSpeedRate(MOVE_RUN);
+                                trapper->SetSpeedRate(MOVE_RUN, SPEED_RATE_HELPERS);
+                                trapper->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                                trapper->SetSpeedRate(MOVE_RUN, speedRate);
                                 ++index;
                             }
                         }
@@ -424,6 +457,7 @@ struct boss_razorscaleAI : public BossAI
 
         if (newHarpoon)
         {
+            newHarpoon->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             newHarpoon->SetRespawnTime(HOUR);
             newHarpoon->Refresh();
         }
@@ -602,9 +636,13 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
                         defender->SetImmuneToNPC(false);
                         if (defender->AI())
                             defender->AI()->SetReactState(REACT_AGGRESSIVE);
-                        defender->CastSpell(defender, SPELL_THREAT, TRIGGERED_OLD_TRIGGERED);
+                        defender->CastSpell(nullptr, SPELL_THREAT, TRIGGERED_OLD_TRIGGERED);
                         defender->SetWalk(false);
                         defender->GetMotionMaster()->MoveWaypoint();
+                        if (Creature* razorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
+                        {
+                            defender->SetInCombatWith(razorscale);
+                        }
                     }
                 }
                 break;
@@ -613,7 +651,10 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
                 if (Creature* razorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
                 {
                     if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                        razorscale->AI()->AttackStart(player);
+                    {
+                        razorscale->EngageInCombatWith(player);
+                        //razorscale->AI()->AttackStart(player);
+                    }
                     razorscale->SetInCombatWithZone(false);
                 }
                 break;
@@ -635,6 +676,11 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
         {
             StartNextDialogueText(NPC_EXPEDITION_ENGINEER);
             m_playerGuid = invoker->GetObjectGuid();
+
+            if (Creature* razorscale = m_instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
+            {
+                razorscale->GetMotionMaster()->MovePoint(0, Position(580.63556, -175.46675, 475.54114), FORCED_MOVEMENT_FLIGHT, 0.f, false);
+            }
         }
     }
 
@@ -771,7 +817,19 @@ bool ProcessEventId_event_spell_harpoon_shot(uint32 /*eventId*/, Object* source,
     if (Creature* razorscale = instance->GetSingleCreatureFromStorage(NPC_RAZORSCALE))
         sourceCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, sourceCreature, razorscale);
 
-    return true;;
+    GameObject* harpoon = GetClosestGameObjectWithEntry(sourceCreature, GO_HARPOON_GUN_1, 5.0f);
+    if (!harpoon)
+        harpoon = GetClosestGameObjectWithEntry(sourceCreature, GO_HARPOON_GUN_2, 5.0f);
+    if (!harpoon)
+        harpoon = GetClosestGameObjectWithEntry(sourceCreature, GO_HARPOON_GUN_3, 5.0f);
+    if (!harpoon)
+        harpoon = GetClosestGameObjectWithEntry(sourceCreature, GO_HARPOON_GUN_4, 5.0f);
+
+    if (harpoon)
+    {
+        harpoon->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+    }
+    return true;
 }
 
 struct DevouringFlameRazorscale : public SpellScript
@@ -831,6 +889,16 @@ struct FireboltRazorscale : public SpellScript
     }
 };
 
+struct FlameBreathRazorscale : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->GetEntry() == NPC_RAZORSCALE_CONTROLLER || target->GetEntry() == NPC_DEVOURING_FLAME)
+            return false;
+        return true;
+    }
+};
+
 void AddSC_boss_razorscale()
 {
     Script* pNewScript = new Script;
@@ -862,4 +930,5 @@ void AddSC_boss_razorscale()
 
     RegisterSpellScript<DevouringFlameRazorscale>("spell_devouring_flame_razorscale");
     RegisterSpellScript<FireboltRazorscale>("spell_firebolt_razorscale");
+    RegisterSpellScript<FlameBreathRazorscale>("spell_flame_breath_razorscale");
 }
