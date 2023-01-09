@@ -78,7 +78,7 @@ enum
     NPC_DEVOURING_FLAME                 = 34188,
     NPC_RAZORSCALE_SPAWNER              = 33245,            // dwarf spawner npc for Razorscale
     // NPC_DARK_RUNE_WATCHER            = 33453,
-    // NPC_DARK_RUNE_GUARDIAN           = 33388,
+    NPC_DARK_RUNE_GUARDIAN              = 33388,
     // NPC_DARK_RUNE_SENTINEL           = 33846,
     // GO_MOLE_MACHINE                  = 194316,
 
@@ -313,6 +313,15 @@ struct boss_razorscaleAI : public BossAI
             if (summoned->GetPositionY() > -220.0f)
                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, summoned);
         }
+    }
+
+    void JustKilledUnit(Unit* who) override
+    {
+        if (!who || who->GetEntry() != NPC_DARK_RUNE_GUARDIAN)
+            return;
+        for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+            if (playerRef.getSource())
+                playerRef.getSource()->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_DARK_RUNE_GUARDIAN, 1, m_creature);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
