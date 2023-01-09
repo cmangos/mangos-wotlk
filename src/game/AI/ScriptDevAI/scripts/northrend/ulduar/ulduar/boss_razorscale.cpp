@@ -743,47 +743,6 @@ struct npc_harpoon_fire_stateAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*diff*/) override { }
 };
 
-bool EffectDummyCreature_npc_harpoon_fire_state(Unit* /*caster*/, uint32 spellId, SpellEffectIndex effIdx, Creature* creatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (spellId == SPELL_FIREBOLT && effIdx == EFFECT_INDEX_0 && creatureTarget->GetEntry() == NPC_HARPOON_FIRE_STATE)
-    {
-        creatureTarget->CastSpell(creatureTarget, SPELL_HARPOON_FIRE, TRIGGERED_OLD_TRIGGERED);
-
-        // search for each entry of the nearby harpoon
-        GameObject* harpoon = GetClosestGameObjectWithEntry(creatureTarget, GO_HARPOON_GUN_1, 5.0f);
-        if (!harpoon)
-            harpoon = GetClosestGameObjectWithEntry(creatureTarget, GO_HARPOON_GUN_2, 5.0f);
-        if (!harpoon)
-            harpoon = GetClosestGameObjectWithEntry(creatureTarget, GO_HARPOON_GUN_3, 5.0f);
-        if (!harpoon)
-            harpoon = GetClosestGameObjectWithEntry(creatureTarget, GO_HARPOON_GUN_4, 5.0f);
-
-        // despawn the repaired harpoon
-        if (harpoon)
-        {
-            harpoon->SetLootState(GO_JUST_DEACTIVATED);
-            harpoon->ForcedDespawn();
-        }
-
-        // respawn broken harpoon
-        if (GameObject* newHarpoon = GetClosestGameObjectWithEntry(creatureTarget, GO_BROKEN_HARPOON, 5.0f))
-        {
-            newHarpoon->Refresh();
-            newHarpoon->Respawn();
-        }
-
-        // force reset for harpoon trigger npcs
-        if (Creature* trigger = GetClosestCreatureWithEntry(creatureTarget, NPC_RAZORSCALE_CONTROLLER, 5.0f))
-            trigger->InterruptNonMeleeSpells(false);
-
-        // always return true when we are handling this spell and effect
-        return true;
-    }
-
-    return false;
-}
-
 /*######
 ## event_spell_harpoon_shot
 ######*/
@@ -816,6 +775,48 @@ struct DevouringFlameRazorscale : public SpellScript
     }
 };
 
+struct FireboltRazorscale : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+        if (target->GetEntry() != NPC_HARPOON_FIRE_STATE)
+            return;
+        target->CastSpell(nullptr, SPELL_HARPOON_FIRE, TRIGGERED_OLD_TRIGGERED);
+
+        // search for each entry of the nearby harpoon
+        GameObject* harpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_1, 5.0f);
+        if (!harpoon)
+            harpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_2, 5.0f);
+        if (!harpoon)
+            harpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_3, 5.0f);
+        if (!harpoon)
+            harpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_4, 5.0f);
+
+        // despawn the repaired harpoon
+        if (harpoon)
+        {
+            harpoon->SetLootState(GO_JUST_DEACTIVATED);
+            harpoon->ForcedDespawn();
+        }
+
+        // respawn broken harpoon
+        if (GameObject* newHarpoon = GetClosestGameObjectWithEntry(target, GO_BROKEN_HARPOON, 5.0f))
+        {
+            newHarpoon->Refresh();
+            newHarpoon->Respawn();
+        }
+
+        // force reset for harpoon trigger npcs
+        if (Creature* trigger = GetClosestCreatureWithEntry(target, NPC_RAZORSCALE_CONTROLLER, 5.0f))
+            trigger->InterruptNonMeleeSpells(false);
+    }
+};
+
 void AddSC_boss_razorscale()
 {
     Script* pNewScript = new Script;
@@ -838,7 +839,6 @@ void AddSC_boss_razorscale()
     pNewScript = new Script;
     pNewScript->Name = "npc_harpoon_fire_state";
     pNewScript->GetAI = &GetNewAIInstance<npc_harpoon_fire_stateAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_harpoon_fire_state;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -847,4 +847,5 @@ void AddSC_boss_razorscale()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<DevouringFlameRazorscale>("spell_devouring_flame_razorscale");
+    RegisterSpellScript<FireboltRazorscale>("spell_firebolt_razorscale");
 }
