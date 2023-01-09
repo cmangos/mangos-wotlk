@@ -353,7 +353,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
             break;
         case GO_LEVIATHAN_GATE:
             if (m_auiEncounter[TYPE_LEVIATHAN] != NOT_STARTED)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
             break;
         case GO_XT002_GATE:
             pGo->SetGoState(GO_STATE_READY);
@@ -531,14 +531,38 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         case TYPE_LEVIATHAN:
             m_auiEncounter[uiType] = uiData;
             if (uiData != SPECIAL)
-                DoUseDoorOrButton(GO_SHIELD_WALL);
+            {
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_SHIELD_WALL))
+                {
+                    switch (uiData)
+                    {
+                        case IN_PROGRESS:
+                        {
+                            sLog.outError("Close the door!");
+                            if (door->GetGoState() != GO_STATE_READY)
+                                door->SetGoState(GO_STATE_READY);
+                            break;
+                        }
+                        case DONE:
+                        case FAIL:
+                        {
+                            sLog.outError("Open the door!");
+                            if (door->GetGoState() == GO_STATE_READY)
+                                door->SetGoState(GO_STATE_ACTIVE);
+                            break;
+                        }
+
+                    }
+                }
+            }
             if (uiData == IN_PROGRESS)
             {
                 // make sure that the Lightning door is closed when engaged in combat
                 if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_LIGHTNING_DOOR))
                 {
                     if (pDoor->GetGoState() != GO_STATE_READY)
-                        DoUseDoorOrButton(GO_LIGHTNING_DOOR);
+                        pDoor->SetGoState(GO_STATE_READY);
+                        //DoUseDoorOrButton(GO_LIGHTNING_DOOR);
                 }
 
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHUTOUT, true);
@@ -1624,15 +1648,14 @@ void instance_ulduar::JustDidDialogueStep(int32 iEntry)
                 float fSpeedRate = pLeviathan->GetSpeedRate(MOVE_RUN);
                 pLeviathan->SetWalk(false);
                 pLeviathan->SetSpeedRate(MOVE_RUN, 5);
-                pLeviathan->GetMotionMaster()->MovePoint(1, afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2]);
+                pLeviathan->GetMotionMaster()->MoveCharge(afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2], pLeviathan->GetSpeedRate(MOVE_RUN) * 10, EVENT_CHARGE);
                 pLeviathan->SetSpeedRate(MOVE_RUN, fSpeedRate);
 
                 // modify respawn / home position to the center of arena
                 pLeviathan->SetRespawnCoord(afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2], afLeviathanMovePos[3]);
             }
-
             // Note: starting 4.x this gate is a GO 33 and it's destroyed at this point
-            DoUseDoorOrButton(GO_LEVIATHAN_GATE);
+            GetSingleGameObjectFromStorage(GO_LEVIATHAN_GATE)->SetGoState( GO_STATE_ACTIVE_ALTERNATIVE);
             break;
     }
 }
