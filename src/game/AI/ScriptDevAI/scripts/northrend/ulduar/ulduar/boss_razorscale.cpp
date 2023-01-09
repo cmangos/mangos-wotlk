@@ -159,7 +159,7 @@ struct boss_razorscaleAI : public BossAI
         });
         AddCustomAction(RAZORSCALE_GROUNDED_FIREBOLT, true, [&]()
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FIREBOLT, CAST_FORCE_CAST | CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_FIREBOLT, CAST_TRIGGERED) == CAST_OK)
                 ResetTimer(RAZORSCALE_GROUNDED_LIFTOFF, 2s);
         });
         AddCustomAction(RAZORSCALE_GROUNDED_LIFTOFF, true, [&]()
@@ -707,9 +707,9 @@ struct npc_razorscale_spawnerAI : public Scripted_NoMovementAI
     void JustSummoned(Creature* summoned) override
     {
         summoned->SetInCombatWithZone();
+        summoned->SetIgnoreMMAP(true);
         if (summoned->AI())
             summoned->AI()->AttackClosestEnemy();
-        summoned->SetIgnoreMMAP(true);
     }
 
     void JustSummoned(GameObject* pGo) override
@@ -779,7 +779,11 @@ struct DevouringFlameRazorscale : public SpellScript
     void OnSummon(Spell* spell, Creature* summon) const override
     {
         if (summon->AI())
+        {
+            summon->AI()->SetReactState(REACT_PASSIVE);
             summon->AI()->SetRootSelf(true);
+            summon->SetImmuneToNPC(true);
+        }
         bool isRegularModed = summon->GetMap()->IsRegularDifficulty();
         summon->CastSpell(nullptr, isRegularModed ? SPELL_DEVOURING_FLAME_AURA : SPELL_DEVOURING_FLAME_AURA_H, TRIGGERED_OLD_TRIGGERED);
     }
