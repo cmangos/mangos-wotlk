@@ -32,6 +32,7 @@
 #include "Entities/Vehicle.h"
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
+#include "Log.h"
 
 /* **************************************** TransportBase ****************************************/
 
@@ -158,6 +159,18 @@ void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, f
 {
     TransportInfo* transportInfo = new TransportInfo(passenger, this, lx, ly, lz, lo, seat);
 
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (transportInfo->GetTransportSeat() == m_passenger.second->GetTransportSeat())
+            if (m_passenger.first->IsUnit())
+            {
+                if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
+                {
+                    static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->Board(static_cast<Unit*>(passenger), 0);
+                    return;
+                }
+            }
+    }
     // Insert our new passenger
     m_passengers.insert(PassengerMap::value_type(passenger, transportInfo));
 
@@ -168,6 +181,15 @@ void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, f
 void TransportBase::UnBoardPassenger(WorldObject* passenger)
 {
     PassengerMap::iterator itr = m_passengers.find(passenger);
+
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (m_passenger.first->IsUnit())
+            {
+                if (static_cast<const Unit*>(m_passenger.first)->IsVehicle() && static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->HasOnBoard(passenger))
+                    static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->UnBoard(static_cast<Unit*>(passenger), false);
+            }
+    }
 
     if (itr == m_passengers.end())
         return;
