@@ -47,7 +47,9 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
         return;
 
     // Remove Vehicle Control Aura
-    vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());
+    //vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());
+
+    vehicle->GetVehicleInfo()->UnBoard(_player, false);
 }
 
 void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
@@ -184,7 +186,8 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
     ObjectGuid playerGuid;
     recvPacket >> playerGuid;
 
-    Player* vehicle = _player->GetMap()->GetPlayer(playerGuid);
+    //Player* vehicle = _player->GetMap()->GetPlayer(playerGuid);
+    Unit* vehicle = _player->GetMap()->GetUnit(playerGuid);
 
     if (!vehicle || !vehicle->IsVehicle())
         return;

@@ -279,7 +279,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     if (!IsSeatAvailableFor(passenger, seat))
         if (!GetUsableSeatFor(passenger, seat, true, true))
             return;
-
+    
     VehicleSeatEntry const* seatEntry = GetSeatEntry(seat);
     MANGOS_ASSERT(seatEntry);
 
@@ -473,6 +473,13 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 {
     MANGOS_ASSERT(passenger);
 
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
+        {
+            static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->UnBoard(passenger, false);
+        }
+    }
     PassengerMap::const_iterator itr = m_passengers.find(passenger);
     if (itr == m_passengers.end())
         return;
@@ -779,9 +786,27 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
     uint8 takenSeatsMask = 0;
 
     for (const auto& m_passenger : m_passengers)
+    {
+        if (m_passenger.first->IsUnit())
+            if (static_cast<Unit*>(m_passenger.first)->IsVehicle())
+                continue;
         takenSeatsMask |= 1 << m_passenger.second->GetTransportSeat();
+    }
 
     return takenSeatsMask;
+}
+
+uint8 VehicleInfo::GetEmptySeats() const
+{
+    int size = 0;
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (m_passenger.first->IsUnit())
+            if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
+                continue;
+        size++;
+    }
+    return m_vehicleSeats.size() - size;
 }
 
 bool VehicleInfo::IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const
