@@ -105,10 +105,10 @@ enum
     // SPELL_BIRTH                          = 40031,                    // not used; purpose unk
 
     // vehicle accessories
-    // NPC_LEVIATHAN_SEAT                   = 33114,
-    // NPC_LEVIATHAN_TURRET                 = 33139,
-    // NPC_DEFENSE_TURRET                   = 33142,
-    // NPC_OVERLOAD_DEVICE                  = 33143,
+    NPC_LEVIATHAN_SEAT                      = 33114,
+    NPC_LEVIATHAN_TURRET                    = 33139,
+    NPC_DEFENSE_TURRET                      = 33142,
+    NPC_OVERLOAD_DEVICE                     = 33143,
 
     // hard mode beacons - they cast the actual damage spells
     NPC_HODIR_FURY                          = 33212,
@@ -185,10 +185,6 @@ struct boss_flame_leviathanAI : public BossAI
         AddOnKillText(SAY_SLAY);
         AddOnDeathText(SAY_DEATH);
         AddRespawnOnEvade(30s);
-        AddCustomAction(LEVIATHAN_HARDMODES, 10s, [&]()
-        {
-            HandleHardmode();
-        }, TIMER_COMBAT_COMBAT);
         AddCustomAction(LEVIATHAN_THORIMS_HAMMER, true, [&]()
         {
             DoSpawnThorimsHammer();
@@ -198,6 +194,8 @@ struct boss_flame_leviathanAI : public BossAI
                 ResetTimer(LEVIATHAN_THORIMS_HAMMER, 1s);
         });
         AddTimerlessCombatAction(LEVIATHAN_FETCH_TOWERS, true);
+        AddCombatAction(LEVIATHAN_HARDMODES, 10s);
+        Reset();
     }
 
     instance_ulduar* m_instance;
@@ -243,11 +241,19 @@ struct boss_flame_leviathanAI : public BossAI
         }
     }
 
-    void Aggro(Unit* /*who*/) override
+    void EnterEvadeMode() override
     {
-        BossAI::Aggro();
-        // check the towers again to make sure that some of them were not destroyed in the meanwhile
-        FetchTowers();
+        static const std::vector<uint32> addEntries = {NPC_LEVIATHAN_SEAT, NPC_LEVIATHAN_TURRET, NPC_DEFENSE_TURRET, NPC_OVERLOAD_DEVICE};
+        CreatureList leviAdds;
+        for (const uint32& entry : addEntries)
+        {
+            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
+            for (auto& add : leviAdds)
+            {
+                add->ForcedDespawn();
+            }
+        }
+        BossAI::EnterEvadeMode();
     }
 
     void JustSummoned(Creature* summoned) override
@@ -299,7 +305,7 @@ struct boss_flame_leviathanAI : public BossAI
 
     void MovementInform(uint32 moveType, uint32 pointId) override
     {
-        if (moveType != POINT_MOTION_TYPE || !pointId)
+        if (moveType != EFFECT_MOTION_TYPE)
             return;
 
         // set boss in combat (if not already)
@@ -312,6 +318,7 @@ struct boss_flame_leviathanAI : public BossAI
         if (!m_ulduarTower[TOWER_ID_HODIR] && !m_ulduarTower[TOWER_ID_FREYA] && !m_ulduarTower[TOWER_ID_MIMIRON] && !m_ulduarTower[TOWER_ID_THORIM])
         {
             DoBroadcastText(SAY_TOWER_DOWN, m_creature);
+            DisableCombatAction(LEVIATHAN_HARDMODES);
         }
         else
         {
@@ -320,7 +327,7 @@ struct boss_flame_leviathanAI : public BossAI
             {
                 case 0:
                     DoBroadcastText(SAY_HARD_MODE, m_creature);
-                    ResetTimer(LEVIATHAN_HARDMODES, 10s);
+                    ResetCombatAction(LEVIATHAN_HARDMODES, 10s);
                     ++m_hardmodeStep;
                     break;
                 default:
@@ -343,7 +350,7 @@ struct boss_flame_leviathanAI : public BossAI
                             }
 
                             // reset timer and wait for another turn
-                            ResetTimer(LEVIATHAN_HARDMODES, 10s);
+                            ResetCombatAction(LEVIATHAN_HARDMODES, 10s);
                             ++m_hardmodeStep;
                             break;
                         }
@@ -351,7 +358,7 @@ struct boss_flame_leviathanAI : public BossAI
 
                         // stop the timer after the final element
                         if (i == KEEPER_ENCOUNTER - 1)
-                            DisableTimer(LEVIATHAN_HARDMODES);
+                            DisableCombatAction(LEVIATHAN_HARDMODES);
                     }
                     break;
             }
@@ -451,6 +458,10 @@ struct boss_flame_leviathanAI : public BossAI
                 FetchTowers();
                 DisableCombatAction(action);
                 return;
+            }
+            case LEVIATHAN_HARDMODES:
+            {
+                HandleHardmode();
             }
         }
     }
@@ -638,6 +649,59 @@ struct PursueLeviathan : public SpellScript
     }
 };
 
+struct BatteringRamLeviathan : public SpellScript
+{
+    // TODO: Figure out Targeting issues
+};
+
+// 62297 Hodir's Fury
+struct HodirsFuryLeviathan : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return false;
+        if (caster->IsFriend(target))
+            return false;
+        if (!target->IsPlayer() && !target->IsControlledByPlayer())
+            return false;
+        return true;
+    }
+};
+
+// 62912 Thorim's Hammer
+struct ThorimsHammerLeviathan : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return false;
+        if (caster->IsFriend(target))
+            return false;
+        if (!target->IsPlayer() && !target->IsControlledByPlayer())
+            return false;
+        return true;
+    }
+};
+
+// 62910 Mimiron's Inferno
+struct MimironsInfernoLeviathan : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return false;
+        if (caster->IsFriend(target))
+            return false;
+        if (!target->IsPlayer() && !target->IsControlledByPlayer())
+            return false;
+        return true;
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -666,4 +730,7 @@ void AddSC_boss_flame_leviathan()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<PursueLeviathan>("spell_pursue_leviathan");
+    RegisterSpellScript<HodirsFuryLeviathan>("spell_hodirs_fury_leviathan");
+    RegisterSpellScript<ThorimsHammerLeviathan>("spell_thorims_hammer_leviathan");
+    RegisterSpellScript<MimironsInfernoLeviathan>("spell_mimirons_inferno_leviathan");
 }
