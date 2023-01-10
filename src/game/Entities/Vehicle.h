@@ -79,6 +79,7 @@ class VehicleInfo : public TransportBase
 {
     public:
         explicit VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry);
+        void RepopulateSeat(uint8 seatId);
         void Initialize();                                  ///< Initializes the accessories
         void Cleanup();
         bool IsInitialized() const { return m_isInitialized; }
@@ -120,7 +121,8 @@ class VehicleInfo : public TransportBase
 
         uint8 GetTakenSeatsMask() const;
         uint8 GetEmptySeatsMask() const { return ~GetTakenSeatsMask(); }
-        uint8 GetEmptySeats() const { return m_vehicleSeats.size() - m_passengers.size(); }
+        //uint8 GetEmptySeats() const { return m_vehicleSeats.size() - m_passengers.size(); }
+        uint8 GetEmptySeats() const;
 
         bool IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const;
         bool IsUsableSeatForCreature(uint32 /*seatFlags*/) const { return true; } // special flag?, !IsUsableSeatForPlayer(seatFlags)?

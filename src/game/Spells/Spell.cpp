@@ -4077,7 +4077,8 @@ void Spell::update(uint32 difftime)
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if ((m_trueCaster->IsUnit() && m_timer != 0) &&
             (m_castPositionX != m_trueCaster->GetPositionX() || m_castPositionY != m_trueCaster->GetPositionY() || m_castPositionZ != m_trueCaster->GetPositionZ()) &&
-            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
+            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)) &&
+            (!m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT)))
     {
         // always cancel for channeled spells
         if (m_spellState == SPELL_STATE_CHANNELING)
