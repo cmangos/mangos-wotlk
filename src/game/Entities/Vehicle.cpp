@@ -788,7 +788,7 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
     for (const auto& m_passenger : m_passengers)
     {
         if (m_passenger.first->IsUnit())
-            if (static_cast<Unit*>(m_passenger.first)->IsVehicle())
+            if (static_cast<Unit*>(m_passenger.first)->IsVehicle() && static_cast<Unit*>(m_passenger.first)->GetVehicleInfo()->GetEmptySeats() > 0)
                 continue;
         takenSeatsMask |= 1 << m_passenger.second->GetTransportSeat();
     }
@@ -802,7 +802,7 @@ uint8 VehicleInfo::GetEmptySeats() const
     for (const auto& m_passenger : m_passengers)
     {
         if (m_passenger.first->IsUnit())
-            if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
+            if (static_cast<const Unit*>(m_passenger.first)->IsVehicle() && static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->GetEmptySeats() > 0)
                 continue;
         size++;
     }
