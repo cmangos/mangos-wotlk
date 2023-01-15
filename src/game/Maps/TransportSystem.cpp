@@ -48,6 +48,7 @@ TransportBase::TransportBase(WorldObject* owner) :
 
 TransportBase::~TransportBase()
 {
+    m_passengers.clear();
     MANGOS_ASSERT(m_passengers.empty());
 }
 
@@ -155,7 +156,7 @@ bool TransportBase::HasOnBoard(WorldObject const* passenger) const
     return false;
 }
 
-void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat)
+bool TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat)
 {
     TransportInfo* transportInfo = new TransportInfo(passenger, this, lx, ly, lz, lo, seat);
 
@@ -167,7 +168,7 @@ void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, f
                 if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
                 {
                     static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->Board(static_cast<Unit*>(passenger), 0);
-                    return;
+                    return false;
                 }
             }
     }
@@ -176,6 +177,7 @@ void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, f
 
     // The passenger needs fast access to transportInfo
     passenger->SetTransportInfo(transportInfo);
+    return true;
 }
 
 void TransportBase::UnBoardPassenger(WorldObject* passenger)
