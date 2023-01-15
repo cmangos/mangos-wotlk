@@ -298,7 +298,9 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
             else
                 m_vaporVezaxBunnyGuid = pCreature->GetObjectGuid();
             return;
-
+        case NPC_LEVIATHAN_SEAT:
+            m_leviathanSeatGuids.insert(pCreature->GetObjectGuid());
+            return;
         default:
             return;
     }
@@ -520,16 +522,14 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                     {
                         case IN_PROGRESS:
                         {
-                            sLog.outError("Close the door!");
-                            if (door->GetGoState() != GO_STATE_READY)
+                            //if (door->GetGoState() != GO_STATE_READY)
                                 door->SetGoState(GO_STATE_READY);
                             break;
                         }
                         case DONE:
                         case FAIL:
                         {
-                            sLog.outError("Open the door!");
-                            if (door->GetGoState() == GO_STATE_READY)
+                            //if (door->GetGoState() == GO_STATE_READY)
                                 door->SetGoState(GO_STATE_ACTIVE);
                             break;
                         }
@@ -1364,6 +1364,9 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
             SetData(TYPE_FREYA_CONSPEEDATORY, DONE);
         }
         break;
+        case NPC_LEVIATHAN_SEAT:
+            m_leviathanSeatGuids.erase(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -1735,6 +1738,26 @@ void instance_ulduar::Update(uint32 uiDiff)
     }
 }
 
+bool AreaTrigger_repair_station(Player* player, AreaTriggerEntry const* at)
+{
+    switch (at->id)
+    {
+        case AREATRIGGER_ID_REPAIR_1:
+        case AREATRIGGER_ID_REPAIR_2:
+        {
+            const Creature* vehicle = dynamic_cast<const Creature*>(player->FindRootVehicle());
+            Creature* vehiclePtr = const_cast<Creature*>(vehicle);
+            if (!vehiclePtr)
+                return false;
+            if (!vehiclePtr->HasAura(62705))
+                player->CastSpell(vehiclePtr, 62705, TRIGGERED_NONE);
+            return false;
+        }
+        default:
+            return false;
+    }
+}
+
 InstanceData* GetInstanceData_instance_ulduar(Map* pMap)
 {
     return new instance_ulduar(pMap);
@@ -1789,5 +1812,10 @@ void AddSC_instance_ulduar()
     pNewScript = new Script;
     pNewScript->Name = "event_ulduar";
     pNewScript->pProcessEventId = &ProcessEventId_event_ulduar;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_ulduar";
+    pNewScript->pAreaTrigger = &AreaTrigger_repair_station;
     pNewScript->RegisterSelf();
 }
