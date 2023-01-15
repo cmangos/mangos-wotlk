@@ -79,6 +79,7 @@ class VehicleInfo : public TransportBase
 {
     public:
         explicit VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry);
+        void RepopulateSeat(uint8 seatId);
         void Initialize();                                  ///< Initializes the accessories
         bool IsInitialized() const { return m_isInitialized; }
         void SummonPassenger(uint32 entry, Position const& pos, uint8 seatId);

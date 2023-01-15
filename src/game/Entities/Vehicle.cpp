@@ -201,6 +201,26 @@ VehicleInfo::~VehicleInfo()
     RemoveAccessoriesFromMap();                             // Remove accessories (for example required with player vehicles)
 }
 
+void VehicleInfo::RepopulateSeat(uint8 seatId)
+{
+    // Loading passengers (rough version only!)
+    SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
+    for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        auto* seatEntry = GetSeatEntry(itr->seatId);
+        if (seatId == itr->seatId && seatEntry && seatEntry->m_ID && !GetPassenger(seatId))
+        {
+            if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+            {
+                DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
+                m_accessoryGuids.insert(summoned->GetObjectGuid());
+                int32 basepoint0 = itr->seatId + 1;
+                summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+}
+
 void VehicleInfo::Initialize()
 {
     if (!m_overwriteNpcEntry)
@@ -212,9 +232,17 @@ void VehicleInfo::Initialize()
         SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
         for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
         {
-            Position pos = m_owner->GetPosition();
-            pos.o *= 2;
-            SummonPassenger(itr->passengerEntry, pos, itr->seatId);
+            auto* seatEntry = GetSeatEntry(itr->seatId);
+            if (seatEntry && seatEntry->m_ID)
+            {
+                if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+                {
+                    DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
+                    m_accessoryGuids.insert(summoned->GetObjectGuid());
+                    int32 basepoint0 = itr->seatId + 1;
+                    summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
         }
     }
 
@@ -470,7 +498,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     {
         if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
         {
-            static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->UnBoard(passenger, false);
+            static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->UnBoard(passenger, changeVehicle);
         }
     }
     PassengerMap::const_iterator itr = m_passengers.find(passenger);
@@ -842,6 +870,8 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->SetCharm(pVehicle);
             pVehicle->SetCharmer(pPlayer);
 
+            pVehicle->SetCanEnterCombat(true);
+
             pVehicle->GetMotionMaster()->Clear();
             pVehicle->GetMotionMaster()->MoveIdle();
             pVehicle->StopMoving(true);
@@ -952,8 +982,8 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             if (pPlayer->IsPvPFreeForAll())
                 pVehicle->SetPvPFreeForAll(false);
 
-            // must be called after movement control unapplying
-            pPlayer->GetCamera().ResetView();
+            // // must be called after movement control unapplying
+            // pPlayer->GetCamera().ResetView();
 
             if (pVehicle->GetTypeId() == TYPEID_UNIT)
             {
@@ -963,6 +993,9 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
                 pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
             }
         }
+
+        // must be called after movement control unapplying
+        pPlayer->GetCamera().ResetView();
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
             pPlayer->RemovePetActionBar();
