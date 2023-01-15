@@ -76,9 +76,11 @@ enum
     NPC_BRONZEBEARD_RADIO       = 34054,
     NPC_EXPLORER_DELLORAH       = 33701,
     NPC_BRANN_BRONZEBEARD       = 33579,
+    NPC_PROJECTION_UNIT         = 33721,
     NPC_ORBITAL_SUPPORT         = 34286,
     // NPC_GENERATOR            = 33571,                    // spawns iron dwarfs from Storm Beacons
     NPC_GENERATOR_SMALL         = 34159,                    // spawns iron dwarfs from hard mode towers
+    NPC_LEVIATHAN_SEAT          = 33114,
 
     // Leviathan reinforcements
     // NPC_HIRED_ENGINEER       = 33626,
@@ -625,6 +627,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         void GetThunderOrbsGuids(GuidList& lOrbs) const { lOrbs = m_lUpperThunderOrbsGuids; }
         void GetSmashTargetsGuids(GuidList& lTargets, bool bLeft) { lTargets = bLeft ? m_lLeftHandBunniesGuids : m_lRightHandBunniesGuids; }
         void GetOminousCloudGuids(GuidList& lClouds) const { lClouds = m_lOminousCloudsGuids; }
+        void GetLeviathanSeatGuids(GuidSet& seats) const { seats = m_leviathanSeatGuids; }
 
         // Function that will trigger the tram turnaround object, based on the tram location
         void SetTramRotateTimer() { m_uiTramRotateTimer = m_bTramAtCenter ? 33000 : 30000; }
@@ -677,6 +680,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         GuidList m_lRightHandBunniesGuids;
         GuidList m_lOminousCloudsGuids;
         GuidSet m_sColossusGuidSet;
+        GuidSet m_leviathanSeatGuids;
 };
 
 #endif

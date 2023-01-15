@@ -11607,6 +11607,10 @@ void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
+    if (Creature* creatureTarget = dynamic_cast<Creature*>(unitTarget))
+        if (creatureTarget->GetCreatureInfo()->Rank == 3)
+            return;
+
     switch (m_spellInfo->Id)
     {
         case 36812:                                     // Soaring - Test Flight quests
