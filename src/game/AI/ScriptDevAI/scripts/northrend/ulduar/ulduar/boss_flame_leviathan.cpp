@@ -21,10 +21,10 @@ SDComment: Defense turret AI and related event NYI.
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/base/TimerAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
+#include "Entities/Vehicle.h"
 
 enum
 {
@@ -75,7 +75,8 @@ enum
     // SPELL_SMOKE_TRAIL                    = 63575,
     // SPELL_EJECT_ALL_PASSENGERS           = 50630,                    // used by vehicles on death; currently handled by DB linking
     // SPELL_EJECT_PASSENGER_4              = 64614,
-    // SPELL_EJECT_PASSENGER_1              = 60603,
+    SPELL_EJECT_PASSENGER_1                 = 60603,
+    SPELL_PASSENGER_LOADED                  = 62340,
 
     // tower buffs to Leviathan (applied on combat start if the towers are alive)
     SPELL_TOWER_OF_FROST                    = 65077,
@@ -105,7 +106,7 @@ enum
     // SPELL_BIRTH                          = 40031,                    // not used; purpose unk
 
     // vehicle accessories
-    NPC_LEVIATHAN_SEAT                      = 33114,
+    //NPC_LEVIATHAN_SEAT                      = 33114,
     NPC_LEVIATHAN_TURRET                    = 33139,
     NPC_DEFENSE_TURRET                      = 33142,
     NPC_OVERLOAD_DEVICE                     = 33143,
@@ -162,6 +163,8 @@ static const float afHodirFury[MAX_HODIR_FURY][3] =
 
 static const float afMimironInferno[3] = {329.1809f, 8.02577f, 409.887f};
 
+static const std::vector<uint32> addEntries = {NPC_LEVIATHAN_SEAT, NPC_LEVIATHAN_TURRET, NPC_DEFENSE_TURRET, NPC_OVERLOAD_DEVICE};
+
 /*######
 ## boss_flame_leviathan
 ######*/
@@ -171,6 +174,7 @@ enum FlameLeviathanActions
     LEVIATHAN_FETCH_TOWERS,
     LEVIATHAN_HARDMODES,
     LEVIATHAN_THORIMS_HAMMER,
+    LEVIATHAN_RESET_OVERLOAD,
     LEVIATHAN_ACTIONS_MAX,
 };
 
@@ -184,7 +188,6 @@ struct boss_flame_leviathanAI : public BossAI
         AddOnAggroText(SAY_AGGRO);
         AddOnKillText(SAY_SLAY);
         AddOnDeathText(SAY_DEATH);
-        AddRespawnOnEvade(30s);
         AddCustomAction(LEVIATHAN_THORIMS_HAMMER, true, [&]()
         {
             DoSpawnThorimsHammer();
@@ -196,6 +199,15 @@ struct boss_flame_leviathanAI : public BossAI
         AddTimerlessCombatAction(LEVIATHAN_FETCH_TOWERS, true);
         AddCombatAction(LEVIATHAN_HARDMODES, 10s);
         Reset();
+        m_creature->SetActiveObjectState(true);
+        AddCustomAction(LEVIATHAN_RESET_OVERLOAD, true, [&]()
+        {
+            Aura* aura = m_creature->GetAura(SPELL_OVERLOAD_CIRCUIT, EFFECT_INDEX_1);
+            if (!aura)
+                return;
+            if (Unit* caster = aura->GetCaster())
+                caster->InterruptNonMeleeSpells(true);
+        });
     }
 
     instance_ulduar* m_instance;
@@ -218,6 +230,16 @@ struct boss_flame_leviathanAI : public BossAI
 
         m_hardmodeStep         = 0;
         m_thorimsHammerCount   = 0;
+
+        CreatureList leviAdds;
+        for (const uint32& entry : addEntries)
+        {
+            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
+            for (auto& add : leviAdds)
+            {
+                add->SetActiveObjectState(true);
+            }
+        }
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -241,19 +263,34 @@ struct boss_flame_leviathanAI : public BossAI
         }
     }
 
+    void Aggro(Unit* who) override
+    {
+        BossAI::Aggro(who);
+        SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_A, nullptr, 0, 20.f);
+    }
+
     void EnterEvadeMode() override
     {
-        static const std::vector<uint32> addEntries = {NPC_LEVIATHAN_SEAT, NPC_LEVIATHAN_TURRET, NPC_DEFENSE_TURRET, NPC_OVERLOAD_DEVICE};
+        m_creature->CastSpell(m_creature, 50630, TRIGGERED_OLD_TRIGGERED);
         CreatureList leviAdds;
         for (const uint32& entry : addEntries)
         {
             GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
-            for (auto& add : leviAdds)
+            for (auto add : leviAdds)
             {
-                add->ForcedDespawn();
+                if (add)
+                    add->ForcedDespawn();
             }
         }
+
+        if (m_instance)
+        {
+            // clear hard mode auras
+            if (Creature* orbital = m_instance->GetSingleCreatureFromStorage(NPC_ORBITAL_SUPPORT))
+                orbital->RemoveAllAuras();
+        }
         BossAI::EnterEvadeMode();
+        m_creature->ForcedDespawn(3000);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -505,8 +542,8 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
             return;
 
         // cast Hodir Fury on point reached and search for another target
-        if (Creature* pHodirFury = m_creature->GetMap()->GetCreature(m_hodirFuryGuid))
-            pHodirFury->CastSpell(m_creature, SPELL_HODIR_FURY, TRIGGERED_OLD_TRIGGERED);
+        //if (Creature* pHodirFury = m_creature->GetMap()->GetCreature(m_hodirFuryGuid))
+        m_creature->CastSpell(m_creature, SPELL_HODIR_FURY, TRIGGERED_OLD_TRIGGERED);
 
         m_uiTargetChaseTimer = 5000;
     }
@@ -616,6 +653,89 @@ struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
     }
 };
 
+struct npc_salvaged_demolisherAI : public CombatAI
+{
+    npc_salvaged_demolisherAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        SetCombatMovement(false);
+    }
+
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        m_creature->SetMaxPower(POWER_ENERGY, 50);
+        m_creature->SetPower(POWER_ENERGY, 50);
+        if (!m_creature->IsVehicle())
+            return;
+        Unit* mechanicSeat = m_creature->GetVehicleInfo()->GetPassenger(1);
+        if (!mechanicSeat)
+            return;
+        mechanicSeat->SetPowerType(POWER_ENERGY);
+        mechanicSeat->SetMaxPower(POWER_ENERGY, 50);
+        mechanicSeat->SetPower(POWER_ENERGY, 50);
+    }
+};
+
+enum DefenseTurretActions
+{
+    DEFENSE_TURRET_RANGE_CHECK,
+    DEFENSE_TURRET_ACTIONS_MAX,
+};
+
+struct npc_leviathan_defense_turretAI : public CombatAI
+{
+    npc_leviathan_defense_turretAI(Creature* creature) : CombatAI(creature, DEFENSE_TURRET_ACTIONS_MAX)
+    {
+        SetCombatMovement(false);
+        AddCombatAction(DEFENSE_TURRET_RANGE_CHECK, 1s);
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        uint8 seatId = m_creature->GetTransSeat();
+        TransportInfo* transportInfo = m_creature->GetTransportInfo();
+        if (!transportInfo)
+            return;
+        Unit* leviSeat = static_cast<Unit*>(transportInfo->GetTransport());
+        if (!leviSeat || !leviSeat->IsVehicle())
+            return;
+        Unit* overloadDevice = leviSeat->GetVehicleInfo()->GetPassenger(seatId == 1 ? 2 : 1);
+        if (!overloadDevice)
+            return;
+        overloadDevice->CastSpell(nullptr, SPELL_OVERLOAD_CIRCUIT, TRIGGERED_OLD_TRIGGERED);
+        m_creature->ForcedDespawn(1000);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == DEFENSE_TURRET_RANGE_CHECK)
+        {
+            float newHealthVal = m_creature->GetHealthPercent() + 1.f;
+            if (!m_creature->GetVictim())
+                m_creature->SetHealthPercent(std::min(newHealthVal, 100.f));
+            m_creature->RemoveUnattackableTargets();
+            ResetCombatAction(DEFENSE_TURRET_RANGE_CHECK, 1s);
+        }
+    }
+};
+
+bool NpcSpellClick_npc_salvaged_demolisher(Player* player, Creature* clickedCreature, uint32 spellId)
+{
+    if (!clickedCreature || clickedCreature->GetEntry() != NPC_SALVAGED_DEMOLISHER)
+        return false;
+    VehicleInfo* vehicleInfo = clickedCreature->GetVehicleInfo();
+    if (!vehicleInfo)
+        return false;
+    if (vehicleInfo->CanBoard(player))
+    {
+        player->CastSpell(clickedCreature, 62309, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        return true;
+    }
+    int32 newSeat = 0;
+    player->CastCustomSpell(clickedCreature, 62309, &newSeat, nullptr, nullptr, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+    return true;
+}
+
 struct PursueLeviathan : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -659,6 +779,8 @@ struct HodirsFuryLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
+        if (!target)
+            return true;
         Unit* caster = spell->GetCaster();
         if (!caster)
             return false;
@@ -675,6 +797,8 @@ struct ThorimsHammerLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
+        if (!target)
+            return true;
         Unit* caster = spell->GetCaster();
         if (!caster)
             return false;
@@ -691,6 +815,8 @@ struct MimironsInfernoLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
+        if (!target)
+            return true;
         Unit* caster = spell->GetCaster();
         if (!caster)
             return false;
@@ -699,6 +825,184 @@ struct MimironsInfernoLeviathan : public SpellScript
         if (!target->IsPlayer() && !target->IsControlledByPlayer())
             return false;
         return true;
+    }
+};
+
+struct LoadIntoCatapultLeviathan : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        if (apply)
+        {
+            target->CastSpell(nullptr, SPELL_PASSENGER_LOADED, TRIGGERED_OLD_TRIGGERED);
+            return;
+        }
+        target->RemoveAurasDueToSpell(SPELL_PASSENGER_LOADED);
+        aura->GetCaster()->RemoveAurasDueToSpell(SPELL_PASSENGER_LOADED);
+    }
+};
+
+// 62324 Throw Passenger. May also apply to 47792
+struct ThrowPassenger : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+        auto& targetList = spell->GetTargetList();
+        Unit* projectile = nullptr;
+        Unit* seat = nullptr;
+
+        if (caster->GetVehicleInfo())
+            if (caster->GetVehicleInfo()->GetPassenger(3))
+                if (Unit* seat = static_cast<Unit*>(caster->GetVehicleInfo()->GetPassenger(3)))
+                    if (seat->IsVehicle())
+                        projectile = seat->GetVehicleInfo()->GetPassenger(0);
+        if (!projectile)
+            return;
+
+        if (seat)
+            seat->GetVehicleInfo()->UnBoard(projectile, false);
+        projectile->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, projectile->GetObjectGuid());
+        projectile->RemoveAurasDueToSpell(64414);
+        projectile->KnockBackWithAngle(projectile->GetAngle(spell->m_targets.m_destPos.x, spell->m_targets.m_destPos.y), spell->m_targets.getSpeed() * cos(spell->m_targets.getElevation()), spell->m_targets.getSpeed() * sin(spell->m_targets.getElevation()));
+        projectile->CastSpell(nullptr, 62336, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+    }
+};
+
+struct HookshotAura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        caster->CastSpell(nullptr, aura->GetBasePoints(), TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        if (aura->GetAuraTicks() < 6)
+            return;
+        caster->RemoveAurasByCasterSpell(62336, caster->GetObjectGuid());
+    }
+};
+
+struct Hookshot : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        if (eff != EFFECT_INDEX_0)
+            return true;
+        Unit* caster = spell->GetCaster();
+        if (!caster || !target)
+            return true;
+        if (caster->GetPosition().GetDistance(target->GetPosition()) > 30.f * 30.f)
+            return false;
+        caster->RemoveAurasByCasterSpell(62336, caster->GetObjectGuid());
+        return true;
+    }
+};
+
+struct OverloadCircuit : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            return;
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        if (target->GetEntry() != NPC_LEVIATHAN)
+            return;
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        bool isRegularMode = target->GetMap()->IsRegularDifficulty();
+        if (target->GetAuraCount(62399) >= 2 && isRegularMode)
+        {
+            target->CastSpell(nullptr, SPELL_SYSTEMS_SHUTDOWN, TRIGGERED_OLD_TRIGGERED);
+        }
+        else if (target->GetAuraCount(62399) >= 4)
+        {
+            target->CastSpell(nullptr, SPELL_SYSTEMS_SHUTDOWN, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct SystemsShutdown : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        if (apply)
+        {
+            target->SetStunned(true);
+            if (target->AI())
+                target->AI()->SetCombatScriptStatus(true);
+            if (target->GetEntry() == NPC_LEVIATHAN_SEAT)
+                target->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+        {
+            target->SetStunned(false);
+            if (target->AI())
+                target->AI()->SetCombatScriptStatus(false);
+        }
+
+        if (target->GetEntry() != NPC_LEVIATHAN)
+            return;
+        if (apply)
+        {
+            CreatureList leviAdds;
+            for (const uint32& entry : addEntries)
+            {
+                GetCreatureListWithEntryInGrid(leviAdds, target, entry, 50.f);
+                for (auto add : leviAdds)
+                {
+                    if (add)
+                    {
+                        add->CastSpell(nullptr, SPELL_SYSTEMS_SHUTDOWN, TRIGGERED_OLD_TRIGGERED);
+                        add->SetTarget(nullptr);
+                    }
+                }
+            }
+            target->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
+            return;
+        }
+        CreatureList leviSeats;
+        GetCreatureListWithEntryInGrid(leviSeats, target, NPC_LEVIATHAN_SEAT, 50.f);
+        for (auto seat : leviSeats)
+        {
+            if (seat && seat->IsVehicle())
+            {
+                seat->GetVehicleInfo()->RepopulateSeat(1);
+            }
+        }
+    }
+};
+
+struct EjectPassenger1 : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsVehicle())
+            return;
+        VehicleInfo* vInfo = target->GetVehicleInfo();
+        if (!vInfo)
+            return;
+        Unit* passenger = vInfo->GetPassenger(spell->m_currentBasePoints[0]);
+        if (!passenger)
+            return;
+        vInfo->UnBoard(passenger, false);
+        passenger->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+        passenger->RemoveSpellsCausingAura(SPELL_AURA_FACTION_OVERRIDE);
+        passenger->CastSpell(passenger, 61243, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
     }
 };
 
@@ -729,8 +1033,26 @@ void AddSC_boss_flame_leviathan()
     pNewScript->GetAI = &GetNewAIInstance<npc_mimiron_infernoAI>;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "npc_salvaged_demolisher";
+    pNewScript->GetAI = &GetNewAIInstance<npc_salvaged_demolisherAI>;
+    pNewScript->pNpcSpellClick = &NpcSpellClick_npc_salvaged_demolisher;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_leviathan_defense_turret";
+    pNewScript->GetAI = &GetNewAIInstance<npc_leviathan_defense_turretAI>;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<PursueLeviathan>("spell_pursue_leviathan");
     RegisterSpellScript<HodirsFuryLeviathan>("spell_hodirs_fury_leviathan");
     RegisterSpellScript<ThorimsHammerLeviathan>("spell_thorims_hammer_leviathan");
     RegisterSpellScript<MimironsInfernoLeviathan>("spell_mimirons_inferno_leviathan");
+    RegisterSpellScript<LoadIntoCatapultLeviathan>("spell_load_into_catapult_leviathan");
+    RegisterSpellScript<ThrowPassenger>("spell_throw_passenger");
+    RegisterSpellScript<HookshotAura>("spell_hookshot_aura");
+    RegisterSpellScript<Hookshot>("spell_hookshot");
+    RegisterSpellScript<OverloadCircuit>("spell_overload_circuit");
+    RegisterSpellScript<SystemsShutdown>("spell_systems_shutdown");
+    RegisterSpellScript<EjectPassenger1>("spell_eject_passenger_1");
 }
