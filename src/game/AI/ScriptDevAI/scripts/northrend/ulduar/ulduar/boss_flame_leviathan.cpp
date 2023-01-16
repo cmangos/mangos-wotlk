@@ -1022,6 +1022,20 @@ struct SmokeTrailLeviathan : public SpellScript
     }
 };
 
+struct ParachuteLeviathan : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        if (!caster->IsFalling())
+            return;caster->RemoveAura(aura);
+        caster->RemoveAurasDueToSpell(aura->GetSpellProto()->Id);
+        caster->CastSpell(caster, aura->GetBasePoints(), TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -1072,4 +1086,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<SystemsShutdown>("spell_systems_shutdown");
     RegisterSpellScript<EjectPassenger1>("spell_eject_passenger_1");
     RegisterSpellScript<SmokeTrailLeviathan>("spell_smoke_trail_leviathan");
+    RegisterSpellScript<ParachuteLeviathan>("spell_parachute_leviathan");
 }
