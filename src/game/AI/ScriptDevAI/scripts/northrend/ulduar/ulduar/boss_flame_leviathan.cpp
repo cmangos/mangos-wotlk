@@ -72,7 +72,7 @@ enum
     // Leviathan seat has missing aura 62421
 
     // leviathan other spells - for the moment these are not used
-    // SPELL_SMOKE_TRAIL                    = 63575,
+    SPELL_SMOKE_TRAIL                       = 63575,
     // SPELL_EJECT_ALL_PASSENGERS           = 50630,                    // used by vehicles on death; currently handled by DB linking
     // SPELL_EJECT_PASSENGER_4              = 64614,
     SPELL_EJECT_PASSENGER_1                 = 60603,
@@ -1002,7 +1002,23 @@ struct EjectPassenger1 : public SpellScript
         vInfo->UnBoard(passenger, false);
         passenger->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
         passenger->RemoveSpellsCausingAura(SPELL_AURA_FACTION_OVERRIDE);
-        passenger->CastSpell(passenger, 61243, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        target->CastSpell(passenger, SPELL_SMOKE_TRAIL, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+    }
+};
+
+struct SmokeTrailLeviathan : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+        Unit* caster = spell->GetCaster();
+        if (!caster || !caster->IsVehicle())
+            return;
+        target->KnockBackFrom(caster, 5.f, 25.f);
     }
 };
 
@@ -1055,4 +1071,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<OverloadCircuit>("spell_overload_circuit");
     RegisterSpellScript<SystemsShutdown>("spell_systems_shutdown");
     RegisterSpellScript<EjectPassenger1>("spell_eject_passenger_1");
+    RegisterSpellScript<SmokeTrailLeviathan>("spell_smoke_trail_leviathan");
 }
