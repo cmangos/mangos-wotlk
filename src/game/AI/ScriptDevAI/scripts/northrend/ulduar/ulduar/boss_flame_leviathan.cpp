@@ -1002,7 +1002,7 @@ struct EjectPassenger1 : public SpellScript
         vInfo->UnBoard(passenger, false);
         passenger->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
         passenger->RemoveSpellsCausingAura(SPELL_AURA_FACTION_OVERRIDE);
-        target->CastSpell(passenger, SPELL_SMOKE_TRAIL, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        target->CastSpell(passenger, SPELL_SMOKE_TRAIL, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE); // This may actually be a separate cast, not sure.
     }
 };
 
@@ -1030,7 +1030,7 @@ struct ParachuteLeviathan : public AuraScript
         if (!caster)
             return;
         if (!caster->IsFalling())
-            return;caster->RemoveAura(aura);
+            return;
         caster->RemoveAurasDueToSpell(aura->GetSpellProto()->Id);
         caster->CastSpell(caster, aura->GetBasePoints(), TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
     }
