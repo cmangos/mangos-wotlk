@@ -76,7 +76,10 @@ enum
     // SPELL_EJECT_ALL_PASSENGERS           = 50630,                    // used by vehicles on death; currently handled by DB linking
     // SPELL_EJECT_PASSENGER_4              = 64614,
     SPELL_EJECT_PASSENGER_1                 = 60603,
+    SPELL_LOAD_INTO_CATAPULT                = 64414,
     SPELL_PASSENGER_LOADED                  = 62340,
+    SPELL_HOOKSHOT_AURA                     = 62336,
+    SPELL_RIDE_VEHICLE_SCALES_WITH_GEAR     = 62309,
 
     // tower buffs to Leviathan (applied on combat start if the towers are alive)
     SPELL_TOWER_OF_FROST                    = 65077,
@@ -728,11 +731,11 @@ bool NpcSpellClick_npc_salvaged_demolisher(Player* player, Creature* clickedCrea
         return false;
     if (vehicleInfo->CanBoard(player))
     {
-        player->CastSpell(clickedCreature, 62309, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+        player->CastSpell(clickedCreature, SPELL_RIDE_VEHICLE_SCALES_WITH_GEAR, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
         return true;
     }
     int32 newSeat = 0;
-    player->CastCustomSpell(clickedCreature, 62309, &newSeat, nullptr, nullptr, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+    player->CastCustomSpell(clickedCreature, SPELL_RIDE_VEHICLE_SCALES_WITH_GEAR, &newSeat, nullptr, nullptr, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
     return true;
 }
 
@@ -868,9 +871,9 @@ struct ThrowPassenger : public SpellScript
         if (seat)
             seat->GetVehicleInfo()->UnBoard(projectile, false);
         projectile->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, projectile->GetObjectGuid());
-        projectile->RemoveAurasDueToSpell(64414);
+        projectile->RemoveAurasDueToSpell(SPELL_LOAD_INTO_CATAPULT);
         projectile->KnockBackWithAngle(projectile->GetAngle(spell->m_targets.m_destPos.x, spell->m_targets.m_destPos.y), spell->m_targets.getSpeed() * cos(spell->m_targets.getElevation()), spell->m_targets.getSpeed() * sin(spell->m_targets.getElevation()));
-        projectile->CastSpell(nullptr, 62336, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        projectile->CastSpell(nullptr, SPELL_HOOKSHOT_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
     }
 };
 
@@ -886,7 +889,7 @@ struct HookshotAura : public AuraScript
         caster->CastSpell(nullptr, aura->GetBasePoints(), TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
         if (aura->GetAuraTicks() < 6)
             return;
-        caster->RemoveAurasByCasterSpell(62336, caster->GetObjectGuid());
+        caster->RemoveAurasByCasterSpell(SPELL_HOOKSHOT_AURA, caster->GetObjectGuid());
     }
 };
 
@@ -901,7 +904,7 @@ struct Hookshot : public SpellScript
             return true;
         if (caster->GetPosition().GetDistance(target->GetPosition()) > 30.f * 30.f)
             return false;
-        caster->RemoveAurasByCasterSpell(62336, caster->GetObjectGuid());
+        caster->RemoveAurasByCasterSpell(SPELL_HOOKSHOT_AURA, caster->GetObjectGuid());
         return true;
     }
 };
@@ -921,11 +924,11 @@ struct OverloadCircuit : public AuraScript
         if (!caster)
             return;
         bool isRegularMode = target->GetMap()->IsRegularDifficulty();
-        if (target->GetAuraCount(62399) >= 2 && isRegularMode)
+        if (target->GetAuraCount(SPELL_OVERLOAD_CIRCUIT) >= 2 && isRegularMode)
         {
             target->CastSpell(nullptr, SPELL_SYSTEMS_SHUTDOWN, TRIGGERED_OLD_TRIGGERED);
         }
-        else if (target->GetAuraCount(62399) >= 4)
+        else if (target->GetAuraCount(SPELL_OVERLOAD_CIRCUIT) >= 4)
         {
             target->CastSpell(nullptr, SPELL_SYSTEMS_SHUTDOWN, TRIGGERED_OLD_TRIGGERED);
         }
