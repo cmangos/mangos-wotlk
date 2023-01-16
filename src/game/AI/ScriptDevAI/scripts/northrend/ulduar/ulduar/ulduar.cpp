@@ -1113,7 +1113,7 @@ bool instance_ulduar::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 u
                 break;
 
             // handle vehicle spell clicks - are available only after the gauntlet was started by gossip or when Leviathan is active
-            return GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL;
+            return GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL || GetData(TYPE_LEVIATHAN) == IN_PROGRESS;
         }
     }
 
