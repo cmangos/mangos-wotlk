@@ -383,8 +383,10 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         case GO_IRON_ENTRANCE_DOOR:
             break;
         case GO_ARCHIVUM_DOOR:
-            if (m_auiEncounter[TYPE_ASSEMBLY])
+            if (m_auiEncounter[TYPE_ASSEMBLY] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
+            else
+                pGo->SetGoState(GO_STATE_READY);
             break;
         // Celestial Planetarium
         case GO_CELESTIAL_ACCES:
@@ -647,7 +649,9 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_IRON_ENTRANCE_DOOR);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_ARCHIVUM_DOOR);
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_ARCHIVUM_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
+                //DoUseDoorOrButton(GO_ARCHIVUM_DOOR);
 
                 if (Player* pPlayer = GetPlayerInMap())
                 {
