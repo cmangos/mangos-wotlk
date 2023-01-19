@@ -80,6 +80,9 @@ void BossAI::Aggro(Unit* who)
 
 void BossAI::EnterEvadeMode()
 {
+    if (m_instanceDataType != -1)
+        if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+            instance->SetData(m_instanceDataType, FAIL);
     if (m_respawnDelay == -1)
     {
         CombatAI::EnterEvadeMode();
@@ -95,10 +98,6 @@ void BossAI::EnterEvadeMode()
         addToDespawn->SetRespawnDelay(m_respawnDelay);
         addToDespawn->ForcedDespawn();
     }
-    if (m_instanceDataType == -1)
-        return;
-    if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
-        instance->SetData(m_instanceDataType, FAIL);
 }
 
 void BossAI::AddCastOnDeath(QueuedCast cast)
