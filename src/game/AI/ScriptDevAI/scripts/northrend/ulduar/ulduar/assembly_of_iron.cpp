@@ -132,8 +132,12 @@ struct boss_brundirAI : public BossAI
         AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
         AddCustomAction(BRUNDIR_PREFIGHT_CHANNEL, 5s, [&]()
         {
+            if (m_creature->IsInCombat())
+                return;
             m_creature->CastSpell(nullptr, SPELL_LIGHTNING_CHANNEL_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
         });
+        m_creature->SetNoLoot(true);
+        m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 10.f);
     }
 
     instance_ulduar* m_instance;
@@ -143,12 +147,16 @@ struct boss_brundirAI : public BossAI
 
     void Reset() override
     {
-        m_creature->SetLevitate(false);
+        m_creature->SetHover(false);
+        m_creature->SetStunned(false);
     }
 
     void Aggro(Unit* /*who*/) override
     {
         BossAI::Aggro();
+        if (m_instance)
+            m_instance->SetData(TYPE_ASSEMBLY, IN_PROGRESS);
+
         m_creature->InterruptNonMeleeSpells(false);
         DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
     }
@@ -162,8 +170,14 @@ struct boss_brundirAI : public BossAI
 
     void JustSummoned(Creature* summoned) override
     {
+        if (summoned->AI())
+            summoned->AI()->SetRootSelf(true);
+        m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
+        summoned->SetInCombatWithZone(false);
         if (summoned->GetEntry() == NPC_OVERLOAD_VISUAL)
         {
+            if (summoned->AI())
+                summoned->AI()->SetReactState(REACT_PASSIVE);
             summoned->CastSpell(summoned, SPELL_OVERLOAD_AURA, TRIGGERED_OLD_TRIGGERED);
             // Visual npc- shouldn't move and should despawn in 6 sec
             summoned->GetMotionMaster()->MoveIdle();
@@ -206,12 +220,13 @@ struct boss_brundirAI : public BossAI
                 {
                     DoMoveToTarget(target);
                     m_followTargetGuid = target->GetObjectGuid();
+                    m_creature->GetMotionMaster()->MoveChase(target);
                 }
                 break;
             // After reached the land remove all the auras and resume basic combat
             case POINT_ID_LAND:
-                m_creature->SetLevitate(false);
                 SetCombatMovement(true);
+                SetCombatScriptStatus(false);
                 if (m_creature->GetVictim())
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 break;
@@ -224,7 +239,7 @@ struct boss_brundirAI : public BossAI
         if (target)
         {
             m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MovePoint(0, target->GetPositionX(), target->GetPositionY(), m_creature->GetPositionZ());
+            m_creature->GetMotionMaster()->MovePoint(0, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());// + 10.f);
         }
     }
 };
@@ -247,8 +262,12 @@ struct boss_molgeimAI : public BossAI
         AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
         AddCustomAction(MOLGEIM_PRE_FIGHT_VISUAL, 5s, [&]()
         {
-            m_creature->CastSpell(nullptr, SPELL_RUNE_OF_POWER_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
+            Creature* steel = m_instance->GetSingleCreatureFromStorage(NPC_STEELBREAKER);
+            if (!steel || m_creature->IsInCombat())
+                return;
+            m_creature->CastSpell(steel, SPELL_RUNE_OF_POWER_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
         });
+        m_creature->SetNoLoot(true);
     }
 
     instance_ulduar* m_instance;
@@ -273,16 +292,26 @@ struct boss_molgeimAI : public BossAI
 
     void JustSummoned(Creature* summoned) override
     {
+        if (summoned->AI())
+        {
+            summoned->AI()->SetReactState(REACT_PASSIVE);
+            summoned->AI()->SetRootSelf(true);
+        }
+        m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
         if (summoned->GetEntry() == NPC_RUNE_OF_SUMMONING)
+        {
             summoned->CastSpell(summoned, SPELL_RUNE_OF_SUMMONING_AURA, true, nullptr, nullptr, m_creature->GetObjectGuid());
-        else if (summoned->GetEntry() == NPC_RUNE_OF_POWER)
-            summoned->CastSpell(summoned, SPELL_RUNE_OF_POWER_AURA, TRIGGERED_OLD_TRIGGERED);
+            summoned->ForcedDespawn(20000);
+        }
         else if (summoned->GetEntry() == NPC_LIGHTNING_ELEMENTAL)
         {
             summoned->CastSpell(summoned, m_isRegularMode ? SPELL_LIGHTNING_ELEMENTAL_PASSIVE : SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H, TRIGGERED_OLD_TRIGGERED);
 
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                summoned->AI()->SetReactState(REACT_AGGRESSIVE);
                 summoned->AI()->AttackStart(target);
+            }
         }
     }
 };
@@ -301,6 +330,8 @@ struct boss_steelbreakerAI : public BossAI
         AddOnAggroText(SAY_STEEL_AGGRO);
         AddOnKillText(SAY_STEEL_SLAY_1, SAY_STEEL_SLAY_2);
         AddOnDeathText(SAY_STEEL_DEATH_1, SAY_STEEL_DEATH_2);
+        AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
+        m_creature->SetNoLoot(true);
     }
 
     instance_ulduar* m_instance;
@@ -329,24 +360,6 @@ struct LightningWhirl : public SpellScript
     {
         spell->SetMaxAffectedTargets(urand(2, 3));
     }
-
-    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
-    {
-        Unit* caster = spell->GetCaster();
-        if (!caster)
-            return SPELL_FAILED_CASTER_DEAD;
-        if (!caster->HasAura(SPELL_SUPERCHARGE))
-            return SPELL_FAILED_CASTER_AURASTATE;
-        return SPELL_CAST_OK;
-    }
-
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx)
-    {
-        Unit* caster = spell->GetCaster();
-        if (!caster || effIdx != EFFECT_INDEX_0)
-            return;
-        DoBroadcastText(SAY_BRUNDIR_WHIRL, caster);
-    }
 };
 
 struct LightningWhirlHeroic : public SpellScript
@@ -354,24 +367,6 @@ struct LightningWhirlHeroic : public SpellScript
     void OnInit(Spell* spell) const override
     {
         spell->SetMaxAffectedTargets(urand(3, 6));
-    }
-
-    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
-    {
-        Unit* caster = spell->GetCaster();
-        if (!caster)
-            return SPELL_FAILED_CASTER_DEAD;
-        if (!caster->HasAura(SPELL_SUPERCHARGE))
-            return SPELL_FAILED_CASTER_AURASTATE;
-        return SPELL_CAST_OK;
-    }
-
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx)
-    {
-        Unit* caster = spell->GetCaster();
-        if (!caster || effIdx != EFFECT_INDEX_0)
-            return;
-        DoBroadcastText(SAY_BRUNDIR_WHIRL, caster);
     }
 };
 
@@ -396,12 +391,9 @@ struct SuperChargeIronCouncil : public SpellScript
                 }
                 caster->CastSpell(nullptr, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
                 instance->SetData(TYPE_ASSEMBLY, DONE);
+                static_cast<Creature*>(caster)->SetNoLoot(false);
             }
             return;
-        }
-        else
-        {
-            caster->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
         }
         Unit* target = spell->GetUnitTarget();
         if (!target || !target->IsAlive())
@@ -435,15 +427,26 @@ struct LightningTendrils : public SpellScript, public AuraScript
         {
             caster->CastSpell(nullptr, SPELL_TENDRILS_VISUAL, TRIGGERED_OLD_TRIGGERED);
             DoBroadcastText(SAY_BRUNDIR_FLY, caster);
-            caster->SetLevitate(true);
-            caster->GetMotionMaster()->MovePoint(POINT_ID_LIFT_OFF, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ() + 15.0f);
+            caster->SetHover(true);
+            caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+            if (caster->AI())
+            {
+                caster->AI()->SetCombatScriptStatus(true);
+                caster->AttackStop();
+            }
         }
         else
         {
-            float groundZ = caster->GetMap()->GetHeight(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), false);
-            float fZ = caster->GetTerrain()->GetWaterOrGroundLevel(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), groundZ);
-            caster->GetMotionMaster()->MovePoint(POINT_ID_LAND, caster->GetPositionX(), caster->GetPositionY(), fZ);
+            caster->SetHover(false);
             caster->RemoveAurasDueToSpell(SPELL_TENDRILS_VISUAL);
+            caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
+            if (caster->AI())
+            {
+                caster->AI()->SetCombatMovement(true);
+                caster->AI()->SetCombatScriptStatus(false);
+            }
+            if (caster->GetVictim())
+                caster->GetMotionMaster()->MoveChase(caster->GetVictim());//caster->SetStunned(false);
         }
     }
 
@@ -482,7 +485,8 @@ struct LightningTendrilsVisual : public AuraScript
         Unit* caster = aura->GetCaster();
         if (!caster)
             return;
-        caster->RemoveAurasDueToSpell(aura->GetId());
+        if (!aura->GetAuraTicks() < 25)
+            return;
         if (boss_brundirAI* brundirAI = dynamic_cast<boss_brundirAI*>(caster->AI()))
             if (Unit* target = caster->GetMap()->GetUnit(brundirAI->m_followTargetGuid))
                 brundirAI->DoMoveToTarget(target);
@@ -588,6 +592,42 @@ struct BerserkCouncil : public AuraScript
     }
 };
 
+struct LightningWhirlTrigger : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return SPELL_FAILED_CASTER_DEAD;
+        if (caster->GetAuraCount(SPELL_SUPERCHARGE) < 1)
+            return SPELL_FAILED_CASTER_AURASTATE;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx)
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster || effIdx != EFFECT_INDEX_0)
+            return;
+        DoBroadcastText(SAY_BRUNDIR_WHIRL, caster);
+    }
+};
+
+struct RuneOfPowerCouncil : public SpellScript
+{
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    {
+        if (summon->AI())
+        {
+            summon->AI()->SetReactState(REACT_PASSIVE);
+            summon->AI()->SetRootSelf(true);
+        }
+        summon->SetInCombatWithZone(false);
+        summon->CastSpell(summon, SPELL_RUNE_OF_POWER_AURA, TRIGGERED_OLD_TRIGGERED);
+        summon->ForcedDespawn(60000);
+    }
+};
+
 void AddSC_boss_assembly_of_iron()
 {
     Script* pNewScript = new Script;
@@ -615,4 +655,6 @@ void AddSC_boss_assembly_of_iron()
     RegisterSpellScript<RuneOfDeathCouncil>("spell_rune_of_death_iron_council");
     RegisterSpellScript<LightningTendrilsVisual>("spell_lightning_tendrils_visual");
     RegisterSpellScript<LightningTendrils>("spell_lightning_tendrils");
+    RegisterSpellScript<LightningWhirlTrigger>("spell_lightning_whirl_trigger");
+    RegisterSpellScript<RuneOfPowerCouncil>("spell_rune_of_power_council");
 }
