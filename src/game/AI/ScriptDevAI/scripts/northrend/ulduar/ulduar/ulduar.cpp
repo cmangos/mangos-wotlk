@@ -657,9 +657,9 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             else if (uiData == IN_PROGRESS)
             {
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, true);
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, true);
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, true);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, false);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, false);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_STUNNED, true);
             }
             break;
@@ -1413,15 +1413,15 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
             return m_abAchievCriteria[TYPE_ACHIEV_NINE_LIVES];
         case ACHIEV_CRIT_BRUNDIR_N:
         case ACHIEV_CRIT_BRUNDIR_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+            //if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_BRUNDIR];
         case ACHIEV_CRIT_MOLGEIM_N:
         case ACHIEV_CRIT_MOLGEIM_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+            //if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_MOLGEIM];
         case ACHIEV_CRIT_STEELBREAKER_N:
         case ACHIEV_CRIT_STEELBREAKER_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+            //if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_STEELBREAKER];
         case ACHIEV_CRIT_STUNNED_BRUND_N:
         case ACHIEV_CRIT_STUNNED_STEEL_N:
