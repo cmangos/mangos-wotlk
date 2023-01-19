@@ -54,6 +54,7 @@ instance_naxxramas::instance_naxxramas(Map* pMap) : ScriptedInstance(pMap),
     m_uiHorseMenKilled(0),
     m_uiLivingPoisonTimer(5000),
     m_uiScreamsTimer(2 * MINUTE * IN_MILLISECONDS),
+    m_despawnKTTriggerTimer(0),
     m_dialogueHelper(aNaxxDialogue)
 {
     Initialize();
@@ -530,7 +531,11 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_KELTHUZAD_EXIT_DOOR);
             if (uiData == IN_PROGRESS)
+            {
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_GET_ENOUGH, false);
+                DoUseDoorOrButton(GO_KELTHUZAD_TRIGGER);
+                m_despawnKTTriggerTimer = 5 * IN_MILLISECONDS;
+            }
             break;
         case TYPE_UNDYING_FAILED:
             m_auiEncounter[uiType] = uiData;
@@ -665,6 +670,22 @@ void instance_naxxramas::Update(uint32 uiDiff)
         }
         else
             m_uiLivingPoisonTimer -= uiDiff;
+    }
+
+    if (m_despawnKTTriggerTimer)
+    {
+        if (m_despawnKTTriggerTimer < uiDiff)
+        {
+            if (GameObject* trigger = GetSingleGameObjectFromStorage(GO_KELTHUZAD_TRIGGER))
+            {
+                trigger->ResetDoorOrButton();
+                trigger->SetLootState(GO_JUST_DEACTIVATED);
+                trigger->SetForcedDespawn();
+            }
+            m_despawnKTTriggerTimer = 0;
+        }
+        else
+            m_despawnKTTriggerTimer -= uiDiff;
     }
 
     if (m_uiScreamsTimer && m_auiEncounter[TYPE_THADDIUS] != DONE)
