@@ -406,7 +406,7 @@ struct SuperChargeIronCouncil : public SpellScript
         Unit* target = spell->GetUnitTarget();
         if (!target || !target->IsAlive())
             return;
-        if (target->GetEntry() == NPC_BRUNDIR && target->GetAuraCount(SPELL_SUPERCHARGE) == 2)
+        if (target->GetEntry() == NPC_BRUNDIR && target->GetAuraCount(SPELL_SUPERCHARGE) == 1)
             target->CastSpell(nullptr, SPELL_STORMSHIELD, TRIGGERED_OLD_TRIGGERED);
         target->SetHealthPercent(100.f);
         if (target->AI())
@@ -608,4 +608,11 @@ void AddSC_boss_assembly_of_iron()
     RegisterSpellScript<LightningWhirl>("spell_lightning_whirl");
     RegisterSpellScript<LightningWhirlHeroic>("spell_lightning_whirl_heroic");
     RegisterSpellScript<SuperChargeIronCouncil>("spell_supercharge_iron_council");
+    RegisterSpellScript<BerserkCouncil>("spell_berserk_iron_council");
+    RegisterSpellScript<StaticDisruption>("spell_static_disruption");
+    RegisterSpellScript<OverwhelmingPower>("spell_overwhelming_power");
+    RegisterSpellScript<RuneOfSummoningCouncil>("spell_rune_of_summoning_iron_council");
+    RegisterSpellScript<RuneOfDeathCouncil>("spell_rune_of_death_iron_council");
+    RegisterSpellScript<LightningTendrilsVisual>("spell_lightning_tendrils_visual");
+    RegisterSpellScript<LightningTendrils>("spell_lightning_tendrils");
 }
