@@ -137,7 +137,7 @@ struct boss_brundirAI : public BossAI
             m_creature->CastSpell(nullptr, SPELL_LIGHTNING_CHANNEL_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
         });
         m_creature->SetNoLoot(true);
-        m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 10.f);
+        m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 13.f);
     }
 
     instance_ulduar* m_instance;
@@ -202,44 +202,6 @@ struct boss_brundirAI : public BossAI
             case SPELL_LIGHTNING_WHIRL_DAMAGE_H:
                 m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_STUNNED, false);
                 break;
-        }
-    }
-
-    void MovementInform(uint32 moveType, uint32 pointId) override
-    {
-        if (moveType != POINT_MOTION_TYPE || !pointId)
-            return;
-
-        switch (pointId)
-        {
-            // After lift up follow a target and set the target change timer
-            case POINT_ID_LIFT_OFF:
-                // TODO: the boss should follow without changing his Z position - missing core feature
-                // Current implementation with move point is wrong
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
-                {
-                    DoMoveToTarget(target);
-                    m_followTargetGuid = target->GetObjectGuid();
-                    m_creature->GetMotionMaster()->MoveChase(target);
-                }
-                break;
-            // After reached the land remove all the auras and resume basic combat
-            case POINT_ID_LAND:
-                SetCombatMovement(true);
-                SetCombatScriptStatus(false);
-                if (m_creature->GetVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                break;
-        }
-    }
-
-    // Wrapper for target movement
-    void DoMoveToTarget(Unit* target)
-    {
-        if (target)
-        {
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MovePoint(0, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());// + 10.f);
         }
     }
 };
@@ -431,17 +393,21 @@ struct LightningTendrils : public SpellScript, public AuraScript
             caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             if (caster->AI())
             {
+                caster->AI()->SetReactState(REACT_PASSIVE);
                 caster->AI()->SetCombatScriptStatus(true);
                 caster->AttackStop();
+                caster->SetTarget(nullptr);
+                caster->GetMotionMaster()->Clear();
+                caster->GetMotionMaster()->MovePoint(POINT_ID_LIFT_OFF, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ() + caster->GetHoverOffset());
             }
         }
         else
         {
-            caster->SetHover(false);
             caster->RemoveAurasDueToSpell(SPELL_TENDRILS_VISUAL);
             caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
             if (caster->AI())
             {
+                caster->AI()->SetReactState(REACT_AGGRESSIVE);
                 caster->AI()->SetCombatMovement(true);
                 caster->AI()->SetCombatScriptStatus(false);
             }
@@ -457,39 +423,26 @@ struct LightningTendrils : public SpellScript, public AuraScript
         Unit* caster = aura->GetCaster();
         if (!caster)
             return;
-        if (aura->GetAuraTicks() <= 25)
+        if (aura->GetAuraTicks() <= 29)
         {
             if (aura->GetAuraTicks() % 5)
             {
                 if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
                 {
-                    if (boss_brundirAI* brundirAI = dynamic_cast<boss_brundirAI*>(caster->AI()))
-                    {
-                        brundirAI->DoMoveToTarget(target);
-                        brundirAI->m_followTargetGuid = target->GetObjectGuid();
-                    }
+                    caster->GetMotionMaster()->Clear();
+                    caster->GetMotionMaster()->MoveChase(target);
                 }
+            }
+            if (aura->GetAuraTicks() == 25)
+            {
+                float gZ = caster->GetMap()->GetHeight(caster->GetPhaseMask(), caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+                caster->GetMotionMaster()->Clear();
+                caster->GetMotionMaster()->MovePoint(POINT_ID_LAND, caster->GetPositionX(), caster->GetPositionY(), gZ);
+                caster->SetHover(false);
             }
             return;
         }
         caster->RemoveAurasDueToSpell(aura->GetId());
-    }
-};
-
-struct LightningTendrilsVisual : public AuraScript
-{
-    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
-    {
-        if (aura->GetEffIndex() != EFFECT_INDEX_0)
-            return;
-        Unit* caster = aura->GetCaster();
-        if (!caster)
-            return;
-        if (!aura->GetAuraTicks() < 25)
-            return;
-        if (boss_brundirAI* brundirAI = dynamic_cast<boss_brundirAI*>(caster->AI()))
-            if (Unit* target = caster->GetMap()->GetUnit(brundirAI->m_followTargetGuid))
-                brundirAI->DoMoveToTarget(target);
     }
 };
 
@@ -653,7 +606,6 @@ void AddSC_boss_assembly_of_iron()
     RegisterSpellScript<OverwhelmingPower>("spell_overwhelming_power");
     RegisterSpellScript<RuneOfSummoningCouncil>("spell_rune_of_summoning_iron_council");
     RegisterSpellScript<RuneOfDeathCouncil>("spell_rune_of_death_iron_council");
-    RegisterSpellScript<LightningTendrilsVisual>("spell_lightning_tendrils_visual");
     RegisterSpellScript<LightningTendrils>("spell_lightning_tendrils");
     RegisterSpellScript<LightningWhirlTrigger>("spell_lightning_whirl_trigger");
     RegisterSpellScript<RuneOfPowerCouncil>("spell_rune_of_power_council");
