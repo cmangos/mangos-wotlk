@@ -389,14 +389,24 @@ struct SuperChargeIronCouncil : public SpellScript
             }
             return;
         }
-        Unit* target = spell->GetUnitTarget();
+    }
+
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        if (eff != EFFECT_INDEX_2)
+            return true;
         if (!target || !target->IsAlive())
-            return;
+            return false;
         if (target->GetEntry() == NPC_BRUNDIR && target->GetAuraCount(SPELL_SUPERCHARGE) == 1)
             target->CastSpell(nullptr, SPELL_STORMSHIELD, TRIGGERED_OLD_TRIGGERED);
+        if (target->GetEntry() == NPC_STEELBREAKER && target->GetAuraCount(SPELL_SUPERCHARGE) == 1)
+        {
+            target->CastSpell(nullptr, SPELL_ELECTRICAL_CHARGE, TRIGGERED_OLD_TRIGGERED);
+        }
         target->SetHealthPercent(100.f);
         if (target->AI())
             target->AI()->SpellListChanged();
+        return true;
     }
 };
 
@@ -637,6 +647,24 @@ struct RuneOfPowerCouncil : public SpellScript
     }
 };
 
+struct ElectricalChargeCouncil : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        if (aura->GetRemoveMode() != AURA_REMOVE_BY_DEATH)
+            return;
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        target->CastSpell(aura->GetCaster(), aura->GetBasePoints(), TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_assembly_of_iron()
 {
     Script* pNewScript = new Script;
@@ -665,4 +693,5 @@ void AddSC_boss_assembly_of_iron()
     RegisterSpellScript<LightningTendrils>("spell_lightning_tendrils");
     RegisterSpellScript<LightningWhirlTrigger>("spell_lightning_whirl_trigger");
     RegisterSpellScript<RuneOfPowerCouncil>("spell_rune_of_power_council");
+    RegisterSpellScript<ElectricalChargeCouncil>("spell_electrical_charge_council");
 }
