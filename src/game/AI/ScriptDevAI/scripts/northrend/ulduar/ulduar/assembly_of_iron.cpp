@@ -27,31 +27,31 @@ EndScriptData */
 
 enum
 {
-    SAY_BRUNDIR_AGGRO                   = -1603056,
-    SAY_BRUNDIR_WHIRL                   = -1603057,
-    SAY_BRUNDIR_DEATH_1                 = -1603058,
-    SAY_BRUNDIR_DEATH_2                 = -1603059,
-    SAY_BRUNDIR_SLAY_1                  = -1603060,
-    SAY_BRUNDIR_SLAY_2                  = -1603061,
-    SAY_BRUNDIR_BERSERK                 = -1603062,
-    SAY_BRUNDIR_FLY                     = -1603063,
+    SAY_BRUNDIR_AGGRO                   = 34314,
+    SAY_BRUNDIR_WHIRL                   = 33962,
+    SAY_BRUNDIR_DEATH_1                 = 34318,
+    SAY_BRUNDIR_DEATH_2                 = 34319,
+    SAY_BRUNDIR_SLAY_1                  = 34315,
+    SAY_BRUNDIR_SLAY_2                  = 34316,
+    SAY_BRUNDIR_BERSERK                 = 34320,
+    SAY_BRUNDIR_FLY                     = 34317,
 
-    SAY_MOLGEIM_AGGRO                   = -1603064,
-    SAY_MOLGEIM_DEATH_1                 = -1603065,
-    SAY_MOLGEIM_DEATH_2                 = -1603066,
-    SAY_MOLGEIM_DEATH_RUNE              = -1603067,
-    SAY_MOLGEIM_SURGE                   = -1603068,
-    SAY_MOLGEIM_SLAY_1                  = -1603069,
-    SAY_MOLGEIM_SLAY_2                  = -1603070,
-    SAY_MOLGEIM_BERSERK                 = -1603071,
+    SAY_MOLGEIM_AGGRO                   = 34328,
+    SAY_MOLGEIM_DEATH_1                 = 34333,
+    SAY_MOLGEIM_DEATH_2                 = 34334,
+    SAY_MOLGEIM_DEATH_RUNE              = 34331,
+    SAY_MOLGEIM_SURGE                   = 34332,
+    SAY_MOLGEIM_SLAY_1                  = 34329,
+    SAY_MOLGEIM_SLAY_2                  = 34330,
+    SAY_MOLGEIM_BERSERK                 = 34320,
 
-    SAY_STEEL_AGGRO                     = -1603072,
-    SAY_STEEL_DEATH_1                   = -1603073,
-    SAY_STEEL_DEATH_2                   = -1603074,
-    SAY_STEEL_SLAY_1                    = -1603075,
-    SAY_STEEL_SLAY_2                    = -1603076,
-    SAY_STEEL_OVERWHELM                 = -1603077,
-    SAY_STEEL_BERSERK                   = -1603078,
+    SAY_STEEL_AGGRO                     = 34321,
+    SAY_STEEL_DEATH_1                   = 34325,
+    SAY_STEEL_DEATH_2                   = 34326,
+    SAY_STEEL_SLAY_1                    = 34322,
+    SAY_STEEL_SLAY_2                    = 34323,
+    SAY_STEEL_OVERWHELM                 = 34324,
+    SAY_STEEL_BERSERK                   = 34320,
 
     // Common spells
     SPELL_BERSERK                       = 62535,        // triggers 47008 after 15 min
@@ -111,11 +111,13 @@ enum
 
     POINT_ID_LIFT_OFF                   = 1,
     POINT_ID_LAND                       = 2,
+    POINT_ID_PRECHANNEL                 = 3,
 };
 
 enum BrundirActions
 {
     BRUNDIR_PREFIGHT_CHANNEL,
+    BRUNDIR_CLOSE_DOOR,
     BRUNDIR_ACTIONS_MAX,
 };
 
@@ -125,19 +127,25 @@ struct boss_brundirAI : public BossAI
         m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        //SetDataType(TYPE_ASSEMBLY);
-        AddOnAggroText(SAY_BRUNDIR_AGGRO);
         AddOnKillText(SAY_BRUNDIR_SLAY_1, SAY_BRUNDIR_SLAY_2);
         AddOnDeathText(SAY_BRUNDIR_DEATH_1, SAY_BRUNDIR_DEATH_2);
         AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
+        AddCombatAction(BRUNDIR_CLOSE_DOOR, 3s);
         AddCustomAction(BRUNDIR_PREFIGHT_CHANNEL, 5s, [&]()
         {
             if (m_creature->IsInCombat())
                 return;
-            m_creature->CastSpell(nullptr, SPELL_LIGHTNING_CHANNEL_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
-        });
+            float o = urand(0, 5) * M_PI_F / 3.0f;
+            Creature* steel = m_instance->GetSingleCreatureFromStorage(NPC_STEELBREAKER);
+            if (!steel)
+                return;
+            m_creature->InterruptNonMeleeSpells(true);
+            Position dest;
+            steel->GetFirstCollisionPosition(dest, 10.f, o);
+            m_creature->GetMotionMaster()->MovePoint(POINT_ID_PRECHANNEL, dest, FORCED_MOVEMENT_RUN);
+        }, TIMER_COMBAT_OOC);
         m_creature->SetNoLoot(true);
-        m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 13.f);
+        m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 13.f); // Should be 10.f but that results him rising only 10 units, when he should rise by 13 (probably some collision height calculations)
     }
 
     instance_ulduar* m_instance;
@@ -147,6 +155,7 @@ struct boss_brundirAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
         m_creature->SetHover(false);
         m_creature->SetStunned(false);
     }
@@ -173,6 +182,15 @@ struct boss_brundirAI : public BossAI
         BossAI::JustDied(who);
         if (m_creature->GetHoverOffset() > 0)
             m_creature->GetMotionMaster()->MoveFall();
+    }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType != POINT_MOTION_TYPE || data != POINT_ID_PRECHANNEL)
+            return;
+        m_creature->CastSpell(nullptr, SPELL_LIGHTNING_CHANNEL_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
+        if (!m_creature->IsInCombat())
+            ResetTimer(BRUNDIR_PREFIGHT_CHANNEL, 10s);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -211,6 +229,17 @@ struct boss_brundirAI : public BossAI
                 break;
         }
     }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == BRUNDIR_CLOSE_DOOR)
+        {
+            if (m_creature->IsAlive() && m_creature->IsInCombat())
+                if (GameObject* door = m_instance->GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
+                    door->SetGoState(GO_STATE_READY);
+            DisableCombatAction(action);
+        }
+    }
 };
 
 enum MolgeimActions
@@ -225,7 +254,6 @@ struct boss_molgeimAI : public BossAI
         m_instance(dynamic_cast<instance_ulduar *>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddOnAggroText(SAY_MOLGEIM_AGGRO);
         AddOnKillText(SAY_MOLGEIM_SLAY_1, SAY_MOLGEIM_SLAY_2);
         AddOnDeathText(SAY_MOLGEIM_DEATH_1, SAY_MOLGEIM_DEATH_2);
         AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
@@ -296,7 +324,6 @@ struct boss_steelbreakerAI : public BossAI
         m_instance(dynamic_cast<instance_ulduar *>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddOnAggroText(SAY_STEEL_AGGRO);
         AddOnKillText(SAY_STEEL_SLAY_1, SAY_STEEL_SLAY_2);
         AddOnDeathText(SAY_STEEL_DEATH_1, SAY_STEEL_DEATH_2);
         AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
@@ -387,6 +414,8 @@ struct LightningTendrils : public SpellScript, public AuraScript
 
     void OnApply(Aura* aura, bool apply) const override
     {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
         Unit* caster = aura->GetCaster();
         if (!caster)
             return;
