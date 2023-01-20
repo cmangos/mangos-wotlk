@@ -133,8 +133,11 @@ enum UnitVisFlags
 // These flags seem to be related to miscellaneous animations
 enum UnitMiscFlags
 {
+    UNIT_BYTE1_FLAG_GROUND       = 0x00,
     UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
     UNIT_BYTE1_FLAG_FLY_ANIM     = 0x02,                    // Creature that can fly and are not on the ground appear to have this flag. If they are on the ground, flag is not present.
+    UNIT_BYTE1_FLAG_REAL_FLY_ANIM= 0x03,
+    UNIT_BYTE1_FLAG_SUBMERGED    = 0x04,
     UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
 
@@ -2493,6 +2496,16 @@ class Unit : public WorldObject
         virtual bool CanWalk() const = 0;
         virtual bool IsFlying() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
 
+        float GetHoverOffset() const
+        {
+            return m_movementInfo.HasMovementFlag(MOVEFLAG_HOVER) ? GetFloatValue(UNIT_FIELD_HOVERHEIGHT) : 0.0f;
+        }
+
+        float GetHoverHeight() const
+        {
+            return GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
+        }
+
         // Take possession of an unit (pet, creature, ...)
         bool TakePossessOf(Unit* possessed);
 
@@ -2539,6 +2552,11 @@ class Unit : public WorldObject
         virtual void SetBaseWalkSpeed(float speed) { m_baseSpeedWalk = speed; }
         virtual void SetBaseRunSpeed(float speed, bool /*force*/ = true) { m_baseSpeedRun = speed; }
         float GetBaseRunSpeed() { return m_baseSpeedRun; }
+
+        void SetHoverHeight(float hoverHeight)
+        {
+            SetFloatValue(UNIT_FIELD_HOVERHEIGHT, hoverHeight);
+        }
 
         bool IsSpellProccingHappening() const { return m_spellProcsHappening; }
         void AddDelayedHolderDueToProc(SpellAuraHolder* holder) { m_delayedSpellAuraHolders.push_back(holder); }
