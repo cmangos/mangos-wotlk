@@ -580,7 +580,7 @@ bool MotionMaster::MoveFall(ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/*
 
     // use larger distance for vmap height search than in most other cases
     float tz = m_owner->GetMap()->GetHeight(m_owner->GetPhaseMask(), x, y, z);
-
+    tz += m_owner->GetHoverOffset();
     if (tz <= INVALID_HEIGHT)
     {
         DEBUG_LOG("MotionMaster::MoveFall: unable retrive a proper height at map %u (x: %f, y: %f, z: %f).", m_owner->GetMap()->GetId(), x, y, z);

@@ -2490,6 +2490,11 @@ class Unit : public WorldObject
         virtual bool CanWalk() const = 0;
         virtual bool IsFlying() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_FLYING); }
 
+        float GetHoverOffset() const
+        {
+            return m_movementInfo.HasMovementFlag(MOVEFLAG_HOVER) ? GetFloatValue(UNIT_FIELD_HOVERHEIGHT) : 0.0f;
+        }
+
         // Take possession of an unit (pet, creature, ...)
         bool TakePossessOf(Unit* possessed);
 
@@ -2536,6 +2541,11 @@ class Unit : public WorldObject
         virtual void SetBaseWalkSpeed(float speed) { m_baseSpeedWalk = speed; }
         virtual void SetBaseRunSpeed(float speed, bool /*force*/ = true) { m_baseSpeedRun = speed; }
         float GetBaseRunSpeed() { return m_baseSpeedRun; }
+
+        void SetHoverHeight(float hoverHeight)
+        {
+            SetFloatValue(UNIT_FIELD_HOVERHEIGHT, hoverHeight);
+        }
 
         bool IsSpellProccingHappening() const { return m_spellProcsHappening; }
         void AddDelayedHolderDueToProc(SpellAuraHolder* holder) { m_delayedSpellAuraHolders.push_back(holder); }
