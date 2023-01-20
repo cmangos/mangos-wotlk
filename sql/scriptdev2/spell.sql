@@ -1095,6 +1095,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61883,'spell_lightning_tendrils_visual'),
 (61887,'spell_lightning_tendrils'),
 (61888,'spell_overwhelming_power'),
+(61900,'spell_electrical_charge_council'),
 (61915,'spell_lightning_whirl_trigger'),
 (61916,'spell_lightning_whirl'),
 (61920,'spell_supercharge_iron_council'),
