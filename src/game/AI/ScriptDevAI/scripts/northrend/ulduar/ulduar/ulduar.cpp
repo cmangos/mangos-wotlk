@@ -651,7 +651,8 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             {
                 if (GameObject* door = GetSingleGameObjectFromStorage(GO_ARCHIVUM_DOOR))
                     door->SetGoState(GO_STATE_ACTIVE);
-                //DoUseDoorOrButton(GO_ARCHIVUM_DOOR);
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
 
                 if (Player* pPlayer = GetPlayerInMap())
                 {
@@ -661,11 +662,21 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             else if (uiData == IN_PROGRESS)
             {
+                switch (urand(0,2))
+                {
+                    case 0: if(Unit* brundir = GetSingleCreatureFromStorage(NPC_BRUNDIR)) DoBroadcastText(34314, brundir); break;
+                    case 1: if(Unit* molgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM)) DoBroadcastText(34328, molgeim); break;
+                    case 2: if(Unit* steel = GetSingleCreatureFromStorage(NPC_STEELBREAKER)) DoBroadcastText(34321, steel); break;
+                }
+
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_STUNNED, true);
             }
+            else if (uiData == FAIL)
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
             break;
         case TYPE_KOLOGARN:
             m_auiEncounter[uiType] = uiData;
