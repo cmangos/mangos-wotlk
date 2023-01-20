@@ -168,6 +168,13 @@ struct boss_brundirAI : public BossAI
             m_instance->SetData(TYPE_ASSEMBLY, FAIL);
     }
 
+    void JustDied(Unit* who) override
+    {
+        BossAI::JustDied(who);
+        if (m_creature->GetHoverOffset() > 0)
+            m_creature->GetMotionMaster()->MoveFall();
+    }
+
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->AI())
@@ -334,10 +341,8 @@ struct LightningWhirlHeroic : public SpellScript
 
 struct SuperChargeIronCouncil : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnInit(Spell* spell) const override
     {
-        if (effIdx != EFFECT_INDEX_2)
-            return;
         Unit* caster = spell->GetCaster();
         if (!caster)
             return;
@@ -425,7 +430,7 @@ struct LightningTendrils : public SpellScript, public AuraScript
             return;
         if (aura->GetAuraTicks() <= 29)
         {
-            if (aura->GetAuraTicks() % 5)
+            if (!(aura->GetAuraTicks() % 5))
             {
                 if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
                 {
@@ -437,7 +442,7 @@ struct LightningTendrils : public SpellScript, public AuraScript
             {
                 float gZ = caster->GetMap()->GetHeight(caster->GetPhaseMask(), caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
                 caster->GetMotionMaster()->Clear();
-                caster->GetMotionMaster()->MovePoint(POINT_ID_LAND, caster->GetPositionX(), caster->GetPositionY(), gZ);
+                caster->GetMotionMaster()->MovePointTOL(POINT_ID_LAND, caster->GetPositionX(), caster->GetPositionY(), gZ, false);
                 caster->SetHover(false);
             }
             return;
@@ -511,9 +516,31 @@ struct OverwhelmingPower : public SpellScript
 
 struct StaticDisruption : public SpellScript
 {
-    void OnInit(Spell* spell) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        spell->SetFilteringScheme(EFFECT_INDEX_0, true, SCHEME_FURTHEST);
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+        auto targets = spell->GetTargetList();
+        if (targets.empty())
+            return;
+        bool isRegularDifficulty = caster->GetMap()->IsRegularDifficulty();
+        UnitList unitList;
+        for (auto& target : targets)
+        {
+            if (Unit* utarget = caster->GetMap()->GetUnit(target.targetGUID))
+                unitList.push_back(utarget);
+        }
+        unitList.sort(TargetDistanceOrderFarAway(caster));
+        unitList.resize(std::min(uint32(unitList.size()), uint32(isRegularDifficulty ? 3 : 7)));
+        std::vector targetVector(unitList.begin(), unitList.end());
+        std::shuffle(targetVector.begin(), targetVector.end(), *GetRandomGenerator());
+        if (Unit* target = targetVector.front())
+        {
+            caster->CastSpell(target, isRegularDifficulty ? SPELL_STATIC_DISRUPTION : SPELL_STATIC_DISRUPTION_H, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        }
     }
 
     SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
@@ -521,7 +548,7 @@ struct StaticDisruption : public SpellScript
         Unit* caster = spell->GetCaster();
         if (!caster)
             return SPELL_FAILED_CASTER_DEAD;
-        if (caster->GetAuraCount(SPELL_SUPERCHARGE) < 2)
+        if (caster->GetAuraCount(SPELL_SUPERCHARGE) < 1)
             return SPELL_FAILED_CASTER_AURASTATE;
         return SPELL_CAST_OK;
     }
