@@ -573,7 +573,7 @@ struct StaticDisruption : public SpellScript
                 unitList.push_back(utarget);
         }
         unitList.sort(TargetDistanceOrderFarAway(caster));
-        unitList.resize(std::min(uint32(unitList.size()), uint32(isRegularDifficulty ? 3 : 7)));
+        unitList.resize(std::min(uint32(unitList.size()), uint32(isRegularDifficulty ? 2 : 3)));
         std::vector targetVector(unitList.begin(), unitList.end());
         std::shuffle(targetVector.begin(), targetVector.end(), *GetRandomGenerator());
         if (Unit* target = targetVector.front())
