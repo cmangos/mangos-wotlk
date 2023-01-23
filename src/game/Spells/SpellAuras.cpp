@@ -5555,34 +5555,6 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
             target->CastSpell(target, 25860, TRIGGERED_OLD_TRIGGERED, nullptr, this);
     }
 
-    // Swift Flight Form check for higher speed flying mounts
-    if (apply && target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->Id == 40121)
-    {
-        for (PlayerSpellMap::const_iterator iter = ((Player*)target)->GetSpellMap().begin(); iter != ((Player*)target)->GetSpellMap().end(); ++iter)
-        {
-            if (iter->second.state != PLAYERSPELL_REMOVED)
-            {
-                bool changedSpeed = false;
-                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(iter->first);
-                for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-                {
-                    if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
-                    {
-                        int32 mountSpeed = spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
-                        if (mountSpeed > m_modifier.m_amount)
-                        {
-                            m_modifier.m_amount = mountSpeed;
-                            changedSpeed = true;
-                            break;
-                        }
-                    }
-                }
-                if (changedSpeed)
-                    break;
-            }
-        }
-    }
-
     target->UpdateSpeed(MOVE_FLIGHT, true);
 }
 

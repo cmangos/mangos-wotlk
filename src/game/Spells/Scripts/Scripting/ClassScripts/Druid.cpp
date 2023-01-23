@@ -143,6 +143,34 @@ struct ShredDruid : public SpellScript
     }
 };
 
+// 40121 - Swift Flight Form (Passive)
+struct SwiftFlightFormPassive : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (!data.target->IsPlayer() || data.effIdx != EFFECT_INDEX_1)
+            return value;
+        Player* player = static_cast<Player*>(data.target);
+        for (PlayerSpellMap::const_iterator iter = player->GetSpellMap().begin(); iter != player->GetSpellMap().end(); ++iter)
+        {
+            if (iter->second.state != PLAYERSPELL_REMOVED)
+            {
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(iter->first);
+                for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+                {
+                    if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)
+                    {
+                        int32 mountSpeed = spellInfo->CalculateSimpleValue(SpellEffectIndex(i));
+                        if (mountSpeed > value)
+                            return mountSpeed;
+                    }
+                }
+            }
+        }
+        return value;
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterSpellScript<Regrowth>("spell_regrowth");
@@ -152,4 +180,5 @@ void LoadDruidScripts()
     RegisterSpellScript<WildGrowth>("spell_wild_growth");
     RegisterSpellScript<Brambles>("spell_brambles");
     RegisterSpellScript<ShredDruid>("spell_shred_druid");
+    RegisterSpellScript<SwiftFlightFormPassive>("spell_swift_flight_form_passive");
 }

@@ -1286,7 +1286,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27001,'spell_shred_druid'),
 (27002,'spell_shred_druid'),
 (48571,'spell_shred_druid'),
-(48572,'spell_shred_druid');
+(48572,'spell_shred_druid'),
+(40121,'spell_swift_flight_form_passive');
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
