@@ -1267,7 +1267,6 @@ UPDATE creature_template SET ScriptName='boss_sapphiron' WHERE entry=15989;
 UPDATE gameobject_template SET ScriptName='go_sapphiron_birth' WHERE entry=181356;
 UPDATE creature_template SET ScriptName='boss_kelthuzad' WHERE entry=15990;
 UPDATE creature_template SET ScriptName='npc_living_poison' WHERE Entry=16027;
-UPDATE creature_template SET ScriptName='npc_stoneskin_gargoyle' WHERE Entry=16168;
 UPDATE creature_template SET ScriptName='npc_obedience_crystal' WHERE Entry=29912;
 
 /* NETHERSTORM */

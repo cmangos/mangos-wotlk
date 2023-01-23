@@ -40,91 +40,6 @@ enum
     SPELL_EXPLODE           = 28433, // Used by Living Poison blobs when players come in range
 };
 
-enum GargoyleActions
-{
-    GARGOYLE_STONESKIN,
-    GARGOYLE_ACID_VOLLEY,
-    GARGOYLE_ACTION_MAX,
-};
-
-struct npc_stoneskin_gargoyleAI : public CombatAI
-{
-    npc_stoneskin_gargoyleAI(Creature* creature) : CombatAI(creature, GARGOYLE_ACTION_MAX)
-    {
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z) -> bool
-        {
-            return x > gargoyleResetCoords.x && y > gargoyleResetCoords.y && z > gargoyleResetCoords.z;
-        });
-        m_creature->SetForceAttackingCapability(true);
-        AddTimerlessCombatAction(GARGOYLE_STONESKIN, true);
-    }
-
-    bool m_canCastVolley;
-
-    void Reset() override
-    {
-        CombatAI::Reset();
-        TryStoneForm();
-
-        DoCastSpellIfCan(nullptr, SPELL_STEALTH_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-
-    void TryStoneForm()
-    {
-        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
-            {
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-                m_creature->SetImmuneToPlayer(true);
-            }
-        }
-    }
-
-    void JustRespawned() override
-    {
-        CombatAI::JustRespawned();
-        // All Stoneskin Gargoyles cast Acid Volley but the first one encountered
-        float respawnX, respawnY, respawnZ;
-        m_creature->GetRespawnCoord(respawnX, respawnY, respawnZ);
-        if (m_creature->GetDefaultMovementType() == IDLE_MOTION_TYPE || respawnZ < gargoyleResetCoords.z)
-            AddCombatAction(GARGOYLE_ACID_VOLLEY, 4000u);
-    }
-
-    void JustReachedHome() override
-    {
-        TryStoneForm();
-    }
-
-    void Aggro(Unit* /*enemy*/) override
-    {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_SPAWNING))
-        {
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-            m_creature->SetImmuneToPlayer(false);
-        }
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case GARGOYLE_ACID_VOLLEY:
-                if (DoCastSpellIfCan(m_creature, m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? SPELL_ACID_VOLLEY : SPELL_ACID_VOLLEY_25) == CAST_OK)
-                    ResetCombatAction(action,8000);
-                break;
-            case GARGOYLE_STONESKIN:
-                // Stoneskin at 30% HP
-                if (m_creature->GetHealthPercent() < 30.0f && !m_creature->HasAura(SPELL_STONESKIN))
-                {
-                    if (DoCastSpellIfCan(nullptr, SPELL_STONESKIN) == CAST_OK)
-                        DoScriptText(SAY_GARGOYLE_NOISE, m_creature);
-                }
-                break;
-        }
-    }
-};
-
 /*###################
 #   npc_living_poison
 ###################*/
@@ -155,12 +70,6 @@ struct npc_living_poisonAI : public ScriptedAI
 void AddSC_naxxramas()
 {
     Script* pNewScript = new Script;
-    pNewScript = new Script;
-    pNewScript->Name = "npc_stoneskin_gargoyle";
-    pNewScript->GetAI = &GetNewAIInstance<npc_stoneskin_gargoyleAI>;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_living_poison";
     pNewScript->GetAI = &GetNewAIInstance<npc_living_poisonAI>;
     pNewScript->RegisterSelf();
