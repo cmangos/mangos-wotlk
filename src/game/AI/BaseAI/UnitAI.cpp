@@ -859,6 +859,13 @@ CanCastResult UnitAI::HandleSpellCastResult(CanCastResult result, SpellEntry con
     return result;
 }
 
+void UnitAI::JumpingEnded()
+{
+    if (!m_unit->IsAlive() && !GetCombatScriptStatus())
+        return;
+    DoStartMovement(m_unit->GetVictim());
+}
+
 void UnitAI::AttackSpecificEnemy(std::function<void(Unit*, Unit*&)> check)
 {
     Unit* chosenEnemy = nullptr;

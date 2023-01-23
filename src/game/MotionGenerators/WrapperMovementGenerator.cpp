@@ -121,7 +121,12 @@ void AbstractWrapperMovementGenerator::Inform(Unit& owner)
     const MovementGeneratorType type = GetMovementGeneratorType();
 
     if (UnitAI* ai = owner.AI())
+    {
+        if (i_id == EVENT_JUMP)
+            ai->JumpingEnded();
+
         ai->MovementInform(type, i_id);
+    }
 
     if (owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).IsTemporarySummon())
     {

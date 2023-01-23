@@ -481,6 +481,7 @@ class UnitAI : public CombatActions
         virtual void TimedFleeingEnded();
         virtual void RetreatingArrived() {}
         virtual void RetreatingEnded() {}
+        virtual void JumpingEnded();
 
         void AttackSpecificEnemy(std::function<void(Unit*,Unit*&)> check);
         virtual void AttackClosestEnemy();
