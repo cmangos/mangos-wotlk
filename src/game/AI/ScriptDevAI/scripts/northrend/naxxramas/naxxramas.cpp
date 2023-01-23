@@ -301,7 +301,7 @@ void instance_naxxramas::OnCreatureRespawn(Creature* creature)
     }
 }
 
-void instance_naxxramas::OnPlayerDeath(Player* /*pPlayer*/)
+void instance_naxxramas::OnPlayerDeath(Player* /*player*/)
 {
     if (IsEncounterInProgress())
         SetData(TYPE_UNDYING_FAILED, DONE);
@@ -795,46 +795,58 @@ InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
     return new instance_naxxramas(pMap);
 }
 
-bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
+bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigger)
 {
-    if (pAt->id == AREATRIGGER_KELTHUZAD)
+    if (areaTrigger->id == AREATRIGGER_KELTHUZAD)
     {
-        if (pPlayer->IsGameMaster() || !pPlayer->IsAlive())
+        if (player->IsGameMaster() || !player->IsAlive())
             return false;
 
-        instance_naxxramas* pInstance = (instance_naxxramas*)pPlayer->GetInstanceData();
+        instance_naxxramas* instance = static_cast<instance_naxxramas*>(player->GetInstanceData());
 
-        if (!pInstance)
+        if (!instance)
             return false;
 
-        pInstance->SetChamberCenterCoords(pAt->x, pAt->y, pAt->z);
+        instance->SetChamberCenterCoords(areaTrigger->x, areaTrigger->y, areaTrigger->z);
 
-        if (pInstance->GetData(TYPE_KELTHUZAD) == NOT_STARTED)
+        if (instance->GetData(TYPE_KELTHUZAD) == NOT_STARTED)
         {
-            if (Creature* pKelthuzad = pInstance->GetSingleCreatureFromStorage(NPC_KELTHUZAD))
+            if (Creature* pKelthuzad = instance->GetSingleCreatureFromStorage(NPC_KELTHUZAD))
             {
                 if (pKelthuzad->IsAlive())
                 {
-                    pInstance->SetData(TYPE_KELTHUZAD, IN_PROGRESS);
+                    instance->SetData(TYPE_KELTHUZAD, IN_PROGRESS);
                     pKelthuzad->SetInCombatWithZone();
                 }
             }
         }
     }
 
-    if (pAt->id == AREATRIGGER_THADDIUS_DOOR)
+    if (areaTrigger->id == AREATRIGGER_THADDIUS_DOOR)
     {
-        if (instance_naxxramas* pInstance = (instance_naxxramas*)pPlayer->GetInstanceData())
+        if (instance_naxxramas* instance = static_cast<instance_naxxramas*>(player->GetInstanceData()))
         {
-            if (pInstance->GetData(TYPE_THADDIUS) == NOT_STARTED)
+            if (instance->GetData(TYPE_THADDIUS) == NOT_STARTED)
             {
-                if (Creature* pThaddius = pInstance->GetSingleCreatureFromStorage(NPC_THADDIUS))
+                if (Creature* pThaddius = instance->GetSingleCreatureFromStorage(NPC_THADDIUS))
                 {
-                    pInstance->SetData(TYPE_THADDIUS, SPECIAL);
+                    instance->SetData(TYPE_THADDIUS, SPECIAL);
                     DoScriptText(SAY_THADDIUS_GREET, pThaddius);
                 }
             }
         }
+    }
+
+    if (areaTrigger->id == AREATRIGGER_FROSTWYRM_TELE)
+    {
+        instance_naxxramas* instance = static_cast<instance_naxxramas*>(player->GetInstanceData());
+        if (!instance)
+            return false;
+
+        // Area trigger handles teleport in DB. Here we only need to check if all the end wing encounters are done
+        if (instance->GetData(TYPE_THADDIUS) != DONE || instance->GetData(TYPE_LOATHEB) != DONE || instance->GetData(TYPE_MAEXXNA) != DONE ||
+            instance->GetData(TYPE_FOUR_HORSEMEN) != DONE)
+            return true;
     }
 
     return false;
