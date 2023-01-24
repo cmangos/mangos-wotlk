@@ -73,7 +73,7 @@ struct WyvernSting : public AuraScript
     int32 OnDurationCalculate(WorldObject const* caster, Unit const* target, int32 duration) const override
     {
         // PVP DR example
-        if (caster->IsControlledByPlayer() && target->IsPlayerControlled())
+        if (target && caster->IsControlledByPlayer() && target->IsPlayerControlled())
             return 6000;
         return duration;
     }
