@@ -105,8 +105,8 @@ enum
     // SPELL_TARGET_SEARCH_B                = 63762,                    // moves the caster to the target location
     // SPELL_TARGET_SEARCH_C                = 63763,                    // these are not used since we are doing this by waypoint movement
     // SPELL_TARGET_SEARCH_D                = 63764,
-    // SPELL_BEAM_TARGET_STATE              = 62898,                    // cast by all tower reticles; purpose unk
-    // SPELL_BIRTH                          = 40031,                    // not used; purpose unk
+    SPELL_BEAM_TARGET_STATE                 = 62898,                    // cast by all tower reticles; purpose unk
+    SPELL_BIRTH                             = 40031,                    // not used; purpose unk
 
     // vehicle accessories
     //NPC_LEVIATHAN_SEAT                      = 33114,
@@ -125,6 +125,10 @@ enum
     NPC_MIMIRON_INFERNO_VEHICLE             = 33369,                    // has accessory 33370
     NPC_HODIR_FURY_VEHICLE                  = 33108,                    // has accessory 33212
     NPC_FREYA_WARD_VEHICLE                  = 33366,                    // has accessory 33367
+
+    /*
+UPDATE vehicle_accessory SET seat=0 WHERE vehicle_entry IN (33364, 33369, 33108, 33366);
+    */
 
     // freya's ward summons - handled by eventAI
     NPC_WRITHING_LASHER                     = 33387,                    // both spam spell 65062 on target
@@ -302,15 +306,23 @@ struct boss_flame_leviathanAI : public BossAI
         switch (summoned->GetEntry())
         {
             case NPC_THORIM_HAMMER_VEHICLE:
+                summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_LIGHTNING_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_MIMIRON_INFERNO_VEHICLE:
+                summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_RED_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_HODIR_FURY_VEHICLE:
+                summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BLUE_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_FREYA_WARD_VEHICLE:
+                summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_GREEN_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
@@ -648,8 +660,8 @@ struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
     {
         if (m_uiMimironInfernoTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MIMIRON_INFERNO) == CAST_OK)
-                m_uiMimironInfernoTimer = 1000;
+            if (DoCastSpellIfCan(nullptr, SPELL_MIMIRON_INFERNO) == CAST_OK)
+                m_uiMimironInfernoTimer = 2000;
         }
         else
             m_uiMimironInfernoTimer -= diff;
