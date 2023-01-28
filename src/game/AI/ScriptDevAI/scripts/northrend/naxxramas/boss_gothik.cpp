@@ -230,12 +230,14 @@ struct boss_gothikAI : public BossAI
     void EnterEvadeMode() override
     {
         BossAI::EnterEvadeMode();
-        m_creature->SetRespawnDelay(30 * IN_MILLISECONDS, true);
+        m_creature->SetRespawnDelay(30, true);
         m_creature->ForcedDespawn();
     }
 
     void JustSummoned(Creature* summoned) override
     {
+        if (HasPlayersInLeftSide())
+            summoned->SetInCombatWithZone();
         m_summonedAddGuids.push_back(summoned->GetObjectGuid());
     }
 
