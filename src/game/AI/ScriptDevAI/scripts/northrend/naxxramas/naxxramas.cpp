@@ -251,6 +251,12 @@ void instance_naxxramas::OnObjectCreate(GameObject* pGo)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             break;
 
+        case GO_KELTHUZAD_WINDOW_1:
+        case GO_KELTHUZAD_WINDOW_2:
+        case GO_KELTHUZAD_WINDOW_3:
+        case GO_KELTHUZAD_WINDOW_4:
+            break;
+
         default:
             // Heigan Traps - many different entries which are only required for sorting
             if (pGo->GetGoType() == GAMEOBJECT_TYPE_TRAP)

@@ -75,6 +75,13 @@ enum
     MAX_ABOMINATION_COUNT               = 8,
     MAX_BANSHEE_COUNT                   = 8,
 
+    SPELL_CHANNEL_VISUAL_EFFECT         = 29422,            // Handle the application of summoning auras
+
+    NPC_WORLD_TRIGGER                   = 15384,            // Handle the summoning of the NPCs in each alcove
+
+    MAX_SUMMON_TICKS                    = 5 * MINUTE + 10,  // Adds despawn after 5 min 10 secs
+    MAX_CHANNEL_TICKS                   = 5 * MINUTE + 25,  // Start phase 2 after 5 min 25 secs
+
     // Call forth one of the add to the center of the room
     // Soldier of the Frozen Waste (triggers 28415)
     SPELL_SUMMON_PERIODIC_A_1           = 29410,            // Every 5 secs
@@ -160,80 +167,31 @@ enum Phase
 
 enum KelThuzadActions
 {
-    KELTHUZAD_SUMMON_GUARDIAN,
     KELTHUZAD_PHASE_GUARDIANS,
     KELTHUZAD_ACTIONS_MAX,
-    KELTHUZAD_COMBAT_PHASE,
-    KELTHUZAD_SUMMON_INTRO,
-    KELTHUZAD_SUMMON_SOLDIER,
-    KELTHUZAD_SUMMON_WEAVER,
-    KELTHUZAD_SUMMON_ABO,
+    KELTHUZAD_LICH_KING_ANSWER
 };
 
 struct boss_kelthuzadAI : public BossAI
 {
     boss_kelthuzadAI(Creature* creature) : BossAI(creature, KELTHUZAD_ACTIONS_MAX),
         m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_uiGuardiansCountMax(m_isRegularMode ? 2 : 4)
     {
         SetDataType(TYPE_KELTHUZAD);
         AddOnKillText(SAY_SLAY1, SAY_SLAY2);
         AddOnDeathText(SAY_DEATH);
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
-        AddCombatAction(KELTHUZAD_SUMMON_GUARDIAN, true);
+        AddCustomAction(KELTHUZAD_LICH_KING_ANSWER, true, [&]() { HandleLichKingAnswer(); });
         AddTimerlessCombatAction(KELTHUZAD_PHASE_GUARDIANS, false);
-        AddCustomAction(KELTHUZAD_COMBAT_PHASE, true, [&]()
-        {
-            SetCombatScriptStatus(false);
-            m_uiPhase = PHASE_NORMAL;
-            DespawnIntroCreatures();
-
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_UNINTERACTIBLE);
-            SetCombatMovement(true);
-            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-
-            AddInitialCooldowns();
-
-            DoScriptText(EMOTE_PHASE2, m_creature);
-        });
-        AddCustomAction(KELTHUZAD_SUMMON_SOLDIER, true, [&]()
-        {
-            if (m_uiSoldierCount >= MAX_SOLDIER_COUNT || m_uiPhase != PHASE_INTRO)
-            {
-                DisableTimer(KELTHUZAD_SUMMON_SOLDIER);
-                return;
-            }
-            SummonMob(NPC_SOLDIER_FROZEN);
-            ResetTimer(KELTHUZAD_SUMMON_SOLDIER, 3s);
-        });
-        AddCustomAction(KELTHUZAD_SUMMON_WEAVER, true, [&]()
-        {
-            if (m_uiBansheeCount >= MAX_BANSHEE_COUNT || m_uiPhase != PHASE_INTRO)
-            {
-                DisableTimer(KELTHUZAD_SUMMON_WEAVER);
-                return;
-            }
-            SummonMob(NPC_SOUL_WEAVER);
-            ResetTimer(KELTHUZAD_SUMMON_WEAVER, 25s);
-        });
-        AddCustomAction(KELTHUZAD_SUMMON_ABO, true, [&]()
-        {
-            if (m_uiAbominationCount >= MAX_ABOMINATION_COUNT || m_uiPhase != PHASE_INTRO)
-            {
-                DisableTimer(KELTHUZAD_SUMMON_ABO);
-                return;
-            }
-            SummonMob(NPC_UNSTOPPABLE_ABOM);
-            ResetTimer(KELTHUZAD_SUMMON_ABO, 3s);
-        });
-        m_uiGuardiansCountMax = m_isRegularMode ? 2 : 4;
     }
 
     instance_naxxramas* m_instance;
     bool m_isRegularMode;
 
     uint32 m_uiGuardiansCount;
-    uint32 m_uiGuardiansCountMax;
+    uint32 m_uiGuardiansCountMax; // must be after regular mode
 
     uint8  m_uiPhase;
     uint32 m_uiSoldierCount;
@@ -242,8 +200,10 @@ struct boss_kelthuzadAI : public BossAI
     uint32 m_uiIntroPackCount;
     uint32 m_uiKilledAbomination;
 
-    GuidVector m_introMobsSet;
-    GuidSet m_lAddsSet;
+    uint32 m_summonTicks;
+    GuidVector m_introMobsList;
+    CreatureList m_summoningTriggers;
+    GuidVector m_guardians;
 
     void Reset() override
     {
@@ -276,36 +236,28 @@ struct boss_kelthuzadAI : public BossAI
     void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-        DespawnAdds();
+        DespawnGuids(m_guardians);
 
         if (m_instance)
             m_instance->SetData(TYPE_KELTHUZAD, DONE);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         DespawnIntroCreatures();
-        DespawnAdds();
+        DespawnGuids(m_guardians);
 
         if (m_instance)
             m_instance->SetData(TYPE_KELTHUZAD, NOT_STARTED);
+
+        m_creature->SetRespawnDelay(30, true);
+        m_creature->ForcedDespawn();
     }
 
     void Aggro(Unit* enemy) override
     {
-        ResetTimer(KELTHUZAD_COMBAT_PHASE, 3min + 48s);
         DoScriptText(SAY_SUMMON_MINIONS, m_creature);
         DoCastSpellIfCan(nullptr, SPELL_CHANNEL_VISUAL);
-        AddCustomAction(KELTHUZAD_SUMMON_INTRO, 2s, [&]()
-        {
-            SummonIntroCreatures(m_uiIntroPackCount);
-            ++m_uiIntroPackCount;
-            if (m_uiIntroPackCount < 8)
-                ResetTimer(KELTHUZAD_SUMMON_INTRO, 2s);
-        });
-        ResetTimer(KELTHUZAD_SUMMON_SOLDIER, 5s);
-        ResetTimer(KELTHUZAD_SUMMON_WEAVER, 5s);
-        ResetTimer(KELTHUZAD_SUMMON_ABO, 5s);
     }
 
     void MoveInLineOfSight(Unit* who) override
@@ -316,101 +268,169 @@ struct boss_kelthuzadAI : public BossAI
         ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void DespawnIntroCreatures()
+    void StartPhase2()
     {
-        DespawnGuids(m_introMobsSet);
+        SetCombatScriptStatus(false);
+        m_uiPhase = PHASE_NORMAL;
+
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_UNINTERACTIBLE);
+        SetCombatMovement(true);
+        m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+
+        AddInitialCooldowns();
+
+        DoScriptText(EMOTE_PHASE2, m_creature);
     }
 
-    void DespawnAdds()
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
+    {
+        // Phase 1 start
+        if (spell->Id == SPELL_CHANNEL_VISUAL)
+        {
+            DoScriptText(SAY_SUMMON_MINIONS, m_creature);
+
+            // Get all summoning trigger NPCs
+            m_summoningTriggers.clear();
+            GetCreatureListWithEntryInGrid(m_summoningTriggers, m_creature, NPC_WORLD_TRIGGER, 100.0f);
+        }
+        // Phase 1 periodic update every 1 second (everything in phase 1 is handled here rather than in UpdateAI())
+        else if (spell->Id == SPELL_CHANNEL_VISUAL_EFFECT)
+        {
+            ++m_summonTicks;
+            switch (m_summonTicks)
+            {
+                case 4:
+                    SummonIntroCreatures(NPC_SOLDIER_FROZEN, 9);
+                    break;
+                case 9:
+                    SummonIntroCreatures(NPC_UNSTOPPABLE_ABOM, 3);
+                    break;
+                case 12:
+                    SummonIntroCreatures(NPC_SOUL_WEAVER, 1);
+                    break;
+                case MAX_SUMMON_TICKS:
+                    DespawnIntroCreatures();    // Will leave those that for some reason are in combat
+                    switch (urand(0, 2))
+                    {
+                        case 0:
+                            DoScriptText(SAY_AGGRO1, m_creature);
+                            break;
+                        case 1:
+                            DoScriptText(SAY_AGGRO2, m_creature);
+                            break;
+                        case 2:
+                            DoScriptText(SAY_AGGRO3, m_creature);
+                            break;
+                    }
+                    break;
+                case MAX_CHANNEL_TICKS:
+                    StartPhase2();
+                    break;
+                default:
+                    UpdateSummoning();
+                    // Kel'Thuzad does not enter combat until phase 2, so we check every second if there are still players alive and force him to evade otherwise
+                    if (!m_instance->GetPlayerInMap(true, false))
+                        EnterEvadeMode();
+                    break;
+            }
+        }
+    }
+
+    // Called every tick (1 second) to check if the periodic summoning auras on Kel'Thuzad need to be updated or removed
+    void UpdateSummoning()
+    {
+        for (auto add : phaseOneAdds)
+        {
+            uint32 summoningAura = 0;
+            std::vector<std::vector<uint32>> spellTimers;
+            switch (add)
+            {
+                case NPC_SOUL_WEAVER:
+                    spellTimers = soulWeaverSpellsTimers;
+                    break;
+                case NPC_UNSTOPPABLE_ABOM:
+                    spellTimers = unstoppableAbominationSpellsTimers;
+                    break;
+                case NPC_SOLDIER_FROZEN:
+                    spellTimers = soldierFrozenWasteSpellsTimers;
+                    break;
+                default:
+                    return;
+            }
+
+            // Iterate the summoning auras timeline for the current add as long as the tick is in range
+            // then exit with the last valid summoning aura
+            for (const auto& spellTimer : spellTimers)
+            {
+                if (spellTimer[0] <= m_summonTicks)
+                    summoningAura = spellTimer[1];
+                else
+                    break;
+            }
+
+            // Do not update aura for current add type if summoning aura is already present
+            if (m_creature->HasAura(summoningAura))
+                continue;
+
+            // Clear all summoning auras for current add before applying the new one (especially needed in case new one is NULL)
+            StopAllSummoningForNPC(add);
+            DoCastSpellIfCan(m_creature, summoningAura, CAST_TRIGGERED);
+        }
+    }
+
+    // Remove all periodic auras on Kel'Thuzad used to summon a given NPC type
+    void StopAllSummoningForNPC(uint32 entry)
+    {
+        auto iter = summoningSpells.begin();
+        while (iter != summoningSpells.end())
+        {
+            if (iter->first == entry)
+                for (auto aura : iter->second)
+                    m_creature->RemoveAurasDueToSpell(aura);
+            ++iter;
+        }
+    }
+
+    // Summon three type of adds in each of the surrounding alcoves
+    bool SummonIntroCreatures(uint32 entry, uint8 count)
+    {
+        if (!m_instance)
+            return false;
+
+        float newX, newY, newZ;
+
+        // Spawn all the adds for phase 1 from each of the trigger NPCs
+        for (auto& trigger : m_summoningTriggers)
+        {
+            // "How many NPCs per type" is stored in a vector: {npc_entry:number_of_npcs}
+            for (uint8 i = 0; i < count; ++i)
+            {
+                m_creature->GetRandomPoint(trigger->GetPositionX(), trigger->GetPositionY(), trigger->GetPositionZ(), 12.0f, newX, newY, newZ);
+                if (Creature* summoned = m_creature->SummonCreature(entry, newX, newY, newZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5 * MINUTE * IN_MILLISECONDS))
+                {
+                    if (summoned->AI())
+                        summoned->AI()->SetReactState(REACT_PASSIVE);   // Intro mobs only attack if engaged or hostile target in range
+                }
+            }
+        }
+        return true;
+    }
+
+    void DespawnIntroCreatures()
     {
         if (m_instance)
         {
-            for (auto itr : m_lAddsSet)
+            for (auto itr : m_introMobsList)
             {
                 if (Creature* creature = m_instance->instance->GetCreature(itr))
                 {
-                    if (creature->IsAlive())
-                    {
-                        creature->AI()->EnterEvadeMode();
-                        creature->ForcedDespawn(15000);
-                    }
+                    if (creature->IsAlive() && !creature->IsInCombat())
+                        creature->ForcedDespawn();
                 }
             }
         }
 
-        m_lAddsSet.clear();
-    }
-
-    float GetLocationAngle(uint32 uiId) const
-    {
-        switch (uiId)
-        {
-            case 1: return M_PI_F - M_F_ANGLE;              // south
-            case 2: return M_PI_F / 2 * 3 - M_F_ANGLE;      // east
-            case 3: return M_PI_F / 2 - M_F_ANGLE;          // west
-            case 4: return M_PI_F / 4 - M_F_ANGLE;          // north-west
-            case 5: return M_PI_F / 4 * 7 - M_F_ANGLE;      // north-east
-            case 6: return M_PI_F / 4 * 5 - M_F_ANGLE;      // south-east
-            case 7: return M_PI_F / 4 * 3 - M_F_ANGLE;      // south-west
-        }
-
-        return M_F_ANGLE;
-    }
-
-    void SummonIntroCreatures(uint32 packId)
-    {
-        if (!m_instance)
-            return;
-
-        float fAngle = GetLocationAngle(packId + 1);
-
-        float fX, fY, fZ;
-        m_instance->GetChamberCenterCoords(fX, fY, fZ);
-
-        fX += M_F_RANGE * cos(fAngle);
-        fY += M_F_RANGE * sin(fAngle);
-        fZ += M_F_HEIGHT;
-
-        MaNGOS::NormalizeMapCoord(fX);
-        MaNGOS::NormalizeMapCoord(fY);
-
-        uint32 uiNpcEntry = NPC_SOUL_WEAVER;
-
-        for (uint8 uiI = 0; uiI < 14; ++uiI)
-        {
-            if (uiI > 0)
-            {
-                if (uiI < 4)
-                    uiNpcEntry = NPC_UNSTOPPABLE_ABOM;
-                else
-                    uiNpcEntry = NPC_SOLDIER_FROZEN;
-            }
-
-            float fNewX, fNewY, fNewZ;
-            m_creature->GetRandomPoint(fX, fY, fZ, 12.0f, fNewX, fNewY, fNewZ);
-
-            m_creature->SummonCreature(uiNpcEntry, fNewX, fNewY, fNewZ, fAngle + M_PI_F, TEMPSPAWN_CORPSE_DESPAWN, 5000);
-        }
-    }
-
-    void SummonMob(uint32 uiType)
-    {
-        if (!m_instance)
-            return;
-
-        float fAngle = GetLocationAngle(urand(1, 7));
-
-        float fX, fY, fZ;
-        m_instance->GetChamberCenterCoords(fX, fY, fZ);
-
-        fX += M_F_RANGE * cos(fAngle);
-        fY += M_F_RANGE * sin(fAngle);
-        fZ += M_F_HEIGHT;
-
-        MaNGOS::NormalizeMapCoord(fX);
-        MaNGOS::NormalizeMapCoord(fY);
-
-        m_creature->SummonCreature(uiType, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
+        m_introMobsList.clear();
     }
 
     void JustSummoned(Creature* summoned) override
@@ -421,7 +441,7 @@ struct boss_kelthuzadAI : public BossAI
             {
                 DoScriptText(EMOTE_GUARDIAN, m_creature);
 
-                m_lAddsSet.insert(summoned->GetObjectGuid());
+                m_guardians.push_back(summoned->GetObjectGuid());
                 ++m_uiGuardiansCount;
 
                 summoned->SetInCombatWithZone();
@@ -430,42 +450,7 @@ struct boss_kelthuzadAI : public BossAI
             case NPC_SOLDIER_FROZEN:
             case NPC_UNSTOPPABLE_ABOM:
             case NPC_SOUL_WEAVER:
-            {
-                if (m_uiIntroPackCount < 7)
-                    m_introMobsSet.push_back(summoned->GetObjectGuid());
-                else
-                {
-                    m_lAddsSet.insert(summoned->GetObjectGuid());
-
-                    if (m_instance)
-                    {
-                        float fX, fY, fZ;
-                        m_instance->GetChamberCenterCoords(fX, fY, fZ);
-                        summoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-                    }
-                }
-
-                break;
-            }
-        }
-    }
-
-    void SummonedCreatureJustDied(Creature* summoned) override
-    {
-        switch (summoned->GetEntry())
-        {
-            case NPC_GUARDIAN:
-            case NPC_SOLDIER_FROZEN:
-            case NPC_SOUL_WEAVER:
-                m_lAddsSet.erase(summoned->GetObjectGuid());
-                break;
-            case NPC_UNSTOPPABLE_ABOM:
-                m_lAddsSet.erase(summoned->GetObjectGuid());
-
-                ++m_uiKilledAbomination;
-                if (m_uiKilledAbomination >= ACHIEV_REQ_KILLED_ABOMINATIONS)
-                    m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_GET_ENOUGH, true);
-
+                m_introMobsList.push_back(summoned->GetObjectGuid());
                 break;
         }
     }
@@ -486,13 +471,20 @@ struct boss_kelthuzadAI : public BossAI
         }
     }
 
-    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
+    void HandleLichKingAnswer()
     {
-        switch (action)
-        {
-            case KELTHUZAD_SUMMON_GUARDIAN: return 5s;
-            default: return 0s;
-        }
+        // Start summoning Guardians of Icecrown
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_PERIODIC_D, TRIGGERED_OLD_TRIGGERED);
+        // Start checking if Guardians are shackled or not
+        m_creature->CastSpell(nullptr, SPELL_GUARDIAN_INIT, TRIGGERED_OLD_TRIGGERED);
+
+        if (Creature* lichKing = m_instance->GetSingleCreatureFromStorage(NPC_THE_LICHKING))
+            DoScriptText(SAY_ANSWER_REQUEST, lichKing);
+
+        m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_1);
+        m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_2);
+        m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_3);
+        m_instance->DoUseDoorOrButton(GO_KELTHUZAD_WINDOW_4);
     }
 
     void ExecuteAction(uint32 action) override
@@ -503,24 +495,13 @@ struct boss_kelthuzadAI : public BossAI
             {
                 if (m_creature->GetHealthPercent() < 45.0f)
                 {
-                    ResetCombatAction(KELTHUZAD_SUMMON_GUARDIAN, GetSubsequentActionTimer(KELTHUZAD_SUMMON_GUARDIAN));
+                    ResetTimer(KELTHUZAD_LICH_KING_ANSWER, 4000);
                     DoScriptText(SAY_REQUEST_AID, m_creature);
                     DisableCombatAction(action);
                 }
                 return;
             }
-            case KELTHUZAD_SUMMON_GUARDIAN:
-            {
-                if (m_uiGuardiansCount >= m_uiGuardiansCountMax)
-                {
-                    DisableCombatAction(action);
-                    return;
-                }
-                SummonMob(NPC_GUARDIAN);
-                break;
-            }
         }
-        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
 
