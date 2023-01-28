@@ -129,7 +129,7 @@ struct boss_nothAI : public BossAI
 
     void EnterEvadeMode() override
     {
-        m_creature->SetRespawnDelay(10 * IN_MILLISECONDS, true);
+        m_creature->SetRespawnDelay(10, true);
         m_creature->ForcedDespawn();
 
         DespawnGuids(m_undeadSummonGuidList);

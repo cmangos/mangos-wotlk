@@ -377,7 +377,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_MAEXXNA:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_ARAC_MAEX_INNER_DOOR, uiData);
+            DoUseOpenableObject(GO_ARAC_MAEX_INNER_DOOR, uiData != IN_PROGRESS);
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_ARAC_EYE_RAMP);
@@ -389,7 +389,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_NOTH:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_PLAG_NOTH_ENTRY_DOOR);
+            DoUseOpenableObject(GO_PLAG_NOTH_ENTRY_DOOR, uiData != IN_PROGRESS);
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_PLAG_NOTH_EXIT_DOOR);
@@ -406,7 +406,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_LOATHEB:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_PLAG_LOAT_DOOR);
+            DoUseOpenableObject(GO_PLAG_LOAT_DOOR, uiData != IN_PROGRESS);
             if (uiData == IN_PROGRESS)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SPORE_LOSER, true);
             else if (uiData == DONE)
@@ -426,22 +426,21 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
             switch (uiData)
             {
                 case IN_PROGRESS:
-                    DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
-                    DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
+                    DoUseOpenableObject(GO_MILI_GOTH_ENTRY_GATE, false);
+                    DoUseOpenableObject(GO_MILI_GOTH_COMBAT_GATE, false);
                     break;
                 case SPECIAL:
-                    DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
+                    DoUseOpenableObject(GO_MILI_GOTH_COMBAT_GATE, true);
                     break;
                 case FAIL:
-                    if (m_auiEncounter[uiType] == IN_PROGRESS)
-                        DoUseDoorOrButton(GO_MILI_GOTH_COMBAT_GATE);
-
-                    DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
+                    DoUseOpenableObject(GO_MILI_GOTH_ENTRY_GATE, true);
+                    DoUseOpenableObject(GO_MILI_GOTH_COMBAT_GATE, true);
                     break;
                 case DONE:
-                    DoUseDoorOrButton(GO_MILI_GOTH_ENTRY_GATE);
-                    DoUseDoorOrButton(GO_MILI_GOTH_EXIT_GATE);
-                    DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
+                    DoUseOpenableObject(GO_MILI_GOTH_ENTRY_GATE, true);
+                    DoUseOpenableObject(GO_MILI_GOTH_EXIT_GATE, true);
+                    DoUseOpenableObject(GO_MILI_GOTH_COMBAT_GATE, true);
+                    DoUseOpenableObject(GO_MILI_HORSEMEN_DOOR, true);
 
                     m_dialogueHelper.StartNextDialogueText(NPC_THANE);
                     break;
@@ -478,7 +477,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_CHEST_HORSEMEN_NORM : GO_CHEST_HORSEMEN_HERO, 30 * MINUTE);
                 m_uiTauntTimer = 5000;
             }
-            DoUseDoorOrButton(GO_MILI_HORSEMEN_DOOR);
+            DoUseOpenableObject(GO_MILI_HORSEMEN_DOOR, uiData != IN_PROGRESS);
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_PATCHWERK:
@@ -506,7 +505,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
 
             m_auiEncounter[uiType] = uiData;
             if (uiData != SPECIAL)
-                DoUseDoorOrButton(GO_CONS_THAD_DOOR, uiData);
+                DoUseOpenableObject(GO_CONS_THAD_DOOR, uiData != IN_PROGRESS);
             if (uiData == IN_PROGRESS)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHOCKING, true);
             if (uiData == DONE)

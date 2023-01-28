@@ -147,13 +147,13 @@ struct boss_thaddiusAI : public BossAI
             Creature* stalagg = m_instance->GetSingleCreatureFromStorage(NPC_STALAGG);
             if (feugen)
             {
+                feugen->SetRespawnDelay(0, true);
                 feugen->ForcedDespawn();
-                feugen->Respawn();
             }
             if (stalagg)
             {
+                stalagg->SetRespawnDelay(0, true);
                 stalagg->ForcedDespawn();
-                stalagg->Respawn();
             }
         }
     }
