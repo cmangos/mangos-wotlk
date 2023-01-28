@@ -20,7 +20,7 @@
 #define MANGOS_CINEMATICMGR_H
 
 #include "Entities/Object.h"
-#include "M2Stores.h"
+#include "Models/M2Stores.h"
 
 #define CINEMATIC_LOOKAHEAD (2 * IN_MILLISECONDS)
 #define CINEMATIC_UPDATEDIFF 200

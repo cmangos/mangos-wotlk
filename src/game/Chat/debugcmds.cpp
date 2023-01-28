@@ -33,7 +33,7 @@
 #include "Spells/SpellMgr.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Maps/InstanceData.h"
-#include "Cinematics/M2Stores.h"
+#include "Models/M2Stores.h"
 #include "Entities/Transports.h"
 #include "World/World.h"
 

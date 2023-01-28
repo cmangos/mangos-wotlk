@@ -25,6 +25,7 @@ DETAIL_LOG_FILE="MaNGOSExtractor_detailed.log"
 USE_AD="0"
 USE_VMAPS="0"
 USE_MMAPS="0"
+USE_MODELS="0"
 USE_MMAPS_OFFMESH="0"
 USE_MMAPS_DELAY=""
 AD_RES=""
@@ -73,6 +74,7 @@ then
   USE_AD="1"
   USE_VMAPS="1"
   USE_MMAPS="1"
+  USE_MODELS="1"
   USE_MMAPS_DELAY="no"
 else
   ## do some questioning!
@@ -86,11 +88,17 @@ else
     USE_AD="1"
     USE_VMAPS="1"
     USE_MMAPS="1"
+    USE_MODELS="1"
   else
     echo
     echo "Should dbc and maps be extracted? (y/n)"
     read line
     if [ "$line" = "y" ]; then USE_AD="1"; fi
+
+    echo
+    echo "Should creature model data be extracted? (y/n)"
+    read line
+    if [ "$line" = "y" ]; then USE_MODELS="1"; fi
 
     echo
     echo "Should vmaps be extracted? (y/n)"
@@ -232,6 +240,12 @@ then
 else
   echo "DBC and map files won't be extracted!" | tee -a "$LOG_FILE"
 fi
+if [ "$USE_MODELS" = "1" ];
+then
+  echo "Creature model files will be extracted" | tee -a $LOG_FILE
+else
+  echo "Creature model files won't be extracted!" | tee -a $LOG_FILE
+fi
 if [ "$USE_VMAPS" = "1" ]
 then
   echo "Vmaps will be extracted" | tee -a "$LOG_FILE"
@@ -246,8 +260,8 @@ else
 fi
 echo | tee -a "$LOG_FILE"
 
-echo "$(date): Start extracting MaNGOS data: DBCs/maps $USE_AD, vmaps $USE_VMAPS, mmaps $USE_MMAPS using $NUM_THREAD CPU threads" | tee "$DETAIL_LOG_FILE"
-echo | tee -a "$DETAIL_LOG_FILE"
+echo "$(date): Start extracting MaNGOS data: DBCs/maps $USE_AD, Models $USE_MODELS, vmaps $USE_VMAPS, mmaps $USE_MMAPS using $NUM_THREAD CPU threads" | tee $DETAIL_LOG_FILE
+echo | tee -a $DETAIL_LOG_FILE
 
 ## Extract dbcs and maps
 if [ "$USE_AD" = "1" ]
@@ -257,6 +271,16 @@ then
  echo "$(date): Extracting of DBCs and map files finished" | tee -a "$LOG_FILE"
  echo | tee -a "$LOG_FILE"
  echo | tee -a "$DETAIL_LOG_FILE"
+fi
+
+## Extract creature models
+if [ "$USE_MODELS" = "1" ] && [ "$USE_AD" = "0" ]
+then
+ echo "$(date): Start extraction of model files..." | tee -a $LOG_FILE
+ $PREFIX/ad -e 8 | tee -a $DETAIL_LOG_FILE
+ echo "$(date): Extracting of model files finished" | tee -a $LOG_FILE
+ echo | tee -a $LOG_FILE
+ echo | tee -a $DETAIL_LOG_FILE
 fi
 
 ## Extract vmaps

@@ -1,9 +1,12 @@
+#include <sstream>
+#include <fstream>
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <stdio.h>
 #include <deque>
 #include <set>
 #include <cstdlib>
+#include <iomanip>
 
 #ifdef _WIN32
 #include "direct.h"
@@ -39,6 +42,8 @@
 #endif
 
 #include "Maps/GridMapDefines.h"
+#include "G3D/Vector3.h"
+#include "Models/M2Structure.h"
 extern ArchiveSet gOpenArchives;
 
 typedef struct
@@ -61,11 +66,12 @@ enum Extract
 {
     EXTRACT_MAP = 1,
     EXTRACT_DBC = 2,
-    EXTRACT_CAMERA = 4
+    EXTRACT_CAMERA = 4,
+    EXTRACT_MODELDATA = 8,
 };
 
 // Select data for extract
-int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC | EXTRACT_CAMERA;
+int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC | EXTRACT_CAMERA | EXTRACT_MODELDATA;
 // This option allow limit minimum height to some value (Allow save some memory)
 // see contrib/mmap/src/Tilebuilder.h, INVALID_MAP_LIQ_HEIGHT
 bool  CONF_allow_height_limit = true;
@@ -123,7 +129,7 @@ void Usage(char* prg)
         "%s -[var] [value]\n"\
         "-i set input path\n"\
         "-o set output path\n"\
-        "-e extract only MAP(1)/DBC(2)/Camera(4) - standard: all(7)\n"\
+        "-e extract only MAP(1)/DBC(2)/Camera(4) - standard: all(15)\n"\
         "-f height stored as int (less map size but lost some accuracy) 1 by default\n"\
         "Example: %s -f 0 -i \"c:\\games\\game\"", prg, prg);
     exit(1);
@@ -165,7 +171,7 @@ void HandleArgs(int argc, char* arg[])
                 if (c + 1 < argc)                           // all ok
                 {
                     CONF_extract = atoi(arg[(c++) + 1]);
-                    if (!(CONF_extract > 0 && CONF_extract < 8))
+                    if (!(CONF_extract > 0 && CONF_extract < 16))
                         Usage(arg[0]);
                 }
                 else
@@ -928,6 +934,61 @@ bool ExtractFile(char const* mpq_name, std::string const& filename)
     return true;
 }
 
+bool ExtractMinimizedModelFile(char const* mpq_name, std::string const& filename)
+{
+    FILE* output = fopen(filename.c_str(), "wb");
+    if (!output)
+    {
+        printf("Can't create the output file '%s'\n", filename.c_str());
+        return false;
+    }
+
+    MPQFile m(mpq_name);
+    if (!m.isEof())
+    {
+        std::stringstream m2file;
+        m2file.write(m.getPointer(), m.getSize());
+        m2file.seekg(0, std::ios::end);
+        std::streamoff const fileSize = m2file.tellg();
+
+        if (static_cast<uint32_t const>(fileSize) < sizeof(M2Header))
+        {
+            printf("Creature Model file %s is damaged. File is smaller than header size\n", filename.c_str());
+            m2file.clear();
+            return false;
+        }
+        m2file.seekg(0, std::ios::beg);
+        char fileCheck[5];
+        m2file.read(fileCheck, 4);
+        fileCheck[4] = 0;
+
+        // Check file has correct magic (MD20)
+        if (strcmp(fileCheck, "MD20"))
+        {
+            printf("Creature Model file %s is damaged. File identifier not found\n", filename.c_str());
+            m2file.clear();
+            return false;
+        }
+        M2Array<M2Attachment> attachments;
+
+        m2file.seekg(0x0F0);
+        m2file.read(reinterpret_cast<char*>(&attachments), sizeof(attachments));
+
+        m2file.seekg(attachments.offset);
+        std::vector<M2Attachment> attachmentData(attachments.size);
+        m2file.read(reinterpret_cast<char*>(attachmentData.data()), attachments.size * sizeof(M2Attachment));
+
+        for (M2Attachment& attachment : attachmentData)
+        {
+            fwrite(&attachment.id, sizeof(uint32_t), 1, output);
+            fwrite(&attachment.position, sizeof(G3D::Vector3), 1, output);
+        }
+    }
+
+    fclose(output);
+    return true;
+}
+
 void ExtractDBCFiles(int locale, bool basicLocale)
 {
     printf("Extracting dbc files...\n");
@@ -1023,6 +1084,59 @@ void ExtractCameraFiles(int locale, bool basicLocale)
             ++count;
     }
     printf("Extracted %u camera files\n", count);
+}
+
+void ExtractCreatureModelFiles(int locale, bool basicLocale)
+{
+    printf("Extracting Creature Model files...\n");
+    DBCFile modeldbc("DBFilesClient\\CreatureModelData.dbc");
+
+    if (!modeldbc.open())
+    {
+        printf("Unable to open CreatureModelData.dbc. Creature Model extract aborted.\n");
+        return;
+    }
+
+    // get camera file list from DBC
+    std::vector<std::string> modelfiles;
+    size_t model_count = modeldbc.getRecordCount();
+
+    for (uint32 i = 0; i < model_count; ++i)
+    {
+        std::string modelFile(modeldbc.getRecord(i).getString(2));
+        size_t loc = modelFile.find(".mdx");
+        if (loc != std::string::npos)
+            modelFile.replace(loc, 4, ".m2");
+        modelfiles.push_back(std::string(modelFile));
+    }
+
+    std::string path = output_path;
+    path += "/CreatureModels/";
+    CreateDir(path);
+    if (!basicLocale)
+    {
+        path += langs[locale];
+        path += "/";
+        CreateDir(path);
+    }
+
+    // extract M2s
+    uint32 count = 0;
+    for (std::string thisFile : modelfiles)
+    {
+        std::string filename = path;
+
+        auto pos = thisFile.find_last_of('\\');
+        std::string pureName = thisFile;
+        filename += pureName;
+
+        if (FileExists(filename.c_str()))
+            continue;
+
+        if (ExtractMinimizedModelFile(thisFile.c_str(), filename))
+            ++count;
+    }
+    printf("Extracted %u CreatureModel files\n", count);
 }
 
 void LoadLocaleMPQFiles(int const locale)
@@ -1122,6 +1236,19 @@ int main(int argc, char* arg[])
         LoadCommonMPQFiles();
 
         ExtractCameraFiles(FirstLocale, true);
+        // Close MPQs
+        CloseMPQFiles();
+    }
+
+    if (CONF_extract & EXTRACT_MODELDATA)
+    {
+        printf("Using locale: %s\n", langs[FirstLocale]);
+
+        // Open MPQs
+        LoadLocaleMPQFiles(FirstLocale);
+        LoadCommonMPQFiles();
+
+        ExtractCreatureModelFiles(FirstLocale, true);
         // Close MPQs
         CloseMPQFiles();
     }

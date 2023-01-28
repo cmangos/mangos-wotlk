@@ -23,6 +23,7 @@
 #include "World/World.h"
 #include "Database/DatabaseEnv.h"
 #include "Config/Config.h"
+#include "Models/M2Stores.h"
 #include "Platform/Define.h"
 #include "SystemConfig.h"
 #include "Log.h"
@@ -971,6 +972,9 @@ void World::SetInitialWorldSettings()
     // Loading cameras for characters creation cinematic
     sLog.outString("Loading cinematic...");
     LoadM2Cameras(m_dataPath);
+
+    sLog.outString("Loading Attachment Data...");
+    LoadM2Attachments(m_dataPath);
 
     sLog.outString("Loading Script Names...");
     sScriptDevAIMgr.LoadScriptNames();

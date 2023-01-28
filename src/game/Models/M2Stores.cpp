@@ -16,16 +16,22 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#include "Globals/Locales.h"
+#include "Models/M2Structure.h"
 #include "Server/DBCStores.h"
 #include "M2Structure.h"
 #include "M2Stores.h"
 #include "Common.h"
 #include "Log.h"
+#include "Server/DBCStructure.h"
 #include "World/World.h"
+#include <cstdint>
 #include <fstream>
 #include <iomanip>
+#include <unordered_map>
 
 std::unordered_map<uint32, FlyByCameraCollection> sFlyByCameraStore;
+std::unordered_map<uint32, AttachmentCollection> sModelAttachmentStore;
 
 // Convert the geomoetry from a spline value, to an actual world XYZ
 G3D::Vector3 TranslateLocation(G3D::Vector4 const* DBCPosition, G3D::Vector3 const* basePosition, G3D::Vector3 const* splineVector)
@@ -61,24 +67,24 @@ bool readCamera(M2Camera const* cam, uint32 buffSize, M2Header const* header, Ci
     DBCData.w = dbcentry->OriginFacing;
 
     // Read target locations, only so that we can calculate orientation
-    for (uint32 k = 0; k < cam->target_positions.timestamps.number; ++k)
+    for (uint32 k = 0; k < cam->target_positions.timestamps.size; ++k)
     {
         // Extract Target positions
-        if (cam->target_positions.timestamps.offset_elements + sizeof(M2Array) > buffSize)
+        if (cam->target_positions.timestamps.offset + sizeof(M2Array<uint32_t>) > buffSize)
             return false;
-        M2Array const* targTsArray = reinterpret_cast<M2Array const*>(buffer + cam->target_positions.timestamps.offset_elements);
-        if (targTsArray->offset_elements + sizeof(uint32) > buffSize || cam->target_positions.values.offset_elements + sizeof(M2Array) > buffSize)
+        M2Array<uint32_t> const* targTsArray = reinterpret_cast<M2Array<uint32_t> const*>(buffer + cam->target_positions.timestamps.offset);
+        if (targTsArray->offset + sizeof(uint32) > buffSize || cam->target_positions.values.offset + sizeof(M2Array<uint32_t>) > buffSize)
             return false;
-        uint32 const* targTimestamps = reinterpret_cast<uint32 const*>(buffer + targTsArray->offset_elements);
-        M2Array const* targArray = reinterpret_cast<M2Array const*>(buffer + cam->target_positions.values.offset_elements);
+        uint32 const* targTimestamps = reinterpret_cast<uint32 const*>(buffer + targTsArray->offset);
+        M2Array<uint32_t> const* targArray = reinterpret_cast<M2Array<uint32_t> const*>(buffer + cam->target_positions.values.offset);
 
-        if (targArray->offset_elements + sizeof(M2SplineKey<G3D::Vector3>) > buffSize)
+        if (targArray->offset + sizeof(M2SplineKey<G3D::Vector3>) > buffSize)
             return false;
-        M2SplineKey<G3D::Vector3> const* targPositions = reinterpret_cast<M2SplineKey<G3D::Vector3> const*>(buffer + targArray->offset_elements);
+        M2SplineKey<G3D::Vector3> const* targPositions = reinterpret_cast<M2SplineKey<G3D::Vector3> const*>(buffer + targArray->offset);
 
         // Read the data for this set
-        uint32 currPos = targArray->offset_elements;
-        for (uint32 i = 0; i < targTsArray->number; ++i)
+        uint32 currPos = targArray->offset;
+        for (uint32 i = 0; i < targTsArray->size; ++i)
         {
             if (currPos + sizeof(M2SplineKey<G3D::Vector3>) > buffSize)
                 return false;
@@ -99,23 +105,23 @@ bool readCamera(M2Camera const* cam, uint32 buffSize, M2Header const* header, Ci
     }
 
     // Read camera positions and timestamps (translating first position of 3 only, we don't need to translate the whole spline)
-    for (uint32 k = 0; k < cam->positions.timestamps.number; ++k)
+    for (uint32 k = 0; k < cam->positions.timestamps.size; ++k)
     {
         // Extract Camera positions for this set
-        if (cam->positions.timestamps.offset_elements + sizeof(M2Array) > buffSize)
+        if (cam->positions.timestamps.offset + sizeof(M2Array<uint32_t>) > buffSize)
             return false;
-        M2Array const* posTsArray = reinterpret_cast<M2Array const*>(buffer + cam->positions.timestamps.offset_elements);
-        if (posTsArray->offset_elements + sizeof(uint32) > buffSize || cam->positions.values.offset_elements + sizeof(M2Array) > buffSize)
+        M2Array<uint32_t> const* posTsArray = reinterpret_cast<M2Array<uint32_t> const*>(buffer + cam->positions.timestamps.offset);
+        if (posTsArray->offset + sizeof(uint32) > buffSize || cam->positions.values.offset + sizeof(M2Array<uint32_t>) > buffSize)
             return false;
-        uint32 const* posTimestamps = reinterpret_cast<uint32 const*>(buffer + posTsArray->offset_elements);
-        M2Array const* posArray = reinterpret_cast<M2Array const*>(buffer + cam->positions.values.offset_elements);
-        if (posArray->offset_elements + sizeof(M2SplineKey<G3D::Vector3>) > buffSize)
+        uint32 const* posTimestamps = reinterpret_cast<uint32 const*>(buffer + posTsArray->offset);
+        M2Array<uint32_t> const* posArray = reinterpret_cast<M2Array<uint32_t> const*>(buffer + cam->positions.values.offset);
+        if (posArray->offset + sizeof(M2SplineKey<G3D::Vector3>) > buffSize)
             return false;
-        M2SplineKey<G3D::Vector3> const* positions = reinterpret_cast<M2SplineKey<G3D::Vector3> const*>(buffer + posArray->offset_elements);
+        M2SplineKey<G3D::Vector3> const* positions = reinterpret_cast<M2SplineKey<G3D::Vector3> const*>(buffer + posArray->offset);
 
         // Read the data for this set
-        uint32 currPos = posArray->offset_elements;
-        for (uint32 i = 0; i < posTsArray->number; ++i)
+        uint32 currPos = posArray->offset;
+        for (uint32 i = 0; i < posTsArray->size; ++i)
         {
             if (currPos + sizeof(M2SplineKey<G3D::Vector3>) > buffSize)
                 return false;
@@ -255,4 +261,47 @@ void LoadM2Cameras(std::string const& dataPath)
     }
     sLog.outString(">> Loaded %u cinematic waypoint sets in %u ms", static_cast<uint32 const>(sFlyByCameraStore.size()), WorldTimer::getMSTimeDiff(oldMSTime, WorldTimer::getMSTime()));
     sLog.outString();
+}
+
+void LoadM2Attachments(std::string const& dataPath)
+{
+    sModelAttachmentStore.clear();
+
+    for (uint32 i = 0; i < sCreatureModelDataStore.GetNumRows(); ++i)
+    {
+        if (CreatureModelDataEntry const* dbcentry = sCreatureModelDataStore.LookupEntry(i))
+        {
+            std::string filename = dataPath;
+            filename.append("CreatureModels/");
+            filename.append(dbcentry->ModelPath);
+
+            // Replace mdx to .m2
+            size_t loc = filename.find(".mdx");
+            if (loc != std::string::npos)
+                filename.replace(loc, 4, ".m2");
+
+            std::ifstream m2file(filename.c_str(), std::ios::in | std::ios::binary);
+            if (!m2file.is_open())
+                continue;
+
+            // Get file size
+            m2file.seekg(0, std::ios::end);
+            std::streamoff const fileSize = m2file.tellg();
+            if (fileSize == 0 || fileSize % sizeof(MiniM2Attachment))
+            {
+                sLog.outDetail("M2 Attachment File %s invalid", filename.c_str());
+                m2file.close();
+                continue;
+            }
+
+            m2file.seekg(std::ios::beg);
+            uint32 numEles = fileSize / sizeof(MiniM2Attachment);
+            std::vector<MiniM2Attachment> attachmentData(numEles);
+            m2file.read(reinterpret_cast<char*>(attachmentData.data()), numEles * sizeof(MiniM2Attachment));
+
+            sModelAttachmentStore[dbcentry->Id] = attachmentData;
+
+            m2file.close();
+        }
+    }
 }

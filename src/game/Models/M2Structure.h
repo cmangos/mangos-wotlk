@@ -21,6 +21,7 @@
 
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
+#include <cstdint>
 
 #define VERSION_ORGINAL_MIN 0
 #define VERSION_ORGINAL_MAX 256
@@ -119,17 +120,54 @@ struct M2Header
     uint32 ofsBlendMaps;           // Same as above. Points to an array of uint16 of nBlendMaps entries -- From WoD information.};
 };
 
-struct M2Array
-{
-    uint32_t number;
-    uint32 offset_elements;
+template <typename T>
+struct M2Array {
+    uint32_t size;
+    uint32_t offset;
 };
-struct M2Track
+
+struct M2TrackBase
 {
     uint16_t interpolation_type;
     uint16_t global_sequence;
-    M2Array timestamps;
-    M2Array values;
+    M2Array<M2Array<uint32_t>> timestamps;
+};
+
+template<typename T>
+struct M2Track : M2TrackBase
+{
+    M2Array<M2Array<T>> values;
+};
+
+template<typename T> 
+struct M2PartTrack
+{
+  M2Array<int16_t> times;
+  M2Array<T> values;
+};
+
+struct M2Range
+{
+  uint32_t minimum;
+  uint32_t maximum;
+};
+
+struct M2Attachment
+{
+    uint32_t id;
+    uint16_t bone;
+    uint16_t unknown;
+    G3D::Vector3 position;
+    M2Track<uint8_t> animate_attached;
+};
+
+struct MiniM2Attachment
+{
+    uint32_t id;
+    //uint16_t bone;
+    //uint16_t unknown;
+    G3D::Vector3 position;
+    //M2Track<uint8_t> animate_attached;
 };
 
 struct M2Camera
@@ -138,11 +176,11 @@ struct M2Camera
     float fov; // No radians, no degrees. Multiply by 35 to get degrees.
     float far_clip;
     float near_clip;
-    M2Track positions; // How the camera's position moves. Should be 3*3 floats.
+    M2Track<M2SplineKey<G3D::Vector3>> positions; // How the camera's position moves. Should be 3*3 floats.
     G3D::Vector3 position_base;
-    M2Track target_positions; // How the target moves. Should be 3*3 floats.
+    M2Track<M2SplineKey<G3D::Vector3>> target_positions; // How the target moves. Should be 3*3 floats.
     G3D::Vector3 target_position_base;
-    M2Track rolldata; // The camera can have some roll-effect. Its 0 to 2*Pi.
+    M2Track<M2SplineKey<G3D::Vector3>> rolldata; // The camera can have some roll-effect. Its 0 to 2*Pi.
 };
 #pragma pack(pop)
 

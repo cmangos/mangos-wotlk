@@ -56,6 +56,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   shared
   game
   gsoap
+  g3dlite
 )
 
 if(WIN32)

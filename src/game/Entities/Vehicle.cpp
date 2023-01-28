@@ -40,10 +40,42 @@
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "Globals/ObjectMgr.h"
+#include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
+
+constexpr uint8 attachmentLookup(const int32 attachmentID)
+{
+    switch (attachmentID)
+    {
+        case 0: return 20;
+        case 1: return 34;
+        case 2: return 19;
+        case 3: return 21;
+        case 4: return 22;
+        case 5: return 17;
+        case 6: return 23;
+        case 7: return 24;
+        case 8: return 25;
+        case 9: return 15;
+        case 10: return 16;
+        case 11: return 37;
+        case 12: return 38;
+        case 13: return 39;
+        case 14: return 40;
+        case 15: return 41;
+        case 16: return 42;
+        case 17: return 43;
+        case 18: return 44;
+        case 19: return 45;
+        case 20: return 46;
+        case 21: return 0;
+        default: return -1;
+    }
+    return -1; // unreachable
+}
 
 void ObjectMgr::LoadVehicleAccessory()
 {
@@ -263,12 +295,24 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     DEBUG_LOG("VehicleInfo::Board: Board passenger: %s to seat %u", passenger->GetGuidStr().c_str(), seat);
 
-    // Calculate passengers local position
-    float lx, ly, lz, lo;
-    CalculateBoardingPositionOf(passenger->GetPositionX(), passenger->GetPositionY(), passenger->GetPositionZ(), passenger->GetOrientation(), lx, ly, lz, lo);
-
     if (GenericTransport* transport = passenger->GetTransport())
         transport->RemovePassenger(passenger);
+
+    // Calculate passengers local position
+    float lx, ly, lz, lo = 0.f;
+    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
+    float scale = creatureDisplayInfo->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
+    {
+        if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+        {
+            lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+            ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+            lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+            break;
+        }
+    }
 
     BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
 
@@ -297,8 +341,8 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     }
 
     Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
-    init.SetFacing(0.0f);                                   // local orientation ? ToDo: Set proper orientation!
+    init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
+    init.SetFacing(lo);                                   // local orientation ? ToDo: Set proper orientation!
     init.SetBoardVehicle();
     init.Launch();
 
@@ -355,13 +399,29 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     // Remove passenger modifications of the old seat
     RemoveSeatMods(passenger, seatEntry->m_flags);
 
+    float lx, ly, lz, lo = 0.f;
+    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
+    float scale = creatureDisplayInfo->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
+    {
+        if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+        {
+            lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+            ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+            lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+            break;
+        }
+    }
+
     // Set to new seat
     itr->second->SetTransportSeat(seat);
+    itr->second->SetLocalPosition(lx, ly, lz, lo);
 
     Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
+    init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
     //if (oldorientation != neworientation) (?)
-    //init.SetFacing(0.0f);                                 // local orientation ? ToDo: Set proper orientation!
+    init.SetFacing(lo);                                 // local orientation ? ToDo: Set proper orientation!
     // It seems that Seat switching is sent without SplineFlag BoardVehicle
     init.Launch();
 
