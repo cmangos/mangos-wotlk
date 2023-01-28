@@ -60,6 +60,16 @@ bool Model::open(StringSet& failedPaths)
         f.seekRelative(header.ofsBoundingTriangles);
         indices = new uint16[header.nBoundingTriangles];
         f.read(indices, header.nBoundingTriangles * 2);
+        f.seek(0);
+        f.seekRelative(header.ofsAttachments);
+        attachments = new M2Attachment[header.nAttachments];
+        f.read(attachments, header.nAttachments * sizeof(M2Attachment));
+        f.seek(0);
+        f.seekRelative(header.id[0]);
+        uint32 modelId;
+        f.read(&modelId, sizeof(uint32));
+        if (attachments)
+            printf("Model ID: %d, X: %f, Y: %f, Z: %f", modelId, attachments->position.x, attachments->position.y, attachments->position.z);
         f.close();
     }
     else
