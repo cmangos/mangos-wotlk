@@ -270,18 +270,15 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     if (GenericTransport* transport = passenger->GetTransport())
         transport->RemovePassenger(passenger);
-    static const std::vector<uint8> seatMap = {39, 40, 41, 42, 43, 44, 45, 46};
     float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->scale;
     scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId)->Scale;
     for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId])
     {
-        sLog.outError("Attachment ID: %d", attachment.id);
         if (attachment.id == seatMap[seat])
         {
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
             lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-            sLog.outError("Adjusted XYZ for: %s; %f, %f, %f", m_owner->GetName(), lx, ly, lz);
         }
     }
 
@@ -375,7 +372,6 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     float ly = 0.f;
     float lz = 0.f;
 
-    static const std::vector<uint8> seatMap = {39, 40, 41, 42, 43, 44, 45, 46};
     float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->scale;
     scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId)->Scale;
     for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId])
@@ -385,7 +381,6 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
             lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-            sLog.outError("Adjusted XYZ for: %s; %f, %f, %f", m_owner->GetName(), lx, ly, lz);
         }
     }
 
