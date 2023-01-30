@@ -265,9 +265,8 @@ void LoadM2Cameras(std::string const& dataPath)
 
 void LoadM2Attachments(std::string const& dataPath)
 {
-    //sFlyByCameraStore.clear();
+    sModelAttachmentStore.clear();
 
-    //uint32 oldMSTime = WorldTimer::getMSTime();
     for (uint32 i = 0; i < sCreatureModelDataStore.GetNumRows(); ++i)
     {
         if (CreatureModelDataEntry const* dbcentry = sCreatureModelDataStore.LookupEntry(i))
