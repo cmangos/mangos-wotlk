@@ -558,7 +558,10 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
 
         // cast Hodir Fury on point reached and search for another target
         //if (Creature* pHodirFury = m_creature->GetMap()->GetCreature(m_hodirFuryGuid))
-        m_creature->CastSpell(m_creature, SPELL_HODIR_FURY, TRIGGERED_OLD_TRIGGERED);
+        if (m_creature->IsVehicle() && m_creature->GetVehicleInfo())
+            if (Unit* hodirsFuryCaster = m_creature->GetVehicleInfo()->GetPassenger(0))
+                hodirsFuryCaster->CastSpell(m_creature, SPELL_HODIR_FURY, TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        //m_creature->CastSpell(m_creature, SPELL_HODIR_FURY, TRIGGERED_OLD_TRIGGERED);
 
         m_uiTargetChaseTimer = 5000;
     }
@@ -661,7 +664,7 @@ struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
         if (m_uiMimironInfernoTimer < diff)
         {
             if (DoCastSpellIfCan(nullptr, SPELL_MIMIRON_INFERNO) == CAST_OK)
-                m_uiMimironInfernoTimer = 2000;
+                m_uiMimironInfernoTimer = 3000;
         }
         else
             m_uiMimironInfernoTimer -= diff;
