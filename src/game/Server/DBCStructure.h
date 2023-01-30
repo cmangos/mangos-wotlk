@@ -813,7 +813,7 @@ struct CreatureModelDataEntry
 {
     uint32      Id;
     uint32      Flags;
-    // char*    ModelPath[16]
+    char*       ModelPath;//[16];
     // uint32   Unk1;
     float       Scale;                                      // Used in calculation of unit collision data
     // int32    Unk2

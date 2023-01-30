@@ -32,15 +32,6 @@ namespace ADT { struct MDDF; struct MODF; }
 
 Vec3D fixCoordSystem(Vec3D v);
 
-struct M2Attachment
-{
-  uint32_t id;                      // Referenced in the lookup-block below.
-  uint16_t bone;                    // attachment base
-  uint16_t unknown;                 // see BogBeast.m2 in vanilla for a model having values here
-  Vec3D position;                   // relative to bone; Often this value is the same as bone's pivot point 
-  uint8_t animate_attached;           // whether or not the attached model is animated when this model is. only a bool is used. default is true.
-};
-
 class Model
 {
     public:
@@ -49,7 +40,6 @@ class Model
         Vec3D* BB_vertices, *vertices;
         uint16* BB_indices, *indices;
         size_t nIndices;
-        M2Attachment* attachments;
 
         bool open(StringSet& failedPaths);
         bool ConvertToVMAPModel(const char* outfilename);
@@ -64,10 +54,8 @@ class Model
         {
             delete[] vertices;
             delete[] indices;
-            delete[] attachments;
             vertices = NULL;
             indices = NULL;
-            attachments = NULL;
         }
         std::string filename;
 };

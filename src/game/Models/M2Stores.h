@@ -20,6 +20,7 @@
 #define MANGOS_M2STORES_H
 
 #include "Common.h"
+#include "Models/M2Structure.h"
 
 struct CamLocation
 {
@@ -35,9 +36,12 @@ struct FlyByCamera
 };
 
 typedef std::vector<FlyByCamera> FlyByCameraCollection;
+typedef std::vector<M2Attachment> AttachmentCollection;
 
 extern std::unordered_map<uint32, FlyByCameraCollection> sFlyByCameraStore;
+extern std::unordered_map<uint32, AttachmentCollection> sModelAttachmentStore;
 
 void LoadM2Cameras(std::string const& dataPath);
+void LoadM2Attachments(std::string const& dataPath);
 
 #endif

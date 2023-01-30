@@ -1025,6 +1025,63 @@ void ExtractCameraFiles(int locale, bool basicLocale)
     printf("Extracted %u camera files\n", count);
 }
 
+void ExtractCreatureModelFiles(int locale, bool basicLocale)
+{
+    printf("Extracting Creature Model files...\n");
+    DBCFile modeldbc("DBFilesClient\\CreatureModelData.dbc");
+
+    if (!modeldbc.open())
+    {
+        printf("Unable to open CreatureModelData.dbc. Creature Model extract aborted.\n");
+        return;
+    }
+
+    // get camera file list from DBC
+    std::vector<std::string> modelfiles;
+    size_t model_count = modeldbc.getRecordCount();
+
+    for (uint32 i = 0; i < model_count; ++i)
+    {
+        std::string modelFile(modeldbc.getRecord(i).getString(2));
+        size_t loc = modelFile.find(".mdx");
+        if (loc != std::string::npos)
+            modelFile.replace(loc, 4, ".m2");
+        modelfiles.push_back(std::string(modelFile));
+    }
+
+    std::string path = output_path;
+    path += "/CreatureModels/";
+    CreateDir(path);
+    if (!basicLocale)
+    {
+        path += langs[locale];
+        path += "/";
+        CreateDir(path);
+    }
+
+    // extract M2s
+    uint32 count = 0;
+    for (std::string thisFile : modelfiles)
+    {
+        std::string filename = path;
+
+        //filename += (thisFile.c_str() + strlen("CreatureModels\\"));
+        auto pos = thisFile.find_last_of('\\');
+        std::string pureName = thisFile;
+        //if (pos != std::string::npos)
+        //    pureName = thisFile.substr(pos + 1);
+        filename += pureName;
+        //filename += thisFile;
+
+        if (FileExists(filename.c_str()))
+            continue;
+
+        if (ExtractFile(thisFile.c_str(), filename))
+            ++count;
+    }
+    printf("Extracted %u CreatureModel files\n", count);
+}
+
 void LoadLocaleMPQFiles(int const locale)
 {
     char filename[512];
@@ -1122,6 +1179,19 @@ int main(int argc, char* arg[])
         LoadCommonMPQFiles();
 
         ExtractCameraFiles(FirstLocale, true);
+        // Close MPQs
+        CloseMPQFiles();
+    }
+
+    if (true)
+    {
+        printf("Using locale: %s\n", langs[FirstLocale]);
+
+        // Open MPQs
+        LoadLocaleMPQFiles(FirstLocale);
+        LoadCommonMPQFiles();
+
+        ExtractCreatureModelFiles(FirstLocale, true);
         // Close MPQs
         CloseMPQFiles();
     }
