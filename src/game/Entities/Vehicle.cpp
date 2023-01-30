@@ -40,6 +40,7 @@
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "Globals/ObjectMgr.h"
+#include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
 #include "Maps/MapManager.h"
@@ -269,6 +270,20 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     if (GenericTransport* transport = passenger->GetTransport())
         transport->RemovePassenger(passenger);
+    static const std::vector<uint8> seatMap = {39, 40, 41, 42, 43, 44, 45, 46};
+    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId])
+    {
+        sLog.outError("Attachment ID: %d", attachment.id);
+        if (attachment.id == seatMap[seat])
+        {
+            lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+            ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+            lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+            sLog.outError("Adjusted XYZ for: %s; %f, %f, %f", m_owner->GetName(), lx, ly, lz);
+        }
+    }
 
     BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
 
@@ -297,8 +312,9 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     }
 
     Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
-    init.SetFacing(0.0f);                                   // local orientation ? ToDo: Set proper orientation!
+//    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
+    init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
+    init.SetFacing(lo);                                   // local orientation ? ToDo: Set proper orientation!
     init.SetBoardVehicle();
     init.Launch();
 
@@ -355,11 +371,30 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     // Remove passenger modifications of the old seat
     RemoveSeatMods(passenger, seatEntry->m_flags);
 
+    float lx = 0.f;
+    float ly = 0.f;
+    float lz = 0.f;
+
+    static const std::vector<uint8> seatMap = {39, 40, 41, 42, 43, 44, 45, 46};
+    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId])
+    {
+        if (attachment.id == seatMap[seat])
+        {
+            lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+            ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+            lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+            sLog.outError("Adjusted XYZ for: %s; %f, %f, %f", m_owner->GetName(), lx, ly, lz);
+        }
+    }
+
     // Set to new seat
     itr->second->SetTransportSeat(seat);
+    itr->second->SetLocalPosition(lx, ly, lz, 0.f);
 
     Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
+    init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
     //if (oldorientation != neworientation) (?)
     //init.SetFacing(0.0f);                                 // local orientation ? ToDo: Set proper orientation!
     // It seems that Seat switching is sent without SplineFlag BoardVehicle
