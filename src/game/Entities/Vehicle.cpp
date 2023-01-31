@@ -46,6 +46,38 @@
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
 
+// Hackfix until the proper relation between AttachmentIDs has been found
+constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
+{
+    switch (seatEntry->m_ID)
+    {
+        //Salvaged Chopper
+        case 3005: return -1; // 13
+        case 3004: return -1; // 14
+        //Salvaged Demolisher
+        case 3011: return 39; // 13
+        case 3146: return 41; // 15
+        case 3013: return 42; // 16
+        case 3147: return 40; // 4
+        //Flame Leviathan (10)
+        case 3832: return 46; // 20
+        case 3833: return 46; // 20
+        case 3834: return 46; // 20
+        //Flame Leviathan (25)
+        case 3043: return 46; // 20
+        case 3065: return 46; // 20
+        case 3071: return 46; // 20
+        case 3072: return 46; // 20
+        case 3070: return 46; // 20
+        //Ignis
+        case 3064: return 35; // 4
+        case 3206: return 40; // 14
+        //Gal'Darah
+        case 2097: return 17; // 5
+    }
+    return -1;
+}
+
 void ObjectMgr::LoadVehicleAccessory()
 {
     sVehicleAccessoryStorage.Load();
@@ -265,20 +297,34 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     DEBUG_LOG("VehicleInfo::Board: Board passenger: %s to seat %u", passenger->GetGuidStr().c_str(), seat);
 
     // Calculate passengers local position
-    float lx, ly, lz, lo;
-    CalculateBoardingPositionOf(passenger->GetPositionX(), passenger->GetPositionY(), passenger->GetPositionZ(), passenger->GetOrientation(), lx, ly, lz, lo);
+    float lx = 0.f;
+    float ly = 0.f;
+    float lz = 0.f;
+    float lo = 0.f;
 
     if (GenericTransport* transport = passenger->GetTransport())
         transport->RemovePassenger(passenger);
-    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->scale;
-    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId)->Scale;
-    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId])
+    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
     {
-        if (attachment.id == seatMap[seat])
+        if (attachment.id == attachmentLookup(seatEntry))
         {
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
             lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+        }
+    }
+    if (lx == 0.f && ly == 0.f && lz == 0.f)
+    {
+            for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
+        {
+            if (attachment.id == seatMap[seat])
+            {
+                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+            }
         }
     }
 
@@ -311,7 +357,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     Movement::MoveSplineInit init(*passenger);
 //    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
     init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
-    init.SetFacing(lo);                                   // local orientation ? ToDo: Set proper orientation!
+    init.SetFacing(0.f);                                   // local orientation ? ToDo: Set proper orientation!
     init.SetBoardVehicle();
     init.Launch();
 
@@ -371,27 +417,39 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     float lx = 0.f;
     float ly = 0.f;
     float lz = 0.f;
-
-    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->scale;
-    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId)->Scale;
-    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetDisplayId())->ModelId])
+    float lo = 0.f;
+    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
     {
-        if (attachment.id == seatMap[seat])
+        if (attachment.id == attachmentLookup(seatEntry))
         {
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
             lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
         }
     }
+    if (lx == 0.f && ly == 0.f && lz == 0.f)
+    {
+            for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
+        {
+            if (attachment.id == seatMap[seat])
+            {
+                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+            }
+        }
+    }
 
     // Set to new seat
     itr->second->SetTransportSeat(seat);
-    itr->second->SetLocalPosition(lx, ly, lz, 0.f);
+    itr->second->SetLocalPosition(lx, ly, lz, lo);
 
     Movement::MoveSplineInit init(*passenger);
     init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
     //if (oldorientation != neworientation) (?)
-    //init.SetFacing(0.0f);                                 // local orientation ? ToDo: Set proper orientation!
+    init.SetFacing(lo);                                 // local orientation ? ToDo: Set proper orientation!
     // It seems that Seat switching is sent without SplineFlag BoardVehicle
     init.Launch();
 
