@@ -72,6 +72,10 @@ constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
         //Ignis
         case 3064: return 35; // 4
         case 3206: return 40; // 14
+        //Kologarn's Right Arm
+        case 3690:            // 13
+        case 3691:            // 13
+        case 3692: return 39; // 13
         //Gal'Darah
         case 2097: return 17; // 5
     }
