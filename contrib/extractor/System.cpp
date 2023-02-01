@@ -61,11 +61,12 @@ enum Extract
 {
     EXTRACT_MAP = 1,
     EXTRACT_DBC = 2,
-    EXTRACT_CAMERA = 4
+    EXTRACT_CAMERA = 4,
+    EXTRACT_MODELDATA = 8,
 };
 
 // Select data for extract
-int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC | EXTRACT_CAMERA;
+int   CONF_extract = EXTRACT_MAP | EXTRACT_DBC | EXTRACT_CAMERA | EXTRACT_MODELDATA;
 // This option allow limit minimum height to some value (Allow save some memory)
 // see contrib/mmap/src/Tilebuilder.h, INVALID_MAP_LIQ_HEIGHT
 bool  CONF_allow_height_limit = true;
@@ -123,7 +124,7 @@ void Usage(char* prg)
         "%s -[var] [value]\n"\
         "-i set input path\n"\
         "-o set output path\n"\
-        "-e extract only MAP(1)/DBC(2)/Camera(4) - standard: all(7)\n"\
+        "-e extract only MAP(1)/DBC(2)/Camera(4) - standard: all(15)\n"\
         "-f height stored as int (less map size but lost some accuracy) 1 by default\n"\
         "Example: %s -f 0 -i \"c:\\games\\game\"", prg, prg);
     exit(1);
@@ -165,7 +166,7 @@ void HandleArgs(int argc, char* arg[])
                 if (c + 1 < argc)                           // all ok
                 {
                     CONF_extract = atoi(arg[(c++) + 1]);
-                    if (!(CONF_extract > 0 && CONF_extract < 8))
+                    if (!(CONF_extract > 0 && CONF_extract < 16))
                         Usage(arg[0]);
                 }
                 else
@@ -1183,7 +1184,7 @@ int main(int argc, char* arg[])
         CloseMPQFiles();
     }
 
-    if (true)
+    if (CONF_extract & EXTRACT_MODELDATA)
     {
         printf("Using locale: %s\n", langs[FirstLocale]);
 
