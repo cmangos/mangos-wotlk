@@ -323,6 +323,8 @@ void LoadM2Attachments(std::string const& dataPath)
             m2file.read(reinterpret_cast<char*>(attachmentData.data()), attachments.size * sizeof(M2Attachment));
 
             sModelAttachmentStore[dbcentry->Id] = attachmentData;
+
+            m2file.close();
         }
     }
 }
