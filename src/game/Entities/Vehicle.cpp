@@ -73,9 +73,23 @@ constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
         case 3064: return 35; // 4
         case 3206: return 40; // 14
         //Kologarn's Right Arm
-        case 3690:            // 13
-        case 3691:            // 13
+        case 3690: return 39; // 13
+        case 3691: return 39; // 13
         case 3692: return 39; // 13
+        //Mimiron's Legs
+        case 3566: return 39; // 13
+        case 3567: return 39; // 13
+        case 3568: return 19; // 2 (Special Case? Local coordinates are 0,0,0)
+        case 3570: return 19; // 2 (Special Case? Local coordinates are 0,0,0)
+        case 3586: return 34; // 1 (could also be 17, both same source coordinates)
+        case 3587: return 39; // 13
+        case 3588: return 46; // 20
+        case 3886: return 46; // 20
+        //Mimiron's Torso
+        case 3807: return 34; // 1
+        case 3806: return 40; // 14
+        //Mimiron's Head
+        case 3626: return 39; // 13
         //Gal'Darah
         case 2097: return 17; // 5
     }
