@@ -177,7 +177,8 @@ struct boss_kelthuzadAI : public BossAI
     boss_kelthuzadAI(Creature* creature) : BossAI(creature, KELTHUZAD_ACTIONS_MAX),
         m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
-        m_uiGuardiansCountMax(m_isRegularMode ? 2 : 4)
+        m_uiGuardiansCountMax(m_isRegularMode ? 2 : 4),
+        m_summonTicks(0)
     {
         SetDataType(TYPE_KELTHUZAD);
         AddOnKillText(SAY_SLAY1, SAY_SLAY2);
@@ -201,8 +202,8 @@ struct boss_kelthuzadAI : public BossAI
     uint32 m_uiKilledAbomination;
 
     uint32 m_summonTicks;
-    GuidVector m_introMobsList;
-    CreatureList m_summoningTriggers;
+    std::map<ObjectGuid, GuidVector> m_introMobsList;
+    GuidList m_summoningTriggers;
     GuidVector m_guardians;
 
     void Reset() override
@@ -257,6 +258,7 @@ struct boss_kelthuzadAI : public BossAI
     void Aggro(Unit* enemy) override
     {
         DoScriptText(SAY_SUMMON_MINIONS, m_creature);
+        m_summonTicks = 0;
         DoCastSpellIfCan(nullptr, SPELL_CHANNEL_VISUAL);
     }
 
@@ -291,7 +293,12 @@ struct boss_kelthuzadAI : public BossAI
 
             // Get all summoning trigger NPCs
             m_summoningTriggers.clear();
-            GetCreatureListWithEntryInGrid(m_summoningTriggers, m_creature, NPC_WORLD_TRIGGER, 100.0f);
+            CreatureList triggers;
+            GetCreatureListWithEntryInGrid(triggers, m_creature, NPC_WORLD_TRIGGER, 100.0f);
+            Position pos(3716.f, -5106.f, 141.f);
+            for (Creature* trigger : triggers)
+                if (pos.GetDistance(trigger->GetPosition()) > (60.f * 60.f) && pos.GetDistance(trigger->GetPosition()) < (70.f * 70.f))
+                    m_summoningTriggers.push_back(trigger->GetObjectGuid());
         }
         // Phase 1 periodic update every 1 second (everything in phase 1 is handled here rather than in UpdateAI())
         else if (spell->Id == SPELL_CHANNEL_VISUAL_EFFECT)
@@ -300,13 +307,13 @@ struct boss_kelthuzadAI : public BossAI
             switch (m_summonTicks)
             {
                 case 4:
-                    SummonIntroCreatures(NPC_SOLDIER_FROZEN, 9);
+                    SummonIntroCreatures(SPELL_SUMMON_TYPE_A, 9);
                     break;
                 case 9:
-                    SummonIntroCreatures(NPC_UNSTOPPABLE_ABOM, 3);
+                    SummonIntroCreatures(SPELL_SUMMON_TYPE_B, 3);
                     break;
                 case 12:
-                    SummonIntroCreatures(NPC_SOUL_WEAVER, 1);
+                    SummonIntroCreatures(SPELL_SUMMON_TYPE_C, 1);
                     break;
                 case MAX_SUMMON_TICKS:
                     DespawnIntroCreatures();    // Will leave those that for some reason are in combat
@@ -392,7 +399,7 @@ struct boss_kelthuzadAI : public BossAI
     }
 
     // Summon three type of adds in each of the surrounding alcoves
-    bool SummonIntroCreatures(uint32 entry, uint8 count)
+    bool SummonIntroCreatures(uint32 spellId, uint8 count)
     {
         if (!m_instance)
             return false;
@@ -400,17 +407,16 @@ struct boss_kelthuzadAI : public BossAI
         float newX, newY, newZ;
 
         // Spawn all the adds for phase 1 from each of the trigger NPCs
-        for (auto& trigger : m_summoningTriggers)
+        for (auto triggerGuid : m_summoningTriggers)
         {
+            Creature* trigger = m_creature->GetMap()->GetCreature(triggerGuid);
+            if (!trigger)
+                continue;
             // "How many NPCs per type" is stored in a vector: {npc_entry:number_of_npcs}
             for (uint8 i = 0; i < count; ++i)
             {
                 m_creature->GetRandomPoint(trigger->GetPositionX(), trigger->GetPositionY(), trigger->GetPositionZ(), 12.0f, newX, newY, newZ);
-                if (Creature* summoned = m_creature->SummonCreature(entry, newX, newY, newZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5 * MINUTE * IN_MILLISECONDS))
-                {
-                    if (summoned->AI())
-                        summoned->AI()->SetReactState(REACT_PASSIVE);   // Intro mobs only attack if engaged or hostile target in range
-                }
+                trigger->CastSpell(newX, newY, newZ, spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             }
         }
         return true;
@@ -422,10 +428,13 @@ struct boss_kelthuzadAI : public BossAI
         {
             for (auto itr : m_introMobsList)
             {
-                if (Creature* creature = m_instance->instance->GetCreature(itr))
+                for (auto guid : itr.second)
                 {
-                    if (creature->IsAlive() && !creature->IsInCombat())
-                        creature->ForcedDespawn();
+                    if (Creature* creature = m_instance->instance->GetCreature(guid))
+                    {
+                        if (creature->IsAlive() && !creature->IsInCombat())
+                            creature->ForcedDespawn();
+                    }
                 }
             }
         }
@@ -450,7 +459,9 @@ struct boss_kelthuzadAI : public BossAI
             case NPC_SOLDIER_FROZEN:
             case NPC_UNSTOPPABLE_ABOM:
             case NPC_SOUL_WEAVER:
-                m_introMobsList.push_back(summoned->GetObjectGuid());
+                m_introMobsList[summoned->GetSpawnerGuid()].push_back(summoned->GetObjectGuid());
+                summoned->SetCanCallForAssistance(false);
+                summoned->GetMotionMaster()->MoveRandomAroundPoint(summoned->GetPositionX(), summoned->GetPositionY(), summoned->GetPositionZ(), 3.f);
                 break;
         }
     }
@@ -512,22 +523,34 @@ struct TriggerKTAdd : public SpellScript
     {
         if (Unit* unitTarget = spell->GetUnitTarget())
         {
+            uint32 summonId = 0;
             switch (spell->m_spellInfo->Id)
             {
-                case 28415:
-                    unitTarget->CastSpell(unitTarget, SPELL_SUMMON_TYPE_A, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid(), nullptr);
-                    break;
-                case 28416:
-                    unitTarget->CastSpell(unitTarget, SPELL_SUMMON_TYPE_B, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid(), nullptr);
-                    break;
-                case 28417:
-                    unitTarget->CastSpell(unitTarget, SPELL_SUMMON_TYPE_C, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid(), nullptr);
-                    break;
-                case 28455:
-                    unitTarget->CastSpell(unitTarget, SPELL_SUMMON_TYPE_D, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid(), nullptr);
-                    break;
-                default:
-                    break;
+                case 28415: summonId = SPELL_SUMMON_TYPE_A; break;
+                case 28416: summonId = SPELL_SUMMON_TYPE_B; break;
+                case 28417: summonId = SPELL_SUMMON_TYPE_C; break;
+                case 28455: summonId = SPELL_SUMMON_TYPE_D; break;
+                default: break;
+            }
+
+            if (summonId)
+                unitTarget->CastSpell(unitTarget, summonId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid(), nullptr);
+
+            if (!unitTarget->GetMap()->GetInstanceData())
+                return;
+
+            if (Creature* kelthuzad = static_cast<ScriptedInstance*>(unitTarget->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_KELTHUZAD))
+            {
+                if (boss_kelthuzadAI* ai = dynamic_cast<boss_kelthuzadAI*>(kelthuzad->AI()))
+                {
+                    auto& summonedNpcs = ai->m_introMobsList[unitTarget->GetObjectGuid()];
+                    std::shuffle(summonedNpcs.begin(), summonedNpcs.end(), *GetRandomGenerator());
+                    for (auto guid : summonedNpcs)
+                        if (Creature* creature = kelthuzad->GetMap()->GetCreature(guid))
+                            if (creature->GetCreatedBySpellId() == summonId)
+                                if (Unit* target = kelthuzad->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                                    creature->AI()->AttackStart(target);
+                }
             }
         }
     }
