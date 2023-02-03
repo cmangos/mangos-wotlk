@@ -172,6 +172,8 @@ enum KelThuzadActions
     KELTHUZAD_LICH_KING_ANSWER
 };
 
+const Position centerRoomKT(3716.f, -5106.f, 141.f);
+
 struct boss_kelthuzadAI : public BossAI
 {
     boss_kelthuzadAI(Creature* creature) : BossAI(creature, KELTHUZAD_ACTIONS_MAX),
@@ -295,9 +297,8 @@ struct boss_kelthuzadAI : public BossAI
             m_summoningTriggers.clear();
             CreatureList triggers;
             GetCreatureListWithEntryInGrid(triggers, m_creature, NPC_WORLD_TRIGGER, 100.0f);
-            Position pos(3716.f, -5106.f, 141.f);
             for (Creature* trigger : triggers)
-                if (pos.GetDistance(trigger->GetPosition()) > (60.f * 60.f) && pos.GetDistance(trigger->GetPosition()) < (70.f * 70.f))
+                if (centerRoomKT.GetDistance(trigger->GetPosition()) > (60.f * 60.f) && centerRoomKT.GetDistance(trigger->GetPosition()) < (70.f * 70.f))
                     m_summoningTriggers.push_back(trigger->GetObjectGuid());
         }
         // Phase 1 periodic update every 1 second (everything in phase 1 is handled here rather than in UpdateAI())
@@ -519,6 +520,13 @@ struct boss_kelthuzadAI : public BossAI
 // Summon one add (which type depends on spell)
 struct TriggerKTAdd : public SpellScript
 {
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const
+    {
+        if (centerRoomKT.GetDistance(target->GetPosition()) > (60.f * 60.f) && centerRoomKT.GetDistance(target->GetPosition()) < (70.f * 70.f))
+            return true;
+        return false;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
         if (Unit* unitTarget = spell->GetUnitTarget())
