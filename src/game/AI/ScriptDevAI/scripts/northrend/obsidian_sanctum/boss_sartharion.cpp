@@ -25,6 +25,7 @@ EndScriptData */
 #include "obsidian_sanctum.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "World/WorldStateDefines.h"
 
 enum
 {
@@ -108,12 +109,14 @@ enum
     SPELL_FLAME_TSUNAMI                         = 57494,    // the visual dummy
     // SPELL_FLAME_TSUNAMI_LEAP                 = 60241,    // SPELL_EFFECT_138 some leap effect, causing caster to move in direction
     SPELL_FLAME_TSUNAMI_DMG_AURA                = 57492,    // periodic damage, npc has this aura
+    SPELL_SUPER_SHRINK                          = 37963,
 
     // Fire cyclone
     // SPELL_LAVA_STRIKE                        = 57578,    // triggers 57571 then trigger visual missile, then summon Lava Blaze on impact(spell 57572)
     SPELL_LAVA_STRIKE_IMPACT                    = 57591,
     // SPELL_CYCLONE_AURA                       = 57560,    // in creature_template_addon
     SPELL_CYCLONE_AURA_STRIKE                   = 57598,    // triggers 57578
+    SPELL_CYCLONE_AURA_STRIKE_H                 = 58964,    // triggers 57578
 
     // other npcs related to this encounter
     NPC_FLAME_TSUNAMI                           = 30616,    // for the flame waves
@@ -163,19 +166,15 @@ Waypoint m_aDragonCommon[] =
     {3209.969f, 566.523f, 98.652f}
 };
 
-Waypoint m_aTsunamiLoc[] =
-{
-    // Note: this coords are guesswork, they might need to be updated.
-    {3201.0f, 481.82f, 58.6f, 6.23f},                       // left to right
-    {3201.0f, 524.50f, 58.6f, 6.23f},
-    {3201.0f, 566.64f, 58.6f, 6.23f},
-    {3287.5f, 545.50f, 58.6f, 3.19f},                       // right to left
-    {3287.5f, 503.00f, 58.6f, 3.19f},
-};
-
 /*######
 ## Boss Sartharion
 ######*/
+
+enum SartharionActions
+{
+    SARTHARION_ACTION_MAX,
+    SARTHARION_RESET_WORLDSTATE
+};
 
 struct boss_sartharionAI : public ScriptedAI
 {
@@ -183,6 +182,7 @@ struct boss_sartharionAI : public ScriptedAI
     {
         m_pInstance = (instance_obsidian_sanctum*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        AddCustomAction(SARTHARION_RESET_WORLDSTATE, true, [&]() { HandleResetWorldstate(); });
         Reset();
     }
 
@@ -354,21 +354,21 @@ struct boss_sartharionAI : public ScriptedAI
     void SendFlameTsunami()
     {
         DoScriptText(EMOTE_LAVA_CHURN, m_creature);
+        DoScriptText(SAY_SARTHARION_SPECIAL_4, m_creature);
+        m_creature->GetMap()->GetVariableManager().SetVariable(urand(0, 1) ? WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_LEFT : WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_RIGHT, 1);
+        ResetTimer(SARTHARION_RESET_WORLDSTATE, 5000);
+    }
 
-        uint8 uiTsunamiStartLoc = 0;
-        uint8 uiTsunamiEndLoc = 3;
-        if (urand(0, 1))
-        {
-            uiTsunamiStartLoc = 3;
-            uiTsunamiEndLoc = 5;
-        }
-
-        for (uint8 i = uiTsunamiStartLoc; i < uiTsunamiEndLoc; ++i)
-            m_creature->SummonCreature(NPC_FLAME_TSUNAMI, m_aTsunamiLoc[i].m_fX, m_aTsunamiLoc[i].m_fY, m_aTsunamiLoc[i].m_fZ, m_aTsunamiLoc[i].m_fO, TEMPSPAWN_TIMED_DESPAWN, 15000);
+    void HandleResetWorldstate()
+    {
+        m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_LEFT, 0);
+        m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_RIGHT, 0);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        UpdateTimers(uiDiff, m_creature->IsInCombat());
+
         // Return since we have no target
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
@@ -406,7 +406,7 @@ struct boss_sartharionAI : public ScriptedAI
         if (m_uiFlameTsunamiTimer < uiDiff)
         {
             SendFlameTsunami();
-            m_uiFlameTsunamiTimer = 30000;
+            m_uiFlameTsunamiTimer = 33000;
         }
         else
             m_uiFlameTsunamiTimer -= uiDiff;
@@ -447,14 +447,13 @@ struct boss_sartharionAI : public ScriptedAI
             if (m_pInstance)
             {
                 if (Creature* pCyclone = m_creature->GetMap()->GetCreature(m_pInstance->SelectRandomFireCycloneGuid()))
-                    pCyclone->CastSpell(pCyclone, SPELL_CYCLONE_AURA_STRIKE, TRIGGERED_OLD_TRIGGERED);
+                    pCyclone->CastSpell(nullptr, m_bIsRegularMode ? SPELL_CYCLONE_AURA_STRIKE : SPELL_CYCLONE_AURA_STRIKE_H, TRIGGERED_OLD_TRIGGERED);
 
-                switch (urand(0, 5))
+                switch (urand(0, 4))
                 {
                     case 0: DoScriptText(SAY_SARTHARION_SPECIAL_1, m_creature); break;
                     case 1: DoScriptText(SAY_SARTHARION_SPECIAL_2, m_creature); break;
                     case 2: DoScriptText(SAY_SARTHARION_SPECIAL_3, m_creature); break;
-                    case 3: DoScriptText(SAY_SARTHARION_SPECIAL_4, m_creature); break;
                 }
             }
             m_uiLavaStrikeTimer = 30000;
@@ -1199,17 +1198,23 @@ struct npc_flame_tsunamiAI : public ScriptedAI
     {
         SetReactState(REACT_PASSIVE);
         m_creature->SetCanEnterCombat(false);
-        Reset();
+        m_creature->SetWalk(false);
+        AddCustomAction(0, 2000u, [&]() { HandleTsunamiVisual(); });
+        AddCustomAction(0, 5000u, [&]() { HandleTsunamiDamage(); });
     }
 
-    uint32 m_uiTsunamiTimer;
+    void Reset() override {}
 
-    void Reset() override
+    void HandleTsunamiVisual()
     {
-        m_uiTsunamiTimer = 2000;
+        DoCastSpellIfCan(nullptr, SPELL_FLAME_TSUNAMI, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
 
-        DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI_DMG_AURA, CAST_TRIGGERED);
+    void HandleTsunamiDamage()
+    {
+        DoCastSpellIfCan(nullptr, SPELL_FLAME_TSUNAMI_DMG_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        uint32 diff = m_creature->GetDbGuid() - (6150000 + 200);
+        m_creature->GetMotionMaster()->MoveWaypoint(6150000 + diff);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -1218,24 +1223,8 @@ struct npc_flame_tsunamiAI : public ScriptedAI
             return;
 
         m_creature->RemoveAllAurasOnEvade();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiTsunamiTimer)
-        {
-            if (m_uiTsunamiTimer <= uiDiff)
-            {
-                // Note: currently the way in which spell 60241 works is unk, so for the moment we'll use simple movement
-                m_creature->SetWalk(false);
-                m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX() < 3250.0f ? m_creature->GetPositionX() + 86.5f : m_creature->GetPositionX() - 86.5f,
-                        m_creature->GetPositionY(), m_creature->GetPositionZ());
-
-                m_uiTsunamiTimer = 0;
-            }
-            else
-                m_uiTsunamiTimer -= uiDiff;
-        }
+        m_creature->CastSpell(nullptr, SPELL_SUPER_SHRINK, TRIGGERED_OLD_TRIGGERED);
+        m_creature->ForcedDespawn(3000);
     }
 };
 
