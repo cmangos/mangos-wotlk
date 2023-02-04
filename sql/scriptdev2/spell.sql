@@ -797,6 +797,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57083,'spell_crystal_spikes'),
 (57283,'spell_remove_mushroom_power'),
 (57473,'spell_arcane_storm'),
+(57491,'spell_flame_tsunami_damage'),
 (57578,'spell_lava_strike'),
 (57669,'spell_replenishment'),
 (58418,'spell_portal_to_capital_city'),

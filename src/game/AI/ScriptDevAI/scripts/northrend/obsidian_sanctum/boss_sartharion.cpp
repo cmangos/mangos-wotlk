@@ -107,7 +107,7 @@ enum
 
     // Flame tsunami
     SPELL_FLAME_TSUNAMI                         = 57494,    // the visual dummy
-    // SPELL_FLAME_TSUNAMI_LEAP                 = 60241,    // SPELL_EFFECT_138 some leap effect, causing caster to move in direction
+    SPELL_FLAME_TSUNAMI_LEAP                    = 60241,    // SPELL_EFFECT_138 some leap effect, causing caster to move in direction
     SPELL_FLAME_TSUNAMI_DMG_AURA                = 57492,    // periodic damage, npc has this aura
     SPELL_SUPER_SHRINK                          = 37963,
 
@@ -1302,6 +1302,14 @@ struct spell_lava_strike : public SpellScript
     }
 };
 
+struct FlameTsunamiDamage : public SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
+    {
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), SPELL_FLAME_TSUNAMI_LEAP, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     Script* pNewScript = new Script;
@@ -1346,4 +1354,5 @@ void AddSC_boss_sartharion()
 
     RegisterSpellScript<spell_twilight_shift_aura>("spell_twilight_shift_aura");
     RegisterSpellScript<spell_lava_strike>("spell_lava_strike");
+    RegisterSpellScript<FlameTsunamiDamage>("spell_flame_tsunami_damage");
 }
