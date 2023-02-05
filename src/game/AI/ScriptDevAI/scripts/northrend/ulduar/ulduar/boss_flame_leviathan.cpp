@@ -691,7 +691,7 @@ struct npc_salvaged_demolisherAI : public CombatAI
                 Unit* mechanicSeat = m_creature->GetVehicleInfo()->GetPassenger(1);
                 if (!mechanicSeat)
                     return;
-                m_creature->SetPower(POWER_ENERGY, mechanicSeat->GetPower(POWER_ENERGY));
+                mechanicSeat->SetPower(POWER_ENERGY, m_creature->GetPower(POWER_ENERGY));
             }
         });
         SetCombatMovement(false);
