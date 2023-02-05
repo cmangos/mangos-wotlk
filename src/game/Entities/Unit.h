@@ -2134,6 +2134,8 @@ class Unit : public WorldObject
         SpellImmuneList m_spellImmune[MAX_SPELL_IMMUNITY];
         bool IsAOEImmune() const { return m_aoeImmune; }
         void SetAOEImmune(bool state) { m_aoeImmune = state; }
+        bool IsChainImmune() const { return m_chainImmune; }
+        void SetChainImmune(bool state) { m_chainImmune = state; }
 
         // Threat related methods
         bool CanHaveThreatList(bool ignoreAliveState = false) const;
@@ -2746,6 +2748,7 @@ class Unit : public WorldObject
         uint32 m_overridenMountId;
 
         bool m_aoeImmune;
+        bool m_chainImmune;
 
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type
