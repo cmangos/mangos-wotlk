@@ -671,10 +671,29 @@ struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
     }
 };
 
+enum DemolisherActions
+{
+    DEMOLISHER_ACTIONS_MAX,
+    DEMOLISHER_SYNC_ENERGY,
+};
+
 struct npc_salvaged_demolisherAI : public CombatAI
 {
-    npc_salvaged_demolisherAI(Creature* creature) : CombatAI(creature, 0)
+    npc_salvaged_demolisherAI(Creature* creature) : CombatAI(creature, DEMOLISHER_ACTIONS_MAX)
     {
+        AddCustomAction(DEMOLISHER_SYNC_ENERGY, 1s, [&]()
+        {
+            if (!m_creature->IsAlive())
+                return;
+            ResetTimer(DEMOLISHER_SYNC_ENERGY, 1s);
+            if (m_creature->GetVehicleInfo()->GetPassenger(0))
+            {
+                Unit* mechanicSeat = m_creature->GetVehicleInfo()->GetPassenger(1);
+                if (!mechanicSeat)
+                    return;
+                m_creature->SetPower(POWER_ENERGY, mechanicSeat->GetPower(POWER_ENERGY));
+            }
+        });
         SetCombatMovement(false);
     }
 
@@ -731,7 +750,9 @@ struct npc_leviathan_defense_turretAI : public CombatAI
             float newHealthVal = m_creature->GetHealthPercent() + 1.f;
             if (!m_creature->GetVictim())
                 m_creature->SetHealthPercent(std::min(newHealthVal, 100.f));
-            m_creature->RemoveUnattackableTargets();
+            for (auto& attacker : m_creature->getAttackers())
+                if (attacker->GetDistance(m_creature, true) >= (20.f * 20.f))
+                    m_creature->getThreatManager().modifyThreatPercent(attacker, -101);
             ResetCombatAction(DEFENSE_TURRET_RANGE_CHECK, 1s);
         }
     }
@@ -756,6 +777,18 @@ bool NpcSpellClick_npc_salvaged_demolisher(Player* player, Creature* clickedCrea
 
 struct PursueLeviathan : public SpellScript
 {
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!target)
+            return false;
+        if (!target->IsVehicle())
+            return false;
+        if (auto vehicleInfo = target->GetVehicleInfo())
+            if (vehicleInfo->GetPassenger(0))
+                return true;
+        return false;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
@@ -921,6 +954,22 @@ struct Hookshot : public SpellScript
             return false;
         caster->RemoveAurasByCasterSpell(SPELL_HOOKSHOT_AURA, caster->GetObjectGuid());
         return true;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        CreatureList turrets;
+        GetCreatureListWithEntryInGrid(turrets, target, NPC_DEFENSE_TURRET, 10.f);
+        for (auto& turret : turrets)
+        {
+            turret->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        }
     }
 };
 
