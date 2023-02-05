@@ -691,6 +691,7 @@ struct npc_salvaged_demolisherAI : public CombatAI
                 Unit* mechanicSeat = m_creature->GetVehicleInfo()->GetPassenger(1);
                 if (!mechanicSeat)
                     return;
+                mechanicSeat->SetMaxPower(POWER_ENERGY, 50);
                 mechanicSeat->SetPower(POWER_ENERGY, m_creature->GetPower(POWER_ENERGY));
             }
         });
@@ -1103,6 +1104,23 @@ struct ParachuteLeviathan : public AuraScript
     }
 };
 
+struct GrabPyrite : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target)
+            return;
+        if (auto transportInfo = caster->GetTransportInfo())
+            if (auto vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
+            {
+                target->CastSpell(vehicle, spell->m_currentBasePoints[0], TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(vehicle, 62473, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+            }
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -1154,4 +1172,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<EjectPassenger1>("spell_eject_passenger_1");
     RegisterSpellScript<SmokeTrailLeviathan>("spell_smoke_trail_leviathan");
     RegisterSpellScript<ParachuteLeviathan>("spell_parachute_leviathan");
+    RegisterSpellScript<GrabPyrite>("spell_grab_crate_leviathan");
 }
