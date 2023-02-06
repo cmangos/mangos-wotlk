@@ -364,8 +364,10 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         case GO_IRON_ENTRANCE_DOOR:
             break;
         case GO_ARCHIVUM_DOOR:
-            if (m_auiEncounter[TYPE_ASSEMBLY])
+            if (m_auiEncounter[TYPE_ASSEMBLY] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
+            else
+                pGo->SetGoState(GO_STATE_READY);
             break;
         // Celestial Planetarium
         case GO_CELESTIAL_ACCES:
@@ -628,7 +630,10 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_IRON_ENTRANCE_DOOR);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_ARCHIVUM_DOOR);
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_ARCHIVUM_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
 
                 if (Player* pPlayer = GetPlayerInMap())
                 {
@@ -638,11 +643,21 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             else if (uiData == IN_PROGRESS)
             {
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, true);
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, true);
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, true);
+                switch (urand(0,2))
+                {
+                    case 0: if(Unit* brundir = GetSingleCreatureFromStorage(NPC_BRUNDIR)) DoBroadcastText(34314, brundir); break;
+                    case 1: if(Unit* molgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM)) DoBroadcastText(34328, molgeim); break;
+                    case 2: if(Unit* steel = GetSingleCreatureFromStorage(NPC_STEELBREAKER)) DoBroadcastText(34321, steel); break;
+                }
+
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, false);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, false);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_STUNNED, true);
             }
+            else if (uiData == FAIL)
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
             break;
         case TYPE_KOLOGARN:
             m_auiEncounter[uiType] = uiData;
@@ -1394,15 +1409,15 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
             return m_abAchievCriteria[TYPE_ACHIEV_NINE_LIVES];
         case ACHIEV_CRIT_BRUNDIR_N:
         case ACHIEV_CRIT_BRUNDIR_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+            //if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_BRUNDIR];
         case ACHIEV_CRIT_MOLGEIM_N:
         case ACHIEV_CRIT_MOLGEIM_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+            //if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_MOLGEIM];
         case ACHIEV_CRIT_STEELBREAKER_N:
         case ACHIEV_CRIT_STEELBREAKER_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
+            //if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_STEELBREAKER];
         case ACHIEV_CRIT_STUNNED_BRUND_N:
         case ACHIEV_CRIT_STUNNED_STEEL_N:
