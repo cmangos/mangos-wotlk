@@ -933,6 +933,50 @@ bool EffectDummyCreature_npc_grand_admiral_westwind(Unit* pCaster, uint32 uiSpel
     return false;
 }
 
+/*######
+## spell_create_lance - 63845
+######*/
+
+struct SpellCreateLanceData
+{
+    Races playerRace;
+    uint32 spellId, itemId;
+};
+
+static const SpellCreateLanceData createLanceData[] =
+{
+    {RACE_HUMAN,    63914, 46069},
+    {RACE_DWARF,    63915, 46069},
+    {RACE_NIGHTELF, 63916, 46069},
+    {RACE_GNOME,    63917, 46069},
+    {RACE_DRAENEI,  63918, 46069},
+    {RACE_ORC,      63919, 46070},
+    {RACE_UNDEAD,   63920, 46070},
+    {RACE_TAUREN,   63921, 46070},
+    {RACE_TROLL,    63922, 46070},
+    {RACE_BLOODELF, 63923, 46070},
+};
+
+struct spell_create_lance : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        Player* playerTarget = (Player*)target;
+
+        for (const auto& i : createLanceData)
+            if (playerTarget->getRace() == i.playerRace && !playerTarget->HasItemCount(i.itemId, 1))
+                playerTarget->CastSpell(playerTarget, i.spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -963,4 +1007,6 @@ void AddSC_icecrown()
     pNewScript->GetAI = &GetAI_npc_grand_admiral_westwind;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_grand_admiral_westwind;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_create_lance>("spell_create_lance");
 }
