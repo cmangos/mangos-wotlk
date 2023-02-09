@@ -2865,6 +2865,9 @@ const std::vector<uint32> brewfestTextsHorde = { 23627, 23628 };
 const std::vector<uint32> hallowsEndTextsAlliance = { 24346, 24348, 24338, 24339, 23287, 23293, 24347, 23357 };
 const std::vector<uint32> hallowsEndTextsHorde = { 23295, 24331, 23298, 24329, 24336, 23351, 24337, 24330 };
 
+const std::vector<uint32> lunarTextsAlliance = { 24349, 24350 };
+const std::vector<uint32> lunarTextsHorde = { 24332, 24333 };
+
 uint32 GetRandomText(const std::vector<uint32> texts)
 {
     return texts[urand(0, texts.size() - 1)];
@@ -2936,7 +2939,21 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
 
         if (events == GOSSIP_EVENT_LUNAR_FESTIVAL)
         {
-
+            switch (spell->GetCaster()->GetEntry())
+            {
+                default:
+                case NPC_HUMAN_COMMONER:
+                case NPC_DWARF_COMMONER:
+                case NPC_GNOME_COMMONER:
+                case NPC_NIGHT_ELF_COMMONER:
+                case NPC_DRAENEI_COMMONER: textId = GetRandomText(lunarTextsAlliance); break;
+                case NPC_BLOOD_ELF_COMMONER:
+                case NPC_ORC_COMMONER:
+                case NPC_TAUREN_COMMONER:
+                case NPC_TROLL_COMMONER:
+                case NPC_FORSAKEN_COMMONER: textId = GetRandomText(lunarTextsHorde); break;
+                case NPC_GOBLIN_COMMONER: textId = GetRandomText(lunarTextsHorde); break;
+            }
         }
 
         if (events == GOSSIP_EVENT_BREWFEST)
