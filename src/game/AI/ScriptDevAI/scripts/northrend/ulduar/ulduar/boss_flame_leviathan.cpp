@@ -543,7 +543,17 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
     }
 
     void AttackStart(Unit* /*who*/) override { }
-    void MoveInLineOfSight(Unit* /*who*/) override { }
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (m_creature->IsFriend(who))
+            return;
+        if (who->GetDistance2d(m_creature->GetPositionX(), m_creature->GetPositionY()) <= 3.f)
+        {
+            m_creature->StopMoving();
+            m_uiTargetChaseTimer = 0;
+            MovementInform(POINT_MOTION_TYPE, 1);
+        }
+    }
 
     void JustSummoned(Creature* summoned) override
     {
@@ -752,7 +762,7 @@ struct npc_leviathan_defense_turretAI : public CombatAI
             if (!m_creature->GetVictim())
                 m_creature->SetHealthPercent(std::min(newHealthVal, 100.f));
             for (auto& attacker : m_creature->getAttackers())
-                if (attacker->GetDistance(m_creature, true) >= (20.f * 20.f))
+                if (attacker->GetDistance(m_creature, true) >= (20.f * 20.f) || m_creature->IsFriend(attacker))
                     m_creature->getThreatManager().modifyThreatPercent(attacker, -101);
             ResetCombatAction(DEFENSE_TURRET_RANGE_CHECK, 1s);
         }
