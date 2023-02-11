@@ -2272,7 +2272,11 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 4044,  -- Target Dummy Passive
+6742, -- Bloodlust
 11816, -- Land Mine Arming
+13879, -- Magma Splash
+17205, -- Winterfall Firewater
+23378, -- Magma Splash
 27791, -- Suicide (Suicide)
 21789, -- Hate to Half (Hate to Half)
 28330  -- Flameshocker - Immolate Visual
@@ -2899,6 +2903,7 @@ UPDATE `spell_template` SET `EffectMiscValueB1`=64 WHERE `Id` IN(38107);
 -- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
+36630, -- Resistances (c.22000)
 37248, -- Power Converters: Electromental Visual
 43119, -- Cyclone Visual
 43120, -- Cyclone
