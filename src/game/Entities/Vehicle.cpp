@@ -49,47 +49,29 @@
 // Hackfix until the proper relation between AttachmentIDs has been found
 constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
 {
+    switch (seatEntry->m_attachmentID)
+    {
+        case 13: return 39;
+        case 14: return 40;
+        case 15: return 41;
+        case 16: return 42;
+        case 17: return 43;
+        case 18: return 44;
+        case 19: return 45;
+        case 20: return 46;
+    }
     switch (seatEntry->m_ID)
     {
-        //Salvaged Chopper
-        case 3005: return -1; // 13
-        case 3004: return -1; // 14
         //Salvaged Demolisher
-        case 3011: return 39; // 13
-        case 3146: return 41; // 15
-        case 3013: return 42; // 16
         case 3147: return 40; // 4
-        //Flame Leviathan (10)
-        case 3832: return 46; // 20
-        case 3833: return 46; // 20
-        case 3834: return 46; // 20
-        //Flame Leviathan (25)
-        case 3043: return 46; // 20
-        case 3065: return 46; // 20
-        case 3071: return 46; // 20
-        case 3072: return 46; // 20
-        case 3070: return 46; // 20
         //Ignis
         case 3064: return 35; // 4
-        case 3206: return 40; // 14
-        //Kologarn's Right Arm
-        case 3690: return 39; // 13
-        case 3691: return 39; // 13
-        case 3692: return 39; // 13
         //Mimiron's Legs
-        case 3566: return 39; // 13
-        case 3567: return 39; // 13
         case 3568: return 19; // 2 (Special Case? Local coordinates are 0,0,0)
         case 3570: return 19; // 2 (Special Case? Local coordinates are 0,0,0)
         case 3586: return 34; // 1 (could also be 17, both same source coordinates)
-        case 3587: return 39; // 13
-        case 3588: return 46; // 20
-        case 3886: return 46; // 20
         //Mimiron's Torso
         case 3807: return 34; // 1
-        case 3806: return 40; // 14
-        //Mimiron's Head
-        case 3626: return 39; // 13
         //Gal'Darah
         case 2097: return 17; // 5
     }
