@@ -45,7 +45,7 @@ namespace Movement
     struct MoveSplineInitArgs
     {
             MoveSplineInitArgs(size_t path_capacity = 16) : path_Idx_offset(0),
-                velocity(0), parabolic_amplitude(0.f), time_perc(0.f), splineId(0), initialOrientation(0.f), slowed(false)
+                velocity(0), parabolic_amplitude(0.f), time_perc(0.f), splineId(0), initialOrientation(0.f), slowed(0.f)
             {
                 path.reserve(path_capacity);
             }
@@ -59,7 +59,7 @@ namespace Movement
             float time_perc;
             uint32 splineId;
             float initialOrientation;
-            bool slowed;
+            float slowed;
 
             /** Returns true to show that the arguments were configured correctly and MoveSpline initialization will succeed. */
             bool Validate(Unit* unit) const;
