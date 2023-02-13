@@ -550,6 +550,7 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
     ScriptedInstance* m_instance;
 
     uint32 m_uiTargetChaseTimer;
+    std::chrono::time_point<std::chrono::steady_clock> m_castOnCooldown = std::chrono::steady_clock::now();
     ObjectGuid m_hodirFuryGuid;
 
     void Reset() override
@@ -561,14 +562,16 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
     void AttackStart(Unit* /*who*/) override { }
     void MoveInLineOfSight(Unit* who) override
     {
-        if (m_creature->IsFriend(who))
+        if (who->GetDistance2d(m_creature->GetPositionX(), m_creature->GetPositionY()) > 3.f)
             return;
-        if (who->GetDistance2d(m_creature->GetPositionX(), m_creature->GetPositionY()) <= 3.f)
-        {
-            m_creature->StopMoving();
-            m_uiTargetChaseTimer = 0;
-            MovementInform(POINT_MOTION_TYPE, 1);
-        }
+        if (std::chrono::steady_clock::now() < m_castOnCooldown)
+            return;
+        if (!who->HasCharmer() || m_creature->IsFriend(who))
+            return;
+        m_creature->GetMotionMaster()->Clear();
+        m_uiTargetChaseTimer = 0;
+        m_castOnCooldown = std::chrono::steady_clock::now() + 5s;
+        MovementInform(POINT_MOTION_TYPE, 1);
     }
 
     void JustSummoned(Creature* summoned) override
