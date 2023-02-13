@@ -1030,7 +1030,14 @@ struct SystemsShutdown : public AuraScript
             if (target->AI())
                 target->AI()->SetCombatScriptStatus(true);
             if (target->GetEntry() == NPC_LEVIATHAN_SEAT)
+            {
+                Unit* passenger;
+                if (target && target->IsVehicle())
+                    passenger = target->GetVehicleInfo()->GetPassenger(0);
                 target->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
+                if (passenger)
+                    target->CastSpell(passenger, SPELL_SMOKE_TRAIL, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE); // This may actually be a separate cast, not sure.
+            }
         }
         else
         {
@@ -1086,8 +1093,6 @@ struct EjectPassenger1 : public SpellScript
             return;
         vInfo->UnBoard(passenger, false);
         passenger->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-        passenger->RemoveSpellsCausingAura(SPELL_AURA_FACTION_OVERRIDE);
-        target->CastSpell(passenger, SPELL_SMOKE_TRAIL, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE); // This may actually be a separate cast, not sure.
     }
 };
 
