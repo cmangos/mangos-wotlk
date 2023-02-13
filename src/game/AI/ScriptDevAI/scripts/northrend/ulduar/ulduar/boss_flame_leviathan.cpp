@@ -302,28 +302,31 @@ struct boss_flame_leviathanAI : public BossAI
 
     void JustSummoned(Creature* summoned) override
     {
-        m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
         switch (summoned->GetEntry())
         {
             case NPC_THORIM_HAMMER_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_LIGHTNING_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
+                m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_MIMIRON_INFERNO_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_RED_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
+                m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_HODIR_FURY_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BLUE_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
+                m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_FREYA_WARD_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_GREEN_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
+                m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
         }
     }
@@ -648,14 +651,14 @@ struct npc_freya_wardAI : public Scripted_NoMovementAI
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_WRITHING_LASHER || summoned->GetEntry() == NPC_WARD_OF_LIFE)
-            summoned->SetInCombatWithZone();
+            summoned->SetInCombatWithZone(false);
     }
 
     void UpdateAI(const uint32 diff) override
     {
         if (m_uiFreyaWardTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FREYA_WARD) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_FREYA_WARD) == CAST_OK)
                 m_uiFreyaWardTimer = 30000;
         }
         else
@@ -1160,6 +1163,15 @@ struct OverloadLeviathan : public SpellScript
     }
 };
 
+struct FreyasWard : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        caster->CastSpell(caster, spell->m_currentBasePoints[1], TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 struct FlamesLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1225,4 +1237,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<GrabPyrite>("spell_grab_crate_leviathan");
     RegisterSpellScript<OverloadLeviathan>("spell_overload_leviathan");
     RegisterSpellScript<FlamesLeviathan>("spell_flames_leviathan");
+    RegisterSpellScript<FreyasWard>("spell_freyas_ward_leviathan");
 }
