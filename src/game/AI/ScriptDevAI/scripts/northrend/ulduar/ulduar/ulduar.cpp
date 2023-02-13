@@ -529,7 +529,10 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 DoUseOpenableObject(GO_SHIELD_WALL, true);
             }
             else if (uiData == FAIL)
+            {
+                DoUseOpenableObject(GO_SHIELD_WALL, true);
                 DoCallLeviathanHelp();
+            }
             break;
         case TYPE_IGNIS:
             m_auiEncounter[uiType] = uiData;
