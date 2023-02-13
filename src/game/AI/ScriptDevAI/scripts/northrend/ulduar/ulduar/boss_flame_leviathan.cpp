@@ -1148,9 +1148,20 @@ struct OverloadLeviathan : public SpellScript
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         Unit* caster = spell->GetAffectiveCaster();
-        if (target->IsVehicle() && caster->IsEnemy(target))
+        if (target && target->IsVehicle() && caster->IsEnemy(target))
             return true;
         return false;
+    }
+};
+
+struct FlamesLeviathan : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        if (target && caster->IsFriend(target))
+            return false;
+        return true;
     }
 };
 
@@ -1207,4 +1218,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<ParachuteLeviathan>("spell_parachute_leviathan");
     RegisterSpellScript<GrabPyrite>("spell_grab_crate_leviathan");
     RegisterSpellScript<OverloadLeviathan>("spell_overload_leviathan");
+    RegisterSpellScript<FlamesLeviathan>("spell_flames_leviathan");
 }
