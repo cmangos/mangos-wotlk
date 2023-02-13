@@ -22,6 +22,7 @@ SDCategory: Ulduar
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 #include "Entities/Vehicle.h"
@@ -71,15 +72,16 @@ enum
     SPELL_SYSTEMS_SHUTDOWN                  = 62475,                    // sends event 21605 for achiev check
     // Leviathan seat has missing aura 62421
 
-    // leviathan other spells - for the moment these are not used
+    // leviathan other spells
     SPELL_SMOKE_TRAIL                       = 63575,
-    // SPELL_EJECT_ALL_PASSENGERS           = 50630,                    // used by vehicles on death; currently handled by DB linking
+    SPELL_EJECT_ALL_PASSENGERS              = 50630,                    // used by vehicles on death; currently handled by DB linking
     // SPELL_EJECT_PASSENGER_4              = 64614,
     SPELL_EJECT_PASSENGER_1                 = 60603,
     SPELL_LOAD_INTO_CATAPULT                = 64414,
     SPELL_PASSENGER_LOADED                  = 62340,
     SPELL_HOOKSHOT_AURA                     = 62336,
     SPELL_RIDE_VEHICLE_SCALES_WITH_GEAR     = 62309,
+    SPELL_OVERLOAD                          = 63618,
 
     // tower buffs to Leviathan (applied on combat start if the towers are alive)
     SPELL_TOWER_OF_FROST                    = 65077,
@@ -215,6 +217,10 @@ struct boss_flame_leviathanAI : public BossAI
             if (Unit* caster = aura->GetCaster())
                 caster->InterruptNonMeleeSpells(true);
         });
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float, float)
+        {
+            return x < 148;
+        });
     }
 
     instance_ulduar* m_instance;
@@ -278,7 +284,8 @@ struct boss_flame_leviathanAI : public BossAI
 
     void EnterEvadeMode() override
     {
-        m_creature->CastSpell(m_creature, 50630, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(m_creature, SPELL_EJECT_ALL_PASSENGERS, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_OVERLOAD, TRIGGERED_OLD_TRIGGERED);
         CreatureList leviAdds;
         for (const uint32& entry : addEntries)
         {
@@ -1131,6 +1138,16 @@ struct GrabPyrite : public SpellScript
     }
 };
 
+struct OverloadLeviathan : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->IsVehicle())
+            return true;
+        return false;
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -1183,4 +1200,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<SmokeTrailLeviathan>("spell_smoke_trail_leviathan");
     RegisterSpellScript<ParachuteLeviathan>("spell_parachute_leviathan");
     RegisterSpellScript<GrabPyrite>("spell_grab_crate_leviathan");
+    RegisterSpellScript<OverloadLeviathan>("spell_overload_leviathan");
 }
