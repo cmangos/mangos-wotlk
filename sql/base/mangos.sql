@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14067_01_mangos_addon_stand_state` bit(1) DEFAULT NULL
+  `required_14068_01_mangos_gameobject_data_split` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1646,10 +1646,7 @@ CREATE TABLE `creature_template_addon` (
   `mount` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `stand_state` TINYINT(3) UNSIGNED NOT NULL DEFAULT '0',
   `b2_0_sheath` tinyint(3) unsigned NOT NULL DEFAULT '0',
-<<<<<<< HEAD
   `b2_1_pvp_state` tinyint(3) unsigned NOT NULL DEFAULT '0',
-=======
->>>>>>> 13bfbaab5b6 ([s2459] Creature: Change bytes1 addon column into stand state)
   `emote` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `moveflags` int(10) unsigned NOT NULL DEFAULT '0',
   `auras` text,
@@ -2312,8 +2309,6 @@ CREATE TABLE `gameobject` (
   `rotation3` float NOT NULL DEFAULT '0',
   `spawntimesecsmin` int(11) NOT NULL DEFAULT '0' COMMENT 'GameObject respawn time minimum',
   `spawntimesecsmax` int(11) NOT NULL DEFAULT '0' COMMENT 'Gameobject respawn time maximum',
-  `animprogress` tinyint(3) unsigned NOT NULL DEFAULT '0',
-  `state` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
   KEY `idx_map` (`map`),
   KEY `idx_id` (`id`)
@@ -2328,35 +2323,24 @@ LOCK TABLES `gameobject` WRITE;
 /*!40000 ALTER TABLE `gameobject` ENABLE KEYS */;
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS `gameobject_addon`;
+CREATE TABLE `gameobject_addon` (
+  `guid` int(10) unsigned NOT NULL DEFAULT '0',
+  `animprogress` TINYINT(3) UNSIGNED NOT NULL DEFAULT '100',
+  `state` TINYINT(3) NOT NULL DEFAULT -1,
+  `path_rotation0` float NOT NULL DEFAULT '0',
+  `path_rotation1` float NOT NULL DEFAULT '0',
+  `path_rotation2` float NOT NULL DEFAULT '0',
+  `path_rotation3` float NOT NULL DEFAULT '1',
+  PRIMARY KEY(`guid`)
+);
+
 DROP TABLE IF EXISTS `gameobject_spawn_entry`;
 CREATE TABLE `gameobject_spawn_entry`(
 `guid` INT UNSIGNED NOT NULL COMMENT 'Gameobject table guid',
 `entry` MEDIUMINT UNSIGNED NOT NULL COMMENT 'Gameobject Template entry',
 PRIMARY KEY(`guid`,`entry`)
 );
-
---
--- Table structure for table `gameobject_addon`
---
-
-DROP TABLE IF EXISTS `gameobject_addon`;
-CREATE TABLE `gameobject_addon` (
-  `guid` int(10) unsigned NOT NULL DEFAULT '0',
-  `path_rotation0` float NOT NULL DEFAULT '0',
-  `path_rotation1` float NOT NULL DEFAULT '0',
-  `path_rotation2` float NOT NULL DEFAULT '0',
-  `path_rotation3` float NOT NULL DEFAULT '1',
-  PRIMARY KEY (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Gameobject System';
-
---
--- Dumping data for table `gameobject_addon`
---
-
-LOCK TABLES `gameobject_addon` WRITE;
-/*!40000 ALTER TABLE `gameobject_addon` DISABLE KEYS */;
-/*!40000 ALTER TABLE `gameobject_addon` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `gameobject_battleground`

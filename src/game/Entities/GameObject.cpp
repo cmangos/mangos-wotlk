@@ -181,7 +181,7 @@ void GameObject::RemoveFromWorld()
     WorldObject::RemoveFromWorld();
 }
 
-bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, const QuaternionData& rotation, uint8 animprogress, GOState go_state)
+bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, const QuaternionData & rotation, uint8 animprogress, GOState goState)
 {
     MANGOS_ASSERT(map);
     Relocate(x, y, z, ang);
@@ -216,11 +216,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     SetObjectScale(goinfo->size);
 
     SetLocalRotation(rotation.x, rotation.y, rotation.z, rotation.w);
-    // For most of gameobjects is (0, 0, 0, 1) quaternion, only some transports has not standart rotation
-    if (const GameObjectDataAddon* addon = sGameObjectDataAddonStorage.LookupEntry<GameObjectDataAddon>(guidlow))
-        SetTransportPathRotation(addon->path_rotation);
-    else
-        SetTransportPathRotation(QuaternionData(0, 0, 0, 1));
+    SetTransportPathRotation(QuaternionData(0, 0, 0, 1));
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
@@ -234,8 +230,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     SetEntry(goinfo->id);
     SetDisplayId(goinfo->displayId);
 
-    // GAMEOBJECT_BYTES_1, index at 0, 1, 2 and 3
-    SetGoState(go_state);
+    SetGoState(goState);
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoArtKit(0);                                         // unknown what this is
     SetGoAnimProgress(animprogress);
@@ -281,6 +276,9 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
             break;
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             ForceGameObjectHealth(GetMaxHealth(), nullptr);
+            break;
+        case GAMEOBJECT_TYPE_AURA_GENERATOR:
+            SetGoState(goinfo->auraGenerator.startOpen ? GO_STATE_ACTIVE : GO_STATE_READY);
             break;
         default:
             break;
@@ -845,8 +843,6 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
     data.rotation.w = m_localRotation.w;
     data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
     data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
-    data.animprogress = GetGoAnimProgress();
-    data.go_state = GetGoState();
     data.spawnMask = spawnMask;
 
     // updated in DB
@@ -866,9 +862,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
        << m_localRotation.z << ", "
        << m_localRotation.w << ", "
        << m_respawnDelay << ", "
-       << m_respawnDelay << ", " // TODO: Add variance
-       << uint32(GetGoAnimProgress()) << ", "
-       << uint32(GetGoState()) << ")";
+       << m_respawnDelay << ")";
 
     WorldDatabase.BeginTransaction();
     WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", GetGUIDLow());
@@ -897,8 +891,7 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     if (transport)
         transport->CalculatePassengerPosition(x, y, z, &ang);
 
-    uint8 animprogress = data->animprogress;
-    GOState go_state = data->go_state;
+    uint32 animprogress = data->animprogress;
 
     SpawnGroupEntry* groupEntry = map->GetMapDataContainer().GetSpawnGroupByGuid(dbGuid, TYPEID_GAMEOBJECT); // use dynguid by default \o/
     GameObjectGroup* group = nullptr;
@@ -925,8 +918,13 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
         entry = randomEntry;
 
-    if (!Create(dbGuid, newGuid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
+    if (!Create(dbGuid, newGuid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, GO_STATE_READY))
         return false;
+
+    if (data->goState != -1)
+        SetGoState(GOState(data->goState));
+
+    SetTransportPathRotation(data->path_rotation);
 
     if (group)
         SetGameObjectGroup(group);

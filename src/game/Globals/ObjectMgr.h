@@ -722,7 +722,6 @@ class ObjectMgr
         void LoadEquipmentTemplates();
         void LoadGameObjectLocales();
         void LoadGameObjects();
-        void LoadGameObjectAddon();
         void LoadGameObjectSpawnEntry();
         void LoadGameObjectTemplateAddons();
         void LoadItemPrototypes();

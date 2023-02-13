@@ -638,12 +638,13 @@ struct GameObjectData
     int32 spawntimesecsmin;
     int32 spawntimesecsmax;
     uint32 animprogress;
-    GOState go_state;
+    int32 goState;
     uint8 spawnMask;
     uint16 gameEvent;
     uint16 GuidPoolId;
     uint16 EntryPoolId;
     uint16 OriginalZoneId;
+    QuaternionData path_rotation;
 
     uint32 GetRandomRespawnTime() const { return urand(uint32(spawntimesecsmin), uint32(spawntimesecsmax)); }
 
@@ -654,13 +655,6 @@ struct GameObjectData
 struct GameObjectTemplateAddon
 {
     std::array<uint32, 4> artKits = {};
-};
-
-// from `gameobject_addon`
-struct GameObjectDataAddon
-{
-    uint32 guid;
-    QuaternionData path_rotation;
 };
 
 enum class GameObjectActions : uint32
