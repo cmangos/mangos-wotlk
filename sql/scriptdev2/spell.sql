@@ -931,6 +931,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (62116,'spell_tails_up_summon_female_icepaw_bear'),
 (62138,'spell_teleport_inside_violet_hold'),
 (62297,'spell_hodirs_fury_leviathan'),
+(62907,'spell_freyas_ward_leviathan'),
 (62910,'spell_mimirons_inferno_leviathan'),
 (62912,'spell_thorims_hammer_leviathan'),
 (62374,'spell_pursue_leviathan'),
