@@ -961,6 +961,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (64475,'spell_ignis_remove_strength'),
 (64503,'spell_ignis_water'),
 (64568,'spell_blood_reserve_enchant'),
+(65045,'spell_flames_leviathan'),
 (65121,'spell_searing_light'),
 (65667,'spell_ignis_heat'),
 (65869,'spell_disengage'),
