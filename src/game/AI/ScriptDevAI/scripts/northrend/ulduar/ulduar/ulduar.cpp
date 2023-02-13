@@ -180,6 +180,7 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_LEVIATHAN:
         case NPC_EXPLORER_DELLORAH:
         case NPC_BRANN_BRONZEBEARD:
+        case NPC_PROJECTION_UNIT:
         case NPC_ORBITAL_SUPPORT:
         case NPC_IGNIS:
         case NPC_RAZORSCALE:
@@ -514,45 +515,18 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         // Siege of Ulduar
         case TYPE_LEVIATHAN:
             m_auiEncounter[uiType] = uiData;
-            if (uiData != SPECIAL)
-            {
-                if (GameObject* door = GetSingleGameObjectFromStorage(GO_SHIELD_WALL))
-                {
-                    switch (uiData)
-                    {
-                        case IN_PROGRESS:
-                        {
-                            //if (door->GetGoState() != GO_STATE_READY)
-                                door->SetGoState(GO_STATE_READY);
-                            break;
-                        }
-                        case DONE:
-                        case FAIL:
-                        {
-                            //if (door->GetGoState() == GO_STATE_READY)
-                                door->SetGoState(GO_STATE_ACTIVE);
-                            break;
-                        }
-
-                    }
-                }
-            }
             if (uiData == IN_PROGRESS)
             {
                 // make sure that the Lightning door is closed when engaged in combat
-                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_LIGHTNING_DOOR))
-                {
-                    if (pDoor->GetGoState() != GO_STATE_READY)
-                        pDoor->SetGoState(GO_STATE_READY);
-                        //DoUseDoorOrButton(GO_LIGHTNING_DOOR);
-                }
-
+                DoUseOpenableObject(GO_LIGHTNING_DOOR, false);
+                DoUseOpenableObject(GO_SHIELD_WALL, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHUTOUT, true);
             }
             else if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_XT002_GATE);
-                DoUseDoorOrButton(GO_LIGHTNING_DOOR);
+                DoUseOpenableObject(GO_XT002_GATE, true);
+                DoUseOpenableObject(GO_LIGHTNING_DOOR, true);
+                DoUseOpenableObject(GO_SHIELD_WALL, true);
             }
             else if (uiData == FAIL)
                 DoCallLeviathanHelp();

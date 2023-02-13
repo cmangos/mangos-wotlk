@@ -1145,9 +1145,10 @@ struct GrabPyrite : public SpellScript
 
 struct OverloadLeviathan : public SpellScript
 {
-    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
-        if (target->IsVehicle())
+        Unit* caster = spell->GetAffectiveCaster();
+        if (target->IsVehicle() && caster->IsEnemy(target))
             return true;
         return false;
     }
