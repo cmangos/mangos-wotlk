@@ -369,6 +369,11 @@ struct boss_flame_leviathanAI : public BossAI
 
     void HandleHardmode()
     {
+        if(!m_creature->IsInCombat())
+        {
+            DisableCombatAction(LEVIATHAN_HARDMODES);
+            return;
+        }
         // if all towers are deactivated then skip the rest
         if (!m_ulduarTower[TOWER_ID_HODIR] && !m_ulduarTower[TOWER_ID_FREYA] && !m_ulduarTower[TOWER_ID_MIMIRON] && !m_ulduarTower[TOWER_ID_THORIM])
         {
@@ -500,7 +505,7 @@ struct boss_flame_leviathanAI : public BossAI
         {
             float fX, fY, fZ;
             m_creature->GetRandomPoint(orbital->GetPositionX(), orbital->GetPositionY(), orbital->GetPositionZ(), 150.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 8000);
+            m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 20000);
         }
     }
 
@@ -527,7 +532,7 @@ struct boss_flame_leviathanAI : public BossAI
                     ResetCombatAction(LEVIATHAN_THORIMS_HAMMER, 500ms);
                 else
                 {
-                    ResetCombatAction(action, 40s);
+                    ResetCombatAction(action, 80s);
                     m_thorimsHammerCount = 0;
                 }
             }
