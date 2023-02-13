@@ -197,16 +197,9 @@ struct boss_flame_leviathanAI : public BossAI
         AddOnAggroText(SAY_AGGRO);
         AddOnKillText(SAY_SLAY);
         AddOnDeathText(SAY_DEATH);
-        AddCustomAction(LEVIATHAN_THORIMS_HAMMER, true, [&]()
-        {
-            DoSpawnThorimsHammer();
-            ++m_thorimsHammerCount;
-
-            if (m_thorimsHammerCount < MAX_THORIM_HAMMER)
-                ResetTimer(LEVIATHAN_THORIMS_HAMMER, 1s);
-        });
         AddTimerlessCombatAction(LEVIATHAN_FETCH_TOWERS, true);
         AddCombatAction(LEVIATHAN_HARDMODES, 10s);
+        AddCombatAction(LEVIATHAN_THORIMS_HAMMER, true);
         Reset();
         m_creature->SetActiveObjectState(true);
         AddCustomAction(LEVIATHAN_RESET_OVERLOAD, true, [&]()
@@ -405,7 +398,7 @@ struct boss_flame_leviathanAI : public BossAI
                                 case TOWER_ID_HODIR:    DoSpawnHodirsFury();           break;
                                 case TOWER_ID_FREYA:    DoSpawnFreyasWard();           break;
                                 case TOWER_ID_MIMIRON:  DoSpawnMimironsInferno();      break;
-                                case TOWER_ID_THORIM:   ResetTimer(LEVIATHAN_THORIMS_HAMMER, 1s); break;
+                                case TOWER_ID_THORIM:   ResetCombatAction(LEVIATHAN_THORIMS_HAMMER, 1s); break;
                             }
 
                             // reset timer and wait for another turn
@@ -521,6 +514,19 @@ struct boss_flame_leviathanAI : public BossAI
             case LEVIATHAN_HARDMODES:
             {
                 HandleHardmode();
+            }
+            case LEVIATHAN_THORIMS_HAMMER:
+            {
+                DoSpawnThorimsHammer();
+                ++m_thorimsHammerCount;
+
+                if (m_thorimsHammerCount < MAX_THORIM_HAMMER)
+                    ResetCombatAction(LEVIATHAN_THORIMS_HAMMER, 500ms);
+                else
+                {
+                    ResetCombatAction(action, 40s);
+                    m_thorimsHammerCount = 0;
+                }
             }
         }
     }
