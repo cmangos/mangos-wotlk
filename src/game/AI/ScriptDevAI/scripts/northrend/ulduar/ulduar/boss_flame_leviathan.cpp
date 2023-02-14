@@ -715,26 +715,12 @@ struct npc_salvaged_demolisherAI : public CombatAI
 {
     npc_salvaged_demolisherAI(Creature* creature) : CombatAI(creature, DEMOLISHER_ACTIONS_MAX)
     {
-        AddCustomAction(DEMOLISHER_SYNC_ENERGY, 1s, [&]()
-        {
-            if (!m_creature->IsAlive())
-                return;
-            ResetTimer(DEMOLISHER_SYNC_ENERGY, 1s);
-            if (m_creature->GetVehicleInfo()->GetPassenger(0))
-            {
-                Unit* mechanicSeat = m_creature->GetVehicleInfo()->GetPassenger(1);
-                if (!mechanicSeat)
-                    return;
-                mechanicSeat->SetMaxPower(POWER_ENERGY, 50);
-                mechanicSeat->SetPower(POWER_ENERGY, m_creature->GetPower(POWER_ENERGY));
-            }
-        });
+        AddCustomAction(DEMOLISHER_SYNC_ENERGY, 1s, [&]() { initialize(); });
         SetCombatMovement(false);
     }
 
-    void JustRespawned() override
+    void initialize()
     {
-        CombatAI::JustRespawned();
         m_creature->SetMaxPower(POWER_ENERGY, 50);
         m_creature->SetPower(POWER_ENERGY, 50);
         if (!m_creature->IsVehicle())
@@ -745,6 +731,12 @@ struct npc_salvaged_demolisherAI : public CombatAI
         mechanicSeat->SetPowerType(POWER_ENERGY);
         mechanicSeat->SetMaxPower(POWER_ENERGY, 50);
         mechanicSeat->SetPower(POWER_ENERGY, 50);
+    }
+
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        ResetTimer(DEMOLISHER_SYNC_ENERGY, 1s);
     }
 };
 
