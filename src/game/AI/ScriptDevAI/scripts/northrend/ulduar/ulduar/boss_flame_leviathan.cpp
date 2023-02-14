@@ -931,21 +931,33 @@ struct ThrowPassenger : public SpellScript
         Unit* caster = spell->GetCaster();
         if (!caster)
             return;
+        if (caster->GetEntry() != NPC_SALVAGED_DEMOLISHER)
+            return;
         auto& targetList = spell->GetTargetList();
         Unit* projectile = nullptr;
         Unit* seat = nullptr;
 
         if (caster->GetVehicleInfo())
             if (caster->GetVehicleInfo()->GetPassenger(3))
-                if (Unit* seat = static_cast<Unit*>(caster->GetVehicleInfo()->GetPassenger(3)))
+                if (seat = static_cast<Unit*>(caster->GetVehicleInfo()->GetPassenger(3)))
                     if (seat->IsVehicle())
                         projectile = seat->GetVehicleInfo()->GetPassenger(0);
         if (!projectile)
             return;
+        if (!seat)
+            return;
 
-        if (seat)
-            seat->GetVehicleInfo()->UnBoard(projectile, false);
-        projectile->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, projectile->GetObjectGuid());
+        std::unordered_set<uint32> spellIds;
+        for (auto aura : caster->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
+        {
+            if (aura->GetCasterGuid() == projectile->GetObjectGuid())
+                spellIds.emplace(aura->GetId());
+        }
+
+        for (uint32 spell : spellIds)
+            projectile->RemoveAurasByCasterSpell(spell, projectile->GetObjectGuid());
+        spellIds.clear();
+
         projectile->RemoveAurasDueToSpell(SPELL_LOAD_INTO_CATAPULT);
         projectile->KnockBackWithAngle(projectile->GetAngle(spell->m_targets.m_destPos.x, spell->m_targets.m_destPos.y), spell->m_targets.getSpeed() * cos(spell->m_targets.getElevation()), spell->m_targets.getSpeed() * sin(spell->m_targets.getElevation()));
         projectile->CastSpell(nullptr, SPELL_HOOKSHOT_AURA, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
@@ -1100,8 +1112,17 @@ struct EjectPassenger1 : public SpellScript
         Unit* passenger = vInfo->GetPassenger(spell->m_currentBasePoints[0]);
         if (!passenger)
             return;
-        vInfo->UnBoard(passenger, false);
-        passenger->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+
+        std::unordered_set<uint32> spellIds;
+        for (auto aura : target->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
+        {
+            if (aura->GetCasterGuid() == passenger->GetObjectGuid())
+                spellIds.emplace(aura->GetId());
+        }
+
+        for (uint32 spell : spellIds)
+            passenger->RemoveAurasByCasterSpell(spell, passenger->GetObjectGuid());
+        spellIds.clear();
     }
 };
 
@@ -1183,6 +1204,33 @@ struct FlamesLeviathan : public SpellScript
     }
 };
 
+struct ReadyToFly : public SpellScript
+{
+    const std::vector<uint32> bcts = {34429, 34433};
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (!target->IsBoarded())
+                return;
+            Unit* vehicle = dynamic_cast<Unit*>(target->GetTransportInfo()->GetTransport());
+            if (!vehicle || !vehicle->IsVehicle())
+                return;
+            Unit* driver = vehicle->GetVehicleInfo()->GetPassenger(0);
+            if (!driver)
+                return;
+            DoBroadcastText(spell->m_triggeredBySpellInfo->EffectBasePoints[2] + 1, spell->GetTrueCaster(), driver);
+        }
+        else if (effIdx == EFFECT_INDEX_1)
+        {
+            DoBroadcastText(bcts[urand(0,1)], target);
+        }
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -1238,4 +1286,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<OverloadLeviathan>("spell_overload_leviathan");
     RegisterSpellScript<FlamesLeviathan>("spell_flames_leviathan");
     RegisterSpellScript<FreyasWard>("spell_freyas_ward_leviathan");
+    RegisterSpellScript<ReadyToFly>("spell_ready_to_fly");
 }
