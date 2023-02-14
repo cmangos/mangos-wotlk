@@ -1151,7 +1151,7 @@ struct ParachuteLeviathan : public AuraScript
             return;
         if (!caster->IsFalling())
             return;
-        caster->RemoveAurasDueToSpell(aura->GetSpellProto()->Id);
+        caster->RemoveAurasDueToSpell(aura->GetId());
         caster->CastSpell(caster, aura->GetBasePoints(), TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
     }
 };
