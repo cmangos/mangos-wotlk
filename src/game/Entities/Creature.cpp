@@ -2284,8 +2284,8 @@ bool Creature::LoadCreatureAddon(bool reload)
     // 3 Unknown
     SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_SHEATH_STATE, cainfo->sheath_state);
 
-    if (cainfo->pvp_state != 0)
-        SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PVP_FLAG, cainfo->pvp_state);
+    if (cainfo->pvp_flags != 0)
+        SetByteValue(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PVP_FLAG, cainfo->pvp_flags);
 
     // SetByteValue(UNIT_FIELD_BYTES_2, 2, 0);
     // SetByteValue(UNIT_FIELD_BYTES_2, 3, 0);
