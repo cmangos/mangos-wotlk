@@ -740,6 +740,41 @@ struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
     }
 };
 
+struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
+{
+    npc_pyrite_safety_containerAI(Creature* creature) : Scripted_NoMovementAI(creature)
+    {
+        AddCustomAction(0, 1s, [&]()
+        {
+            Creature* lift = dynamic_cast<Creature*>(m_creature->GetSpawner());
+            //Creature* lift = GetClosestCreatureWithEntry(m_creature, 33214, 6.f);
+            if (!lift)
+                return;
+            m_creature->CastSpell(lift, 63605, TRIGGERED_OLD_TRIGGERED);
+        });
+        AddCustomAction(1, true, [&]()
+        {
+            if (m_creature->IsFalling())
+            {
+                ResetTimer(1, 500ms);
+                return;
+            }
+            float gZ = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+            if ((gZ + 0.1f) < m_creature->GetPositionZ())
+            {
+                ResetTimer(1, 500ms);
+                return;
+            }
+            m_creature->CastSpell(nullptr, 63360, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(m_creature, 54740, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(m_creature, 62543, TRIGGERED_OLD_TRIGGERED);
+            //temporary until spell 62543 is implemented
+            m_creature->SummonCreature(33189, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.f, TEMPSPAWN_TIMED_DESPAWN, 30000, false, false, 0, 0, 0, false, true);
+            m_creature->ForcedDespawn(1000);
+        });
+    }
+};
+
 enum DemolisherActions
 {
     DEMOLISHER_ACTIONS_MAX,
@@ -1235,7 +1270,7 @@ struct FlamesLeviathan : public SpellScript
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         Unit* caster = spell->GetAffectiveCaster();
-        if (target && caster->IsFriend(target))
+        if (!caster->IsEnemy(target))
             return false;
         return true;
     }
@@ -1275,7 +1310,26 @@ struct AntiAirRocket : public SpellScript
         Unit* caster = spell->GetAffectiveCaster();
         if (!caster->IsEnemy(target))
             return false;
+        if (target->GetEntry() == 33218)
+            return false;
         return true;
+    }
+};
+
+// 63605 - Rope Beam
+struct RopeBeam : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        Unit* caster = aura->GetCaster();
+        if (!caster || caster->GetEntry() != 33218)
+            return;
+        caster->CastSpell(nullptr, 56093, TRIGGERED_OLD_TRIGGERED);
+        caster->GetMotionMaster()->MoveFall();
+        if (caster->AI())
+            caster->AI()->ResetTimer(1, 500ms);
     }
 };
 
@@ -1322,6 +1376,11 @@ void AddSC_boss_flame_leviathan()
     pNewScript->GetAI = &GetNewAIInstance<npc_liquid_pyriteAI>;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "npc_pyrite_safety_container";
+    pNewScript->GetAI = &GetNewAIInstance<npc_pyrite_safety_containerAI>;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<PursueLeviathan>("spell_pursue_leviathan");
     RegisterSpellScript<HodirsFuryLeviathan>("spell_hodirs_fury_leviathan");
     RegisterSpellScript<ThorimsHammerLeviathan>("spell_thorims_hammer_leviathan");
@@ -1341,4 +1400,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<FreyasWard>("spell_freyas_ward_leviathan");
     RegisterSpellScript<ReadyToFly>("spell_ready_to_fly");
     RegisterSpellScript<AntiAirRocket>("spell_anti_air_rocket");
+    RegisterSpellScript<RopeBeam>("spell_rope_beam");
 }
