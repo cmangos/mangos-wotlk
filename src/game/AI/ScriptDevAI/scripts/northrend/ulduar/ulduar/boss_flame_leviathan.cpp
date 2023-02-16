@@ -766,8 +766,8 @@ struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
                 return;
             }
             m_creature->CastSpell(nullptr, 63360, TRIGGERED_OLD_TRIGGERED);
-            m_creature->CastSpell(m_creature, 54740, TRIGGERED_OLD_TRIGGERED);
-            m_creature->CastSpell(m_creature, 62543, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, 54740, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, 62543, TRIGGERED_OLD_TRIGGERED);
             m_creature->ForcedDespawn(1000);
         });
     }
