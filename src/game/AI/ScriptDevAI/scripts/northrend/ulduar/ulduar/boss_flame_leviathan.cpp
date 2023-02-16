@@ -111,6 +111,7 @@ enum
     SPELL_BIRTH                             = 40031,                    // not used; purpose unk
 
     // player vehicle spells
+    SPELL_LIQUID_PYRITE_AURA                = 62494,
     SPELL_LIQUID_PYRITE                     = 62496,
     SPELL_RELOAD_AMMMO                      = 62473,
 
@@ -709,6 +710,36 @@ struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
     }
 };
 
+struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
+{
+    npc_liquid_pyriteAI(Creature* creature) : Scripted_NoMovementAI(creature) {
+        AddCustomAction(0, true, [&]()
+        {
+            if (!m_creature->IsBoarded())
+                return;
+            Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+            if (!vehicle)
+                return;
+            m_creature->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
+            m_creature->ForcedDespawn(3000);
+        });
+        Reset();
+    }
+
+    void Reset() override
+    {
+        Scripted_NoMovementAI::Reset();
+        DoCastSpellIfCan(m_creature, SPELL_LIQUID_PYRITE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void MovementInform(uint32 motionType, uint32 /*value*/)
+    {
+        if (motionType != BOARD_VEHICLE_MOTION_TYPE)
+            return;
+        ResetTimer(0, 2s);
+    }
+};
+
 enum DemolisherActions
 {
     DEMOLISHER_ACTIONS_MAX,
@@ -1174,11 +1205,7 @@ struct GrabPyrite : public SpellScript
             if (auto vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
             {
                 uint32 val = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
-                target->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
                 target->CastSpell(vehicle, val, TRIGGERED_OLD_TRIGGERED);
-                if (!vehicle->IsBoarded())
-                    return;
-                static_cast<Creature*>(target)->ForcedDespawn(3000);
             }
     }
 };
@@ -1277,6 +1304,11 @@ void AddSC_boss_flame_leviathan()
     pNewScript = new Script;
     pNewScript->Name = "npc_leviathan_defense_turret";
     pNewScript->GetAI = &GetNewAIInstance<npc_leviathan_defense_turretAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_liquid_pyrite";
+    pNewScript->GetAI = &GetNewAIInstance<npc_liquid_pyriteAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<PursueLeviathan>("spell_pursue_leviathan");
