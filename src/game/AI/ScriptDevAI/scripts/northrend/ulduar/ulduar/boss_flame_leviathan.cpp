@@ -110,6 +110,10 @@ enum
     SPELL_BEAM_TARGET_STATE                 = 62898,                    // cast by all tower reticles; purpose unk
     SPELL_BIRTH                             = 40031,                    // not used; purpose unk
 
+    // player vehicle spells
+    SPELL_LIQUID_PYRITE                     = 62496,
+    SPELL_RELOAD_AMMMO                      = 62473,
+
     // vehicle accessories
     //NPC_LEVIATHAN_SEAT                      = 33114,
     NPC_LEVIATHAN_TURRET                    = 33139,
@@ -1158,8 +1162,10 @@ struct ParachuteLeviathan : public AuraScript
 
 struct GrabPyrite : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
         Unit* caster = spell->GetCaster();
         Unit* target = spell->GetUnitTarget();
         if (!caster || !target)
@@ -1167,8 +1173,12 @@ struct GrabPyrite : public SpellScript
         if (auto transportInfo = caster->GetTransportInfo())
             if (auto vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
             {
-                target->CastSpell(vehicle, spell->m_currentBasePoints[0], TRIGGERED_OLD_TRIGGERED);
-                target->CastSpell(vehicle, 62473, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+                uint32 val = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+                target->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(vehicle, val, TRIGGERED_OLD_TRIGGERED);
+                if (!vehicle->IsBoarded())
+                    return;
+                static_cast<Creature*>(target)->ForcedDespawn(3000);
             }
     }
 };
