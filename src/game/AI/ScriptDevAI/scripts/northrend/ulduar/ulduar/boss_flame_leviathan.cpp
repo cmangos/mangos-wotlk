@@ -768,8 +768,6 @@ struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
             m_creature->CastSpell(nullptr, 63360, TRIGGERED_OLD_TRIGGERED);
             m_creature->CastSpell(m_creature, 54740, TRIGGERED_OLD_TRIGGERED);
             m_creature->CastSpell(m_creature, 62543, TRIGGERED_OLD_TRIGGERED);
-            //temporary until spell 62543 is implemented
-            m_creature->SummonCreature(33189, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.f, TEMPSPAWN_TIMED_DESPAWN, 30000, false, false, 0, 0, 0, false, true);
             m_creature->ForcedDespawn(1000);
         });
     }
