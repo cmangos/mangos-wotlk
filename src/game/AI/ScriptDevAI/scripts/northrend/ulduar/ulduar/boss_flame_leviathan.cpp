@@ -110,6 +110,11 @@ enum
     SPELL_BEAM_TARGET_STATE                 = 62898,                    // cast by all tower reticles; purpose unk
     SPELL_BIRTH                             = 40031,                    // not used; purpose unk
 
+    // player vehicle spells
+    SPELL_LIQUID_PYRITE_AURA                = 62494,
+    SPELL_LIQUID_PYRITE                     = 62496,
+    SPELL_RELOAD_AMMMO                      = 62473,
+
     // vehicle accessories
     //NPC_LEVIATHAN_SEAT                      = 33114,
     NPC_LEVIATHAN_TURRET                    = 33139,
@@ -705,6 +710,63 @@ struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
     }
 };
 
+struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
+{
+    npc_liquid_pyriteAI(Creature* creature) : Scripted_NoMovementAI(creature) {
+        AddCustomAction(0, true, [&]()
+        {
+            if (!m_creature->IsBoarded())
+                return;
+            Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+            if (!vehicle)
+                return;
+            m_creature->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
+            m_creature->ForcedDespawn(3000);
+        });
+        Reset();
+    }
+
+    void Reset() override
+    {
+        Scripted_NoMovementAI::Reset();
+        DoCastSpellIfCan(m_creature, SPELL_LIQUID_PYRITE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void MovementInform(uint32 motionType, uint32 /*value*/)
+    {
+        if (motionType != BOARD_VEHICLE_MOTION_TYPE)
+            return;
+        ResetTimer(0, 2s);
+    }
+};
+
+struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
+{
+    npc_pyrite_safety_containerAI(Creature* creature) : Scripted_NoMovementAI(creature)
+    {
+        AddCustomAction(0, 1s, [&]()
+        {
+            Creature* lift = dynamic_cast<Creature*>(m_creature->GetSpawner());
+            if (!lift)
+                return;
+            m_creature->CastSpell(lift, 63605, TRIGGERED_OLD_TRIGGERED);
+        });
+        AddCustomAction(1, true, [&]()
+        {
+            float gZ = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+            if ((gZ + 0.1f) < m_creature->GetPositionZ())
+            {
+                ResetTimer(1, 500ms);
+                return;
+            }
+            m_creature->CastSpell(nullptr, 63360, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, 54740, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, 62543, TRIGGERED_OLD_TRIGGERED);
+            m_creature->ForcedDespawn(1000);
+        });
+    }
+};
+
 enum DemolisherActions
 {
     DEMOLISHER_ACTIONS_MAX,
@@ -1158,8 +1220,10 @@ struct ParachuteLeviathan : public AuraScript
 
 struct GrabPyrite : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
         Unit* caster = spell->GetCaster();
         Unit* target = spell->GetUnitTarget();
         if (!caster || !target)
@@ -1167,8 +1231,8 @@ struct GrabPyrite : public SpellScript
         if (auto transportInfo = caster->GetTransportInfo())
             if (auto vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
             {
-                target->CastSpell(vehicle, spell->m_currentBasePoints[0], TRIGGERED_OLD_TRIGGERED);
-                target->CastSpell(vehicle, 62473, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+                uint32 val = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+                target->CastSpell(vehicle, val, TRIGGERED_OLD_TRIGGERED);
             }
     }
 };
@@ -1198,7 +1262,7 @@ struct FlamesLeviathan : public SpellScript
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         Unit* caster = spell->GetAffectiveCaster();
-        if (target && caster->IsFriend(target))
+        if (!caster->IsEnemy(target))
             return false;
         return true;
     }
@@ -1228,6 +1292,36 @@ struct ReadyToFly : public SpellScript
         {
             DoBroadcastText(bcts[urand(0,1)], target);
         }
+    }
+};
+
+struct AntiAirRocket : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster->IsEnemy(target))
+            return false;
+        if (target->GetEntry() == 33218)
+            return false;
+        return true;
+    }
+};
+
+// 63605 - Rope Beam
+struct RopeBeam : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        Unit* caster = aura->GetCaster();
+        if (!caster || caster->GetEntry() != 33218)
+            return;
+        caster->CastSpell(nullptr, 56093, TRIGGERED_OLD_TRIGGERED);
+        caster->GetMotionMaster()->MoveFall();
+        if (caster->AI())
+            caster->AI()->ResetTimer(1, 500ms);
     }
 };
 
@@ -1269,6 +1363,16 @@ void AddSC_boss_flame_leviathan()
     pNewScript->GetAI = &GetNewAIInstance<npc_leviathan_defense_turretAI>;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "npc_liquid_pyrite";
+    pNewScript->GetAI = &GetNewAIInstance<npc_liquid_pyriteAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_pyrite_safety_container";
+    pNewScript->GetAI = &GetNewAIInstance<npc_pyrite_safety_containerAI>;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<PursueLeviathan>("spell_pursue_leviathan");
     RegisterSpellScript<HodirsFuryLeviathan>("spell_hodirs_fury_leviathan");
     RegisterSpellScript<ThorimsHammerLeviathan>("spell_thorims_hammer_leviathan");
@@ -1287,4 +1391,6 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<FlamesLeviathan>("spell_flames_leviathan");
     RegisterSpellScript<FreyasWard>("spell_freyas_ward_leviathan");
     RegisterSpellScript<ReadyToFly>("spell_ready_to_fly");
+    RegisterSpellScript<AntiAirRocket>("spell_anti_air_rocket");
+    RegisterSpellScript<RopeBeam>("spell_rope_beam");
 }
