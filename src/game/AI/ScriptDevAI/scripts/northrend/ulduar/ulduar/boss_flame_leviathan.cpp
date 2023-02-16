@@ -747,18 +747,12 @@ struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
         AddCustomAction(0, 1s, [&]()
         {
             Creature* lift = dynamic_cast<Creature*>(m_creature->GetSpawner());
-            //Creature* lift = GetClosestCreatureWithEntry(m_creature, 33214, 6.f);
             if (!lift)
                 return;
             m_creature->CastSpell(lift, 63605, TRIGGERED_OLD_TRIGGERED);
         });
         AddCustomAction(1, true, [&]()
         {
-            if (m_creature->IsFalling())
-            {
-                ResetTimer(1, 500ms);
-                return;
-            }
             float gZ = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
             if ((gZ + 0.1f) < m_creature->GetPositionZ())
             {
