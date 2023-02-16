@@ -5619,7 +5619,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Caster aura req check if need
         if (m_spellInfo->casterAuraSpell && !m_caster->HasAura(m_spellInfo->casterAuraSpell))
-            return SPELL_FAILED_CASTER_AURASTATE;
+            if (!m_triggeredBySpellInfo || m_triggeredBySpellInfo->Id != m_spellInfo->casterAuraSpell)
+                return SPELL_FAILED_CASTER_AURASTATE;
         if (m_spellInfo->excludeCasterAuraSpell)
         {
             // Special cases of non existing auras handling
