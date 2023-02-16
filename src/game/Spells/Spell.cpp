@@ -1293,12 +1293,13 @@ uint64 Spell::CalculateDelayMomentForDst() const
         }
     }
 
-    return 0;     
+    return 0;
 }
 
 void Spell::RecalculateDelayMomentForDest()
 {
     m_delayMoment = CalculateDelayMomentForDst();
+    m_destTargetInfo.timeDelay = m_delayMoment;
     m_trueCaster->m_events.ModifyEventTime(m_spellEvent, GetDelayStart() + m_delayMoment);
 }
 
