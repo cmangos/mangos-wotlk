@@ -1268,6 +1268,17 @@ struct ReadyToFly : public SpellScript
     }
 };
 
+struct AntiAirRocket : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster->IsEnemy(target))
+            return false;
+        return true;
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -1329,4 +1340,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<FlamesLeviathan>("spell_flames_leviathan");
     RegisterSpellScript<FreyasWard>("spell_freyas_ward_leviathan");
     RegisterSpellScript<ReadyToFly>("spell_ready_to_fly");
+    RegisterSpellScript<AntiAirRocket>("spell_anti_air_rocket");
 }
