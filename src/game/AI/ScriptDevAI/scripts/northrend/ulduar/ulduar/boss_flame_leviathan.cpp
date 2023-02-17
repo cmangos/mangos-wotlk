@@ -720,8 +720,15 @@ struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
             Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
             if (!vehicle)
                 return;
-            m_creature->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
-            m_creature->ForcedDespawn(3000);
+            if (vehicle->GetEntry() == NPC_SALVAGED_DEMOLISHER)
+            {
+                m_creature->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
+                m_creature->ForcedDespawn(3000);
+            }
+            else if (vehicle->GetEntry() == NPC_SALVAGED_CHOPPER)
+            {
+                vehicle->CastSpell(nullptr, 69748, TRIGGERED_OLD_TRIGGERED);
+            }
         });
         Reset();
     }
