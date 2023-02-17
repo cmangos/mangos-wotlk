@@ -604,7 +604,7 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_HODIR_FURY)
-            m_hodirFuryGuid = summoned->GetObjectGuid();
+            m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
     }
 
     void MovementInform(uint32 moveType, uint32 pointId) override
@@ -682,14 +682,20 @@ struct npc_freya_wardAI : public Scripted_NoMovementAI
     {
         if (summoned->GetEntry() == NPC_WRITHING_LASHER || summoned->GetEntry() == NPC_WARD_OF_LIFE)
             summoned->SetInCombatWithZone(false);
+        m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 diff) override
     {
         if (m_uiFreyaWardTimer < diff)
         {
-            if (DoCastSpellIfCan(nullptr, SPELL_FREYA_WARD) == CAST_OK)
-                m_uiFreyaWardTimer = 30000;
+            if (m_creature->IsBoarded())
+            {
+                Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+                if (vehicle && vehicle->GetVehicleInfo())
+                    if (DoCastSpellIfCan(vehicle, SPELL_FREYA_WARD) == CAST_OK)
+                        m_uiFreyaWardTimer = 30000;
+            }
         }
         else
             m_uiFreyaWardTimer -= diff;
