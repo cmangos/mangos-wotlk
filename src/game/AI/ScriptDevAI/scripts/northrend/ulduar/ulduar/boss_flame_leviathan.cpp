@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_flame_leviathan
-SD%Complete: 75%
-SDComment: Defense turret AI and related event NYI.
+SD%Complete: 100%
+SDComment: 
 SDCategory: Ulduar
 EndScriptData */
 
@@ -29,30 +29,30 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                               = -1603159,
-    SAY_SLAY                                = -1603160,
-    SAY_DEATH                               = -1603161,
-    SAY_CHANGE_1                            = -1603162,
-    SAY_CHANGE_2                            = -1603163,
-    SAY_CHANGE_3                            = -1603164,
+    SAY_AGGRO                               = 33487,
+    SAY_SLAY                                = 33507,
+    SAY_DEATH                               = 33506,
+    SAY_CHANGE_1                            = 33488,
+    SAY_CHANGE_2                            = 33489,
+    SAY_CHANGE_3                            = 33490,
 
-    SAY_PLAYER_RIDE                         = -1603165,
-    SAY_OVERLOAD_1                          = -1603166,
-    SAY_OVERLOAD_2                          = -1603167,
-    SAY_OVERLOAD_3                          = -1603168,
+    SAY_PLAYER_RIDE                         = 33501,
+    SAY_OVERLOAD_1                          = 33503,
+    SAY_OVERLOAD_2                          = 33504,
+    SAY_OVERLOAD_3                          = 33505,
 
-    SAY_HARD_MODE                           = -1603169,
-    SAY_TOWER_FROST                         = -1603170,
-    SAY_TOWER_FIRE                          = -1603171,
-    SAY_TOWER_ENERGY                        = -1603172,
-    SAY_TOWER_NATURE                        = -1603173,
-    SAY_TOWER_DOWN                          = -1603174,
+    SAY_HARD_MODE                           = 33491,
+    SAY_TOWER_FROST                         = 33493,
+    SAY_TOWER_FIRE                          = 33495,
+    SAY_TOWER_ENERGY                        = 33499,
+    SAY_TOWER_NATURE                        = 33497,
+    SAY_TOWER_DOWN                          = 33492,
 
-    EMOTE_PURSUE                            = -1603175,
-    EMOTE_HODIR_FURY                        = -1603242,
-    EMOTE_FREYA_WARD                        = -1603243,
-    EMOTE_MIMIRON_INFERNO                   = -1603244,
-    EMOTE_THORIM_HAMMER                     = -1603245,
+    EMOTE_PURSUE                            = 33502,
+    EMOTE_HODIR_FURY                        = 33494,
+    EMOTE_FREYA_WARD                        = 33498,
+    EMOTE_MIMIRON_INFERNO                   = 33496,
+    EMOTE_THORIM_HAMMER                     = 33500,
 
     // Leviathan spells
     SPELL_INVISIBILITY_DETECTION            = 18950,
@@ -114,6 +114,10 @@ enum
     SPELL_LIQUID_PYRITE_AURA                = 62494,
     SPELL_LIQUID_PYRITE                     = 62496,
     SPELL_RELOAD_AMMMO                      = 62473,
+    SPELL_GENERAL_TRIGGER_1_FROM_PSG_2      = 69748,
+    SPELL_GENERAL_TRIGGER_2_TO_SELF         = 67395,
+    SPELL_GRAB_PYRITE                       = 67372,
+    SPELL_EJECT_PASSENGER                   = 67393,
 
     // vehicle accessories
     //NPC_LEVIATHAN_SEAT                      = 33114,
@@ -163,19 +167,19 @@ static const int32 leviathanTowerEmote[KEEPER_ENCOUNTER] = { EMOTE_HODIR_FURY, E
 
 static const float afFreyaWard[MAX_FREYA_WARD][4] =
 {
-    {156.9291f, 61.52306f, 409.887f, 5.68f},
-    {376.641f, 68.61361f, 411.2287f, 3.85f},
-    {383.6206f, -130.8576f, 410.7088f, 2.26f},
-    {154.9095f, -137.4339f, 409.887f, 0.79f},
+    {156.9291f, 61.52306f, 410.887f, 5.68f},
+    {376.641f, 68.61361f, 412.2287f, 3.85f},
+    {383.6206f, -130.8576f, 411.7088f, 2.26f},
+    {154.9095f, -137.4339f, 410.887f, 0.79f},
 };
 
 static const float afHodirFury[MAX_HODIR_FURY][3] =
 {
-    {219.9013f, 7.913357f, 409.7861f},
-    {326.0777f, -74.99034f, 409.887f},
+    {219.9013f, 7.913357f, 410.7861f},
+    {326.0777f, -74.99034f, 410.887f},
 };
 
-static const float afMimironInferno[3] = {329.1809f, 8.02577f, 409.887f};
+static const float afMimironInferno[3] = {329.1809f, 8.02577f, 410.887f};
 
 static const std::vector<uint32> addEntries = {NPC_LEVIATHAN_SEAT, NPC_LEVIATHAN_TURRET, NPC_DEFENSE_TURRET, NPC_OVERLOAD_DEVICE};
 
@@ -263,6 +267,19 @@ struct boss_flame_leviathanAI : public BossAI
                 orbital->RemoveAllAuras();
         }
 
+        CreatureList leviAdds;
+        for (const uint32& entry : addEntries)
+        {
+            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
+            for (auto add : leviAdds)
+            {
+                if (add && (add->GetEntry() == NPC_DEFENSE_TURRET || add->GetEntry() == NPC_LEVIATHAN_TURRET || add->GetEntry() == NPC_LEVIATHAN_SEAT))
+                    add->Suicide();
+                else if (add)
+                    add->ForcedDespawn();
+            }
+        }
+
         // start epilogue event
         if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSPAWN_CORPSE_DESPAWN, 0))
         {
@@ -312,24 +329,28 @@ struct boss_flame_leviathanAI : public BossAI
             case NPC_THORIM_HAMMER_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_LIGHTNING_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_MIMIRON_INFERNO_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_RED_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_HODIR_FURY_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_BLUE_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_FREYA_WARD_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_GREEN_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
@@ -369,7 +390,7 @@ struct boss_flame_leviathanAI : public BossAI
             return;
 
         // set boss in combat (if not already)
-        m_creature->SetInCombatWithZone();
+        m_creature->SetInCombatWithZone(false);
     }
 
     void HandleHardmode()
@@ -510,7 +531,7 @@ struct boss_flame_leviathanAI : public BossAI
         {
             float fX, fY, fZ;
             m_creature->GetRandomPoint(orbital->GetPositionX(), orbital->GetPositionY(), orbital->GetPositionZ(), 150.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 20000);
+            m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ + 1, 0, TEMPSPAWN_TIMED_DESPAWN, 8000);
         }
     }
 
@@ -587,7 +608,7 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_HODIR_FURY)
-            m_hodirFuryGuid = summoned->GetObjectGuid();
+            m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
     }
 
     void MovementInform(uint32 moveType, uint32 pointId) override
@@ -616,7 +637,7 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
                     if (Creature* pLeviathan = m_instance->GetSingleCreatureFromStorage(NPC_LEVIATHAN))
                     {
                         if (Unit* target = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            m_creature->GetMotionMaster()->MovePoint(1, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+                            m_creature->GetMotionMaster()->MovePoint(1, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 1);
                     }
                 }
                 m_uiTargetChaseTimer = 0;
@@ -665,14 +686,20 @@ struct npc_freya_wardAI : public Scripted_NoMovementAI
     {
         if (summoned->GetEntry() == NPC_WRITHING_LASHER || summoned->GetEntry() == NPC_WARD_OF_LIFE)
             summoned->SetInCombatWithZone(false);
+        m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 diff) override
     {
         if (m_uiFreyaWardTimer < diff)
         {
-            if (DoCastSpellIfCan(nullptr, SPELL_FREYA_WARD) == CAST_OK)
-                m_uiFreyaWardTimer = 30000;
+            if (m_creature->IsBoarded())
+            {
+                Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+                if (vehicle && vehicle->GetVehicleInfo())
+                    if (DoCastSpellIfCan(vehicle, SPELL_FREYA_WARD) == CAST_OK)
+                        m_uiFreyaWardTimer = 30000;
+            }
         }
         else
             m_uiFreyaWardTimer -= diff;
@@ -720,14 +747,10 @@ struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
             Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
             if (!vehicle)
                 return;
-            if (vehicle->GetEntry() == NPC_SALVAGED_DEMOLISHER)
+            if (vehicle->GetEntry() == 33167 || vehicle->GetEntry() == NPC_SALVAGED_DEMOLISHER)
             {
                 m_creature->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
                 m_creature->ForcedDespawn(3000);
-            }
-            else if (vehicle->GetEntry() == NPC_SALVAGED_CHOPPER)
-            {
-                vehicle->CastSpell(nullptr, 69748, TRIGGERED_OLD_TRIGGERED);
             }
         });
         Reset();
@@ -806,6 +829,47 @@ struct npc_salvaged_demolisherAI : public CombatAI
     {
         CombatAI::JustRespawned();
         ResetTimer(DEMOLISHER_SYNC_ENERGY, 1s);
+    }
+};
+
+struct npc_salvaged_chopperAI : public CombatAI
+{
+    npc_salvaged_chopperAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        SetCombatMovement(false);
+        m_creature->SetCanEnterCombat(false);
+#ifdef PRENERF_3_4_1
+        m_creature->UpdateSpell(3, 0);
+#endif
+    }
+
+    void OnPassengerRide(Unit* passenger, bool boarded, uint8 seat) override
+    {
+        Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
+        if (!driver)
+            return;
+        if (!seat)
+            return;
+        CharmInfo* charmInfo = m_creature->InitCharmInfo(m_creature);
+        if (boarded)
+        {
+            //m_creature->CastSpell(nullptr, SPELL_GENERAL_TRIGGER_1_FROM_PSG_2, TRIGGERED_OLD_TRIGGERED);
+            m_creature->UpdateSpell(3, SPELL_EJECT_PASSENGER);
+#ifdef PRENERF_3_4_1
+            m_creature->UpdateSpell(3, 0);
+#endif
+            charmInfo->InitVehicleCreateSpells();
+            driver->VehicleSpellInitialize();
+        }
+        else
+        {
+            m_creature->UpdateSpell(3, SPELL_GRAB_PYRITE);
+#ifdef PRENERF_3_4_1
+            m_creature->UpdateSpell(3, 0);
+#endif
+            charmInfo->InitVehicleCreateSpells();
+            driver->VehicleSpellInitialize();
+        }
     }
 };
 
@@ -1060,6 +1124,8 @@ struct Hookshot : public SpellScript
             return true;
         if (caster->GetPosition().GetDistance(target->GetPosition()) > 30.f * 30.f)
             return false;
+        if (target->HasAura(SPELL_SYSTEMS_SHUTDOWN))
+            return false;
         caster->RemoveAurasByCasterSpell(SPELL_HOOKSHOT_AURA, caster->GetObjectGuid());
         return true;
     }
@@ -1078,6 +1144,11 @@ struct Hookshot : public SpellScript
         {
             turret->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
+        instance_ulduar* instance = dynamic_cast<instance_ulduar*>(target->GetInstanceData());
+        if (!instance)
+            return;
+        Creature* levi = instance->GetSingleCreatureFromStorage(NPC_LEVIATHAN);
+        DoBroadcastText(SAY_PLAYER_RIDE, levi);
     }
 };
 
@@ -1154,6 +1225,12 @@ struct SystemsShutdown : public AuraScript
                 }
             }
             target->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
+            switch (urand(0,2))
+            {
+                case 0: DoBroadcastText(SAY_OVERLOAD_1, target); break;
+                case 1: DoBroadcastText(SAY_OVERLOAD_2, target); break;
+                case 2: DoBroadcastText(SAY_OVERLOAD_3, target); break;
+            }
             return;
         }
         CreatureList leviSeats;
@@ -1378,6 +1455,11 @@ void AddSC_boss_flame_leviathan()
     pNewScript = new Script;
     pNewScript->Name = "npc_pyrite_safety_container";
     pNewScript->GetAI = &GetNewAIInstance<npc_pyrite_safety_containerAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_salvaged_chopper";
+    pNewScript->GetAI = &GetNewAIInstance<npc_salvaged_chopperAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<PursueLeviathan>("spell_pursue_leviathan");
