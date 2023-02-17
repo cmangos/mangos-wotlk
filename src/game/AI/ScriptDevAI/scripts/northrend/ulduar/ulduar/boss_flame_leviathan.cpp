@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_flame_leviathan
-SD%Complete: 75%
-SDComment: Defense turret AI and related event NYI.
+SD%Complete: 100%
+SDComment: 
 SDCategory: Ulduar
 EndScriptData */
 
