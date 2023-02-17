@@ -163,19 +163,19 @@ static const int32 leviathanTowerEmote[KEEPER_ENCOUNTER] = { EMOTE_HODIR_FURY, E
 
 static const float afFreyaWard[MAX_FREYA_WARD][4] =
 {
-    {156.9291f, 61.52306f, 409.887f, 5.68f},
-    {376.641f, 68.61361f, 411.2287f, 3.85f},
-    {383.6206f, -130.8576f, 410.7088f, 2.26f},
-    {154.9095f, -137.4339f, 409.887f, 0.79f},
+    {156.9291f, 61.52306f, 410.887f, 5.68f},
+    {376.641f, 68.61361f, 412.2287f, 3.85f},
+    {383.6206f, -130.8576f, 411.7088f, 2.26f},
+    {154.9095f, -137.4339f, 410.887f, 0.79f},
 };
 
 static const float afHodirFury[MAX_HODIR_FURY][3] =
 {
-    {219.9013f, 7.913357f, 409.7861f},
-    {326.0777f, -74.99034f, 409.887f},
+    {219.9013f, 7.913357f, 410.7861f},
+    {326.0777f, -74.99034f, 410.887f},
 };
 
-static const float afMimironInferno[3] = {329.1809f, 8.02577f, 409.887f};
+static const float afMimironInferno[3] = {329.1809f, 8.02577f, 410.887f};
 
 static const std::vector<uint32> addEntries = {NPC_LEVIATHAN_SEAT, NPC_LEVIATHAN_TURRET, NPC_DEFENSE_TURRET, NPC_OVERLOAD_DEVICE};
 
@@ -325,24 +325,28 @@ struct boss_flame_leviathanAI : public BossAI
             case NPC_THORIM_HAMMER_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_LIGHTNING_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_MIMIRON_INFERNO_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_RED_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_HODIR_FURY_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_BLUE_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
             case NPC_FREYA_WARD_VEHICLE:
                 summoned->CastSpell(summoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_BEAM_TARGET_STATE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, 50195, TRIGGERED_OLD_TRIGGERED); // Hackfix for reticles until hovering is properly implemented
                 summoned->CastSpell(summoned, SPELL_GREEN_SKYBEAM, TRIGGERED_OLD_TRIGGERED);
                 m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
                 break;
@@ -382,7 +386,7 @@ struct boss_flame_leviathanAI : public BossAI
             return;
 
         // set boss in combat (if not already)
-        m_creature->SetInCombatWithZone();
+        m_creature->SetInCombatWithZone(false);
     }
 
     void HandleHardmode()
@@ -523,7 +527,7 @@ struct boss_flame_leviathanAI : public BossAI
         {
             float fX, fY, fZ;
             m_creature->GetRandomPoint(orbital->GetPositionX(), orbital->GetPositionY(), orbital->GetPositionZ(), 150.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 20000);
+            m_creature->SummonCreature(NPC_THORIM_HAMMER_VEHICLE, fX, fY, fZ + 1, 0, TEMPSPAWN_TIMED_DESPAWN, 8000);
         }
     }
 
@@ -629,7 +633,7 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
                     if (Creature* pLeviathan = m_instance->GetSingleCreatureFromStorage(NPC_LEVIATHAN))
                     {
                         if (Unit* target = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            m_creature->GetMotionMaster()->MovePoint(1, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ());
+                            m_creature->GetMotionMaster()->MovePoint(1, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 1);
                     }
                 }
                 m_uiTargetChaseTimer = 0;
