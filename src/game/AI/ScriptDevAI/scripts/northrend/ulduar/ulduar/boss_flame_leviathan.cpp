@@ -29,30 +29,30 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                               = -1603159,
-    SAY_SLAY                                = -1603160,
-    SAY_DEATH                               = -1603161,
-    SAY_CHANGE_1                            = -1603162,
-    SAY_CHANGE_2                            = -1603163,
-    SAY_CHANGE_3                            = -1603164,
+    SAY_AGGRO                               = 33487,
+    SAY_SLAY                                = 33507,
+    SAY_DEATH                               = 33506,
+    SAY_CHANGE_1                            = 33488,
+    SAY_CHANGE_2                            = 33489,
+    SAY_CHANGE_3                            = 33490,
 
-    SAY_PLAYER_RIDE                         = -1603165,
-    SAY_OVERLOAD_1                          = -1603166,
-    SAY_OVERLOAD_2                          = -1603167,
-    SAY_OVERLOAD_3                          = -1603168,
+    SAY_PLAYER_RIDE                         = 33501,
+    SAY_OVERLOAD_1                          = 33503,
+    SAY_OVERLOAD_2                          = 33504,
+    SAY_OVERLOAD_3                          = 33505,
 
-    SAY_HARD_MODE                           = -1603169,
-    SAY_TOWER_FROST                         = -1603170,
-    SAY_TOWER_FIRE                          = -1603171,
-    SAY_TOWER_ENERGY                        = -1603172,
-    SAY_TOWER_NATURE                        = -1603173,
-    SAY_TOWER_DOWN                          = -1603174,
+    SAY_HARD_MODE                           = 33491,
+    SAY_TOWER_FROST                         = 33493,
+    SAY_TOWER_FIRE                          = 33495,
+    SAY_TOWER_ENERGY                        = 33499,
+    SAY_TOWER_NATURE                        = 33497,
+    SAY_TOWER_DOWN                          = 33492,
 
-    EMOTE_PURSUE                            = -1603175,
-    EMOTE_HODIR_FURY                        = -1603242,
-    EMOTE_FREYA_WARD                        = -1603243,
-    EMOTE_MIMIRON_INFERNO                   = -1603244,
-    EMOTE_THORIM_HAMMER                     = -1603245,
+    EMOTE_PURSUE                            = 33502,
+    EMOTE_HODIR_FURY                        = 33494,
+    EMOTE_FREYA_WARD                        = 33498,
+    EMOTE_MIMIRON_INFERNO                   = 33496,
+    EMOTE_THORIM_HAMMER                     = 33500,
 
     // Leviathan spells
     SPELL_INVISIBILITY_DETECTION            = 18950,
@@ -1078,6 +1078,11 @@ struct Hookshot : public SpellScript
         {
             turret->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         }
+        instance_ulduar* instance = dynamic_cast<instance_ulduar*>(target->GetInstanceData());
+        if (!instance)
+            return;
+        Creature* levi = instance->GetSingleCreatureFromStorage(NPC_LEVIATHAN);
+        DoBroadcastText(SAY_PLAYER_RIDE, levi);
     }
 };
 
@@ -1154,6 +1159,12 @@ struct SystemsShutdown : public AuraScript
                 }
             }
             target->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
+            switch (urand(0,2))
+            {
+                case 0: DoBroadcastText(SAY_OVERLOAD_1, target);
+                case 1: DoBroadcastText(SAY_OVERLOAD_2, target);
+                case 2: DoBroadcastText(SAY_OVERLOAD_3, target);
+            }
             return;
         }
         CreatureList leviSeats;
