@@ -181,6 +181,7 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_EXPLORER_DELLORAH:
         case NPC_BRANN_BRONZEBEARD:
         case NPC_PROJECTION_UNIT:
+        case NPC_LORE_KEEPER_NORGANNON:
         case NPC_ORBITAL_SUPPORT:
         case NPC_IGNIS:
         case NPC_RAZORSCALE:
@@ -1108,7 +1109,12 @@ bool instance_ulduar::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 u
                 break;
 
             // handle vehicle spell clicks - are available only after the gauntlet was started by gossip or when Leviathan is active
-            return GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL || GetData(TYPE_LEVIATHAN) == IN_PROGRESS;
+            Creature* keeper = GetSingleCreatureFromStorage(NPC_LORE_KEEPER_NORGANNON);
+            bool isDead = true;
+            if (keeper)
+                if (keeper->IsAlive())
+                    isDead = false;
+            return (isDead || GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL || GetData(TYPE_LEVIATHAN) == IN_PROGRESS) && GetData(TYPE_LEVIATHAN) != DONE;
         }
     }
 
