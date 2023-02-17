@@ -72,6 +72,7 @@ enum
     NPC_XT_TOY_PILE             = 33337,                    // robot spawner npc for XT002
 
     // Leviathan other npcs
+    NPC_LORE_KEEPER_NORGANNON   = 33686,
     NPC_ULDUAR_COLOSSUS         = 33237,
     NPC_BRONZEBEARD_RADIO       = 34054,
     NPC_EXPLORER_DELLORAH       = 33701,
