@@ -235,11 +235,30 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
     if (!passenger || !passenger->IsBoarded())
         return;
 
-    // _player is not a vehicle
-    if (!_player->IsVehicle())
+    // _player is not on a vehicle
+    if (!_player->IsBoarded())
         return;
 
-    VehicleInfo* vehicleInfo = _player->GetVehicleInfo();
+    Unit* vehicle = dynamic_cast<Unit*>(_player->GetTransportInfo()->GetTransport());
+
+    if (!vehicle)
+        return;
+
+    VehicleInfo* vehicleInfo = vehicle->GetVehicleInfo();
+
+    for (int i = 0; i < MAX_VEHICLE_SEAT; i++)
+    {
+        if (Unit* psg = vehicleInfo->GetPassenger(i))
+            if (psg->IsVehicle())
+            {
+                if (VehicleInfo* vi = psg->GetVehicleInfo())
+                    if (vi->HasOnBoard(passenger))
+                    {
+                        vehicleInfo = vi;
+                        break;
+                    }
+            }
+    }
 
     // _player must be transporting passenger
     if (!vehicleInfo->HasOnBoard(passenger))
@@ -248,5 +267,5 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
     // Check for eject flag
     if (VehicleSeatEntry const* seatEntry = vehicleInfo->GetSeatEntry(passenger->GetTransportInfo()->GetTransportSeat()))
         if (seatEntry->m_flagsB & SEAT_FLAG_B_EJECTABLE)
-            _player->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, passengerGuid);
+            vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, passengerGuid);
 }
