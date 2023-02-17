@@ -341,6 +341,9 @@ void instance_ulduar::OnCreatureRespawn(Creature* creature)
             hodirHelper->CastSpell(hodirHelper, 64174, TRIGGERED_NONE);
         });
     }
+    //Workaround because Vehicles aren't Creatures, so CreatureAddons aren't applied to them
+    if (creature->GetEntry() == 33059 || creature->GetEntry() == 33061 || creature->GetEntry() == 33063)
+        creature->CastSpell(nullptr, 29266, TRIGGERED_OLD_TRIGGERED);
 }
 
 void instance_ulduar::OnObjectCreate(GameObject* pGo)
