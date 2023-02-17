@@ -1083,6 +1083,8 @@ struct Hookshot : public SpellScript
             return true;
         if (caster->GetPosition().GetDistance(target->GetPosition()) > 30.f * 30.f)
             return false;
+        if (target->HasAura(SPELL_SYSTEMS_SHUTDOWN))
+            return false;
         caster->RemoveAurasByCasterSpell(SPELL_HOOKSHOT_AURA, caster->GetObjectGuid());
         return true;
     }
@@ -1184,9 +1186,9 @@ struct SystemsShutdown : public AuraScript
             target->RemoveAurasDueToSpell(SPELL_GATHERING_SPEED);
             switch (urand(0,2))
             {
-                case 0: DoBroadcastText(SAY_OVERLOAD_1, target);
-                case 1: DoBroadcastText(SAY_OVERLOAD_2, target);
-                case 2: DoBroadcastText(SAY_OVERLOAD_3, target);
+                case 0: DoBroadcastText(SAY_OVERLOAD_1, target); break;
+                case 1: DoBroadcastText(SAY_OVERLOAD_2, target); break;
+                case 2: DoBroadcastText(SAY_OVERLOAD_3, target); break;
             }
             return;
         }
