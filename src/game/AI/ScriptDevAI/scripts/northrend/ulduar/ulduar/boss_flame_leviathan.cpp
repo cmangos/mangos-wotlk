@@ -263,6 +263,19 @@ struct boss_flame_leviathanAI : public BossAI
                 orbital->RemoveAllAuras();
         }
 
+        CreatureList leviAdds;
+        for (const uint32& entry : addEntries)
+        {
+            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
+            for (auto add : leviAdds)
+            {
+                if (add && (add->GetEntry() == NPC_DEFENSE_TURRET || add->GetEntry() == NPC_LEVIATHAN_TURRET || add->GetEntry() == NPC_LEVIATHAN_SEAT))
+                    add->Suicide();
+                else if (add)
+                    add->ForcedDespawn();
+            }
+        }
+
         // start epilogue event
         if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSPAWN_CORPSE_DESPAWN, 0))
         {
