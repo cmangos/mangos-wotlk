@@ -280,6 +280,7 @@ enum
 
     // Doors and other Objects
     // The siege
+    GO_PROTECTIVE_BUBBLE        = 194484,
     GO_SHIELD_WALL              = 194416,                   // Gate before Leviathan
     GO_LIGHTNING_DOOR           = 194905,                   // Lightning gate after the Leviathan. It closes after the boss enters the arena
     GO_LEVIATHAN_GATE           = 194630,                   // Gate after Leviathan -> this will be broken when the boss enters the arena

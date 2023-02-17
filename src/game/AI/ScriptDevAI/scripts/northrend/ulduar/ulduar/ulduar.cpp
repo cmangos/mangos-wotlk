@@ -353,6 +353,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         // -----------------    Doors & Other   -----------------
         // The siege
         case GO_SHIELD_WALL:
+        case GO_PROTECTIVE_BUBBLE:
             break;
         case GO_LIGHTNING_DOOR:
             if (m_auiEncounter[TYPE_LEVIATHAN] == SPECIAL || m_auiEncounter[TYPE_LEVIATHAN] == FAIL)
