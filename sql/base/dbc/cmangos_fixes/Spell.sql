@@ -3301,6 +3301,12 @@ INSERT INTO `spell_template` (`Id`, `SchoolMask`, `Category`, `Dispel`, `Mechani
 INSERT INTO `spell_template` (Id, Attributes, AttributesEx, AttributesEx3, AttributesEx4, AttributesEx6, CastingTimeIndex, MaxLevel, BaseLevel, SpellLevel, RangeIndex, Effect1, EffectDieSides1, EffectBasePoints1, EffectImplicitTargetA1, EffectMultipleValue1, EffectMiscValue1, SpellIconID, SpellName, SpellFamilyFlags) VALUES
 (62474, 553648256, 1024, 262144, 128, 16777216, 1, 83, 80, 80, 12, 62, 1, 4, 97, 1, 3, 3779, '(Serverside/Non-DB2) Hurl Boulder (Power Burn)', 16);
 
+-- Ulduar - Demolisher ability spells
+INSERT INTO `spell_template` (Id, Attributes, AttributesEx, AttributesEx3, AttributesEx4, AttributesEx6, CastingTimeIndex, MaxLevel, BaseLevel, SpellLevel, RangeIndex, Effect1, Effect2, EffectImplicitTargetA1, EffectImplicitTargetA2, SpellName, SpellFamilyFlags, IsServerSide) VALUES
+(64998, 553648256, 1024, 262144, 128, 16777216, 1, 83, 80, 80, 1, 3, 3, 94, 1, '(Serverside/Non-DB2) Say you\'re ready to fly!', 16, 1);
+INSERT INTO `spell_template` (Id, Attributes, CastingTimeIndex, DurationIndex, RangeIndex, Effect1, EffectDieSides1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectMiscValue1, EffectMiscValueB1, SpellName, SchoolMask, IsServerSide) VALUES
+(62543, 384, 1, 25, 1, 28, 1, 22, 36, 33189, 64, '(Serverside/Non-DB2) Spawn Pyrite', 1, 1);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
