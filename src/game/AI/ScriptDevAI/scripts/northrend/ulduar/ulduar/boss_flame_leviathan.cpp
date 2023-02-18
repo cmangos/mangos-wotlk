@@ -114,6 +114,8 @@ enum
     SPELL_LIQUID_PYRITE_AURA                = 62494,
     SPELL_LIQUID_PYRITE                     = 62496,
     SPELL_RELOAD_AMMMO                      = 62473,
+    SPELL_GENERAL_TRIGGER_1_FROM_PSG_2      = 69748,
+    SPELL_GENERAL_TRIGGER_2_TO_SELF         = 67395,
 
     // vehicle accessories
     //NPC_LEVIATHAN_SEAT                      = 33114,
@@ -843,12 +845,11 @@ struct npc_salvaged_chopperAI : public CombatAI
     {
         if (!seat)
             return;
-        m_creature->CastSpell(nullptr, 69748, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_GENERAL_TRIGGER_1_FROM_PSG_2, TRIGGERED_OLD_TRIGGERED);
         m_creature->SetSpellList(3306201);
 #ifdef PRENERF_3_1
         m_creature->UpdateSpell(3, 0);
 #endif
-
         Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
         if (!driver)
             return;
@@ -861,12 +862,10 @@ struct npc_salvaged_chopperAI : public CombatAI
     {
         if (!seat)
             return;
-        m_creature->CastSpell(nullptr, 67395, TRIGGERED_OLD_TRIGGERED);
         m_creature->SetSpellList(3306200);
 #ifdef PRENERF_3_1
         m_creature->UpdateSpell(3, 0);
 #endif
-
         Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
         if (!driver)
             return;
