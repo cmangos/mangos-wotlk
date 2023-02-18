@@ -568,6 +568,10 @@ class UnitAI : public CombatActions
         virtual void RequestFollow(Unit* /*followee*/) {}
         virtual void RelinquishFollow(ObjectGuid /*follower*/) {}
 
+        // Vehicle Hooks
+        virtual void OnPassengerRide(Unit* passenger, bool boarded, uint8 seat) {}
+        virtual void OnVehicleRide(Unit* vehicle, bool boarded, uint8 seat) {}
+
     protected:
         virtual std::string GetAIName() { return "UnitAI"; }
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents

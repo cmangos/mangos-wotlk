@@ -353,6 +353,14 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Apply passenger modifications
     ApplySeatMods(passenger, seatEntry->m_flags);
+
+    if (Unit* owner = dynamic_cast<Unit*>(m_owner))
+    {
+        if (owner->AI())
+            owner->AI()->OnPassengerRide(passenger, true, seat);
+        if (passenger->AI())
+            passenger->AI()->OnVehicleRide(owner, true, seat);
+    }
 }
 
 void VehicleInfo::ChangeSeat(Unit* passenger, uint8 currentSeat, bool next)
@@ -438,6 +446,14 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
 
     // Apply passenger modifications of the new seat
     ApplySeatMods(passenger, seatEntry->m_flags);
+
+    if (Unit* owner = dynamic_cast<Unit*>(m_owner))
+    {
+        if (owner->AI())
+            owner->AI()->OnPassengerRide(passenger, true, seat);
+        if (passenger->AI())
+            passenger->AI()->OnVehicleRide(owner, true, seat);
+    }
 }
 
 /**
@@ -457,7 +473,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     DEBUG_LOG("VehicleInfo::Unboard: passenger: %s", passenger->GetGuidStr().c_str());
 
-    VehicleSeatEntry const* seatEntry = GetSeatEntry(itr->second->GetTransportSeat());
+    uint8 seat = itr->second->GetTransportSeat();
+
+    VehicleSeatEntry const* seatEntry = GetSeatEntry(seat);
     MANGOS_ASSERT(seatEntry);
 
     UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
@@ -541,6 +559,14 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             if (((Creature*)m_owner)->IsTemporarySummon())
                 ((Creature*)m_owner)->ForcedDespawn(1000);
         }
+    }
+
+    if (Unit* owner = dynamic_cast<Unit*>(m_owner))
+    {
+        if (owner->AI())
+            owner->AI()->OnPassengerRide(passenger, false, seat);
+        if (passenger->AI())
+            passenger->AI()->OnVehicleRide(owner, false, seat);
     }
 }
 
