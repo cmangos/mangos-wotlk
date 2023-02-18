@@ -743,14 +743,10 @@ struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
             Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
             if (!vehicle)
                 return;
-            if (vehicle->GetEntry() == NPC_SALVAGED_DEMOLISHER)
+            if (vehicle->GetEntry() == 33167 || vehicle->GetEntry() == NPC_SALVAGED_DEMOLISHER)
             {
                 m_creature->CastSpell(vehicle, SPELL_LIQUID_PYRITE, TRIGGERED_OLD_TRIGGERED);
                 m_creature->ForcedDespawn(3000);
-            }
-            else if (vehicle->GetEntry() == NPC_SALVAGED_CHOPPER)
-            {
-                vehicle->CastSpell(nullptr, 69748, TRIGGERED_OLD_TRIGGERED);
             }
         });
         Reset();
@@ -829,6 +825,54 @@ struct npc_salvaged_demolisherAI : public CombatAI
     {
         CombatAI::JustRespawned();
         ResetTimer(DEMOLISHER_SYNC_ENERGY, 1s);
+    }
+};
+
+struct npc_salvaged_chopperAI : public CombatAI
+{
+    npc_salvaged_chopperAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        SetCombatMovement(false);
+        m_creature->SetCanEnterCombat(false);
+#ifdef PRENERF_3_1
+        m_creature->UpdateSpell(3, 0);
+#endif
+    }
+
+    void PassengerBoarded(Unit* passenger, uint8 seat) override
+    {
+        if (!seat)
+            return;
+        m_creature->CastSpell(nullptr, 69748, TRIGGERED_OLD_TRIGGERED);
+        m_creature->SetSpellList(3306201);
+#ifdef PRENERF_3_1
+        m_creature->UpdateSpell(3, 0);
+#endif
+
+        Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
+        if (!driver)
+            return;
+        CharmInfo* charmInfo = m_creature->InitCharmInfo(m_creature);
+            charmInfo->InitVehicleCreateSpells();
+        driver->VehicleSpellInitialize();
+    }
+
+    void PassengerUnboarded(Unit* passenger, uint8 seat) override
+    {
+        if (!seat)
+            return;
+        m_creature->CastSpell(nullptr, 67395, TRIGGERED_OLD_TRIGGERED);
+        m_creature->SetSpellList(3306200);
+#ifdef PRENERF_3_1
+        m_creature->UpdateSpell(3, 0);
+#endif
+
+        Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
+        if (!driver)
+            return;
+        CharmInfo* charmInfo = m_creature->InitCharmInfo(m_creature);
+            charmInfo->InitVehicleCreateSpells();
+        driver->VehicleSpellInitialize();
     }
 };
 
@@ -1414,6 +1458,11 @@ void AddSC_boss_flame_leviathan()
     pNewScript = new Script;
     pNewScript->Name = "npc_pyrite_safety_container";
     pNewScript->GetAI = &GetNewAIInstance<npc_pyrite_safety_containerAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_salvaged_chopper";
+    pNewScript->GetAI = &GetNewAIInstance<npc_salvaged_chopperAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<PursueLeviathan>("spell_pursue_leviathan");
