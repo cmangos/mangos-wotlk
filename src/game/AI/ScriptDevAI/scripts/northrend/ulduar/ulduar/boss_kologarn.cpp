@@ -111,7 +111,6 @@ static const float afKoloArmsLoc[4] = {1797.15f, -24.4027f, 448.741f, 3.1939f};
 
 enum KologarnActions
 {
-    KOLOGARN_EYE_BEAM,
     KOLOGARN_BERSERK,
     KOLOGARN_ARM_SWEEP,
     KOLOGARN_STONE_GRIP,
@@ -137,7 +136,6 @@ struct boss_kologarnAI : public BossAI
         AddOnDeathText(SAY_DEATH),
         AddCastOnDeath(QueuedCast{ObjectGuid(), SPELL_INSTAKILL_KOLOGARN_ARM, TRIGGERED_OLD_TRIGGERED},
                        QueuedCast{ObjectGuid(), SPELL_INSTAKILL_KOLOGARN_ARM, TRIGGERED_OLD_TRIGGERED});
-        AddCombatAction(KOLOGARN_EYE_BEAM, 10s);
         AddCombatAction(KOLOGARN_OVERHEAD_SMASH, 5s, 10s);
         AddCombatAction(KOLOGARN_PETRIFYING_BREATH, 4s);
         AddCombatAction(KOLOGARN_ARM_SWEEP, 15s, 20s);
@@ -349,7 +347,6 @@ struct boss_kologarnAI : public BossAI
         {
             case KOLOGARN_STONE_SHOUT: return RandomTimer(3s, 4s);
             case KOLOGARN_OVERHEAD_SMASH: return 15s;
-            case KOLOGARN_EYE_BEAM: return 20s;
             case KOLOGARN_ARM_SWEEP: return 17s;
             case KOLOGARN_STONE_GRIP: return RandomTimer(20s, 30s);
             case KOLOGARN_PETRIFYING_BREATH: return 4s;
@@ -389,12 +386,6 @@ struct boss_kologarnAI : public BossAI
                     return;
                 }
                 break;
-            }
-            case KOLOGARN_EYE_BEAM:
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FOCUSED_EYEBEAM_SUMMON) == CAST_OK)
-                    break;
-                return;
             }
             case KOLOGARN_ARM_SWEEP:
             {
