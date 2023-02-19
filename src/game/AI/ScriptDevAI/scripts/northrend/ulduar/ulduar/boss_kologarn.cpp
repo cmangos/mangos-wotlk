@@ -207,6 +207,7 @@ struct boss_kologarnAI : public BossAI
         BossAI::JustDied();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->GetMap()->ChangeGOPathfinding(194232, 8546, true);
+        m_creature->SetOrientation(m_creature->GetRespawnPosition().GetPositionO());
     }
 
     void JustReachedHome() override
