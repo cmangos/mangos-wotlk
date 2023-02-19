@@ -561,6 +561,33 @@ struct FocusedEyebeamSummon : SpellScript
     }
 };
 
+// 64224 - Stone Grip Absorb
+struct StoneGripAbsorb : AuraScript
+{
+    void OnApply(Aura* /*aura*/, bool apply) const override
+    {
+        sLog.outError("Apply: %b", apply);
+    }
+
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/) const override
+    {
+        currentAbsorb = 0;
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+        if (remainingDamage < aura->GetModifier()->m_amount)
+        {
+            aura->GetModifier()->m_amount -= remainingDamage;
+            return;
+        }
+        Unit* player = aura->GetCaster();
+        if (!player->IsAlive())
+            return;
+        uint32 auraToRemove = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
+        player->RemoveAurasDueToSpell(auraToRemove);
+        aura->GetModifier()->m_amount = 0;
+    }
+};
+
 void AddSC_boss_kologarn()
 {
     Script* pNewScript = new Script;
@@ -579,6 +606,7 @@ void AddSC_boss_kologarn()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<FocusedEyebeamSummon>("spell_focused_eyebeam_summon");
+    RegisterSpellScript<StoneGripAbsorb>("spell_stone_grip_absorb");
     /*
     INSERT INTO `spell_scripts` VALUES
     (63343,'spell_focused_eyebeam_summon'),
