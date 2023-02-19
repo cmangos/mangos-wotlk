@@ -284,6 +284,9 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
             break;
     }
 
+    if (goinfo->StringId)
+        SetStringId(goinfo->StringId, true);
+
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGroundOrArena())
         ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
@@ -928,6 +931,9 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
 
     if (group)
         SetGameObjectGroup(group);
+
+    if (groupEntry->StringId)
+        SetStringId(groupEntry->StringId, true);
 
     if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecsmin >= 0)
     {

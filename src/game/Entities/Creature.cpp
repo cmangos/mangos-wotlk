@@ -627,6 +627,15 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     if (eventData)
         ApplyGameEventSpells(eventData, true);
 
+    if (GetCreatureInfo()->StringID1)
+        SetStringId(GetCreatureInfo()->StringID1, true);
+
+    if (GetCreatureInfo()->StringID2)
+        SetStringId(GetCreatureInfo()->StringID2, true);
+
+    if (data && data->spawnTemplate->stringId)
+        SetStringId(data->spawnTemplate->stringId, true);
+
     return true;
 }
 
@@ -1651,6 +1660,9 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
 
     if (groupEntry)
         SetCreatureGroup(group);
+
+    if (groupEntry->StringId)
+        SetStringId(groupEntry->StringId, true);
 
     SetRespawnCoord(pos);
     m_respawnradius = data->spawndist;
