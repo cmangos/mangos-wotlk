@@ -843,37 +843,33 @@ struct npc_salvaged_chopperAI : public CombatAI
 #endif
     }
 
-    void PassengerBoarded(Unit* passenger, uint8 seat) override
+    void OnPassengerRide(Unit* passenger, bool boarded, uint8 seat) override
     {
-        if (!seat)
-            return;
-        //m_creature->CastSpell(nullptr, SPELL_GENERAL_TRIGGER_1_FROM_PSG_2, TRIGGERED_OLD_TRIGGERED);
-        m_creature->UpdateSpell(3, SPELL_EJECT_PASSENGER);
-#ifdef PRENERF_3_4_1
-        m_creature->UpdateSpell(3, 0);
-#endif
         Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
         if (!driver)
             return;
-        CharmInfo* charmInfo = m_creature->InitCharmInfo(m_creature);
-        charmInfo->InitVehicleCreateSpells();
-        driver->VehicleSpellInitialize();
-    }
-
-    void PassengerUnboarded(Unit* passenger, uint8 seat) override
-    {
         if (!seat)
             return;
-        m_creature->UpdateSpell(3, SPELL_GRAB_PYRITE);
-#ifdef PRENERF_3_4_1
-        m_creature->UpdateSpell(3, 0);
-#endif
-        Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
-        if (!driver)
-            return;
         CharmInfo* charmInfo = m_creature->InitCharmInfo(m_creature);
-        charmInfo->InitVehicleCreateSpells();
-        driver->VehicleSpellInitialize();
+        if (boarded)
+        {
+            //m_creature->CastSpell(nullptr, SPELL_GENERAL_TRIGGER_1_FROM_PSG_2, TRIGGERED_OLD_TRIGGERED);
+            m_creature->UpdateSpell(3, SPELL_EJECT_PASSENGER);
+#ifdef PRENERF_3_4_1
+            m_creature->UpdateSpell(3, 0);
+#endif
+            charmInfo->InitVehicleCreateSpells();
+            driver->VehicleSpellInitialize();
+        }
+        else
+        {
+            m_creature->UpdateSpell(3, SPELL_GRAB_PYRITE);
+#ifdef PRENERF_3_4_1
+            m_creature->UpdateSpell(3, 0);
+#endif
+            charmInfo->InitVehicleCreateSpells();
+            driver->VehicleSpellInitialize();
+        }
     }
 };
 
