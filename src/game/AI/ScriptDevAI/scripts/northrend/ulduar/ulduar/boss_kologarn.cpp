@@ -122,6 +122,7 @@ enum KologarnActions
     KOLOGARN_RESPAWN_RIGHT_ARM,
     KOLOGARN_DISARMED_TIMER,
     KOLOGARN_ACTIONS_MAX,
+    KOLOGARN_ORIENTATION_CORRECTION,
 };
 
 struct boss_kologarnAI : public BossAI
@@ -170,6 +171,13 @@ struct boss_kologarnAI : public BossAI
         AddCustomAction(KOLOGARN_DISARMED_TIMER, true, [&]()
         {
             m_disarmedStatus = false;
+        });
+        AddCustomAction(KOLOGARN_ORIENTATION_CORRECTION, 1s, [&]()
+        {
+            if (!m_creature->IsAlive())
+                return;
+            m_creature->SetOrientation(m_creature->GetRespawnPosition().GetPositionO());
+            ResetTimer(KOLOGARN_ORIENTATION_CORRECTION, 1s);
         });
         m_creature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CANNOT_TURN);
         SetCombatMovement(false);
