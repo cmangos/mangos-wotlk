@@ -1528,7 +1528,7 @@ struct MammothTrapBoreanAI : public GameObjectAI
     void OnLootStateChange(Unit* user) override
     {
         if (m_go->GetLootState() == GO_JUST_DEACTIVATED)
-            m_go->GetMap()->ScriptsStart(sGameObjectTemplateScripts, m_go->GetEntry(), user, m_go);
+            m_go->GetMap()->ScriptsStart(SCRIPT_TYPE_GAMEOBJECT_TEMPLATE, m_go->GetEntry(), user, m_go);
     }
 };
 

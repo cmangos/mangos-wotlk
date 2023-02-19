@@ -424,7 +424,7 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
                 break;
             case 41:
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ROAD_TO_FALCON_WATCH, m_creature);
-                pPlayer->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_END_TALERIS_INT, m_creature, m_creature);
+                pPlayer->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, DBSCRIPT_END_TALERIS_INT, m_creature, m_creature);
                 break;
         }
     }

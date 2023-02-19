@@ -158,8 +158,8 @@ struct RevelerApplauseCheer : public SpellScript
                 {
                     caster->SetFacingToObject(spell->GetUnitTarget());
                     target->SetFacingToObject(caster);
-                    caster->GetMap()->ScriptsStart(sRelayScripts, RELAY_SCRIPT_ID_DELAY_RESET_ORIENTATION, caster, caster);
-                    target->GetMap()->ScriptsStart(sRelayScripts, RELAY_SCRIPT_ID_DELAY_RESET_ORIENTATION, target, target);
+                    caster->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, RELAY_SCRIPT_ID_DELAY_RESET_ORIENTATION, caster, caster);
+                    target->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, RELAY_SCRIPT_ID_DELAY_RESET_ORIENTATION, target, target);
                     caster->HandleEmote(EMOTE_ONESHOT_BOW);
                 }
             }

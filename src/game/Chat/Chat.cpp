@@ -303,6 +303,9 @@ ChatCommand* ChatHandler::getCommandTable()
         { "debugflags",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugObjectFlags,                "", nullptr },
         { "packetlog",      SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugPacketLog,                  "", nullptr },
         { "dbscript",       SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugDbscript,                   "", nullptr },
+        { "dbscripttargeted", SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugDbscriptTargeted,         "", nullptr },
+        { "dbscriptsourced", SEC_ADMINISTRATOR, true,  &ChatHandler::HandleDebugDbscriptSourced,            "", nullptr },
+        { "dbscriptguided", SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugDbscriptGuided,             "", nullptr },
         { "lfg",            SEC_ADMINISTRATOR,  true,  nullptr,                                             "", debugLfgCommandTable },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };

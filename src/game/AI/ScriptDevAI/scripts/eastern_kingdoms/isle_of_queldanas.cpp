@@ -147,7 +147,7 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
                 }
             }
             if (transformScriptId)
-                m_creature->GetMap()->ScriptsStart(sRelayScripts, transformScriptId, m_creature, m_creature);
+                m_creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, transformScriptId, m_creature, m_creature);
         }
     }
 

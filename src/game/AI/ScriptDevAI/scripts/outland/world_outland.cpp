@@ -830,7 +830,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
     {
         if (GameObject* go = GetSingleGameObjectFromStorage(GO_BASHIR_CRYSTALFORGE, true))
             if (Creature* controller = GetClosestCreatureWithEntry(go, CRYSTALFORGE_SLAVE_EVENT_CONTROLLER_ENTRY, 10.f))
-                instance->ScriptsStart(sRelayScripts, CRYSTALFORGE_SLAVE_EVENT_RELAY_ID, controller, controller);
+                instance->ScriptsStart(SCRIPT_TYPE_RELAY, CRYSTALFORGE_SLAVE_EVENT_RELAY_ID, controller, controller);
     }
 
     void HandleBashirSpawnEnemy()

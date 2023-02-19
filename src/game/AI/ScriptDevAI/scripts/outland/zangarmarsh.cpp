@@ -209,7 +209,7 @@ struct StormcrowAmulet : public AuraScript
             {
                 if (Creature* ysiel = scriptedMap->GetSingleCreatureFromStorage(NPC_YSIEL_WINDSINGER))
                 {
-                    caster->GetMap()->ScriptsStart(sRelayScripts, RELAY_SCRIPT_CROW_FLIES, ysiel, caster);
+                    caster->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, RELAY_SCRIPT_CROW_FLIES, ysiel, caster);
                 }
             }
         }

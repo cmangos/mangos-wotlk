@@ -262,7 +262,7 @@ struct npc_xiri : public ScriptedAI
 
     void RunAkamaRPEvent()
     {
-        m_creature->GetMap()->ScriptsStart(sRelayScripts, RELAY_SCRIPT_AKAMA, m_creature, m_creature);
+        m_creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, RELAY_SCRIPT_AKAMA, m_creature, m_creature);
 
         m_bAkamaInteractionPerformed = true;
     }

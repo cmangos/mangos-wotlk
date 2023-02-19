@@ -2247,7 +2247,7 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map, uint
     creature->Summon(settings.spawnType, settings.despawnTime);                  // Also initializes the AI and MMGen
 
     if (relayId)
-        map->ScriptsStart(sRelayScripts, relayId, creature, settings.dbscriptTarget);
+        map->ScriptsStart(SCRIPT_TYPE_RELAY, relayId, creature, settings.dbscriptTarget);
 
     if (settings.corpseDespawnTime)
         creature->SetCorpseDelay(settings.corpseDespawnTime);

@@ -2439,7 +2439,7 @@ bool QuestRewarded_into_the_soulgrinder(Player* player, Creature* pCreature, Que
     {
         DoScriptText(SAY_MOGDORG_1, pCreature, player);
         player->CastSpell(player, SPELL_OGRE_FORCE_REACTION, TRIGGERED_OLD_TRIGGERED);
-        player->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_SPAWN_OGRES, player, pCreature);
+        player->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, DBSCRIPT_SPAWN_OGRES, player, pCreature);
     }
 
     return true;
@@ -2966,7 +2966,7 @@ struct npc_evergrove_druidAI : public ScriptedAI
             m_creature->SetLevitate(true);
             m_creature->SetHover(false);
             m_creature->SetCanFly(false);
-            m_creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_LANDING_SCRIPT, m_creature, who);
+            m_creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, DBSCRIPT_LANDING_SCRIPT, m_creature, who);
         }
     }
 
@@ -2981,7 +2981,7 @@ struct npc_evergrove_druidAI : public ScriptedAI
 
         returnTimer = 0;
         Unit* summoned = m_creature->GetMap()->GetUnit(m_summonerGuid);
-        m_creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_FLY_OFF_SCRIPT, m_creature, summoned);
+        m_creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, DBSCRIPT_FLY_OFF_SCRIPT, m_creature, summoned);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override

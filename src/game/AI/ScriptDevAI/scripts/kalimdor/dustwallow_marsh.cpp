@@ -1334,7 +1334,7 @@ bool QuestAccept_npc_major_mills(Player* player, Creature* creature, const Quest
         {
             if (npc_major_mills* ai = static_cast<npc_major_mills*>(creature->AI()))
                 ai->m_playerGuid = player->GetObjectGuid();
-            creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_RELAY_TAKE_DOWN_TETHYR, creature, player);
+            creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, DBSCRIPT_RELAY_TAKE_DOWN_TETHYR, creature, player);
         }
     }
 
