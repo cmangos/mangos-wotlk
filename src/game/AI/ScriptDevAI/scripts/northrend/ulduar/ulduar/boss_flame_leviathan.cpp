@@ -847,7 +847,7 @@ struct npc_salvaged_chopperAI : public CombatAI
     {
         if (!seat)
             return;
-        m_creature->CastSpell(nullptr, SPELL_GENERAL_TRIGGER_1_FROM_PSG_2, TRIGGERED_OLD_TRIGGERED);
+        //m_creature->CastSpell(nullptr, SPELL_GENERAL_TRIGGER_1_FROM_PSG_2, TRIGGERED_OLD_TRIGGERED);
         m_creature->UpdateSpell(3, SPELL_EJECT_PASSENGER);
 #ifdef PRENERF_3_4_1
         m_creature->UpdateSpell(3, 0);
