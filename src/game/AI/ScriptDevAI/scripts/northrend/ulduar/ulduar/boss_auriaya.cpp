@@ -152,8 +152,6 @@ struct boss_feral_defenderAI : public BossAI
         m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_instance = (instance_ulduar*)creature->GetInstanceData();
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         m_maxFeralRush = m_isRegularMode ? 6 : 10;
         AddCombatAction(FERAL_DEFENDER_FERAL_RUSH, 3s, 5s);
         AddCustomAction(FERAL_DEFENDER_REVIVE, true, [&]()
