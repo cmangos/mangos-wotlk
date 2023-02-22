@@ -2360,7 +2360,7 @@ class Player : public Unit
         Object* GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask);
 
         // currently visible objects at player client
-        bool HasAtClient(WorldObject const* u) { return u == this || m_clientGUIDs.find(u->GetObjectGuid()) != m_clientGUIDs.end(); }
+        bool HasAtClient(WorldObject const* u) const { return u == this || m_clientGUIDs.find(u->GetObjectGuid()) != m_clientGUIDs.end(); }
         void AddAtClient(WorldObject* target);
         void RemoveAtClient(WorldObject* target);
         GuidSet& GetClientGuids() { return m_clientGUIDs; }
