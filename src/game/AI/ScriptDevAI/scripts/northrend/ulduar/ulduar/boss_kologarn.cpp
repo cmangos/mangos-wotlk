@@ -194,6 +194,7 @@ struct boss_kologarnAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
         m_armStatus[LEFT_ARM]       = 0;
         m_armStatus[RIGHT_ARM]      = 0;
         m_disarmedStatus            = false;
@@ -564,9 +565,19 @@ struct FocusedEyebeamSummon : SpellScript
 // 64224 - Stone Grip Absorb
 struct StoneGripAbsorb : AuraScript
 {
-    void OnApply(Aura* /*aura*/, bool apply) const override
+    void OnApply(Aura* aura, bool apply) const override
     {
-        sLog.outError("Apply: %b", apply);
+        if (apply)
+            return;
+        Unit* player = aura->GetCaster();
+        if (!player->IsAlive())
+            return;
+        uint32 auraToRemove = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
+        player->RemoveAurasDueToSpell(auraToRemove);
+        player->RemoveAurasDueToSpell(64290);
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsAlive())
+            return;
     }
 
     void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/) const override
@@ -574,17 +585,7 @@ struct StoneGripAbsorb : AuraScript
         currentAbsorb = 0;
         if (aura->GetEffIndex() != EFFECT_INDEX_0)
             return;
-        if (remainingDamage < aura->GetModifier()->m_amount)
-        {
-            aura->GetModifier()->m_amount -= remainingDamage;
-            return;
-        }
-        Unit* player = aura->GetCaster();
-        if (!player->IsAlive())
-            return;
-        uint32 auraToRemove = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
-        player->RemoveAurasDueToSpell(auraToRemove);
-        aura->GetModifier()->m_amount = 0;
+        aura->GetModifier()->m_amount = std::max(0, aura->GetModifier()->m_amount - remainingDamage);
     }
 };
 
