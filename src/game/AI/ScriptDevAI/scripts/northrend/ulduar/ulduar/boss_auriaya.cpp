@@ -91,13 +91,6 @@ struct boss_auriayaAI : public BossAI
     instance_ulduar* m_instance;
     bool m_isRegularMode;
 
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiSwarmTimer;
-    uint32 m_uiSonicScreechTimer;
-    uint32 m_uiSentinelBlastTimer;
-    uint32 m_uiTerrifyingScreechTimer;
-    uint32 m_uiDefenderTimer;
-
     void JustDied(Unit* killer) override
     {
         BossAI::JustDied(killer);
