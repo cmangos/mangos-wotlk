@@ -589,7 +589,7 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (i_fobj->isHonorOrXPTarget(u) ||
-                        u->GetDeathState() != CORPSE || u->IsDeadByDefault() || u->IsTaxiFlying() ||
+                        u->GetDeathState() != CORPSE || u->IsTaxiFlying() ||
                         (u->GetCreatureTypeMask() & (1 << (CREATURE_TYPE_HUMANOID - 1))) == 0 ||
                         (u->GetDisplayId() != u->GetNativeDisplayId()))
                     return false;
@@ -617,7 +617,7 @@ namespace MaNGOS
             }
             bool operator()(Creature* u)
             {
-                if (u->GetDeathState() != CORPSE || u->IsTaxiFlying() || u->IsDeadByDefault() ||
+                if (u->GetDeathState() != CORPSE || u->IsTaxiFlying() ||
                     (u->GetDisplayId() != u->GetNativeDisplayId()) ||
                         (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL) != 0)
                     return false;

@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14069_01_mangos_addon_rename` bit(1) DEFAULT NULL
+  `required_14070_01_mangos_creature_drops` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -971,8 +971,11 @@ CREATE TABLE `creature` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Identifier',
   `map` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
   `spawnMask` tinyint(3) unsigned NOT NULL DEFAULT '1',
+<<<<<<< HEAD
   `phaseMask` smallint(5) unsigned NOT NULL DEFAULT '1',
   `modelid` mediumint(8) unsigned NOT NULL DEFAULT '0',
+=======
+>>>>>>> 4191dd9b2d6 ([s2462] Creature: Drop redundant creature table columns)
   `equipment_id` mediumint(9) NOT NULL DEFAULT '0',
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
@@ -981,10 +984,6 @@ CREATE TABLE `creature` (
   `spawntimesecsmin` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time minimum',
   `spawntimesecsmax` int(10) unsigned NOT NULL DEFAULT '120' COMMENT 'Creature respawn time maximum',
   `spawndist` float NOT NULL DEFAULT '5',
-  `currentwaypoint` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `curhealth` int(10) unsigned NOT NULL DEFAULT '1',
-  `curmana` int(10) unsigned NOT NULL DEFAULT '0',
-  `DeathState` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `MovementType` tinyint(3) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`),
   KEY `idx_map` (`map`),
