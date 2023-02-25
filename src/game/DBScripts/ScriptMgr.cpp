@@ -486,8 +486,8 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 // bitmask: 0/1=target-player, 0/2=with distance dependent, 0/4=map wide, 0/8=zone wide, 0/16=area wide
                 if (tmp.playSound.flags & ~(1 | 2 | 4 | 8 | 16))
                     sLog.outErrorDb("Table `%s` using unsupported sound flags (datalong2: %u) in SCRIPT_COMMAND_PLAY_SOUND for script id %u, unsupported flags will be ignored", tablename, tmp.playSound.flags, tmp.id);
-                if ((tmp.playSound.flags & (1 | 2)) > 0 && (tmp.playSound.flags & (4 | 8)) > 0)
-                    sLog.outErrorDb("Table `%s` uses sound flags (datalong2: %u) in SCRIPT_COMMAND_PLAY_SOUND for script id %u, combining (1|2) with (4|8) makes no sense", tablename, tmp.playSound.flags, tmp.id);
+                if ((tmp.playSound.flags & (1 | 2)) > 0 && (tmp.playSound.flags & (4 | 8 | 16)) > 0)
+                    sLog.outErrorDb("Table `%s` uses sound flags (datalong2: %u) in SCRIPT_COMMAND_PLAY_SOUND for script id %u, combining (1|2) with (4|8|16) makes no sense", tablename, tmp.playSound.flags, tmp.id);
                 break;
             }
             case SCRIPT_COMMAND_CREATE_ITEM:                // 17
