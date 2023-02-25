@@ -67,51 +67,48 @@ struct boss_apothecary_hummelAI : public CombatAI
         AddCombatAction(HUMMEL_ACTION_PERFUME_SPRAY, 4000u);
         AddCombatAction(HUMMEL_ACTION_CHAIN_REACTION, 15000u);
         AddCombatAction(HUMMEL_ACTION_SUMMON_ADD, 15000u);
-
-        DoCastSpellIfCan(m_creature, SPELL_ALLURING_PERFUME, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-
-        m_bIsFakingDeath = false;
     }
 
     instance_shadowfang_keep* m_instance;
 
     bool m_bIsFakingDeath;
 
-    void JustRespawned() override
+    void Reset() override
     {
-        DoCastSpellIfCan(m_creature, SPELL_ALLURING_PERFUME, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        CombatAI::Reset();
+        SetDeathPrevention(true);
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+        SetMeleeEnabled(true);
+        m_bIsFakingDeath = false;
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void JustRespawned() override
     {
-        if (m_bIsFakingDeath)
-        {
-            uiDamage = 0;
-            return;
-        }
+        CombatAI::JustRespawned();
+        DoCastSpellIfCan(nullptr, SPELL_ALLURING_PERFUME, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
 
-        if (uiDamage >= m_creature->GetHealth())
-        {
-            uiDamage = 0;
+    void JustPreventedDeath(Unit* killer)
+    {
+        DoScriptText(SAY_HUMMEL_DEATH, m_creature);
 
-            DoScriptText(SAY_HUMMEL_DEATH, m_creature);
+        DoCastSpellIfCan(nullptr, SPELL_PERMANENT_FEIGN_DEATH, CAST_TRIGGERED);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
-            DoCastSpellIfCan(m_creature, SPELL_PERMANENT_FEIGN_DEATH, CAST_TRIGGERED);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        SetCombatScriptStatus(true);
+        m_creature->SetTarget(nullptr);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
 
-            SetCombatScriptStatus(true);
-            m_creature->SetTarget(nullptr);
-            m_creature->SetHealth(1);
+        DisableCombatAction(HUMMEL_ACTION_PERFUME_SPRAY);
+        DisableCombatAction(HUMMEL_ACTION_CHAIN_REACTION);
+        DisableCombatAction(HUMMEL_ACTION_SUMMON_ADD);
 
-            DisableCombatAction(HUMMEL_ACTION_PERFUME_SPRAY);
-            DisableCombatAction(HUMMEL_ACTION_CHAIN_REACTION);
-            DisableCombatAction(HUMMEL_ACTION_SUMMON_ADD);
+        m_bIsFakingDeath = true;
 
-            m_bIsFakingDeath = true;
-
-            if (m_instance)
-                m_instance->SetData(TYPE_APOTHECARY, SPECIAL);
-        }
+        if (m_instance)
+            m_instance->SetData(TYPE_APOTHECARY, SPECIAL);
     }
 
     void ExecuteAction(uint32 action) override
@@ -125,15 +122,15 @@ struct boss_apothecary_hummelAI : public CombatAI
             case HUMMEL_ACTION_CHAIN_REACTION:
                 if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAIN_REACTION) == CAST_OK)
                 {
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_TABLE, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SUMMON_TABLE, CAST_TRIGGERED);
                     ResetCombatAction(action, 25000);
                 }
                 break;
             case HUMMEL_ACTION_SUMMON_ADD:
-                if (m_instance)
+                if (m_instance) // TODO: These are meant to come from different sides
                 {
-                    if (Creature* pGenerator = m_instance->GetSingleCreatureFromStorage(NPC_APOTHECARY_GENERATOR))
-                        pGenerator->CastSpell(pGenerator, SPELL_SUMMON_VALENTINE_ADD, TRIGGERED_OLD_TRIGGERED);
+                    if (Creature* generator = m_instance->GetSingleCreatureFromStorage(NPC_APOTHECARY_GENERATOR))
+                        generator->CastSpell(generator, SPELL_SUMMON_VALENTINE_ADD, TRIGGERED_OLD_TRIGGERED);
 
                     ResetCombatAction(action, 15000);
                 }
@@ -142,12 +139,12 @@ struct boss_apothecary_hummelAI : public CombatAI
     }
 };
 
-bool QuestRewarded_boss_apothecary_hummel(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+bool QuestRewarded_boss_apothecary_hummel(Player* player, Creature* creature, Quest const* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_BEEN_SERVED)
-        if (instance_shadowfang_keep* pInstance = static_cast<instance_shadowfang_keep*>(pCreature->GetInstanceData()))
+    if (quest->GetQuestId() == QUEST_BEEN_SERVED)
+        if (instance_shadowfang_keep* pInstance = static_cast<instance_shadowfang_keep*>(creature->GetInstanceData()))
             if (Creature* pValentineMgr = pInstance->GetSingleCreatureFromStorage(NPC_VALENTINE_BOSS_MGR))
-                pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pValentineMgr);
+                creature->AI()->SendAIEvent(AI_EVENT_START_EVENT, player, pValentineMgr);
 
     return true;
 }
@@ -198,13 +195,13 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
         {
             case NPC_HUMMEL:
             {
-                if (Creature* pHummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL))
+                if (Creature* hummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL))
                 {
-                    pHummel->SetImmuneToPlayer(false);
-                    pHummel->SetImmuneToNPC(false);
+                    hummel->SetImmuneToPlayer(false);
+                    hummel->SetImmuneToNPC(false);
 
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_eventStarterGuid))
-                        pHummel->AI()->AttackStart(pPlayer);
+                        hummel->AI()->AttackStart(pPlayer);
                 }
 
                 m_instance->SetData(TYPE_APOTHECARY, IN_PROGRESS);
@@ -212,37 +209,37 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
             }
             case NPC_BAXTER:
             {
-                Creature* pHummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL);
-                if (!pHummel)
+                Creature* hummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL);
+                if (!hummel)
                     return;
 
-                if (Creature* pBaxter = m_instance->GetSingleCreatureFromStorage(NPC_BAXTER))
+                if (Creature* baxter = m_instance->GetSingleCreatureFromStorage(NPC_BAXTER))
                 {
-                    DoScriptText(SAY_CALL_BAXTER, pHummel);
+                    DoScriptText(SAY_CALL_BAXTER, hummel);
 
-                    pBaxter->SetImmuneToPlayer(false);
-                    pBaxter->SetImmuneToNPC(false);
+                    baxter->SetImmuneToPlayer(false);
+                    baxter->SetImmuneToNPC(false);
 
-                    if (pHummel->GetVictim())
-                        pBaxter->AI()->AttackStart(pHummel->GetVictim());
+                    baxter->SetInCombatWithZone();
+                    baxter->AI()->AttackClosestEnemy();
                 }
                 break;
             }
             case NPC_FRYE:
             {
-                Creature* pHummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL);
-                if (!pHummel)
+                Creature* hummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL);
+                if (!hummel)
                     return;
 
-                if (Creature* pFrye = m_instance->GetSingleCreatureFromStorage(NPC_FRYE))
+                if (Creature* frye = m_instance->GetSingleCreatureFromStorage(NPC_FRYE))
                 {
-                    DoScriptText(SAY_CALL_FRYE, pHummel);
+                    DoScriptText(SAY_CALL_FRYE, hummel);
 
-                    pFrye->SetImmuneToPlayer(false);
-                    pFrye->SetImmuneToNPC(false);
+                    frye->SetImmuneToPlayer(false);
+                    frye->SetImmuneToNPC(false);
 
-                    if (pHummel->GetVictim())
-                        pFrye->AI()->AttackStart(pHummel->GetVictim());
+                    frye->SetInCombatWithZone();
+                    frye->AI()->AttackClosestEnemy();
                 }
                 break;
             }
@@ -257,28 +254,28 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
 
         StartNextDialogueText(QUEST_BEEN_SERVED);
 
-        if (Creature* pHummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL))
+        if (Creature* hummel = m_instance->GetSingleCreatureFromStorage(NPC_HUMMEL))
         {
-            pHummel->SetImmuneToPlayer(true);
-            pHummel->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+            hummel->SetImmuneToPlayer(true);
+            hummel->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
         }
 
         // Move Baxter to position
-        if (Creature* pBaxter = m_instance->GetSingleCreatureFromStorage(NPC_BAXTER))
+        if (Creature* baxter = m_instance->GetSingleCreatureFromStorage(NPC_BAXTER))
         {
-            pBaxter->SetImmuneToPlayer(true);
-            pBaxter->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-            pBaxter->SetWalk(false);
-            pBaxter->GetMotionMaster()->MoveWaypoint();
+            baxter->SetImmuneToPlayer(true);
+            baxter->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+            baxter->SetWalk(false);
+            baxter->GetMotionMaster()->MoveWaypoint();
         }
 
         // Move Frye to position
-        if (Creature* pFrye = m_instance->GetSingleCreatureFromStorage(NPC_FRYE))
+        if (Creature* frye = m_instance->GetSingleCreatureFromStorage(NPC_FRYE))
         {
-            pFrye->SetImmuneToPlayer(true);
-            pFrye->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-            pFrye->SetWalk(false);
-            pFrye->GetMotionMaster()->MoveWaypoint();
+            frye->SetImmuneToPlayer(true);
+            frye->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+            frye->SetWalk(false);
+            frye->GetMotionMaster()->MoveWaypoint();
         }
 
         // despawn the other Apothecaries
@@ -313,7 +310,7 @@ struct spell_lingering_fumes_targetting : public SpellScript
             return;
 
         caster->CastSpell(target, 68799, TRIGGERED_OLD_TRIGGERED);
-        caster->CastSpell(target, 68644, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, 68644, TRIGGERED_OLD_TRIGGERED);
     }
 
     void OnAfterHit(Spell* spell) const override
@@ -347,7 +344,7 @@ struct spell_valentine_boss_validate_area : public SpellScript
             return;
 
         // target triggers spell Valentine Boss 3 Throw Vial A or Valentine Boss 3 Throw Vial B
-        caster->CastSpell(caster, 69039, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, 69039, TRIGGERED_OLD_TRIGGERED);
         caster->CastSpell(target, urand(0, 1) ? 68841 : 68799, TRIGGERED_OLD_TRIGGERED);
     }
 };
@@ -368,7 +365,7 @@ struct spell_valentine_trigger_vial_a : public SpellScript
         if (!target || !caster)
             return;
 
-        caster->CastSpell(target, 68798, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, 68798, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -388,7 +385,7 @@ struct spell_valentine_trigger_vial_b : public SpellScript
         if (!target || !caster)
             return;
 
-        caster->CastSpell(target, 68614, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, 68614, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
