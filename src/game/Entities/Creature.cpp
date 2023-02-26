@@ -1659,10 +1659,12 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
         return false;
 
     if (groupEntry)
+    {
         SetCreatureGroup(group);
 
-    if (groupEntry->StringId)
-        SetStringId(groupEntry->StringId, true);
+        if (groupEntry->StringId)
+            SetStringId(groupEntry->StringId, true);
+    }
 
     SetRespawnCoord(pos);
     m_respawnradius = data->spawndist;
