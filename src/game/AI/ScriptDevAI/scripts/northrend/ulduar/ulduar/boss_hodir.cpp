@@ -24,7 +24,6 @@ EndScriptData */
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
-#include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
@@ -35,6 +34,8 @@ enum
     SAY_EPILOGUE                        = 33484,
     SAY_BERSERK                         = 34340,
 
+    SAY_FLASH_FREEZE                    = 34339,
+    EMOTE_FLASH_FREEZE                  = 33314,
 
     // spells
     SPELL_BERSERK                       = 26662,
@@ -94,6 +95,8 @@ enum
 enum HodirActions
 {
     HODIR_AGGRO_SPELLS,
+    HODIR_FLASH_FREEZE,
+    HODIR_FREEZE,
     HODIR_BERSERK,
     HODIR_ACTIONS_MAX,
     HODIR_EPILOGUE,
@@ -110,6 +113,8 @@ struct boss_hodirAI : public BossAI
         AddOnAggroText(SAY_AGGRO);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddCombatAction(HODIR_BERSERK, 8min);
+        AddCombatAction(HODIR_FREEZE, 25s, 30s);
+        AddCombatAction(HODIR_FLASH_FREEZE, 50s);
         AddTimerlessCombatAction(HODIR_AGGRO_SPELLS, true);
         AddCustomAction(HODIR_EPILOGUE, true, [&]()
         {
@@ -206,6 +211,24 @@ struct boss_hodirAI : public BossAI
                 DisableCombatAction(action);
                 return;
             }
+            case HODIR_FREEZE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (DoCastSpellIfCan(nullptr, SPELL_FREEZE, CAST_TRIGGERED) == CAST_OK)
+                        ResetCombatAction(action, 15s);
+                return;
+            }
+            case HODIR_FLASH_FREEZE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_FLASH_FREEZE, CAST_FORCE_CAST) == CAST_OK)
+                {
+                    DoBroadcastText(SAY_FLASH_FREEZE, m_creature);
+                    DoBroadcastText(EMOTE_FLASH_FREEZE, m_creature);
+                    DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_ICICLE_SNOWPACK : SPELL_ICICLE_SNOWPACK_H, CAST_TRIGGERED);
+                    ResetCombatAction(action, 50s);
+                }
+                return;
+            }
             case HODIR_BERSERK:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
@@ -227,6 +250,11 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 {
     npc_flash_freezeAI(Creature* creature) : Scripted_NoMovementAI(creature)
     {
+        AddCustomAction(0, true, [&]()
+        {
+            if (m_creature->GetHealthPercent() >=99.9f)
+                m_creature->CombatStop();
+        });
         m_instance = (instance_ulduar*)creature->GetInstanceData();
         Reset();
     }
@@ -238,6 +266,11 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
     void Reset() override
     {
         m_bFreezeInit = false;
+    }
+
+    void Aggro(Unit* who) override
+    {
+        ResetIfNotStarted(0, 5s);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
@@ -345,6 +378,7 @@ struct npc_icicle_targetAI : public Scripted_NoMovementAI
 
     void Reset() override
     {
+        SetRootSelf(true);
         DoCastSpellIfCan(m_creature, SPELL_SAFE_AREA);
     }
 
