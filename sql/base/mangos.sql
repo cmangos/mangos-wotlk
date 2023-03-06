@@ -971,11 +971,7 @@ CREATE TABLE `creature` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0' COMMENT 'Creature Identifier',
   `map` smallint(5) unsigned NOT NULL DEFAULT '0' COMMENT 'Map Identifier',
   `spawnMask` tinyint(3) unsigned NOT NULL DEFAULT '1',
-<<<<<<< HEAD
   `phaseMask` smallint(5) unsigned NOT NULL DEFAULT '1',
-  `modelid` mediumint(8) unsigned NOT NULL DEFAULT '0',
-=======
->>>>>>> 4191dd9b2d6 ([s2462] Creature: Drop redundant creature table columns)
   `equipment_id` mediumint(9) NOT NULL DEFAULT '0',
   `position_x` float NOT NULL DEFAULT '0',
   `position_y` float NOT NULL DEFAULT '0',
