@@ -2078,7 +2078,7 @@ void ObjectMgr::LoadCreatures()
         data.spawndist          = fields[10].GetFloat();
         data.movementType       = fields[11].GetUInt8();
         data.spawnMask          = fields[12].GetUInt8();
-        data.phaseMask          = fields[13].GetUInt8();
+        data.phaseMask          = fields[13].GetUInt16();
         data.gameEvent          = fields[14].GetInt16();
         data.GuidPoolId         = fields[15].GetInt16();
         data.EntryPoolId        = fields[16].GetInt16();
