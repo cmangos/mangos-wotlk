@@ -115,7 +115,7 @@ class GameEventMgr
 
         std::unordered_map<uint32, std::vector<uint32>> const& GetEventGroups() const { return m_gameEventGroups; }
 
-        GameEventCreatureData const* GetCreatureUpdateDataForActiveEvent(uint32 lowguid) const;
+        GameEventCreatureData const* GetCreatureUpdateDataForActiveEvent(uint32 dbGuid) const;
 
         void WeeklyEventTimerRecalculation();
     private:
