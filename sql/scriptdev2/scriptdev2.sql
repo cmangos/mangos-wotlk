@@ -211,7 +211,7 @@ UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
 -- eastern kingdoms
 8888,13016,
 -- kalimdor
-9299,12296,12298,
+9299,
 -- outland
 16880,16518,16847,17157,17326,17654,18879,21729,24918,24922,25084,25085,
 -- northrend
