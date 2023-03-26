@@ -2742,25 +2742,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 }
                 break;
             }
-            // Earth Shield
-            if (dummySpell->SpellFamilyFlags & uint64(0x0000040000000000))
-            {
-                target = this;
-                basepoints[0] = triggerAmount;
-
-                // Glyph of Earth Shield
-                if (Unit* caster = triggeredByAura->GetCaster())
-                {
-                    if (Aura* aur = caster->GetDummyAura(63279))
-                    {
-                        int32 aur_mod = aur->GetModifier()->m_amount;
-                        basepoints[0] = int32(basepoints[0] * (aur_mod + 100.0f) / 100.0f);
-                    }
-                }
-
-                triggered_spell_id = 379;
-                break;
-            }
             // Improved Water Shield
             if (dummySpell->SpellIconID == 2287)
             {

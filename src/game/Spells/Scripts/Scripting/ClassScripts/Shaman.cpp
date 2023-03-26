@@ -100,6 +100,24 @@ struct EarthShield : public AuraScript
         }
         return value;
     }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        procData.basepoints[0] = aura->GetAmount();
+        procData.triggerTarget = aura->GetTarget();
+        procData.triggeredSpellId = 379;
+        // Glyph of Earth Shield
+        if (Unit* caster = aura->GetCaster())
+        {
+            if (Aura* aur = caster->GetDummyAura(63279))
+            {
+                int32 aur_mod = aur->GetModifier()->m_amount;
+                procData.basepoints[0] = int32(procData.basepoints[0] * (aur_mod + 100.0f) / 100.0f);
+            }
+        }
+
+        return SPELL_AURA_PROC_OK;
+    }
 };
 
 enum
