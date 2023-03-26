@@ -279,7 +279,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
-        pPlayer->RemovePet(PET_SAVE_AS_CURRENT);
+        pPlayer->UnsummonPetTemporaryIfAny();
 
         WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA);
         pPlayer->GetSession()->SendPacket(data);
