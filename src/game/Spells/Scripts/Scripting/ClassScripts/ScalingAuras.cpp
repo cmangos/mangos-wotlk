@@ -572,7 +572,7 @@ struct DruidPetScaling1 : public AuraScript
                         int32 nature = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_NATURE);
                         if (nature < 0)
                             nature = 0;
-                        value = nature * 1.f;
+                        value = nature * 0.5f;
                     }
                 }
                 break;
@@ -594,8 +594,12 @@ struct DruidPetScaling2 : public AuraScript
                     value = float(owner->GetStat(STAT_STAMINA)) * 0.3f;
                 break;
             case EFFECT_INDEX_1: // armor
+                if (Unit* owner = data.caster->GetOwner())
+                    value = owner->GetArmor() * 0.35f;
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FIRE) * 0.4f);
                 break;
         }
         return value;
@@ -609,10 +613,16 @@ struct DruidPetScaling3 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FROST) * 0.4f);
                 break;
             case EFFECT_INDEX_1: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_ARCANE) * 0.4f);
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_NATURE) * 0.4f);
                 break;
         }
         return value;
@@ -626,6 +636,8 @@ struct DruidPetScaling4 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_SHADOW) * 0.4f);
                 break;
             default: break;
         }
