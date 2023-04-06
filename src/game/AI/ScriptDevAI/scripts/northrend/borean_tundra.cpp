@@ -1532,6 +1532,34 @@ struct MammothTrapBoreanAI : public GameObjectAI
     }
 };
 
+// 45742 - Plant Warsong Banner
+struct PlantWarsongBanner : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->IsAlive() || target->GetEntry() != 25430)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        if (!spell->GetCaster()->HasAura(45760))
+            return SPELL_FAILED_CASTER_AURASTATE;
+
+        return SPELL_CAST_OK;
+    }
+
+    void OnCast(Spell* spell) const override
+    {
+        if (Unit* target = spell->m_targets.getUnitTarget())
+        {
+            if (target->IsCreature())
+            {
+                static_cast<Creature*>(target)->RegisterHitBySpell(spell->m_spellInfo->Id);
+                target->CastSpell(spell->GetCaster(), 45744, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript = new Script;
@@ -1623,4 +1651,6 @@ void AddSC_borean_tundra()
     pNewScript->Name = "go_mammoth_trap_borean";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<MammothTrapBoreanAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<PlantWarsongBanner>("spell_plant_warsong_banner");
 }
