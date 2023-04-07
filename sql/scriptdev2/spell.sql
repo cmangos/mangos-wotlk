@@ -613,6 +613,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (42796,'spell_ingvar_transform_aura'),
 (42912,'spell_summon_banshee'),
 (43182,'spell_drink'),
+(43286,'spell_use_bricks_bonesaw'),
 (43768,'spell_flying_machine_controls'),
 (43770,'spell_grappling_hook'),
 (43789,'spell_grappling_beam'),
