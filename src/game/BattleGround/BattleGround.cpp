@@ -1575,7 +1575,7 @@ void BattleGround::AddPlayer(Player* player)
 
         // update world states on player enter
         GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
-        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
     }
     else
     {
@@ -1701,7 +1701,7 @@ void BattleGround::RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/)
             return;
 
         GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
-        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
 
         CheckArenaWinConditions();
     }
@@ -2245,7 +2245,7 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
     {
         // update world states on player kill
         GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
-        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
+        GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
 
         // check win conditions
         CheckArenaWinConditions();
