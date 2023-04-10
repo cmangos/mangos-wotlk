@@ -1399,6 +1399,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         });
         InitializeDialogueHelper(m_instance);
         m_creature->SetNoThreatState(true);
+        SetDeathPrevention(true);
     }
 
     instance_black_temple* m_instance;
@@ -1448,6 +1449,12 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         SetReactState(REACT_AGGRESSIVE);
         m_instance->DoTeleportAkamaIfCan();
+    }
+
+    void JustPreventedDeath(Unit* killer) override
+    {
+        if (Creature* illidan = m_instance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
+            illidan->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, illidan);
     }
 
     void CorpseRemoved(uint32& respawnDelay) override
