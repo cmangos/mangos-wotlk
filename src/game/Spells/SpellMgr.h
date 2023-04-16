@@ -2262,6 +2262,8 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_MOD_RANGED_HASTE:
         case SPELL_AURA_MOD_DAMAGE_DONE:
         case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE: // Ferocious Inspiration, Shadow Embrace
+            if (entry->Id == 29521 && entry2->Id == 29521) // Dance Vibe
+                return false;
             if (positive)
                 return true;
             nonmui = true;
