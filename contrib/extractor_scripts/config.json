@@ -27,6 +27,10 @@
 			"walkableClimb": 4.0
 		}
 	},
+        "540": {
+	"_Info": "The Shattered Halls - .go c id 16809",
+	"walkableSlopeAngle": 70
+	},
         "542": {
                 "walkableSlopeAngle":50,
                 "walkableClimb": 5.0
@@ -45,6 +49,9 @@
 		"borderSize": 5
 	},
         "554": {
+                "_Info": "The Mechanar - .go c 5540016",
+                "walkableHeight": 5.0,
+                "walkableClimb": 4.5,
                 "walkableSlopeAngle":60,
                 "minRegionArea": 30,
                 "walkableRadius": 1
