@@ -3634,7 +3634,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1015185','Check this out guys!  I can rock like you guys!','0','0','0','0','25610','Silvermoon LVL70ETC 4 say'),
 ('-1015186','Salandria begins to play air guitar and sing The Power of the Horde.','0','2','0','0','25613','Silvermoon LVL70ETC 5 emote'),
 
-('-1015187','Oh wow!','0','0','0','1','20463','Auchindoun 1 say');
+('-1015187','Oh wow!','0','0','0','1','20463','Auchindoun 1 say'),
+
+('-1015188','You dare summon me?!','0','1','0','0','20773','Vimgol Yell 1'),
+('-1015189','Now me grow bigger and crush you!','0','1','0','0','21264','Vimgol Yell 2');
 
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

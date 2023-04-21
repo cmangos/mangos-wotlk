@@ -1119,6 +1119,9 @@ enum
     SPELL_INTERRUPT_UNHOLY_GROWTH = 40547,
     SPELL_SUMMON_GRIMOIRE       = 39862,
     SPELL_SHADOWBOLT_VOLLEY     = 40070,
+
+    SAY_VIMGOL_1                = -1015188,
+    SAY_VIMGOL_2                = -1015189,
 };
 
 struct npc_vimgol_AI : public ScriptedAI
@@ -1143,6 +1146,7 @@ struct npc_vimgol_AI : public ScriptedAI
     {
         m_creature->GetMotionMaster()->Clear();
         m_creature->CastSpell(m_creature, SPELL_UNHOLY_GROWTH, TRIGGERED_NONE);
+        DoScriptText(SAY_VIMGOL_2, m_creature);
         m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
     }
 
@@ -1365,6 +1369,7 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
     {
         pSummoned->CastSpell(pSummoned, SPELL_SUMMONED_DEMON, TRIGGERED_OLD_TRIGGERED);
         CastBunnySpell(nullptr, SPELL_PENTAGRAM_BEAM);
+        DoScriptText(SAY_VIMGOL_1, pSummoned);
         m_uiSpawned = true;
 
         for (bool& m_uiActiveCircle : m_uiActiveCircles)
@@ -1398,7 +1403,7 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
             }
             else
             {
-                if (playersInsideCircles() == 5)
+                if (playersInsideCircles() == 1)
                     m_creature->SummonCreature(NPC_VIMGOL_THE_VILE, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 90000);
                 if (m_uiBeamTimer == 0)
                 {
