@@ -2152,23 +2152,6 @@ void ObjectMgr::LoadCreatures()
         if (!ok)
             continue;
 
-<<<<<<< HEAD
-        if (data.equipmentId > 0)                           // -1 no equipment, 0 use default
-        {
-            if (!GetEquipmentInfo(data.equipmentId))
-            {
-                sLog.outErrorDb("Table `creature` have creature (Entry: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", data.id, data.equipmentId);
-                data.equipmentId = -1;
-            }
-            if (cInfo && data.equipmentId == cInfo->EquipmentTemplateId)
-            {
-                sLog.outErrorDb("Table `creature` has creature (GUID: %u, Entry: %u) with equipment_id %u already defined in creature_template table", guid, data.id, data.equipmentId); 
-                data.equipmentId = 0;
-            }
-        }
-
-=======
->>>>>>> ce56ca199a3 ([s2465] Creature: Drop equipment_id as scheduled)
         if (data.spawndist < 0.0f)
         {
             sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `spawndist`< 0, set to 0.", guid, data.id);
