@@ -59,6 +59,19 @@ enum
     EVENT_OG_FROM_TB_ARRIVAL      = 21868,
     EVENT_TB_FROM_OG_ARRIVAL      = 21870,
 
+    RELAY_UC_FROM_GROMGOL_ARRIVAL = 21000,
+    RELAY_GROMGOL_FROM_UC_ARRIVAL = 21001,
+    RELAY_OG_FROM_UC_ARRIVAL      = 21002,
+    RELAY_UC_FROM_OG_ARRIVAL      = 21003,
+    RELAY_OG_FROM_GROMGOL_ARRIVAL = 21004,
+    RELAY_GROMGOL_FROM_OG_ARRIVAL = 21005,
+    RELAY_VL_FROM_UC_ARRIVAL      = 21006,
+    RELAY_UC_FROM_VL_ARRIVAL      = 21007,
+    RELAY_OG_FROM_BT_ARRIVAL      = 21008,
+    RELAY_BT_FROM_OG_ARRIVAL      = 21009,
+    RELAY_OG_FROM_TB_ARRIVAL      = 21010,
+    RELAY_TB_FROM_OG_ARRIVAL      = 21011,
+
     SOUND_ZEPPELIN_HORN           = 11804,
 };
 
@@ -69,31 +82,38 @@ bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* /*pTarget
     WorldObject* transport = (WorldObject*)pSource;
     uint32 entry = 0;
     int32 text_entry = 0;
+    uint32 relay_entry = 0;
     switch (uiEventId)
     {
         case EVENT_UC_FROM_GROMGOL_ARRIVAL:         // UC arrival from gromgol
             entry = NPC_HINDENBURG;
             text_entry = SAY_ST_FROM_GROMGOL_ARRIVAL;
+            relay_entry = RELAY_UC_FROM_GROMGOL_ARRIVAL;
             break;
         case EVENT_GROMGOL_FROM_UC_ARRIVAL:         // gromgol arrival from UC
             entry = NPC_SQUIBBY_OVERSPECK;
             text_entry = SAY_TIRISFAL_FROM_UC_ARRIVAL;
+            relay_entry = RELAY_GROMGOL_FROM_UC_ARRIVAL;
             break;
         case EVENT_OG_FROM_UC_ARRIVAL:              // OG arrival from UC
             entry = NPC_FREZZA;
             text_entry = SAY_TIRISFAL_FROM_UC_ARRIVAL;
+            relay_entry = RELAY_OG_FROM_UC_ARRIVAL;
             break;
         case EVENT_UC_FROM_OG_ARRIVAL:              // UC arrival from OG
             entry = NPC_ZAPETTA;
             text_entry = SAY_DUROTAR_FROM_OG_ARRIVAL;
+            relay_entry = RELAY_UC_FROM_OG_ARRIVAL;
             break;
         case EVENT_OG_FROM_GROMGOL_ARRIVAL:         // OG arrival from gromgol
             entry = NPC_SNURK_BUCKSQUICK;
             text_entry = SAY_ST_FROM_GROMGOL_ARRIVAL;
+            relay_entry = RELAY_OG_FROM_GROMGOL_ARRIVAL;
             break;
         case EVENT_GROMGOL_FROM_OG_ARRIVAL:         // gromgol arrival from OG
             entry = NPC_NEZRAZ;
             text_entry = SAY_DUROTAR_FROM_OG_ARRIVAL;
+            relay_entry = RELAY_GROMGOL_FROM_OG_ARRIVAL;
             break;
         case EVENT_WK_ARRIVAL:                      // WestGuard Keep arrival
             entry = NPC_HARROWMEISER;
@@ -106,26 +126,32 @@ bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* /*pTarget
         case EVENT_VL_FROM_UC_ARRIVAL:              // Vengance Landing arrival from UC
             entry = NPC_DRENK_SPANNERSPARK;
             text_entry = SAY_TIRISFAL_FROM_UC_ARRIVAL;
+            relay_entry = RELAY_VL_FROM_UC_ARRIVAL;
             break;
         case EVENT_UC_FROM_VL_ARRIVAL:              // UC arrival from Vengance Landing
             entry = NPC_MEEFI_FARTHROTTLE;
             text_entry = SAY_UC_FROM_VL_ARRIVAL;
+            relay_entry = RELAY_UC_FROM_VL_ARRIVAL;
             break;
         case EVENT_OG_FROM_BT_ARRIVAL:              // OG arrival from BT
             entry = NPC_GREEB_RAMROCKET;
             text_entry = SAY_OG_FROM_BT_ARRIVAL;
+            relay_entry = RELAY_OG_FROM_BT_ARRIVAL;
             break;
         case EVENT_BT_FROM_OG_ARRIVAL:              // BT arrival from OG
             entry = NPC_NARGO_SCREWBORE;
             text_entry = SAY_DUROTAR_FROM_OG_ARRIVAL;
+            relay_entry = RELAY_BT_FROM_OG_ARRIVAL;
             break;
         case EVENT_OG_FROM_TB_ARRIVAL:              // OG arrival from TB
             entry = NPC_ZELLI_HOTNOZZLE;
             text_entry = SAY_OG_FROM_TB_ARRIVAL;
+            relay_entry = RELAY_OG_FROM_TB_ARRIVAL;
             break;
         case EVENT_TB_FROM_OG_ARRIVAL:              // TB arrival from OG
             entry = NPC_KRENDLE_BIGPOCKETS;
             text_entry = SAY_DUROTAR_FROM_OG_ARRIVAL;
+            relay_entry = RELAY_TB_FROM_OG_ARRIVAL;
             break;
     }
     if (entry)
@@ -133,6 +159,7 @@ bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* /*pTarget
         {
             zeppelinMaster->PlayDistanceSound(SOUND_ZEPPELIN_HORN);
             DoScriptText(text_entry, zeppelinMaster);
+            zeppelinMaster->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, relay_entry, zeppelinMaster, zeppelinMaster);
         }
     return true;
 }
