@@ -250,7 +250,6 @@ struct CreatureData
     uint32 id;                                              // entry in creature_template
     uint16 mapid;
     uint16 phaseMask;
-    int32 equipmentId;
     float posX;
     float posY;
     float posZ;

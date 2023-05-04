@@ -412,7 +412,7 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         else if (eventData->entry_id)
             LoadEquipment(cinfo->EquipmentTemplateId, true);    // use changed entry default template
     }
-    else if (!data || (data->equipmentId == 0 && data->spawnTemplate->equipmentId == -1))
+    else if (!data || (data->spawnTemplate->equipmentId == -1))
     {
         if (cinfo->EquipmentTemplateId == 0)
             LoadEquipment(normalInfo->EquipmentTemplateId, true); // use default from normal template if diff does not have any
@@ -427,8 +427,6 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
             if (data->spawnTemplate->equipmentId != 0)
                 LoadEquipment(data->spawnTemplate->equipmentId);
         }
-        else if (data->equipmentId != -1)
-            LoadEquipment(data->equipmentId);
     }
 
     SetName(normalInfo->Name);                              // at normal entry always
@@ -1247,7 +1245,6 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     data.mapid = mapid;
     data.spawnMask = spawnMask;
     data.phaseMask = phaseMask;
-    data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
@@ -1273,7 +1270,6 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
        << data.mapid << ","
        << static_cast<uint32>(data.spawnMask) << ","       // cast to prevent save as symbol
        << static_cast<uint16>(data.phaseMask) << ","       // prevent out of range error
-       << data.equipmentId << ","
        << data.posX << ","
        << data.posY << ","
        << data.posZ << ","
