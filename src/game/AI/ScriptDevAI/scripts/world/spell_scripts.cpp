@@ -1626,7 +1626,7 @@ struct GameobjectCallForHelpOnUsage : public SpellScript
 
 struct Submerged : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* unitTarget = spell->GetUnitTarget();
         if (!unitTarget)
@@ -1639,7 +1639,7 @@ struct Submerged : public SpellScript
 
 struct Stand : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* unitTarget = spell->GetUnitTarget();
         if (!unitTarget)

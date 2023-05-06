@@ -1451,7 +1451,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         m_instance->DoTeleportAkamaIfCan();
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         if (Creature* illidan = m_instance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
             illidan->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, illidan);
