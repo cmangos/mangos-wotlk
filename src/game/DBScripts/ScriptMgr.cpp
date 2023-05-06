@@ -1126,6 +1126,9 @@ void ScriptMgr::LoadStringIds(bool reload)
         bar.step();
         sLog.outString(">> Loaded %u script definitions from table string_id", count);
         sLog.outString();
+
+        m_stringIds = std::make_shared<StringIdMap>();
+        m_stringIdsByString = std::make_shared<StringIdMapByString>();
         return;
     }
     
