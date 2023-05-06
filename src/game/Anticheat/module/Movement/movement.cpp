@@ -976,7 +976,7 @@ bool Movement::CheckFallReset(MovementInfo const& movementInfo) const
 
     if (GetLastMovementInfo().ctime)
     {
-        if (!GetLastMovementInfo().HasMovementFlag(MovementFlags(MOVEFLAG_JUMPING | MOVEFLAG_FALLINGFAR)))
+        if (!GetLastMovementInfo().HasMovementFlag(MovementFlags(MOVEFLAG_FALLINGFAR)))
             return true;
     }
 
