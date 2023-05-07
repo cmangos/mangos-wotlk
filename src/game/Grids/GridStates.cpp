@@ -17,6 +17,7 @@
  */
 
 #include "Grids/GridStates.h"
+#include "Grids/ObjectGridLoader.h"
 #include "Log.h"
 
 void
