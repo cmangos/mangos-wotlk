@@ -8917,6 +8917,11 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
         target->CastSpell(target, spellId75, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
 }
 
+bool Spell::IsInterruptible() const
+{
+    return (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT) && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && CanBeInterrupted();
+}
+
 void Spell::RegisterAuraProc(Aura* aura)
 {
     m_procOnceHolder.insert(aura);

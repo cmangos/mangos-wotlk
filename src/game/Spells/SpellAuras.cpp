@@ -669,8 +669,8 @@ void AreaAura::Update(uint32 diff)
                 }
                 case AREA_AURA_FRIEND:
                 {
-                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(caster, nullptr, m_radius, GetSpellProto()->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT));
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+                    MaNGOS::AnySpellAssistableUnitInObjectRangeCheck u_check(caster, nullptr, m_radius, GetSpellProto()->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT));
+                    MaNGOS::UnitListSearcher<MaNGOS::AnySpellAssistableUnitInObjectRangeCheck> searcher(targets, u_check);
                     Cell::VisitAllObjects(caster, searcher, m_radius);
                     break;
                 }

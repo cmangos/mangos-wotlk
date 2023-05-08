@@ -278,6 +278,7 @@ class Pet : public Creature
         }
 
         virtual CombatData* GetCombatData() override { return m_combatData; }
+        virtual CombatData const* GetCombatData() const override { return m_combatData; }
 
         virtual void RegenerateHealth() override;
 

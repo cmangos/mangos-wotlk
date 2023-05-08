@@ -5354,6 +5354,15 @@ void Unit::InterruptSpellsAndAurasWithInterruptFlags(uint32 flags)
     RemoveAurasWithInterruptFlags(flags);
 }
 
+bool Unit::IsInterruptible() const
+{
+    // TODO: Maybe need to check for immunities and static flags
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; ++i)
+        if (m_currentSpells[i] && m_currentSpells[i]->IsInterruptible())
+            return true;
+    return false;
+}
+
 Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
 {
     for (auto m_currentSpell : m_currentSpells)
@@ -6774,6 +6783,18 @@ bool Unit::HasMechanicMaskOrDispelMaskAura(uint32 dispelMask, uint32 mechanicMas
     return false;
 }
 
+bool Unit::HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag) const
+{
+    Unit::SpellAuraHolderMap const& Auras = GetSpellAuraHolderMap();
+    for (auto itr = Auras.begin(); itr != Auras.end(); ++itr)
+    {
+        SpellAuraHolder* holder = itr->second;
+        if (holder->GetSpellProto()->AuraInterruptFlags & flag && holder->IsPositive())
+            return true;
+    }
+    return false;
+}
+
 uint32 Unit::GetAuraCount(uint32 spellId) const
 {
     uint32 count = 0;
@@ -8065,6 +8086,11 @@ Pet* Unit::GetProtectorPet()
                 return pet;
 
     return nullptr;
+}
+
+bool Unit::HasAnyPet() const
+{
+    return !m_guardianPets.empty() || GetPetGuid() || GetCritterGuid();
 }
 
 Unit* Unit::_GetTotem(TotemSlot slot) const
@@ -12475,8 +12501,8 @@ Unit* Unit::SelectRandomFriendlyTarget(Unit* except /*= nullptr*/, float radius 
 {
     UnitList targets;
 
-    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(this, nullptr, radius);
-    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+    MaNGOS::AnySpellAssistableUnitInObjectRangeCheck u_check(this, nullptr, radius);
+    MaNGOS::UnitListSearcher<MaNGOS::AnySpellAssistableUnitInObjectRangeCheck> searcher(targets, u_check);
 
     Cell::VisitAllObjects(this, searcher, radius);
 
@@ -12693,6 +12719,11 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
     }
 
     WorldObject::SetPhaseMask(newPhaseMask, update);
+}
+
+bool Unit::IsUnitConditionSatisfied(int32 unitConditionId, Unit const* otherUnit) const
+{
+    return sObjectMgr.IsUnitConditionSatisfied(unitConditionId, this, otherUnit);
 }
 
 void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/, bool transportLeave /*= false*/)
@@ -14458,7 +14489,7 @@ void Unit::DespawnSummonsOnDeath()
     m_summonsForOnDeathDespawn.clear();
 }
 
-bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params) const
+bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const
 {
     if (selectFlags)
     {
@@ -14572,15 +14603,18 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
         }
     }
 
+    if (unitConditionId)
+        sObjectMgr.IsUnitConditionSatisfied(unitConditionId, target, this);
+
     return true;
 }
 
-Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
-    return SelectAttackingTarget(target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params);
+    return SelectAttackingTarget(target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params, unitConditionId);
 }
 
-Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
     if (!CanHaveThreatList())
         return nullptr;
@@ -14605,7 +14639,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         suitableUnits.push_back(pTarget);
                 }
             }
@@ -14624,7 +14658,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         return pTarget;
                 }
             }
@@ -14642,7 +14676,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         return pTarget;
                 }
             }
@@ -14658,7 +14692,7 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         suitableUnits.push_back(pTarget);
                 }
             }
@@ -14690,12 +14724,12 @@ Unit* Unit::SelectAttackingTarget(AttackingTarget target, uint32 position, Spell
     return nullptr;
 }
 
-void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
-    SelectAttackingTargets(selectedTargets, target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params);
+    SelectAttackingTargets(selectedTargets, target, position, sSpellTemplate.LookupEntry<SpellEntry>(spellId), selectFlags, params, unitConditionId);
 }
 
-void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/) const
+void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, AttackingTarget target, uint32 position, SpellEntry const* spellInfo /*= nullptr*/, uint32 selectFlags/*= 0*/, SelectAttackingTargetParams params /*= SelectAttackingTargetParams()*/, int32 unitConditionId/* = 0*/) const
 {
     if (!CanHaveThreatList())
         return;
@@ -14717,7 +14751,7 @@ void Unit::SelectAttackingTargets(std::vector<Unit*>& selectedTargets, Attacking
             {
                 if (Unit* pTarget = GetMap()->GetUnit((*itr)->getUnitGuid()))
                 {
-                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params))
+                    if ((!selectFlags && !spellInfo) || MeetsSelectAttackingRequirement(pTarget, spellInfo, selectFlags, params, unitConditionId))
                         selectedTargets.push_back(pTarget);
                 }
             }

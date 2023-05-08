@@ -8063,7 +8063,7 @@ void Spell::EffectInterruptCast(SpellEffectIndex eff_idx)
         {
             SpellEntry const* curSpellInfo = spell->m_spellInfo;
             // check if we can interrupt spell
-            if ((curSpellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT) && curSpellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE && spell->CanBeInterrupted())
+            if (spell->IsInterruptible())
             {
                 unitTarget->LockOutSpells(GetSpellSchoolMask(curSpellInfo), unitTarget->CalculateAuraDuration(m_spellInfo, (1 << eff_idx), GetSpellDuration(m_spellInfo), m_caster));
                 unitTarget->InterruptSpell(CurrentSpellTypes(i), false);
@@ -9069,8 +9069,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 38794:                                 // Murmur's Touch - Heroic
                 {
                     UnitList objectList;
-                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck check(unitTarget, nullptr, 100.f);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(objectList, check);
+                    MaNGOS::AnySpellAssistableUnitInObjectRangeCheck check(unitTarget, nullptr, 100.f);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnySpellAssistableUnitInObjectRangeCheck> searcher(objectList, check);
                     Cell::VisitAllObjects(unitTarget, searcher, 100.0f);
                     objectList.remove(unitTarget); // remove target
 
