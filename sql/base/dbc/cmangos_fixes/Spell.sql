@@ -3283,6 +3283,7 @@ UPDATE spell_template SET EffectDieSides1 = 0, EffectBasePoints1 = 0 WHERE id = 
 -- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
+44652, -- Iron Rune Aura
 50665, -- Bleeding Out
 50681, -- Bleeding Out
 50695, -- Bleeding Out
