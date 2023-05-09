@@ -19,11 +19,11 @@
 #include "SpellScript.h"
 #include "Entities/DynamicObject.h"
 
-std::map<uint32, SpellScript*> SpellScriptMgr::m_spellScriptMap = std::map<uint32, SpellScript*>();
-std::map<uint32, AuraScript*> SpellScriptMgr::m_auraScriptMap = std::map<uint32, AuraScript*>();
+std::map<uint32, SpellScript*> SpellScriptMgr::m_spellScriptMap {};
+std::map<uint32, AuraScript*> SpellScriptMgr::m_auraScriptMap {};
 
-std::map<std::string, SpellScript*> SpellScriptMgr::m_spellScriptStringMap = std::map<std::string, SpellScript*>();
-std::map<std::string, AuraScript*> SpellScriptMgr::m_auraScriptStringMap = std::map<std::string, AuraScript*>();
+std::map<std::string, std::unique_ptr<SpellScript>> SpellScriptMgr::m_spellScriptStringMap {};
+std::map<std::string, std::unique_ptr<AuraScript>> SpellScriptMgr::m_auraScriptStringMap {};
 
 SpellScript* SpellScriptMgr::GetSpellScript(uint32 spellId)
 {
@@ -113,7 +113,7 @@ SpellScript* SpellScriptMgr::GetSpellScript(std::string scriptName)
 {
     auto itr = m_spellScriptStringMap.find(scriptName);
     if (itr != m_spellScriptStringMap.end())
-        return (*itr).second;
+        return (*itr).second.get();
     return nullptr;
 }
 
@@ -121,7 +121,7 @@ AuraScript* SpellScriptMgr::GetAuraScript(std::string scriptName)
 {
     auto itr = m_auraScriptStringMap.find(scriptName);
     if (itr != m_auraScriptStringMap.end())
-        return (*itr).second;
+        return (*itr).second.get();
     return nullptr;
 }
 
