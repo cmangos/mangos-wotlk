@@ -514,11 +514,13 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMapStore,                 dbcPath, "Map.dbc");
     {
         // repairs entry for netherstorm - should be moved to SQL
-        MapEntry const* mEntry = sMapStore.LookupEntry(550);
-        MapEntry* tempestKeepMap = new MapEntry(*mEntry);
-        tempestKeepMap->ghost_entrance_map = 530;
-        sMapStore.EraseEntry(550);
-        sMapStore.InsertEntry(tempestKeepMap, 550);
+        if (MapEntry const* mEntry = sMapStore.LookupEntry(550))
+        {
+            MapEntry* tempestKeepMap = new MapEntry(*mEntry);
+            tempestKeepMap->ghost_entrance_map = 530;
+            sMapStore.EraseEntry(550);
+            sMapStore.InsertEntry(tempestKeepMap, 550);
+        }
     }
 
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sMapDifficultyStore,       dbcPath, "MapDifficulty.dbc");
