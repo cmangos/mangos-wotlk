@@ -1064,7 +1064,6 @@ struct OrcChildLaughter : public SpellScript
 void AddSC_shade_of_the_horseman()
 {
     Script* pNewScript = new Script;
-    pNewScript = new Script;
     pNewScript->Name = "npc_shade_of_the_horseman";
     pNewScript->GetAI = GetNewAIInstance<npc_shade_of_the_horsemanAI>;
     pNewScript->RegisterSelf();

@@ -4115,11 +4115,6 @@ void AddSC_netherstorm()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_manaforge_spawn";
-    pNewScript->GetAI = &GetAI_npc_manaforge_spawnAI;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_salhadaar";
     pNewScript->GetAI = &GetAI_npc_salhadaar;
     pNewScript->RegisterSelf();
