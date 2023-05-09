@@ -1277,7 +1277,7 @@ bool TerrainInfo::IsUnderWater(float x, float y, float z, float* pWaterZ/*= null
  *
  * @return           calculated z coordinate
  */
-float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float& groundZ, bool swim /*= false*/, float minWaterDeep /*= DEFAULT_COLLISION_HEIGHT*/) const
+float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float /*z*/, float& groundZ, bool swim /*= false*/, float minWaterDeep /*= DEFAULT_COLLISION_HEIGHT*/) const
 {
     if (CanCheckLiquidLevel(x, y))
     {

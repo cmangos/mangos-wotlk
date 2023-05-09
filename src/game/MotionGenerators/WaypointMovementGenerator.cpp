@@ -160,7 +160,7 @@ void WaypointMovementGenerator<Creature>::Reset(Creature& creature)
     SendNextWayPointPath(creature);
 }
 
-void WaypointMovementGenerator<Creature>::SwitchToNextNode(Creature& creature, WaypointPath::const_iterator& nodeItr)
+void WaypointMovementGenerator<Creature>::SwitchToNextNode(Creature& /*creature*/, WaypointPath::const_iterator& nodeItr)
 {
     // switch to next node
     ++nodeItr;

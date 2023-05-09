@@ -482,7 +482,7 @@ void Warden::HandlePacket(WorldPacket& recvData)
     }
 }
 
-void Warden::Update(uint32 diff)
+void Warden::Update(uint32 /*diff*/)
 {
     if (!!_timeoutClock && WorldTimer::getMSTime() > _timeoutClock)
     {

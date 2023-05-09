@@ -22,7 +22,7 @@
 // 14185 - Preparation
 struct Preparation : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (spell->GetCaster()->IsPlayer())
         {

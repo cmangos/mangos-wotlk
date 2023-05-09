@@ -20,7 +20,7 @@
 #include "Server/WorldSession.h"
 #include "Entities/Creature.h"
 
-bool ChatHandler::HandleNpcListSpells(char* args)
+bool ChatHandler::HandleNpcListSpells(char* /*args*/)
 {
     Creature* creature = getSelectedCreature();
     if (!creature)

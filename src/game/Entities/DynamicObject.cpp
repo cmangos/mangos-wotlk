@@ -121,7 +121,7 @@ Unit* DynamicObject::GetCaster() const
     return ObjectAccessor::GetUnit(*this, GetCasterGuid());
 }
 
-void DynamicObject::Update(const uint32 diff)
+void DynamicObject::Update(const uint32 /*diff*/)
 {
     // caster can be not in world at time dynamic object update, but dynamic object not yet deleted in Unit destructor
     Unit* caster = GetCaster();

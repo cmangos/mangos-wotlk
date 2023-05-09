@@ -22,7 +22,7 @@
 
 struct spell_judgement : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* unitTarget = spell->GetUnitTarget();
         if (!unitTarget || !unitTarget->IsAlive())
@@ -89,7 +89,7 @@ struct spell_judgement : public SpellScript
 
 struct spell_paladin_tier_6_trinket : public AuraScript
 {
-    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& procData) const override
     {
         if (!procData.spellInfo)
             return SPELL_AURA_PROC_FAILED;

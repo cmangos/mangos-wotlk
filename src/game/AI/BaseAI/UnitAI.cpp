@@ -124,7 +124,7 @@ void UnitAI::EnterEvadeMode()
     m_unit->TriggerEvadeEvents();
 }
 
-void UnitAI::JustDied(Unit* killer)
+void UnitAI::JustDied(Unit* /*killer*/)
 {
     ClearSelfRoot();
 }
@@ -723,7 +723,7 @@ CreatureList UnitAI::DoFindFriendlyEligibleDispel(SpellEntry const* spellInfo, b
     return DoFindFriendlyEligibleDispel(maxRange, dispelMask, mechanicMask, self);
 }
 
-CreatureList UnitAI::DoFindFriendlyMissingBuff(float range, uint32 spellId, bool inCombat, bool self) const
+CreatureList UnitAI::DoFindFriendlyMissingBuff(float /*range*/, uint32 spellId, bool inCombat, bool self) const
 {
     return DoFindFriendlyMissingBuff(sSpellTemplate.LookupEntry<SpellEntry>(spellId), inCombat, self);
 }

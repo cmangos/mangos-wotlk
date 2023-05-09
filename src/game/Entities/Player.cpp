@@ -288,7 +288,7 @@ PlayerTaxi::PlayerTaxi()
     memset(m_taximask, 0, sizeof(m_taximask));
 }
 
-void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 level)
+void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 chrClass, uint32 /*level*/)
 {
     // class specific initial known nodes
     switch (chrClass)
@@ -762,7 +762,7 @@ void Player::CleanupsBeforeDelete()
     Unit::CleanupsBeforeDelete();
 }
 
-bool Player::ValidateAppearance(uint8 race, uint8 class_, uint8 gender, uint8 hairID, uint8 hairColor, uint8 faceID, uint8 facialHair, uint8 skinColor, bool create /*=false*/)
+bool Player::ValidateAppearance(uint8 race, uint8 /*class_*/, uint8 gender, uint8 hairID, uint8 hairColor, uint8 faceID, uint8 facialHair, uint8 skinColor, bool /*create = false*/)
 {
     // For Skin type is always 0
     CharSectionsEntry const* skinEntry = GetCharSectionEntry(race, SECTION_TYPE_SKIN, gender, 0, skinColor);
@@ -5890,7 +5890,7 @@ void Player::UpdateWeaponSkill(WeaponAttackType attType)
     UpdateAllCritPercentages();
 }
 
-void Player::UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence)
+void Player::UpdateCombatSkills(Unit* /*pVictim*/, WeaponAttackType attType, bool defence)
 {
     const uint16 skillId = (defence ? SKILL_DEFENSE : GetWeaponSkillIdForAttack(attType));
     const uint16 skill = GetSkillValuePure(skillId);

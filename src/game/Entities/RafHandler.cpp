@@ -67,7 +67,7 @@ void WorldSession::HandleGrantLevel(WorldPacket& recv_data)
     target->SendDirectMessage(data2);
 }
 
-void WorldSession::HandleReferAFriend(WorldPacket& recv_data)
+void WorldSession::HandleReferAFriend(WorldPacket& /*recv_data*/)
 {
 
 }

@@ -24,7 +24,7 @@
 
 struct SentryTotem : public SpellScript, public AuraScript
 {
-    void OnRadiusCalculate(Spell* spell, SpellEffectIndex effIdx, bool targetB, float& radius) const override
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex effIdx, bool targetB, float& radius) const override
     {
         if (!targetB && effIdx == EFFECT_INDEX_0)
             radius = 2.f;

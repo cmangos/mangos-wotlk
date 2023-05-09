@@ -28,7 +28,7 @@ bool ChatHandler::HandleAnticheatInfoCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleAnticheatEnableCommand(char* args)
+bool ChatHandler::HandleAnticheatEnableCommand(char* /*args*/)
 {
     PSendSysMessage("Anticheat Late March version");
     return true;
@@ -191,7 +191,7 @@ bool ChatHandler::HandleAnticheatFingerprintAHistoryCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleAnticheatCheatinformCommand(char* args)
+bool ChatHandler::HandleAnticheatCheatinformCommand(char* /*args*/)
 {
     // ACCOUNT FLAGS
     WorldSession* session = GetSession();
@@ -213,7 +213,7 @@ bool ChatHandler::HandleAnticheatCheatinformCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleAnticheatSpaminformCommand(char* args)
+bool ChatHandler::HandleAnticheatSpaminformCommand(char* /*args*/)
 {
     // ACCOUNT FLAGS
     WorldSession* session = GetSession();

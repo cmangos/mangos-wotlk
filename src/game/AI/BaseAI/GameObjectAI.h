@@ -53,7 +53,7 @@ class GameObjectAI
         * LootState to which the GO is changed to is accessible in the GameObjectAI through GetLootState()
         * User can be nullptr
         */
-        virtual void OnLootStateChange(Unit* user) {}
+        virtual void OnLootStateChange(Unit* /*user*/) {}
 
         /*
         * Called when GO state changes.

@@ -160,7 +160,7 @@ struct FlagClickBg : public SpellScript
         return SPELL_CAST_OK;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         uint32 spellId = 0;
@@ -274,7 +274,7 @@ struct OutdoorPvpNotifyAI : public GameObjectAI
 {
     using GameObjectAI::GameObjectAI;
 
-    void OnUse(Unit* user, SpellEntry const* spellInfo) override
+    void OnUse(Unit* user, SpellEntry const* /*spellInfo*/) override
     {
         if (!user->IsPlayer())
             return;

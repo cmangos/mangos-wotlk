@@ -2495,7 +2495,7 @@ class Unit : public WorldObject
         virtual CombatData* GetCombatData() { return m_combatData; }
 
         virtual void SetBaseWalkSpeed(float speed) { m_baseSpeedWalk = speed; }
-        virtual void SetBaseRunSpeed(float speed, bool force = true) { m_baseSpeedRun = speed; }
+        virtual void SetBaseRunSpeed(float speed, bool /*force*/ = true) { m_baseSpeedRun = speed; }
         float GetBaseRunSpeed() { return m_baseSpeedRun; }
 
         bool IsSpellProccingHappening() const { return m_spellProcsHappening; }

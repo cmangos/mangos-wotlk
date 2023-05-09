@@ -439,7 +439,7 @@ bool ChatHandler::HandleDebugSendQuestInvalidMsgCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugListUpdateFieldsCommand(char* args)
+bool ChatHandler::HandleDebugListUpdateFieldsCommand(char* /*args*/)
 {
     Unit* pTarget = getSelectedUnit();
 
@@ -1817,7 +1817,7 @@ bool ChatHandler::HandleDebugObjectFlags(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugOutPacketHistory(char* args)
+bool ChatHandler::HandleDebugOutPacketHistory(char* /*args*/)
 {
     Player* player = getSelectedPlayer();
     if (player == nullptr)
@@ -1835,7 +1835,7 @@ bool ChatHandler::HandleDebugOutPacketHistory(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugIncPacketHistory(char* args)
+bool ChatHandler::HandleDebugIncPacketHistory(char* /*args*/)
 {
     Player* player = getSelectedPlayer();
     if (player == nullptr)
@@ -1853,7 +1853,7 @@ bool ChatHandler::HandleDebugIncPacketHistory(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugTransports(char* args)
+bool ChatHandler::HandleDebugTransports(char* /*args*/)
 {
     Player* player = GetSession()->GetPlayer();
     if (!player->IsInWorld())
@@ -1866,7 +1866,7 @@ bool ChatHandler::HandleDebugTransports(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugSpawnsList(char* args)
+bool ChatHandler::HandleDebugSpawnsList(char* /*args*/)
 {
     Player* player = GetSession()->GetPlayer();
     if (!player->IsInWorld())
@@ -1876,7 +1876,7 @@ bool ChatHandler::HandleDebugSpawnsList(char* args)
     return true;
 }
 
-bool ChatHandler::HandleDebugRespawnDynguid(char* args)
+bool ChatHandler::HandleDebugRespawnDynguid(char* /*args*/)
 {
     Creature* target = getSelectedCreature();
     if (!target)

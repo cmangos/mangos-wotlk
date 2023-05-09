@@ -341,7 +341,7 @@ void WorldSession::ProcessByteBufferException(WorldPacket const& packet)
             GetAccountId(), GetRemoteAddress().c_str());
         m_anticheat->RecordCheat(CHEAT_ACTION_INFO_LOG, "Anticrash", "ByteBufferException");
         ObjectGuid guid = _player->GetObjectGuid();
-        GetMessager().AddMessage([guid](WorldSession* world) -> void
+        GetMessager().AddMessage([guid](WorldSession* /*world*/) -> void
         {
             ObjectAccessor::KickPlayer(guid);
         });
@@ -349,7 +349,7 @@ void WorldSession::ProcessByteBufferException(WorldPacket const& packet)
 }
 
 /// Update the WorldSession (triggered by World update)
-bool WorldSession::Update(uint32 diff)
+bool WorldSession::Update(uint32 /*diff*/)
 {
     GetMessager().Execute(this);
 

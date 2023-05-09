@@ -311,7 +311,7 @@ bool BattleGroundEY::HandleEvent(uint32 eventId, Object* source, Object* target)
 }
 
 // Method that handles the capture point capture events
-void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 message)
+void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 /*newWorldState*/, uint32 message)
 {
     DEBUG_LOG("BattleGroundEY: Process capture point event from gameobject entry %u, captured by team %u", go->GetEntry(), team);
 

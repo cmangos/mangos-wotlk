@@ -278,7 +278,7 @@ void Transport::DespawnPassengers()
     m_staticPassengers.clear();
 }
 
-void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, float o)
+void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, float /*o*/)
 {
     Map* oldMap = GetMap();
     Relocate(x, y, z);

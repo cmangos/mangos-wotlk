@@ -41,7 +41,7 @@ void CombatAI::Reset()
     m_storedTarget = ObjectGuid();
 }
 
-void CombatAI::HandleDelayedInstantAnimation(SpellEntry const* spellInfo)
+void CombatAI::HandleDelayedInstantAnimation(SpellEntry const* /*spellInfo*/)
 {
     m_storedTarget = m_creature->GetTarget() ? m_creature->GetTarget()->GetObjectGuid() : ObjectGuid();
     if (m_storedTarget)

@@ -1994,7 +1994,7 @@ void WorldState::OnDisable(ScourgeInvasionData::CityAttack& zone)
     });
 }
 
-bool WorldState::IsActiveZone(uint32 zoneId)
+bool WorldState::IsActiveZone(uint32 /*zoneId*/)
 {
     return false;
 }

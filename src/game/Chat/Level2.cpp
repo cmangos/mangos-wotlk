@@ -1828,7 +1828,7 @@ bool ChatHandler::HandleNpcTempSpawn(char* args)
     return true;
 }
 
-bool ChatHandler::HandleNpcEvade(char* args)
+bool ChatHandler::HandleNpcEvade(char* /*args*/)
 {
     Creature* target = getSelectedCreature();
 

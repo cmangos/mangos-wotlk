@@ -124,7 +124,7 @@ WorldSafeLocsEntry const* GraveyardManager::GetClosestGraveyardHelper(GraveYardM
     return entryFar;
 }
 
-void GraveyardManager::Init(Map* map)
+void GraveyardManager::Init(Map* /*map*/)
 {
     // TODO: Only load relevant ones for specific map - warning: for example TK needs to have netherstorm
     // For now its likely not that harmful, its not that big
