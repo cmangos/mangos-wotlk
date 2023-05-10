@@ -417,7 +417,7 @@ class UnitAI : public CombatActions
         /*
          * Notifies AI on being called for help
          */
-        virtual void OnCallForHelp(Unit* caller, Unit* enemy) {}
+        virtual void OnCallForHelp(Unit* /*enemy*/) {}
 
         /*
          * Notifies AI on pet/totem unsummon - warning: works only for pets/totems

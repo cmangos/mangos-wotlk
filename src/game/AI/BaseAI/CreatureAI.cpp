@@ -210,7 +210,7 @@ void CreatureAI::DoCallForHelp(float radius)
     m_creature->CallForHelp(radius);
 }
 
-void CreatureAI::OnCallForHelp(Unit* caller, Unit* enemy)
+void CreatureAI::OnCallForHelp(Unit* enemy)
 {
     if (FactionTemplateEntry const* factionTemplate = m_creature->GetFactionTemplateEntry())
     {
