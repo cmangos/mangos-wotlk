@@ -133,8 +133,9 @@ enum BrutallusActions
 
 struct boss_brutallusAI : public CombatAI, private DialogueHelper
 {
-    boss_brutallusAI(Creature* creature) : CombatAI(creature, BRUTALLUS_ACTION_MAX), m_instance(static_cast<instance_sunwell_plateau*>(creature->GetInstanceData())),
-        DialogueHelper(aIntroDialogue), m_bIsIntroInProgress(false)
+    boss_brutallusAI(Creature* creature) : CombatAI(creature, BRUTALLUS_ACTION_MAX), DialogueHelper(aIntroDialogue),
+        m_instance(static_cast<instance_sunwell_plateau*>(creature->GetInstanceData())),
+        m_bIsIntroInProgress(false)
     {
         InitializeDialogueHelper(m_instance);
         AddCombatAction(BRUTALLUS_BERSERK, uint32(6 * MINUTE * IN_MILLISECONDS));

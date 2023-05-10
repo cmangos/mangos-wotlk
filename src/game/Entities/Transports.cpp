@@ -123,7 +123,7 @@ void MapManager::LoadTransports()
     sLog.outString();
 }
 
-Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_transportTemplate(transportTemplate), m_isMoving(true), m_lastStopIndex(-1)
+Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_isMoving(true), m_transportTemplate(transportTemplate), m_lastStopIndex(-1)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
 }

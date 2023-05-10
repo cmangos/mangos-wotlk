@@ -387,8 +387,9 @@ bool GossipHello_npc_orphan(Player* player, Creature* creature)
 
 struct npc_shade_of_the_horsemanAI : public ScriptedAI
 {
-    npc_shade_of_the_horsemanAI(Creature* creature) : ScriptedAI(creature), m_performedDoubleLaugh(false), m_stopPeriodicFireTimer(30000), m_bombingRunTimer(148000), m_finalWarningTimer(268000), m_failTimer(388000), m_landing(false), m_startedFires(false), m_allFiresOutTestTimer(0),
-        m_instance(creature->GetInstanceData())
+    npc_shade_of_the_horsemanAI(Creature* creature) : ScriptedAI(creature), m_stopPeriodicFireTimer(30000), m_failTimer(388000),
+        m_bombingRunTimer(148000), m_finalWarningTimer(268000), m_allFiresOutTestTimer(0), m_landing(false), m_startedFires(false),
+        m_performedDoubleLaugh(false), m_instance(creature->GetInstanceData())
     {
         DoCastSpellIfCan(creature, SPELL_CLIMAX_GHOST_VISUAL);
         DoCastSpellIfCan(creature, SPELL_SHADE_DURATION);

@@ -29,7 +29,7 @@
  */
 struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
 {
-    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap), m_brewfestEvent(this), m_shadeData({ AREAID_GOLDSHIRE, AREAID_KHARANOS, AREAID_BRILL })
+    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap), m_shadeData({ AREAID_GOLDSHIRE, AREAID_KHARANOS, AREAID_BRILL }), m_brewfestEvent(this)
     {
         AddCustomAction(EVENT_SPAWN, true, [&]
         {

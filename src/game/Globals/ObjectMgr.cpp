@@ -145,6 +145,7 @@ template uint32 IdGenerator<uint32>::Generate();
 template uint64 IdGenerator<uint64>::Generate();
 
 ObjectMgr::ObjectMgr() :
+    m_Dbc2StorageLocaleIndex(DEFAULT_LOCALE),
     m_ArenaTeamIds("Arena team ids"),
     m_AuctionIds("Auction ids"),
     m_EquipmentSetIds("Equipment set ids"),
@@ -152,8 +153,7 @@ ObjectMgr::ObjectMgr() :
     m_MailIds("Mail ids"),
     m_PetNumbers("Pet numbers"),
     m_FirstTemporaryCreatureGuid(1),
-    m_FirstTemporaryGameObjectGuid(1),
-    m_Dbc2StorageLocaleIndex(DEFAULT_LOCALE)
+    m_FirstTemporaryGameObjectGuid(1)
 {
 }
 
