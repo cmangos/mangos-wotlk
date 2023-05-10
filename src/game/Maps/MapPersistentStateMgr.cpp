@@ -315,10 +315,10 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
 
     for (auto itr = bounds.first; itr != bounds.second; ++itr)
     {
-        DungeonEncounter const* encounter = itr->second;
-        DungeonEncounterEntry const* dbcEntry = encounter->dbcEntry;
+        const DungeonEncounter& encounter = itr->second;
+        DungeonEncounterEntry const* dbcEntry = encounter.dbcEntry;
 
-        if (encounter->creditType == type && Difficulty(dbcEntry->Difficulty) == GetDifficulty() && dbcEntry->mapId == GetMapId())
+        if (encounter.creditType == type && Difficulty(dbcEntry->Difficulty) == GetDifficulty() && dbcEntry->mapId == GetMapId())
         {
             m_completedEncountersMask |= 1 << dbcEntry->encounterIndex;
 
@@ -333,10 +333,10 @@ void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint
             CharacterDatabase.PExecute("UPDATE instance SET encountersMask = '%u' WHERE id = '%u'", m_completedEncountersMask, GetInstanceId());
 
             DEBUG_LOG("DungeonPersistentState: Dungeon %s (Id %u) completed encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->encounterName[sWorld.GetDefaultDbcLocale()]);
-            if (encounter->lastEncounterDungeon)
+            if (encounter.lastEncounterDungeon)
             {
                 DEBUG_LOG("DungeonPersistentState:: Dungeon %s (Instance-Id %u) completed last encounter %s", GetMap()->GetMapName(), GetInstanceId(), dbcEntry->encounterName[sWorld.GetDefaultDbcLocale()]);
-                dungeonId = encounter->lastEncounterDungeon;
+                dungeonId = encounter.lastEncounterDungeon;
             }
             break;
         }
