@@ -2,8 +2,8 @@
 * This program is free software licensed under GPL version 2
 * Please see the included DOCS/LICENSE.TXT for more information */
 
-#ifndef DEF_SERPENT_SHRINE_H
-#define DEF_SERPENT_SHRINE_H
+#ifndef UNDERBOG_H
+#define UNDERBOG_H
 
 enum
 {
