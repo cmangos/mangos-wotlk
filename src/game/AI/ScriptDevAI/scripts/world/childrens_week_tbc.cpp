@@ -268,12 +268,12 @@ struct ChildTbcAI : public PetAI
         {
             case QUEST_A_TRIP_TO_THE_DARK_PORTAL_H:
             case QUEST_A_TRIP_TO_THE_DARK_PORTAL_A:
-                StartDarkPortalScript(IsHorde());
+                StartDarkPortalScript();
                 break;
 
             case QUEST_TIME_TO_VISIT_THE_CAVERNS_H:
             case QUEST_TIME_TO_VISIT_THE_CAVERNS_A:
-                StartCoTScript(IsHorde());
+                StartCoTScript();
                 break;
 
             case QUEST_HCHUU_AND_THE_MUSHROOM_PEOPLE: StartSporeggarScript(); break;
@@ -313,7 +313,7 @@ struct ChildTbcAI : public PetAI
 
     // Dark portal
 
-    void StartDarkPortalScript(bool horde)
+    void StartDarkPortalScript()
     {
         ResetTimer(ACTION_TRIP_TO_THE_DARK_PORTAL, 1000);
     }
@@ -386,7 +386,7 @@ struct ChildTbcAI : public PetAI
 
     // Caverns of Time
 
-    void StartCoTScript(bool horde)
+    void StartCoTScript()
     {
         ResetTimer(ACTION_TIME_TO_VISIT_THE_CAVERNS, 3000);
     }
