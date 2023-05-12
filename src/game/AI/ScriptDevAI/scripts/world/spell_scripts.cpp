@@ -1216,6 +1216,13 @@ struct FoodAnimation : public AuraScript
 {
     void OnHeartbeat(Aura* aura) const override
     {
+        // standing up cancels immediately but doing /sleep or /kneel interrupts on next tick
+        if (!aura->GetTarget()->IsSitState())
+        {
+            aura->GetTarget()->RemoveAurasDueToSpell(aura->GetId());
+            return;
+        }
+
         aura->GetTarget()->PlaySpellVisual(SPELL_VISUAL_KIT_FOOD);
     }
 };
@@ -1224,6 +1231,13 @@ struct DrinkAnimation : public AuraScript
 {
     void OnHeartbeat(Aura* aura) const override
     {
+        // standing up cancels immediately but doing /sleep or /kneel interrupts on next tick
+        if (!aura->GetTarget()->IsSitState())
+        {
+            aura->GetTarget()->RemoveAurasDueToSpell(aura->GetId());
+            return;
+        }
+
         aura->GetTarget()->PlaySpellVisual(SPELL_VISUAL_KIT_DRINK);
     }
 };
