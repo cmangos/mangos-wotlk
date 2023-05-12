@@ -299,10 +299,7 @@ bool Guild::LoadGuildFromDB(QueryResult* guildDataResult)
     if (purchasedTabs > GUILD_BANK_MAX_TABS)
         purchasedTabs = GUILD_BANK_MAX_TABS;
 
-    m_TabListMap.resize(purchasedTabs);
-
-    for (uint8 i = 0; i < purchasedTabs; ++i)
-        m_TabListMap[i] = new GuildBankTab;
+    m_TabList.resize(purchasedTabs);
 
     return true;
 }
@@ -989,7 +986,7 @@ void Guild::LogGuildEvent(uint8 EventType, ObjectGuid playerGuid1, ObjectGuid pl
 // Bank content related
 void Guild::DisplayGuildBankContent(WorldSession* session, uint8 TabId)
 {
-    GuildBankTab const* tab = m_TabListMap[TabId];
+    GuildBankTab const& tab = m_TabList[TabId];
 
     if (!IsMemberHaveRights(session->GetPlayer()->GetGUIDLow(), TabId, GUILD_BANK_RIGHT_VIEW_TAB))
         return;
@@ -1028,7 +1025,7 @@ void Guild::DisplayGuildBankMoneyUpdate(WorldSession* session)
 
 void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
 {
-    GuildBankTab const* tab = m_TabListMap[TabId];
+    GuildBankTab const& tab = m_TabList[TabId];
 
     WorldPacket data(SMSG_GUILD_BANK_LIST, 1200);
 
@@ -1075,7 +1072,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
 
 void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec const& slots)
 {
-    GuildBankTab const* tab = m_TabListMap[TabId];
+    GuildBankTab const& tab = m_TabList[TabId];
 
     WorldPacket data(SMSG_GUILD_BANK_LIST, 1200);
 
@@ -1112,7 +1109,7 @@ Item* Guild::GetItem(uint8 TabId, uint8 SlotId)
 {
     if (TabId >= GetPurchasedTabs() || SlotId >= GUILD_BANK_MAX_SLOTS)
         return nullptr;
-    return m_TabListMap[TabId]->Slots[SlotId];
+    return m_TabList[TabId].Slots[SlotId];
 }
 
 // *************************************************
@@ -1131,8 +1128,8 @@ void Guild::DisplayGuildBankTabsInfo(WorldSession* session)
 
     for (uint8 i = 0; i < GetPurchasedTabs(); ++i)
     {
-        data << m_TabListMap[i]->Name.c_str();
-        data << m_TabListMap[i]->Icon.c_str();
+        data << m_TabList[i].Name.c_str();
+        data << m_TabList[i].Icon.c_str();
     }
     data << uint8(0);                                       // Do not send tab content
     session->SendPacket(data);
@@ -1146,7 +1143,7 @@ void Guild::CreateNewBankTab()
         return;
 
     uint32 tabId = GetPurchasedTabs();                      // next free id
-    m_TabListMap.push_back(new GuildBankTab);
+    m_TabList.emplace_back();
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM guild_bank_tab WHERE guildid='%u' AND TabId='%u'", m_Id, tabId);
@@ -1156,11 +1153,11 @@ void Guild::CreateNewBankTab()
 
 void Guild::SetGuildBankTabInfo(uint8 TabId, std::string Name, std::string Icon)
 {
-    if (m_TabListMap[TabId]->Name == Name && m_TabListMap[TabId]->Icon == Icon)
+    if (m_TabList[TabId].Name == Name && m_TabList[TabId].Icon == Icon)
         return;
 
-    m_TabListMap[TabId]->Name = Name;
-    m_TabListMap[TabId]->Icon = Icon;
+    m_TabList[TabId].Name = Name;
+    m_TabList[TabId].Icon = Icon;
 
     CharacterDatabase.escape_string(Name);
     CharacterDatabase.escape_string(Icon);
@@ -1185,7 +1182,7 @@ void Guild::LoadGuildBankFromDB()
     QueryResult* result = CharacterDatabase.PQuery("SELECT TabId, TabName, TabIcon, TabText FROM guild_bank_tab WHERE guildid='%u' ORDER BY TabId", m_Id);
     if (!result)
     {
-        m_TabListMap.clear();
+        m_TabList.clear();
         return;
     }
 
@@ -1199,13 +1196,9 @@ void Guild::LoadGuildBankFromDB()
             continue;
         }
 
-        GuildBankTab* NewTab = new GuildBankTab;
-
-        NewTab->Name = fields[1].GetCppString();
-        NewTab->Icon = fields[2].GetCppString();
-        NewTab->Text = fields[3].GetCppString();
-
-        m_TabListMap[tabId] = NewTab;
+        m_TabList[tabId].Name = fields[1].GetCppString();
+        m_TabList[tabId].Icon = fields[2].GetCppString();
+        m_TabList[tabId].Text = fields[3].GetCppString();
     }
     while (result->NextRow());
 
@@ -1255,7 +1248,7 @@ void Guild::LoadGuildBankFromDB()
         }
 
         pItem->AddToWorld();
-        m_TabListMap[TabId]->Slots[SlotId] = pItem;
+        m_TabList[TabId].Slots[SlotId] = pItem;
     }
     while (result->NextRow());
 
@@ -1702,9 +1695,9 @@ bool Guild::AddGBankItemToDB(uint32 GuildId, uint32 BankTab, uint32 BankTabSlot,
     return true;
 }
 
-void Guild::AppendDisplayGuildBankSlot(WorldPacket& data, GuildBankTab const* tab, int slot) const
+void Guild::AppendDisplayGuildBankSlot(WorldPacket& data, GuildBankTab const& tab, int slot) const
 {
-    Item* item = tab->Slots[slot];
+    Item* item = tab.Slots[slot];
     uint32 entry = item ? item->GetEntry() : 0;
 
     data << uint8(slot);
@@ -1774,7 +1767,7 @@ Item* Guild::_StoreItem(uint8 tab, uint8 slot, Item* pItem, uint32 count, bool c
 
     DEBUG_LOG("GUILD STORAGE: StoreItem tab = %u, slot = %u, item = %u, count = %u", tab, slot, pItem->GetEntry(), count);
 
-    Item* pItem2 = m_TabListMap[tab]->Slots[slot];
+    Item* pItem2 = m_TabList[tab].Slots[slot];
 
     if (!pItem2)
     {
@@ -1786,7 +1779,7 @@ Item* Guild::_StoreItem(uint8 tab, uint8 slot, Item* pItem, uint32 count, bool c
         if (!pItem)
             return nullptr;
 
-        m_TabListMap[tab]->Slots[slot] = pItem;
+        m_TabList[tab].Slots[slot] = pItem;
 
         pItem->SetGuidValue(ITEM_FIELD_CONTAINED, ObjectGuid());
         pItem->SetGuidValue(ITEM_FIELD_OWNER, ObjectGuid());
@@ -1812,14 +1805,14 @@ Item* Guild::_StoreItem(uint8 tab, uint8 slot, Item* pItem, uint32 count, bool c
 
 void Guild::RemoveItem(uint8 tab, uint8 slot)
 {
-    m_TabListMap[tab]->Slots[slot] = nullptr;
+    m_TabList[tab].Slots[slot] = nullptr;
     CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid='%u' AND TabId='%u' AND SlotId='%u'",
                                GetId(), uint32(tab), uint32(slot));
 }
 
 InventoryResult Guild::_CanStoreItem_InSpecificSlot(uint8 tab, uint8 slot, GuildItemPosCountVec& dest, uint32& count, bool swap, Item* pSrcItem) const
 {
-    Item* pItem2 = m_TabListMap[tab]->Slots[slot];
+    Item* pItem2 = m_TabList[tab].Slots[slot];
 
     // ignore move item (this slot will be empty at move)
     if (pItem2 == pSrcItem)
@@ -1868,7 +1861,7 @@ InventoryResult Guild::_CanStoreItem_InTab(uint8 tab, GuildItemPosCountVec& dest
         if (j == skip_slot)
             continue;
 
-        Item* pItem2 = m_TabListMap[tab]->Slots[j];
+        Item* pItem2 = m_TabList[tab].Slots[j];
 
         // ignore move item (this slot will be empty at move)
         if (pItem2 == pSrcItem)
@@ -1967,15 +1960,12 @@ void Guild::SetGuildBankTabText(uint8 TabId, std::string text)
     if (TabId >= GetPurchasedTabs())
         return;
 
-    if (!m_TabListMap[TabId])
-        return;
-
-    if (m_TabListMap[TabId]->Text == text)
+    if (m_TabList[TabId].Text == text)
         return;
 
     utf8truncate(text, 500);                                // DB and client size limitation
 
-    m_TabListMap[TabId]->Text = text;
+    m_TabList[TabId].Text = text;
 
     CharacterDatabase.escape_string(text);
     CharacterDatabase.PExecute("UPDATE guild_bank_tab SET TabText='%s' WHERE guildid='%u' AND TabId='%u'", text.c_str(), m_Id, uint32(TabId));
@@ -1986,11 +1976,11 @@ void Guild::SetGuildBankTabText(uint8 TabId, std::string text)
 
 void Guild::SendGuildBankTabText(WorldSession* session, uint8 TabId)
 {
-    GuildBankTab const* tab = m_TabListMap[TabId];
+    GuildBankTab const& tab = m_TabList[TabId];
 
-    WorldPacket data(MSG_QUERY_GUILD_BANK_TEXT, 1 + tab->Text.size() + 1);
+    WorldPacket data(MSG_QUERY_GUILD_BANK_TEXT, 1 + tab.Text.size() + 1);
     data << uint8(TabId);
-    data << tab->Text;
+    data << tab.Text;
 
     if (session)
         session->SendPacket(data);
@@ -2464,11 +2454,11 @@ void Guild::BroadcastEvent(GuildEvents event, ObjectGuid guid, char const* str1 
 
 void Guild::DeleteGuildBankItems(bool alsoInDB /*= false*/)
 {
-    for (auto& i : m_TabListMap)
+    for (auto& tab : m_TabList)
     {
         for (uint8 j = 0; j < GUILD_BANK_MAX_SLOTS; ++j)
         {
-            if (Item* pItem = i->Slots[j])
+            if (Item* pItem = tab.Slots[j])
             {
                 pItem->RemoveFromWorld();
 
@@ -2478,9 +2468,8 @@ void Guild::DeleteGuildBankItems(bool alsoInDB /*= false*/)
                 delete pItem;
             }
         }
-        delete i;
     }
-    m_TabListMap.clear();
+    m_TabList.clear();
 }
 
 bool GuildItemPosCount::isContainedIn(GuildItemPosCountVec const& vec) const
