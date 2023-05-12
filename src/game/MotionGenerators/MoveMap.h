@@ -23,6 +23,8 @@
 #include <Detour/Include/DetourAlloc.h>
 #include <Detour/Include/DetourNavMesh.h>
 #include <Detour/Include/DetourNavMeshQuery.h>
+
+#include <memory>
 #include <mutex>
 
 class Unit;
@@ -120,7 +122,7 @@ namespace MMAP
             MMapDataSet m_loadedMMaps;
             uint32 m_loadedTiles;
 
-            std::unordered_map<uint32, MMapGOData*> m_loadedModels;
+            std::unordered_map<uint32, std::unique_ptr<MMapGOData>> m_loadedModels;
             std::mutex m_modelsMutex;
     };
 
