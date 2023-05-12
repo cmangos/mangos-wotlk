@@ -271,7 +271,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (38640,'spell_koi_koi_death'),
 (38915,'spell_mental_interference'),
 (38544,'spell_coax_marmot'),
-(38708,'spell_demonaic_visitation'),
+(38708,'spell_demoniac_visitation'),
 (40309,'spell_possess_demon_shartuul'),
 (40222,'spell_smash_shield'),
 (40503,'spell_possession_transfer'),

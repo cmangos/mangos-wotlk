@@ -3051,7 +3051,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 28084:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(29660);
                 return;
-            case 30238:                                     // Lordaeron's Bleesing
+            case 30238:                                     // Lordaeron's Blessing
             {
                 target->RemoveAurasDueToSpell(31906);
                 return;

@@ -350,7 +350,7 @@ bool GossipSelect_npc_demoniac_scryer(Player* pPlayer, Creature* pCreature, uint
     return true;
 }
 
-struct DemonaicVisitation : public AuraScript
+struct DemoniacVisitation : public AuraScript
 {
     void OnApply(Aura* aura, bool /*apply*/) const override
     {
@@ -2510,5 +2510,5 @@ void AddSC_hellfire_peninsula()
     RegisterSpellScript<LivingFlareDetonator>("spell_living_flare_detonator");
     RegisterSpellScript<LivingFlareMaster>("spell_living_flare_master");
     RegisterSpellScript<LivingFlareUnstable>("spell_living_flare_unstable");
-    RegisterSpellScript<DemonaicVisitation>("spell_demonaic_visitation");
+    RegisterSpellScript<DemoniacVisitation>("spell_demoniac_visitation");
 }
