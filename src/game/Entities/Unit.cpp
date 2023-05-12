@@ -12263,7 +12263,7 @@ void Unit::SetStandState(uint8 state, bool acknowledge/* = false*/)
 
     SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_STAND_STATE, state);
 
-    if (!IsSeatedState())
+    if (IsStandState())
         RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_STANDING_CANCELS);
 
     if (!acknowledge && GetTypeId() == TYPEID_PLAYER)
