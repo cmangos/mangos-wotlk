@@ -166,7 +166,7 @@ struct boss_muruAI : public CombatAI
         DespawnGuids(m_spawns);
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         SetActionReadyStatus(MURU_TRANSITION, true);
     }

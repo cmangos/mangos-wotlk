@@ -352,7 +352,7 @@ bool GossipSelect_npc_demoniac_scryer(Player* pPlayer, Creature* pCreature, uint
 
 struct DemonaicVisitation : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const override
+    void OnApply(Aura* aura, bool /*apply*/) const override
     {
         DoBroadcastText(SAY_DEMONIAC_VISITATION_END, aura->GetCaster(), aura->GetTarget());
     }
@@ -2257,7 +2257,7 @@ enum
 
 struct ExposeRazorthornRoot : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         if (!target || !target->AI())

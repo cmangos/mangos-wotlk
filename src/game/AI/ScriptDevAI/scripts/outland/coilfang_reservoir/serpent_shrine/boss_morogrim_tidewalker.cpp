@@ -108,7 +108,7 @@ struct boss_morogrim_tidewalkerAI : public CombatAI
         AddCombatAction(MOROGRIM_TIDAL_WAVE, 10000, 15000);
         AddCombatAction(MOROGRIM_WATERY_GRAVE, 30000u);
         AddCombatAction(MOROGRIM_WATER_GLOBULES, true);
-        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float /*y*/, float /*z*/)
         {
             return x < 304.12f || x > 457.35f;
         });

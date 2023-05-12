@@ -100,7 +100,7 @@ struct boss_halazziAI : public CombatAI
         AddCombatAction(HALAZZI_ACTION_SABER_LASH, 20000u);
         AddCombatAction(HALAZZI_ACTION_SHOCK, true);
         AddCombatAction(HALAZZI_ACTION_TOTEM, true);
-        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float /*z*/)
             {
                 return x < 307.f || y < 1055.f;
             });

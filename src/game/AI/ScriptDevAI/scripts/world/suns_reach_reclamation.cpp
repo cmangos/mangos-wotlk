@@ -18,7 +18,7 @@
 #include "World/WorldState.h"
 #include "Spells/Scripts/SpellScript.h"
 
-bool QuestRewarded_suns_reach_reclamation(Player* player, Creature* creature, Quest const* quest)
+bool QuestRewarded_suns_reach_reclamation(Player* /*player*/, Creature* /*creature*/, Quest const* quest)
 {
     sWorldState.AddSunsReachProgress(quest->GetQuestId());
     sWorldState.AddSunwellGateProgress(quest->GetQuestId());

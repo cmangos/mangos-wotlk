@@ -170,7 +170,7 @@ struct boss_alythessAI : public CombatAI
         m_aggro = m_creature->GetMap()->GetCurrentClockTime();
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         if (Creature* sacrolash = m_instance->GetSingleCreatureFromStorage(NPC_SACROLASH))
         {
@@ -190,7 +190,7 @@ struct boss_alythessAI : public CombatAI
         }
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         if (m_instance && m_creature->HasAura(SPELL_EMPOWER))
             m_instance->SetData(TYPE_EREDAR_TWINS, DONE);
@@ -359,7 +359,7 @@ struct boss_sacrolashAI : public CombatAI
         m_aggro = m_creature->GetMap()->GetCurrentClockTime();
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         if (Creature* alythess = m_instance->GetSingleCreatureFromStorage(NPC_ALYTHESS))
         {
@@ -379,7 +379,7 @@ struct boss_sacrolashAI : public CombatAI
         }
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         if (m_instance && m_creature->HasAura(SPELL_EMPOWER))
             m_instance->SetData(TYPE_EREDAR_TWINS, DONE);

@@ -183,7 +183,7 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
             m_instance->SetData(TYPE_DELRISSA, FAIL);
     }
 
-    void Aggro(Unit* who) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 

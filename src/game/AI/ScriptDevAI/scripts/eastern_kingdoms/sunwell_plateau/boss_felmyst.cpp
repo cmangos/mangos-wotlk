@@ -139,7 +139,7 @@ struct boss_felmystAI : public CombatAI
         m_creature->SetStandState(UNIT_STAND_STATE_SLEEP);
         if (m_instance)
         {
-            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float z)
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float /*z*/)
             {
                 return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
             });
@@ -566,7 +566,7 @@ struct npc_demonic_vaporAI : public CombatAI
 
 struct SoulSever : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* unitTarget = spell->GetUnitTarget();
         if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || !unitTarget->HasAura(SPELL_FOG_OF_CORRUPTION_CHARM))

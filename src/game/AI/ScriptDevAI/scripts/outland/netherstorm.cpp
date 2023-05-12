@@ -2930,7 +2930,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
 
 struct ScrapReaverSpell : public SpellScript, public AuraScript
 {
-    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const
     {
         // Only one player can control the scrap reaver
         if (target->HasAura(SPELL_SCRAP_REAVER))

@@ -544,7 +544,7 @@ struct WrathOfTheTitansStacker : public SpellScript
 
 struct WrathOfTheTitansProcAura : public AuraScript
 {
-    bool OnCheckProc(Aura* aura, ProcExecutionData& data) const override
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
     {
         std::set<uint32> spells = { 30605, 30606, 30607, 30609, 30608 };
         if (spells.find(data.spellInfo->Id) != spells.end())

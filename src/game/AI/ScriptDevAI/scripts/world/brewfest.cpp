@@ -558,7 +558,7 @@ enum KegFetching
     QUEST_THERE_AND_BACK_AGAIN_H = 11412,
 };
 
-bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const* at)
+bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const* /*at*/)
 {
     if (player->HasAura(SPELL_SEE_SUPPLIER_MARK))
     {
@@ -576,7 +576,7 @@ bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const*
     return true;
 }
 
-bool AreaTrigger_at_brewfest_send_keg(Player* player, AreaTriggerEntry const* at)
+bool AreaTrigger_at_brewfest_send_keg(Player* player, AreaTriggerEntry const* /*at*/)
 {
     if (player->HasAura(SPELL_SEE_BASE_CAMP_MARK))
     {

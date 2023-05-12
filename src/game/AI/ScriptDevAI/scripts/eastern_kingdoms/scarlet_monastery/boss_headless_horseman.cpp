@@ -410,7 +410,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
         }
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_HEAD_IS_DEAD, CAST_TRIGGERED);
 

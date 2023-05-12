@@ -708,7 +708,7 @@ struct npc_Shattered_Hand_Scout : public ScriptedAI
         m_bRunning = false;
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* /*pWho*/) override
     {
         // Abuse Prevention for when people revive mid gauntlet and continue onward instead of starting the gauntlet
         if (!m_bRunning)
@@ -857,7 +857,7 @@ struct npc_shattered_hand_legionnaire : public CombatAI
             ResetTimer(LEGIONNAIRE_CALL_FOR_REINFORCEMENTS, 0u);
     }
 
-    void SummonedMovementInform(Creature* summoned, uint32 uiMotionType, uint32 uiPointId) override
+    void SummonedMovementInform(Creature* summoned, uint32 /*uiMotionType*/, uint32 uiPointId) override
     {
         // When last waypoint reached, search for players.
         if (summoned->GetEntry() == MOB_FEL_ORC && uiPointId == 100)

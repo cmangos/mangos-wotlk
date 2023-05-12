@@ -83,7 +83,7 @@ struct npc_doomguard_punisherAI : public CombatAI
             m_instance->SetData(TYPE_SHARTUUL, EVENT_FAIL);
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         SetActionReadyStatus(PUNISHER_POSSESSION_TRANSFER, true);
     }
@@ -182,7 +182,7 @@ struct npc_shivan_assassinAI : public CombatAI
         ResetTimer(SHIVAN_OOC_ANIM, 8000);
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         SetActionReadyStatus(SHIVAN_POSSESSION_TRANSFER, true);
     }
@@ -260,7 +260,7 @@ struct npc_eye_of_shartuulAI : public CombatAI
             m_instance->SetData(TYPE_SHARTUUL, EVENT_FAIL);
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         if (m_instance)
             m_instance->SetData(TYPE_SHARTUUL, EVENT_EYE_OF_SHARTUUL_DEATH);
@@ -356,7 +356,7 @@ struct npc_dreadmawAI : public CombatAI
             m_instance->SetData(TYPE_SHARTUUL, EVENT_FAIL);
     }
 
-    void JustPreventedDeath(Unit* killer) override
+    void JustPreventedDeath(Unit* /*killer*/) override
     {
         if (m_instance)
             m_instance->SetData(TYPE_SHARTUUL, EVENT_DREADMAW_DEATH);

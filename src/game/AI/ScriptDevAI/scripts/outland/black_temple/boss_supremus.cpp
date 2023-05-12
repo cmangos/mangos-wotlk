@@ -299,7 +299,7 @@ struct SupremusRandomTarget : public AuraScript
 
 struct SupremusHatefulStrikePrimer : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         Unit* caster = spell->GetCaster();

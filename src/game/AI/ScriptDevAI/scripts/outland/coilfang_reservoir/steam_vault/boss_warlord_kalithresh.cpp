@@ -65,7 +65,7 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
         AddCombatAction(WARLORD_KALITHRESH_ACTION_REFLECTION, 0u);
         AddCombatAction(WARLORD_KALITHRESH_ACTION_IMPALE, 0u);
         AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 0u);
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
             {
                 return x < -95.7f && y > -439.6f;
             });

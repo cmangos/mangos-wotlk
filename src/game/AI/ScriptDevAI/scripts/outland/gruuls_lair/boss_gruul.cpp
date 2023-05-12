@@ -202,7 +202,7 @@ struct HurtfulStrikePrimer : public SpellScript
         return true;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         Unit* caster = spell->GetCaster();

@@ -80,7 +80,7 @@ struct boss_nalorakkAI : public CombatAI
         AddCombatAction(NALORAKK_ACTION_SLASH, true);
         AddCombatAction(NALORAKK_ACTION_REND, true);
         AddCombatAction(NALORAKK_ACTION_ROAR, true);
-        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float /*x*/, float y, float /*z*/)
         {
             return y > 1378.009f;
         });

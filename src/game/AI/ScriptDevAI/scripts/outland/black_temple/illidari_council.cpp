@@ -289,7 +289,7 @@ struct boss_illidari_councilAI : public CombatAI
     boss_illidari_councilAI(Creature* creature, uint32 combatActions) : CombatAI(creature, combatActions),
             m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float /*y*/, float /*z*/)
             {
                 return x < 620.0f;
             });

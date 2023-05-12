@@ -232,7 +232,7 @@ struct boss_malacrassAI : public CombatAI
         AddCombatAction(MALACRASS_PLAYER_ABILITY_2, true);
         AddCombatAction(MALACRASS_PLAYER_ABILITY_3, true);
         AddCombatAction(MALACRASS_PLAYER_ABILITY_4, true);
-        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float /*x*/, float y, float /*z*/)
         {
             return y > 1025.f;
         });

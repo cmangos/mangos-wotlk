@@ -1891,7 +1891,7 @@ struct NetherVaporSummon : public SpellScript
 
 struct NetherVaporSummonParent : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         spell->GetCaster()->CastSpell(nullptr, 35861, TRIGGERED_NONE);
         spell->GetCaster()->CastSpell(nullptr, 35862, TRIGGERED_NONE);

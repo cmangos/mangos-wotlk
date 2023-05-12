@@ -59,7 +59,7 @@ struct go_bonfire : GameObjectAI
     }
 };
 
-bool QuestRewardedBonfireDesecrate(Player* player, GameObject* go, Quest const* quest)
+bool QuestRewardedBonfireDesecrate(Player* player, GameObject* /*go*/, Quest const* /*quest*/)
 {
     player->CastSpell(nullptr, SPELL_STAMP_OUT_BONFIRE, TRIGGERED_NONE);
     player->CastSpell(nullptr, SPELL_STAMP_OUT_BONFIRE_ART_KIT, TRIGGERED_NONE);
@@ -255,7 +255,7 @@ struct TorchToss : public SpellScript
         return false;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         spell->GetUnitTarget()->CastSpell(spell->GetCaster(), SPELL_BRAZIERS_HIT, TRIGGERED_OLD_TRIGGERED);
     }
@@ -302,7 +302,7 @@ struct TorchTargetPicker : public SpellScript
         return true;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (!spell->GetUnitTarget())
             return;
@@ -331,7 +331,7 @@ struct FlignTorch : public SpellScript
         spell->m_targets.setDestination(pos.x, pos.y, pos.z);
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* caster = spell->GetCaster();
         Position pos = spell->m_targets.m_destPos;
@@ -362,7 +362,7 @@ struct JuggleTorchCatchQuest : public SpellScript
         }
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 45693, TRIGGERED_OLD_TRIGGERED);
     }

@@ -292,7 +292,7 @@ struct essence_base_AI : public CombatAI
             if (!m_creature->GetVictim())
                 EnterEvadeMode();
         });
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
             {
                 return x > 660.9f && y > 66.8902f;
             });

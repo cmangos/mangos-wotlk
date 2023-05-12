@@ -553,7 +553,7 @@ struct DeathCloudBrutallus : public AuraScript
 
 struct FreezeMadrigosa : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         spell->GetUnitTarget()->CastSpell(nullptr, SPELL_FREEZE_USE_GO, TRIGGERED_OLD_TRIGGERED);
     }

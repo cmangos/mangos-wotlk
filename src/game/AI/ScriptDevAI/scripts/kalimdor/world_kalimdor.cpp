@@ -451,7 +451,7 @@ struct world_map_kalimdor : public ScriptedMap
         return m_encounter[type];
     }
 
-    void OnEventHappened(uint16 event_id, bool activate, bool resume) override
+    void OnEventHappened(uint16 event_id, bool activate, bool /*resume*/) override
     {
         if (event_id == GAME_EVENT_BREWFEST_DARK_IRON_ATTACK && activate)
             m_brewfestEvent.StartDarkIronAttackEvent();

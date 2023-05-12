@@ -240,7 +240,7 @@ struct mob_pure_energyAI : public ScriptedAI
 
 struct spell_clear_energy_feedback : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (spell->GetUnitTarget())
             spell->GetUnitTarget()->RemoveAurasDueToSpell(SPELL_ENERGY_FEEDBACK_DEBUFF);

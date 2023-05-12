@@ -91,7 +91,7 @@ bool instance_sunwell_plateau::IsEncounterInProgress() const
     return false;
 }
 
-void instance_sunwell_plateau::OnPlayerEnter(Player* pPlayer)
+void instance_sunwell_plateau::OnPlayerEnter(Player* /*pPlayer*/)
 {
     if (m_firstEnter)
     {

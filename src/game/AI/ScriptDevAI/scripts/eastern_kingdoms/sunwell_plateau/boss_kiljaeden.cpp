@@ -555,7 +555,7 @@ struct boss_kiljaedenAI : public CombatAI, private DialogueHelper
         SetRootSelf(true);
         if (m_instance)
         {
-            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float z)
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float /*z*/)
             {
                 return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
             });
@@ -788,7 +788,7 @@ struct boss_kiljaedenAI : public CombatAI, private DialogueHelper
     }
 
     // Hack for simulating spell list
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -1206,7 +1206,7 @@ struct DarknessOfSouls : public AuraScript
 
 struct SinisterReflection : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* unitTarget = spell->GetUnitTarget();
         if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)

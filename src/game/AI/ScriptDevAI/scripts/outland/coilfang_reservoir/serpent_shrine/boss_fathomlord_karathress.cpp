@@ -300,7 +300,7 @@ struct boss_fathomguard_sharkkisAI : public CombatAI
         summoned->CastSpell(summoned, SPELL_SPAWN_WITH_STUN, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void SummonedCreatureJustDied(Creature* summoned) override
+    void SummonedCreatureJustDied(Creature* /*summoned*/) override
     {
         ResetCombatAction(SHARKKIS_PET_SUMMON, 30000);
     }
@@ -549,7 +549,7 @@ struct npc_caribdis_cyclone : public CombatAI
         HandleTargetPick();
     }
 
-    void ExecuteAction(uint32 action) override {}
+    void ExecuteAction(uint32 /*action*/) override {}
 };
 
 struct TidalSurge : public SpellScript

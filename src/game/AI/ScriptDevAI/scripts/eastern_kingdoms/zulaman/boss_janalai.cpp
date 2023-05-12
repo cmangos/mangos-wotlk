@@ -113,7 +113,7 @@ struct boss_janalaiAI : public CombatAI
             if (bomb)
                 bomb->CastSpell(nullptr, SPELL_FIRE_BOMB_EXPLODE, TRIGGERED_NONE);
         });
-        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float /*y*/, float /*z*/)
         {
             return x > -8.f || x < -57.f;
         });

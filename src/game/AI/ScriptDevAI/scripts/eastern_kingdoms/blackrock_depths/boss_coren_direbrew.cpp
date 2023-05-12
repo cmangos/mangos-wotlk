@@ -140,7 +140,7 @@ struct boss_coren_direbrewAI : public CombatAI
         go->ForcedDespawn(7000);
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         DespawnGuids(m_guids);
         CreatureList staticSpawns;
@@ -221,7 +221,7 @@ bool QuestRewarded_npc_coren_direbrew(Player* player, Creature* creature, Quest 
 
 struct RequestSecondMug : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         spell->GetUnitTarget()->CastSpell(spell->GetCaster(), SPELL_SEND_SECOND_MUG, TRIGGERED_NONE);
     }

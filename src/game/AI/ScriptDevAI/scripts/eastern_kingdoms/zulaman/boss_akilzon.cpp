@@ -99,7 +99,7 @@ struct boss_akilzonAI : public CombatAI
             if (m_creature->IsInCombat() && !m_creature->GetCombatManager().IsEvadingHome())
                 m_instance->DoUseDoorOrButton(GO_WIND_DOOR);
         });
-        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float /*y*/, float /*z*/)
         {
             return x < 336.259f;
         });

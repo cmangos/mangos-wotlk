@@ -152,14 +152,14 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
     }
 
     void Reset() override {}
-    void UpdateAI(const uint32 diff) override {}
+    void UpdateAI(const uint32 /*diff*/) override {}
 };
 
 struct npc_shattered_sun_warriorAI : public npc_shattered_sun_fighterAI
 {
     npc_shattered_sun_warriorAI(Creature* creature) : npc_shattered_sun_fighterAI(creature) { Reset(); }
     void Reset() override {}
-    void UpdateAI(const uint32 diff) override
+    void UpdateAI(const uint32 /*diff*/) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;

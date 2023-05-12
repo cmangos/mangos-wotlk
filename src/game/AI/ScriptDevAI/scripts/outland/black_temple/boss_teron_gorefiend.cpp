@@ -95,7 +95,7 @@ struct boss_teron_gorefiendAI : public CombatAI
         AddCombatAction(GOREFIEND_ACTION_SHADOW_OF_DEATH, GetInitialActionTimer(GOREFIEND_ACTION_SHADOW_OF_DEATH));
         AddCombatAction(GOREFIEND_ACTION_CRUSHING_SHADOWS, GetInitialActionTimer(GOREFIEND_ACTION_CRUSHING_SHADOWS));
         AddCombatAction(GOREFIEND_ACTION_BERSERK, GetInitialActionTimer(GOREFIEND_ACTION_BERSERK));
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
             {
                 return x < 512.8f && y > 402.8f;
             });

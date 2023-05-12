@@ -165,7 +165,7 @@ struct boss_zuljinAI : public CombatAI
                 m_instance->DoUseDoorOrButton(GO_FIRE_DOOR);
         });
         m_creature->SetWalk(true);
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float /*x*/, float y, float /*z*/)
             {
                 return y > 734.0f;
             });

@@ -2623,7 +2623,7 @@ struct HarvestSilithidEgg : public SpellScript
 
 struct ImpInABottleSay : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (Unit* caster = spell->GetCaster())
             if (Unit* spawner = caster->GetSpawner())
@@ -2827,7 +2827,7 @@ struct GossipNPCAI : public ScriptedAI
 
 struct GossipNPCPeriodicTriggerFidget : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         spell->GetCaster()->HandleEmote(EMOTE_ONESHOT_TALK);
     }
@@ -2867,7 +2867,7 @@ uint32 GetRandomText(const std::vector<uint32> texts)
 
 struct GossipNPCPeriodicTriggerTalk : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         GossipNPCAI* ai = dynamic_cast<GossipNPCAI*>(spell->GetCaster()->AI());
         if (!ai)
@@ -3008,7 +3008,7 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
 
 struct GossipNPCAppearanceAllBrewfest : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const override
+    void OnApply(Aura* aura, bool /*apply*/) const override
     {
         uint32 entry = 0;
         switch (aura->GetTarget()->GetEntry())

@@ -693,7 +693,7 @@ struct CurseOfBoundlessAgonyRemoval : public SpellScript, public AuraScript
             Remove(spell->GetUnitTarget());
     }
 
-    void OnApply(Aura* aura, bool apply) const override
+    void OnApply(Aura* aura, bool /*apply*/) const override
     {
         Remove(aura->GetTarget());
     }
@@ -706,7 +706,7 @@ struct CurseOfBoundlessAgonyRemoval : public SpellScript, public AuraScript
 
 struct CrazedRage : public SpellScript
 {
-    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         if (target->IsPlayer() || (target->GetEntry() != NPC_KALECGOS_DRAGON && target->GetEntry() != NPC_SATHROVARR) || target->HasAura(SPELL_BANISH))
             return false;
