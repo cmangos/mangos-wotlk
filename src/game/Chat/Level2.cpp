@@ -2317,7 +2317,7 @@ bool ChatHandler::HandleNpcSpawnDistCommand(char* args)
     {
         option = (float)std::stod(args);
     }
-    catch (std::invalid_argument)
+    catch (const std::invalid_argument&)
     {
         // string was not a float representation
         return false;
