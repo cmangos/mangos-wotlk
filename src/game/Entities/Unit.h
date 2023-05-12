@@ -1514,6 +1514,7 @@ class Unit : public WorldObject
         bool IsSitState() const;
         bool IsStandState() const;
         bool IsSeatedState() const;
+        bool IsStandUpOnMovementState() const;
         void SetStandState(uint8 state, bool acknowledge = false);
 
         void SetVisFlags(uint8 flags) { SetByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAGS, flags); }

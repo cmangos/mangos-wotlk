@@ -801,7 +801,7 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
 
     if (movementInfo.GetMovementFlags() & MOVEFLAG_MASK_MOVING_OR_TURN)
     {
-        if (mover->IsSitState())
+        if (mover->IsStandUpOnMovementState())
             mover->SetStandState(UNIT_STAND_STATE_STAND);
         mover->HandleEmoteState(0);
     }

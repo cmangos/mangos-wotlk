@@ -12247,6 +12247,15 @@ bool Unit::IsSeatedState() const
     return standState != UNIT_STAND_STATE_SLEEP && standState != UNIT_STAND_STATE_STAND;
 }
 
+bool Unit::IsStandUpOnMovementState() const
+{
+    uint8 s = getStandState();
+    return
+        s == UNIT_STAND_STATE_SIT_CHAIR || s == UNIT_STAND_STATE_SIT_LOW_CHAIR ||
+        s == UNIT_STAND_STATE_SIT_MEDIUM_CHAIR || s == UNIT_STAND_STATE_SIT_HIGH_CHAIR ||
+        s == UNIT_STAND_STATE_SIT || s == UNIT_STAND_STATE_SLEEP;
+}
+
 void Unit::SetStandState(uint8 state, bool acknowledge/* = false*/)
 {
     if (getStandState() == state)
