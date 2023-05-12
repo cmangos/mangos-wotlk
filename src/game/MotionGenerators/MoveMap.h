@@ -86,8 +86,6 @@ namespace MMAP
     };
 
 
-    typedef std::unordered_map<uint64, MMapData*> MMapDataSet;
-
     // singleton class
     // holds all access to mmap loading unloading and meshes
     class MMapManager
@@ -119,7 +117,7 @@ namespace MMAP
             uint32 packTileID(int32 x, int32 y) const;
             uint64 packInstanceId(uint32 mapId, uint32 instanceId) const;
 
-            MMapDataSet m_loadedMMaps;
+            std::unordered_map<uint64, std::unique_ptr<MMapData>> m_loadedMMaps;
             uint32 m_loadedTiles;
 
             std::unordered_map<uint32, std::unique_ptr<MMapGOData>> m_loadedModels;
