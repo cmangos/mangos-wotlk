@@ -869,6 +869,7 @@ struct OCWAuchindounSummonAdventurer : public SpellScript
     {
         summon->CastSpell(spell->GetCaster(), SPELL_ARRIVAL, TRIGGERED_NONE);
         spell->GetCaster()->SetFacingToObject(summon);
+        spell->GetCaster()->GetMap()->GetCreatures("STRING_ID");
         if (auto ai = spell->GetCaster()->AI())
         {
             static_cast<ChildTbcAI*>(ai)->m_target = summon->GetObjectGuid();
