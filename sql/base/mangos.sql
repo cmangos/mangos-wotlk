@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14074_01_mangos_spell_list_conditions` bit(1) DEFAULT NULL
+  `required_14075_01_mangos_creature_static_flags` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1551,6 +1551,10 @@ CREATE TABLE `creature_template` (
   `DynamicFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `ExtraFlags` int(10) unsigned NOT NULL DEFAULT '0',
   `CreatureTypeFlags` int(10) unsigned NOT NULL DEFAULT '0',
+  `StaticFlags1` INT UNSIGNED NOT NULL DEFAULT 0,
+  `StaticFlags2` INT UNSIGNED NOT NULL DEFAULT 0,
+  `StaticFlags3` INT UNSIGNED NOT NULL DEFAULT 0,
+  `StaticFlags4` INT UNSIGNED NOT NULL DEFAULT 0,
   `SpeedWalk` float NOT NULL DEFAULT '0',
   `SpeedRun` float NOT NULL DEFAULT '0',
   `Detection` INT(10) UNSIGNED NOT NULL DEFAULT '18' COMMENT 'Detection range for proximity',

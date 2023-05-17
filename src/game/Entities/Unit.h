@@ -2592,6 +2592,7 @@ class Unit : public WorldObject
         virtual bool IsNoMountedFollow() const { return false; }
 
         virtual bool IsNoWeaponSkillGain() const { return false; }
+        virtual bool IsPreventingDeath() const { return false; }
 
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
