@@ -1645,7 +1645,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
         newGuid = map->GenerateLocalLowGuid(cinfo->GetHighGuid());
 
     // Creature can be loaded already in map if grid has been unloaded while creature walk to another grid
-    if (map->GetCreature(cinfo->GetObjectGuid(dbGuid)))
+    if (map->GetCreature(dbGuid))
         return false;
 
     Position dbPos(data->posX, data->posY, data->posZ, data->orientation);
