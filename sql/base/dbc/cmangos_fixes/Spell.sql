@@ -2273,6 +2273,7 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 4044,  -- Target Dummy Passive
 6742, -- Bloodlust
+8852, -- Moss Hide
 11816, -- Land Mine Arming
 13879, -- Magma Splash
 17205, -- Winterfall Firewater
