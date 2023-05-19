@@ -275,7 +275,7 @@ struct npc_tesla_coilAI : public ScriptedAI
     npc_tesla_coilAI(Creature* creature) : ScriptedAI(creature),
         m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
         SetCombatMovement(false);
         Reset();
     }
@@ -448,9 +448,9 @@ struct boss_thaddiusAddsAI : public BossAI
 
     void PauseCombatMovement()
     {
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
         AddCustomAction(THADDIUS_ADD_HOLD, 1s + 500ms, [&](){
-            SetRootSelf(false);
+            SetAIImmobilizedState(false);
             m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
             DisableTimer(THADDIUS_ADD_HOLD);
         });

@@ -552,7 +552,7 @@ struct boss_kiljaedenAI : public CombatAI, private DialogueHelper
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddMainSpell(SPELL_SOUL_FLAY);
         SetRangedMode(true, 100.f, TYPE_FULL_CASTER);
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
         if (m_instance)
         {
             m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float /*z*/)

@@ -84,7 +84,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
         m_thunderingParams.range.maxRange = SPELL_THUNDERING_STORM_MAXRANGE;
         m_uiCastersAttackMurmurTimer = 0;
         m_uiAttackTimer = 0;
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
         Reset();
     }
 

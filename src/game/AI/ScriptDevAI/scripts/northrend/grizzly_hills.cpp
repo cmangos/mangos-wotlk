@@ -692,7 +692,7 @@ struct spell_assemble_cage : public SpellScript
 
         target->CastSpell(target, 47045, TRIGGERED_OLD_TRIGGERED);
 
-        target->AI()->ClearSelfRoot();
+        target->AI()->ClearCombatOnlyRoot();
         target->RemoveAllAurasOnEvade();
         target->CombatStopWithPets(true);
         target->SetImmuneToNPC(true);

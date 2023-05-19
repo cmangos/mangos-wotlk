@@ -98,7 +98,7 @@ struct boss_heiganAI : public BossAI
     {
         BossAI::Reset();
         SetReactState(REACT_AGGRESSIVE);
-        SetRootSelf(false);
+        SetAIImmobilizedState(false);
         SetMeleeEnabled(true);
         StopEruptions();
     }
@@ -187,7 +187,7 @@ struct boss_heiganAI : public BossAI
                 if (DoCastSpellIfCan(nullptr, SPELL_TELEPORT) == CAST_OK)
                 {
                     StopEruptions();
-                    SetRootSelf(true);
+                    SetAIImmobilizedState(true);
                     DoBroadcastText(EMOTE_TELEPORT, m_creature);
                     SetReactState(REACT_PASSIVE);
                     SetCombatScriptStatus(true);

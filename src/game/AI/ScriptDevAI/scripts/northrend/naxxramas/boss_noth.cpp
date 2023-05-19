@@ -123,7 +123,7 @@ struct boss_nothAI : public BossAI
 
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
         SetReactState(REACT_AGGRESSIVE);
-        SetRootSelf(false);
+        SetAIImmobilizedState(false);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
@@ -140,9 +140,9 @@ struct boss_nothAI : public BossAI
         summoned->AI()->AddCustomAction(SUMMONED_UNROOT, 3s + 500ms, [summoned]()
         {
             if (summoned && summoned->AI())
-                summoned->AI()->SetRootSelf(false);
+                summoned->AI()->SetAIImmobilizedState(false);
         });
-        summoned->AI()->SetRootSelf(true);
+        summoned->AI()->SetAIImmobilizedState(true);
         summoned->SetInCombatWithZone();
         m_undeadSummonGuidList.push_back(summoned->GetObjectGuid());
     }
@@ -198,7 +198,7 @@ struct boss_nothAI : public BossAI
                         DisableCombatAction(action);
 
                     DoBroadcastText(EMOTE_TELEPORT, m_creature);
-                    SetRootSelf(true);
+                    SetAIImmobilizedState(true);
                     m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     SetMeleeEnabled(false);
@@ -216,7 +216,7 @@ struct boss_nothAI : public BossAI
                 if (DoCastSpellIfCan(nullptr, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
                     DoBroadcastText(EMOTE_TELEPORT_RETURN, m_creature);
-                    SetRootSelf(false);
+                    SetAIImmobilizedState(false);
                     m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
                     SetMeleeEnabled(true);

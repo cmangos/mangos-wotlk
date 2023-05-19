@@ -184,7 +184,7 @@ struct boss_deathbringer_saurfangAI : public CombatAI
             // yell death and change flags
             DoScriptText(SAY_DEATH, m_creature);
 
-            ClearSelfRoot();
+            ClearCombatOnlyRoot();
             m_creature->RemoveAllAurasOnEvade();
             m_creature->CombatStopWithPets(true);
 

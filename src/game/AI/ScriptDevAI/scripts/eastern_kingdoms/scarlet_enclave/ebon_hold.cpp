@@ -611,7 +611,7 @@ struct npc_death_knight_initiateAI : public CombatAI, private DialogueHelper
             {
                 // complete duel and evade (without home movemnet)
                 m_bIsDuelComplete = true;
-                ClearSelfRoot();
+                ClearCombatOnlyRoot();
                 m_creature->RemoveAllAurasOnEvade();
                 m_creature->CombatStopWithPets(true);
                 m_creature->SetLootRecipient(nullptr);

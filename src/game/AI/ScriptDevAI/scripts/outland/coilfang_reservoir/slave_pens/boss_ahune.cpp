@@ -108,7 +108,7 @@ struct boss_ahuneAI : public CombatAI
         AddCombatAction(AHUNE_COLDWAVE, 5000, 10000);
         AddCombatAction(AHUNE_FROSTWIND, true);
 
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
     }
 
     uint32 m_uiPhaseChangeCount;

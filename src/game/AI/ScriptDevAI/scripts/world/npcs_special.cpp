@@ -1606,7 +1606,7 @@ struct npc_burster_wormAI : public CombatAI
         m_creature->RemoveAurasDueToSpell(SPELL_SANDWORM_SUBMERGE_VISUAL);
         m_creature->RemoveAurasDueToSpell(m_uiBorePassive);
         SetCombatScriptStatus(true);
-        SetRootSelf(true, true);
+        SetAIImmobilizedState(true, true);
 
         if (DoCastSpellIfCan(nullptr, SPELL_STAND) == CAST_OK)
         {

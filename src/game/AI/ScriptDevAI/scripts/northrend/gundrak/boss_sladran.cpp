@@ -173,7 +173,7 @@ struct npc_snakeWrapAI : public Scripted_NoMovementAI
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetReactState(REACT_PASSIVE);
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
     }
 
     instance_gundrak* m_instance;
