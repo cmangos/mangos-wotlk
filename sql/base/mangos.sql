@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14075_01_mangos_creature_static_flags` bit(1) DEFAULT NULL
+  `required_14076_01_mangos_hoverheight` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1559,6 +1559,7 @@ CREATE TABLE `creature_template` (
   `StaticFlags4` INT UNSIGNED NOT NULL DEFAULT 0,
   `SpeedWalk` float NOT NULL DEFAULT '0',
   `SpeedRun` float NOT NULL DEFAULT '0',
+  `HoverHeight` float NOT NULL DEFAULT 1,
   `Detection` INT(10) UNSIGNED NOT NULL DEFAULT '18' COMMENT 'Detection range for proximity',
   `CallForHelp` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Range in which creature calls for help?',
   `Pursuit` INT(10) UNSIGNED NOT NULL DEFAULT '0' COMMENT 'When exceeded during pursuit creature evades?',

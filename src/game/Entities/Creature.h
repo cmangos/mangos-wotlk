@@ -112,6 +112,7 @@ struct CreatureInfo
     uint32  StaticFlags4;
     float   SpeedWalk;
     float   SpeedRun;
+    float   HoverHeight;
     uint32  Detection;                                      // Detection Range for Line of Sight aggro
     uint32  CallForHelp;
     uint32  Pursuit;
