@@ -70,7 +70,7 @@ enum
     SPELL_VOID_ZONE_H       = 57463,
     SPELL_SHADOW_BOLT       = 57374,
     SPELL_SHADOW_BOLT_H     = 57464,
-    SPELL_UNYIELDING_PAIN    = 57381,
+    SPELL_UNYIELDING_PAIN   = 57381,
 
     // baron rivendare
     SPELL_MARK_OF_RIVENDARE = 28834,
@@ -101,7 +101,6 @@ static const float aHorseMenMoveCoords[4][3] =
 
 enum BlaumeuxActions
 {
-    BLAUMEUX_UNYIELDING_PAIN,
     BLAUMEUX_SPECIAL,
     BLAUMEUX_ACTIONS_MAX,
 };
@@ -116,7 +115,6 @@ struct boss_lady_blaumeuxAI : public BossAI
         AddOnKillText(SAY_BLAU_SLAY);
         AddOnDeathText(SAY_BLAU_DEATH);
         AddOnAggroText(SAY_BLAU_AGGRO);
-        AddCombatAction(BLAUMEUX_UNYIELDING_PAIN, 15s);
         AddCombatAction(BLAUMEUX_SPECIAL, 5s, 120s);
     }
 
@@ -166,25 +164,20 @@ struct boss_lady_blaumeuxAI : public BossAI
         switch (action)
         {
             case BLAUMEUX_SPECIAL: return RandomTimer(5s, 120s);
-            case BLAUMEUX_UNYIELDING_PAIN: return 5s;
             default: return 0s;
         }
+    }
+
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/)
+    {
+        if (spellInfo->Id == SPELL_UNYIELDING_PAIN)
+            DoBroadcastText(EMOTE_UNYIELDING_PAIN, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
-            case BLAUMEUX_UNYIELDING_PAIN:
-                if (!m_creature->IsWithinCombatDist(m_creature->GetVictim(), 55.0f))
-                {
-                    if (DoCastSpellIfCan(nullptr, SPELL_UNYIELDING_PAIN) == CAST_OK)
-                    {
-                        DoBroadcastText(EMOTE_UNYIELDING_PAIN, m_creature);
-                        break;
-                    }
-                }
-                return;
             case BLAUMEUX_SPECIAL:
             {
                 DoBroadcastText(SAY_BLAU_SPECIAL, m_creature);
@@ -369,7 +362,6 @@ struct boss_thane_korthazzAI : public BossAI
 
 enum ZeliekActions
 {
-    ZELIEK_CONDEMNATION,
     ZELIEK_SPECIAL,
     ZELIEK_ACTIONS_MAX,
 };
@@ -384,7 +376,6 @@ struct boss_sir_zeliekAI : public BossAI
         AddOnKillText(SAY_ZELI_SLAY);
         AddOnDeathText(SAY_ZELI_DEATH);
         AddOnAggroText(SAY_ZELI_AGGRO);
-        AddCombatAction(ZELIEK_CONDEMNATION, 15s);
         AddCombatAction(ZELIEK_SPECIAL, 5s, 120s);
     }
 
@@ -437,25 +428,20 @@ struct boss_sir_zeliekAI : public BossAI
         switch (action)
         {
             case ZELIEK_SPECIAL: return RandomTimer(5s, 120s);
-            case ZELIEK_CONDEMNATION: return 5s;
             default: return 0s;
         }
+    }
+
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/)
+    {
+        if (spellInfo->Id == SPELL_CONDEMNATION)
+            DoBroadcastText(EMOTE_CONDEMATION, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
-            case ZELIEK_CONDEMNATION:
-                if (!m_creature->IsWithinCombatDist(m_creature->GetVictim(), 55.0f))
-                {
-                    if (DoCastSpellIfCan(nullptr, SPELL_CONDEMNATION) == CAST_OK)
-                    {
-                        DoBroadcastText(EMOTE_CONDEMATION, m_creature);
-                        break;
-                    }
-                }
-                return;
             case ZELIEK_SPECIAL:
             {
                 DoBroadcastText(SAY_ZELI_SPECIAL, m_creature);
