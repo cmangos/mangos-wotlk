@@ -119,9 +119,18 @@ static void SendTrainerSpellHelper(WorldPacket& data, TrainerSpell const* tSpell
     data << uint8(reqLevel);
     data << uint32(tSpell->reqSkill);
     data << uint32(tSpell->reqSkillValue);
-    data << uint32(!tSpell->IsCastable() && chain_node ? (chain_node->prev ? chain_node->prev : chain_node->req) : 0);
-    data << uint32(!tSpell->IsCastable() && chain_node && chain_node->prev ? chain_node->req : 0);
-    data << uint32(0);
+    if (tSpell->reqAbility[0])
+        data << *tSpell->reqAbility[0];
+    else
+        data << uint32(!tSpell->IsCastable() && chain_node ? (chain_node->prev ? chain_node->prev : chain_node->req) : 0);
+    if (tSpell->reqAbility[1])
+        data << *tSpell->reqAbility[1];
+    else
+        data << uint32(!tSpell->IsCastable() && chain_node && chain_node->prev ? chain_node->req : 0);
+    if (tSpell->reqAbility[2])
+        data << *tSpell->reqAbility[2];
+    else
+        data << uint32(0);
 }
 
 void WorldSession::SendTrainerList(ObjectGuid guid) const
