@@ -588,7 +588,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28110,'spell_thaddius_tesla_effect'),
 (28111,'spell_thaddius_tesla_chain'),
 (28359,'spell_trigger_teslas'),
-(28404,'spell_zombie_chow_search_instakill_aoe'),
 (28560,'spell_sapphiron_blizzard_init'),
 (28617,'spell_web_wrap_message'),
 (28622,'spell_web_wrap_damage'),
