@@ -2275,8 +2275,13 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 6742, -- Bloodlust
 8852, -- Moss Hide
 11816, -- Land Mine Arming
+11966, -- Fire Shield
+12896, -- Helboar
+12898, -- Smoke Aura Visual
 13879, -- Magma Splash
 17205, -- Winterfall Firewater
+18163, -- Strength of Arko'narin
+18167, -- Holy Fire
 23378, -- Magma Splash
 27791, -- Suicide (Suicide)
 21789, -- Hate to Half (Hate to Half)
