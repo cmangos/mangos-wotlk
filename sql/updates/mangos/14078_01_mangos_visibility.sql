@@ -1,0 +1,7 @@
+ALTER TABLE db_version CHANGE COLUMN required_14077_01_mangos_trainer_ability required_14078_01_mangos_visibility bit;
+
+UPDATE creature_template SET StaticFlags1=StaticFlags1|0x80000000 WHERE visibilityDistanceType=3;
+UPDATE creature_template SET StaticFlags3=StaticFlags3|0x00000400 WHERE visibilityDistanceType=4;
+UPDATE creature_template SET StaticFlags3=StaticFlags3|0x00000800 WHERE visibilityDistanceType=5;
+ALTER TABLE creature_template DROP COLUMN visibilityDistanceType;
+
