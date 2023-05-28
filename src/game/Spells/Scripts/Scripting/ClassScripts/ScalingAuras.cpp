@@ -496,8 +496,28 @@ struct ElementalPetScaling1 : public AuraScript
             case EFFECT_INDEX_0: // dummy - unk
                 break;
             case EFFECT_INDEX_1: // attack power
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    if (owner->IsPlayer())
+                    {
+                        int32 nature = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_NATURE);
+                        if (nature < 0)
+                            nature = 0;
+                        value = nature * 0.57f;
+                    }
+                }
                 break;
             case EFFECT_INDEX_2: // spell power
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    if (owner->IsPlayer())
+                    {
+                        int32 nature = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_NATURE);
+                        if (nature < 0)
+                            nature = 0;
+                        value = nature * 0.65f;
+                    }
+                }
                 break;
         }
         return value;
@@ -515,8 +535,12 @@ struct ElementalPetScaling2 : public AuraScript
                     value = float(owner->GetStat(STAT_STAMINA)) * 0.3f;
                 break;
             case EFFECT_INDEX_1: // armor
+                if (Unit* owner = data.caster->GetOwner())
+                    value = owner->GetArmor() * 0.35f;
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FIRE) * 0.4f);
                 break;
         }
         return value;
@@ -530,10 +554,16 @@ struct ElementalPetScaling3 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FROST) * 0.4f);
                 break;
             case EFFECT_INDEX_1: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_ARCANE) * 0.4f);
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_NATURE) * 0.4f);
                 break;
         }
         return value;
@@ -547,6 +577,8 @@ struct ElementalPetScaling4 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_SHADOW) * 0.4f);
                 break;
             default: break;
         }
@@ -656,8 +688,28 @@ struct FeralSpiritPetScaling1 : public AuraScript
                     value = float(owner->GetStat(STAT_STAMINA)) * 0.3f;
                 break;
             case EFFECT_INDEX_1: // attack power
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    if (owner->IsPlayer())
+                    {
+                        int32 nature = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_NATURE);
+                        if (nature < 0)
+                            nature = 0;
+                        value = nature * 0.5f;
+                    }
+                }
                 break;
             case EFFECT_INDEX_2: // spell power
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    if (owner->IsPlayer())
+                    {
+                        int32 nature = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_NATURE);
+                        if (nature < 0)
+                            nature = 0;
+                        value = nature * 0.65f;
+                    }
+                }
                 break;
         }
         return value;
@@ -671,10 +723,16 @@ struct FeralSpiritPetScaling2 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FIRE) * 0.4f);
                 break;
             case EFFECT_INDEX_1: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_FROST) * 0.4f);
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_NATURE) * 0.4f);
                 break;
         }
         return value;
@@ -688,10 +746,16 @@ struct FeralSpiritPetScaling3 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_SHADOW) * 0.4f);
                 break;
             case EFFECT_INDEX_1: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                    value = (owner->GetResistance(SPELL_SCHOOL_ARCANE) * 0.4f);
                 break;
             case EFFECT_INDEX_2: // armor
+                if (Unit* owner = data.caster->GetOwner())
+                    value = owner->GetArmor() * 0.35f;
                 break;
         }
         return value;
@@ -795,8 +859,32 @@ struct InfernalPetScaling1 : public AuraScript
                     value = float(owner->GetStat(STAT_STAMINA)) * 0.3f;
                 break;
             case EFFECT_INDEX_1: // attack power
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    if (owner->IsPlayer())
+                    {
+                        int32 fire = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+                        int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
+                        int32 maximum = (fire > shadow) ? fire : shadow;
+                        if (maximum < 0)
+                            maximum = 0;
+                        value = maximum * 0.57f;
+                    }
+                }
                 break;
             case EFFECT_INDEX_2: // spell power
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    if (owner->IsPlayer())
+                    {
+                        int32 fire = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+                        int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
+                        int32 maximum = (fire > shadow) ? fire : shadow;
+                        if (maximum < 0)
+                            maximum = 0;
+                        value = maximum * 0.15f;
+                    }
+                }
                 break;
         }
         return value;
@@ -814,8 +902,16 @@ struct InfernalPetScaling2 : public AuraScript
                     value = float(owner->GetStat(STAT_STAMINA)) * 0.3f;
                 break;
             case EFFECT_INDEX_1: // armor
+                if (Unit* owner = data.caster->GetOwner())
+                    value = owner->GetArmor() * 0.35f;
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    value = (owner->GetResistance(SPELL_SCHOOL_FIRE) * 0.4f);
+                    if (owner->HasAura(SPELL_PET_RESISTANCE))
+                        value += 130;
+                }
                 break;
         }
         return value;
@@ -829,10 +925,28 @@ struct InfernalPetScaling3 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    value = (owner->GetResistance(SPELL_SCHOOL_FROST) * 0.4f);
+                    if (owner->HasAura(SPELL_PET_RESISTANCE))
+                        value += 130;
+                }
                 break;
             case EFFECT_INDEX_1: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    value = (owner->GetResistance(SPELL_SCHOOL_ARCANE) * 0.4f);
+                    if (owner->HasAura(SPELL_PET_RESISTANCE))
+                        value += 130;
+                }
                 break;
             case EFFECT_INDEX_2: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    value = (owner->GetResistance(SPELL_SCHOOL_NATURE) * 0.4f);
+                    if (owner->HasAura(SPELL_PET_RESISTANCE))
+                        value += 130;
+                }
                 break;
         }
         return value;
@@ -846,8 +960,17 @@ struct InfernalPetScaling4 : public AuraScript
         switch (data.effIdx)
         {
             case EFFECT_INDEX_0: // resistance
+                if (Unit* owner = data.caster->GetOwner())
+                {
+                    value = (owner->GetResistance(SPELL_SCHOOL_SHADOW) * 0.4f);
+                    if (owner->HasAura(SPELL_PET_RESISTANCE))
+                        value += 130;
+                }
                 break;
             case EFFECT_INDEX_1: // mana regen
+                if (Unit* owner = data.caster->GetOwner())
+                    if (owner->IsPlayer())
+                        value = static_cast<Player*>(owner)->GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN) * 0.5f * 5.f;
                 break;
             default: break;
         }
