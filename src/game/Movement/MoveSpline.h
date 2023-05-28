@@ -77,7 +77,8 @@ namespace Movement
             // float           duration_mod_next;
             float           vertical_acceleration;
             float           initialOrientation;
-            int32           effect_start_time;
+            int32           parabolic_start_time;
+            int32           animation_start_time;
             int32           point_Idx;
             int32           point_Idx_offset;
 
@@ -141,6 +142,7 @@ namespace Movement
             int32 GetRawPathIndex() const { return point_Idx; }
 
             uint32 Duration() const { return spline.length();}
+            uint32 DurationAtPointIdx(uint32 idx) const { return spline.length(idx);}
             int32 ComputeTimeToIndex(uint32 idx) const { return spline.length(idx) - time_passed; }
 
             float Speed() const { return speed; }

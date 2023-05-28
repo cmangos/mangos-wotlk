@@ -4899,7 +4899,7 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
         height = Movement::gravity * durationSqr / 8;
 
     float verticalSpeed = std::sqrt(2 * Movement::gravity * height);
-    m_caster->GetMotionMaster()->MoveJumpFacing(pos, horizontalSpeed, verticalSpeed, EVENT_JUMP);
+    m_caster->GetMotionMaster()->MoveJumpFacingVerticalSpeed(pos, horizontalSpeed, verticalSpeed, EVENT_JUMP);
 }
 
 void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target settings for this effect!

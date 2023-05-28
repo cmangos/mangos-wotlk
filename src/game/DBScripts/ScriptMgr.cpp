@@ -2298,7 +2298,10 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 case PATH_MOTION_TYPE:
                 {
                     source->StopMoving();
-                    source->GetMotionMaster()->MovePath(wanderORpathId, wp_origin, forcedMovement, false, 0.f, false, targetGuid);
+                    if (m_script->movementFloat.verticalSpeed > 0.f)
+                        source->GetMotionMaster()->MovePathAndJumpVerticalSpeed(wanderORpathId, m_script->speed, m_script->movementFloat.verticalSpeed, forcedMovement, targetGuid);
+                    else
+                        source->GetMotionMaster()->MovePath(wanderORpathId, wp_origin, forcedMovement, false, m_script->speed, false, targetGuid);
                     break;
                 }
                 case LINEAR_WP_MOTION_TYPE:
@@ -2312,7 +2315,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 {
                     source->StopMoving();
                     float speed = m_script->speed == 0.f ? source->GetSpeed(MOVE_RUN) : m_script->speed;
-                    source->GetMotionMaster()->MoveJumpFacing(Position(m_script->x, m_script->y, m_script->z, 100.f), speed, m_script->movementFloat.verticalSpeed, 10001u, targetGuid, wanderORpathId);
+                    source->GetMotionMaster()->MoveJumpFacingVerticalSpeed(Position(m_script->x, m_script->y, m_script->z, 100.f), speed, m_script->movementFloat.verticalSpeed, 10001u, targetGuid, wanderORpathId);
                     break;
                 }
                 case FALL_MOTION_TYPE:

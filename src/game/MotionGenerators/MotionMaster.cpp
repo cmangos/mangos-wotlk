@@ -617,18 +617,34 @@ void MotionMaster::MoveJump(float x, float y, float z, float horizontalSpeed, fl
     Mutate(new EffectMovementGenerator(init, id));
 }
 
-void MotionMaster::MoveJumpFacing(Position pos, float horizontalSpeed, float verticalSpeed, uint32 id/*= EVENT_JUMP*/, ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/* = 0*/)
+void MotionMaster::MoveJumpFacingVerticalSpeed(Position pos, float horizontalSpeed, float verticalSpeed, uint32 id/*= EVENT_JUMP*/, ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/* = 0*/)
 {
     float moveTimeHalf = verticalSpeed / Movement::gravity;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
+    MoveJumpFacing(pos, horizontalSpeed, verticalSpeed, id, guid, relayId);
+}
 
+void MotionMaster::MoveJumpFacing(Position pos, float horizontalSpeed, float maxHeight, uint32 id, ObjectGuid guid, uint32 relayId)
+{
     Movement::MoveSplineInit init(*m_owner);
     init.MoveTo(pos.x, pos.y, pos.z);
-    init.SetParabolic(max_height, 0);
+    init.SetParabolic(maxHeight, 0);
     init.SetVelocity(horizontalSpeed);
     if (pos.o != 100.f)
         init.SetFacing(pos.o);
     Mutate(new EffectMovementGenerator(init, id, false, guid, relayId));
+}
+
+void MotionMaster::MovePathAndJumpVerticalSpeed(uint32 pathId, float horizontalSpeed, float verticalSpeed, ForcedMovement forcedMovement, ObjectGuid guid)
+{
+    float moveTimeHalf = verticalSpeed / Movement::gravity;
+    float maxHeight = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
+    MovePathAndJump(pathId, horizontalSpeed, maxHeight, forcedMovement, guid);
+}
+
+void MotionMaster::MovePathAndJump(uint32 pathId, float horizontalSpeed, float maxHeight, ForcedMovement forcedMovement, ObjectGuid guid)
+{
+    Mutate(new PathJumpGenerator(pathId, forcedMovement, horizontalSpeed, maxHeight, guid));
 }
 
 void MotionMaster::Mutate(MovementGenerator* m)

@@ -105,4 +105,25 @@ class TaxiMovementGenerator : public AbstractPathMovementGenerator
         virtual bool Move(Unit& unit);
 };
 
+class PathJumpGenerator : public AbstractPathMovementGenerator
+{
+    public:
+        explicit PathJumpGenerator(uint32 pathId, uint32 forcedMovement, float horizontalSpeed, float maxHeight, ObjectGuid guid);
+
+        void Initialize(Unit& unit) override;
+        void Finalize(Unit& unit) override;
+        void Interrupt(Unit& unit) override;
+        void Reset(Unit& unit) override;
+
+        MovementGeneratorType GetMovementGeneratorType() const override { return PATH_MOTION_TYPE; }
+
+    protected:
+        virtual bool Move(Unit& unit) const;
+
+    private:
+        uint32 m_forcedMovement;
+        float m_horizontalSpeed;
+        float m_maxHeight;
+};
+
 #endif

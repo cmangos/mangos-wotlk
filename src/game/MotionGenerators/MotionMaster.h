@@ -157,9 +157,12 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveCharge(float x, float y, float z, float speed, uint32 id = EVENT_CHARGE);
         void MoveCharge(Unit& target, float speed, uint32 id = EVENT_CHARGE);
         bool MoveFall(ObjectGuid guid = ObjectGuid(), uint32 relayId = 0);
-        void MoveKnockback(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id = EVENT_JUMP);
-        void MoveJump(float x, float y, float z, float horizontalSpeed, float max_height, uint32 id = EVENT_JUMP);
-        void MoveJumpFacing(Position pos, float horizontalSpeed, float verticalSpeed, uint32 id = EVENT_JUMP, ObjectGuid guid = ObjectGuid(), uint32 relayId = 0);
+        void MoveKnockback(float x, float y, float z, float horizontalSpeed, float maxHeight, uint32 id = EVENT_JUMP);
+        void MoveJump(float x, float y, float z, float horizontalSpeed, float maxHeight, uint32 id = EVENT_JUMP);
+        void MoveJumpFacingVerticalSpeed(Position pos, float horizontalSpeed, float verticalSpeed, uint32 id = EVENT_JUMP, ObjectGuid guid = ObjectGuid(), uint32 relayId = 0);
+        void MoveJumpFacing(Position pos, float horizontalSpeed, float maxHeight, uint32 id = EVENT_JUMP, ObjectGuid guid = ObjectGuid(), uint32 relayId = 0);
+        void MovePathAndJumpVerticalSpeed(uint32 pathId, float horizontalSpeed, float verticalSpeed, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, ObjectGuid guid = ObjectGuid());
+        void MovePathAndJump(uint32 pathId, float horizontalSpeed, float maxHeight, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, ObjectGuid guid = ObjectGuid());
 
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
 

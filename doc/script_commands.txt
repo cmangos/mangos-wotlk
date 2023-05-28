@@ -269,6 +269,10 @@ Defining a buddy could be done in several way:
                                             *             0x2 - for waypoint, path and linear path - uses pathId from waypoint_path table
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
                                             * dataint = enum ForcedMovement
+                                            * dataFloat = vertical Speed - used by Jump and special case of Path
+                                            * speed = override of speed for Jump and Path
+                                            * Path when Vertical Speed is set - Uses exclusively waypoint_path, supports forcedMovement, pathId, speed, verticalSpeed
+                                              - moves to second to last point and jumps to last
 
 21 SCRIPT_COMMAND_SET_ACTIVEOBJECT          resultingSource = WorldObject
                                             * datalong=bool 0=off, 1=on

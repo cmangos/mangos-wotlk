@@ -415,3 +415,67 @@ bool TaxiMovementGenerator::Resume(Unit& unit)
 
     return Move(unit);
 }
+
+PathJumpGenerator::PathJumpGenerator(uint32 pathId, uint32 forcedMovement, float horizontalSpeed, float maxHeight, ObjectGuid guid)
+    : AbstractPathMovementGenerator(sWaypointMgr.GetPathFromOrigin(0, 0, pathId, PATH_FROM_WAYPOINT_PATH), 0, false), m_forcedMovement(forcedMovement), m_horizontalSpeed(horizontalSpeed), m_maxHeight(maxHeight)
+{
+}
+
+void PathJumpGenerator::Initialize(Unit& unit)
+{
+    unit.addUnitState(UNIT_STAT_ROAMING);
+
+    AbstractPathMovementGenerator::Initialize(unit);
+
+    if (m_spline.size() && Move(unit))
+    {
+        m_firstCycle = true;
+        m_startPoint = m_pathIndex;
+        unit.addUnitState(UNIT_STAT_ROAMING_MOVE);
+    }
+}
+
+void PathJumpGenerator::Finalize(Unit& unit)
+{
+    unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    AbstractPathMovementGenerator::Finalize(unit);
+}
+
+void PathJumpGenerator::Interrupt(Unit& unit)
+{
+    unit.clearUnitState(UNIT_STAT_ROAMING | UNIT_STAT_ROAMING_MOVE);
+    AbstractPathMovementGenerator::Interrupt(unit);
+}
+
+void PathJumpGenerator::Reset(Unit& unit)
+{
+    unit.addUnitState(UNIT_STAT_ROAMING);
+    AbstractPathMovementGenerator::Reset(unit);
+}
+
+bool PathJumpGenerator::Move(Unit& unit) const
+{
+    Movement::MoveSplineInit init(unit);
+    init.MovebyPath(m_spline);
+    if (m_forcedMovement == FORCED_MOVEMENT_WALK)
+        init.SetWalk(true);
+    else if (m_forcedMovement == FORCED_MOVEMENT_RUN)
+        init.SetWalk(false);
+    else
+        init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
+
+    // non catmullrom
+    if (!unit.movespline->Finalized())
+        unit.UpdateSplinePosition(true);
+    Position pos = unit.GetPosition(unit.GetTransport());
+    init.Path()[0].x = pos.x; init.Path()[0].y = pos.y; init.Path()[0].z = pos.z;
+    if (!init.CheckBounds())
+        ERROR_DB_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Path movement non-catmullrom pathId %u point %u for %s has invalid out of bounds spline. Likely meant to be split into several. (by script action or waittime)", unit.GetMotionMaster()->GetPathId(), m_pathIndex, unit.GetName());
+    if (m_orientation != 0.f)
+        init.SetFacing(m_orientation);
+    if (m_horizontalSpeed != 0.f)
+        init.SetVelocity(m_horizontalSpeed);
+    init.SetParabolic(m_maxHeight, init.Path().size() - 2);
+    init.SetFirstPointId(m_pathIndex);
+    return bool(init.Launch());
+}
