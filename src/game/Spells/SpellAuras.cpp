@@ -4018,34 +4018,38 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
+    uint32 displayId = 0;
     if (ssEntry->modelID_A)
     {
         // i will asume that creatures will always take the defined model from the dbc
         // since no field in creature_templates describes wether an alliance or
         // horde modelid should be used at shapeshifting
         if (target->GetTypeId() != TYPEID_PLAYER)
-            m_modifier.m_amount = ssEntry->modelID_A;
+            displayId = ssEntry->modelID_A;
         else
         {
             // players are a bit different since the dbc has seldomly an horde modelid
             if (Player::TeamForRace(target->getRace()) == HORDE)
             {
                 if (ssEntry->modelID_H)
-                    m_modifier.m_amount = ssEntry->modelID_H;           // 3.2.3 only the moonkin form has this information
+                    displayId = ssEntry->modelID_H;           // 3.2.3 only the moonkin form has this information
                 else                                        // get model for race
-                    m_modifier.m_amount = sObjectMgr.GetModelForRace(ssEntry->modelID_A, target->getRaceMask());
+                    displayId = sObjectMgr.GetModelForRace(ssEntry->modelID_A, target->getRaceMask());
             }
 
             // nothing found in above, so use default
-            if (!m_modifier.m_amount)
-                m_modifier.m_amount = ssEntry->modelID_A;
+            if (!displayId)
+                displayId = ssEntry->modelID_A;
         }
     }
+
+    if (uint32 overrideDisplayId = GetAuraScriptCustomizationValue()) // from script
+        displayId = overrideDisplayId;
 
     switch (GetId())
     {
         case 35200: // Roc Form
-            m_modifier.m_amount = 4877;
+            displayId = 4877;
             break;
     }
 
@@ -4127,8 +4131,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         // remove other shapeshift before applying a new one
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
-        if (m_modifier.m_amount > 0)
-            target->SetDisplayId(m_modifier.m_amount);
+        if (displayId > 0)
+            target->SetDisplayId(displayId);
 
         // now only powertype must be set
         switch (form)
