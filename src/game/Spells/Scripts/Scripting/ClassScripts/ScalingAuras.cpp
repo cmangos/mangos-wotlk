@@ -970,7 +970,7 @@ struct InfernalPetScaling4 : public AuraScript
             case EFFECT_INDEX_1: // mana regen
                 if (Unit* owner = data.caster->GetOwner())
                     if (owner->IsPlayer())
-                        value = static_cast<Player*>(owner)->GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN) * 0.5f * 5.f;
+                        value = static_cast<Player*>(owner)->GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * 0.5f * 5.f;
                 break;
             default: break;
         }
