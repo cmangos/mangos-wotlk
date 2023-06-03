@@ -571,6 +571,14 @@ struct WrathOfTheTitansProcAura : public AuraScript
     }
 };
 
+struct HealingTouchHorses : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        return target->GetHealthPercent() <= 50;
+    }
+};
+
 void AddSC_karazhan()
 {
     Script* pNewScript = new Script;
@@ -598,4 +606,5 @@ void AddSC_karazhan()
     RegisterSpellScript<BlinkArcaneAnomaly>("spell_blink_arcane_anomaly");
     RegisterSpellScript<WrathOfTheTitansStacker>("spell_wrath_of_the_titans_stacker");
     RegisterSpellScript<WrathOfTheTitansProcAura>("spell_wrath_of_the_titans_proc_aura");
+    RegisterSpellScript<HealingTouchHorses>("spell_healing_touch_horses");
 }

@@ -203,6 +203,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (42178,'spell_invisible_campfire_remove'),
 (38048,'spell_curse_of_pain'),
 (32811,'spell_greater_invisibility_mob'),
+(29339,'spell_healing_touch_horses'),
 (29969,'spell_summon_blizzard'),
 (29970,'spell_dispel_blizzard'),
 (29979,'spell_massive_magnetic_pull'),
