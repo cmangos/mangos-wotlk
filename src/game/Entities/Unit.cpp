@@ -13510,7 +13510,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         player->UnsummonPetTemporaryIfAny();
 
         player->GetCamera().SetView(possessed);                         // modify camera view to the creature view
-        // Force client control (required to function propely)
+        // Force granting client control (required for action bars to function propely, will be taken away on demand after action bars update below)
         player->UpdateClientControl(possessed, true, true);             // transfer client control to the creature after altering flags
         player->SetMover(possessed);                                    // set mover so now we know that creature is "moved" by this unit
         player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
@@ -13650,8 +13650,8 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (player)
     {
         player->GetCamera().SetView(possessed);
-        // Force client control (required to function propely)
-        player->UpdateClientControl(possessed, !IsCrowdControlled(), true);
+        // Force granting client control (required for action bars to function propely, will be taken away on demand after action bars update below)
+        player->UpdateClientControl(possessed, true, true);
         player->SetMover(possessed);
         player->SendForcedObjectUpdate();
 
