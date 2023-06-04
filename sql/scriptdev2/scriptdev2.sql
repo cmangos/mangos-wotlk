@@ -608,6 +608,7 @@ INSERT INTO scripted_event_id VALUES
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
 UPDATE creature_template SET ScriptName='npc_agent_proudwell' WHERE entry=19942;
 UPDATE gameobject_template SET ScriptName='go_infernaling_summoner_portal_hound' WHERE entry=183357;
+UPDATE gameobject_template SET ScriptName='go_rune_of_the_defiler' WHERE entry IN(153204);
 
 /* BLOODMYST ISLE */
 UPDATE creature_template SET ScriptName='mob_webbed_creature' WHERE entry=17680;
