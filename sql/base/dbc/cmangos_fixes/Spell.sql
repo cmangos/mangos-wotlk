@@ -2628,8 +2628,7 @@ UPDATE `spell_template` SET `AttributesEx4`=`AttributesEx4`|64 WHERE `Id`=33949;
 
 -- Backstab spells used by creatures
 -- these are all easily controlled and made castable only from behind via AI, however when a player Mind Controls the NPC, we need these attributes to prevent usage from the front:
--- SPELL_ATTR_EX_FACING_TARGET, SPELL_ATTR_EX2_FACING_TARGETS_BACK
-UPDATE `spell_template` SET `AttributesEx`=`AttributesEx`|0x00000200, `AttributesEx2`=`AttributesEx2`|0x00100000 WHERE `Id` IN (7159,15582,15657,22416,30992,34614,37685);
+UPDATE `spell_template` SET AttributesServerside=AttributesServerside|0x00000008 WHERE `Id` IN (7159,15582,15657,22416,30992,34614,37685);
 
 -- Stormchops - Fix targeting
 UPDATE spell_template SET EffectImplicitTargetA2=1,EffectImplicitTargetB2=0 WHERE Id IN(43730);
