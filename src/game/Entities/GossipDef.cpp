@@ -182,7 +182,7 @@ void PlayerMenu::SendGossipMenu(uint32 TitleTextId, ObjectGuid objectGuid)
         data << uint32(qItem.m_qIcon);
         data << int32(pQuest->GetQuestLevel());
         data << uint32(pQuest->GetQuestFlags());            // 3.3.3 quest flags
-        data << uint8(0);                                   // 3.3.3 changes icon: blue question or yellow exclamation
+        data << uint8(pQuest->IsAutoComplete() && pQuest->IsRepeatable() && !pQuest->IsDailyOrWeekly() && !pQuest->IsMonthly()); // 3.3.3 icon changes - 0: yellow exclapamtion mark, 1: blue question mark
 
         int loc_idx = GetMenuSession()->GetSessionDbLocaleIndex();
         std::string title = pQuest->GetTitle();
