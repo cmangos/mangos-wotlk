@@ -1719,6 +1719,7 @@ class Unit : public WorldObject
         void EngageInCombatWithAggressor(Unit* aggressor);
         void ClearInCombat();
         void HandleExitCombat(bool pvpCombat = false);
+        virtual uint32 GetPursuit() const { return 15000; }
 
         SpellAuraHolderBounds GetSpellAuraHolderBounds(uint32 spell_id)
         {
