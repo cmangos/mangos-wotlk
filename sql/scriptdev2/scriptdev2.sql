@@ -3963,12 +3963,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1269010','Leaving so soon?','10416','1','0','0','16819','chrono_lord_deja SAY_SLAY2'),
 ('-1269011','Time ... is on our side.','10417','1','0','0','16816','chrono_lord_deja SAY_DEATH'),
 
-('-1269012','The time has come to shatter this clockwork universe forever! Let us no longer be slaves of the hourglass! I warn you: those who do not embrace the greater path shall become victims of its passing!','10400','1','0','0','16827','aeonus SAY_ENTER'),
-('-1269013','Let us see what fate lays in store...','10402','1','0','0','16828','aeonus SAY_AGGRO'),
-('-1269014','Your time is up, slave of the past!','10401','1','0','0','16829','aeonus SAY_BANISH'),
-('-1269015','One less obstacle in our way!','10403','1','0','0','16831','aeonus SAY_SLAY1'),
-('-1269016','No one can stop us! No one!','10404','1','0','0','16832','aeonus SAY_SLAY2'),
-('-1269017','It is only a matter...of time.','10405','1','0','0','16830','aeonus SAY_DEATH'),
+('-1269012','The time has come to shatter this clockwork universe forever! Let us no longer be slaves of the hourglass! I warn you: those who do not embrace this greater path shall become victims of its passing!','10400','1','0','0','16827','aeonus SAY_ENTER'),
 ('-1269018','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1269019','Stop! Do not go any further, mortal. You are ill-prepared to face the forces of the Infinite Dragonflight. Come, let me help you.','0','0','0','0','17814','saat SAY_SAAT_WELCOME'),
