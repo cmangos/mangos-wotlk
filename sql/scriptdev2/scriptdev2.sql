@@ -3957,11 +3957,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1269005','My death means ... little.','10447','1','0','0','16823','temporus SAY_DEATH'),
 
 ('-1269006','Why do you aid the Magus? Just think of how many lives could be saved if the portal is never opened, if the resulting wars could be erased ...','10412','1','0','0','16814','chrono_lord_deja SAY_ENTER'),
-('-1269007','If you will not cease this foolish quest, then you will die!','10414','1','0','0','16815','chrono_lord_deja SAY_AGGRO'),
-('-1269008','You have outstayed your welcome, Timekeeper. Begone!','10413','1','0','0','16817','chrono_lord_deja SAY_BANISH'),
-('-1269009','I told you it was a fool''s quest!','10415','1','0','0','16818','chrono_lord_deja SAY_SLAY1'),
-('-1269010','Leaving so soon?','10416','1','0','0','16819','chrono_lord_deja SAY_SLAY2'),
-('-1269011','Time ... is on our side.','10417','1','0','0','16816','chrono_lord_deja SAY_DEATH'),
 
 ('-1269012','The time has come to shatter this clockwork universe forever! Let us no longer be slaves of the hourglass! I warn you: those who do not embrace this greater path shall become victims of its passing!','10400','1','0','0','16827','aeonus SAY_ENTER'),
 ('-1269018','REUSE ME','0','0','0','0','0','REUSE ME'),
