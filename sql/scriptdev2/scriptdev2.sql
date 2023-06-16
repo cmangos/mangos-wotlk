@@ -3949,12 +3949,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 269 000 OPENING OF THE DARK PORTAL (BLACK MORASS)
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1269000','Why do you persist? Surely you can see the futility of it all. It is not too late! You may still leave with your lives ...','10442','1','0','0','16821','temporus SAY_ENTER'),
-('-1269001','So be it ... you have been warned.','10444','1','0','0','16822','temporus SAY_AGGRO'),
-('-1269002','Time... sands of time is run out for you.','10443','1','0','0','16824','temporus SAY_BANISH'),
-('-1269003','You should have left when you had the chance.','10445','1','0','0','16825','temporus SAY_SLAY1'),
-('-1269004','Your days are done.','10446','1','0','0','16826','temporus SAY_SLAY2'),
-('-1269005','My death means ... little.','10447','1','0','0','16823','temporus SAY_DEATH'),
+('-1269000','Why do you persist? Surely you can see the futility of it all. It is not too late! You may still leave with your lives...','10442','1','0','0','16821','temporus SAY_ENTER'),
 
 ('-1269006','Why do you aid the Magus? Just think of how many lives could be saved if the portal is never opened, if the resulting wars could be erased ...','10412','1','0','0','16814','chrono_lord_deja SAY_ENTER'),
 
