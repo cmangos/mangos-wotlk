@@ -1470,6 +1470,7 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 37962:
         case 37968:
         case 35734: // Dropping Phase Disruptor
+        case 62910:
             return false;
     }
 
