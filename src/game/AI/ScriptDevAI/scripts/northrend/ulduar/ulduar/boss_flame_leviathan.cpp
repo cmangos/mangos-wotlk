@@ -1016,17 +1016,19 @@ struct ThorimsHammerLeviathan : public SpellScript
 };
 
 // 62910 Mimiron's Inferno
-struct MimironsInfernoLeviathan : public SpellScript
+struct MimironsInfernoLeviathan : public SpellScript, public AuraScript
 {
-    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    bool OnAreaAuraCheckTarget(Aura* aura, Unit* target) const override
     {
         if (!target)
-            return true;
-        Unit* caster = spell->GetCaster();
+            return false;
+        Unit* caster = aura->GetCaster();
         if (!caster)
             return false;
         if (caster->IsFriend(target))
+        {
             return false;
+        }
         if (!target->IsPlayer() && !target->IsControlledByPlayer())
             return false;
         return true;
