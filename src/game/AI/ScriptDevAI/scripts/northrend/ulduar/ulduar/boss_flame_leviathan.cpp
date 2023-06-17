@@ -210,8 +210,10 @@ struct boss_flame_leviathanAI : public BossAI
         AddTimerlessCombatAction(LEVIATHAN_FETCH_TOWERS, true);
         AddCombatAction(LEVIATHAN_HARDMODES, 10s);
         AddCombatAction(LEVIATHAN_THORIMS_HAMMER, true);
+        AddEntranceObject(GO_SHIELD_WALL);
+        AddExitObject(GO_LIGHTNING_DOOR, GO_XT002_GATE);
+        SetGateDelay(5s);
         Reset();
-        m_creature->SetActiveObjectState(true);
         AddCustomAction(LEVIATHAN_RESET_OVERLOAD, true, [&]()
         {
             Aura* aura = m_creature->GetAura(SPELL_OVERLOAD_CIRCUIT, EFFECT_INDEX_1);
@@ -247,16 +249,6 @@ struct boss_flame_leviathanAI : public BossAI
 
         m_hardmodeStep         = 0;
         m_thorimsHammerCount   = 0;
-
-        CreatureList leviAdds;
-        for (const uint32& entry : addEntries)
-        {
-            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
-            for (auto& add : leviAdds)
-            {
-                add->SetActiveObjectState(true);
-            }
-        }
     }
 
     void JustDied(Unit* /*killer*/) override
