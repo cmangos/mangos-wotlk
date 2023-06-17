@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellEffectDefines.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 #include "Entities/Vehicle.h"
@@ -223,6 +224,7 @@ struct boss_flame_leviathanAI : public BossAI
         {
             return x < 148;
         });
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_KNOCK_BACK, true);
     }
 
     instance_ulduar* m_instance;
