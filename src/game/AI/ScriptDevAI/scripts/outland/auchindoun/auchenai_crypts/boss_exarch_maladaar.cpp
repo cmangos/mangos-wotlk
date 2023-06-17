@@ -153,7 +153,6 @@ struct boss_exarch_maladaarAI : public CombatAI
         {
             case NPC_AVATAR_MARTYRED:
             {
-                summoned->CastSpell(summoned, SPELL_PHASE_IN, TRIGGERED_NONE);
                 m_avatar = summoned->GetObjectGuid();
                 break;
             }
