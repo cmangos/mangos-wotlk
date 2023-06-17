@@ -248,6 +248,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (31624,'spell_raise_dead_hyjal'),
 (31625,'spell_raise_dead_hyjal'),
 (35781,'spell_countercharge'),
+(37866,'spell_summon_water_globules'),
 (38028,'spell_watery_grave'),
 (32360,'spell_stolen_soul_summon'),
 (30610,'spell_wrath_of_the_titans_stacker'),
