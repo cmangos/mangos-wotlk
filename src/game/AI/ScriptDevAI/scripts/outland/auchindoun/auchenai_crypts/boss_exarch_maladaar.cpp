@@ -77,16 +77,15 @@ struct mob_stolen_soulAI : public ScriptedAI
 
 enum
 {
-    SAY_INTRO                = -1558000,
-    SAY_SUMMON               = -1558001,
-    SAY_AGGRO_1              = -1558002,
-    SAY_AGGRO_2              = -1558003,
-    SAY_AGGRO_3              = -1558004,
-    SAY_ROAR                 = -1558005,
-    SAY_SOUL_CLEAVE          = -1558006,
-    SAY_SLAY_1               = -1558007,
-    SAY_SLAY_2               = -1558008,
-    SAY_DEATH                = -1558009,
+    SAY_SUMMON               = 15466,
+    SAY_AGGRO_1              = 17647,
+    SAY_AGGRO_2              = 17648,
+    SAY_AGGRO_3              = 17649,
+    SAY_ROAR                 = 17644,
+    SAY_SOUL_CLEAVE          = 17645,
+    SAY_SLAY_1               = 17650,
+    SAY_SLAY_2               = 17651,
+    SAY_DEATH                = 17646,
 
     SPELL_RIBBON_OF_SOULS    = 32422,
     SPELL_SOUL_SCREAM        = 32421,
@@ -113,6 +112,7 @@ struct boss_exarch_maladaarAI : public CombatAI
     boss_exarch_maladaarAI(Creature* creature) : CombatAI(creature, MALADAAR_ACTION_MAX), m_bHasTaunted(false)
     {
         AddTimerlessCombatAction(MALADAAR_SUMMON_AVATAR, true);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
     ObjectGuid m_avatar;
@@ -130,7 +130,7 @@ struct boss_exarch_maladaarAI : public CombatAI
     {
         if (!m_bHasTaunted && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 150.0f) && m_creature->IsWithinLOSInMap(who))
         {
-            DoScriptText(SAY_INTRO, m_creature);
+            m_creature->PlayDistanceSound(10509, PLAY_ZONE);
             m_bHasTaunted = true;
         }
 
@@ -141,9 +141,9 @@ struct boss_exarch_maladaarAI : public CombatAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
     }
 
@@ -160,17 +160,9 @@ struct boss_exarch_maladaarAI : public CombatAI
         }
     }
 
-    void KilledUnit(Unit* /*victim*/ ) override
-    {
-        if (urand(0, 1))
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         // When Exarch Maladaar is defeated D'ore appear.
         m_creature->SummonCreature(NPC_DORE, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 600000);
@@ -185,7 +177,7 @@ struct boss_exarch_maladaarAI : public CombatAI
     void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
         if (spellInfo->Id == SPELL_STOLEN_SOUL && urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_ROAR : SAY_SOUL_CLEAVE, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_ROAR : SAY_SOUL_CLEAVE, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
@@ -194,7 +186,7 @@ struct boss_exarch_maladaarAI : public CombatAI
         {
             if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_AVATAR) == CAST_OK)
             {
-                DoScriptText(SAY_SUMMON, m_creature);
+                DoBroadcastText(SAY_SUMMON, m_creature);
                 SetActionReadyStatus(action, false);
             }
         }
