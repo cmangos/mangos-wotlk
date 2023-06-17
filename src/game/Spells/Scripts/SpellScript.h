@@ -125,6 +125,8 @@ struct AuraScript
     virtual void OnPeriodicTickEnd(Aura* /*aura*/) const {}
     // called on persistent area aura dyngo lifetime end
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
+    // called on AreaAura target selection
+    virtual bool OnPersistentAreaAuraCheckTarget(DynamicObject* /*dynGo*/, Unit* /*target*/) const { return true; }
     // called on unit heartbeat
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
     // used to override SPELL_AURA_TRANSFORM or SPELL_AURA_MOD_SHAPESHIFT display id - more uses in future
