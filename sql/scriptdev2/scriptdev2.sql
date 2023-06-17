@@ -5275,11 +5275,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1558004','Serve your penitence!','10515','1','0','0','17649','maladaar SAY_AGGRO_3'),
 ('-1558005','Let your mind be clouded.','10510','1','0','0','17644','maladaar SAY_ROAR'),
 ('-1558006','Stare into the darkness of your soul.','10511','1','0','0','17645','maladaar SAY_SOUL_CLEAVE'),
-('-1558007','These walls will be your doom.','10516','1','0','0','0','maladaar SAY_SLAY_1'),
-('-1558008','<laugh> Now, you''ll stay for eternity!','10517','1','0','0','0','maladaar SAY_SLAY_2'),
-('-1558009','This is... where.. I belong...','10518','1','0','0','17646','maladaar SAY_DEATH'),
-
-('-1558010','%s focuses on $N','0','3','0','0','21077','shirrak EMOTE_FOCUS');
+('-1558007','These walls will be your tomb!','10516','1','0','0','17650','maladaar SAY_SLAY_1'),
+('-1558008','Now you''ll stay... for eternity.','10517','1','0','0','17651','maladaar SAY_SLAY_2'),
+('-1558009','This is... where I belong.','10518','1','0','0','17646','maladaar SAY_DEATH');
 
 -- -1 560 000 ESCAPE FROM DURNHOLDE (OLD HILLSBRAD)
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

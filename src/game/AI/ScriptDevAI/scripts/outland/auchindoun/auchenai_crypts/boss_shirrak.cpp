@@ -28,7 +28,7 @@ EndScriptData */
 
 enum
 {
-    EMOTE_FOCUS                     = -1558010,
+    EMOTE_FOCUS                     = 19321,
 
     SPELL_CARNIVOROUS_BITE          = 36383,
     SPELL_CARNIVOROUS_BITE_H        = 39382,
@@ -46,20 +46,13 @@ enum
 
 enum ShirrakActions
 {
-    SHIRRAK_FOCUS_FIRE,
-    SHIRRAK_CARNIVOROUS_BITE,
-    SHIRRAK_ATTRACT_MAGIC,
     SHIRRAK_ACTION_MAX,
 };
 
 struct boss_shirrakAI : public CombatAI
 {
     boss_shirrakAI(Creature* creature) : CombatAI(creature, SHIRRAK_ACTION_MAX), m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty())
-    {
-        AddCombatAction(SHIRRAK_CARNIVOROUS_BITE, 4000, 7000);
-        AddCombatAction(SHIRRAK_FOCUS_FIRE, 15000u);
-        AddCombatAction(SHIRRAK_ATTRACT_MAGIC, 20000, 24000);
-    }
+    {}
 
     bool m_bIsRegularMode;
 
@@ -78,29 +71,7 @@ struct boss_shirrakAI : public CombatAI
     void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
         if (spellInfo->Id == SPELL_FOCUS_FIRE_AURA)
-            DoScriptText(EMOTE_FOCUS, m_creature, target);
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case SHIRRAK_CARNIVOROUS_BITE:
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_CARNIVOROUS_BITE : SPELL_CARNIVOROUS_BITE_H) == CAST_OK)
-                    ResetCombatAction(action, urand(4000, 10000));
-                break;
-            case SHIRRAK_FOCUS_FIRE:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, SPELL_FOCUS_FIRE_AURA) == CAST_OK) // not meant to be in sniff
-                        ResetCombatAction(action, 15000);
-                break;
-            }
-            case SHIRRAK_ATTRACT_MAGIC:
-                if (DoCastSpellIfCan(m_creature, SPELL_ATTRACT_MAGIC) == CAST_OK)
-                    ResetCombatAction(action, urand(25000, 38000));
-                break;
-        }
+            DoBroadcastText(EMOTE_FOCUS, m_creature, target);
     }
 };
 
