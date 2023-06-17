@@ -352,6 +352,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (41910,'spell_alar_phoenix_ember_blast'),
 (30632,'spell_magtheridon_debris'),
 (32286,'spell_focus_target_visual'),
+(32301,'spell_ping_shirrak'),
 (33985,'spell_use_corpse'),
 (34011,'spell_raise_dead'),
 (34012,'spell_raise_dead'),

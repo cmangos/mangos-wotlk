@@ -8803,15 +8803,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 32247, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 32301:                                 // Ping Shirrak
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // Cast Focus fire on caster
-                    unitTarget->CastSpell(m_caster, 32300, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 33525:                                 // Ground Slam - Gruul
                 {
                     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
