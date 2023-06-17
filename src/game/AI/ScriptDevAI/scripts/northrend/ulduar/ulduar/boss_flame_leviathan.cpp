@@ -22,6 +22,7 @@ SDCategory: Ulduar
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Maps/GridDefines.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellEffectDefines.h"
 #include "ulduar.h"
@@ -1018,11 +1019,11 @@ struct ThorimsHammerLeviathan : public SpellScript
 // 62910 Mimiron's Inferno
 struct MimironsInfernoLeviathan : public SpellScript, public AuraScript
 {
-    bool OnAreaAuraCheckTarget(Aura* aura, Unit* target) const override
+    bool OnAreaAuraCheckTarget(DynamicObject* dynGo, Unit* target) const override
     {
         if (!target)
             return false;
-        Unit* caster = aura->GetCaster();
+        Unit* caster = dynGo->GetCaster();
         if (!caster)
             return false;
         if (caster->IsFriend(target))
