@@ -19468,7 +19468,7 @@ void Player::VehicleSpellInitialize() const
 
     data << uint8(0);                                       // spells count
 
-    CharmCooldownInitialize(data);
+    charm->CharmCooldownInitialize(data);
 
     GetSession()->SendPacket(data);
 }
