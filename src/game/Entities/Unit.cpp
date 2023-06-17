@@ -9312,6 +9312,12 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     if (m_Visibility == VISIBILITY_REMOVE_CORPSE)
         return false;
 
+    if (this->IsBoarded())
+        if (Unit* vehicle = dynamic_cast<Unit*>(this->GetTransportInfo()->GetTransport()))
+            if (Player* player = const_cast<Player*>(dynamic_cast<const Player*>(u)))
+                if (!player->HasAtClient(vehicle))
+                    return false;
+
     Map& _map = *u->GetMap();
     // Grid dead/alive checks
     if (u->GetTypeId() == TYPEID_PLAYER)
