@@ -542,18 +542,10 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             {
                 // make sure that the Lightning door is closed when engaged in combat
                 DoUseOpenableObject(GO_LIGHTNING_DOOR, false);
-                DoUseOpenableObject(GO_SHIELD_WALL, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHUTOUT, true);
-            }
-            else if (uiData == DONE)
-            {
-                DoUseOpenableObject(GO_XT002_GATE, true);
-                DoUseOpenableObject(GO_LIGHTNING_DOOR, true);
-                DoUseOpenableObject(GO_SHIELD_WALL, true);
             }
             else if (uiData == FAIL)
             {
-                DoUseOpenableObject(GO_SHIELD_WALL, true);
                 DoCallLeviathanHelp();
             }
             break;
