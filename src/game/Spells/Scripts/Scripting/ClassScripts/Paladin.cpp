@@ -258,7 +258,8 @@ struct ArdentDefender : public AuraScript
         remainingDamage *= (100 - reduction) / 100.f;
         if (int32(player->GetHealth()) - remainingDamage > 0 || player->HasAura(66233))
             return;
-        float defenseFactor = (player->GetDefenseSkillValue() - player->GetLevel() * 5) / 140.f;
+        float defenseFactor = std::min(140u, (player->GetDefenseSkillValue() - player->GetLevel() * 5)) / 140.f;
+        defenseFactor = std::max(0.f, defenseFactor);
         healMod *= defenseFactor;
         healMod = player->GetMaxHealth() * (healMod / 100.f);
         remainingDamage = 0;
