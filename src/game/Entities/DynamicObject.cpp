@@ -216,3 +216,9 @@ void DynamicObject::OnPersistentAreaAuraEnd()
         m_auraScript->OnPersistentAreaAuraEnd(this);
 }
 
+bool DynamicObject::OnPersistentAreaAuraCheckTarget(Unit* target)
+{
+    if (m_auraScript)
+        return m_auraScript->OnPersistentAreaAuraCheckTarget(this, target);
+    return true;
+}
