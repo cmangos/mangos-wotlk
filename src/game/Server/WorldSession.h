@@ -33,6 +33,8 @@
 #include "Multithreading/Messager.h"
 #include "LFG/LFGDefines.h"
 
+#include <atomic>
+#include <map>
 #include <deque>
 #include <mutex>
 #include <memory>
@@ -1063,7 +1065,7 @@ class WorldSession
         bool m_playerRecentlyLogout;
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
-        uint32 m_latency;
+        std::atomic<uint32> m_latency;
         uint32 m_clientTimeDelay;
         AccountData m_accountData[NUM_ACCOUNT_DATA_TYPES];
         uint32 m_Tutorials[8];
