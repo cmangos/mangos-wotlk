@@ -232,6 +232,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (37670,'spell_nether_charge_timer'),
 (33676,'spell_incite_chaos'),
 (30843,'spell_enfeeble'),
+(32325,'spell_void_blast'),
+(38760,'spell_void_blast'),
 (41624,'spell_enfeeble_removal'),
 (32264,'spell_shirrak_inhibit_magic'),
 (33332,'spell_suppression_blast'),

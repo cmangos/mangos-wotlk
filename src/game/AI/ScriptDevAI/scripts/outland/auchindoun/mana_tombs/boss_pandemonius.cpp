@@ -16,22 +16,23 @@
 
 /* ScriptData
 SDName: Boss_Pandemonius
-SD%Complete: 80
-SDComment: Not known how void blast is done (amount of rapid cast seems to be related to players in party).
+SD%Complete: 100
+SDComment:
 SDCategory: Auchindoun, Mana Tombs
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
-    SAY_AGGRO_1                     = -1557008,
-    SAY_AGGRO_2                     = -1557009,
-    SAY_AGGRO_3                     = -1557010,
-    SAY_KILL_1                      = -1557011,
-    SAY_KILL_2                      = -1557012,
-    SAY_DEATH                       = -1557013,
-    EMOTE_DARK_SHELL                = -1557014,
+    SAY_AGGRO_1                     = 17771,
+    SAY_AGGRO_2                     = 17772,
+    SAY_AGGRO_3                     = 17773,
+    SAY_KILL_1                      = 17774,
+    SAY_KILL_2                      = 17775,
+    SAY_DEATH                       = 17776,
+    EMOTE_DARK_SHELL                = 21067,
 
     SPELL_VOID_BLAST                = 32325,
     SPELL_VOID_BLAST_H              = 38760,
@@ -41,101 +42,57 @@ enum
     MAX_VOID_BLASTS                 = 5,
 };
 
-struct boss_pandemoniusAI : public ScriptedAI
+struct boss_pandemoniusAI : public CombatAI
 {
-    boss_pandemoniusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_pandemoniusAI(Creature* creature) : CombatAI(creature, 0), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
-    bool m_bIsRegularMode;
+    bool m_isRegularMode;
 
-    uint32 m_uiVoidBlastTimer;
-    uint32 m_uiDarkShellTimer;
-    uint8 m_uiVoidBlastCounter;
-
-    void Reset() override
+    void JustDied(Unit* /*killer*/) override
     {
-        m_uiVoidBlastTimer   = urand(15000, 20000);
-        m_uiDarkShellTimer   = urand(13000, 15000);
-        m_uiVoidBlastCounter = 0;
+        DoBroadcastText(SAY_DEATH, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiVoidBlastTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_VOID_BLAST : SPELL_VOID_BLAST_H);
-
-            // reset timer and counter when counter has reached the max limit
-            if (m_uiVoidBlastCounter == MAX_VOID_BLASTS)
-            {
-                m_uiVoidBlastTimer = urand(25000, 30000);
-                m_uiVoidBlastCounter = 0;
-            }
-            // cast the void blasts in a row until we reach the max limit
-            else
-            {
-                m_uiVoidBlastTimer = 500;
-                ++m_uiVoidBlastCounter;
-            }
-        }
-        else
-            m_uiVoidBlastTimer -= uiDiff;
-
-        // use the darkshell only when the boss isn't casting the void blasts
-        if (!m_uiVoidBlastCounter)
-        {
-            if (m_uiDarkShellTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DARK_SHELL : SPELL_DARK_SHELL_H) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_DARK_SHELL, m_creature);
-                    m_uiDarkShellTimer = urand(18000, 30000);
-                }
-            }
-            else
-                m_uiDarkShellTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
+        if (spellInfo->Id == SPELL_DARK_SHELL || spellInfo->Id == SPELL_DARK_SHELL_H)
+            DoBroadcastText(EMOTE_DARK_SHELL, m_creature);
     }
 };
 
-UnitAI* GetAI_boss_pandemonius(Creature* pCreature)
+struct VoidBlast : public SpellScript
 {
-    return new boss_pandemoniusAI(pCreature);
-}
+    void OnCast(Spell* spell) const override
+    {
+        Unit* caster = spell->GetCaster();
+        uint64 scriptVal = spell->GetScriptValue();
+        if (scriptVal == MAX_VOID_BLASTS)
+            return;
+        SpellCastArgs args;
+        args.SetScriptValue(scriptVal + 1);
+        caster->CastSpell(args, spell->m_spellInfo, TRIGGERED_NORMAL_COMBAT_CAST | TRIGGERED_IGNORE_COOLDOWNS);
+    }
+};
 
 void AddSC_boss_pandemonius()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_pandemonius";
-    pNewScript->GetAI = &GetAI_boss_pandemonius;
+    pNewScript->GetAI = &GetNewAIInstance<boss_pandemoniusAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<VoidBlast>("spell_void_blast");
 }
