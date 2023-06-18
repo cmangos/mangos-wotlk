@@ -2870,7 +2870,7 @@ uint32 World::GetAverageLatency() const
         return 0;
 
     uint32 result = 0;
-    const_cast<World*>(this)->ExecuteForAllSessions([&](WorldSession const& session)
+    ExecuteForAllSessions([&](WorldSession const& session)
     {
         result += session.GetLatency();
     });
