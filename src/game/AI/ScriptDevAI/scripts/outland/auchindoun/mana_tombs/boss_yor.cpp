@@ -27,7 +27,7 @@ mob_ethereal_beacon
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -46,8 +46,6 @@ enum
 
 enum YorActions
 {
-    YOR_ACTION_STOMP,
-    YOR_ACTION_DOUBLE_BREATH,
     YOR_COMBAT_ACTION_MAX,
     YOR_ATTACK,
 };
@@ -60,9 +58,9 @@ enum PrisonerActions
     PRISONER_CREDIT,
 };
 
-struct boss_yorAI : public ScriptedAI
+struct boss_yorAI : public CombatAI
 {
-    boss_yorAI(Creature* creature) : ScriptedAI(creature, YOR_COMBAT_ACTION_MAX)
+    boss_yorAI(Creature* creature) : CombatAI(creature, YOR_COMBAT_ACTION_MAX)
     {
         AddCustomAction(YOR_ATTACK, true, [&]
         {
@@ -72,8 +70,6 @@ struct boss_yorAI : public ScriptedAI
             if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 AttackStart(player);
         });
-        AddCombatAction(YOR_ACTION_STOMP, 0u);
-        AddCombatAction(YOR_ACTION_DOUBLE_BREATH, 0u);
         JustRespawned();
     }
 
@@ -98,82 +94,6 @@ struct boss_yorAI : public ScriptedAI
         m_creature->RemoveAurasDueToSpell(SPELL_PURPLE_BANISH_STATE);
         m_creature->UpdateEntry(NPC_YOR);
         ResetTimer(YOR_ATTACK, 2000);
-    }
-
-    void Reset() override
-    {
-        for (uint32 i = 0; i < YOR_COMBAT_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(YOR_ACTION_STOMP,         GetInitialActionTimer(YOR_ACTION_STOMP));
-        ResetTimer(YOR_ACTION_DOUBLE_BREATH, GetInitialActionTimer(YOR_ACTION_DOUBLE_BREATH));
-    }
-
-    uint32 GetInitialActionTimer(YorActions id)
-    {
-        switch (id)
-        {
-            case YOR_ACTION_STOMP: return 15000;
-            case YOR_ACTION_DOUBLE_BREATH: return 8000;
-            default: return 0;
-        }
-    }
-
-    uint32 GetSubsequentActionTimer(YorActions id)
-    {
-        switch (id)
-        {
-            case YOR_ACTION_STOMP: return 20000;
-            case YOR_ACTION_DOUBLE_BREATH: return urand(9000, 14000);
-            default: return 0;
-        }
-    }
-
-    void ExecuteActions() override
-    {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < YOR_COMBAT_ACTION_MAX; ++i)
-        {
-            if (!GetActionReadyStatus(i))
-                continue;
-
-            switch (i)
-            {
-                case YOR_ACTION_STOMP:
-                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_STOMP, SELECT_FLAG_USE_EFFECT_RADIUS))
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_STOMP) == CAST_OK)
-                        {
-                            SetActionReadyStatus(i, false);
-                            ResetTimer(i, GetSubsequentActionTimer(YorActions(i)));
-                            return;
-                        }
-                    }
-                    continue;
-                case YOR_ACTION_DOUBLE_BREATH:
-                    if (DoCastSpellIfCan(nullptr, SPELL_DOUBLE_BREATH) == CAST_OK)
-                    {
-                        SetActionReadyStatus(i, false);
-                        ResetTimer(i, GetSubsequentActionTimer(YorActions(i)));
-                        return;
-                    }
-                    continue;
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff, m_creature->IsInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
     }
 };
 
