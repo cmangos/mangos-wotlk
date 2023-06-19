@@ -1264,27 +1264,24 @@ void Spell::AddDestExecution(SpellEffectIndex effIndex)
 
 uint64 Spell::CalculateDelayMomentForDst() const
 {
-    // spell fly from visual cast object
-    WorldObject* affectiveObject = GetAffectiveCasterObject();
-    float baseSpeed = GetSpellSpeed();
-    if (baseSpeed > 0.0f)
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        // calculate spell incoming interval
-        float x, y, z;
-        m_targets.getDestination(x, y, z);
-        float dist = affectiveObject->GetDistance(x, y, z, DIST_CALC_NONE);
-        dist = sqrt(dist); // default distance calculation is raw, apply sqrt before the next step
-        float speed;
+        Position dest = m_targets.getDestination();
         if (m_targets.getSpeed() > 0.0f)
-            speed = m_targets.getSpeed() * cos(m_targets.getElevation());
-        else
         {
-            speed = baseSpeed;
-
-            if (dist < 5.0f)
-                dist = 5.0f;
+            Position src = m_targets.getSource();
+            float speed = m_targets.getSpeed() * cos(m_targets.getElevation());
+            if (speed > 0.0f)
+                return (uint64)floor(sqrt(src.GetDistance2d(dest)) / speed * 1000.0f);
         }
-        return (uint64)floor(dist / speed * 1000.0f);
+        else if (m_spellInfo->speed > 0.0f)
+        {
+            WorldObject* affectiveObject = GetAffectiveCasterObject();
+            Position src = affectiveObject->GetPosition();
+            // We should not subtract caster size from dist calculation (fixes execution time desync with animation on client, eg. Malleable Goo cast by PP)
+            float dist = src.GetDistance(dest);
+            return (uint64)std::floor(sqrt(dist) / m_spellInfo->speed * 1000.0f);
+        }
     }
 
     return 0;     
