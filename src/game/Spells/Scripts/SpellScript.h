@@ -126,6 +126,8 @@ struct AuraScript
     // called on persistent area aura dyngo lifetime end
     virtual void OnPersistentAreaAuraEnd(DynamicObject* /*dynGo*/) const {}
     // called on unit heartbeat
+    virtual bool OnAreaAuraCheckTarget(Aura* aura, Unit* target) const { return true; }
+    // called on AreaAura target checking
     virtual void OnHeartbeat(Aura* /*aura*/) const {}
     // used to override SPELL_AURA_TRANSFORM or SPELL_AURA_MOD_SHAPESHIFT display id - more uses in future
     virtual uint32 GetAuraScriptCustomizationValue(Aura* /*aura*/) const { return 0; }
