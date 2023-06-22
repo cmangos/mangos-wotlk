@@ -5197,19 +5197,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 556 000 SETHEKK HALLS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1556000','I have pets..<squawk>..of my own!','10502','1','0','0','17733','syth SAY_SUMMON'),
-('-1556001','Hrrmm.. Time to.. hrrm.. make my move.','10503','1','0','0','17734','syth SAY_AGGRO_1'),
-('-1556002','Nice pets..hrm.. Yes! <squawking>','10504','1','0','0','17735','syth SAY_AGGRO_2'),
-('-1556003','Nice pets have.. weapons. No so..<squawk>..nice.','10505','1','0','0','17736','syth SAY_AGGRO_3'),
-('-1556004','Death.. meeting life is.. <squawking>','10506','1','0','0','0','syth SAY_SLAY_1'),
-('-1556005','Uhn.. Be free..<squawk>','10507','1','0','0','17738','syth SAY_SLAY_2'),
-('-1556006','No more life..hrm. No more pain. <squawks weakly>','10508','1','0','0','17739','syth SAY_DEATH'),
-
-('-1556007','<squawk>..Trinkets yes pretty Trinkets..<squawk>..power, great power.<squawk>..power in Trinkets..<squawk>','10557','1','0','0','17769','ikiss SAY_INTRO'),
-('-1556008','You make war on Ikiss?..<squawk>','10554','1','0','0','17765','ikiss SAY_AGGRO_1'),
-('-1556009','Ikiss cut you pretty..<squawk>..slice you. Yes!','10555','1','0','0','17767','ikiss SAY_AGGRO_2'),
-('-1556010','No escape for..<squawk>..for you','10556','1','0','0','17768','ikiss SAY_AGGRO_3'),
-('-1556011','You die..<squawk>..stay away from Trinkets','10558','1','0','0','17763','ikiss SAY_SLAY_1'),
+('-1556007','Ra-ak! Trinkets, yes. Pretty trinkets! Ak! Power, great power. Ra-kaw! Power in trinkets! Ak-caw!','10557','1','0','0','17769','ikiss SAY_INTRO'),
+('-1556008','Mmm, you make war on Ikiss? Aa-ak!','10554','1','0','0','17765','ikiss SAY_AGGRO_1'),
+('-1556009','Ikiss cut you, pretty -- ak-a-ak -- slice you, yes!','10555','1','0','0','17767','ikiss SAY_AGGRO_2'),
+('-1556010','Ak-a-ra-k! No escape for -- caw -- you!','10556','1','0','0','17768','ikiss SAY_AGGRO_3'),
+('-1556011','You die -- ka! Stay away from trinkets!','10558','1','0','0','17763','ikiss SAY_SLAY_1'),
 ('-1556012','<squawk>','10559','1','0','0','0','ikiss SAY_SLAY_2'),
 ('-1556013','Ikiss will not..<squawk>..die','10560','1','0','0','17762','ikiss SAY_DEATH'),
 ('-1556015','%s begins to channel arcane energy...','0','3','0','0','19738','ikiss EMOTE_ARCANE_EXP'),

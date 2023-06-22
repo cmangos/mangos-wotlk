@@ -22,6 +22,7 @@ SDCategory: Auchindoun, Sethekk Halls
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -57,45 +58,33 @@ enum
     NPC_SHADOW_ELEMENTAL        = 19206,
 };
 
-struct boss_darkweaver_sythAI : public ScriptedAI
+enum SythActions
 {
-    boss_darkweaver_sythAI(Creature* pCreature) : ScriptedAI(pCreature)
+    SYTH_90,
+    SYTH_55,
+    SYTH_15,
+    SYTH_ACTION_MAX
+};
+
+struct boss_darkweaver_sythAI : public CombatAI
+{
+    boss_darkweaver_sythAI(Creature* creature) : CombatAI(creature, SYTH_ACTION_MAX), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddTimerlessCombatAction(SYTH_90, true);
+        AddTimerlessCombatAction(SYTH_55, true);
+        AddTimerlessCombatAction(SYTH_15, true);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
-    bool m_bIsRegularMode;
-    uint32 m_uiFlameshockTimer;
-    uint32 m_uiArcaneshockTimer;
-    uint32 m_uiFrostshockTimer;
-    uint32 m_uiShadowshockTimer;
-    uint32 m_uiChainlightningTimer;
+    bool m_isRegularMode;
 
-    bool FirstSummon;
-    bool SecondSummon;
-    bool ThirdSummon;
-
-    void Reset() override
-    {
-        m_uiFlameshockTimer     = 18000;
-        m_uiArcaneshockTimer    = 19000;
-        m_uiFrostshockTimer     = 18000;
-        m_uiShadowshockTimer    = 17000;
-        m_uiChainlightningTimer = urand(6000, 9000);
-
-        FirstSummon = false;
-        SecondSummon = false;
-        ThirdSummon = false;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
     }
     
@@ -104,130 +93,65 @@ struct boss_darkweaver_sythAI : public ScriptedAI
         m_creature->RemoveGuardians();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
         m_creature->RemoveGuardians();
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (urand(0, 1))
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (Unit* Target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(Target);
+        if (Unit* Target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            summoned->AI()->AttackStart(Target);
     }
 
     // Wrapper to handle the elementals summon
     void SythSummoning()
     {
-        DoScriptText(SAY_SUMMON, m_creature);
+        DoBroadcastText(SAY_SUMMON, m_creature);
 
-        if (m_creature->IsNonMeleeSpellCasted(false))
-            m_creature->InterruptNonMeleeSpells(false);
-
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_SYTH_ARCANE, CAST_TRIGGERED); // front
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_SYTH_FIRE,   CAST_TRIGGERED); // back
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_SYTH_FROST,  CAST_TRIGGERED); // left
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_SYTH_SHADOW, CAST_TRIGGERED); // right
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_SYTH_ARCANE, TRIGGERED_IGNORE_COOLDOWNS); // front
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_SYTH_FIRE, TRIGGERED_IGNORE_COOLDOWNS); // back
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_SYTH_FROST, TRIGGERED_IGNORE_COOLDOWNS); // left
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_SYTH_SHADOW, TRIGGERED_IGNORE_COOLDOWNS); // right
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (!CanExecuteCombatAction())
             return;
 
-        // Summon elementals at 90%, 55% and 15% health
-        if (m_creature->GetHealthPercent() < 90.0f && !FirstSummon)
+        switch (action)
         {
-            SythSummoning();
-            FirstSummon = true;
+            case SYTH_90:
+                if (m_creature->GetHealthPercent() < 90.0f)
+                {
+                    SythSummoning();
+                    SetActionReadyStatus(action, false);
+                }
+                break;
+            case SYTH_55:
+                if (m_creature->GetHealthPercent() < 55.0f)
+                {
+                    SythSummoning();
+                    SetActionReadyStatus(action, false);
+                }
+                break;
+            case SYTH_15:
+                if (m_creature->GetHealthPercent() < 15.0f)
+                {
+                    SythSummoning();
+                    SetActionReadyStatus(action, false);
+                }
+                break;
         }
-        if (m_creature->GetHealthPercent() < 55.0f && !SecondSummon)
-        {
-            SythSummoning();
-            SecondSummon = true;
-        }
-        if (m_creature->GetHealthPercent() < 15.0f && !ThirdSummon)
-        {
-            SythSummoning();
-            ThirdSummon = true;
-        }
-
-        if (m_uiFlameshockTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FLAME_SHOCK : SPELL_FLAME_SHOCK_H) == CAST_OK)
-                    m_uiFlameshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
-            }
-        }
-        else
-            m_uiFlameshockTimer -= uiDiff;
-
-        if (m_uiArcaneshockTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ARCANE_SHOCK : SPELL_ARCANE_SHOCK_H) == CAST_OK)
-                    m_uiArcaneshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
-            }
-        }
-        else
-            m_uiArcaneshockTimer -= uiDiff;
-
-        if (m_uiFrostshockTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROST_SHOCK : SPELL_FROST_SHOCK_H) == CAST_OK)
-                    m_uiFrostshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
-            }
-        }
-        else
-            m_uiFrostshockTimer -= uiDiff;
-
-        if (m_uiShadowshockTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_SHOCK : SPELL_SHADOW_SHOCK_H) == CAST_OK)
-                    m_uiShadowshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
-            }
-        }
-        else
-            m_uiShadowshockTimer -= uiDiff;
-
-        if (m_uiChainlightningTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
-                    m_uiChainlightningTimer = m_bIsRegularMode ? urand(14000, 26000) : urand(13000, 19000);
-            }
-        }
-        else
-            m_uiChainlightningTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_darkweaver_syth(Creature* pCreature)
-{
-    return new boss_darkweaver_sythAI(pCreature);
-}
 
 void AddSC_boss_darkweaver_syth()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_darkweaver_syth";
-    pNewScript->GetAI = &GetAI_boss_darkweaver_syth;
+    pNewScript->GetAI = &GetNewAIInstance<boss_darkweaver_sythAI>;
     pNewScript->RegisterSelf();
 }
