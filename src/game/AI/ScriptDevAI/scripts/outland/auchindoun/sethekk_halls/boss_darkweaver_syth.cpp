@@ -26,13 +26,13 @@ EndScriptData */
 
 enum
 {
-    SAY_SUMMON                  = -1556000,
-    SAY_AGGRO_1                 = -1556001,
-    SAY_AGGRO_2                 = -1556002,
-    SAY_AGGRO_3                 = -1556003,
-    SAY_SLAY_1                  = -1556004,
-    SAY_SLAY_2                  = -1556005,
-    SAY_DEATH                   = -1556006,
+    SAY_SUMMON                  = 17733,
+    SAY_AGGRO_1                 = 17734,
+    SAY_AGGRO_2                 = 17735,
+    SAY_AGGRO_3                 = 17736,
+    SAY_SLAY_1                  = 17737,
+    SAY_SLAY_2                  = 17738,
+    SAY_DEATH                   = 17739,
 
     SPELL_FROST_SHOCK           = 12548,
     SPELL_FROST_SHOCK_H         = 21401,
