@@ -23,19 +23,19 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "sethekk_halls.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Entities/TemporarySpawn.h"
 
 enum
 {
-    SAY_ANZU_INTRO_1    = -1556016,
-    SAY_ANZU_INTRO_2    = -1556017,
+    SAY_ANZU_INTRO_1    = 20797,
+    SAY_ANZU_INTRO_2    = 20799,
 
-    SAY_BANISH          = -1556018,
-    SAY_WHISPER_MAGIC_1 = -1556019,
-    SAY_WHISPER_MAGIC_2 = -1556021,
-    SAY_WHISPER_MAGIC_3 = -1556022,
-    EMOTE_BIRD_STONE    = -1556020,
+    SAY_BANISH          = 20991,
+    SAY_WHISPER_MAGIC_1 = 21015,
+    SAY_WHISPER_MAGIC_2 = 21016,
+    SAY_WHISPER_MAGIC_3 = 21017,
+    EMOTE_BIRD_STONE    = 20980,
 
     // Intro spells
     SPELL_SHADOWFORM    = 37816,
@@ -73,6 +73,12 @@ enum
 };
 
 static const uint32 aSpiritsEntries[3] = {NPC_FALCON_SPIRIT, NPC_HAWK_SPIRIT, NPC_EAGLE_SPIRIT};
+static const Position aSpiritsPos[3] =
+{
+    Position(-72.34341f, 290.8609f, 26.48511f, 3.298672f ),
+    Position(-96.48158f, 304.236f , 26.51348f, 5.235988f ),
+    Position(-99.59056f, 276.6608f, 26.84667f, 0.7504916f)
+};
 
 float spiritSpawns[][4] = 
 {
@@ -88,25 +94,22 @@ enum AnzuActions
 {
     ANZU_ACTION_SPAWN_BROODS,
     ANZU_ACTION_BANISH,
-    ANZU_ACTION_DIVE,
-    ANZU_ACTION_FLESH_RIP,
-    ANZU_ACTION_SCREECH,
-    ANZU_ACTION_SPELL_BOMB,
-    ANZU_ACTION_CYCLONE,
     ANZU_COMBAT_ACTION_MAX,
     ANZU_INTRO_TALK,
     ANZU_INTRO_FLAGS,
     ANZU_BROOD_ATTACK,
 };
 
-struct boss_anzuAI : public ScriptedAI
+struct boss_anzuAI : public CombatAI
 {
-    boss_anzuAI(Creature* pCreature) : ScriptedAI(pCreature, ANZU_COMBAT_ACTION_MAX)
+    boss_anzuAI(Creature* creature) : CombatAI(creature, ANZU_COMBAT_ACTION_MAX),
+        m_instance(static_cast<instance_sethekk_halls*>(creature->GetInstanceData()))
     {
-        m_instance = (instance_sethekk_halls*)pCreature->GetInstanceData();
+        AddTimerlessCombatAction(ANZU_ACTION_SPAWN_BROODS, true);
+        AddTimerlessCombatAction(ANZU_ACTION_BANISH, true);
         AddCustomAction(ANZU_INTRO_TALK, true, [&]
         {
-            DoScriptText(SAY_ANZU_INTRO_2, m_creature); // is sent to despawned NPC_INVIS_RAVEN_GOD_TARGET in sniff
+            DoBroadcastText(SAY_ANZU_INTRO_2, m_creature); // is sent to despawned NPC_INVIS_RAVEN_GOD_TARGET in sniff
         });
         AddCustomAction(ANZU_INTRO_FLAGS, true, [&]
         {
@@ -119,12 +122,6 @@ struct boss_anzuAI : public ScriptedAI
                 if (Creature* brood = m_creature->GetMap()->GetCreature(guid))
                     brood->AI()->SetReactState(REACT_AGGRESSIVE);
         });
-        AddCombatAction(ANZU_ACTION_FLESH_RIP, 0u);
-        AddCombatAction(ANZU_ACTION_SCREECH, 0u);
-        AddCombatAction(ANZU_ACTION_SPELL_BOMB, 0u);
-        AddCombatAction(ANZU_ACTION_CYCLONE, 0u);
-        AddCombatAction(ANZU_ACTION_DIVE, 0u);
-        Reset();
     }
 
     instance_sethekk_halls* m_instance;
@@ -132,67 +129,28 @@ struct boss_anzuAI : public ScriptedAI
     float m_healthBroodCheck;
     float m_healthBanishCheck;
 
-    GuidList m_birdsGuidList;
-    GuidList m_broodGuidList;
+    GuidVector m_birdsGuidList;
+    GuidVector m_broodGuidList;
 
     void Reset() override
     {
-        for (uint32 i = 0; i < ANZU_COMBAT_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(ANZU_ACTION_FLESH_RIP, GetInitialActionTimer(ANZU_ACTION_FLESH_RIP));
-        ResetTimer(ANZU_ACTION_SCREECH, GetInitialActionTimer(ANZU_ACTION_SCREECH));
-        ResetTimer(ANZU_ACTION_SPELL_BOMB, GetInitialActionTimer(ANZU_ACTION_SPELL_BOMB));
-        ResetTimer(ANZU_ACTION_CYCLONE, GetInitialActionTimer(ANZU_ACTION_CYCLONE));
-        ResetTimer(ANZU_ACTION_DIVE, GetInitialActionTimer(ANZU_ACTION_DIVE));
-
-        DisableTimer(ANZU_INTRO_TALK);
-        DisableTimer(ANZU_INTRO_FLAGS);
-        DisableTimer(ANZU_BROOD_ATTACK);
-
-        SetActionReadyStatus(ANZU_ACTION_SPAWN_BROODS, true);
-        SetActionReadyStatus(ANZU_ACTION_BANISH, true);
+        CombatAI::Reset();
 
         m_healthBroodCheck = 73.f;
         m_healthBanishCheck = 70.f;
     }
 
-    uint32 GetInitialActionTimer(AnzuActions id)
-    {
-        switch (id)
-        {
-            case ANZU_ACTION_FLESH_RIP: return urand(9000, 10000);
-            case ANZU_ACTION_SCREECH: return 23000;
-            case ANZU_ACTION_SPELL_BOMB: return 17000;
-            case ANZU_ACTION_CYCLONE: return 5000;
-            case ANZU_ACTION_DIVE: return 10000;
-            default: return 0;
-        }
-    }
-
-    uint32 GetSubsequentActionTimer(AnzuActions id)
-    {
-        switch (id)
-        {
-            case ANZU_ACTION_FLESH_RIP: return urand(10000, 20000);
-            case ANZU_ACTION_SCREECH: return urand(31000, 35000);
-            case ANZU_ACTION_SPELL_BOMB: return urand(24000, 40000);
-            case ANZU_ACTION_CYCLONE: return 21000;
-            case ANZU_ACTION_DIVE: return 20000;
-            default: return 0;
-        }
-    }
-
     void JustRespawned() override
     {
-        DoScriptText(SAY_ANZU_INTRO_1, m_creature, m_creature->GetSpawner());
+        CombatAI::JustRespawned();
+        DoBroadcastText(SAY_ANZU_INTRO_1, m_creature, m_creature->GetSpawner());
         DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoSummonBirdHelpers();
         ResetTimer(ANZU_INTRO_TALK, 5000);
         ResetTimer(ANZU_INTRO_FLAGS, 10000);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {        
         EnableBirdHelpers();
 
@@ -200,7 +158,7 @@ struct boss_anzuAI : public ScriptedAI
             m_instance->SetData(TYPE_ANZU, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DespawnBirdHelpers();
 
@@ -211,7 +169,7 @@ struct boss_anzuAI : public ScriptedAI
     void JustReachedHome() override
     {
         DespawnBirdHelpers();
-        static_cast<TemporarySpawn*>(m_creature)->UnSummon();
+        m_creature->ForcedDespawn();
 
         if (m_instance)
             m_instance->SetData(TYPE_ANZU, FAIL);
@@ -236,7 +194,7 @@ struct boss_anzuAI : public ScriptedAI
     {
         if (summoned->GetEntry() == NPC_BROOD_OF_ANZU)
         {
-            m_broodGuidList.remove(summoned->GetObjectGuid());
+            m_broodGuidList.erase(std::remove(m_broodGuidList.begin(), m_broodGuidList.end(), summoned->GetObjectGuid()), m_broodGuidList.end());
             if (m_broodGuidList.size() == 0)
                 m_creature->RemoveAurasDueToSpell(SPELL_BANISH_SELF);
         }
@@ -253,13 +211,8 @@ struct boss_anzuAI : public ScriptedAI
 
     void DoSummonBirdHelpers()
     {
-        float fX, fY, fZ;
         for (uint8 i = 0; i < 3; ++i)
-        {
-            float fAng = 2 * M_PI_F / 3 * i;
-            m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 15.0f, fAng);
-            m_creature->SummonCreature(aSpiritsEntries[i], fX, fY, fZ, fAng + M_PI_F, TEMPSPAWN_CORPSE_DESPAWN, 0);
-        }
+            m_creature->SummonCreature(aSpiritsEntries[i], aSpiritsPos[i].x, aSpiritsPos[i].y, aSpiritsPos[i].z, aSpiritsPos[i].o, TEMPSPAWN_CORPSE_DESPAWN, 0);
     }
 
     void EnableBirdHelpers()
@@ -271,11 +224,7 @@ struct boss_anzuAI : public ScriptedAI
 
     void DespawnBirdHelpers()
     {
-        for (GuidList::const_iterator itr = m_birdsGuidList.begin(); itr != m_birdsGuidList.end(); ++itr)
-        {
-            if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                pTemp->ForcedDespawn();
-        }
+        DespawnGuids(m_birdsGuidList);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
@@ -284,106 +233,44 @@ struct boss_anzuAI : public ScriptedAI
             SetMeleeEnabled(true);
     }
 
-    void ExecuteActions() override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < ANZU_COMBAT_ACTION_MAX; ++i)
+        if (spellInfo->Id == SPELL_SPELL_BOMB)
         {
-            if (!GetActionReadyStatus(i))
-                continue;
-
-            switch (i)
+            switch (urand(0, 2))
             {
-                case ANZU_ACTION_SPAWN_BROODS:
-                    if (m_creature->GetHealthPercent() < m_healthBanishCheck)
-                    {
-                        DoSummonBroodsOfAnzu();
-                        m_healthBroodCheck -= 40.0f;
-                    }
-                    continue;
-                case ANZU_ACTION_BANISH:
-                    if (m_creature->GetHealthPercent() < m_healthBanishCheck)
-                    {
-                        if (DoCastSpellIfCan(m_creature, SPELL_BANISH_SELF) == CAST_OK)
-                        {
-                            DoScriptText(SAY_BANISH, m_creature);
-                            SetMeleeEnabled(false);
-                            m_healthBanishCheck -= 40.0f;
-                            ResetTimer(ANZU_BROOD_ATTACK, 15000);
-                            return;
-                        }
-                    }
-                    continue;
-                case ANZU_ACTION_FLESH_RIP:
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FLESH_RIP) == CAST_OK)
-                    {
-                        SetActionReadyStatus(i, false);
-                        ResetTimer(i, GetSubsequentActionTimer(AnzuActions(i)));
-                        return;
-                    }
-                    continue;
-                case ANZU_ACTION_SCREECH:
-                    if (DoCastSpellIfCan(m_creature, SPELL_SCREECH) == CAST_OK)
-                    {
-                        SetActionReadyStatus(i, false);
-                        ResetTimer(i, GetSubsequentActionTimer(AnzuActions(i)));
-                        return;
-                    }
-                    continue;
-                case ANZU_ACTION_SPELL_BOMB:
-                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
-                    {
-                        if (DoCastSpellIfCan(target, SPELL_SPELL_BOMB) == CAST_OK)
-                        {
-                            switch (urand(0, 2))
-                            {
-                                case 0: DoScriptText(SAY_WHISPER_MAGIC_1, m_creature, target); break;
-                                case 1: DoScriptText(SAY_WHISPER_MAGIC_2, m_creature, target); break;
-                                case 2: DoScriptText(SAY_WHISPER_MAGIC_3, m_creature, target); break;
-                            }
-                            SetActionReadyStatus(i, false);
-                            ResetTimer(i, GetSubsequentActionTimer(AnzuActions(i)));
-                            return;
-                        }
-                    }
-                    continue;
-                case ANZU_ACTION_CYCLONE:
-                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-                    {
-                        if (DoCastSpellIfCan(target, SPELL_CYCLONE) == CAST_OK)
-                        {
-                            SetActionReadyStatus(i, false);
-                            ResetTimer(i, GetSubsequentActionTimer(AnzuActions(i)));
-                            return;
-                        }
-                    }
-                    continue;
-                case ANZU_ACTION_DIVE:
-                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-                    {
-                        if (DoCastSpellIfCan(target, SPELL_DIVE) == CAST_OK)
-                        {
-                            SetActionReadyStatus(i, false);
-                            ResetTimer(i, GetSubsequentActionTimer(AnzuActions(i)));
-                            return;
-                        }
-                    }
-                    continue;
+                case 0: DoBroadcastText(SAY_WHISPER_MAGIC_1, m_creature, target); break;
+                case 1: DoBroadcastText(SAY_WHISPER_MAGIC_2, m_creature, target); break;
+                case 2: DoBroadcastText(SAY_WHISPER_MAGIC_3, m_creature, target); break;
             }
         }
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 i) override
     {
-        UpdateTimers(diff, m_creature->IsInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        ExecuteActions();
-        DoMeleeAttackIfReady();
+        switch (i)
+        {
+            case ANZU_ACTION_SPAWN_BROODS:
+                if (m_creature->GetHealthPercent() < m_healthBanishCheck && CanExecuteCombatAction())
+                {
+                    DoSummonBroodsOfAnzu();
+                    m_healthBroodCheck -= 40.0f;
+                }
+                return;
+            case ANZU_ACTION_BANISH:
+                if (m_creature->GetHealthPercent() < m_healthBanishCheck && CanExecuteCombatAction())
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_BANISH_SELF) == CAST_OK)
+                    {
+                        DoBroadcastText(SAY_BANISH, m_creature);
+                        SetMeleeEnabled(false);
+                        m_healthBanishCheck -= 40.0f;
+                        ResetTimer(ANZU_BROOD_ATTACK, 15000);
+                        return;
+                    }
+                }
+                return;
+        }
     }
 };
 
@@ -415,7 +302,7 @@ struct npc_anzu_bird_spiritAI : public ScriptedAI
     {
         DoCastSpellIfCan(nullptr, SPELL_FREEZE_ANIM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_SPIRIT_STONEFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoScriptText(EMOTE_BIRD_STONE, m_creature);
+        DoBroadcastText(EMOTE_BIRD_STONE, m_creature);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
@@ -464,25 +351,28 @@ struct npc_anzu_bird_spiritAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_anzu(Creature* pCreature)
+// 42354 - Banish Self
+struct AnzuBanishSelf : public AuraScript
 {
-    return new boss_anzuAI(pCreature);
-}
-
-UnitAI* GetAI_npc_anzu_bird_spirit(Creature* pCreature)
-{
-    return new npc_anzu_bird_spiritAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply) // Anzu - Banish
+            if (UnitAI* ai = aura->GetTarget()->AI())
+                ai->SendAIEvent(AI_EVENT_CUSTOM_A, aura->GetTarget(), aura->GetTarget());
+    }
+};
 
 void AddSC_boss_anzu()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_anzu";
-    pNewScript->GetAI = &GetAI_boss_anzu;
+    pNewScript->GetAI = &GetNewAIInstance<boss_anzuAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_anzu_bird_spirit";
-    pNewScript->GetAI = &GetAI_npc_anzu_bird_spirit;
+    pNewScript->GetAI = &GetNewAIInstance<npc_anzu_bird_spiritAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<AnzuBanishSelf>("spell_anzu_banish_self");
 }
