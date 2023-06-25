@@ -1466,7 +1466,6 @@ UPDATE creature_template SET ScriptName='npc_adal' WHERE entry IN(18481);
 /* SHOLAZAR BASIN */
 UPDATE creature_template SET ScriptName='npc_helice' WHERE entry=28787;
 UPDATE creature_template SET ScriptName='npc_injured_rainspeaker' WHERE entry=28217;
-UPDATE creature_template SET ScriptName='npc_mosswalker_victim' WHERE entry=28113;
 UPDATE creature_template SET ScriptName='npc_tipsy_mcmanus' WHERE entry=28566;
 UPDATE creature_template SET ScriptName='npc_wants_fruit_credit' WHERE entry IN (28535,28536,28537);
 UPDATE gameobject_template SET ScriptName='go_quest_still_at_it_credit' WHERE entry IN (190635,190636);
@@ -2617,20 +2616,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000607','Thanks!','0','0','0','0','27752','rainspeaker SAY_END_1'),
 ('-1000608','Oh no! Some puppy-men followed!','0','0','0','0','27799','rainspeaker SAY_END_2'),
 ('-1000609','Dumb big-tongue lover! You not friend of Frenzyheart no more. Frenzyheart will get you good.','0','1','0','0','27798','rainspeaker SAY_TRACKER'),
-
-('-1000610','The mosswalker victim groans in pain.','0','2','0','0','28638','mosswalker victim EMOTE_PAIN'),
-
-('-1000611','Maybe you make weather better too?','0','0','0','0','28906','mosswalker victim SAY_RESCUE_1'),
-('-1000612','We saved. You nice, dryskin.','0','0','0','0','28631','mosswalker victim SAY_RESCUE_2'),
-('-1000613','You save us! Yay for you!','0','0','0','0','28909','mosswalker victim SAY_RESCUE_3'),
-('-1000614','Thank you! You good!','0','0','0','0','28905','mosswalker victim SAY_RESCUE_4'),
-
-('-1000615','Use my shinies...make weather good again...make undead things go away.','0','0','0','0','28901','mosswalker victim SAY_DIE_1'),
-('-1000616','We gave shinies to shrine... we not greedy... why this happen?','0','0','0','0','28900','mosswalker victim SAY_DIE_2'),
-('-1000617','I do something bad? I sorry....','0','0','0','0','28904','mosswalker victim SAY_DIE_3'),
-('-1000618','We not do anything... to them... I no understand.','0','0','0','0','28903','mosswalker victim SAY_DIE_4'),
-('-1000619','Thank...you.','0','0','0','0','28902','mosswalker victim SAY_DIE_5'),
-('-1000620','Please take... my shinies. All done...','0','0','0','0','28630','mosswalker victim SAY_DIE_6'),
 
 ('-1000621','All systems on-line.  Prepare yourself, we leave shortly.','0','0','0','0','19481','maxx SAY_START'),
 ('-1000622','Be careful in there and come back in one piece!','0','0','0','0','17003','maxx SAY_ALLEY_FAREWELL'),
@@ -7655,7 +7640,6 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3000101,'Taruk send me to collect what you owe.','silvermoon harry GOSSIP_ITEM_GAMBLING_DEBT'),
 (-3000102,'Pay up, Harry!','silvermoon harry GOSSIP_ITEM_PAYING'),
 (-3000103,'I am ready to travel to you village now.','rainspeaker GOSSIP_ITEM_READY'),
-(-3000104,'<Check for pulse...>','mosswalker victim GOSSIP_ITEM_PULSE'),
 (-3000105,'Ezekiel said that you might have a certain book...','dirty larry GOSSIP_ITEM_BOOK'),
 (-3000106,'Let Marshal Windsor know that I am ready.','squire rowe GOSSIP_ITEM_WINDSOR'),
 (-3000107,'I am ready, as are my forces. Let us end this masquerade!','reginald windsor GOSSIP_ITEM_START'),

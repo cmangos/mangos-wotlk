@@ -17,14 +17,13 @@
 /* ScriptData
 SDName: Sholazar_Basin
 SD%Complete: 100
-SDComment: Quest support: 12570, 12580, 12644, 12688
+SDComment: Quest support: 12570, 12644, 12688
 SDCategory: Sholazar Basin
 EndScriptData */
 
 /* ContentData
 npc_helice
 npc_injured_rainspeaker
-npc_mosswalker_victim
 npc_tipsy_mcmanus
 npc_wants_fruit_credit
 go_quest_still_at_it_credit
@@ -326,91 +325,6 @@ bool GossipSelect_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature, 
 */
 
 /*######
-## npc_mosswalker_victim
-######*/
-
-enum
-{
-    QUEST_MOSSWALKER_SAVIOR         = 12580,
-    SPELL_DEAD_SOLDIER              = 45801,                // not clear what this does, but looks like all have it
-    SPELL_MOSSWALKER_QUEST_CREDIT   = 52157,
-
-    GOSSIP_ITEM_PULSE               = -3000104,
-    TEXT_ID_INJURED                 = 13318,
-
-    EMOTE_PAIN                      = -1000610,
-
-    SAY_RESCUE_1                    = -1000611,
-    SAY_RESCUE_2                    = -1000612,
-    SAY_RESCUE_3                    = -1000613,
-    SAY_RESCUE_4                    = -1000614,
-
-    SAY_DIE_1                       = -1000615,
-    SAY_DIE_2                       = -1000616,
-    SAY_DIE_3                       = -1000617,
-    SAY_DIE_4                       = -1000618,
-    SAY_DIE_5                       = -1000619,
-    SAY_DIE_6                       = -1000620,
-};
-
-bool GossipHello_npc_mosswalker_victim(Player* pPlayer, Creature* pCreature)
-{
-    if (pPlayer->GetQuestStatus(QUEST_MOSSWALKER_SAVIOR) == QUEST_STATUS_INCOMPLETE)
-    {
-        // doesn't appear they always emote
-        if (urand(0, 3) == 0)
-            DoScriptText(EMOTE_PAIN, pCreature);
-
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_PULSE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-    }
-
-    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_INJURED, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_mosswalker_victim(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF)
-    {
-        pPlayer->CLOSE_GOSSIP_MENU();
-
-        // just to prevent double credit
-        if (pCreature->GetLootRecipient())
-            return true;
-        pCreature->SetLootRecipient(pPlayer);
-
-        if (urand(0, 2))                                    // die
-        {
-            switch (urand(0, 5))
-            {
-                case 0: DoScriptText(SAY_DIE_1, pCreature, pPlayer); break;
-                case 1: DoScriptText(SAY_DIE_2, pCreature, pPlayer); break;
-                case 2: DoScriptText(SAY_DIE_3, pCreature, pPlayer); break;
-                case 3: DoScriptText(SAY_DIE_4, pCreature, pPlayer); break;
-                case 4: DoScriptText(SAY_DIE_5, pCreature, pPlayer); break;
-                case 5: DoScriptText(SAY_DIE_6, pCreature, pPlayer); break;
-            }
-        }
-        else                                                // survive
-        {
-            switch (urand(0, 3))
-            {
-                case 0: DoScriptText(SAY_RESCUE_1, pCreature, pPlayer); break;
-                case 1: DoScriptText(SAY_RESCUE_2, pCreature, pPlayer); break;
-                case 2: DoScriptText(SAY_RESCUE_3, pCreature, pPlayer); break;
-                case 3: DoScriptText(SAY_RESCUE_4, pCreature, pPlayer); break;
-            }
-
-            pCreature->CastSpell(pPlayer, SPELL_MOSSWALKER_QUEST_CREDIT, TRIGGERED_OLD_TRIGGERED);
-        }
-
-        // more details may apply, instead of just despawn
-        pCreature->ForcedDespawn(5000);
-    }
-    return true;
-}
-
-/*######
 ## npc_tipsy_mcmanus
 ######*/
 
@@ -695,12 +609,6 @@ void AddSC_sholazar_basin()
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_injured_rainspeaker;
     // pNewScript->pGossipHello = &GossipHello_npc_injured_rainspeaker;
     // pNewScript->pGossipSelect = &GossipSelect_npc_injured_rainspeaker;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_mosswalker_victim";
-    pNewScript->pGossipHello = &GossipHello_npc_mosswalker_victim;
-    pNewScript->pGossipSelect = &GossipSelect_npc_mosswalker_victim;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
