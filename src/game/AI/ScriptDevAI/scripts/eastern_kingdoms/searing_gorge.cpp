@@ -35,7 +35,8 @@ EndContentData */
 enum
 {
     SAY_DORIUS_AGGRO_1              = 4351,
-    SAY_DORIUS_AGGRO_2              = 4353,
+    SAY_DORIUS_AGGRO_2              = 4352,
+    SAY_DORIUS_AGGRO_3              = 4353,
 
     SAY_DORIUS_TO_PLAYER            = 4354,
     SAY_DORIUS_FINISH               = 4359,
@@ -54,19 +55,22 @@ struct npc_dorius_stonetenderAI : public npc_escortAI
 {
     npc_dorius_stonetenderAI(Creature* pCreature) : npc_escortAI(pCreature) 
     { 
-        m_creature->SetStandState(UNIT_STAND_STATE_DEAD, true);
         Reset(); 
     }
 
     void Reset() override
     {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
-            m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        m_creature->SetStandState(UNIT_STAND_STATE_DEAD, true);
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
-        DoBroadcastText(urand(0, 1) ? SAY_DORIUS_AGGRO_1 : SAY_DORIUS_AGGRO_2, m_creature, pWho);
+        switch (urand(0, 2))
+        {
+            case 0: DoBroadcastText(SAY_DORIUS_AGGRO_1, m_creature, who); break;
+            case 1: DoBroadcastText(SAY_DORIUS_AGGRO_2, m_creature, who); break;
+            case 2: DoBroadcastText(SAY_DORIUS_AGGRO_3, m_creature, who); break;
+        }
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
