@@ -5153,15 +5153,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 555 000 SHADOW LABYRINTH
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1555000','Infidels have invaded the sanctuary! Sniveling pests...You have yet to learn the true meaning of agony!','10473','1','0','0','0','hellmaw SAY_INTRO'),
-('-1555001','Pathetic mortals! You will pay dearly!','10475','1','0','0','17860','hellmaw SAY_AGGRO1'),
-('-1555002','I will break you!','10476','1','0','0','17861','hellmaw SAY_AGGRO2'),
-('-1555003','Finally! Something to relieve the tedium!','10477','1','0','0','17863','hellmaw SAY_AGGRO3'),
-('-1555004','Aid me, you fools, before it''s too late!','10474','1','0','0','17859','hellmaw SAY_HELP'),
-('-1555005','Do you fear death?','10478','1','0','0','17864','hellmaw SAY_SLAY1'),
-('-1555006','This is the part I enjoy most.','10479','1','0','0','17865','hellmaw SAY_SLAY2'),
-('-1555007','Do not...grow...overconfident, mortal.','10480','1','0','0','17866','hellmaw SAY_DEATH'),
-
 ('-1555008','All flesh must burn.','10482','1','0','0','0','blackhearth SAY_INTRO1'),
 ('-1555009','All creation must be unmade!','10483','1','0','0','0','blackhearth SAY_INTRO2'),
 ('-1555010','Power will be yours!','10484','1','0','0','0','blackhearth SAY_INTRO3'),
