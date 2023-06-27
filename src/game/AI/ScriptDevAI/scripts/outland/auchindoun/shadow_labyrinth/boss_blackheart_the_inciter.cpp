@@ -49,27 +49,12 @@ enum
     SPELL_INCITE_CHAOS_SPAWN_4  = 33682,
     SPELL_INCITE_CHAOS_SPAWN_5  = 33683,
 
-    SAY_INTRO1              = -1555008,
-    SAY_INTRO2              = -1555009,
-    SAY_INTRO3              = -1555010,
-    SAY_AGGRO1              = -1555011,
-    SAY_INCITE_CHAOS        = -1555012,
-    SAY_AGGRO2              = -1555013,
+    SAY_AGGRO_1             = 17563,
+    SAY_AGGRO_2             = 17565,
     SAY_SLAY1               = 17573,
     SAY_SLAY2               = 19528,
-    SAY_HELP                = -1555016,
-    SAY_DEATH               = -1555017,
-
-    SAY2_INTRO1             = -1555018,
-    SAY2_INTRO2             = -1555019,
-    SAY2_INTRO3             = -1555020,
-    SAY2_AGGRO1             = -1555021,
-    SAY2_AGGRO2             = -1555022,
-    SAY2_AGGRO3             = -1555023,
-    SAY2_SLAY1              = -1555024,
-    SAY2_SLAY2              = -1555025,
-    SAY2_HELP               = -1555026,
-    SAY2_DEATH              = -1555027,
+    SAY_INCITE              = 16433,
+    SAY_DEATH               = 17569,
 
     // faction IDs used during incite chaos - each trigger has one
     FACTION_INCITER_1       = 1761,
@@ -88,9 +73,6 @@ enum
 
 enum BlackheartActions
 {
-    BLACKHEART_INCITE_CHAOS,
-    BLACKHEART_CHARGE,
-    BLACKHEART_KNOCKBACK,
     BLACKHEART_ACTION_MAX,
     BLACKHEART_INCITE_TIMER,
 };
@@ -99,12 +81,6 @@ struct boss_blackheart_the_inciterAI : public CombatAI
 {
     boss_blackheart_the_inciterAI(Creature* creature) : CombatAI(creature, BLACKHEART_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        if (m_isRegularMode)
-            AddCombatAction(BLACKHEART_INCITE_CHAOS, 18000, 24000);
-        else
-            AddCombatAction(BLACKHEART_INCITE_CHAOS, 12000, 17000);
-        AddCombatAction(BLACKHEART_CHARGE, 30000, 50000);
-        AddCombatAction(BLACKHEART_KNOCKBACK, 10000, 14000);
         AddCustomAction(BLACKHEART_INCITE_TIMER, true, [&]() { HandleInciteEnd(); });
         AddOnKillText(SAY_SLAY1, SAY_SLAY2);
     }
@@ -113,20 +89,9 @@ struct boss_blackheart_the_inciterAI : public CombatAI
     bool m_isRegularMode;
     GuidVector m_vTargetsGuids;
 
-    uint32 GetSubsequentActionTimer(BlackheartActions id)
-    {
-        switch (id)
-        {
-            case BLACKHEART_INCITE_CHAOS: return urand(52000, 60000);
-            case BLACKHEART_CHARGE: return urand(26000, 44000);
-            case BLACKHEART_KNOCKBACK: return urand(15000, 30000);
-            default: return 0;
-        }
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_INCITER, DONE);
@@ -136,8 +101,8 @@ struct boss_blackheart_the_inciterAI : public CombatAI
     {
         switch (urand(0, 1))
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
         }
 
         if (m_instance)
@@ -150,6 +115,27 @@ struct boss_blackheart_the_inciterAI : public CombatAI
             m_instance->SetData(TYPE_INCITER, FAIL);
     }
 
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    {
+        if (spellInfo->Id == SPELL_INCITE_CHAOS)
+            HandleInciteStart();
+        else if (spellInfo->Id == SPELL_WAR_STOMP || spellInfo->Id == SPELL_CHARGE)
+            DoResetThreat();
+    }
+
+    void HandleInciteStart()
+    {
+        DoBroadcastText(SAY_INCITE, m_creature);
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+        m_meleeEnabled = false;
+        DoResetThreat();
+        m_creature->MeleeAttackStop(m_creature->GetVictim());
+        m_creature->SetTarget(nullptr);
+        m_creature->CastSpell(nullptr, SPELL_LAUGH_PERIODIC, TRIGGERED_NONE);
+        ResetTimer(BLACKHEART_INCITE_TIMER, 19000);
+    }
+
     void HandleInciteEnd()
     {
         SetCombatScriptStatus(false);
@@ -159,55 +145,6 @@ struct boss_blackheart_the_inciterAI : public CombatAI
         {
             m_creature->MeleeAttackStart(m_creature->GetVictim());
             m_creature->SetTarget(m_creature->GetVictim());
-        }
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case BLACKHEART_INCITE_CHAOS:
-            {
-                if (m_creature->getThreatManager().getThreatList().size() > 1)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_INCITE_CHAOS) == CAST_OK)
-                    {
-                        DoScriptText(SAY_INCITE_CHAOS, m_creature);
-                        SetCombatScriptStatus(true);
-                        SetCombatMovement(false);
-                        m_meleeEnabled = false;
-                        DoResetThreat();
-                        m_creature->MeleeAttackStop(m_creature->GetVictim());
-                        m_creature->SetTarget(nullptr);
-                        m_creature->CastSpell(nullptr, SPELL_LAUGH_PERIODIC, TRIGGERED_NONE);
-                        ResetCombatAction(action, GetSubsequentActionTimer(BlackheartActions(action)));
-                        ResetTimer(BLACKHEART_INCITE_TIMER, 19000);
-                        return;
-                    }
-                }
-                break;
-            }
-            case BLACKHEART_CHARGE:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
-                {
-                    if (DoCastSpellIfCan(target, SPELL_CHARGE) == CAST_OK)
-                    {
-                        ResetCombatAction(action, GetSubsequentActionTimer(BlackheartActions(action)));
-                        DoResetThreat();
-                    }
-                }
-                break;
-            }
-            case BLACKHEART_KNOCKBACK:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_WAR_STOMP) == CAST_OK)
-                {
-                    ResetCombatAction(action, GetSubsequentActionTimer(BlackheartActions(action)));
-                    DoResetThreat();
-                }
-                break;
-            }
         }
     }
 };

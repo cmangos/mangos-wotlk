@@ -5153,28 +5153,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 555 000 SHADOW LABYRINTH
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1555008','All flesh must burn.','10482','1','0','0','0','blackhearth SAY_INTRO1'),
-('-1555009','All creation must be unmade!','10483','1','0','0','0','blackhearth SAY_INTRO2'),
-('-1555010','Power will be yours!','10484','1','0','0','0','blackhearth SAY_INTRO3'),
-('-1555011','You''ll be sorry!','10486','1','0','0','17563','blackhearth SAY_AGGRO1'),
-('-1555012','Time for fun!','10487','1','0','0','16433','blackhearth SAY_AGGRO2'),
-('-1555013','I see dead people!','10488','1','0','0','0','blackhearth SAY_AGGRO3'),
-('-1555014','No comin'' back for you!','10489','1','0','0','0','blackhearth SAY_SLAY1'),
-('-1555015','Nice try!','10490','1','0','0','19528','blackhearth SAY_SLAY2'),
-('-1555016','Help us, hurry!','10485','1','0','0','0','blackhearth SAY_HELP'),
-('-1555017','This... no... good...','10491','1','0','0','17569','blackhearth SAY_DEATH'),
-
-('-1555018','Be ready for Dark One''s return.','10492','1','0','0','0','blackhearth SAY2_INTRO1'),
-('-1555019','So we have place in new universe.','10493','1','0','0','0','blackhearth SAY2_INTRO2'),
-('-1555020','Dark one promise!','10494','1','0','0','0','blackhearth SAY2_INTRO3'),
-('-1555021','You''ll be sorry!','10496','1','0','0','17563','blackhearth SAY2_AGGRO1'),
-('-1555022','Time to kill!','10497','1','0','0','17565','blackhearth SAY2_AGGRO2'),
-('-1555023','You be dead people!','10498','1','0','0','0','blackhearth SAY2_AGGRO3'),
-('-1555024','Now you gone for good.','10499','1','0','0','17576','blackhearth SAY2_SLAY1'),
-('-1555025','You failed, haha haha','10500','1','0','0','0','blackhearth SAY2_SLAY2'),
-('-1555026','Help us, hurry!','10495','1','0','0','0','blackhearth SAY2_HELP'),
-('-1555027','Arrgh, aah...ahhh','10501','1','0','0','0','blackhearth SAY2_DEATH'),
-
 ('-1555028','Keep your minds focused for the days of reckoning are close at hand. Soon, the destroyer of worlds will return to make good on his promise. Soon the destruction of all that is will begin!','10522','1','0','0','0','vorpil SAY_INTRO'),
 ('-1555029','I''ll make an offering of your blood!','10524','1','0','0','17868','vorpil SAY_AGGRO1'),
 ('-1555030','You''ll be a fine example, for the others.','10525','1','0','0','17869','vorpil SAY_AGGRO2'),
