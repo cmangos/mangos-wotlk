@@ -378,6 +378,7 @@ UPDATE creature_template SET ScriptName='boss_murmur' WHERE entry=18708;
 UPDATE creature_template SET ScriptName='boss_grandmaster_vorpil' WHERE entry=18732;
 UPDATE creature_template SET ScriptName='boss_blackheart_the_inciter' WHERE entry=18667;
 UPDATE creature_template SET ScriptName='boss_ambassador_hellmaw' WHERE entry=18731;
+UPDATE creature_template SET ScriptName='npc_voidwalker_summoner' WHERE entry=19427;
 UPDATE creature_template SET ScriptName='npc_void_traveler' WHERE entry=19226;
 UPDATE creature_template SET ScriptName='dummy_blackheart_the_inciter' WHERE entry IN(19300,19301,19302,19303,19304);
 UPDATE gameobject_template SET ScriptName='go_screaming_hall_door' WHERE entry=183295;
@@ -5154,13 +5155,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 -- -1 555 000 SHADOW LABYRINTH
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1555028','Keep your minds focused for the days of reckoning are close at hand. Soon, the destroyer of worlds will return to make good on his promise. Soon the destruction of all that is will begin!','10522','1','0','0','0','vorpil SAY_INTRO'),
-('-1555029','I''ll make an offering of your blood!','10524','1','0','0','17868','vorpil SAY_AGGRO1'),
-('-1555030','You''ll be a fine example, for the others.','10525','1','0','0','17869','vorpil SAY_AGGRO2'),
-('-1555031','Good, a worthy sacrifice.','10526','1','0','0','17870','vorpil SAY_AGGRO3'),
-('-1555032','Come to my aid, heed your master now!','10523','1','0','0','17867','vorpil SAY_HELP'),
-('-1555033','I serve with pride.','10527','1','0','0','17871','vorpil SAY_SLAY1'),
-('-1555034','Your death is for the greater cause!','10528','1','0','0','17872','vorpil SAY_SLAY2'),
-('-1555035','I give my life... Gladly.','10529','1','0','0','17873','vorpil SAY_DEATH'),
 
 ('-1555036','%s draws energy from the air.','0','2','0','0','18799','murmur EMOTE_SONIC_BOOM');
 
