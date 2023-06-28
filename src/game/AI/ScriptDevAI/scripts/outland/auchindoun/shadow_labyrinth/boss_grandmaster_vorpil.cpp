@@ -84,18 +84,14 @@ struct boss_grandmaster_vorpilAI : public CombatAI
 {
     boss_grandmaster_vorpilAI(Creature* creature) : CombatAI(creature, VORPIL_ACTION_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
-        m_bHasDoneIntro(false)
+        m_hasDoneIntro(false)
     {
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
-
-    uint32 m_uiShadowBoltVolleyTimer;
-    uint32 m_uiDrawShadowsTimer;
-    uint32 m_uiBanishTimer;
-    bool m_bHasDoneIntro;
+    bool m_hasDoneIntro;
 
     GuidVector m_spawns;
     ObjectGuid m_summoner;
@@ -103,9 +99,6 @@ struct boss_grandmaster_vorpilAI : public CombatAI
     void Reset() override
     {
         CombatAI::Reset();
-        m_uiShadowBoltVolleyTimer   = urand(13000, 19000);
-        m_uiDrawShadowsTimer        = urand(38000, 44000);
-        m_uiBanishTimer             = urand(12000, 16000);
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
         DespawnGuids(m_spawns);
@@ -124,10 +117,10 @@ struct boss_grandmaster_vorpilAI : public CombatAI
     void MoveInLineOfSight(Unit* who) override
     {
         // not sure about right radius
-        if (!m_bHasDoneIntro && who->IsPlayer() && who->IsWithinDistInMap(m_creature, 50.0f) && who->IsWithinLOSInMap(m_creature))
+        if (!m_hasDoneIntro && who->IsPlayer() && who->IsWithinDistInMap(m_creature, 50.0f) && who->IsWithinLOSInMap(m_creature))
         {
             DoScriptText(SAY_INTRO, m_creature);
-            m_bHasDoneIntro = true;
+            m_hasDoneIntro = true;
         }
 
         ScriptedAI::MoveInLineOfSight(who);
@@ -182,47 +175,6 @@ struct boss_grandmaster_vorpilAI : public CombatAI
             SetCombatMovement(false);
             SetCombatScriptStatus(true);
         }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiShadowBoltVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(nullptr, SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
-                m_uiShadowBoltVolleyTimer = urand(10000, 26000);
-        }
-        else
-            m_uiShadowBoltVolleyTimer -= uiDiff;
-
-        if (m_uiDrawShadowsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(nullptr, SPELL_DRAW_SHADOWS) == CAST_OK)
-            {
-                m_uiDrawShadowsTimer = urand(36000, 44000);
-            }
-        }
-        else
-            m_uiDrawShadowsTimer -= uiDiff;
-
-        if (!m_isRegularMode)
-        {
-            if (m_uiBanishTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_BANISH_H) == CAST_OK)
-                        m_uiBanishTimer = urand(17000, 23000);
-                }
-            }
-            else
-                m_uiBanishTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
 
