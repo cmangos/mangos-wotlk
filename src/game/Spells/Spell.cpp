@@ -9742,13 +9742,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
             if (m_caster->getThreatManager().getThreatList().size() >= 2 && target == m_caster->GetVictim())
                 return false;
             break;
-        case 39365:                                         // Thundering Storm - only hits 25-100yd range targets
-        {
-            float dist = sqrt(target->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_NONE));
-            if (dist < 25.f || dist > 100.f)
-                return false;
-            break;
-        }
         case 39921:                                         // Vimgol Pentagram Beam
         {
             if (target->GetTypeId() != TYPEID_UNIT || target->GetEntry() != 23040 || m_caster->GetTypeId() != TYPEID_UNIT || m_caster->GetEntry() != 23040)

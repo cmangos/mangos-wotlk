@@ -377,7 +377,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
             m_currentSquareGuid = pInvoker->GetObjectGuid();
 
             // ToDo: enable this when the scope of the spell is clear
-            //if (Creature* pStalker = m_pInstance->GetSingleCreatureFromStorage(NPC_WAITING_ROOM_STALKER))
+            //if (Creature* pStalker = m_instance->GetSingleCreatureFromStorage(NPC_WAITING_ROOM_STALKER))
             //    pStalker->CastSpell(pStalker, SPELL_AI_ACTION_TIMER, TRIGGERED_OLD_TRIGGERED);
 
             //DoCastSpellIfCan(m_creature, SPELL_AI_SNAPSHOT_TIMER, CAST_TRIGGERED);

@@ -238,6 +238,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (41624,'spell_enfeeble_removal'),
 (32264,'spell_shirrak_inhibit_magic'),
 (33332,'spell_suppression_blast'),
+(39365,'spell_thundering_storm'),
 (32830,'spell_auchenai_possess'),
 (32756,'spell_shadowy_disguise'),
 (33953,'spell_spell_haste_healer_trinket'),

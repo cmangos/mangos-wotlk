@@ -125,7 +125,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
         DoScriptText(SAY_DEATH, m_creature);
 
         /*for questId 10886 (heroic mode only)
-        if (m_pInstance && m_pInstance->GetData(TYPE_HARBINGERSKYRISS) != DONE)
+        if (m_instance && m_instance->GetData(TYPE_HARBINGERSKYRISS) != DONE)
             ->FailQuest();*/
     }
 
