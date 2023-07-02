@@ -156,28 +156,8 @@ struct boss_swamplord_muselekAI : public CombatAI
             }
             case MUSELEK_ACTION_BEAR_COMMAND:
             {
-                if (Creature* claw = m_instance->GetSingleCreatureFromStorage(NPC_CLAW))
-                    if (claw->IsAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
-                    {
-                        uint8 claw_spell = urand(0, 2);
-
-                        switch (claw_spell)
-                        {
-                            case 0:
-                                claw->AI()->DoCastSpellIfCan(claw, SPELL_MAUL);
-                                break;
-                            case 1:
-                                claw->AI()->DoCastSpellIfCan(claw, SPELL_ROAR);
-                                break;
-                            default:
-                                break;
-                        }
-
-                        claw->AI()->DoCastSpellIfCan(claw, SPELL_FRENZY);
-                        DoScriptText(SAY_COMMAND, m_creature);
-                    }
-
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                if (DoCastSpellIfCan(nullptr, SPELL_BEAR_COMMAND) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
             case MUSELEK_ACTION_RANGED_ATTACK:
@@ -257,10 +237,40 @@ struct boss_swamplord_muselekAI : public CombatAI
     }
 };
 
+// 34662 - Bear Command
+struct BearCommand : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* claw = spell->GetUnitTarget();
+        if (claw && claw->IsAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
+        {
+            uint8 claw_spell = urand(0, 2);
+
+            switch (claw_spell)
+            {
+                case 0:
+                    claw->AI()->DoCastSpellIfCan(claw, SPELL_MAUL);
+                    break;
+                case 1:
+                    claw->AI()->DoCastSpellIfCan(claw, SPELL_ROAR);
+                    break;
+                default:
+                    break;
+            }
+
+            claw->AI()->DoCastSpellIfCan(claw, SPELL_FRENZY);
+            DoScriptText(SAY_COMMAND, spell->GetCaster());
+        }
+    }
+};
+
 void AddSC_boss_swamplord_muselek()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_swamplord_muselek";
     pNewScript->GetAI = &GetNewAIInstance<boss_swamplord_muselekAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<BearCommand>("spell_bear_command");
 }
