@@ -34,6 +34,7 @@ enum // order based on priority
     SPELL_CHAIN_LIGHTNING       = 31717,
     SPELL_SUSPENSION            = 31719,
     SPELL_SUMMON_SPORE_STRIDER  = 38755,
+    SPELL_SUMMON_SPORE_STRIDER_MAIN = 38756,
 
     NPC_BLACK_STALKER           = 17882,
 };
@@ -121,10 +122,8 @@ struct boss_black_stalkerAI : public CombatAI
             }
             case BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER:
             {
-                DoCastSpellIfCan(nullptr, SPELL_SUMMON_SPORE_STRIDER, CAST_TRIGGERED);
-                DoCastSpellIfCan(nullptr, SPELL_SUMMON_SPORE_STRIDER, CAST_TRIGGERED);
-                DoCastSpellIfCan(nullptr, SPELL_SUMMON_SPORE_STRIDER, CAST_TRIGGERED);
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_SPORE_STRIDER_MAIN) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
                 break;
             }
         }
@@ -201,6 +200,16 @@ struct MagneticPull : public SpellScript
     }
 };
 
+// 38756 - Summon Spore Strider
+struct SummonSporeStrider : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        for (uint32 i = 0; i < 3; ++i)
+            spell->GetCaster()->CastSpell(nullptr, SPELL_SUMMON_SPORE_STRIDER, TRIGGERED_OLD_TRIGGERED); // only spell log meant to be sent
+    }
+};
+
 void AddSC_boss_black_stalker()
 {
     Script* pNewScript = new Script;
@@ -211,4 +220,5 @@ void AddSC_boss_black_stalker()
     RegisterSpellScript<StalkerLevitate>("spell_levitate");
     RegisterSpellScript<SomeoneGrabMe>("spell_someone_grab_me");
     RegisterSpellScript<MagneticPull>("spell_magnetic_pull");
+    RegisterSpellScript<SummonSporeStrider>("spell_summon_spore_strider");
 }

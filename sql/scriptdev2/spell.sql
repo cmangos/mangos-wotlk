@@ -218,6 +218,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (31702,'spell_someone_grab_me'),
 (31703,'spell_magnetic_pull'),
 (31704,'spell_levitate'),
+(38756,'spell_summon_spore_strider'),
 (30166,'spell_shadow_grasp_magtheridon'),
 (30410,'spell_shadow_grasp_cube'),
 (30658,'spell_quake_magtheridon'),
