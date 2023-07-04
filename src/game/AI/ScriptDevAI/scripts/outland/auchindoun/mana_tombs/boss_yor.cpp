@@ -112,8 +112,8 @@ enum
 {
     SPELL_BLUE_BANISH_STATE = 39650,
 
-    SAY_RELEASED_1 = -1557036,
-    SAY_RELEASED_2 = -1557037,
+    SAY_RELEASED_1 = 20633,
+    SAY_RELEASED_2 = 20634,
 
     NPC_AMBASSADOR_PAXIVI = 22928,
 
@@ -132,7 +132,7 @@ struct npc_ethereum_prisoner_dungeonAI : public ScriptedAI
         AddCustomAction(PRISONER_TALK, true, [&]
         {
             if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                DoScriptText(SAY_RELEASED_2, m_creature, player);
+                DoBroadcastText(SAY_RELEASED_2, m_creature, player);
             m_creature->ForcedDespawn(600000);
         });
         JustRespawned();
@@ -161,7 +161,7 @@ struct npc_ethereum_prisoner_dungeonAI : public ScriptedAI
         float angle = m_unit->GetAngle(player);
         m_creature->SetFacingTo(angle);
         m_creature->SetOrientation(angle);
-        DoScriptText(SAY_RELEASED_1, m_creature, player);
+        DoBroadcastText(SAY_RELEASED_1, m_creature, player);
         ResetTimer(PRISONER_CREDIT, 500);
         ResetTimer(PRISONER_TALK, 8500);
     }

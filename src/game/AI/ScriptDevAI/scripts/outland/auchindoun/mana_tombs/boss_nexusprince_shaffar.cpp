@@ -30,14 +30,14 @@ EndContentData */
 
 enum
 {
-    SAY_INTRO                       = -1557000,
-    SAY_AGGRO_1                     = -1557001,
-    SAY_AGGRO_2                     = -1557002,
-    SAY_AGGRO_3                     = -1557003,
-    SAY_SLAY_1                      = -1557004,
-    SAY_SLAY_2                      = -1557005,
-    SAY_SUMMON                      = -1557006,
-    SAY_DEAD                        = -1557007,
+    SAY_INTRO                       = 17784,
+    SAY_AGGRO_1                     = 17780,
+    SAY_AGGRO_2                     = 17781,
+    SAY_AGGRO_3                     = 17782,
+    SAY_SLAY_1                      = 17779,
+    SAY_SLAY_2                      = 17778,
+    SAY_SUMMON                      = 17783,
+    SAY_DEAD                        = 17777,
 
     SPELL_BLINK                     = 34605,
     SPELL_FROSTBOLT                 = 32364,
@@ -80,6 +80,7 @@ struct boss_nexusprince_shaffarAI : public CombatAI
         }
         AddDistanceSpell(SPELL_FROSTNOVA);
         SetRangedMode(true, 30.f, TYPE_PROXIMITY);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
     ScriptedInstance* m_instance;
@@ -117,7 +118,7 @@ struct boss_nexusprince_shaffarAI : public CombatAI
     {
         if (!m_hasTaunted && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 100.0f) && m_creature->IsWithinLOSInMap(who))
         {
-            DoScriptText(SAY_INTRO, m_creature);
+            DoBroadcastText(SAY_INTRO, m_creature);
             m_hasTaunted = true;
         }
 
@@ -128,9 +129,9 @@ struct boss_nexusprince_shaffarAI : public CombatAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
     }
 
@@ -140,14 +141,9 @@ struct boss_nexusprince_shaffarAI : public CombatAI
             summoned->AI()->AttackStart(pTarget);
     }
 
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEAD, m_creature);
+        DoBroadcastText(SAY_DEAD, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
@@ -158,7 +154,7 @@ struct boss_nexusprince_shaffarAI : public CombatAI
                 if (DoCastSpellIfCan(nullptr, SPELL_ETHEREAL_BEACON) == CAST_OK)
                 {
                     if (!urand(0, 3))
-                        DoScriptText(SAY_SUMMON, m_creature);
+                        DoBroadcastText(SAY_SUMMON, m_creature);
 
                     ResetCombatAction(action, GetSubsequentActionTimer(ShaffarActions(action)));
                     return;
