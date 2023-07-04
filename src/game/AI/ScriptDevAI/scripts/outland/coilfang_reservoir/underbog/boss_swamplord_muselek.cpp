@@ -27,13 +27,13 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO_1 = -1546000,
-    SAY_AGGRO_2 = -1546001,
-    SAY_AGGRO_3 = -1546002,
-    SAY_COMMAND = -1546003,
-    SAY_SLAY_1  = -1546004,
-    SAY_SLAY_2  = -1546005,
-    SAY_DEATH   = -1546006,
+    SAY_AGGRO_1 = 17506,
+    SAY_AGGRO_2 = 17505,
+    SAY_AGGRO_3 = 17507,
+    SAY_COMMAND = 17511,
+    SAY_SLAY_1  = 17508,
+    SAY_SLAY_2  = 17509,
+    SAY_DEATH   = 17510,
     
     // SWAMPLORD
     SPELL_KNOCK_AWAY           = 18813,
@@ -83,6 +83,7 @@ struct boss_swamplord_muselekAI : public CombatAI
         SetRangedMode(true, 30.f, TYPE_PROXIMITY);
         AddMainSpell(SPELL_SHOOT);
         AddMainSpell(SPELL_MULTI_SHOT);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
     ScriptedInstance* m_instance;
@@ -200,13 +201,13 @@ struct boss_swamplord_muselekAI : public CombatAI
         switch (yell)
         {
             case 0:
-                DoScriptText(SAY_AGGRO_1, m_creature);
+                DoBroadcastText(SAY_AGGRO_1, m_creature);
                 break;
             case 1:
-                DoScriptText(SAY_AGGRO_2, m_creature);
+                DoBroadcastText(SAY_AGGRO_2, m_creature);
                 break;
             case 2:
-                DoScriptText(SAY_AGGRO_3, m_creature);
+                DoBroadcastText(SAY_AGGRO_3, m_creature);
                 break;
         }	
     }
@@ -215,7 +216,7 @@ struct boss_swamplord_muselekAI : public CombatAI
     {
         if (Creature* claw = m_instance->GetSingleCreatureFromStorage(NPC_CLAW))
             m_creature->CastSpell(claw, SPELL_NOTIFY_OF_DEATH, TRIGGERED_NONE); // TODO: what does this do?
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
     }
 
     void JustReachedHome() override 
@@ -226,14 +227,6 @@ struct boss_swamplord_muselekAI : public CombatAI
                 claw->ForcedDespawn();
                 claw->Respawn();
             }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override 
-    {
-        if (urand(0, 1))
-            DoScriptText(SAY_SLAY_1, m_creature);
-        else
-            DoScriptText(SAY_SLAY_2, m_creature);
     }
 };
 
@@ -260,7 +253,7 @@ struct BearCommand : public SpellScript
             }
 
             claw->AI()->DoCastSpellIfCan(claw, SPELL_FRENZY);
-            DoScriptText(SAY_COMMAND, spell->GetCaster());
+            DoBroadcastText(SAY_COMMAND, spell->GetCaster());
         }
     }
 };
