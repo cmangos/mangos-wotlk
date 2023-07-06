@@ -1187,6 +1187,24 @@ struct go_aura_generator : public GameObjectAI
     }
 };
 
+struct go_ai_ectoplasmic_distiller_trap : public GameObjectAI
+{
+    go_ai_ectoplasmic_distiller_trap(GameObject* go) : GameObjectAI(go), m_castTimer(1000) {}
+
+    uint32 m_castTimer;
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_castTimer <= uiDiff)
+        {
+            m_go->CastSpell(nullptr, nullptr, m_go->GetGOInfo()->trap.spellId, TRIGGERED_OLD_TRIGGERED);
+            m_castTimer = 2 * IN_MILLISECONDS;
+        }
+        else
+            m_castTimer -= uiDiff;
+    }
+};
+
 void AddSC_go_scripts()
 {
     Script* pNewScript = new Script;
@@ -1297,5 +1315,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_aura_generator";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_aura_generator>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_ectoplasmic_distiller_trap";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_ai_ectoplasmic_distiller_trap>;
     pNewScript->RegisterSelf();
 }

@@ -130,6 +130,7 @@ UPDATE gameobject_template SET ScriptName='go_containment_coffer' WHERE entry=12
 UPDATE gameobject_template SET ScriptName='go_large_jack_o_lantern' WHERE entry=186887;
 UPDATE gameobject_template SET ScriptName='go_imp_in_a_ball' WHERE entry=185898;
 UPDATE gameobject_template SET ScriptName='go_aura_generator' WHERE entry IN(182524,183333,183791,185324,193579,193982,194029);
+UPDATE gameobject_template SET ScriptName='go_ectoplasmic_distiller_trap' WHERE entry=181054;
 
 /* Outdoor PVP*/
 -- si
