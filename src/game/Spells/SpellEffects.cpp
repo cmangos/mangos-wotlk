@@ -6472,6 +6472,10 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         if (prop->Flags & SUMMON_PROP_FLAG_DO_NOT_FOLLOW_MOUNTED_SUMMONER)
             spawnCreature->SetNoMountedFollow();
 
+        // only done for guardians out of all pets - rest come from db tables
+        if (spawnCreature->GetCreatureInfo()->SpellList)
+            spawnCreature->SetSpellList(spawnCreature->GetCreatureInfo()->SpellList);
+
         spawnCreature->SetLoading(false);
         m_caster->AddGuardian(spawnCreature);
 
