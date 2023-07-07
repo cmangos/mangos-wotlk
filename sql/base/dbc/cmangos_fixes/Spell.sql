@@ -3353,6 +3353,9 @@ INSERT INTO `spell_template` (Id, Attributes, AttributesEx, AttributesEx3, Attri
 INSERT INTO `spell_template` (Id, Attributes, CastingTimeIndex, DurationIndex, RangeIndex, Effect1, EffectDieSides1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectMiscValue1, EffectMiscValueB1, SpellName, SchoolMask, IsServerSide) VALUES
 (62543, 384, 1, 25, 1, 28, 1, 22, 36, 33189, 64, '(Serverside/Non-DB2) Spawn Pyrite', 1, 1);
 
+-- Freya Dummy - 10 targets
+UPDATE spell_template SET MaxAffectedTargets = 10 WHERE id = 51318;
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
