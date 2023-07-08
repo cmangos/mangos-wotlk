@@ -643,6 +643,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 9205:          // Hate to Zero (Hate to Zero)
         case 9460:          // Corrosive Ooze
         case 9464:          // Barbs
+        case 9617:          // Ghost Visual
         case 9769:          // Radiation
         case 9941:          // Spell Reflection
         case 10022:         // Deadly Poison
@@ -707,6 +708,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 21862:         // Radiation
         case 22128:         // Thorns
         case 22578:         // Glowy (Black)
+        case 22650:         // Ghost Visual
         case 22735:         // Spirit of Runn Tum
         case 22781:         // Thornling
         case 22788:         // Grow
@@ -719,6 +721,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 27578:         // Battle Shout
         case 27793:         // Disease Cloud
         case 27987:         // Unholy Aura
+        case 28002:         // Ghost Visual
         case 28126:         // Spirit Particles (purple)
         case 28156:         // Disease Cloud
         case 28362:         // Disease Cloud
@@ -728,6 +731,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 29526:         // Hate to Zero (Hate to Zero)
         case 30205:         // Shadow Cage - Magtheridon
         case 30982:         // Crippling Poison
+        case 30987:         // Ghost Visual (Red)
         case 31332:         // Dire Wolf Visual
         case 31387:         // Time Rift Channel
         case 31607:         // Disease Cloud
@@ -756,7 +760,9 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 35408:         // Fear Proc
         case 35596:         // Power of the Legion
         case 35747:         // Flame Buffet
+        case 35838:         // Ghost Visual
         case 35841:         // Draenei Spirit Visual
+        case 35847:         // Ghost Visual Red
         case 35850:         // Draenei Spirit Visual 2
         case 35917:         // Firey Intellect
         case 36006:         // Fel Fire Aura
