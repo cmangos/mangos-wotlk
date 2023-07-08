@@ -5149,15 +5149,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1555028','Keep your minds focused for the days of reckoning are close at hand. Soon, the destroyer of worlds will return to make good on his promise. Soon the destruction of all that is will begin!','10522','1','0','0','0','vorpil SAY_INTRO');
 
 -- -1 556 000 SETHEKK HALLS
-INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1556007','Ra-ak! Trinkets, yes. Pretty trinkets! Ak! Power, great power. Ra-kaw! Power in trinkets! Ak-caw!','10557','1','0','0','17769','ikiss SAY_INTRO'),
-('-1556008','Mmm, you make war on Ikiss? Aa-ak!','10554','1','0','0','17765','ikiss SAY_AGGRO_1'),
-('-1556009','Ikiss cut you, pretty -- ak-a-ak -- slice you, yes!','10555','1','0','0','17767','ikiss SAY_AGGRO_2'),
-('-1556010','Ak-a-ra-k! No escape for -- caw -- you!','10556','1','0','0','17768','ikiss SAY_AGGRO_3'),
-('-1556011','You die -- ka! Stay away from trinkets!','10558','1','0','0','17763','ikiss SAY_SLAY_1'),
-('-1556012','<squawk>','10559','1','0','0','0','ikiss SAY_SLAY_2'),
-('-1556013','Ikiss will not -- rak, rak -- die...','10560','1','0','0','17762','ikiss SAY_DEATH'),
-('-1556015','%s begins to channel arcane energy....','0','3','0','0','19738','ikiss EMOTE_ARCANE_EXP');
 
 -- -1 557 000 MANA TOMBS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

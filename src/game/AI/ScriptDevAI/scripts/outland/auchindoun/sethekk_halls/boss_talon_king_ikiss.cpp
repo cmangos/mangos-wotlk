@@ -27,14 +27,14 @@ EndScriptData */
 
 enum
 {
-    SAY_INTRO                   = -1556007,
-    SAY_AGGRO_1                 = -1556008,
-    SAY_AGGRO_2                 = -1556009,
-    SAY_AGGRO_3                 = -1556010,
-    SAY_SLAY_1                  = -1556011,
-    SAY_SLAY_2                  = -1556012,
-    SAY_DEATH                   = -1556013,
-    EMOTE_ARCANE_EXP            = -1556015,
+    SAY_INTRO                   = 17769,
+    SAY_AGGRO_1                 = 17765,
+    SAY_AGGRO_2                 = 17767,
+    SAY_AGGRO_3                 = 17768,
+    SAY_SLAY_1                  = 17763,
+    SAY_SLAY_2                  = 17764,
+    SAY_DEATH                   = 17762,
+    EMOTE_ARCANE_EXP            = 19738,
 
     SPELL_BLINK                 = 38194,
     SPELL_MANA_SHIELD           = 38151,
