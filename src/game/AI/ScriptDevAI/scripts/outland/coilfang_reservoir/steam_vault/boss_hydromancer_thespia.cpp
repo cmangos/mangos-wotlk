@@ -27,6 +27,7 @@ mob_coilfang_waterelemental
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "steam_vault.h"
 
 enum
@@ -46,16 +47,15 @@ enum
     SPELL_SUMMON_ELEMENTALS     = 31476,            // not sure where to use this
 };
 
-struct boss_thespiaAI : public ScriptedAI
+struct boss_thespiaAI : public CombatAI
 {
-    boss_thespiaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_thespiaAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
     bool m_bIsRegularMode;
 
     uint32 m_uiLightningCloudTimer;
@@ -71,24 +71,19 @@ struct boss_thespiaAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HYDROMANCER_THESPIA, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_HYDROMANCER_THESPIA, FAIL);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEAD, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HYDROMANCER_THESPIA, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_HYDROMANCER_THESPIA, DONE);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
@@ -97,8 +92,8 @@ struct boss_thespiaAI : public ScriptedAI
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HYDROMANCER_THESPIA, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_HYDROMANCER_THESPIA, IN_PROGRESS);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -150,15 +145,10 @@ struct boss_thespiaAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_thespiaAI(Creature* pCreature)
-{
-    return new boss_thespiaAI(pCreature);
-}
-
 void AddSC_boss_hydromancer_thespia()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_hydromancer_thespia";
-    pNewScript->GetAI = &GetAI_boss_thespiaAI;
+    pNewScript->GetAI = &GetNewAIInstance<boss_thespiaAI>;
     pNewScript->RegisterSelf();
 }
