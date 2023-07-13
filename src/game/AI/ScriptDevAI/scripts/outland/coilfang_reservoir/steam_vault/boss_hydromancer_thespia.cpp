@@ -32,14 +32,14 @@ EndContentData */
 
 enum
 {
-    SAY_SUMMON                  = -1545000,
-    SAY_CLOUD                   = -1545024,
-    SAY_AGGRO_1                 = -1545001,
-    SAY_AGGRO_2                 = -1545002,
-    SAY_AGGRO_3                 = -1545003,
-    SAY_SLAY_1                  = -1545004,
-    SAY_SLAY_2                  = -1545005,
-    SAY_DEAD                    = -1545006,
+    SAY_SUMMON                  = -1545000, // has no bct, but has sound - keeping it as script text
+    SAY_CLOUD                   = 19456,
+    SAY_AGGRO_1                 = 17696,
+    SAY_AGGRO_2                 = 17697,
+    SAY_AGGRO_3                 = 17698,
+    SAY_SLAY_1                  = 17701,
+    SAY_SLAY_2                  = 17702,
+    SAY_DEAD                    = 17704,
 
     SPELL_LIGHTNING_CLOUD       = 25033,
     SPELL_LUNG_BURST            = 31481,
@@ -58,17 +58,6 @@ struct boss_thespiaAI : public CombatAI
     ScriptedInstance* m_instance;
     bool m_bIsRegularMode;
 
-    uint32 m_uiLightningCloudTimer;
-    uint32 m_uiLungBurstTimer;
-    uint32 m_uiEnvelopingWindsTimer;
-
-    void Reset() override
-    {
-        m_uiLightningCloudTimer  = 15000;
-        m_uiLungBurstTimer       = urand(15000, 18000);
-        m_uiEnvelopingWindsTimer = urand(20000, 25000);
-    }
-
     void JustReachedHome() override
     {
         if (m_instance)
@@ -77,7 +66,7 @@ struct boss_thespiaAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEAD, m_creature);
+        DoBroadcastText(SAY_DEAD, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_HYDROMANCER_THESPIA, DONE);
@@ -87,61 +76,20 @@ struct boss_thespiaAI : public CombatAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
 
         if (m_instance)
             m_instance->SetData(TYPE_HYDROMANCER_THESPIA, IN_PROGRESS);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // LightningCloud_Timer
-        if (m_uiLightningCloudTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_LIGHTNING_CLOUD) == CAST_OK)
-                {
-                    if (urand(0, 1))
-                        DoScriptText(SAY_CLOUD, m_creature);
-                    m_uiLightningCloudTimer = m_bIsRegularMode ? 30000 : 10000;
-                }
-            }
-        }
-        else
-            m_uiLightningCloudTimer -= uiDiff;
-
-        // LungBurst_Timer
-        if (m_uiLungBurstTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_LUNG_BURST) == CAST_OK)
-                    m_uiLungBurstTimer = urand(7000, 12000);
-            }
-        }
-        else
-            m_uiLungBurstTimer -= uiDiff;
-
-        // EnvelopingWinds_Timer
-        if (m_uiEnvelopingWindsTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_ENVELOPING_WINDS) == CAST_OK)
-                    m_uiEnvelopingWindsTimer = m_bIsRegularMode ? 10000 : 15000;
-            }
-        }
-        else
-            m_uiEnvelopingWindsTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        if (spellInfo->Id == SPELL_LIGHTNING_CLOUD)
+            if (urand(0, 1))
+                DoBroadcastText(SAY_CLOUD, m_creature);
     }
 };
 

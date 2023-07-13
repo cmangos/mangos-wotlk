@@ -4866,12 +4866,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 -- -1 545 000 THE STEAMVAULT
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1545000','Surge forth my pets!','10360','1','0','0','0','thespia SAY_SUMMON'),
-('-1545001','The depths will consume you!','10361','1','0','0','17696','thespia SAY_AGGRO_1'),
-('-1545002','Meet your doom, surface dwellers!','10362','1','0','0','17697','thespia SAY_AGGRO_2'),
-('-1545003','You will drown in blood!','10363','1','0','0','17698','thespia SAY_AGGRO_3'),
-('-1545004','To the depths of oblivion with you!','10364','1','0','0','17701','thespia SAY_SLAY_1'),
-('-1545005','For my lady and master!','10365','1','0','0','17702','thespia SAY_SLAY_2'),
-('-1545006','Our matron will be.. the end of.. you..','10366','1','0','0','17704','thespia SAY_DEAD'),
 
 ('-1545007','I''m bringin'' the pain!','10367','1','0','0','17719','mekgineer SAY_MECHANICS'),
 ('-1545008','You''re in for a world of hurt!','10368','1','0','0','0','mekgineer SAY_AGGRO_1'),
@@ -4890,9 +4884,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1545020','Ba''ahntha sol''dorei!','10394','1','0','0','0','kalithresh SAY_AGGRO3'),
 ('-1545021','Scram, surface filth!','10395','1','0','0','17729','kalithresh SAY_SLAY1'),
 ('-1545022','Ah ha ha ha ha ha ha!','10396','1','0','0','0','kalithresh SAY_SLAY2'),
+<<<<<<< HEAD
 ('-1545023','For her Excellency... for... Vashj!','10397','1','0','0','17730','kalithresh SAY_DEATH'),
 
 ('-1545024','Enjoy the storm, warm bloods!','0','1','0','0','19456','thespia SAY_CLOUD');
+=======
+('-1545023','For her Excellency... for... Vashj!','10397','1','0','0','17730','kalithresh SAY_DEATH');
+>>>>>>> 9648d3c0b7... SV: Port Thespia to spell lists and bct
 
 -- -1 546 000 THE UNDERBOG
 
