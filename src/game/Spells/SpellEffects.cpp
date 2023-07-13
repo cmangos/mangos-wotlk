@@ -3157,19 +3157,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 50439, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 51330:                                 // Shoot RJR
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // guessed chances
-                    if (roll_chance_i(75))
-                        m_caster->CastSpell(unitTarget, roll_chance_i(50) ? 51332 : 51366, TRIGGERED_OLD_TRIGGERED, m_CastItem);
-                    else
-                        m_caster->CastSpell(unitTarget, 51331, TRIGGERED_OLD_TRIGGERED, m_CastItem);
-
-                    return;
-                }
                 case 51336:                                 // Magic Pull
                 {
                     if (!unitTarget)

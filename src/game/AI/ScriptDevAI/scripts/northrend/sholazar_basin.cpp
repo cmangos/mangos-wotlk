@@ -595,6 +595,37 @@ bool GOUse_go_quest_still_at_it_credit(Player* pPlayer, GameObject* pGo)
     return false;
 }
 
+// 51330 - Shoot RJR
+struct ShootRJR : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const
+    {
+        if (!spell->m_targets.getUnitTargetGuid().IsCreature() || spell->m_targets.getUnitTargetGuid().GetEntry() != 28054) // Lucky Wilhelm
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_BAD_TARGETS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_27;
+        }
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        // guessed chances
+        if (roll_chance_i(75))
+            caster->CastSpell(target, roll_chance_i(25) ? 51366 : 51332, TRIGGERED_OLD_TRIGGERED);
+        else
+            caster->CastSpell(target, 51331, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -627,4 +658,6 @@ void AddSC_sholazar_basin()
     pNewScript->Name = "go_quest_still_at_it_credit";
     pNewScript->pGOUse = &GOUse_go_quest_still_at_it_credit;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ShootRJR>("spell_shoot_rjr");
 }

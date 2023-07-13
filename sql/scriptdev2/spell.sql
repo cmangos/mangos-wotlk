@@ -718,6 +718,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51088,'spell_have_amberseed'),
 (51094,'spell_have_chilled_serpent_mucus'),
 (51173,'spell_a_tangled_skein_encasing_webs_effect'),
+(51330,'spell_shoot_rjr'),
 (51511,'spell_toss_ice_boulder'),
 (51590,'spell_toss_ice_boulder'),
 (51519,'spell_death_knight_initiate_visual'),
