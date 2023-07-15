@@ -832,12 +832,15 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 switch (tmp.formationData.command)
                 {
                      case 150: // SetFormation
+                     {
                          if (tmp.textId[0] >= SpawnGroupFormationType::SPAWN_GROUP_FORMATION_TYPE_COUNT)
                          {
                              sLog.outErrorDb("Table `%s` uses invalid formation shape id(%u) for script id %u. Command[51], subcommand[%u]",
                                  tablename, tmp.textId[0], tmp.id, tmp.formationData.command);
                              continue;
                          }
+                         break;
+                     }
                      case 151: // Remove formation
                      {
                          auto const& spgCont = sObjectMgr.GetSpawnGroupContainer()->spawnGroupMap;
@@ -943,6 +946,7 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     sLog.outErrorDb("Table `%s` has invalid apply (0 or 1) assigned %d", tablename, tmp.stringId.apply);
                     continue;
                 }
+                break;
             }
             default:
             {
