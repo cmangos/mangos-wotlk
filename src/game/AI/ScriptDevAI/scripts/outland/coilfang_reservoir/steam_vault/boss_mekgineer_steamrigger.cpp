@@ -153,34 +153,31 @@ struct boss_mekgineer_steamriggerAI : public CombatAI
     }
 };
 
+enum SteamriggerMechanicActions
+{
+    STEAMRIGGER_MECHANIC_REPAIR,
+    STEAMRIGGER_MECHANIC_MAX,
+};
+
 struct mob_steamrigger_mechanicAI : public CombatAI
 {
-    mob_steamrigger_mechanicAI(Creature* creature) : CombatAI(creature, 0),
+    mob_steamrigger_mechanicAI(Creature* creature) : CombatAI(creature, STEAMRIGGER_MECHANIC_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
+        AddCombatAction(STEAMRIGGER_MECHANIC_REPAIR, 15000u);
         SetReactState(REACT_DEFENSIVE);
     }
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
 
-    void MoveInLineOfSight(Unit* who) override
+    void ExecuteAction(uint32 action) override
     {
-        // Don't attack players unless attacked
-        if (who->GetEntry() == NPC_STEAMRIGGER)
+        if (action == STEAMRIGGER_MECHANIC_REPAIR)
         {
-            if (m_instance->GetData(TYPE_MEKGINEER_STEAMRIGGER) == IN_PROGRESS)
-            {
-                // Channel the repair spell on Steamrigger
-                // This will also stop creature movement and will allow them to continue to follow the boss after channeling is finished or the boss is out of range
-                if (m_creature->IsWithinDistInMap(who, 2 * INTERACTION_DISTANCE))
-                {
-                    DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_REPAIR : SPELL_REPAIR_H);
-                    SetReactState(REACT_AGGRESSIVE);
-                }
-            }
+            if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_REPAIR : SPELL_REPAIR_H) == CAST_OK)
+                ResetCombatAction(action, 2000);
         }
-        ScriptedAI::MoveInLineOfSight(who);
     }
 };
 
@@ -193,6 +190,17 @@ struct SummonGnomes : public AuraScript
         target->CastSpell(nullptr, SPELL_SUMMON_GNOME_1, TRIGGERED_OLD_TRIGGERED);
         target->CastSpell(nullptr, SPELL_SUMMON_GNOME_2, TRIGGERED_OLD_TRIGGERED);
         target->CastSpell(nullptr, SPELL_SUMMON_GNOME_3, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 31532, 37936 - Repair
+struct RepairMekgineer : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            if (Unit* caster = aura->GetCaster())
+                caster->AddCooldown(*aura->GetSpellProto(), nullptr, false, 4000u);
     }
 };
 
@@ -209,4 +217,5 @@ void AddSC_boss_mekgineer_steamrigger()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SummonGnomes>("spell_summon_gnomes");
+    RegisterSpellScript<RepairMekgineer>("spell_repair_mekgineer");
 }
