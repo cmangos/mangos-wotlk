@@ -27,30 +27,34 @@ mob_steamrigger_mechanic
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "steam_vault.h"
 
 enum
 {
-    SAY_MECHANICS               = -1545007,
-    SAY_AGGRO_1                 = -1545008,
-    SAY_AGGRO_2                 = -1545009,
-    SAY_AGGRO_3                 = -1545010,
-    SAY_AGGRO_4                 = -1545011,
-    SAY_SLAY_1                  = -1545012,
-    SAY_SLAY_2                  = -1545013,
-    SAY_SLAY_3                  = -1545014,
-    SAY_DEATH                   = -1545015,
+    SAY_MECHANICS               = 14602,
+    SAY_AGGRO_1                 = 17716,
+    SAY_AGGRO_2                 = 17717,
+    SAY_AGGRO_3                 = 17718,
+    SAY_AGGRO_4                 = 17719,
+    SAY_SLAY_1                  = 17720,
+    SAY_SLAY_2                  = 17721,
+    SAY_SLAY_3                  = 17722,
+    SAY_DEATH                   = 17723,
 
     SPELL_SUPER_SHRINK_RAY      = 31485,
     SPELL_SAW_BLADE             = 31486,
     SPELL_ELECTRIFIED_NET       = 35107,
     SPELL_BERSERK               = 26662,
 
+    SPELL_INVIS_AND_STEALTH_DET = 18950,
+
     NPC_STEAMRIGGER_MECHANIC    = 17951,
 
     SPELL_SUMMON_GNOME_1        = 31528,
     SPELL_SUMMON_GNOME_2        = 31529,
     SPELL_SUMMON_GNOME_3        = 31530,
+    SPELL_SUMMON_GNOMES         = 31531,
 
     // Mechanic spells
     SPELL_DISPEL_MAGIC          = 17201,
@@ -58,89 +62,70 @@ enum
     SPELL_REPAIR_H              = 37936,
 };
 
-struct SummonLocation
-{
-    float m_fX, m_fY, m_fZ, m_ori;
-};
-
-// Spawn locations used in spell_target_position
-static const SummonLocation aSteamriggerSpawnLocs[] =
-{
-    { -316.101f, -166.444f, -7.66f, 2.5f }, // TODO: this orientation is guesswork
-    { -348.497f, -161.719f, -7.66f, 0.3621517f },
-    { -331.161f, -112.212f, -7.66f, 5.259035f },
-};
-
 static const uint32 gnomeSpells[] = { SPELL_SUMMON_GNOME_1, SPELL_SUMMON_GNOME_2, SPELL_SUMMON_GNOME_3 };
 
-struct boss_mekgineer_steamriggerAI : public ScriptedAI
+enum MekgineerActions
 {
-    boss_mekgineer_steamriggerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    MEKGINEER_SUMMON_GNOMES,
+    MEKGINEER_ACTION_MAX,
+    MEKGINEER_SPAWN_GNOME
+};
+
+struct boss_mekgineer_steamriggerAI : public CombatAI
+{
+    boss_mekgineer_steamriggerAI(Creature* creature) : CombatAI(creature, MEKGINEER_ACTION_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3);
+        AddTimerlessCombatAction(MEKGINEER_SUMMON_GNOMES, true);
+        if (!m_isRegularMode)
+            AddCustomAction(MEKGINEER_SPAWN_GNOME, 20000u, [&]()
+            {
+                m_creature->CastSpell(nullptr, gnomeSpells[urand(0, 2)], TRIGGERED_OLD_TRIGGERED);
+            }, TIMER_COMBAT_COMBAT);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiShrinkTimer;
-    uint32 m_uiSawBladeTimer;
-    uint32 m_uiElectrifiedNetTimer;
-    uint32 m_uiMechanicTimer;
-    uint32 m_uiBerserkTimer;
-    uint8 m_uiMechanicPhaseCount;
+    uint8 m_mechanicPhaseCount;
 
     GuidVector m_spawns;
 
     void Reset() override
     {
-        m_uiShrinkTimer         = 20000;
-        m_uiSawBladeTimer       = 15000;
-        m_uiElectrifiedNetTimer = 10000;
-        m_uiMechanicTimer       = 20000;
-        m_uiMechanicPhaseCount  = 1;
-        m_uiBerserkTimer        = 300000;
+        CombatAI::Reset();
+        DoCastSpellIfCan(nullptr, SPELL_INVIS_AND_STEALTH_DET, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        m_mechanicPhaseCount  = 1;
 
         DespawnGuids(m_spawns);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_MEKGINEER_STEAMRIGGER, FAIL);
     }
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, DONE);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
-        }
+        if (m_instance)
+            m_instance->SetData(TYPE_MEKGINEER_STEAMRIGGER, DONE);
     }
 
     void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_MEKGINEER_STEAMRIGGER, IN_PROGRESS);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -152,142 +137,62 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         }
     }
 
-    // Wrapper to summon three Mechanics
-    void SummonMechanichs()
+    void ExecuteAction(uint32 action) override
     {
-        DoScriptText(SAY_MECHANICS, m_creature);
-
-        m_creature->CastSpell(nullptr, SPELL_SUMMON_GNOME_1, TRIGGERED_OLD_TRIGGERED);
-        m_creature->CastSpell(nullptr, SPELL_SUMMON_GNOME_2, TRIGGERED_OLD_TRIGGERED);
-        m_creature->CastSpell(nullptr, SPELL_SUMMON_GNOME_3, TRIGGERED_OLD_TRIGGERED);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiShrinkTimer < uiDiff)
+        if (action == MEKGINEER_SUMMON_GNOMES)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUPER_SHRINK_RAY) == CAST_OK)
-                m_uiShrinkTimer = 20000;
-        }
-        else
-            m_uiShrinkTimer -= uiDiff;
-
-        if (m_uiSawBladeTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
-            if (!pTarget)
-                pTarget = m_creature->GetVictim();
-
-            if (pTarget)
+            if (m_creature->GetHealthPercent() < (100 - 25 * m_mechanicPhaseCount))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_SAW_BLADE) == CAST_OK)
-                    m_uiSawBladeTimer = 15000;
-            }
-        }
-        else
-            m_uiSawBladeTimer -= uiDiff;
-
-        if (m_uiElectrifiedNetTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_ELECTRIFIED_NET) == CAST_OK)
-                    m_uiElectrifiedNetTimer = 10000;
-            }
-        }
-        else
-            m_uiElectrifiedNetTimer -= uiDiff;
-
-        // On Heroic mode summon a mechanic at each 20 secs
-        if (!m_bIsRegularMode)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_GNOMES) == CAST_OK)
                 {
-                    m_uiBerserkTimer = 0;
+                    DoBroadcastText(SAY_MECHANICS, m_creature);
+                    ++m_mechanicPhaseCount;
                 }
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
-		
-            if (m_uiMechanicTimer < uiDiff)
-            {
-                m_creature->CastSpell(nullptr, gnomeSpells[urand(0, 2)], TRIGGERED_OLD_TRIGGERED);
-                m_uiMechanicTimer = 20000;
-            }
-            else
-                m_uiMechanicTimer -= uiDiff;
         }
-
-        if (m_creature->GetHealthPercent() < (100 - 25 * m_uiMechanicPhaseCount))
-        {
-            SummonMechanichs();
-            ++m_uiMechanicPhaseCount;
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
 
-struct mob_steamrigger_mechanicAI : public ScriptedAI
+struct mob_steamrigger_mechanicAI : public CombatAI
 {
-    mob_steamrigger_mechanicAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_steamrigger_mechanicAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        SetReactState(REACT_DEFENSIVE);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
-    bool m_bCanStartAttack;
-
-    void Reset() override
+    void MoveInLineOfSight(Unit* who) override
     {
-        m_bCanStartAttack = false;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        // Trigger attack only for players
-        if (pWho->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        m_creature->InterruptNonMeleeSpells(false);
-        ScriptedAI::AttackStart(pWho);
-        m_bCanStartAttack = true;
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // Return if already in combat
-        if (m_bCanStartAttack)
-            return;
-
         // Don't attack players unless attacked
-        if (pWho->GetEntry() == NPC_STEAMRIGGER)
+        if (who->GetEntry() == NPC_STEAMRIGGER)
         {
-            if (m_pInstance->GetData(TYPE_MEKGINEER_STEAMRIGGER) == IN_PROGRESS)
+            if (m_instance->GetData(TYPE_MEKGINEER_STEAMRIGGER) == IN_PROGRESS)
             {
                 // Channel the repair spell on Steamrigger
                 // This will also stop creature movement and will allow them to continue to follow the boss after channeling is finished or the boss is out of range
-                if (m_creature->IsWithinDistInMap(pWho, 2 * INTERACTION_DISTANCE))
-                    DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_REPAIR : SPELL_REPAIR_H);
+                if (m_creature->IsWithinDistInMap(who, 2 * INTERACTION_DISTANCE))
+                {
+                    DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_REPAIR : SPELL_REPAIR_H);
+                    SetReactState(REACT_AGGRESSIVE);
+                }
             }
         }
+        ScriptedAI::MoveInLineOfSight(who);
     }
+};
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+// 31531 - Summon Gnomes
+struct SummonGnomes : public AuraScript
+{
+    void OnPeriodicTickEnd(Aura* aura) const override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        Unit* target = aura->GetTarget();
+        target->CastSpell(nullptr, SPELL_SUMMON_GNOME_1, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(nullptr, SPELL_SUMMON_GNOME_2, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(nullptr, SPELL_SUMMON_GNOME_3, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -302,4 +207,6 @@ void AddSC_boss_mekgineer_steamrigger()
     pNewScript->Name = "mob_steamrigger_mechanic";
     pNewScript->GetAI = &GetNewAIInstance<mob_steamrigger_mechanicAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonGnomes>("spell_summon_gnomes");
 }

@@ -4867,16 +4867,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1545000','Surge forth my pets!','10360','1','0','0','0','thespia SAY_SUMMON'),
 
-('-1545007','I''m bringin'' the pain!','10367','1','0','0','17719','mekgineer SAY_MECHANICS'),
-('-1545008','You''re in for a world of hurt!','10368','1','0','0','0','mekgineer SAY_AGGRO_1'),
-('-1545009','Eat hot metal, scumbag!','10369','1','0','0','17717','mekgineer SAY_AGGRO_2'),
-('-1545010','I''ll come over there!','10370','1','0','0','17718','mekgineer SAY_AGGRO_3'),
-('-1545011','I''m bringin'' the pain!','10371','1','0','0','17719','mekgineer SAY_AGGRO_4'),
-('-1545012','You just got served, punk!','10372','1','0','0','17720','mekgineer SOUND_SLAY_1'),
-('-1545013','I own you!','10373','1','0','0','17721','mekgineer SOUND_SLAY_2'),
-('-1545014','Have fun dyin'', cupcake!','10374','1','0','0','17722','mekgineer SOUND_SLAY_3'),
-('-1545015','Mommy!','10375','1','0','0','832','mekgineer SAY_DEATH'),
-
 ('-1545016','You deem yourselves worthy simply because you bested my guards? Our work here will not be compromised!','10390','1','0','0','17724','kalithresh SAY_INTRO'),
 ('-1545017','This is not nearly over...','10391','1','0','0','17725','kalithresh SAY_REGEN'),
 ('-1545018','Your head will roll!','10392','1','0','0','17726','kalithresh SAY_AGGRO1'),
@@ -4884,13 +4874,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1545020','Ba''ahntha sol''dorei!','10394','1','0','0','0','kalithresh SAY_AGGRO3'),
 ('-1545021','Scram, surface filth!','10395','1','0','0','17729','kalithresh SAY_SLAY1'),
 ('-1545022','Ah ha ha ha ha ha ha!','10396','1','0','0','0','kalithresh SAY_SLAY2'),
-<<<<<<< HEAD
-('-1545023','For her Excellency... for... Vashj!','10397','1','0','0','17730','kalithresh SAY_DEATH'),
-
-('-1545024','Enjoy the storm, warm bloods!','0','1','0','0','19456','thespia SAY_CLOUD');
-=======
 ('-1545023','For her Excellency... for... Vashj!','10397','1','0','0','17730','kalithresh SAY_DEATH');
->>>>>>> 9648d3c0b7... SV: Port Thespia to spell lists and bct
 
 -- -1 546 000 THE UNDERBOG
 
