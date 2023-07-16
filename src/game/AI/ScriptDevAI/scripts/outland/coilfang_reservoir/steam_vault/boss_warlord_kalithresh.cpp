@@ -22,19 +22,19 @@ SDCategory: Coilfang Resevoir, The Steamvault
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "steam_vault.h"
 
 enum
 {
-    SAY_INTRO                   = -1545016,
-    SAY_REGEN                   = -1545017,
-    SAY_AGGRO1                  = -1545018,
-    SAY_AGGRO2                  = -1545019,
-    SAY_AGGRO3                  = -1545020,
-    SAY_SLAY1                   = -1545021,
-    SAY_SLAY2                   = -1545022,
-    SAY_DEATH                   = -1545023,
+    SAY_INTRO                   = 17724,
+    SAY_REGEN                   = 17725,
+    SAY_AGGRO1                  = 17726,
+    SAY_AGGRO2                  = 17727,
+    SAY_AGGRO3                  = 17728,
+    SAY_SLAY1                   = 17729,
+    SOUND_SLAY2                 = 10396,
+    SAY_DEATH                   = 17730,
 
     SPELL_SPELL_REFLECTION      = 31534,
     SPELL_IMPALE                = 39061,
@@ -54,53 +54,34 @@ enum WarlordKalithreshActions // order based on priority
     WARLORD_KALITHRESH_ACTION_MAX,
 };
 
-struct boss_warlord_kalithreshAI : public ScriptedAI
+struct boss_warlord_kalithreshAI : public CombatAI
 {
-    boss_warlord_kalithreshAI(Creature* creature) : ScriptedAI(creature, WARLORD_KALITHRESH_ACTION_MAX)
+    boss_warlord_kalithreshAI(Creature* creature) : CombatAI(creature, WARLORD_KALITHRESH_ACTION_MAX),
+        m_instance(static_cast<instance_steam_vault*>(creature->GetInstanceData())), m_hasTaunted(false)
     {
-        m_instance = (instance_steam_vault*)creature->GetInstanceData();
-        m_bHasTaunted = false;
-
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, 0u);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_REFLECTION, 0u);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_IMPALE, 0u);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 0u);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, 15000, 20000);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_REFLECTION, 15000, 20000);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_IMPALE, 7000, 14000);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 10000, 15000);
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
-            {
-                return x < -95.7f && y > -439.6f;
-            });
-        Reset();
+        {
+            return x < -95.7f && y > -439.6f;
+        });
+        AddOnKillText(SAY_SLAY1);
+        AddOnKillSound(SOUND_SLAY2); // is not used on retail, but we have sound file so might as well
     }
 
     instance_steam_vault* m_instance;
     ObjectGuid m_distillerGuid;
 
-    bool m_bHasTaunted;
+    bool m_hasTaunted;
 
     void Reset() override
     {
-        for (uint32 i = 0; i < WARLORD_KALITHRESH_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE));
-        ResetTimer(WARLORD_KALITHRESH_ACTION_REFLECTION, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_REFLECTION));
-        ResetTimer(WARLORD_KALITHRESH_ACTION_IMPALE, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_IMPALE));
-        ResetTimer(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_HEAD_CRACK));
+        CombatAI::Reset();
 
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
-    }
-
-    uint32 GetInitialActionTimer(const uint32 action) const
-    {
-        switch (action)
-        {
-            case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(15000, 20000);
-            case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(15000, 20000);
-            case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7000, 14000);
-            case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(10000, 15000);
-            default: return 0; // never occurs but for compiler
-        }
     }
 
     uint32 GetSubsequentActionTimer(const uint32 action) const
@@ -121,61 +102,56 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
             m_instance->SetData(TYPE_WARLORD_KALITHRESH, FAIL);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO3, m_creature); break;
         }
 
         if (m_instance)
             m_instance->SetData(TYPE_WARLORD_KALITHRESH, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_WARLORD_KALITHRESH, DONE);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_bHasTaunted && m_creature->IsWithinDistInMap(pWho, 45.0f))
+        if (!m_hasTaunted && m_creature->IsWithinDistInMap(who, 45.0f))
         {
-            DoScriptText(SAY_INTRO, m_creature);
-            m_bHasTaunted = true;
+            DoBroadcastText(SAY_INTRO, m_creature);
+            m_hasTaunted = true;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void MovementInform(uint32 uiType, uint32 uiPointId)
+    void MovementInform(uint32 type, uint32 pointId)
     {
-        if (uiType != POINT_MOTION_TYPE || !uiPointId)
+        if (type != POINT_MOTION_TYPE || !pointId)
             return;
 
-        if (uiPointId == POINT_MOVE_DISTILLER)
+        if (pointId == POINT_MOVE_DISTILLER)
         {
             SetCombatScriptStatus(false);
             SetCombatMovement(true);
             SetMeleeEnabled(true);
             DoStartMovement(m_creature->GetVictim());
-            DoCastSpellIfCan(m_creature, SPELL_WARLORDS_RAGE);
+            DoCastSpellIfCan(nullptr, SPELL_WARLORDS_RAGE);
 
-            // Make Distiller cast on arrival
-            if (Creature* Distiller = m_creature->GetMap()->GetCreature(m_distillerGuid))
+            // Make distiller cast on arrival
+            if (Creature* distiller = m_creature->GetMap()->GetCreature(m_distillerGuid))
             {
-                Distiller->CastSpell(Distiller, SPELL_WARLORDS_RAGE_NAGA, TRIGGERED_OLD_TRIGGERED);
-                Distiller->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                distiller->CastSpell(nullptr, SPELL_WARLORDS_RAGE_NAGA, TRIGGERED_OLD_TRIGGERED);
+                distiller->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             }
         }
     }
@@ -193,18 +169,18 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
                 {
                     case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE:
                     {
-                        DoScriptText(SAY_REGEN, m_creature);
+                        DoBroadcastText(SAY_REGEN, m_creature);
                         SetCombatScriptStatus(true);
                         SetCombatMovement(false);
                         SetMeleeEnabled(false);
                         // Move to closest distiller
-                        if (Creature* Distiller = GetClosestCreatureWithEntry(m_creature, NPC_NAGA_DISTILLER, 100.0f))
+                        if (Creature* distiller = GetClosestCreatureWithEntry(m_creature, NPC_NAGA_DISTILLER, 100.0f))
                         {
                             float fX, fY, fZ;
-                            Distiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+                            distiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
                             m_creature->SetWalk(false, true); // Prevent him from slowing down while meleehit/casted upon while starting to move
                             m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTILLER, fX, fY, fZ);
-                            m_distillerGuid = Distiller->GetObjectGuid();
+                            m_distillerGuid = distiller->GetObjectGuid();
 
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -239,8 +215,7 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
                     {
                         if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEAD_CRACK) == CAST_OK)
                         {
-                            ResetTimer(i, GetSubsequentActionTimer(i));
-                            SetActionReadyStatus(i, false);
+                            ResetCombatAction(i, GetSubsequentActionTimer(i));
                             return;
                         }
                         break;
@@ -249,52 +224,30 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
             }
         }
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff, m_creature->IsInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        ExecuteActions();
-        DoMeleeAttackIfReady();
-    }
 };
 
-struct mob_naga_distillerAI : public Scripted_NoMovementAI
+struct mob_naga_distillerAI : public CombatAI
 {
-    mob_naga_distillerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    mob_naga_distillerAI(Creature* creature) : CombatAI(creature, 0) { }
 
     void Reset() override
     {
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+        SetReactState(REACT_PASSIVE);
     }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-UnitAI* GetAI_boss_warlord_kalithresh(Creature* pCreature)
-{
-    return new boss_warlord_kalithreshAI(pCreature);
-}
-
-UnitAI* GetAI_mob_naga_distiller(Creature* pCreature)
-{
-    return new mob_naga_distillerAI(pCreature);
-}
 
 void AddSC_boss_warlord_kalithresh()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_warlord_kalithresh";
-    pNewScript->GetAI = &GetAI_boss_warlord_kalithresh;
+    pNewScript->GetAI = &GetNewAIInstance<boss_warlord_kalithreshAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_naga_distiller";
-    pNewScript->GetAI = &GetAI_mob_naga_distiller;
+    pNewScript->GetAI = &GetNewAIInstance<mob_naga_distillerAI>;
     pNewScript->RegisterSelf();
 }

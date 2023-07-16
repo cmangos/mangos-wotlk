@@ -4865,16 +4865,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 545 000 THE STEAMVAULT
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1545000','Surge forth my pets!','10360','1','0','0','0','thespia SAY_SUMMON'),
-
-('-1545016','You deem yourselves worthy simply because you bested my guards? Our work here will not be compromised!','10390','1','0','0','17724','kalithresh SAY_INTRO'),
-('-1545017','This is not nearly over...','10391','1','0','0','17725','kalithresh SAY_REGEN'),
-('-1545018','Your head will roll!','10392','1','0','0','17726','kalithresh SAY_AGGRO1'),
-('-1545019','I despise all of your kind!','10393','1','0','0','17727','kalithresh SAY_AGGRO2'),
-('-1545020','Ba''ahntha sol''dorei!','10394','1','0','0','0','kalithresh SAY_AGGRO3'),
-('-1545021','Scram, surface filth!','10395','1','0','0','17729','kalithresh SAY_SLAY1'),
-('-1545022','Ah ha ha ha ha ha ha!','10396','1','0','0','0','kalithresh SAY_SLAY2'),
-('-1545023','For her Excellency... for... Vashj!','10397','1','0','0','17730','kalithresh SAY_DEATH');
+('-1545000','Surge forth my pets!','10360','1','0','0','0','thespia SAY_SUMMON');
 
 -- -1 546 000 THE UNDERBOG
 
