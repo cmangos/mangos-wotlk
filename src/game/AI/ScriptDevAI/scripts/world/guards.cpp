@@ -218,71 +218,6 @@ bool GossipHello_guard_hallows_end_helper(Player* player, Creature* creature)
     return true;
 }
 
-UnitAI* GetAI_guard_azuremyst(Creature* pCreature)
-{
-    return new guard_hallows_end_helperAI(pCreature);
-}
-
-UnitAI* GetAI_guard_bluffwatcher(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
-UnitAI* GetAI_guard_contested(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
-UnitAI* GetAI_guard_darnassus(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
-UnitAI* GetAI_guard_dunmorogh(Creature* pCreature)
-{
-    return new guard_hallows_end_helperAI(pCreature);
-}
-
-UnitAI* GetAI_guard_durotar(Creature* pCreature)
-{
-    return new guard_hallows_end_helperAI(pCreature);
-}
-
-UnitAI* GetAI_guard_elwynnforest(Creature* pCreature)
-{
-    return new guard_hallows_end_helperAI(pCreature);
-}
-
-UnitAI* GetAI_guard_eversong(Creature* pCreature)
-{
-    return new guard_hallows_end_helperAI(pCreature);
-}
-
-UnitAI* GetAI_guard_exodar(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
-UnitAI* GetAI_guard_ironforge(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
-UnitAI* GetAI_guard_mulgore(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
-UnitAI* GetAI_guard_orgrimmar(Creature* pCreature)
-{
-    return new guardAI_orgrimmar(pCreature);
-}
-
-UnitAI* GetAI_guard_shattrath(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
 /*******************************************************
  * guard_shattrath_aldor
  *******************************************************/
@@ -344,11 +279,6 @@ struct guard_shattrath_aldorAI : public guardAI
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_guard_shattrath_aldor(Creature* pCreature)
-{
-    return new guard_shattrath_aldorAI(pCreature);
-}
 
 /*******************************************************
  * guard_shattrath_scryer
@@ -412,17 +342,8 @@ struct guard_shattrath_scryerAI : public guardAI
     }
 };
 
-UnitAI* GetAI_guard_shattrath_scryer(Creature* pCreature)
+enum
 {
-    return new guard_shattrath_scryerAI(pCreature);
-}
-
-UnitAI* GetAI_guard_silvermoon(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
-
-enum{
     SPELL_WINDSOR_INSPIRATION_EFFECT = 20275,
     MAX_GUARD_SALUTES                = 7,
 };
@@ -465,32 +386,117 @@ struct guardAI_stormwind : public guardAI
         guardAI::UpdateAI(diff);
     }
 
-    void  ReceiveEmote(Player* player, uint32 textEmote) override
+    void ReceiveEmote(Player* player, uint32 textEmote) override
     {
         if (player->GetTeam() == ALLIANCE)
             DoReplyToTextEmote(textEmote);
     }
 };
 
-UnitAI* GetAI_guard_stormwind(Creature* pCreature)
+// 43783 - Spawn Guard
+struct SpawnGuard : public SpellScript
 {
-    return new guardAI_stormwind(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        float pointX = 0;
+        float pointY = 0;
+        float pointZ = 0;
 
-UnitAI* GetAI_guard_teldrassil(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
+        uint32 guardEntry = 0;
+        uint32 counter = 0;
 
-UnitAI* GetAI_guard_tirisfal(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
+        bool foundPosition = false;
 
-UnitAI* GetAI_guard_undercity(Creature* pCreature)
-{
-    return new guardAI(pCreature);
-}
+        switch (caster->GetAreaId())
+        {
+            case 9:
+            case 24: guardEntry = 1642;     break;      // Northshire
+            case 42: guardEntry = 10038;    break;      // Darkshire
+            case 69: guardEntry = 10037;    break;      // Lakeshire
+            case 87: guardEntry = 1423;     break;      // Goldshire
+            case 108: guardEntry = 8096;    break;      // Sentinel Hill
+            case 131: guardEntry = 727;     break;      // Kharanos
+            case 132: guardEntry = 853;     break;      // Coldridge Valley
+            case 144: guardEntry = 8055;    break;      // Thelsamar
+            case 152:                                   // The Bulwark
+            case 154:                                   // Deathknell
+            case 159: guardEntry = 7980;    break;      // Brill
+            case 188: guardEntry = 4844;    break;      // Shadowglen
+            case 186: guardEntry = 3571;    break;      // Dolanaar
+            case 221:                                   // Camp Narache
+            case 222:                                   // Bloodhoof Village
+            {
+                switch (rand() % 4)
+                {
+                    case 0: guardEntry = 3210; break;
+                    case 1: guardEntry = 3211; break;
+                    case 2: guardEntry = 3213; break;
+                    case 3: guardEntry = 3214; break;
+                }
+                break;
+            }
+            case 228: guardEntry = 7489;    break;      // Sulpcher
+            case 271: guardEntry = 2386;    break;      // Southshore
+            case 272: guardEntry = 2405;    break;      // Tarren Mill
+            case 320: guardEntry = 10696;   break;      // Refuge Pointe
+            case 321: guardEntry = 2621;    break;      // Hammerfall
+            case 340: guardEntry = 8155;    break;      // Kargath
+            case 362: guardEntry = 5953;    break;      // Razor Hill
+            case 363: guardEntry = 5952;    break;      // Valley of Trials
+            case 367: guardEntry = 8017;    break;      // Sen'jin Village
+            case 380: guardEntry = 3501;    break;      // Crossroads
+            case 415: guardEntry = 6087;    break;      // Astranaar
+            case 431: guardEntry = 12903;   break;      // Splintertree Post
+            case 442: guardEntry = 6086;    break;      // Auberdine
+            case 460: guardEntry = 7730;    break;      // Sun Rock Retreat
+            case 484: guardEntry = 9525;    break;      // Freewind Post
+            case 513: guardEntry = 4979;    break;      // Threamore
+            case 597: guardEntry = 8154;    break;      // Ghost Walker Post
+            case 608: guardEntry = 8151;    break;      // Nijel's Point
+            case 1099: guardEntry = 8147;   break;      // Camp Mojache
+            case 1116: guardEntry = 7939;   break;      // Feathermoon Stronghold
+            case 1497: guardEntry = 5624;   break;      // Undercity
+            case 1519: guardEntry = 68;     break;      // Stormwind City
+            case 1537: guardEntry = 5595;   break;      // Ironforge
+            case 1637: guardEntry = 3296;   break;      // Orgrimmar
+            case 1638: guardEntry = 3084;   break;      // Thunder Bluff
+            case 1657: guardEntry = 4262;   break;      // Darnassus
+            case 2408: guardEntry = 12338;  break;      // Shadowprey Village
+            case 2897: guardEntry = 12903;  break;      // Zoram'gar Outpost
+            case 3462:                                  // Fairbreeze Village
+            case 3487:                                  // Silvermoon City
+            case 3488: guardEntry = 16222;  break;      // Tranquillien
+            case 3527: guardEntry = 16921;  break;      // Crash Site
+            case 3557: guardEntry = 16733;  break;      // Exodar
+            case 3576: guardEntry = 18038;  break;      // Azure Watch
+            case 3584: guardEntry = 17549;  break;      // Blood Watch
+            case 3665: guardEntry = 16222;  break;      // Falconwing Square
+        }
+
+        caster->GetRandomPoint(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ(), 30.0f, pointX, pointY, pointZ, 20.0f);
+
+
+        while (counter < 100)
+        {
+            foundPosition = caster->GetMap()->GetReachableRandomPosition(caster, pointX, pointY, pointZ, 20.0f);
+
+            if (foundPosition)
+                break;
+
+            counter++;
+        }
+
+        // Spawn Guards only if we have random position.
+        if (foundPosition && guardEntry != 0)
+        {
+            Creature* guard = caster->SummonCreature(guardEntry, pointX, pointY, pointZ, caster->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30 * IN_MILLISECONDS);
+
+            if (guard)
+                guard->AI()->AttackStart(caster->getAttackerForHelper());
+        }
+    }
+};
 
 /*******************************************************
  * quests 13188 / 13189
@@ -559,109 +565,109 @@ void AddSC_guards()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "guard_azuremyst";
-    pNewScript->GetAI = &GetAI_guard_azuremyst;
+    pNewScript->GetAI = &GetNewAIInstance<guard_hallows_end_helperAI>;
     pNewScript->pGossipHello = &GossipHello_guard_hallows_end_helper;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_bluffwatcher";
-    pNewScript->GetAI = &GetAI_guard_bluffwatcher;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_contested";
-    pNewScript->GetAI = &GetAI_guard_contested;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_darnassus";
-    pNewScript->GetAI = &GetAI_guard_darnassus;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_dunmorogh";
     pNewScript->pGossipHello = &GossipHello_guard_hallows_end_helper;
-    pNewScript->GetAI = &GetAI_guard_dunmorogh;
+    pNewScript->GetAI = &GetNewAIInstance<guard_hallows_end_helperAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_durotar";
     pNewScript->pGossipHello = &GossipHello_guard_hallows_end_helper;
-    pNewScript->GetAI = &GetAI_guard_durotar;
+    pNewScript->GetAI = &GetNewAIInstance<guard_hallows_end_helperAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_elwynnforest";
     pNewScript->pGossipHello = &GossipHello_guard_hallows_end_helper;
-    pNewScript->GetAI = &GetAI_guard_elwynnforest;
+    pNewScript->GetAI = &GetNewAIInstance<guard_hallows_end_helperAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_eversong";
     pNewScript->pGossipHello = &GossipHello_guard_hallows_end_helper;
-    pNewScript->GetAI = &GetAI_guard_eversong;
+    pNewScript->GetAI = &GetNewAIInstance<guard_hallows_end_helperAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_exodar";
-    pNewScript->GetAI = &GetAI_guard_exodar;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_ironforge";
-    pNewScript->GetAI = &GetAI_guard_ironforge;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_mulgore";
-    pNewScript->GetAI = &GetAI_guard_mulgore;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_orgrimmar";
-    pNewScript->GetAI = &GetAI_guard_orgrimmar;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI_orgrimmar>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_city_guard;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_shattrath";
-    pNewScript->GetAI = &GetAI_guard_shattrath;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_shattrath_aldor";
-    pNewScript->GetAI = &GetAI_guard_shattrath_aldor;
+    pNewScript->GetAI = &GetNewAIInstance<guard_shattrath_aldorAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_shattrath_scryer";
-    pNewScript->GetAI = &GetAI_guard_shattrath_scryer;
+    pNewScript->GetAI = &GetNewAIInstance<guard_shattrath_scryerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_silvermoon";
-    pNewScript->GetAI = &GetAI_guard_silvermoon;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_stormwind";
-    pNewScript->GetAI = &GetAI_guard_stormwind;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI_stormwind>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_city_guard;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_teldrassil";
-    pNewScript->GetAI = &GetAI_guard_teldrassil;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_tirisfal";
-    pNewScript->GetAI = &GetAI_guard_tirisfal;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "guard_undercity";
-    pNewScript->GetAI = &GetAI_guard_undercity;
+    pNewScript->GetAI = &GetNewAIInstance<guardAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -669,4 +675,6 @@ void AddSC_guards()
     pNewScript->GetAI = &GetNewAIInstance<guard_hallows_end_helperAI>;
     pNewScript->pGossipHello = &GossipHello_guard_hallows_end_helper;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SpawnGuard>("spell_spawn_guard");
 }

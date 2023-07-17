@@ -80,8 +80,8 @@ void CreatureAI::AttackStart(Unit* who)
         m_creature->EngageInCombatWith(who);
 
         // Cast "Spawn Guard" to help Civilian
-        if (m_creature->IsCivilian())
-            m_creature->CastSpell(m_creature, 43783, TRIGGERED_OLD_TRIGGERED);
+        if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::CALLS_GUARDS))
+            m_creature->CastSpell(nullptr, 43783, TRIGGERED_OLD_TRIGGERED);
 
         HandleMovementOnAttackStart(who, targetChange);
 

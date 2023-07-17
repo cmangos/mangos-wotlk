@@ -514,6 +514,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (29831,'spell_light_bonfire'),
 (46903,'spell_bonfire_artkit'),
 (46904,'spell_bonfire_artkit'),
+(43783,'spell_spawn_guard'),
 (32727,'spell_arena_preparation'),
 (29710,'spell_test_ribbon_pole_channel_trigger'),
 (29705,'spell_test_ribbon_pole_channel'),
