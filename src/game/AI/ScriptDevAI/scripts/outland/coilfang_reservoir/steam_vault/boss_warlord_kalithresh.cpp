@@ -48,9 +48,6 @@ enum
 enum WarlordKalithreshActions // order based on priority
 {
     WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE,
-    WARLORD_KALITHRESH_ACTION_REFLECTION,
-    WARLORD_KALITHRESH_ACTION_IMPALE,
-    WARLORD_KALITHRESH_ACTION_HEAD_CRACK,
     WARLORD_KALITHRESH_ACTION_MAX,
 };
 
@@ -60,9 +57,6 @@ struct boss_warlord_kalithreshAI : public CombatAI
         m_instance(static_cast<instance_steam_vault*>(creature->GetInstanceData())), m_hasTaunted(false)
     {
         AddCombatAction(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, 15000, 20000);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_REFLECTION, 15000, 20000);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_IMPALE, 7000, 14000);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 10000, 15000);
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
         {
             return x < -95.7f && y > -439.6f;
@@ -89,9 +83,6 @@ struct boss_warlord_kalithreshAI : public CombatAI
         switch (action)
         {
             case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(35000, 45000);
-            case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(24000, 35000);
-            case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7500, 12500);
-            case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(45000, 58000);
             default: return 0; // never occurs but for compiler
         }
     }
@@ -156,71 +147,25 @@ struct boss_warlord_kalithreshAI : public CombatAI
         }
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < WARLORD_KALITHRESH_ACTION_MAX; ++i)
+        if (action == WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE)
         {
-            if (GetActionReadyStatus(i))
+            DoBroadcastText(SAY_REGEN, m_creature);
+            SetCombatScriptStatus(true);
+            SetCombatMovement(false);
+            SetMeleeEnabled(false);
+            // Move to closest distiller
+            if (Creature* distiller = GetClosestCreatureWithEntry(m_creature, NPC_NAGA_DISTILLER, 100.0f))
             {
-                switch (i)
-                {
-                    case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE:
-                    {
-                        DoBroadcastText(SAY_REGEN, m_creature);
-                        SetCombatScriptStatus(true);
-                        SetCombatMovement(false);
-                        SetMeleeEnabled(false);
-                        // Move to closest distiller
-                        if (Creature* distiller = GetClosestCreatureWithEntry(m_creature, NPC_NAGA_DISTILLER, 100.0f))
-                        {
-                            float fX, fY, fZ;
-                            distiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
-                            m_creature->SetWalk(false, true); // Prevent him from slowing down while meleehit/casted upon while starting to move
-                            m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTILLER, fX, fY, fZ);
-                            m_distillerGuid = distiller->GetObjectGuid();
+                float fX, fY, fZ;
+                distiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+                m_creature->SetWalk(false, true); // Prevent him from slowing down while meleehit/casted upon while starting to move
+                m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTILLER, fX, fY, fZ);
+                m_distillerGuid = distiller->GetObjectGuid();
 
-                            ResetTimer(i, GetSubsequentActionTimer(i));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        break;
-                    }
-                    case WARLORD_KALITHRESH_ACTION_REFLECTION:
-                    {
-                        if (DoCastSpellIfCan(m_creature, SPELL_SPELL_REFLECTION) == CAST_OK)
-                        {
-                            ResetTimer(i, GetSubsequentActionTimer(i));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        break;
-                    }
-                    case WARLORD_KALITHRESH_ACTION_IMPALE:
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_IMPALE) == CAST_OK)
-                            {
-                                ResetTimer(i, GetSubsequentActionTimer(i));
-                                SetActionReadyStatus(i, false);
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case WARLORD_KALITHRESH_ACTION_HEAD_CRACK:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEAD_CRACK) == CAST_OK)
-                        {
-                            ResetCombatAction(i, GetSubsequentActionTimer(i));
-                            return;
-                        }
-                        break;
-                    }
-                }
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
             }
         }
     }
