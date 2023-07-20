@@ -28,35 +28,36 @@ mob_lesser_shadow_fissure
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "shattered_halls.h"
 
 enum
 {
-    SAY_AGGRO_1         = -1540000, // all Fel Orc Converts alive
-    SAY_AGGRO_2         = -1540001, // no Fel Orc Converts alive
-    SAY_AGGRO_3         = -1540002, // 1-3 Fel Orc Converts alive?
-    SAY_PEON_ATTACK_1   = -1540003,
-    SAY_PEON_ATTACK_2   = -1540004,
-    SAY_PEON_ATTACK_3   = -1540005,
-    SAY_PEON_ATTACK_4   = -1540006,
-    SAY_PEON_DIE_1      = -1540007,
-    SAY_PEON_DIE_2      = -1540008,
-    SAY_PEON_DIE_3      = -1540009,
-    SAY_TAUNT_1         = -1540010,
-    SAY_TAUNT_2         = -1540011,
-    SAY_TAUNT_3         = -1540012,
-    SAY_SLAY_1          = -1540013,
-    SAY_SLAY_2          = -1540014,
-    SAY_SLAY_3          = -1540015,
-    SAY_SLAY_4          = -1540016,
-    SAY_DIE             = -1540017,
+    SAY_AGGRO_1         = 15594, // all Fel Orc Converts alive
+    SAY_AGGRO_2         = 15589, // no Fel Orc Converts alive
+    SAY_AGGRO_3         = 15595, // 1-3 Fel Orc Converts alive?
+    SAY_PEON_ATTACK_1   = 15569,
+    SAY_PEON_ATTACK_2   = 15575,
+    SAY_PEON_ATTACK_3   = 15573,
+    SAY_PEON_ATTACK_4   = 15572,
+    SAY_PEON_DIE_1      = 15579,
+    SAY_PEON_DIE_2      = 15584,
+    SAY_PEON_DIE_3      = 15582,
+    SAY_TAUNT_1         = 14130,
+    SAY_TAUNT_2         = 14132,
+    SAY_TAUNT_3         = 14148,
+    SAY_SLAY_1          = 16863,
+    SAY_SLAY_2          = 16864,
+    SAY_SLAY_3          = 16865,
+    SAY_SLAY_4          = 16866,
+    SAY_DIE             = 16862,
 
     SPELL_DEATH_COIL       = 30500, // targets players
     SPELL_DEATH_COIL_2     = 30741, // targets all Fel Orc Converts (TAUNT_2)
 
     SPELL_DARK_SPIN        = 30502,
 
-    SPELL_TARGET_FISSURES  = 30745, // somehow responsible for picking target of 30744
+    SPELL_TARGET_FISSURES  = 30745,
     SPELL_SHADOW_FISSURE   = 30496, // summons 17471 "Lesser Shadow Fissure" - targets players
     SPELL_SHADOW_FISSURE_2 = 30744, // summons 18370 "Wild Shadow Fissure" - targets Fel Orc Converts (TAUNT_3)
 
@@ -70,23 +71,21 @@ enum
     NPC_FEL_ORC_CONVERT    = 17083,
 };
 
-struct boss_grand_warlock_nethekurseAI : public ScriptedAI
+struct boss_grand_warlock_nethekurseAI : public CombatAI
 {
-    boss_grand_warlock_nethekurseAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_grand_warlock_nethekurseAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_bIntroOnce(false), m_bIsIntroEvent(false)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_bIntroOnce = false;
-        m_bIsIntroEvent = false;
-        Reset();
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3, SAY_SLAY_4);
+        SetReactState(REACT_DEFENSIVE);
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
     bool m_bIsRegularMode;
 
     bool m_bIntroOnce;
     bool m_bIsIntroEvent;
-    bool m_bIsMainEvent;
     bool m_bSpinOnce;
     bool m_firstPhase;
 
@@ -99,7 +98,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
 
     void Reset() override
     {
-        m_bIsMainEvent = false;
+        CombatAI::Reset();
         m_bSpinOnce = false;
         m_firstPhase = true;
 
@@ -113,27 +112,27 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         SetCombatMovement(true);
     }
 
-    void DoYellForPeonAggro(Unit* /*pWho*/)
+    void DoYellForPeonAggro()
     {
         switch (urand(0, 3))
         {
-            case 0: DoScriptText(SAY_PEON_ATTACK_1, m_creature); break;
-            case 1: DoScriptText(SAY_PEON_ATTACK_2, m_creature); break;
-            case 2: DoScriptText(SAY_PEON_ATTACK_3, m_creature); break;
-            case 3: DoScriptText(SAY_PEON_ATTACK_4, m_creature); break;
+            case 0: DoBroadcastText(SAY_PEON_ATTACK_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_PEON_ATTACK_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_PEON_ATTACK_3, m_creature); break;
+            case 3: DoBroadcastText(SAY_PEON_ATTACK_4, m_creature); break;
         }
     }
 
-    void DoYellForPeonDeath(Unit* pKiller)
+    void DoYellForPeonDeath(Unit* killer)
     {
         if (m_uiPeonKilledCount >= 4)
             return;
 
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_PEON_DIE_1, m_creature); break;
-            case 1: DoScriptText(SAY_PEON_DIE_2, m_creature); break;
-            case 2: DoScriptText(SAY_PEON_DIE_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_PEON_DIE_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_PEON_DIE_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_PEON_DIE_3, m_creature); break;
         }
 
         ++m_uiPeonKilledCount;
@@ -141,10 +140,10 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         if (m_uiPeonKilledCount == 4)
         {
             m_bIsIntroEvent = false;
-            m_bIsMainEvent = true;
+            SetReactState(REACT_AGGRESSIVE);
 
-            if (pKiller)
-                AttackStart(pKiller);
+            if (killer)
+                AttackStart(killer);
         }
     }
 
@@ -156,37 +155,30 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
             return;
         }
 
-        std::list<Creature*> lFelConverts;
-        GuidVector m_vFelConverts;
+        std::list<Creature*> felConverts;
+        GuidVector m_felConverts;
 
-        GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
+        GetCreatureListWithEntryInGrid(felConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
 
-        for (Creature* convert : lFelConverts)
-            m_vFelConverts.push_back(convert->GetObjectGuid());
+        for (Creature* convert : felConverts)
+            m_felConverts.push_back(convert->GetObjectGuid());
 
-        if (m_vFelConverts.size() == 0)
+        if (m_felConverts.size() == 0)
             return;
 
         switch (urand(0, 2))
         {
             case 0:
-                if (Creature* target = m_creature->GetMap()->GetCreature(m_vFelConverts[urand(0, m_vFelConverts.size() - 1)]))
-                {
-                    DoCastSpellIfCan(target, SPELL_SHADOW_SEAR);
-                    DoScriptText(SAY_TAUNT_1, m_creature);
-                }
+                DoCastSpellIfCan(nullptr, SPELL_SHADOW_SEAR);
+                DoBroadcastText(SAY_TAUNT_1, m_creature);
                 break;
             case 1:
-                DoCastSpellIfCan(m_creature, SPELL_DEATH_COIL_2);
-                DoScriptText(SAY_TAUNT_2, m_creature);
+                DoCastSpellIfCan(nullptr, SPELL_DEATH_COIL_2);
+                DoBroadcastText(SAY_TAUNT_2, m_creature);
                 break;
             case 2:
-                //DoCastSpellIfCan(m_creature, SPELL_TARGET_FISSURES);
-                if (Creature* target = m_creature->GetMap()->GetCreature(m_vFelConverts[urand(0, m_vFelConverts.size() - 1)]))
-                {
-                    DoCastSpellIfCan(target, SPELL_SHADOW_FISSURE_2);
-                }
-                DoScriptText(SAY_TAUNT_3, m_creature);
+                DoCastSpellIfCan(nullptr, SPELL_TARGET_FISSURES);
+                DoBroadcastText(SAY_TAUNT_3, m_creature);
                 break;
         }
 
@@ -194,67 +186,55 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
     }
 
     // todo: use areatrigger 4347 instead (or when door lock is picked)
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_bIntroOnce && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() && m_creature->IsWithinDistInMap(pWho, 45.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_bIntroOnce && who->IsPlayer() && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 45.0f) && m_creature->IsWithinLOSInMap(who))
         {
             m_bIntroOnce = true;
             m_bIsIntroEvent = true;
 
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
+            if (m_instance)
+                m_instance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         m_bIsIntroEvent = false;
-        m_bIsMainEvent = true;
         switch (m_uiPeonKilledCount)
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: case 2: case 3: DoScriptText(SAY_AGGRO_3, m_creature); break;
-            case 4: DoScriptText(SAY_AGGRO_2, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: case 2: case 3: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
+            case 4: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
         }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        switch (urand(0, 3))
-        {
-            case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY_2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY_3, m_creature); break;
-            case 3: DoScriptText(SAY_SLAY_4, m_creature); break;
-        }
-    }
+        DoBroadcastText(SAY_DIE, m_creature);
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DIE, m_creature);
-
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        m_pInstance->SetData(TYPE_NETHEKURSE, DONE);
+        m_instance->SetData(TYPE_NETHEKURSE, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NETHEKURSE, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_NETHEKURSE, FAIL);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_bIsIntroEvent)
         {
-            if (!m_pInstance)
+            if (!m_instance)
                 return;
 
-            if (m_pInstance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
+            if (m_instance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
             {
                 if (m_uiTauntTimer < uiDiff)
                     DoTauntPeons();
@@ -264,9 +244,6 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (!m_bIsMainEvent)
             return;
 
         if (m_firstPhase)
@@ -318,13 +295,12 @@ static const int32 aRandomAggro[] = { -1540200, -1540201, -1540202, -1540203, -1
 
 struct mob_fel_orc_convertAI : public ScriptedAI
 {
-    mob_fel_orc_convertAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_fel_orc_convertAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
     uint32 m_uiHemorrhageTimer;
 
     void Reset() override
@@ -332,51 +308,55 @@ struct mob_fel_orc_convertAI : public ScriptedAI
         m_uiHemorrhageTimer = 3000;
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() && m_creature->IsWithinDistInMap(pWho, 20.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (who->IsPlayer() && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 20.0f) && m_creature->IsWithinLOSInMap(who))
             m_creature->SetInCombatWithZone();
     }
 
-    void AttackedBy(Unit* pWho) override
+    void AttackedBy(Unit* who) override
     {
-        if (pWho->GetEntry() == NPC_NETHEKURSE)
+        if (who->GetEntry() == NPC_NETHEKURSE)
+        {
+            sLog.outCustomLog("Nethekurse aggroed fel orc");
+            sLog.traceLog();
             return;
+        }
 
-        ScriptedAI::AttackedBy(pWho);
+        ScriptedAI::AttackedBy(who);
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* /*who*/) override
     {
         if (urand(0, 4) == 4)
-            DoScriptText(aRandomAggro[urand(0, 6)], m_creature);
+            DoBroadcastText(aRandomAggro[urand(0, 6)], m_creature);
 
-        if (m_pInstance)
+        if (m_instance)
         {
-            Creature* pKurse = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHEKURSE);
-            if (pKurse && m_creature->IsWithinDist(pKurse, 45.0f))
+            Creature* nethekurse = m_instance->GetSingleCreatureFromStorage(NPC_NETHEKURSE);
+            if (nethekurse && m_creature->IsWithinDist(nethekurse, 45.0f))
             {
-                if (boss_grand_warlock_nethekurseAI* pKurseAI = dynamic_cast<boss_grand_warlock_nethekurseAI*>(pKurse->AI()))
-                    pKurseAI->DoYellForPeonAggro(pWho);
+                if (boss_grand_warlock_nethekurseAI* pKurseAI = dynamic_cast<boss_grand_warlock_nethekurseAI*>(nethekurse->AI()))
+                    pKurseAI->DoYellForPeonAggro();
 
-                if (m_pInstance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
+                if (m_instance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
                     return;
-                m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
+                m_instance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
             }
         }
     }
 
-    void JustDied(Unit* pKiller) override
+    void JustDied(Unit* killer) override
     {
-        if (m_pInstance)
+        if (m_instance)
         {
-            if (m_pInstance->GetData(TYPE_NETHEKURSE) != IN_PROGRESS)
+            if (m_instance->GetData(TYPE_NETHEKURSE) != IN_PROGRESS)
                 return;
 
-            if (Creature* pKurse = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHEKURSE))
+            if (Creature* nethekurse = m_instance->GetSingleCreatureFromStorage(NPC_NETHEKURSE))
             {
-                if (boss_grand_warlock_nethekurseAI* pKurseAI = dynamic_cast<boss_grand_warlock_nethekurseAI*>(pKurse->AI()))
-                    pKurseAI->DoYellForPeonDeath(pKiller);
+                if (boss_grand_warlock_nethekurseAI* nethekurseAI = dynamic_cast<boss_grand_warlock_nethekurseAI*>(nethekurse->AI()))
+                    nethekurseAI->DoYellForPeonDeath(killer);
             }
         }
     }
@@ -398,25 +378,31 @@ struct mob_fel_orc_convertAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_grand_warlock_nethekurse(Creature* pCreature)
+// 30745 - Target Fissures
+struct TargetFissures : public SpellScript
 {
-    return new boss_grand_warlock_nethekurseAI(pCreature);
-}
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(1);
+    }
 
-UnitAI* GetAI_mob_fel_orc_convert(Creature* pCreature)
-{
-    return new mob_fel_orc_convertAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), SPELL_SHADOW_FISSURE_2, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_grand_warlock_nethekurse()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_grand_warlock_nethekurse";
-    pNewScript->GetAI = &GetAI_boss_grand_warlock_nethekurse;
+    pNewScript->GetAI = &GetNewAIInstance<boss_grand_warlock_nethekurseAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_fel_orc_convert";
-    pNewScript->GetAI = &GetAI_mob_fel_orc_convert;
+    pNewScript->GetAI = &GetNewAIInstance<mob_fel_orc_convertAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TargetFissures>("spell_target_fissures");
 }

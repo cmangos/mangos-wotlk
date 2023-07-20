@@ -384,6 +384,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (46839,'spell_ogrila_flasks'),
 (40887,'spell_assist_bt'),
 (40892,'spell_fixate_bt'),
+(30745,'spell_target_fissures'),
 (34852,'spell_call_of_the_falcon'),
 (39581,'spell_storm_blink'),
 (34630,'spell_scrap_reaver_spell'),

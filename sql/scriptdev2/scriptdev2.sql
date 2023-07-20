@@ -4692,26 +4692,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 540 000 SHATTERED HALLS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1540000','You wish to fight us all at once? This should be amusing!','10262','1','0','0','15594','nethekurse SAY_AGGRO_1'),
-('-1540001','Thank you for saving me the trouble. Now it''s my turn to have some fun!','10270','1','0','0','15589','nethekurse SAY_AGGRO_2'),
-('-1540002','Come on, show me a real fight!','10272','1','0','0','15595','nethekurse SAY_AGGRO_3'),
-('-1540003','You can have that one, I no longer need him!','10263','1','0','11','15569','nethekurse PEON_ATTACK_1'),
-('-1540004','Yes, beat him mercilessly! His skull is as thick as an ogre''s!','10264','1','0','0','15575','nethekurse PEON_ATTACK_2'),
-('-1540005','Don''t waste your time on that one, he''s weak!','10265','1','0','11','15573','nethekurse PEON_ATTACK_3'),
-('-1540006','You want him? Very well, take him!','10266','1','0','0','15572','nethekurse PEON_ATTACK_4'),
-('-1540007','One pitiful wretch down. Go on, take another one.','10267','1','0','0','15579','nethekurse PEON_DIE_1'),
-('-1540008','Ah, what a waste... next!','10268','1','0','0','15584','nethekurse PEON_DIE_2'),
-('-1540009','I was going to kill him anyway!','10269','1','0','0','15582','nethekurse PEON_DIE_3'),
-('-1540010','Beg for your pitiful life!','10259','1','0','0','14130','nethekurse SAY_TAUNT_1'),
-('-1540011','Run, coward, run!   ','10260','1','0','11','14132','nethekurse SAY_TAUNT_2'),
-('-1540012','Your pain amuses me!','10261','1','0','11','14148','nethekurse SAY_TAUNT_3'),
-('-1540013','I had more fun torturing the peons!','10273','1','0','0','16863','nethekurse SAY_SLAY_1'),
-('-1540014','I''m already bored!','10271','1','0','0','16864','nethekurse SAY_SAY_2'),
-('-1540015','You lose.','10274','1','0','0','16865','nethekurse SAY_SLAY_3'),
-('-1540016','Oh, just die!','10275','1','0','0','16866','nethekurse SAY_SLAY_4'),
-('-1540017','What... a shame.','10276','1','0','0','16862','nethekurse SAY_DIE'),
-
-('-1540018','Smash!','10306','1','0','0','30471','omrogg GoCombat_1'),
+('-1540018','Smash!','10306','1','0','0','14046','omrogg GoCombat_1'),
 ('-1540019','If you nice me let you live.','10308','1','0','0','14048','omrogg GoCombat_2'),
 ('-1540020','Me hungry!','10309','1','0','0','19842','omrogg GoCombat_3'),
 ('-1540021','Why don''t you let me do the talking?','10317','1','0','0','14047','omrogg GoCombatDelay_1'),
