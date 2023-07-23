@@ -2305,7 +2305,7 @@ void WorldState::HandleSunsReachPhaseTransition(uint32 newPhase)
         default: break;
     }
     SendWorldstateUpdate(m_sunsReachData.m_sunsReachReclamationMutex, m_sunsReachData.m_sunsReachReclamationPlayers, m_sunsReachData.m_phase, WORLD_STATE_QUEL_DANAS_MUSIC);
-	Save(SAVE_ID_QUEL_DANAS);
+    Save(SAVE_ID_QUEL_DANAS);
 }
 
 void WorldState::HandleSunsReachSubPhaseTransition(int32 subPhaseMask, bool initial)
@@ -2469,7 +2469,8 @@ void WorldState::HandleSunwellGateTransition(uint32 newGate)
     }
     if (worldState)
         SendWorldstateUpdate(m_sunsReachData.m_sunsReachReclamationMutex, m_sunsReachData.m_sunsReachReclamationPlayers, m_sunsReachData.m_gate, worldState);
-	Save(SAVE_ID_QUEL_DANAS);
+
+    Save(SAVE_ID_QUEL_DANAS);
 }
 
 void WorldState::SetSunsReachCounter(SunsReachCounters index, uint32 value)
