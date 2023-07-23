@@ -26,6 +26,7 @@ boss_warchief_kargath_bladefist
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "shattered_halls.h"
 
 enum
@@ -44,146 +45,142 @@ enum
     SPELL_CHARGE_H                  = 25821,
     SPELL_DOUBLE_ATTACK             = 19818,
 
+    SPELL_SUMMON_HEATHEN            = 30737,
+    SPELL_SUMMON_REAVER             = 30785,
+    SPELL_SUMMON_SHARPSHOOTER       = 30786,
+
     TARGET_NUM                      = 8,
 
     NPC_SHATTERED_ASSASSIN          = 17695,
-    NPC_HEARTHEN_GUARD              = 17621,
-    NPC_SHARPSHOOTER_GUARD          = 17622,
-    NPC_REAVER_GUARD                = 17623,
 };
 
 float AssassEntrance[3] = {275.136f, -84.29f, 2.3f};        // y -8
 float AssassExit[3] = {184.233f, -84.29f, 2.3f};            // y -8
 float AddsEntrance[3] = {306.036f, -84.29f, 1.93f};
 
-struct boss_warchief_kargath_bladefistAI : public ScriptedAI
+enum WarchiefKargathActions
 {
-    boss_warchief_kargath_bladefistAI(Creature* pCreature) : ScriptedAI(pCreature)
+    WARCHIEF_KARGATH_BLADE_DANCE,
+    WARCHIEF_KARGATH_CHARGE, // not a spell list event due to being tied to blade dance
+    WARCHIEF_KARGATH_ACTIONS_MAX,
+    WARCHIEF_KARGATH_COMBAT_SPAWN_ASSASSINS,
+    WARCHIEF_KARGATH_COMBAT_SPAWN_ASSISTANT,
+    WARCHIEF_KARGATH_COMBAT_BLADE_DANCE,
+};
+
+struct boss_warchief_kargath_bladefistAI : public CombatAI
+{
+    boss_warchief_kargath_bladefistAI(Creature* creature) : CombatAI(creature, WARCHIEF_KARGATH_ACTIONS_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float /*y*/, float /*z*/)
         {
             return x > 270.0f || x < 185.0f;
-        });        
-        Reset();
+        });
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
+        AddCombatAction(WARCHIEF_KARGATH_BLADE_DANCE, 45000u);
+        AddCombatAction(WARCHIEF_KARGATH_CHARGE, true);
+        AddCustomAction(WARCHIEF_KARGATH_COMBAT_SPAWN_ASSASSINS, 5000u, [&]() { SpawnAssassin(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(WARCHIEF_KARGATH_COMBAT_SPAWN_ASSISTANT, 20000u, [&]() { SpawnAssistant(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(WARCHIEF_KARGATH_COMBAT_BLADE_DANCE, true, [&]() { HandleBladeDance(); }, TIMER_COMBAT_COMBAT);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
-    GuidVector m_vAddGuids;
-    GuidVector m_vAssassinGuids;
+    GuidVector m_addGuids;
+    GuidVector m_assassinGuids;
 
     GuidVector m_bladeDanceTargetGuids;
 
-    uint32 m_uiChargeTimer;
-    uint32 m_uiBladeDanceTimer;
-    uint32 m_uiSummonAssistantTimer;
-    uint32 m_uiWaitTimer;
+    uint32 m_summonedType;
 
-    uint32 m_uiAssassinsTimer;
-
-    uint32 m_uiSummoned;
-    bool m_bInBlade;
-
-    uint32 m_uiTargetNum;
+    uint32 m_bladeDanceTargetCount;
 
     void Reset() override
     {
-        m_uiSummoned = 0;
-        m_bInBlade = false;
-        m_uiWaitTimer = 0;
-
-        m_uiChargeTimer = 0;
-        m_uiBladeDanceTimer = 45000;
-        m_uiSummonAssistantTimer = 20000;
-        m_uiAssassinsTimer = 5000;
+        CombatAI::Reset();
+        m_summonedType = 0;
+        m_bladeDanceTargetCount = 0;
 
         SetCombatScriptStatus(false);
         SetCombatMovement(true);
         SetMeleeEnabled(true);
 
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO3, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLADEFIST, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_BLADEFIST, IN_PROGRESS);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_HEARTHEN_GUARD:
             case NPC_SHARPSHOOTER_GUARD:
             case NPC_REAVER_GUARD:
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    summoned->AI()->AttackStart(pTarget);
 
-                m_vAddGuids.push_back(pSummoned->GetObjectGuid());
+                m_addGuids.push_back(summoned->GetObjectGuid());
                 break;
             case NPC_SHATTERED_ASSASSIN:
-                m_vAssassinGuids.push_back(pSummoned->GetObjectGuid());
+                m_assassinGuids.push_back(summoned->GetObjectGuid());
                 break;
         }
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
         DoDespawnAdds();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLADEFIST, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_BLADEFIST, DONE);
     }
 
     void JustReachedHome() override
     {
         DoDespawnAdds();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BLADEFIST, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_BLADEFIST, FAIL);
     }
 
     void OnLeash() override
     {
-        DoScriptText(SAY_EVADE, m_creature);
+        DoBroadcastText(SAY_EVADE, m_creature);
     }
 
     // Note: this should be done by creature linkin in core
     void DoDespawnAdds()
     {
-        for (GuidVector::const_iterator itr = m_vAddGuids.begin(); itr != m_vAddGuids.end(); ++itr)
+        for (GuidVector::const_iterator itr = m_addGuids.begin(); itr != m_addGuids.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                 pTemp->ForcedDespawn();
         }
 
-        m_vAddGuids.clear();
+        m_addGuids.clear();
 
-        for (GuidVector::const_iterator itr = m_vAssassinGuids.begin(); itr != m_vAssassinGuids.end(); ++itr)
+        for (GuidVector::const_iterator itr = m_assassinGuids.begin(); itr != m_assassinGuids.end(); ++itr)
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
                 pTemp->ForcedDespawn();
         }
 
-        m_vAssassinGuids.clear();
+        m_assassinGuids.clear();
     }
 
     void SpawnAssassin()
@@ -194,6 +191,23 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
         m_creature->SummonCreature(NPC_SHATTERED_ASSASSIN, AssassExit[0], AssassExit[1] - 8, AssassExit[2], 0, TEMPSPAWN_TIMED_OOC_DESPAWN, 24000);
     }
 
+    void SpawnAssistant()
+    {
+        Creature* warchiefsPortal = m_creature->GetMap()->GetCreature("SHH_WARCHIEFS_PORTAL");
+        if (warchiefsPortal)
+        {
+            switch (m_summonedType)
+            {
+                case 0: warchiefsPortal->CastSpell(nullptr, SPELL_SUMMON_HEATHEN, TRIGGERED_OLD_TRIGGERED); break;
+                case 1: warchiefsPortal->CastSpell(nullptr, SPELL_SUMMON_REAVER, TRIGGERED_OLD_TRIGGERED); break;
+                case 2: warchiefsPortal->CastSpell(nullptr, SPELL_SUMMON_SHARPSHOOTER, TRIGGERED_OLD_TRIGGERED); break;
+            }
+        }
+
+        m_summonedType = (m_summonedType + 1) % 3;
+        ResetTimer(WARCHIEF_KARGATH_COMBAT_SPAWN_ASSISTANT, 20000);
+    }
+
     void SpellHitTarget(Unit* target, SpellEntry const* spellInfo) override
     {
         switch (spellInfo->Id)
@@ -202,134 +216,68 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                 m_bladeDanceTargetGuids.push_back(target->GetObjectGuid());
                 break;
             case SPELL_BLADE_DANCE_CHARGE:
-                m_uiWaitTimer = 500;
+                ResetTimer(WARCHIEF_KARGATH_COMBAT_BLADE_DANCE, 500);
                 m_creature->CastSpell(nullptr, SPELL_BLADE_DANCE, TRIGGERED_OLD_TRIGGERED);
                 break;
         }            
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleBladeDance()
     {
-        if (!m_creature->SelectHostileTarget())
+        if (m_bladeDanceTargetCount == 0)
         {
-            if (GetCombatScriptStatus())
-                EnterEvadeMode();
-            return;
+            // stop bladedance
+            SetCombatScriptStatus(false);
+            SetCombatMovement(true, true);
+            SetMeleeEnabled(true);
+            if (!m_isRegularMode)
+                ResetCombatAction(WARCHIEF_KARGATH_CHARGE, 500);
         }
-
-        if (m_uiAssassinsTimer)
+        else
         {
-            if (m_uiAssassinsTimer <= uiDiff)
+            // move in bladedance
+            SpellCastResult result = SPELL_NOT_FOUND;
+            do
             {
-                SpawnAssassin();
-                m_uiAssassinsTimer = 0;
-            }
-            else
-                m_uiAssassinsTimer -= uiDiff;
-        }
-
-        if (m_bInBlade)
-        {
-            if (m_uiWaitTimer)
+                uint32 index = urand(0, m_bladeDanceTargetGuids.size() - 1);
+                if (Unit* target = m_creature->GetMap()->GetCreature(m_bladeDanceTargetGuids[index]))
+                    // Until neutral target type TARGET_UNIT stops rolling for hit, need to force it
+                    // should not send SMSG_SPELL_START but triggered spell cast bypasses checks which are necessary
+                    result = m_creature->CastSpell(target, SPELL_BLADE_DANCE_CHARGE, TRIGGERED_IGNORE_HIT_CALCULATION);
+                m_bladeDanceTargetGuids.erase(m_bladeDanceTargetGuids.begin() + index);
+                --m_bladeDanceTargetCount;
+            } while (result != SPELL_CAST_OK && m_bladeDanceTargetCount > 0);
+            if (result != SPELL_CAST_OK)
             {
-                if (m_uiWaitTimer <= uiDiff)
-                {
-                    if (m_uiTargetNum == 0)
-                    {
-                        // stop bladedance
-                        m_bInBlade = false;
-                        SetCombatScriptStatus(false);
-                        SetCombatMovement(true, true);
-                        SetMeleeEnabled(true);
-                        m_uiWaitTimer = 0;
-                        if (!m_bIsRegularMode)
-                            m_uiChargeTimer = 500;
-                    }
-                    else
-                    {
-                        // move in bladedance
-                        SpellCastResult result = SPELL_NOT_FOUND;
-                        do
-                        {
-                            uint32 index = urand(0, m_bladeDanceTargetGuids.size() - 1);
-                            if (Unit* target = m_creature->GetMap()->GetCreature(m_bladeDanceTargetGuids[index]))
-                                // Until neutral target type TARGET_UNIT stops rolling for hit, need to force it
-                                // should not send SMSG_SPELL_START but triggered spell cast bypasses checks which are necessary
-                                result = m_creature->CastSpell(target, SPELL_BLADE_DANCE_CHARGE, TRIGGERED_IGNORE_HIT_CALCULATION);
-                            m_bladeDanceTargetGuids.erase(m_bladeDanceTargetGuids.begin() + index);
-                            --m_uiTargetNum;
-                        } while (result != SPELL_CAST_OK && m_uiTargetNum > 0);
-                        if (result != SPELL_CAST_OK)
-                        {
-                            m_uiWaitTimer = 1;
-                            m_uiTargetNum = 0;
-                        }
-                        else
-                            m_uiWaitTimer = 0;
-                    }
-                }
-                else
-                    m_uiWaitTimer -= uiDiff;
+                ResetTimer(WARCHIEF_KARGATH_COMBAT_BLADE_DANCE, 1);
+                m_bladeDanceTargetCount = 0;
             }
         }
-        else                                                // !m_bInBlade
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (m_uiBladeDanceTimer < uiDiff)
+            case WARCHIEF_KARGATH_BLADE_DANCE:
             {
-                m_uiWaitTimer = 1;
-                m_bInBlade = true;
+                ResetTimer(WARCHIEF_KARGATH_COMBAT_BLADE_DANCE, 1);
                 SetCombatScriptStatus(true);
                 SetCombatMovement(false);
                 SetMeleeEnabled(false);
-                m_uiBladeDanceTimer = 30000;
                 m_bladeDanceTargetGuids.clear();
                 m_creature->CastSpell(nullptr, SPELL_BLADE_DANCE_TARGETING, TRIGGERED_NONE);
-                m_uiTargetNum = std::min(m_bladeDanceTargetGuids.size(), size_t(TARGET_NUM));
-                return;
+                m_bladeDanceTargetCount = std::min(m_bladeDanceTargetGuids.size(), size_t(TARGET_NUM));
+                ResetCombatAction(action, 30000);
+                break;
             }
-            m_uiBladeDanceTimer -= uiDiff;
-
-            if (m_uiChargeTimer)
-            {
-                if (m_uiChargeTimer <= uiDiff)
-                {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                        DoCastSpellIfCan(pTarget, SPELL_CHARGE_H);
-
-                    m_uiChargeTimer = 0;
-                }
-                else
-                    m_uiChargeTimer -= uiDiff;
-            }
-
-            if (m_uiSummonAssistantTimer < uiDiff)
-            {
-                switch (m_uiSummoned)
-                {
-                    case 0: m_creature->SummonCreature(NPC_HEARTHEN_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000); break;
-                    case 1: m_creature->SummonCreature(NPC_REAVER_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000); break;
-                    case 2: m_creature->SummonCreature(NPC_SHARPSHOOTER_GUARD, AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 20000); break;
-                }
-                
-                m_uiSummoned++;
-                
-                if (m_uiSummoned == 3)
-                    m_uiSummoned = 0;
-
-                m_uiSummonAssistantTimer = 20000;
-            }
-            else
-                m_uiSummonAssistantTimer -= uiDiff;
-
-            DoMeleeAttackIfReady();
+            case WARCHIEF_KARGATH_CHARGE:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    DoCastSpellIfCan(target, SPELL_CHARGE_H);
+                break;
         }
     }
 };
-
-UnitAI* GetAI_boss_warchief_kargath_bladefist(Creature* pCreature)
-{
-    return new boss_warchief_kargath_bladefistAI(pCreature);
-}
 
 struct npc_blade_dance_targetAI : public ScriptedAI
 {
@@ -341,20 +289,15 @@ struct npc_blade_dance_targetAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_blade_dance_target(Creature* pCreature)
-{
-    return new npc_blade_dance_targetAI(pCreature);
-}
-
 void AddSC_boss_warchief_kargath_bladefist()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_warchief_kargath_bladefist";
-    pNewScript->GetAI = &GetAI_boss_warchief_kargath_bladefist;
+    pNewScript->GetAI = &GetNewAIInstance<boss_warchief_kargath_bladefistAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_blade_dance_target";
-    pNewScript->GetAI = &GetAI_npc_blade_dance_target;
+    pNewScript->GetAI = &GetNewAIInstance<npc_blade_dance_targetAI>;
     pNewScript->RegisterSelf();
 }

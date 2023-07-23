@@ -114,8 +114,18 @@ void instance_shattered_halls::OnCreatureCreate(Creature* creature)
 
 void instance_shattered_halls::OnCreatureRespawn(Creature* creature)
 {
-    if (creature->GetEntry() == NPC_FLAME_ARROW)
-        creature->SetCanEnterCombat(false);
+    switch (creature->GetEntry())
+    {
+        case NPC_HEARTHEN_GUARD:
+        case NPC_SHARPSHOOTER_GUARD:
+        case NPC_REAVER_GUARD:
+            if (Creature* kargath = GetSingleCreatureFromStorage(NPC_KARGATH_BLADEFIST))
+                kargath->AI()->JustSummoned(creature);
+            break;
+        case NPC_FLAME_ARROW:
+            creature->SetCanEnterCombat(false);
+            break;
+    }
     if (creature->GetRespawnDelay() == 5)
         creature->SetNoRewards();
 }

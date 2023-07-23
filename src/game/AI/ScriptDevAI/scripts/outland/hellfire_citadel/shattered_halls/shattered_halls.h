@@ -68,6 +68,10 @@ enum
     // AT_NETHEKURSE               = 4524,                  // Area trigger used for the execution event
 
     NPC_FLAME_ARROW             = 17687,
+
+    NPC_HEARTHEN_GUARD          = 17621,
+    NPC_SHARPSHOOTER_GUARD      = 17622,
+    NPC_REAVER_GUARD            = 17623,
 };
 
 struct SpawnLocation

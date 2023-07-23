@@ -4717,16 +4717,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1540040','I...hate...you...','10322','1','0','0','16925','omrogg YELL_DIE_R'),
 ('-1540041','%s enrages!','0','2','0','0','0','omrogg EMOTE_ENRAGE'),
 
-('-1540042','Ours is the TRUE Horde! The only Horde!','10323','1','0','0','17614','kargath SAY_AGGRO1'),
-('-1540043','I''ll carve the meat from your bones!','10324','1','0','0','17616','kargath SAY_AGGRO2'),
-('-1540044','I am called Bladefist for a reason, as you will see!','10325','1','0','0','17617','kargath SAY_AGGRO3'),
-('-1540045','For the real Horde!','10326','1','0','0','17619','kargath SAY_SLAY1'),
-('-1540046','I am the only Warchief!','10327','1','0','0','17620','kargath SAY_SLAY2'),
-('-1540047','The true Horde... will.. prevail...','10328','1','0','0','17621','kargath SAY_DEATH'),
-('-1540048','Cowards! You''ll never pull me into the shadows!','0','1','0','0','18367','kargath SAY_EVADE'),
-
-('-1540049','The Alliance dares to intrude this far into my fortress? Bring out the Honor Hold prisoners and call for the executioner! They''ll pay with their lives for this trespass!','0','6','0','0','13721','kargath SAY_EXECUTE_ALLY'),
-('-1540050','It looks like we have a ranking officer among our captives...how amusing. Execute the green-skinned dog at once!','0','6','0','0','13727','kargath SAY_EXECUTE_HORDE'),
+('-1540049','The Alliance dares to intrude this far into my fortress?  Bring out the Honor Hold prisoners and call for the executioner!  They''ll pay with their lives for this trespass!','0','6','0','0','13721','kargath SAY_EXECUTE_ALLY'),
+('-1540050','It looks like we have a ranking officer among our captives... how amusing.  Execute this green-skinned dog at once!','0','6','0','0','13727','kargath SAY_EXECUTE_HORDE'),
 
 ('-1540051','Invaders have breached the defenses!','10285','6','0','0','14309','Gauntlet of fire yell 1'),
 ('-1540052','Archers, form ranks! On my mark!','10156','6','0','0','14310','Gauntlet of fire yell 2'),
