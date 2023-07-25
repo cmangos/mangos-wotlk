@@ -71,43 +71,35 @@ enum
     NPC_FEL_ORC_CONVERT    = 17083,
 };
 
+enum NethekurseActions
+{
+    NETHEKURSE_ACTION_MAX,
+    NETHEKURSE_TAUNT_PEONS
+};
+
 struct boss_grand_warlock_nethekurseAI : public CombatAI
 {
-    boss_grand_warlock_nethekurseAI(Creature* creature) : CombatAI(creature, 0),
-        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty()),
-        m_bIntroOnce(false), m_bIsIntroEvent(false)
+    boss_grand_warlock_nethekurseAI(Creature* creature) : CombatAI(creature, NETHEKURSE_ACTION_MAX),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_introOnce(false)
     {
+        AddCustomAction(NETHEKURSE_TAUNT_PEONS, 545u, [&]() { DoTauntPeons(); });
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3, SAY_SLAY_4);
         SetReactState(REACT_DEFENSIVE);
     }
 
     ScriptedInstance* m_instance;
-    bool m_bIsRegularMode;
+    bool m_isRegularMode;
 
-    bool m_bIntroOnce;
-    bool m_bIsIntroEvent;
-    bool m_bSpinOnce;
-    bool m_firstPhase;
+    bool m_introOnce;
 
-    uint8 m_uiPeonKilledCount;
-
-    uint32 m_uiTauntTimer;
-    uint32 m_uiDeathCoilTimer;
-    uint32 m_uiShadowFissureTimer;
-    uint32 m_uiCleaveTimer;
+    uint8 m_peonKilledCount;
 
     void Reset() override
     {
         CombatAI::Reset();
-        m_bSpinOnce = false;
-        m_firstPhase = true;
 
-        m_uiPeonKilledCount = 0;
-
-        m_uiTauntTimer = 3000;
-        m_uiDeathCoilTimer = 20000;
-        m_uiShadowFissureTimer = 8000;
-        m_uiCleaveTimer = 5000;
+        m_peonKilledCount = 0;
 
         SetCombatMovement(true);
     }
@@ -125,7 +117,7 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
 
     void DoYellForPeonDeath(Unit* killer)
     {
-        if (m_uiPeonKilledCount >= 4)
+        if (m_peonKilledCount >= 4)
             return;
 
         switch (urand(0, 2))
@@ -135,11 +127,11 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
             case 2: DoBroadcastText(SAY_PEON_DIE_3, m_creature); break;
         }
 
-        ++m_uiPeonKilledCount;
+        ++m_peonKilledCount;
 
-        if (m_uiPeonKilledCount == 4)
+        if (m_peonKilledCount == 4)
         {
-            m_bIsIntroEvent = false;
+            DisableTimer(NETHEKURSE_TAUNT_PEONS);
             SetReactState(REACT_AGGRESSIVE);
 
             if (killer)
@@ -149,11 +141,8 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
 
     void DoTauntPeons()
     {
-        if (m_uiPeonKilledCount >= 4)
-        {
-            m_uiTauntTimer = 0;
+        if (m_peonKilledCount >= 4)
             return;
-        }
 
         std::list<Creature*> felConverts;
         GuidVector m_felConverts;
@@ -182,16 +171,16 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
                 break;
         }
 
-        m_uiTauntTimer = urand(30000,35000);
+        ResetTimer(NETHEKURSE_TAUNT_PEONS, urand(30000, 35000));
     }
 
     // todo: use areatrigger 4347 instead (or when door lock is picked)
     void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_bIntroOnce && who->IsPlayer() && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 45.0f) && m_creature->IsWithinLOSInMap(who))
+        if (!m_introOnce && who->IsPlayer() && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 45.0f) && m_creature->IsWithinLOSInMap(who))
         {
-            m_bIntroOnce = true;
-            m_bIsIntroEvent = true;
+            m_introOnce = true;
+            ResetTimer(NETHEKURSE_TAUNT_PEONS, 1);
 
             if (m_instance)
                 m_instance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
@@ -202,8 +191,7 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        m_bIsIntroEvent = false;
-        switch (m_uiPeonKilledCount)
+        switch (m_peonKilledCount)
         {
             case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
             case 1: case 2: case 3: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
@@ -225,69 +213,6 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_NETHEKURSE, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_bIsIntroEvent)
-        {
-            if (!m_instance)
-                return;
-
-            if (m_instance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
-            {
-                if (m_uiTauntTimer < uiDiff)
-                    DoTauntPeons();
-                else
-                    m_uiTauntTimer -= uiDiff;
-            }
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_firstPhase)
-        {
-            if (m_uiCleaveTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SHADOW_CLEAVE : SPELL_SHADOW_SLAM_H);
-                m_uiCleaveTimer = urand(6000, 8500);
-            }
-            else
-                m_uiCleaveTimer -= uiDiff;
-
-            if (m_uiShadowFissureTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    DoCastSpellIfCan(pTarget, SPELL_SHADOW_FISSURE);
-                m_uiShadowFissureTimer = urand(7500, 15000);
-            }
-            else
-                m_uiShadowFissureTimer -= uiDiff;
-
-            if (m_uiDeathCoilTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL);
-                m_uiDeathCoilTimer = urand(15000, 20000);
-            }
-            else
-                m_uiDeathCoilTimer -= uiDiff;
-
-            if (m_creature->GetHealthPercent() <= 20.0f)
-                m_firstPhase = false;
-
-            DoMeleeAttackIfReady();
-        }
-        else
-        {
-            if (!m_bSpinOnce)
-            {
-                SetCombatMovement(false);
-                DoCastSpellIfCan(nullptr, SPELL_DARK_SPIN);
-                m_bSpinOnce = true;
-            }
-        }
     }
 };
 
