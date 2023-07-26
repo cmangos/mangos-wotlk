@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Boss_Warchief_Kargath_Bladefist
-SD%Complete: 90
+SD%Complete: 100
 SDComment:
 SDCategory: Hellfire Citadel, Shattered Halls
 EndScriptData */

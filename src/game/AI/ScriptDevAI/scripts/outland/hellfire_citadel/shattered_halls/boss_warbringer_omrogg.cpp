@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Warbringer_Omrogg
-SD%Complete: 85
-SDComment: Heroic enabled. Spell timing may need additional tweaks
+SD%Complete: 100
+SDComment:
 SDCategory: Hellfire Citadel, Shattered Halls
 EndScriptData */
 
@@ -27,6 +27,7 @@ boss_warbringer_omrogg
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "shattered_halls.h"
 
 enum
@@ -134,17 +135,16 @@ struct mob_omrogg_headsAI : public ScriptedAI
     }
 };
 
-struct boss_warbringer_omroggAI : public ScriptedAI
+struct boss_warbringer_omroggAI : public CombatAI
 {
-    boss_warbringer_omroggAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_warbringer_omroggAI(Creature* pCreature) : CombatAI(pCreature, 0),
+        m_instance(static_cast<ScriptedInstance*>(pCreature->GetInstanceData())), m_isRegularMode(pCreature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
     ObjectGuid m_leftHeadGuid;
     ObjectGuid m_rightHeadGuid;
@@ -200,7 +200,7 @@ struct boss_warbringer_omroggAI : public ScriptedAI
         m_bThreatYell = true;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         m_creature->SummonCreature(NPC_LEFT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
         m_creature->SummonCreature(NPC_RIGHT_HEAD, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_DEAD_DESPAWN, 0);
@@ -215,19 +215,19 @@ struct boss_warbringer_omroggAI : public ScriptedAI
             m_bAggroYell = true;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_OMROGG, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_OMROGG, IN_PROGRESS);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_LEFT_HEAD)
-            m_leftHeadGuid = pSummoned->GetObjectGuid();
-        else if (pSummoned->GetEntry() == NPC_RIGHT_HEAD)
-            m_rightHeadGuid = pSummoned->GetObjectGuid();
+        if (summoned->GetEntry() == NPC_LEFT_HEAD)
+            m_leftHeadGuid = summoned->GetObjectGuid();
+        else if (summoned->GetEntry() == NPC_RIGHT_HEAD)
+            m_rightHeadGuid = summoned->GetObjectGuid();
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         Creature* pLeftHead  = m_creature->GetMap()->GetCreature(m_leftHeadGuid);
         Creature* pRightHead = m_creature->GetMap()->GetCreature(m_rightHeadGuid);
@@ -253,7 +253,7 @@ struct boss_warbringer_omroggAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         Creature* pLeftHead  = m_creature->GetMap()->GetCreature(m_leftHeadGuid);
         Creature* pRightHead = m_creature->GetMap()->GetCreature(m_rightHeadGuid);
@@ -267,8 +267,8 @@ struct boss_warbringer_omroggAI : public ScriptedAI
         if (mob_omrogg_headsAI* pHeadAI = dynamic_cast<mob_omrogg_headsAI*>(pRightHead->AI()))
             pHeadAI->DoDeathYell();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_OMROGG, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_OMROGG, DONE);
     }
 
     void JustReachedHome() override
@@ -285,8 +285,8 @@ struct boss_warbringer_omroggAI : public ScriptedAI
             m_rightHeadGuid.Clear();
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_OMROGG, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_OMROGG, FAIL);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -357,7 +357,7 @@ struct boss_warbringer_omroggAI : public ScriptedAI
 
         if (m_uiBurningMaulTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_BURNING_MAUL : SPELL_BURNING_MAUL_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_BURNING_MAUL : SPELL_BURNING_MAUL_H) == CAST_OK)
             {
                 DoScriptText(EMOTE_ENRAGE, m_creature);
                 m_uiBurningMaulTimer = 40000;
@@ -401,25 +401,15 @@ struct boss_warbringer_omroggAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_warbringer_omrogg(Creature* pCreature)
-{
-    return new boss_warbringer_omroggAI(pCreature);
-}
-
-UnitAI* GetAI_mob_omrogg_heads(Creature* pCreature)
-{
-    return new mob_omrogg_headsAI(pCreature);
-}
-
 void AddSC_boss_warbringer_omrogg()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_warbringer_omrogg";
-    pNewScript->GetAI = &GetAI_boss_warbringer_omrogg;
+    pNewScript->GetAI = &GetNewAIInstance<boss_warbringer_omroggAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_omrogg_heads";
-    pNewScript->GetAI = &GetAI_mob_omrogg_heads;
+    pNewScript->GetAI = &GetNewAIInstance<mob_omrogg_headsAI>;
     pNewScript->RegisterSelf();
 }

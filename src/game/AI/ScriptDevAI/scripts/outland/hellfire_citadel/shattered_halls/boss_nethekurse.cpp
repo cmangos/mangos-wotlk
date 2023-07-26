@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Grand_Warlock_Nethekurse
-SD%Complete: 75
-SDComment: encounter not fully completed. missing part where boss kill minions.
+SD%Complete: 100
+SDComment:
 SDCategory: Hellfire Citadel, Shattered Halls
 EndScriptData */
 
