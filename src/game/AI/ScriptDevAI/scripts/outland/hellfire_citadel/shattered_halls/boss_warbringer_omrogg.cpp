@@ -342,7 +342,7 @@ struct boss_warbringer_omroggAI : public CombatAI
         {
             if (m_uiBlastWaveTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BLAST_WAVE) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_BLAST_WAVE) == CAST_OK)
                 {
                     m_uiBlastWaveTimer = 5000;
                     ++m_uiBlastCount;
@@ -357,7 +357,7 @@ struct boss_warbringer_omroggAI : public CombatAI
 
         if (m_uiBurningMaulTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_BURNING_MAUL : SPELL_BURNING_MAUL_H) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_BURNING_MAUL : SPELL_BURNING_MAUL_H) == CAST_OK)
             {
                 DoScriptText(EMOTE_ENRAGE, m_creature);
                 m_uiBurningMaulTimer = 40000;
@@ -370,20 +370,18 @@ struct boss_warbringer_omroggAI : public CombatAI
 
         if (m_uiResetThreatTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            if (DoCastSpellIfCan(nullptr, SPELL_BEATDOWN) == CAST_OK)
             {
                 DoYellForThreat();
-                DoResetThreat();
-                AttackStart(pTarget);
+                m_uiResetThreatTimer = urand(25000, 40000);
             }
-            m_uiResetThreatTimer = urand(25000, 40000);
         }
         else
             m_uiResetThreatTimer -= uiDiff;
 
         if (m_uiFearTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_FEAR) == CAST_OK)
                 m_uiFearTimer = urand(15000, 35000);
         }
         else
@@ -391,13 +389,37 @@ struct boss_warbringer_omroggAI : public CombatAI
 
         if (m_uiThunderClapTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_THUNDERCLAP) == CAST_OK)
                 m_uiThunderClapTimer = urand(15000, 30000);
         }
         else
             m_uiThunderClapTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
+    }
+};
+
+// 30618 - Beatdown
+struct Beatdown : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->SetScriptValue(urand(0, spell->GetTargetList().size() - 1));
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (effIdx != EFFECT_INDEX_0 || !caster->AI())
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        auto itr = std::find_if(spell->GetTargetList().begin(), spell->GetTargetList().end(), [target](Spell::TargetInfo const& info) { return info.targetGUID == target->GetObjectGuid(); });
+        if (itr == spell->GetTargetList().end())
+            return;
+
+        caster->getThreatManager().modifyAllThreatPercent(100);
+        caster->AI()->AttackStart(target);
     }
 };
 
@@ -412,4 +434,6 @@ void AddSC_boss_warbringer_omrogg()
     pNewScript->Name = "mob_omrogg_heads";
     pNewScript->GetAI = &GetNewAIInstance<mob_omrogg_headsAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<Beatdown>("spell_beatdown");
 }
