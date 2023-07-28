@@ -12745,9 +12745,9 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
             if (MovementGenerator* movgen = c->GetMotionMaster()->top())
                 movgen->Interrupt(*c);
 
-        GetMap()->CreatureRelocation(c, x, y, z, orientation);
+        SendTeleportPacket(x, y, z, orientation, GetTransport());
 
-        SendHeartBeat();
+        GetMap()->CreatureRelocation(c, x, y, z, orientation);
 
         // finished relocation, movegen can different from top before creature relocation,
         // but apply Reset expected to be safe in any case
