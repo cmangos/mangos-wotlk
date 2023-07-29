@@ -1599,7 +1599,7 @@ struct ForgetAxesmith : public SpellScript
 
         Player* player = static_cast<Player*>(spell->GetUnitTarget());
         player->removeSpell(36260);   // Wicked Edge of the Planes
-        player->removeSpell(34562);   // Black Planar Edge
+        player->removeSpell(34542);   // Black Planar Edge
         player->removeSpell(34541);   // The Planar Edge
         player->removeSpell(36134);   // Stormforged Axe
         player->removeSpell(36135);   // Skyforged Great Axe
@@ -1623,7 +1623,7 @@ struct ForgetHammersmith : public SpellScript
         player->removeSpell(34545);   // Drakefist Hammer
         player->removeSpell(36136);   // Lavaforged Warhammer
         player->removeSpell(34547);   // Thunder
-        player->removeSpell(34567);   // Deep Thunder
+        player->removeSpell(34548);   // Deep Thunder
         player->removeSpell(36263);   // Stormherald
         player->removeSpell(36137);   // Great Earthforged Hammer
     }
