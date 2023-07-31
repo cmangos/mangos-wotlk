@@ -4692,31 +4692,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 540 000 SHATTERED HALLS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1540018','Smash!','10306','1','0','0','14046','omrogg GoCombat_1'),
-('-1540019','If you nice me let you live.','10308','1','0','0','14048','omrogg GoCombat_2'),
-('-1540020','Me hungry!','10309','1','0','0','19842','omrogg GoCombat_3'),
-('-1540021','Why don''t you let me do the talking?','10317','1','0','0','14047','omrogg GoCombatDelay_1'),
-('-1540022','No, we will NOT let you live!','10318','1','0','0','16916','omrogg GoCombatDelay_2'),
-('-1540023','You always hungry. That why we so fat!','10319','1','0','0','0','omrogg GoCombatDelay_3'),
-('-1540024','You stay here. Me go kill someone else!','10303','1','0','0','16898','omrogg Threat_1'),
-('-1540025','What are you doing!','10315','1','0','0','58049','omrogg Threat_2'),
-('-1540026','Me kill someone else...','10302','1','0','0','0','omrogg Threat_3'),
-('-1540027','Me not like this one...','10300','1','0','0','14043','omrogg Threat_4'),
-('-1540028','That''s not funny!','10314','1','0','0','16899','omrogg ThreatDelay1_1'),
-('-1540029','Me get bored...','10305','1','0','0','16902','omrogg ThreatDelay1_2'),
-('-1540030','I''m not done yet, idiot!','10313','1','0','0','16896','omrogg ThreatDelay1_3'),
-('-1540031','Hey you numbskull!','10312','1','0','0','14044','omrogg ThreatDelay1_4'),
-('-1540032','Ha ha ha.','10304','1','0','0','16900','omrogg ThreatDelay2_1'),
-('-1540033','Whhy! He almost dead!','10316','1','0','0','0','omrogg ThreatDelay2_2'),
-('-1540034','H''ey...','10307','1','0','0','0','omrogg ThreatDelay2_3'),
-('-1540035','We kill his friend!','10301','1','0','0','14045','omrogg ThreatDelay2_4'),
-('-1540036','This one die easy!','10310','1','0','0','16922','omrogg Killing_1'),
-('-1540037','I''m tired. You kill next one!','10320','1','0','0','16921','omrogg Killing_2'),
-('-1540038','That''s because I do all the hard work!','10321','1','0','0','16923','omrogg KillingDelay_1'),
-('-1540039','This all...your fault!','10311','1','0','0','16924','omrogg YELL_DIE_L'),
-('-1540040','I...hate...you...','10322','1','0','0','16925','omrogg YELL_DIE_R'),
-('-1540041','%s enrages!','0','2','0','0','0','omrogg EMOTE_ENRAGE'),
-
 ('-1540049','The Alliance dares to intrude this far into my fortress?  Bring out the Honor Hold prisoners and call for the executioner!  They''ll pay with their lives for this trespass!','0','6','0','0','13721','kargath SAY_EXECUTE_ALLY'),
 ('-1540050','It looks like we have a ranking officer among our captives... how amusing.  Execute this green-skinned dog at once!','0','6','0','0','13727','kargath SAY_EXECUTE_HORDE'),
 
