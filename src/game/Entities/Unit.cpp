@@ -13254,7 +13254,8 @@ void Unit::OnRelocated()
         m_last_notified_position.x = GetPositionX();
         m_last_notified_position.y = GetPositionY();
         m_last_notified_position.z = GetPositionZ();
-
+        if (!IsBoarded() && IsVehicle()) // must update passengers for visibility reasons
+            m_vehicleInfo->UpdateGlobalPositions();
         GetViewPoint().Call_UpdateVisibilityForOwner();
         UpdateObjectVisibility();
     }
