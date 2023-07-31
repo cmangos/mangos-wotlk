@@ -27,16 +27,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1565000,
-    SAY_ENRAGE                  = -1565001,
-    SAY_OGRE_DEATH1             = -1565002,
-    SAY_OGRE_DEATH2             = -1565003,
-    SAY_OGRE_DEATH3             = -1565004,
-    SAY_OGRE_DEATH4             = -1565005,
+    SAY_AGGRO                   = 20066,
+    SAY_ENRAGE                  = 20067,
+    SAY_OGRE_DEATH1             = 20068,
+    SAY_OGRE_DEATH2             = 20069,
+    SAY_OGRE_DEATH3             = 20070,
+    SAY_OGRE_DEATH4             = 20071,
     SAY_SLAY1                   = 20072,
     SAY_SLAY2                   = 20073,
     SAY_SLAY3                   = 20074,
-    SAY_DEATH                   = -1565009,
+    SAY_DEATH                   = 20075,
 
     // High King Maulgar Spells
     SPELL_ARCING_SMASH          = 39144,
@@ -111,16 +111,16 @@ struct boss_high_king_maulgarAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
-        // Set data to Special on Death
+        // Set data to Done on Death
         if (m_instance)
-            m_instance->SetData(TYPE_MAULGAR_EVENT, SPECIAL);
+            m_instance->SetData(TYPE_MAULGAR_EVENT, DONE);
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_MAULGAR_EVENT, IN_PROGRESS);
@@ -130,10 +130,10 @@ struct boss_high_king_maulgarAI : public CombatAI
     {
         switch (++m_uiCouncilDeathCount)
         {
-            case 1: DoScriptText(SAY_OGRE_DEATH1, m_creature); break;
-            case 2: DoScriptText(SAY_OGRE_DEATH2, m_creature); break;
-            case 3: DoScriptText(SAY_OGRE_DEATH3, m_creature); break;
-            case 4: DoScriptText(SAY_OGRE_DEATH4, m_creature); break;
+            case 1: DoBroadcastText(SAY_OGRE_DEATH1, m_creature); break;
+            case 2: DoBroadcastText(SAY_OGRE_DEATH2, m_creature); break;
+            case 3: DoBroadcastText(SAY_OGRE_DEATH3, m_creature); break;
+            case 4: DoBroadcastText(SAY_OGRE_DEATH4, m_creature); break;
         }
     }
 
@@ -146,7 +146,7 @@ struct boss_high_king_maulgarAI : public CombatAI
                 {
                     if (DoCastSpellIfCan(nullptr, SPELL_FLURRY) == CAST_OK)
                     {
-                        DoScriptText(SAY_ENRAGE, m_creature);
+                        DoBroadcastText(SAY_ENRAGE, m_creature);
                         SetActionReadyStatus(action, false);
                         ResetCombatAction(MAULGAR_FEAR, urand(10000, 25000));
                         ResetCombatAction(MAULGAR_CHARGE, 2000);
@@ -196,9 +196,6 @@ struct Council_Base_AI : public CombatAI
             if (boss_high_king_maulgarAI* pMaulgarAI = dynamic_cast<boss_high_king_maulgarAI*>(pMaulgar->AI()))
                 pMaulgarAI->EventCouncilDeath();
         }
-
-        // Set data to Special on Death
-        m_instance->SetData(TYPE_MAULGAR_EVENT, SPECIAL);
     }
 };
 

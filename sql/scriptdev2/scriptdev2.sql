@@ -5316,17 +5316,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 565 000 GRUUL'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1565000','Gronn are the real power in Outland!','11367','1','0','0','20066','maulgar SAY_AGGRO'),
-('-1565001','You will not defeat the hand of Gruul!','11368','1','0','0','20067','maulgar SAY_ENRAGE'),
-('-1565002','You won''t kill next one so easy.','11369','1','0','0','20068','maulgar SAY_OGRE_DEATH1'),
-('-1565003','Pah! Does not prove anything!','11370','1','0','0','20069','maulgar SAY_OGRE_DEATH2'),
-('-1565004','I''m not afraid of you.','11371','1','0','0','33611','maulgar SAY_OGRE_DEATH3'),
-('-1565005','Good, now you fight me!','11372','1','0','0','20071','maulgar SAY_OGRE_DEATH4'),
-('-1565006','You not so tough after all!','11373','1','0','0','20072','maulgar SAY_SLAY1'),
-('-1565007','Aha-ha ha ha!','11374','1','0','0','0','maulgar SAY_SLAY2'),
-('-1565008','Maulgar is king!','11375','1','0','0','20074','maulgar SAY_SLAY3'),
-('-1565009','Gruul... will crush you.','11376','1','0','0','20075','maulgar SAY_DEATH'),
-
 ('-1565010','Come.... and die.','11355','1','0','0','20116','gruul SAY_AGGRO'),
 ('-1565011','Scurry.','11356','1','0','0','20117','gruul SAY_SLAM1'),
 ('-1565012','No escape.','11357','1','0','0','20118','gruul SAY_SLAM2'),
