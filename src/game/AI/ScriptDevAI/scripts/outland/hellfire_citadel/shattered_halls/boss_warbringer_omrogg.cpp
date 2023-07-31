@@ -32,9 +32,9 @@ EndContentData */
 
 enum
 {
-    YELL_DIE_L                  = -16924,
-    YELL_DIE_R                  = -16925,
-    EMOTE_ENRAGE                = -16402,
+    YELL_DIE_L                  = 16924,
+    YELL_DIE_R                  = 16925,
+    EMOTE_ENRAGE                = 16402,
 
     SPELL_BLAST_WAVE            = 30600,
     SPELL_FEAR                  = 30584,
