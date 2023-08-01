@@ -622,6 +622,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (43768,'spell_flying_machine_controls'),
 (43770,'spell_grappling_hook'),
 (43789,'spell_grappling_beam'),
+(45472,'spell_parachute_periodic_dummy'),
 (45742,'spell_plant_warsong_banner'),
 (46770,'spell_liquid_fire_of_elune'),
 (47028,'spell_taunka_face_me'),

@@ -626,6 +626,19 @@ struct ShootRJR : public SpellScript
     }
 };
 
+// 45472 - Parachute
+struct ParachutePeriodicDummy : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (aura->GetTarget()->IsFalling())
+        {
+            aura->GetTarget()->CastSpell(nullptr, aura->GetAmount(), TRIGGERED_OLD_TRIGGERED);
+            aura->GetTarget()->RemoveAurasDueToSpell(aura->GetId());
+        }
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -660,4 +673,5 @@ void AddSC_sholazar_basin()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<ShootRJR>("spell_shoot_rjr");
+    RegisterSpellScript<ParachutePeriodicDummy>("spell_parachute_periodic_dummy");
 }
