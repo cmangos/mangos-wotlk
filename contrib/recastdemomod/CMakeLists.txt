@@ -25,12 +25,12 @@ ADD_DEFINITIONS("-DNO_CORE_FUNCS")
 target_compile_definitions(RecastDemoMod PRIVATE -DDT_POLYREF64)
 target_link_libraries(RecastDemoMod
     PUBLIC fastlz
-    PUBLIC detour
-    PUBLIC recast
+    PUBLIC Detour
+    PUBLIC Recast
     PUBLIC g3dlite
-    PUBLIC detourcrowd
-    PUBLIC detourtilecache
-    PUBLIC debugutils
+    PUBLIC DetourCrowd
+    PUBLIC DetourTileCache
+    PUBLIC DebugUtils
     PUBLIC vmaplib
     PUBLIC mmaplib
 )
