@@ -7024,7 +7024,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_BAD_TARGETS;
 
                     // It is possible to change between vehicles that are boarded on each other
-                    if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                    /*if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
                     {
                         // Check if trying to board a vehicle that is boarded on current transport
                         bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(expectedTarget);
@@ -7034,7 +7034,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                         if (!boardedOnEachOther)
                             return SPELL_FAILED_NOT_ON_TRANSPORT;
-                    }
+                    }*/
 
                     if (!expectedTarget->GetVehicleInfo()->CanBoard(m_caster))
                         return SPELL_FAILED_BAD_TARGETS;

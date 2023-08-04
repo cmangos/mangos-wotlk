@@ -1011,6 +1011,8 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
                 pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
             }
+
+            pVehicle->SetTarget(nullptr);
         }
 
         // must be called after movement control unapplying
