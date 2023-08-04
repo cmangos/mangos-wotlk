@@ -23,20 +23,21 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "arcatraz.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
-    SAY_AGGRO                       = -1552031,
-    SAY_SOCCOTHRATES_TAUNT_1        = -1552040,
-    SAY_SOCCOTHRATES_TAUNT_2        = -1552041,
-    SAY_SOCCOTHRATES_TAUNT_3        = -1552042,
-    SAY_HEAL_1                      = -1552032,
-    SAY_HEAL_2                      = -1552033,
-    SAY_KILL_1                      = -1552034,
-    SAY_KILL_2                      = -1552035,
-    SAY_WHIRLWIND_1                 = -1552036,
-    SAY_WHIRLWIND_2                 = -1552037,
-    SAY_DEATH                       = -1552038,
+    SAY_AGGRO                       = 19978,
+    SAY_SOCCOTHRATES_TAUNT_1        = 19975,
+    SAY_SOCCOTHRATES_TAUNT_2        = 19974,
+    SAY_SOCCOTHRATES_TAUNT_3        = 19976,
+    SAY_HEAL_1                      = 19984,
+    SAY_HEAL_2                      = 19985,
+    SAY_KILL_1                      = 19980,
+    SAY_KILL_2                      = 19981,
+    SAY_WHIRLWIND_1                 = 19983,
+    SAY_WHIRLWIND_2                 = 19982,
+    SAY_DEATH                       = 19986,
 
     SPELL_DOUBLE_ATTACK             = 19818,
     SPELL_GIFT_DOOMSAYER            = 36173,
@@ -47,17 +48,16 @@ enum
     SPELL_SHADOW_WAVE               = 39016,                // heroic spell only
 };
 
-struct boss_dalliahAI : public ScriptedAI
+struct boss_dalliahAI : public CombatAI
 {
-    boss_dalliahAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_dalliahAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
     uint32 m_uiGiftDoomsayerTimer;
     uint32 m_uiHealTimer;
@@ -68,6 +68,7 @@ struct boss_dalliahAI : public ScriptedAI
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_uiGiftDoomsayerTimer  = urand(4000, 7000);
         m_uiHealTimer           = 0;
         m_uiWhirlwindTimer      = 15000;
@@ -78,25 +79,20 @@ struct boss_dalliahAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DALLIAH, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_DALLIAH, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*who*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
+        DoBroadcastText(SAY_DEATH, m_creature);
 
-    void JustDied(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DALLIAH, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_DALLIAH, DONE);
     }
 
     void EnterEvadeMode() override
@@ -109,21 +105,21 @@ struct boss_dalliahAI : public ScriptedAI
         if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DALLIAH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_DALLIAH, FAIL);
 
         m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }
 
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    void MovementInform(uint32 moveType, uint32 pointId) override
     {
-        if (uiMoveType != POINT_MOTION_TYPE)
+        if (moveType != POINT_MOTION_TYPE)
             return;
 
         // Adjust orientation
-        if (uiPointId)
+        if (pointId)
             m_creature->SetFacingTo(aDalliahStartPos[3]);
     }
 
@@ -134,7 +130,7 @@ struct boss_dalliahAI : public ScriptedAI
 
         if (m_uiGiftDoomsayerTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_GIFT_DOOMSAYER : SPELL_GIFT_DOOMSAYER_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_GIFT_DOOMSAYER : SPELL_GIFT_DOOMSAYER_H) == CAST_OK)
                 m_uiGiftDoomsayerTimer = urand(14000, 19000);
         }
         else
@@ -144,7 +140,7 @@ struct boss_dalliahAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
             {
-                DoScriptText(urand(0, 1) ? SAY_WHIRLWIND_1 : SAY_WHIRLWIND_2, m_creature);
+                DoBroadcastText(urand(0, 1) ? SAY_WHIRLWIND_1 : SAY_WHIRLWIND_2, m_creature);
                 m_uiWhirlwindTimer = urand(25000, 30000);
                 m_uiHealTimer      = 6000;
             }
@@ -156,9 +152,9 @@ struct boss_dalliahAI : public ScriptedAI
         {
             if (m_uiHealTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEAL : SPELL_HEAL_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_HEAL : SPELL_HEAL_H) == CAST_OK)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_HEAL_1 : SAY_HEAL_2, m_creature);
+                    DoBroadcastText(urand(0, 1) ? SAY_HEAL_1 : SAY_HEAL_2, m_creature);
                     m_uiHealTimer = 0;
                 }
             }
@@ -166,7 +162,7 @@ struct boss_dalliahAI : public ScriptedAI
                 m_uiHealTimer -= uiDiff;
         }
 
-        if (!m_bIsRegularMode)
+        if (!m_isRegularMode)
         {
             if (m_uiShadowWaveTimer < uiDiff)
             {
@@ -183,15 +179,15 @@ struct boss_dalliahAI : public ScriptedAI
         if (!m_bHasTaunted && m_creature->GetHealthPercent() < 25.0f)
         {
             // Taunt if Soccothares isn't dead yet
-            if (m_pInstance && m_pInstance->GetData(TYPE_SOCCOTHRATES) != DONE)
+            if (m_instance && m_instance->GetData(TYPE_SOCCOTHRATES) != DONE)
             {
-                if (Creature* pSoccothares = m_pInstance->GetSingleCreatureFromStorage(NPC_SOCCOTHRATES))
+                if (Creature* pSoccothares = m_instance->GetSingleCreatureFromStorage(NPC_SOCCOTHRATES))
                 {
                     switch (urand(0, 2))
                     {
-                        case 0: DoScriptText(SAY_SOCCOTHRATES_TAUNT_1, pSoccothares); break;
-                        case 1: DoScriptText(SAY_SOCCOTHRATES_TAUNT_2, pSoccothares); break;
-                        case 2: DoScriptText(SAY_SOCCOTHRATES_TAUNT_3, pSoccothares); break;
+                        case 0: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_1, pSoccothares); break;
+                        case 1: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_2, pSoccothares); break;
+                        case 2: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_3, pSoccothares); break;
                     }
                 }
             }
@@ -203,15 +199,10 @@ struct boss_dalliahAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_dalliah(Creature* pCreature)
-{
-    return new boss_dalliahAI(pCreature);
-}
-
 void AddSC_boss_dalliah()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_dalliah";
-    pNewScript->GetAI = &GetAI_boss_dalliah;
+    pNewScript->GetAI = &GetNewAIInstance<boss_dalliahAI>;
     pNewScript->RegisterSelf();
 }

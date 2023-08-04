@@ -29,6 +29,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "arcatraz.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /*#####
 # npc_millhouse_manastorm
@@ -36,18 +37,18 @@ EndContentData */
 
 enum
 {
-    SAY_INTRO_1                     = -1552010,
-    SAY_INTRO_2                     = -1552011,
-    SAY_WATER                       = -1552012,
-    SAY_BUFFS                       = -1552013,
-    SAY_DRINK                       = -1552014,
-    SAY_READY                       = -1552015,
-    SAY_KILL_1                      = -1552016,
-    SAY_KILL_2                      = -1552017,
-    SAY_PYRO                        = -1552018,
-    SAY_ICEBLOCK                    = -1552019,
-    SAY_LOWHP                       = -1552020,
-    SAY_DEATH                       = -1552021,
+    SAY_INTRO_1                     = 19108,
+    SAY_INTRO_2                     = 19116,
+    SAY_WATER                       = 19117,
+    SAY_BUFFS                       = 19119,
+    SAY_DRINK                       = 19120,
+    SAY_READY                       = 19121,
+    SAY_KILL_1                      = 19824,
+    SAY_KILL_2                      = 19825,
+    SAY_PYRO                        = 19826,
+    SAY_ICEBLOCK                    = 19827,
+    SAY_LOWHP                       = 19828,
+    SAY_DEATH                       = 19829,
 
     SPELL_CONJURE_WATER             = 36879,
     SPELL_ARCANE_INTELLECT          = 36880,
@@ -82,19 +83,20 @@ static const DialogueEntry aIntroDialogue[] =
 
 static const float fRoomCenterCoords[3] = {445.8804f, -158.7055f, 43.06898f};
 
-struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
+struct npc_millhouse_manastormAI : public CombatAI, private DialogueHelper
 {
-    npc_millhouse_manastormAI(Creature* pCreature) : ScriptedAI(pCreature),
-        DialogueHelper(aIntroDialogue)
+    npc_millhouse_manastormAI(Creature* creature) : CombatAI(creature, 0),
+        DialogueHelper(aIntroDialogue),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        InitializeDialogueHelper(m_pInstance);
-        Reset();
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
+        InitializeDialogueHelper(m_instance);
         m_attackDistance = 25.0f;
         StartNextDialogueText(NPC_MILLHOUSE);
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
     bool m_bHasLowHp;
     uint32 m_uiPyroblastTimer;
@@ -106,6 +108,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_bHasLowHp             = false;
         m_uiPyroblastTimer      = urand(6000, 9000);
         m_uiFireballTimer       = urand(2500, 4000);
@@ -115,18 +118,9 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
         m_uiArcaneMissileTimer  = urand(5000, 8000);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pVictim*/) override
+    void JustDied(Unit* /*victim*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-
-        /*for questId 10886 (heroic mode only)
-        if (m_instance && m_instance->GetData(TYPE_HARBINGERSKYRISS) != DONE)
-            ->FailQuest();*/
     }
 
     void EnterEvadeMode() override
@@ -144,13 +138,13 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
         Reset();
     }
 
-    void JustDidDialogueStep(int32 iEntry) override
+    void JustDidDialogueStep(int32 textEntry) override
     {
-        switch (iEntry)
+        switch (textEntry)
         {
             case TYPE_WARDEN_2:
-                if (m_pInstance)
-                    m_pInstance->SetData(TYPE_WARDEN_2, DONE);
+                if (m_instance)
+                    m_instance->SetData(TYPE_WARDEN_2, DONE);
                 break;
             case SAY_WATER:
                 DoCastSpellIfCan(m_creature, SPELL_CONJURE_WATER);
@@ -242,11 +236,6 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-UnitAI* GetAI_npc_millhouse_manastorm(Creature* pCreature)
-{
-    return new npc_millhouse_manastormAI(pCreature);
-}
-
 /*#####
 # npc_warden_mellichar
 #####*/
@@ -257,34 +246,34 @@ enum
     SPELL_SIMPLE_TELEPORT   = 12980,
 };
 
-struct npc_warden_mellicharAI : public ScriptedAI
+struct npc_warden_mellicharAI : public CombatAI
 {
-    npc_warden_mellicharAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_warden_mellicharAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         SetCombatMovement(false);
-        Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
     uint32 m_uiIntroTimer;
     ObjectGuid m_targetPlayerGuid;
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_uiIntroTimer = 5000;
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
-    void AttackStart(Unit* /*pWho*/) override {}
+    void AttackStart(Unit* /*who*/) override {}
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
         m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetFacingToObject(pWho);
-        m_targetPlayerGuid = pWho->GetObjectGuid();
+        m_creature->SetFacingToObject(who);
+        m_targetPlayerGuid = who->GetObjectGuid();
 
         DoCastSpellIfCan(m_creature, SPELL_BUBBLE_VISUAL);
 
@@ -292,30 +281,30 @@ struct npc_warden_mellicharAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         SetReactState(REACT_PASSIVE);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HARBINGERSKYRISS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_HARBINGERSKYRISS, IN_PROGRESS);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, TRIGGERED_NONE);
+        summoned->CastSpell(summoned, SPELL_SIMPLE_TELEPORT, TRIGGERED_NONE);
 
-        if (pSummoned->GetEntry() != NPC_MILLHOUSE && pSummoned->GetEntry() != NPC_SKYRISS)
+        if (summoned->GetEntry() != NPC_MILLHOUSE && summoned->GetEntry() != NPC_SKYRISS)
         {
             if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
-                pSummoned->AI()->AttackStart(pTarget);
+                summoned->AI()->AttackStart(pTarget);
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-        if (m_pInstance)
+        if (m_instance)
         {
-            if (Creature* pSkyriss = m_pInstance->GetSingleCreatureFromStorage(NPC_SKYRISS))
+            if (Creature* skyriss = m_instance->GetSingleCreatureFromStorage(NPC_SKYRISS))
             {
-                if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
-                    pSkyriss->AI()->AttackStart(pTarget);
+                if (Unit* target = m_creature->GetMap()->GetUnit(m_targetPlayerGuid))
+                    skyriss->AI()->AttackStart(target);
             }
         }
     }
@@ -336,11 +325,6 @@ struct npc_warden_mellicharAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_warden_mellichar(Creature* pCreature)
-{
-    return new npc_warden_mellicharAI(pCreature);
-}
-
 /*######
 ## npc_arcatraz_defender
 ######*/
@@ -353,20 +337,19 @@ enum
     SPELL_PROTEAN_SUBDUAL_H = 40449,
 };
 
-struct npc_arcatraz_defenderAI : public ScriptedAI
+struct npc_arcatraz_defenderAI : public CombatAI
 {
-    npc_arcatraz_defenderAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_arcatraz_defenderAI(Creature* creature) : CombatAI(creature, 0), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
     }
 
-    bool m_bIsRegularMode;
+    bool m_isRegularMode;
     uint32 m_uiFlamingWeaponTimer;
     uint32 m_uiProteanSubdualTimer;
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_uiFlamingWeaponTimer = urand(3000, 6000);
         m_uiProteanSubdualTimer = 2000;
     }
@@ -378,7 +361,7 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
 
         if (m_uiFlamingWeaponTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FLAMING_WEAPON : SPELL_FLAMING_WEAPON_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_FLAMING_WEAPON : SPELL_FLAMING_WEAPON_H) == CAST_OK)
                 m_uiFlamingWeaponTimer = urand(3000, 6000);
         }
         else
@@ -389,7 +372,7 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
         {
             if (m_uiProteanSubdualTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PROTEAN_SUBDUAL : SPELL_PROTEAN_SUBDUAL_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_PROTEAN_SUBDUAL : SPELL_PROTEAN_SUBDUAL_H) == CAST_OK)
                     m_uiProteanSubdualTimer = urand(2000, 3000);
             }
             else
@@ -400,25 +383,20 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_arcatraz_defender(Creature* pCreature)
-{
-    return new npc_arcatraz_defenderAI(pCreature);
-}
-
 void AddSC_arcatraz()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_millhouse_manastorm";
-    pNewScript->GetAI = &GetAI_npc_millhouse_manastorm;
+    pNewScript->GetAI = &GetNewAIInstance<npc_millhouse_manastormAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_warden_mellichar";
-    pNewScript->GetAI = &GetAI_npc_warden_mellichar;
+    pNewScript->GetAI = &GetNewAIInstance<npc_warden_mellicharAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_arcatraz_defender";
-    pNewScript->GetAI = &GetAI_npc_arcatraz_defender;
+    pNewScript->GetAI = &GetNewAIInstance<npc_arcatraz_defenderAI>;
     pNewScript->RegisterSelf();
 }

@@ -33,20 +33,20 @@ EndScriptData */
 
 enum
 {
-    SAY_SOCCOTHRATES_AGGRO          = -1552039,
-    SAY_SOCCOTHRATES_DEATH          = -1552043,
+    SAY_SOCCOTHRATES_AGGRO          = 19968,
+    SAY_SOCCOTHRATES_DEATH          = 19977,
 
-    YELL_MELLICHAR_INTRO1           = -1552023,
-    YELL_MELLICHAR_INTRO2           = -1552024,
-    YELL_MELLICHAR_RELEASE1         = -1552025,
-    YELL_MELLICHAR_RELEASE2         = -1552026,
-    YELL_MELLICHAR_RELEASE3         = -1552027,
-    YELL_MELLICHAR_RELEASE4         = -1552028,
-    YELL_MELLICHAR_RELEASE5         = -1552029,
-    YELL_MELLICAR_WELCOME           = -1552030,
-    SAY_SKYRISS_INTRO               = -1552000,
-    SAY_SKYRISS_AGGRO               = -1552001,
-    SAY_MILLHOUSE_COMPLETE          = -1552022,
+    YELL_MELLICHAR_INTRO1           = 19103,
+    YELL_MELLICHAR_INTRO2           = 19104,
+    YELL_MELLICHAR_RELEASE1         = 19106,
+    YELL_MELLICHAR_RELEASE2         = 19107,
+    YELL_MELLICHAR_RELEASE3         = 19109,
+    YELL_MELLICHAR_RELEASE4         = 19110,
+    YELL_MELLICHAR_RELEASE5         = 19111,
+    YELL_MELLICAR_WELCOME           = 19114,
+    SAY_SKYRISS_INTRO               = 19112,
+    SAY_SKYRISS_AGGRO               = 19113,
+    SAY_MILLHOUSE_COMPLETE          = 19146,
 
     // Spells used by Mellichar during the dialogue
     SPELL_TARGET_BETA               = 36854,

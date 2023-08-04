@@ -23,17 +23,18 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "arcatraz.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
-    SAY_KILL_1                  = -1552002,
-    SAY_KILL_2                  = -1552003,
-    SAY_MIND_1                  = -1552004,
-    SAY_MIND_2                  = -1552005,
-    SAY_FEAR_1                  = -1552006,
-    SAY_FEAR_2                  = -1552007,
-    SAY_IMAGE                   = -1552008,
-    SAY_DEATH                   = -1552009,
+    SAY_KILL_1                  = 19813,
+    SAY_KILL_2                  = 19814,
+    SAY_MIND_1                  = 19816,
+    SAY_MIND_2                  = 19817,
+    SAY_FEAR_1                  = 19818,
+    SAY_FEAR_2                  = 19819,
+    SAY_IMAGE                   = 19821,
+    SAY_DEATH                   = 19815,
 
     SPELL_FEAR                  = 39415,
     SPELL_MIND_REND             = 36924,
@@ -48,17 +49,16 @@ enum
     SPELL_BLINK_VISUAL          = 36937,
 };
 
-struct boss_harbinger_skyrissAI : public ScriptedAI
+struct boss_harbinger_skyrissAI : public CombatAI
 {
-    boss_harbinger_skyrissAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_harbinger_skyrissAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
     uint8 m_uiSplitPhase;
     uint32 m_uiMindRendTimer;
@@ -68,6 +68,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_uiSplitPhase      = 1;
         m_uiMindRendTimer   = 3000;
         m_uiFearTimer       = 15000;
@@ -75,33 +76,24 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
         m_uiManaBurnTimer   = 25000;
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HARBINGERSKYRISS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_HARBINGERSKYRISS, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HARBINGERSKYRISS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_HARBINGERSKYRISS, FAIL);
     }
 
-    void KilledUnit(Unit* pVictim) override
-    {
-        // won't yell killing pet/other unit
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
         if (m_creature->GetVictim())
-            pSummoned->AI()->AttackStart(m_creature->GetVictim());
+            summoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -113,7 +105,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
         if (m_creature->GetHealthPercent() < 100 - 33 * m_uiSplitPhase && m_creature->GetHealthPercent() > 5.0f)
         {
             DoCastSpellIfCan(m_creature, m_uiSplitPhase == 1 ? SPELL_66_ILLUSION : SPELL_33_ILLUSION, CAST_INTERRUPT_PREVIOUS);
-            DoScriptText(SAY_IMAGE, m_creature);
+            DoBroadcastText(SAY_IMAGE, m_creature);
             ++m_uiSplitPhase;
         }
 
@@ -123,7 +115,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
             if (!pTarget)
                 pTarget = m_creature->GetVictim();
 
-            if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MIND_REND : SPELL_MIND_REND_H) == CAST_OK)
+            if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_MIND_REND : SPELL_MIND_REND_H) == CAST_OK)
                 m_uiMindRendTimer = 8000;
         }
         else
@@ -137,7 +129,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
 
             if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
             {
-                DoScriptText(urand(0, 1) ? SAY_FEAR_1 : SAY_FEAR_2, m_creature);
+                DoBroadcastText(urand(0, 1) ? SAY_FEAR_1 : SAY_FEAR_2, m_creature);
                 m_uiFearTimer = 25000;
             }
         }
@@ -148,9 +140,9 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER))
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DOMINATION : SPELL_DOMINATION_H) == CAST_OK)
+                if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_DOMINATION : SPELL_DOMINATION_H) == CAST_OK)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_MIND_1 : SAY_MIND_2, m_creature);
+                    DoBroadcastText(urand(0, 1) ? SAY_MIND_1 : SAY_MIND_2, m_creature);
                     m_uiDominationTimer = urand(16000, 32000);
                 }
             }
@@ -158,7 +150,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
         else
             m_uiDominationTimer -= uiDiff;
 
-        if (!m_bIsRegularMode)
+        if (!m_isRegularMode)
         {
             if (m_uiManaBurnTimer < uiDiff)
             {
@@ -177,15 +169,10 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_harbinger_skyriss(Creature* pCreature)
-{
-    return new boss_harbinger_skyrissAI(pCreature);
-}
-
 void AddSC_boss_harbinger_skyriss()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_harbinger_skyriss";
-    pNewScript->GetAI = &GetAI_boss_harbinger_skyriss;
+    pNewScript->GetAI = &GetNewAIInstance<boss_harbinger_skyrissAI>;
     pNewScript->RegisterSelf();
 }
