@@ -100,7 +100,7 @@ struct boss_soccothratesAI : public CombatAI, private DialogueHelper
         m_uiFelfireLineupTimer  = 0;
         m_uiChargeTimer         = 0;
 
-        DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_IMMOLATION : SPELL_IMMOLATION_H);
+        DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_IMMOLATION : SPELL_IMMOLATION_H);
     }
 
     void Aggro(Unit* /*who*/) override

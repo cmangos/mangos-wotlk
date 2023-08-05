@@ -105,12 +105,12 @@ class instance_arcatraz : public ScriptedInstance, private DialogueHelper
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
-        uint32 m_uiResetDelayTimer;
-        uint32 m_uiEntranceEventTimer;
-        uint8 m_uiKilledWarders;
-        uint8 m_uiKilledDefenders;
+        uint32 m_resetDelayTimer;
+        uint32 m_entranceEventTimer;
+        uint8 m_killedWarders;
+        uint8 m_killedDefenders;
 
-        GuidList m_lSkyrissEventMobsGuidList;
+        GuidVector m_skyrissEventMobsGuids;
 };
 
 #endif

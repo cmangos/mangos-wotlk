@@ -120,7 +120,7 @@ struct npc_millhouse_manastormAI : public CombatAI, private DialogueHelper
 
     void JustDied(Unit* /*victim*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
     }
 
     void EnterEvadeMode() override
@@ -147,16 +147,16 @@ struct npc_millhouse_manastormAI : public CombatAI, private DialogueHelper
                     m_instance->SetData(TYPE_WARDEN_2, DONE);
                 break;
             case SAY_WATER:
-                DoCastSpellIfCan(m_creature, SPELL_CONJURE_WATER);
+                DoCastSpellIfCan(nullptr, SPELL_CONJURE_WATER);
                 break;
             case SAY_BUFFS:
-                DoCastSpellIfCan(m_creature, SPELL_ARCANE_INTELLECT);
+                DoCastSpellIfCan(nullptr, SPELL_ARCANE_INTELLECT);
                 break;
             case SPELL_ICE_ARMOR:
-                DoCastSpellIfCan(m_creature, SPELL_ICE_ARMOR);
+                DoCastSpellIfCan(nullptr, SPELL_ICE_ARMOR);
                 break;
             case SAY_DRINK:
-                DoCastSpellIfCan(m_creature, SD_SPELL_DRINK);
+                DoCastSpellIfCan(nullptr, SD_SPELL_DRINK);
                 break;
             case POINT_ID_CENTER:
                 m_creature->SetWalk(false);
@@ -177,7 +177,7 @@ struct npc_millhouse_manastormAI : public CombatAI, private DialogueHelper
 
         if (!m_bHasLowHp && m_creature->GetHealthPercent() < 20.0f)
         {
-            DoScriptText(SAY_LOWHP, m_creature);
+            DoBroadcastText(SAY_LOWHP, m_creature);
             m_bHasLowHp = true;
         }
 
@@ -186,7 +186,7 @@ struct npc_millhouse_manastormAI : public CombatAI, private DialogueHelper
             if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PYROBLAST) == CAST_OK)
             {
                 m_uiPyroblastTimer = 40000;
-                DoScriptText(SAY_PYRO, m_creature);
+                DoBroadcastText(SAY_PYRO, m_creature);
             }
         }
         else
@@ -275,7 +275,7 @@ struct npc_warden_mellicharAI : public CombatAI
         m_creature->SetFacingToObject(who);
         m_targetPlayerGuid = who->GetObjectGuid();
 
-        DoCastSpellIfCan(m_creature, SPELL_BUBBLE_VISUAL);
+        DoCastSpellIfCan(nullptr , SPELL_BUBBLE_VISUAL);
 
         // In theory the Seal Sphere should protect the npc from being attacked, but because LoS isn't enabled for Gameobjects we have to use this workaround
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
