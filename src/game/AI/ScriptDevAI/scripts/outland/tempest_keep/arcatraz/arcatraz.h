@@ -82,17 +82,17 @@ static const float aEntranceSpawnLoc[4] = {173.471f, -0.138f, -10.101f, 3.123f};
 class instance_arcatraz : public ScriptedInstance, private DialogueHelper
 {
     public:
-        instance_arcatraz(Map* pMap);
+        instance_arcatraz(Map* map);
 
         void Initialize() override;
 
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
+        void OnPlayerEnter(Player* player) override;
+        void OnObjectCreate(GameObject* go) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnCreatureDeath(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
@@ -100,7 +100,7 @@ class instance_arcatraz : public ScriptedInstance, private DialogueHelper
         void Update(const uint32 diff) override;
 
     private:
-        void JustDidDialogueStep(int32 iEntry) override;
+        void JustDidDialogueStep(int32 dialogueEntry) override;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;

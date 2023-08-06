@@ -126,7 +126,7 @@ struct mob_omrogg_headsAI : public ScriptedAI
 
         if (m_uiDeathTimer < uiDiff)
         {
-            DoScriptText(YELL_DIE_R, m_creature);
+            DoBroadcastText(YELL_DIE_R, m_creature);
             m_uiDeathTimer = 10000;
             m_creature->ForcedDespawn(1000);
         }
@@ -185,7 +185,7 @@ struct boss_warbringer_omroggAI : public CombatAI
 
         Unit* pSource = (leftHead->GetEntry() == Threat[m_iThreat].creature ? leftHead : rightHead);
 
-        DoScriptText(Threat[m_iThreat].id, pSource);
+        DoBroadcastText(Threat[m_iThreat].id, pSource);
 
         ResetTimer(OMROGG_HEAD_TALKS, 2500);
         m_threatYell = true;
@@ -200,7 +200,7 @@ struct boss_warbringer_omroggAI : public CombatAI
         {
             m_iAggro = irand(0, 2);
 
-            DoScriptText(GoCombat[m_iAggro].id, leftHead);
+            DoBroadcastText(GoCombat[m_iAggro].id, leftHead);
 
             ResetTimer(OMROGG_HEAD_TALKS, 2500);
             m_aggroYell = true;
@@ -233,12 +233,12 @@ struct boss_warbringer_omroggAI : public CombatAI
         switch (m_iKilling)
         {
             case 0:
-                DoScriptText(Killing[m_iKilling].id, pSource);
+                DoBroadcastText(Killing[m_iKilling].id, pSource);
                 ResetTimer(OMROGG_HEAD_TALKS, 2500);
                 m_killingYell = true;
                 break;
             case 1:
-                DoScriptText(Killing[m_iKilling].id, pSource);
+                DoBroadcastText(Killing[m_iKilling].id, pSource);
                 m_killingYell = false;
                 break;
         }
@@ -252,7 +252,7 @@ struct boss_warbringer_omroggAI : public CombatAI
         if (!leftHead || !rightHead)
             return;
 
-        DoScriptText(YELL_DIE_L, leftHead);
+        DoBroadcastText(YELL_DIE_L, leftHead);
         leftHead->ForcedDespawn(1000);
 
         if (mob_omrogg_headsAI* pHeadAI = dynamic_cast<mob_omrogg_headsAI*>(rightHead->AI()))
@@ -290,7 +290,7 @@ struct boss_warbringer_omroggAI : public CombatAI
 
         if (m_aggroYell)
         {
-            DoScriptText(GoCombatDelay[m_iAggro].id, rightHead);
+            DoBroadcastText(GoCombatDelay[m_iAggro].id, rightHead);
             m_aggroYell = false;
         }
 
@@ -298,7 +298,7 @@ struct boss_warbringer_omroggAI : public CombatAI
         {
             Creature* pSource = (leftHead->GetEntry() == ThreatDelay2[m_iThreat].creature ? leftHead : rightHead);
 
-            DoScriptText(ThreatDelay2[m_iThreat].id, pSource);
+            DoBroadcastText(ThreatDelay2[m_iThreat].id, pSource);
             m_threatYell2 = false;
         }
 
@@ -306,7 +306,7 @@ struct boss_warbringer_omroggAI : public CombatAI
         {
             Creature* pSource = (leftHead->GetEntry() == ThreatDelay1[m_iThreat].creature ? leftHead : rightHead);
 
-            DoScriptText(ThreatDelay1[m_iThreat].id, pSource);
+            DoBroadcastText(ThreatDelay1[m_iThreat].id, pSource);
             m_threatYell = false;
             m_threatYell2 = true;
             ResetTimer(OMROGG_HEAD_TALKS, 2500);
@@ -316,7 +316,7 @@ struct boss_warbringer_omroggAI : public CombatAI
         {
             Creature* pSource = (leftHead->GetEntry() == KillingDelay[m_iKilling].creature ? leftHead : rightHead);
 
-            DoScriptText(KillingDelay[m_iKilling].id, pSource);
+            DoBroadcastText(KillingDelay[m_iKilling].id, pSource);
             m_killingYell = false;
         }
     }
@@ -326,7 +326,7 @@ struct boss_warbringer_omroggAI : public CombatAI
         switch (spellInfo->Id)
         {
             case SPELL_BURNING_MAUL:
-            case SPELL_BURNING_MAUL_H: DoScriptText(EMOTE_ENRAGE, m_creature); break;
+            case SPELL_BURNING_MAUL_H: DoBroadcastText(EMOTE_ENRAGE, m_creature); break;
             case SPELL_BEATDOWN: DoYellForThreat(); break;
         }
     }
