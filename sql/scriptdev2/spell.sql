@@ -333,6 +333,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (33045,'spell_wota_dot'),
 (33048,'spell_wota_search'),
 (33229,'spell_wota_remove'),
+(36142,'spell_whirlwind_daliah'),
 (36812,'spell_soaring'),
 (37910,'spell_soaring'),
 (37962,'spell_soaring'),
