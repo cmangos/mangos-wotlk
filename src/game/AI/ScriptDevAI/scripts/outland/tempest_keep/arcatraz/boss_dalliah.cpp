@@ -48,33 +48,27 @@ enum
     SPELL_SHADOW_WAVE               = 39016,                // heroic spell only
 };
 
+enum DaliahActions
+{
+    DALIAH_TAUNT,
+    DALIAH_ACTION_MAX,
+};
+
 struct boss_dalliahAI : public CombatAI
 {
-    boss_dalliahAI(Creature* creature) : CombatAI(creature, 0),
+    boss_dalliahAI(Creature* creature) : CombatAI(creature, DALIAH_ACTION_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
+        AddTimerlessCombatAction(DALIAH_TAUNT, true);
         AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
 
-    uint32 m_uiGiftDoomsayerTimer;
-    uint32 m_uiHealTimer;
-    uint32 m_uiWhirlwindTimer;
-    uint32 m_uiShadowWaveTimer;
-
-    bool m_bHasTaunted;
-
     void Reset() override
     {
         CombatAI::Reset();
-        m_uiGiftDoomsayerTimer  = urand(4000, 7000);
-        m_uiHealTimer           = 0;
-        m_uiWhirlwindTimer      = 15000;
-        m_uiShadowWaveTimer     = urand(9000, 13000);
-
-        m_bHasTaunted           = false;
 
         DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
@@ -123,79 +117,54 @@ struct boss_dalliahAI : public CombatAI
             m_creature->SetFacingTo(aDalliahStartPos[3]);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiGiftDoomsayerTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_GIFT_DOOMSAYER : SPELL_GIFT_DOOMSAYER_H) == CAST_OK)
-                m_uiGiftDoomsayerTimer = urand(14000, 19000);
-        }
-        else
-            m_uiGiftDoomsayerTimer -= uiDiff;
-
-        if (m_uiWhirlwindTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
-            {
-                DoBroadcastText(urand(0, 1) ? SAY_WHIRLWIND_1 : SAY_WHIRLWIND_2, m_creature);
-                m_uiWhirlwindTimer = urand(25000, 30000);
-                m_uiHealTimer      = 6000;
-            }
-        }
-        else
-            m_uiWhirlwindTimer -= uiDiff;
-
-        if (m_uiHealTimer)
-        {
-            if (m_uiHealTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_HEAL : SPELL_HEAL_H) == CAST_OK)
+            case DALIAH_TAUNT:
+                if (m_creature->GetHealthPercent() < 25.0f)
                 {
-                    DoBroadcastText(urand(0, 1) ? SAY_HEAL_1 : SAY_HEAL_2, m_creature);
-                    m_uiHealTimer = 0;
-                }
-            }
-            else
-                m_uiHealTimer -= uiDiff;
-        }
-
-        if (!m_isRegularMode)
-        {
-            if (m_uiShadowWaveTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_FARTHEST_AWAY, 0, SPELL_SHADOW_WAVE, SELECT_FLAG_PLAYER))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_WAVE) == CAST_OK)
-                        m_uiShadowWaveTimer = urand(13000, 17000);
-                }
-            }
-            else
-                m_uiShadowWaveTimer -= uiDiff;
-        }
-
-        if (!m_bHasTaunted && m_creature->GetHealthPercent() < 25.0f)
-        {
-            // Taunt if Soccothares isn't dead yet
-            if (m_instance && m_instance->GetData(TYPE_SOCCOTHRATES) != DONE)
-            {
-                if (Creature* pSoccothares = m_instance->GetSingleCreatureFromStorage(NPC_SOCCOTHRATES))
-                {
-                    switch (urand(0, 2))
+                    // Taunt if Soccothares isn't dead yet
+                    if (m_instance && m_instance->GetData(TYPE_SOCCOTHRATES) != DONE)
                     {
-                        case 0: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_1, pSoccothares); break;
-                        case 1: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_2, pSoccothares); break;
-                        case 2: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_3, pSoccothares); break;
+                        if (Creature* soccothrates = m_instance->GetSingleCreatureFromStorage(NPC_SOCCOTHRATES))
+                        {
+                            switch (urand(0, 2))
+                            {
+                                case 0: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_1, soccothrates); break;
+                                case 1: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_2, soccothrates); break;
+                                case 2: DoBroadcastText(SAY_SOCCOTHRATES_TAUNT_3, soccothrates); break;
+                            }
+                        }
                     }
+                    DisableCombatAction(action);
                 }
-            }
-
-            m_bHasTaunted = true;
+                break;
         }
+    }
 
-        DoMeleeAttackIfReady();
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    {
+        switch (spellInfo->Id)
+        {
+            case SPELL_WHIRLWIND:
+                DoBroadcastText(urand(0, 1) ? SAY_WHIRLWIND_1 : SAY_WHIRLWIND_2, m_creature);
+                break;
+            case SPELL_HEAL:
+            case SPELL_HEAL_H:
+                DoBroadcastText(urand(0, 1) ? SAY_HEAL_1 : SAY_HEAL_2, m_creature);
+                break;
+        }
+    }
+};
+
+// 36142 - Whirlwind
+struct WhirlwindDaliah : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetTarget()->AI())
+            aura->GetTarget()->AI()->DoCastSpellIfCan(nullptr, aura->GetTarget()->GetMap()->IsRegularDifficulty() ? SPELL_HEAL : SPELL_HEAL_H);
     }
 };
 
@@ -205,4 +174,6 @@ void AddSC_boss_dalliah()
     pNewScript->Name = "boss_dalliah";
     pNewScript->GetAI = &GetNewAIInstance<boss_dalliahAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<WhirlwindDaliah>("spell_whirlwind_daliah");
 }
