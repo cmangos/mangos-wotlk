@@ -87,7 +87,9 @@ jobs:
       - name: Build
         env:
           MAKEFLAGS: "-j8"
-        run: cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+        run: |
+            cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}} --DCMAKE_INSTALL_PREFIX=/home/runner/work
+            cmake --install .
 
   notify:
     name: Discord Notification
