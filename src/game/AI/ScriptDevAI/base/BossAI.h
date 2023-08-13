@@ -153,44 +153,6 @@ class BossAI : public CombatAI
             });
         }
 
-        void AddCastOnDeath(QueuedCast cast);
-        template <typename... Targs>
-        void AddCastOnDeath(QueuedCast cast, Targs... fargs)
-        {
-            AddCastOnDeath(cast);
-            AddCastOnDeath(fargs...);
-        }
-
-        /**
-        * Adds a timer to respawn the Creature on Evade (instead of walking back to spawn)
-        * @param delay The amount of time until the Creature is supposed to respawn as a std::chrono literal
-        */
-        void AddRespawnOnEvade(std::chrono::milliseconds delay);
-
-        /**
-        * Adds one or more Creatures to despawn alongside this Creature on Evade
-        * Uses the same timer for respawn as was set in AddRespawnOnEvade
-        * @param guid ObjectGuid of the creature to respawn
-        */
-        void DespawnSubordinateOnEvade(ObjectGuid guid);
-        template <typename... Targs>
-        void DespawnSubordinateOnEvade(ObjectGuid guid, Targs... fargs)
-        {
-            DespawnSubordinateOnEvade(guid);
-            DespawnSubordinateOnEvade(fargs...);
-        }
-
-        template<typename T, typename W>
-        void ResetValueTo(T& var, W val)
-        {
-            static_assert(std::is_convertible<W, T>::value, "Value must be of castable type to the variable!");
-            T* ptr = &var;
-            m_resetValues.emplace_back([&]()
-            {
-                *ptr = static_cast<T>(val);
-            });
-        }
-
         std::chrono::seconds TimeSinceEncounterStart()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
@@ -208,10 +170,6 @@ class BossAI : public CombatAI
         std::vector<uint32> m_entranceObjects;
         std::vector<uint32> m_exitObjects;
         std::chrono::milliseconds m_gateDelay = 3s;
-        std::vector<QueuedCast> m_castOnDeath;
-
-        std::vector<std::function<void()>> m_resetValues;
-
         std::vector<QueuedCast> m_castOnDeath;
 
         std::vector<std::function<void()>> m_resetValues;
