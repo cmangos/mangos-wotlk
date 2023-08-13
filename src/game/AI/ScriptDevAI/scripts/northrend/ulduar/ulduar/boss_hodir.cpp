@@ -41,10 +41,13 @@ enum
     SPELL_BERSERK                       = 26662,
     SPELL_HODIR_CREDIT                  = 64899,                // kill credit spell; added in spell_template
     SPELL_SHATTER_CHEST                 = 65272,                // hard mode timer until chest is shattered; triggers 62501 which will send event 20907 if completed
+    SPELL_SHATTER_CHEST_TRIGGERED       = 62501,
     SPELL_FROZEN_BLOWS                  = 62478,
     SPELL_FROZEN_BLOWS_H                = 63512,
     SPELL_FREEZE                        = 62469,
     SPELL_BITTING_COLD                  = 62038,                // triggers 62039 and 62188
+    SPELL_BITING_COLD_AURA              = 62039,
+    SPELL_BITING_COLD_STACK             = 62188,
     SPELL_ICICLE_AURA                   = 62227,                // periodic targeting aura; triggers the spell which summons npc 33169
     SPELL_ICICLE_SNOWPACK               = 62476,                // cast right before Flash Freeze; triggers the spell which summons npc 33173
     SPELL_ICICLE_SNOWPACK_H             = 62477,
@@ -59,10 +62,11 @@ enum
 
     // snowpacked icicle target spells
     SPELL_SAFE_AREA                     = 65705,                // grant immunity from flash freeze
+    SPELL_AURA_SAFE_AREA                = 62464,
 
     // flash freeze related spells
     // SPELL_FLASH_FREEZE_VISUAL        = 62148,                // cast by npc 30298 (handled by event 20896)
-    // SPELL_FLASH_FREEZE_SUMMON        = 61970,                // cast by all Flash Freeze targets; summons 32926
+    SPELL_FLASH_FREEZE_SUMMON           = 61970,                // cast by all Flash Freeze targets; summons 32926
     // SPELL_FLASH_FREEZE_SUMMON_NPC    = 61989,                // used to flash freeze all npc targets before the encounter; summons 32938
     // SPELL_FLASH_FREEZE_STUN          = 64175,                // use and purpose unk
     // SPELL_FLASH_FREEZE_FRIENDLY      = 64176,                // use and purpose unk
@@ -74,6 +78,9 @@ enum
     // flash freeze npc spells
     SPELL_FLASH_FREEZE_AURA_NPC         = 61990,                // stuns the summoner (npc)
     SPELL_FLASH_FREEZE_INITIAL          = 62878,                // trigger aggro on Hodir if damaged; sends event 21045
+
+    // npc spells
+    SPELL_TOASTY_FIRE                   = 62821,
 
     // npcs
     NPC_ICICLE                          = 33169,
@@ -378,7 +385,7 @@ struct npc_icicle_targetAI : public Scripted_NoMovementAI
 
     void Reset() override
     {
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
         DoCastSpellIfCan(m_creature, SPELL_SAFE_AREA);
     }
 
@@ -387,10 +394,59 @@ struct npc_icicle_targetAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_icicle_target(Creature* creature)
+// 61968 Flash Freeze
+struct FlashFreeze : public AuraScript
 {
-    return new npc_icicle_targetAI(creature);
-}
+    void OnPeriodicDummy(Aura* aura) const
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        if (aura->GetAuraTicks() == 1 && !target->HasAura(SPELL_AURA_SAFE_AREA))
+            target->CastSpell(nullptr, SPELL_FLASH_FREEZE_SUMMON, TRIGGERED_INSTANT_CAST |
+                TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_CASTER_AURA_STATE | TRIGGERED_IGNORE_GCD, nullptr, aura);
+    }
+};
+
+// 65272 Shatter Chest
+struct ShatterChest : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        target->CastSpell(target, SPELL_SHATTER_CHEST_TRIGGERED, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+    }
+};
+
+// 62038 Biting Cold
+struct BitingCold : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const
+    {
+        Player* target = dynamic_cast<Player*>(aura->GetTarget());
+        if (!target)
+            return;
+        if (target->IsMoving())
+            target->RemoveAuraHolderFromStack(SPELL_BITING_COLD_AURA);
+        else if (aura->GetAuraTicks() % 3 && !target->HasAura(SPELL_TOASTY_FIRE))
+            target->CastSpell(target, SPELL_BITING_COLD_AURA, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+        return;
+    }
+};
+
+// 62039 Biting Cold
+struct BitingColdDamage : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        target->CastSpell(target, SPELL_BITING_COLD_STACK, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_hodir()
 {
@@ -411,6 +467,11 @@ void AddSC_boss_hodir()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_icicle_target";
-    pNewScript->GetAI = GetAI_npc_icicle_target;
+    pNewScript->GetAI = &GetNewAIInstance<npc_icicle_targetAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<FlashFreeze>("spell_flash_freeze");
+    RegisterSpellScript<ShatterChest>("spell_shatter_chest");
+    RegisterSpellScript<BitingCold>("spell_biting_cold");
+    RegisterSpellScript<BitingColdDamage>("spell_biting_cold_damage");
 }
