@@ -239,6 +239,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (33558,'spell_draw_shadows_trigger'),
 (34662,'spell_bear_command'),
 (36815,'spell_shock_barrier'),
+(46165,'spell_shock_barrier'),
 (39228,'spell_argussian_compass'),
 (41341,'spell_balance_of_power'),
 (41475,'spell_reflective_shield_malande'),
