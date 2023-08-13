@@ -1752,6 +1752,17 @@ bool ProcessEventId_event_ulduar(uint32 uiEventId, Object* pSource, Object* /*pT
             }
         }
     }
+    else if (uiEventId == EVENT_ID_FLASH_FREEZE)
+    {
+        if (pSource->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (instance_ulduar* instance = static_cast<instance_ulduar*>(static_cast<Player*>(pSource)->GetInstanceData()))
+            {
+                instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_CHEESE_FREEZE, false);
+                return true;
+            }
+        }
+    }
 
     return false;
 }
