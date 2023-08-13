@@ -113,6 +113,32 @@ struct PainSuppression : public AuraScript
     }
 };
 
+// 17 - Power Word: Shield
+struct PowerWordShieldPriest : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        Unit* caster = aura->GetTarget();
+        Unit::AuraList const& vOverRideCS = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+        for (auto k : vOverRideCS) // 33201 - Reflective Shield
+        {
+            switch (k->GetModifier()->m_miscvalue)
+            {
+                case 5065:                      // Rank 1
+                case 5064:                      // Rank 2
+                {
+                    if (remainingDamage >= currentAbsorb)
+                        reflectDamage = k->GetModifier()->m_amount * currentAbsorb / 100;
+                    else
+                        reflectDamage = k->GetModifier()->m_amount * remainingDamage / 100;
+                    reflectedSpellId = 33619;
+                } break;
+                default: break;
+            }
+        }
+    }
+};
+
 struct DivineHymn : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -312,6 +338,23 @@ struct ShadowAffinityDots : public AuraScript
     }
 };
 
+// 47788 - Guardian Spirit
+struct GuardianSpiritPriest : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& /*currentAbsorb*/, int32& /*remainingDamage*/, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        preventedDeath = true;
+    }
+
+    void OnAuraDeathPrevention(Aura* aura, int32& remainingDamage) const override
+    {
+        int32 healAmount = aura->GetTarget()->GetMaxHealth() * aura->GetModifier()->m_amount / 100;
+        aura->GetTarget()->CastCustomSpell(nullptr, 48153, &healAmount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        aura->GetTarget()->RemoveAurasDueToSpell(aura->GetSpellProto()->Id);
+        remainingDamage = 0;
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -320,6 +363,7 @@ void LoadPriestScripts()
     RegisterSpellScript<PrayerOfMending>("spell_prayer_of_mending");
     RegisterSpellScript<PainSuppression>("spell_pain_suppression");
     RegisterSpellScript<Shadowfiend>("spell_shadowfiend");
+    RegisterSpellScript<PowerWordShieldPriest>("spell_power_word_shield_priest");
     RegisterSpellScript<DivineHymn>("spell_divine_hymn");
     RegisterSpellScript<HymnOfHope>("spell_hymn_of_hope");
     RegisterSpellScript<CircleOfHealing>("spell_circle_of_healing");
@@ -329,4 +373,5 @@ void LoadPriestScripts()
     RegisterSpellScript<GlyphOfLightwell>("spell_glyph_of_lightwell");
     RegisterSpellScript<GlyphOfShadowWordDeath>("spell_glyph_of_shadow_word_death");
     RegisterSpellScript<ShadowAffinityDots>("spell_shadow_affinity_dots");
+    RegisterSpellScript<GuardianSpiritPriest>("spell_guardian_spirit_priest");
 }

@@ -714,6 +714,31 @@ struct VerasDeadlyPoisonTick : public AuraScript
     }
 };
 
+// 41341 - Balance of Power
+struct BalanceOfPower : public AuraScript
+{
+    void OnAbsorb(Aura* /*aura*/, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& dropCharge, DamageEffectType /*damageType*/) const override
+    {
+        // unused atm
+        remainingDamage += currentAbsorb;
+        currentAbsorb = 0;
+        dropCharge = false;
+    }
+};
+
+// 41475 - Reflective Shield
+struct ReflectiveShieldMalande : public AuraScript
+{
+    void OnAbsorb(Aura* /*aura*/, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        if (remainingDamage < currentAbsorb)
+            reflectDamage = remainingDamage / 2;
+        else
+            reflectDamage = currentAbsorb / 2;
+        reflectedSpellId = 33619;
+    }
+};
+
 void AddSC_boss_illidari_council()
 {
     Script* pNewScript = new Script;
@@ -749,4 +774,6 @@ void AddSC_boss_illidari_council()
     RegisterSpellScript<VerasVanish>("spell_veras_vanish");
     RegisterSpellScript<VerasDeadlyPoison>("spell_veras_deadly_poison");
     RegisterSpellScript<VerasDeadlyPoisonTick>("spell_veras_deadly_poison_tick");
+    RegisterSpellScript<BalanceOfPower>("spell_balance_of_power");
+    RegisterSpellScript<ReflectiveShieldMalande>("spell_reflective_shield_malande");
 }

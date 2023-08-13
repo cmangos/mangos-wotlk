@@ -238,6 +238,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (38760,'spell_void_blast'),
 (33558,'spell_draw_shadows_trigger'),
 (34662,'spell_bear_command'),
+(36815,'spell_shock_barrier'),
+(39228,'spell_argussian_compass'),
+(41341,'spell_balance_of_power'),
+(41475,'spell_reflective_shield_malande'),
 (41624,'spell_enfeeble_removal'),
 (32264,'spell_shirrak_inhibit_magic'),
 (33332,'spell_suppression_blast'),
@@ -1004,11 +1008,17 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52285,'spell_will_of_the_necropolis'),
 (52286,'spell_will_of_the_necropolis'),
 (50452,'spell_bloodworm'),
+(49145,'spell_spell_deflection'),
+(49495,'spell_spell_deflection'),
+(49497,'spell_spell_deflection'),
 (50453,'spell_health_leech_passive'),
 (55078,'spell_death_knight_disease'),
 (55095,'spell_death_knight_disease'),
 (65142,'spell_crypt_fever_serverside'),
 (51052,'spell_anti_magic_zone'),
+(48707,'spell_anti_magic_shell_absorb_self'),
+(50462,'spell_anti_magic_shell_zone'),
+(50461,'spell_anti_zone_absorb'),
 (55090,'spell_scourge_strike'),
 (55265,'spell_scourge_strike'),
 (55270,'spell_scourge_strike'),
@@ -1046,6 +1056,20 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (10060,'spell_power_infusion'),
+(17,'spell_power_word_shield_priest'),
+(592,'spell_power_word_shield_priest'),
+(600,'spell_power_word_shield_priest'),
+(3747,'spell_power_word_shield_priest'),
+(6065,'spell_power_word_shield_priest'),
+(6066,'spell_power_word_shield_priest'),
+(10898,'spell_power_word_shield_priest'),
+(10899,'spell_power_word_shield_priest'),
+(10900,'spell_power_word_shield_priest'),
+(10901,'spell_power_word_shield_priest'),
+(25217,'spell_power_word_shield_priest'),
+(25218,'spell_power_word_shield_priest'),
+(48065,'spell_power_word_shield_priest'),
+(48066,'spell_power_word_shield_priest'),
 (27827,'spell_spirit_of_redemption_heal'),
 (33076,'spell_prayer_of_mending'),
 (33206,'spell_pain_suppression'),
@@ -1074,6 +1098,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (48085,'spell_lightwell_renew'),
 (55673,'spell_glyph_of_lightwell'),
 (60123,'spell_lightwell_relay'),
+(47788,'spell_guardian_spirit_priest'),
 (34861,'spell_circle_of_healing'),
 (34863,'spell_circle_of_healing'),
 (34864,'spell_circle_of_healing'),
@@ -1286,6 +1311,20 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12824,'spell_polymorph'),
 (12825,'spell_polymorph'),
 (12826,'spell_polymorph'),
+(543,'spell_frost_warding'),
+(8457,'spell_frost_warding'),
+(8458,'spell_frost_warding'),
+(10223,'spell_frost_warding'),
+(10225,'spell_frost_warding'),
+(27128,'spell_frost_warding'),
+(43010,'spell_frost_warding'),
+(6143,'spell_frost_warding'),
+(8461,'spell_frost_warding'),
+(8462,'spell_frost_warding'),
+(10177,'spell_frost_warding'),
+(28609,'spell_frost_warding'),
+(32796,'spell_frost_warding'),
+(43012,'spell_frost_warding'),
 (58838,'spell_inherit_masters_threat_list'),
 (59638,'spell_mirror_image_frostbolt');
 
@@ -1324,6 +1363,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27002,'spell_shred_druid'),
 (48571,'spell_shred_druid'),
 (48572,'spell_shred_druid'),
+(33851,'spell_primal_tenacity'),
+(33852,'spell_primal_tenacity'),
+(33957,'spell_primal_tenacity'),
+(69366,'spell_moonkin_form_passive'),
 (40121,'spell_swift_flight_form_passive');
 
 -- Rogue
@@ -1339,6 +1382,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (2070,'spell_sap'), -- check ranks before changing
 (11297,'spell_sap'),
 (51724,'spell_sap'),
+(31228,'spell_cheat_death_rogue'),
+(31229,'spell_cheat_death_rogue'),
+(31230,'spell_cheat_death_rogue'),
 (14082,'spell_dirty_deeds'),
 (14083,'spell_dirty_deeds'),
 (13983,'spell_setup_rogue'),
@@ -1350,7 +1396,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51686,'spell_prey_on_the_weak'),
 (51687,'spell_prey_on_the_weak'),
 (51688,'spell_prey_on_the_weak'),
-(51689,'spell_prey_on_the_weak');
+(51689,'spell_prey_on_the_weak'),
+(31130,'spell_nerves_of_steel'),
+(31131,'spell_nerves_of_steel');
 
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
@@ -1396,6 +1444,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (58590,'spell_stoneclaw_totem_absorb'),
 (58591,'spell_stoneclaw_totem_absorb'),
 (70811,'spell_item_shaman_t10_elemental_2p_bonus'),
+(51474,'spell_astral_shift_shaman'),
+(51478,'spell_astral_shift_shaman'),
+(51479,'spell_astral_shift_shaman'),
 (2825,'spell_heroism_bloodlust'),
 (32182,'spell_heroism_bloodlust');
 

@@ -299,6 +299,17 @@ struct FireNovaShaman : public SpellScript
     }
 };
 
+// 51474 - Astral Shift
+struct AstralShiftShaman : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        // while affected by Stun and Fear
+        if (aura->GetTarget()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING | UNIT_FLAG_SILENCED))
+            remainingDamage -= remainingDamage * currentAbsorb / 100;
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -317,4 +328,5 @@ void LoadShamanScripts()
     RegisterSpellScript<StoneclawTotemAbsorb>("spell_stoneclaw_totem_absorb");
     RegisterSpellScript<HeroismBloodlust>("spell_heroism_bloodlust");
     RegisterSpellScript<FireNovaShaman>("spell_fire_nova_shaman");
+    RegisterSpellScript<AstralShiftShaman>("spell_astral_shift_shaman");
 }

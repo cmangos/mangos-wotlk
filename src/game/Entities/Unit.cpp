@@ -2502,14 +2502,14 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
     if (!IsAlive() || !damage)
         return;
 
-    int32 RemainingDamage = int32(damage);
+    int32 remainingDamage = int32(damage);
 
     // Magic damage, check for resists
     if (canResist && (schoolMask & SPELL_SCHOOL_MASK_MAGIC) && (!binary || damagetype == DOT))
     {
         const float multiplier = Unit::RollMagicResistanceMultiplierOutcomeAgainst(caster, this, schoolMask, damagetype, binary);
         *resist = int32(int64(damage) * multiplier);
-        RemainingDamage -= *resist;
+        remainingDamage -= *resist;
     }
     else
         *resist = 0;
@@ -2523,44 +2523,6 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
     // Death Prevention Aura
     Aura* preventDeathAura = nullptr;
 
-    // full absorb cases (by chance)
-    AuraList const& vAbsorb = GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
-    for (AuraList::const_iterator i = vAbsorb.begin(); i != vAbsorb.end() && RemainingDamage > 0; ++i)
-    {
-        // only work with proper school mask damage
-        Modifier* i_mod = (*i)->GetModifier();
-        if (!(i_mod->m_miscvalue & schoolMask))
-            continue;
-
-        SpellEntry const* i_spellProto = (*i)->GetSpellProto();
-        // Fire Ward or Frost Ward
-        if (i_spellProto->SpellFamilyName == SPELLFAMILY_MAGE && i_spellProto->SpellFamilyFlags & uint64(0x0000000000000108))
-        {
-            int chance = 0;
-            Unit::AuraList const& auras = GetAurasByType(SPELL_AURA_ADD_PCT_MODIFIER);
-            for (auto aura : auras)
-            {
-                SpellEntry const* itr_spellProto = aura->GetSpellProto();
-                // Frost Warding (chance full absorb)
-                if (itr_spellProto->SpellFamilyName == SPELLFAMILY_MAGE && itr_spellProto->SpellIconID == 501)
-                {
-                    // chance stored in next dummy effect
-                    chance = itr_spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
-                    break;
-                }
-            }
-            if (roll_chance_i(chance))
-            {
-                int32 amount = RemainingDamage;
-                RemainingDamage = 0;
-
-                // Frost Warding (mana regen)
-                CastCustomSpell(this, 57776, &amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, *i);
-                break;
-            }
-        }
-    }
-
     // Need remove expired auras after
     bool existExpired = false;
 
@@ -2569,7 +2531,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
     // absorb without mana cost
     AuraList const& vSchoolAbsorb = GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
-    for (AuraList::const_iterator i = vSchoolAbsorb.begin(); i != vSchoolAbsorb.end() && RemainingDamage > 0; ++i)
+    for (AuraList::const_iterator i = vSchoolAbsorb.begin(); i != vSchoolAbsorb.end() && remainingDamage > 0; ++i)
     {
         Modifier* mod = (*i)->GetModifier();
         if (!(mod->m_miscvalue & schoolMask))
@@ -2578,7 +2540,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
         SpellEntry const* spellProto = (*i)->GetSpellProto();
 
         // Max Amount can be absorbed by this aura
-        int32  currentAbsorb = mod->m_amount;
+        int32 currentAbsorb = mod->m_amount;
 
         // Found empty aura (impossible but..)
         if (currentAbsorb <= 0)
@@ -2587,232 +2549,18 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             continue;
         }
 
-        // Handle custom absorb auras
-        // TODO: try find better way
-
-        switch (spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_GENERIC:
-            {
-                switch (spellProto->Id)
-                {
-                    case 31130: // Nerves of Steel
-                    case 31131:
-                    {
-                        // while affected by Stun and Fear
-                        if (unitflag & (UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING))
-                            RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                        continue;
-                    }
-                    case 36815: // Shock Barrier - Kael'Thas
-                    {
-                        reflectSpell = 36822;
-                        if (RemainingDamage < currentAbsorb)
-                            reflectDamage = RemainingDamage / 100;
-                        else
-                            reflectDamage = currentAbsorb / 100;
-                        break;
-                    }
-                    case 39228: // Argussian Compass
-                    case 60218: // Essence of Gossamer
-                    {
-                        // Max absorb stored in 1 dummy effect
-                        int32 max_absorb = spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
-                        if (max_absorb < currentAbsorb)
-                            currentAbsorb = max_absorb;
-                        break;
-                    }
-                    case 41341: // Balance of Power
-                    {
-                        continue; // unused atm
-                    }
-                    case 41475: // Reflective Shield (Lady Malande boss)
-                    {
-                        if (RemainingDamage < currentAbsorb)
-                            reflectDamage = RemainingDamage / 2;
-                        else
-                            reflectDamage = currentAbsorb / 2;
-                        reflectSpell = 33619;
-                        reflectTriggeredBy = *i;
-                        break;
-                    }
-                    case 49145: // Spell Deflection
-                    case 49495:
-                    case 49497:
-                    {
-                        // You have a chance equal to your Parry chance
-                        if (damagetype == SPELL_DIRECT_DAMAGE && roll_chance_f(GetParryChance()))
-                            RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                        continue;
-                    }
-                    case 51474: // Astral Shift
-                    case 51478:
-                    case 51479:
-                    {
-                        // reduces all damage taken while stun, fear or silence
-                        if (unitflag & (UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING | UNIT_FLAG_SILENCED))
-                            RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                        continue;
-                    }
-                    default:
-                        break;
-                }
-                break;
-            }
-            case SPELLFAMILY_DRUID:
-            {
-                // Primal Tenacity
-                if (spellProto->SpellIconID == 2253)
-                {
-                    // reduces all damage taken while Stunned and in Cat Form
-                    if (GetShapeshiftForm() == FORM_CAT && (unitflag & UNIT_FLAG_STUNNED))
-                        RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                    continue;
-                }
-                // Moonkin Form passive
-                if (spellProto->Id == 69366)
-                {
-                    // reduces all damage taken while Stunned
-                    if (unitflag & UNIT_FLAG_STUNNED)
-                        RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                    continue;
-                }
-                break;
-            }
-            case SPELLFAMILY_ROGUE:
-            {
-                switch (spellProto->Id)
-                {
-                    case 31228: // Cheat Death
-                    case 31229:
-                    case 31230:
-                    {
-                        if (!preventDeathAura &&
-                            GetTypeId() == TYPEID_PLAYER && // Only players
-                            IsSpellReady(31231) &&
-                            // Only if no cooldown
-                            roll_chance_i((*i)->GetModifier()->m_amount))
-                            // Only if roll
-                        {
-                            preventDeathAura = (*i);
-                        }
-                        // always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
-                        continue;
-                    }
-                }
-                break;
-            }
-            case SPELLFAMILY_PRIEST:
-            {
-                // Guardian Spirit
-                if (spellProto->SpellIconID == 2873)
-                {
-                    preventDeathAura = (*i);
-                    continue;
-                }
-                // Reflective Shield
-                if (spellProto->IsFitToFamilyMask(uint64(0x0000000000000001)) && canReflect && caster)
-                {
-                    if (caster == this)
-                        break;
-                    Unit* caster = (*i)->GetCaster();
-                    if (!caster)
-                        break;
-                    AuraList const& vOverRideCS = caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (auto k : vOverRideCS)
-                    {
-                        switch (k->GetModifier()->m_miscvalue)
-                        {
-                            case 5065:                      // Rank 1
-                            case 5064:                      // Rank 2
-                            {
-                                if (RemainingDamage >= currentAbsorb)
-                                    reflectDamage = k->GetModifier()->m_amount * currentAbsorb / 100;
-                                else
-                                    reflectDamage = k->GetModifier()->m_amount * RemainingDamage / 100;
-                                reflectSpell = 33619;
-                                reflectTriggeredBy = *i;
-                            } break;
-                            default: break;
-                        }
-                    }
-                    break;
-                }
-                break;
-            }
-            case SPELLFAMILY_SHAMAN:
-            {
-                // Astral Shift
-                if (spellProto->SpellIconID == 3066)
-                {
-                    // reduces all damage taken while stun, fear or silence
-                    if (unitflag & (UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING | UNIT_FLAG_SILENCED))
-                        RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                    continue;
-                }
-                break;
-            }
-            case SPELLFAMILY_DEATHKNIGHT:
-            {
-                // Shadow of Death
-                if (spellProto->SpellIconID == 1958)
-                {
-                    // TODO: absorb only while transform
-                    continue;
-                }
-                // Anti-Magic Shell (on self)
-                if (spellProto->Id == 48707)
-                {
-                    // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
-                    // This, if I'm not mistaken, shows that we get back ~2% of the absorbed damage as runic power.
-                    int32 absorbed = RemainingDamage * currentAbsorb / 100;
-                    int32 regen = absorbed * 2 / 10;
-                    CastCustomSpell(this, 49088, &regen, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, *i);
-                    RemainingDamage -= absorbed;
-                    continue;
-                }
-                // Anti-Magic Shell (on single party/raid member)
-                if (spellProto->Id == 50462)
-                {
-                    RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                    continue;
-                }
-                // Anti-Magic Zone
-                if (spellProto->Id == 50461)
-                {
-                    Unit* auraCaster = (*i)->GetCaster();
-                    if (!caster)
-                        continue;
-                    int32 absorbed = RemainingDamage * currentAbsorb / 100;
-                    int32 canabsorb = caster->GetHealth();
-                    if (canabsorb < absorbed)
-                        absorbed = canabsorb;
-
-                    RemainingDamage -= absorbed;
-
-                    uint32 ab_damage = absorbed;
-                    Unit::DealDamageMods(caster, auraCaster, ab_damage, nullptr, damagetype);
-                    Unit::DealDamage(caster, auraCaster, ab_damage, nullptr, damagetype, schoolMask, nullptr, false);
-                    continue;
-                }
-                break;
-            }
-            default:
-                break;
-        }
-
         // currentAbsorb - damage can be absorbed by shield
         // If need absorb less damage
-        if (RemainingDamage < currentAbsorb)
-            currentAbsorb = RemainingDamage;
+        if (remainingDamage < currentAbsorb)
+            currentAbsorb = remainingDamage;
 
-        bool preventedDeath = false;
+        bool preventedDeath = preventDeathAura != nullptr;
         bool dropCharge = true;
-        (*i)->OnAbsorb(currentAbsorb, RemainingDamage, reflectSpell, reflectDamage, preventedDeath, dropCharge);
+        (*i)->OnAbsorb(currentAbsorb, remainingDamage, reflectSpell, reflectDamage, preventedDeath, dropCharge, damagetype);
         if (preventedDeath)
             preventDeathAura = (*i);
 
-        RemainingDamage -= currentAbsorb;
+        remainingDamage -= currentAbsorb;
 
         // Fire Ward or Frost Ward or Ice Barrier (or Mana Shield)
         // for Incanter's Absorption converting to spell power
@@ -2855,7 +2603,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
     // absorb by mana cost
     AuraList const& vManaShield = GetAurasByType(SPELL_AURA_MANA_SHIELD);
-    for (AuraList::const_iterator i = vManaShield.begin(), next; i != vManaShield.end() && RemainingDamage > 0; i = next)
+    for (AuraList::const_iterator i = vManaShield.begin(), next; i != vManaShield.end() && remainingDamage > 0; i = next)
     {
         next = i; ++next;
 
@@ -2864,10 +2612,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             continue;
 
         int32 currentAbsorb;
-        if (RemainingDamage >= (*i)->GetModifier()->m_amount)
+        if (remainingDamage >= (*i)->GetModifier()->m_amount)
             currentAbsorb = (*i)->GetModifier()->m_amount;
         else
-            currentAbsorb = RemainingDamage;
+            currentAbsorb = remainingDamage;
 
         if (float manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()])
         {
@@ -2896,7 +2644,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             next = vManaShield.begin();
         }
 
-        RemainingDamage -= currentAbsorb;
+        remainingDamage -= currentAbsorb;
     }
 
     // effects dependent from full absorb amount
@@ -2929,7 +2677,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
     if (caster && caster != this)
     {
         AuraList const& vSplitDamageFlat = GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_FLAT);
-        for (AuraList::const_iterator i = vSplitDamageFlat.begin(), next; i != vSplitDamageFlat.end() && RemainingDamage >= 0; i = next)
+        for (AuraList::const_iterator i = vSplitDamageFlat.begin(), next; i != vSplitDamageFlat.end() && remainingDamage >= 0; i = next)
         {
             next = i; ++next;
 
@@ -2943,12 +2691,12 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
                 continue;
 
             int32 currentAbsorb;
-            if (RemainingDamage >= (*i)->GetModifier()->m_amount)
+            if (remainingDamage >= (*i)->GetModifier()->m_amount)
                 currentAbsorb = (*i)->GetModifier()->m_amount;
             else
-                currentAbsorb = RemainingDamage;
+                currentAbsorb = remainingDamage;
 
-            RemainingDamage -= currentAbsorb;
+            remainingDamage -= currentAbsorb;
 
             if (caster->IsImmuneToDamage(schoolMask))
             {
@@ -2967,7 +2715,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
         }
 
         AuraList const& vSplitDamagePct = GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_PCT);
-        for (AuraList::const_iterator i = vSplitDamagePct.begin(), next; i != vSplitDamagePct.end() && RemainingDamage >= 0; i = next)
+        for (AuraList::const_iterator i = vSplitDamagePct.begin(), next; i != vSplitDamagePct.end() && remainingDamage >= 0; i = next)
         {
             next = i; ++next;
 
@@ -2980,9 +2728,9 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
             if (!caster || caster == this || !caster->IsInWorld() || !caster->IsAlive())
                 continue;
 
-            uint32 splitted = uint32(RemainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
+            uint32 splitted = uint32(remainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
 
-            RemainingDamage -=  int32(splitted);
+            remainingDamage -=  int32(splitted);
 
             if (caster->IsImmuneToDamage(schoolMask))
             {
@@ -3001,48 +2749,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
     }
 
     // Apply death prevention spells effects
-    if (preventDeathAura && RemainingDamage >= (int32)GetHealth())
-    {
-        SpellEntry const* spellInfo = preventDeathAura->GetSpellProto();
-        switch (spellInfo->SpellFamilyName)
-        {
-            case SPELLFAMILY_ROGUE:
-            {
-                switch (spellInfo->Id)
-                {
-                    case 31228: // Cheat Death
-                    case 31229:
-                    case 31230:
-                    {
-                        SpellEntry const* cheatDeath = sSpellTemplate.LookupEntry<SpellEntry>(31231);
-                        CastSpell(this, cheatDeath, TRIGGERED_OLD_TRIGGERED);
-                        AddCooldown(*cheatDeath, nullptr, false, 60 * IN_MILLISECONDS); // TODO this may be removed by fixing cooldown value in spell template
-                        // with health > 10% lost health until health==10%, in other case no losses
-                        uint32 health10 = GetMaxHealth() / 10;
-                        RemainingDamage = GetHealth() > health10 ? GetHealth() - health10 : 0;
-                        break;
-                    }
-                    default: break;
-                }
-            }
-            // Guardian Spirit
-            case SPELLFAMILY_PRIEST:
-            {
-                // Guardian Spirit
-                if (preventDeathAura->GetSpellProto()->SpellIconID == 2873)
-                {
-                    int32 healAmount = GetMaxHealth() * preventDeathAura->GetModifier()->m_amount / 100;
-                    CastCustomSpell(this, 48153, &healAmount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                    RemoveAurasDueToSpell(preventDeathAura->GetSpellProto()->Id);
-                    RemainingDamage = 0;
-                }
-                break;
-            }
-        }
-        preventDeathAura->OnAuraDeathPrevention(RemainingDamage);
-    }
+    if (preventDeathAura && remainingDamage >= (int32)GetHealth())
+        preventDeathAura->OnAuraDeathPrevention(remainingDamage);
 
-    *absorb = damage - RemainingDamage - *resist;
+    *absorb = damage - remainingDamage - *resist;
 }
 
 void Unit::CalculateAbsorbResistBlock(Unit* caster, SpellNonMeleeDamage* spellDamageInfo, SpellEntry const* spellInfo, WeaponAttackType attType)

@@ -171,6 +171,28 @@ struct SwiftFlightFormPassive : public AuraScript
     }
 };
 
+// 33851 - Primal Tenacity
+struct PrimalTenacity : public AuraScript
+{
+    void OnAbsorb(Aura * aura, int32 & currentAbsorb, int32 & remainingDamage, uint32 & reflectedSpellId, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        // while affected by Stun and Fear
+        if (aura->GetTarget()->GetShapeshiftForm() == FORM_CAT && aura->GetTarget()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
+            remainingDamage -= remainingDamage * currentAbsorb / 100;
+    }
+};
+
+// 69366 - Moonkin Form (Passive)
+struct MoonkinFormPassive : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        // while affected by Stun and Fear
+        if (aura->GetTarget()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED))
+            remainingDamage -= remainingDamage * currentAbsorb / 100;
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterSpellScript<Regrowth>("spell_regrowth");
@@ -181,4 +203,6 @@ void LoadDruidScripts()
     RegisterSpellScript<Brambles>("spell_brambles");
     RegisterSpellScript<ShredDruid>("spell_shred_druid");
     RegisterSpellScript<SwiftFlightFormPassive>("spell_swift_flight_form_passive");
+    RegisterSpellScript<PrimalTenacity>("spell_primal_tenacity");
+    RegisterSpellScript<MoonkinFormPassive>("spell_moonkin_form_passive");
 }

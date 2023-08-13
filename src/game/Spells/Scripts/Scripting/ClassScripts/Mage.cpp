@@ -146,6 +146,28 @@ struct Polymorph : public AuraScript
     }
 };
 
+// 6143 - Frost Ward, 543 - Fire Ward
+struct FrostWarding : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        int chance = 0;
+        if (Aura* frostWarding = aura->GetTarget()->GetAura(11189, EFFECT_INDEX_0))
+            chance = frostWarding->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
+        if (Aura* frostWarding = aura->GetTarget()->GetAura(28332, EFFECT_INDEX_0))
+            chance = frostWarding->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
+        if (roll_chance_i(chance))
+        {
+            int32 amount = remainingDamage;
+            remainingDamage = 0;
+            currentAbsorb = 0;
+
+            // Frost Warding (mana regen)
+            aura->GetTarget()->CastCustomSpell(nullptr, 57776, &amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+        }
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
@@ -156,4 +178,5 @@ void LoadMageScripts()
     RegisterSpellScript<FingersOfFrostDummy>("spell_fingers_of_frost_dummy");
     RegisterSpellScript<DeepFreezeImmunityState>("spell_deep_freeze_immunity_state");
     RegisterSpellScript<Polymorph>("spell_polymorph");
+    RegisterSpellScript<FrostWarding>("spell_frost_warding");
 }

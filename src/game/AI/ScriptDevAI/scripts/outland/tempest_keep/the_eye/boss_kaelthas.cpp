@@ -1928,6 +1928,19 @@ struct GravityLapseKnockup : public AuraScript
     }
 };
 
+// 36815 - Shock Barrier
+struct ShockBarrier : public AuraScript
+{
+    void OnAbsorb(Aura* /*aura*/, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        reflectedSpellId = 36822;
+        if (remainingDamage < currentAbsorb)
+            reflectDamage = remainingDamage / 100;
+        else
+            reflectDamage = currentAbsorb / 100;
+    }
+};
+
 void AddSC_boss_kaelthas()
 {
     Script* pNewScript = new Script;
@@ -1966,4 +1979,5 @@ void AddSC_boss_kaelthas()
     RegisterSpellScript<NetherVaporSummonParent>("spell_nether_vapor_summon_parent");
     RegisterSpellScript<RemoveWeapons>("spell_remove_weapons");
     RegisterSpellScript<GravityLapseKnockup>("spell_gravity_lapse_knockup");
+    RegisterSpellScript<ShockBarrier>("spell_shock_barrier");
 }

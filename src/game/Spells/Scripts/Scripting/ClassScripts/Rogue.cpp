@@ -145,6 +145,34 @@ struct DirtyDeeds : public AuraScript
     }
 };
 
+// 31228 - Cheat Death
+struct CheatDeathRogue : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath, bool& dropCharge, DamageEffectType /*damageType*/) const override
+    {
+        if (!preventedDeath && aura->GetTarget()->IsPlayer() &&
+            aura->GetTarget()->IsSpellReady(31231) &&
+            // Only if no cooldown
+            roll_chance_i(aura->GetModifier()->m_amount))
+            // Only if roll
+        {
+            preventedDeath = true;
+        }
+        // always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
+        dropCharge = false;
+    }
+
+    void OnAuraDeathPrevention(Aura* aura, int32& remainingDamage) const override
+    {
+        SpellEntry const* cheatDeath = sSpellTemplate.LookupEntry<SpellEntry>(31231);
+        aura->GetTarget()->CastSpell(nullptr, cheatDeath, TRIGGERED_OLD_TRIGGERED);
+        aura->GetHolder()->SetProcCooldown(std::chrono::seconds(60), aura->GetTarget()->GetMap()->GetCurrentClockTime());
+        // with health > 10% lost health until health==10%, in other case no losses
+        uint32 health10 = aura->GetTarget()->GetMaxHealth() / 10;
+        remainingDamage = aura->GetTarget()->GetHealth() > health10 ? aura->GetTarget()->GetHealth() - health10 : 0;
+    }
+};
+
 struct KillingSpreeStorage : public ScriptStorage
 {
     GuidSet targets;
@@ -223,6 +251,17 @@ struct PreyOnTheWeak : public AuraScript
     }
 };
 
+// 31130 - Nerves Of Steel
+struct NervesOfSteel : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        // while affected by Stun and Fear
+        if (aura->GetTarget()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING))
+            remainingDamage -= remainingDamage * currentAbsorb / 100;
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<Preparation>("spell_preparation");
@@ -231,6 +270,8 @@ void LoadRogueScripts()
     RegisterSpellScript<SapRogue>("spell_sap");
     RegisterSpellScript<SetupRogue>("spell_setup_rogue");
     RegisterSpellScript<DirtyDeeds>("spell_dirty_deeds");
+    RegisterSpellScript<CheatDeathRogue>("spell_cheat_death_rogue");
     RegisterSpellScript<KillingSpree>("spell_killing_spree");
     RegisterSpellScript<PreyOnTheWeak>("spell_prey_on_the_weak");
+    RegisterSpellScript<NervesOfSteel>("spell_nerves_of_steel");
 }

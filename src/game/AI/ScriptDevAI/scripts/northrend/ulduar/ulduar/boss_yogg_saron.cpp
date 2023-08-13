@@ -1652,7 +1652,7 @@ UnitAI* GetAI_npc_keeper_thorim(Creature* pCreature)
 
 struct HodirsProtectiveGaze : AuraScript
 {
-    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath, bool& dropCharge) const override
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath, bool& dropCharge, DamageEffectType /*damageType*/) const override
     {
         currentAbsorb = 0;
         dropCharge = false;

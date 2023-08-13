@@ -376,11 +376,64 @@ struct SuddenDoom : public AuraScript
 
 struct WillOfTheNecropolis : public AuraScript
 {
-    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/) const override
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
     {
         currentAbsorb = 0;
         if (aura->GetTarget()->GetHealth() - remainingDamage < aura->GetTarget()->GetMaxHealth() * 35 / 100)
             currentAbsorb = aura->GetAmount() * remainingDamage / 100;
+    }
+};
+
+// 49145 - Spell Deflection
+struct SpellDeflection : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType damageType) const override
+    {
+        // You have a chance equal to your Parry chance
+        if (damageType == SPELL_DIRECT_DAMAGE && roll_chance_f(aura->GetTarget()->GetParryChance()))
+            remainingDamage -= remainingDamage * currentAbsorb / 100;
+    }
+};
+
+// 48707 Anti-Magic Shell
+struct AntiMagicShellAbsorbSelf : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        // damage absorbed by Anti-Magic Shell energizes the DK with additional runic power.
+        // This, if I'm not mistaken, shows that we get back ~2% of the absorbed damage as runic power.
+        int32 absorbed = remainingDamage * currentAbsorb / 100;
+        int32 regen = absorbed * 2 / 10;
+        aura->GetTarget()->CastCustomSpell(nullptr, 49088, &regen, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+        remainingDamage -= absorbed;
+    }
+};
+
+// 50462 - Anti-Magic Zone
+struct AntiMagicShellZone : public AuraScript
+{
+    void OnAbsorb(Aura* /*aura*/, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        remainingDamage -= remainingDamage * currentAbsorb / 100;
+    }
+};
+
+// 50461 - Anti-Magic Zone
+struct AntiMagicZoneAbsorb : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType damageType) const override
+    {
+        Unit* auraCaster = aura->GetCaster();
+        int32 absorbed = remainingDamage * currentAbsorb / 100;
+        int32 canabsorb = auraCaster->GetHealth();
+        if (canabsorb < absorbed)
+            absorbed = canabsorb;
+
+        remainingDamage -= absorbed;
+
+        uint32 ab_damage = absorbed;
+        Unit::DealDamageMods(auraCaster, auraCaster, ab_damage, nullptr, damageType);
+        Unit::DealDamage(auraCaster, auraCaster, ab_damage, nullptr, damageType, SPELL_SCHOOL_MASK_SHADOW, nullptr, false);
     }
 };
 
@@ -574,6 +627,10 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<FakeAggroRadius8YD>("spell_fake_aggro_radius_8yd");
     RegisterSpellScript<AggroRadius8YD>("spell_aggro_radius_8yd");
     RegisterSpellScript<SummonGargoyle>("spell_summon_gargoyle");
+    RegisterSpellScript<SpellDeflection>("spell_spell_deflection");
+    RegisterSpellScript<AntiMagicShellAbsorbSelf>("spell_anti_magic_shell_absorb_self");
+    RegisterSpellScript<AntiMagicShellZone>("spell_anti_magic_shell_zone");
+    RegisterSpellScript<AntiMagicZoneAbsorb>("spell_anti_zone_absorb");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_gargoyle_dk";

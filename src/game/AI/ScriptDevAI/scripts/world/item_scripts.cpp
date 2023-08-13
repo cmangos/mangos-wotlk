@@ -352,6 +352,18 @@ struct OrbOfDeception : public AuraScript
     }
 };
 
+// 39228 - Argussian Compass
+struct ArgussianCompass : public AuraScript
+{
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& /*remainingDamage*/, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        // Max absorb stored in 1 dummy effect
+        int32 max_absorb = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
+        if (max_absorb < currentAbsorb)
+            currentAbsorb = max_absorb;
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -389,4 +401,5 @@ void AddSC_item_scripts()
     RegisterSpellScript<ReducedProcChancePast60>("spell_reduced_proc_chance_past60");
     RegisterSpellScript<BanishExile>("spell_banish_exile");
     RegisterSpellScript<OrbOfDeception>("spell_orb_of_deception");
+    RegisterSpellScript<ArgussianCompass>("spell_argussian_compass");
 }
