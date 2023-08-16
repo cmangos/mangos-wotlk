@@ -151,7 +151,7 @@ struct CheatDeathRogue : public AuraScript
     void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath, bool& dropCharge, DamageEffectType /*damageType*/) const override
     {
         if (!preventedDeath && aura->GetTarget()->IsPlayer() &&
-            aura->GetTarget()->IsSpellReady(31231) &&
+            aura->GetHolder()->IsProcReady(aura->GetTarget()->GetMap()->GetCurrentClockTime()) &&
             // Only if no cooldown
             roll_chance_i(aura->GetModifier()->m_amount))
             // Only if roll
@@ -160,6 +160,8 @@ struct CheatDeathRogue : public AuraScript
         }
         // always skip this spell in charge dropping, absorb amount calculation since it has chance as m_amount and doesn't need to absorb any damage
         dropCharge = false;
+        currentAbsorb = 0; // absorb is only done in death prevention case
+        remainingDamage += currentAbsorb;
     }
 
     void OnAuraDeathPrevention(Aura* aura, int32& remainingDamage) const override
