@@ -72,6 +72,8 @@ enum
     NPC_HEARTHEN_GUARD          = 17621,
     NPC_SHARPSHOOTER_GUARD      = 17622,
     NPC_REAVER_GUARD            = 17623,
+
+    WORLD_STATE_CUSTOM_SPAWN_WAVES = 5400004,
 };
 
 struct SpawnLocation
@@ -120,8 +122,6 @@ class instance_shattered_halls : public ScriptedInstance
 
         void DoInitialGets();
 
-        void DoSummonInitialWave();
-
         void DoSummonSHZealot();
 
         void DoBeginArcherAttack(bool leftOrRight);
@@ -142,9 +142,9 @@ class instance_shattered_halls : public ScriptedInstance
         uint8 m_executionStage;
         uint8 m_prisonersLeft;
 
-        GuidVector m_gauntletPermanentGuids;
+        std::vector<uint32> m_gauntletPermanentGuids;
         GuidVector m_gauntletTemporaryGuids;
-        GuidVector m_gauntletBossGuids;
+        std::vector<uint32>  m_gauntletBossGuids;
 
         std::vector<std::pair<ObjectGuid, uint32>> m_blazeTimers;
 
