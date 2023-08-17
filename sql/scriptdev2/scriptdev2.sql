@@ -60,6 +60,7 @@ INSERT INTO scripted_areatrigger VALUES
 (4113,'at_naxxramas'),
 (4156,'at_naxxramas'),
 (4288,'at_dark_portal'),
+(4347,'at_shh_netherkurse'),
 (4422,'at_area_52'),
 (4466,'at_area_52'),
 (4471,'at_area_52'),
@@ -987,6 +988,7 @@ UPDATE creature_template SET ScriptName='npc_blade_dance_target' WHERE entry IN(
 UPDATE creature_template SET ScriptName='npc_shattered_hand_zealot' WHERE entry=17462;
 UPDATE creature_template SET ScriptName='npc_shattered_hand_scout' WHERE entry=17693;
 UPDATE instance_template SET ScriptName='instance_shattered_halls' WHERE map=540;
+UPDATE gameobject_template SET ScriptName='go_netherkurse_door' WHERE entry=182539;
 
 /* MAGTHERIDON'S LAIR */
 UPDATE instance_template SET ScriptName='instance_magtheridons_lair' WHERE map=544;
