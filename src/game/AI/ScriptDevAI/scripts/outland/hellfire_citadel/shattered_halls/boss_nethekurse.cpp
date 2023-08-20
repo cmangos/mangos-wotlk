@@ -75,17 +75,19 @@ enum NethekurseActions
 {
     NETHEKURSE_ACTION_MAX,
     NETHEKURSE_TAUNT_PEONS,
-    NETHEKURSE_START_FIGHT
+    NETHEKURSE_START_FIGHT,
+    NETHEKURSE_PEON_RP_CD
 };
 
 struct boss_grand_warlock_nethekurseAI : public CombatAI
 {
     boss_grand_warlock_nethekurseAI(Creature* creature) : CombatAI(creature, NETHEKURSE_ACTION_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
-        m_introOnce(false)
+        m_introOnce(false), m_peonRPCD(false)
     {
         AddCustomAction(NETHEKURSE_TAUNT_PEONS, true, [&]() { DoTauntPeons(); });
         AddCustomAction(NETHEKURSE_START_FIGHT, true, [&]() { DoStartFight(); });
+        AddCustomAction(NETHEKURSE_PEON_RP_CD, true, [&]() { DoPeonCD(); });
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3, SAY_SLAY_4);
         SetReactState(REACT_DEFENSIVE);
     }
@@ -94,6 +96,7 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
     bool m_isRegularMode;
 
     bool m_introOnce;
+    bool m_peonRPCD;
 
     uint8 m_peonKilledCount;
 
@@ -108,38 +111,66 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
 
     void DoYellForPeonAggro()
     {
-        // This needs a cooldown from ~ 5 seconds so it doesnt get spammed when all 4 peons aggro at same time
-        switch (urand(0, 3))
+        if (!m_peonRPCD)
         {
-            case 0: DoBroadcastText(SAY_PEON_ATTACK_1, m_creature); break;
-            case 1: DoBroadcastText(SAY_PEON_ATTACK_2, m_creature); break;
-            case 2: DoBroadcastText(SAY_PEON_ATTACK_3, m_creature); break;
-            case 3: DoBroadcastText(SAY_PEON_ATTACK_4, m_creature); break;
+            if(!m_creature->IsInCombat())
+            {
+                m_creature->GetMotionMaster()->PauseWaypoints(5000);
+                m_creature->SetFacingTo(4.5727f);
+                m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH);
+
+                switch (urand(0, 3))
+                {
+                    case 0: DoBroadcastText(SAY_PEON_ATTACK_1, m_creature); break;
+                    case 1: DoBroadcastText(SAY_PEON_ATTACK_2, m_creature); break;
+                    case 2: DoBroadcastText(SAY_PEON_ATTACK_3, m_creature); break;
+                    case 3: DoBroadcastText(SAY_PEON_ATTACK_4, m_creature); break;
+                }
+                ResetTimer(NETHEKURSE_PEON_RP_CD, 5000);
+                m_peonRPCD = true;
+            }
         }
     }
-
-    void DoYellForPeonDeath(Unit* killer)
+    void DoPeonCD()
     {
-        // This needs a cooldown from ~ 5 seconds so it doesnt get spammed when all 4 peons die at same time
+        m_peonRPCD = false;
+        DisableTimer(NETHEKURSE_TAUNT_PEONS);
+    }
+    void DoYellForPeonDeath()
+    {        
         if (m_peonKilledCount >= 4)
             return;
 
-        switch (urand(0, 2))
+
+        if (!m_peonRPCD)
         {
-            case 0: DoBroadcastText(SAY_PEON_DIE_1, m_creature); break;
-            case 1: DoBroadcastText(SAY_PEON_DIE_2, m_creature); break;
-            case 2: DoBroadcastText(SAY_PEON_DIE_3, m_creature); break;
-        }
+            m_creature->GetMotionMaster()->PauseWaypoints(4000);
+            m_creature->SetFacingTo(4.5727f);
+            m_creature->HandleEmoteState(EMOTE_STATE_APPLAUD);
 
-        ++m_peonKilledCount;
+            switch (urand(0, 2))
+            {
+                case 0: DoBroadcastText(SAY_PEON_DIE_1, m_creature); break;
+                case 1: DoBroadcastText(SAY_PEON_DIE_2, m_creature); break;
+                case 2: DoBroadcastText(SAY_PEON_DIE_3, m_creature); break;
+            }
 
-        if (m_peonKilledCount == 4)
-        {
-            DisableTimer(NETHEKURSE_TAUNT_PEONS);
-            SetReactState(REACT_AGGRESSIVE);
+            ++m_peonKilledCount;
 
-            // Start fight after 4 seconds
-            ResetTimer(NETHEKURSE_START_FIGHT, 4000);
+            if (m_peonKilledCount == 4)
+            {
+                DisableTimer(NETHEKURSE_TAUNT_PEONS);
+                SetReactState(REACT_AGGRESSIVE);
+
+                // Start fight after 4 seconds
+                ResetTimer(NETHEKURSE_START_FIGHT, 4000);
+            }
+            else
+            {
+                ResetTimer(NETHEKURSE_PEON_RP_CD, 5000);
+                m_peonRPCD = true;
+            }
+
         }
     }
 
@@ -288,7 +319,7 @@ struct mob_fel_orc_convertAI : public ScriptedAI
             if (Creature* nethekurse = m_instance->GetSingleCreatureFromStorage(NPC_NETHEKURSE))
             {
                 if (boss_grand_warlock_nethekurseAI* nethekurseAI = dynamic_cast<boss_grand_warlock_nethekurseAI*>(nethekurse->AI()))
-                    nethekurseAI->DoYellForPeonDeath(killer);
+                    nethekurseAI->DoYellForPeonDeath();
             }
         }
     }
