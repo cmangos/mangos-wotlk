@@ -49,32 +49,25 @@ enum
     SPELL_BLINK_VISUAL          = 36937,
 };
 
+enum HarbingerSkyrissActions
+{
+    SKYRISS_66,
+    SKYRISS_33,
+    SKYRISS_ACTION_MAX,
+};
+
 struct boss_harbinger_skyrissAI : public CombatAI
 {
-    boss_harbinger_skyrissAI(Creature* creature) : CombatAI(creature, 0),
+    boss_harbinger_skyrissAI(Creature* creature) : CombatAI(creature, SKYRISS_ACTION_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddOnKillText(SAY_KILL_1, SAY_KILL_2);
+        AddTimerlessCombatAction(SKYRISS_66, true);
+        AddTimerlessCombatAction(SKYRISS_33, true);
     }
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
-
-    uint8 m_uiSplitPhase;
-    uint32 m_uiMindRendTimer;
-    uint32 m_uiFearTimer;
-    uint32 m_uiDominationTimer;
-    uint32 m_uiManaBurnTimer;
-
-    void Reset() override
-    {
-        CombatAI::Reset();
-        m_uiSplitPhase      = 1;
-        m_uiMindRendTimer   = 3000;
-        m_uiFearTimer       = 15000;
-        m_uiDominationTimer = 30000;
-        m_uiManaBurnTimer   = 25000;
-    }
 
     void JustDied(Unit* /*killer*/) override
     {
@@ -96,76 +89,35 @@ struct boss_harbinger_skyrissAI : public CombatAI
             summoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Check if creature is below 66% or 33%; Also don't allow it to split the third time
-        if (m_creature->GetHealthPercent() < 100 - 33 * m_uiSplitPhase && m_creature->GetHealthPercent() > 5.0f)
+        switch (action)
         {
-            DoCastSpellIfCan(m_creature, m_uiSplitPhase == 1 ? SPELL_66_ILLUSION : SPELL_33_ILLUSION, CAST_INTERRUPT_PREVIOUS);
-            DoBroadcastText(SAY_IMAGE, m_creature);
-            ++m_uiSplitPhase;
-        }
-
-        if (m_uiMindRendTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
-            if (!pTarget)
-                pTarget = m_creature->GetVictim();
-
-            if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_MIND_REND : SPELL_MIND_REND_H) == CAST_OK)
-                m_uiMindRendTimer = 8000;
-        }
-        else
-            m_uiMindRendTimer -= uiDiff;
-
-        if (m_uiFearTimer < uiDiff)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
-            if (!pTarget)
-                pTarget = m_creature->GetVictim();
-
-            if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
-            {
-                DoBroadcastText(urand(0, 1) ? SAY_FEAR_1 : SAY_FEAR_2, m_creature);
-                m_uiFearTimer = 25000;
-            }
-        }
-        else
-            m_uiFearTimer -= uiDiff;
-
-        if (m_uiDominationTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_DOMINATION : SPELL_DOMINATION_H) == CAST_OK)
+            case SKYRISS_66:
+                if (m_creature->GetHealthPercent() <= 66.f)
                 {
-                    DoBroadcastText(urand(0, 1) ? SAY_MIND_1 : SAY_MIND_2, m_creature);
-                    m_uiDominationTimer = urand(16000, 32000);
+                    DoCastSpellIfCan(nullptr, SPELL_66_ILLUSION);
+                    DoBroadcastText(SAY_IMAGE, m_creature);
+                    DisableCombatAction(action);
                 }
-            }
+                break;
+            case SKYRISS_33:
+                if (m_creature->GetHealthPercent() <= 33.f)
+                {
+                    DoCastSpellIfCan(nullptr, SPELL_33_ILLUSION);
+                    DoBroadcastText(SAY_IMAGE, m_creature);
+                    DisableCombatAction(action);
+                }
+                break;
         }
-        else
-            m_uiDominationTimer -= uiDiff;
+    }
 
-        if (!m_isRegularMode)
-        {
-            if (m_uiManaBurnTimer < uiDiff)
-            {
-                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA);
-                if (!pTarget)
-                    pTarget = m_creature->GetVictim();
-
-                if (DoCastSpellIfCan(pTarget, SPELL_MANA_BURN_H) == CAST_OK)
-                    m_uiManaBurnTimer = urand(16000, 32000);
-            }
-            else
-                m_uiManaBurnTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    {
+        if (spellInfo->Id == SPELL_FEAR)
+            DoBroadcastText(urand(0, 1) ? SAY_FEAR_1 : SAY_FEAR_2, m_creature);
+        else if (spellInfo->Id == SPELL_DOMINATION || spellInfo->Id == SPELL_DOMINATION_H)
+            DoBroadcastText(urand(0, 1) ? SAY_MIND_1 : SAY_MIND_2, m_creature);
     }
 };
 
