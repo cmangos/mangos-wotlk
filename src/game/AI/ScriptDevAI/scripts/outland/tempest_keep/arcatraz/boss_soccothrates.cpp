@@ -68,24 +68,26 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
+enum SoccothratesActions
+{
+    SOCCOTHRATES_ACTION_MAX,
+    SOCCOTHRATES_FELFIRE_LINEUP,
+};
+
 struct boss_soccothratesAI : public CombatAI, private DialogueHelper
 {
-    boss_soccothratesAI(Creature* creature) : CombatAI(creature, 0),
+    boss_soccothratesAI(Creature* creature) : CombatAI(creature, SOCCOTHRATES_ACTION_MAX),
         DialogueHelper(aIntroDialogue),
-        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_hasYelledIntro(false)
     {
         AddOnKillText(SAY_KILL);
         InitializeDialogueHelper(m_instance);
-        m_hasYelledIntro = false;
+        AddCustomAction(SOCCOTHRATES_FELFIRE_LINEUP, true, [&]() { HandleFelfireLineup(); });
     }
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
-
-    uint32 m_uiKnockAwayTimer;
-    uint32 m_uiFelfireShockTimer;
-    uint32 m_uiFelfireLineupTimer;
-    uint32 m_uiChargeTimer;
 
     float m_x, m_y, m_z; // last charge target location
     uint8 m_lineUpCounter;
@@ -95,10 +97,6 @@ struct boss_soccothratesAI : public CombatAI, private DialogueHelper
     void Reset() override
     {
         CombatAI::Reset();
-        m_uiFelfireShockTimer   = urand(10000, 13000);
-        m_uiKnockAwayTimer      = urand(22000, 25000);
-        m_uiFelfireLineupTimer  = 0;
-        m_uiChargeTimer         = 0;
 
         DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_IMMOLATION : SPELL_IMMOLATION_H);
     }
@@ -210,73 +208,32 @@ struct boss_soccothratesAI : public CombatAI, private DialogueHelper
         }
     }
 
+    void HandleFelfireLineup()
+    {
+        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+        {
+            if (DoCastSpellIfCan(target, SPELL_CHARGE_TARGETING) == CAST_OK)
+            {
+                m_creature->CastSpell(nullptr, SPELL_FELFIRE_LINE_UP, TRIGGERED_OLD_TRIGGERED);
+                DoBroadcastText(urand(0, 1) ? SAY_CHARGE_1 : SAY_CHARGE_2, m_creature, target);
+            }
+        }
+    }
+
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    {
+        if (spellInfo->Id == SPELL_KNOCK_AWAY)
+            ResetTimer(SOCCOTHRATES_FELFIRE_LINEUP, 2000);
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
         DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiFelfireShockTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_FELFIRE_SHOCK : SPELL_FELFIRE_SHOCK_H) == CAST_OK)
-                m_uiFelfireShockTimer = urand(35000, 45000);
-        }
-        else
-            m_uiFelfireShockTimer -= uiDiff;
-
-        if (m_uiKnockAwayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_KNOCK_AWAY) == CAST_OK)
-            {
-                m_uiKnockAwayTimer = urand(30000, 35000);
-                m_uiFelfireLineupTimer = 2000;
-            }
-        }
-        else
-            m_uiKnockAwayTimer -= uiDiff;
-
-        // Prepare the boss for charging
-        if (m_uiFelfireLineupTimer)
-        {
-            if (m_uiFelfireLineupTimer <= uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_CHARGE_TARGETING) == CAST_OK)
-                    {
-                        // ToDo: the Wrath-Scryer's Felfire npcs should be summoned at this point and aligned to the chosen target!
-                        m_creature->CastSpell(m_creature, SPELL_FELFIRE_LINE_UP, TRIGGERED_OLD_TRIGGERED);
-                        DoBroadcastText(urand(0, 1) ? SAY_CHARGE_1 : SAY_CHARGE_2, m_creature, pTarget);
-
-                        m_uiChargeTimer        = 2500;
-                        m_uiFelfireLineupTimer = 0;
-                    }
-                }
-            }
-            else
-                m_uiFelfireLineupTimer -= uiDiff;
-        }
-
-        // Charge the target
-        if (m_uiChargeTimer)
-        {
-            if (m_uiChargeTimer <= uiDiff)
-            {
-                m_creature->RemoveAurasDueToSpell(SPELL_KNOCK_AWAY);
-                SetCombatMovement(false); // prevents interrupting charge
-                // Note: this spellInfo will also light up the Wrath-Scryer's Felfire npcs
-                if (DoCastSpellIfCan(m_creature, SPELL_CHARGE) == CAST_OK)
-                    m_uiChargeTimer = 0;
-            }
-            else
-                m_uiChargeTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
+        CombatAI::UpdateAI(uiDiff);
     }
 };
 
+// 35754 - Charge
 struct SoccothratesCharge : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
@@ -289,6 +246,24 @@ struct SoccothratesCharge : public SpellScript
     }
 };
 
+// 36512 - Knock Away
+struct KnockAwaySoccothrates : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (target->AI())
+            {
+                target->AI()->SetCombatMovement(false); // prevents interrupting charge
+                // Note: this spellInfo will also light up the Wrath-Scryer's Felfire npcs
+                target->AI()->DoCastSpellIfCan(nullptr, SPELL_CHARGE);
+            }
+        }
+    }
+};
+
 void AddSC_boss_soccothrates()
 {
     Script* pNewScript = new Script;
@@ -297,4 +272,5 @@ void AddSC_boss_soccothrates()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SoccothratesCharge>("spell_soccothrates_charge");
+    RegisterSpellScript<KnockAwaySoccothrates>("spell_soccothrates_knock_away");
 }

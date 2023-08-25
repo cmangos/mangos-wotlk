@@ -256,6 +256,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (36374,'spell_summon_smoke_beacon'),
 (37591,'spell_inebriate_removal'),
 (35754,'spell_soccothrates_charge'),
+(36512,'spell_soccothrates_knock_away'),
 (31617,'spell_raise_dead_hyjal'),
 (31624,'spell_raise_dead_hyjal'),
 (31625,'spell_raise_dead_hyjal'),
