@@ -25,12 +25,12 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1553000,
-    SAY_KILL_1                  = -1553001,
-    SAY_KILL_2                  = -1553002,
-    SAY_TREE_1                  = -1553003,
-    SAY_TREE_2                  = -1553004,
-    SAY_DEATH                   = -1553005,
+    SAY_AGGRO                   = 19944,
+    SAY_KILL_1                  = 19945,
+    SAY_KILL_2                  = 19946,
+    SAY_TREE_1                  = 19947,
+    SAY_TREE_2                  = 19948,
+    SAY_DEATH                   = 19949,
 
     SPELL_TRANQUILITY           = 34550,
     SPELL_TREE_FORM             = 34551,
@@ -67,7 +67,7 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -115,12 +115,12 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -136,7 +136,7 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
                 m_creature->RemoveAllAuras();
 
                 DoCastSpellIfCan(nullptr, SPELL_TREE_FORM, CAST_TRIGGERED);
-                DoScriptText(urand(0, 1) ? SAY_TREE_1 : SAY_TREE_2, m_creature);
+                DoBroadcastText(urand(0, 1) ? SAY_TREE_1 : SAY_TREE_2, m_creature);
 
                 SetCombatMovement(false);
                 m_bCanMoveFree       = false;

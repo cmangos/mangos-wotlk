@@ -4944,30 +4944,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 -- -1 552 000 THE ARCATRAZ
 
 -- -1 553 000 THE BOTANICA
-INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1553000','What are you doing? These specimens are very delicate!','11144','1','0','0','19944','freywinn SAY_AGGRO'),
-('-1553001','Your life cycle is now concluded!','11145','1','0','0','19945','freywinn SAY_KILL_1'),
-('-1553002','You will feed the worms.','11146','1','0','0','19946','freywinn SAY_KILL_2'),
-('-1553003','Endorel aluminor!','11147','1','0','0','19947','freywinn SAY_TREE_1'),
-('-1553004','Nature bends to my will!','11148','1','0','0','19948','freywinn SAY_TREE_2'),
-('-1553005','The specimens...must be preserved.','11149','1','0','0','19949','freywinn SAY_DEATH'),
-
-('-1553006','%s emits a strange noise.','0','2','0','0','10755','laj EMOTE_SUMMON'),
-
-('-1553007','Who disturbs this sanctuary?','11230','1','0','0','20024','warp SAY_AGGRO'),
-('-1553008','You must die! But wait: this does not--No, no... you must die!','11231','1','0','0','20025','warp SAY_SLAY_1'),
-('-1553009','What am I doing? Why do I...','11232','1','0','0','20026','warp SAY_SLAY_2'),
-('-1553010','Children, come to me!','11233','1','0','0','18376','warp SAY_SUMMON_1'),
-('-1553011','Maybe this is not--No, we fight! Come to my aid.','11234','1','0','0','20022','warp SAY_SUMMON_2'),
-('-1553012','So... confused. Do not... belong here!','11235','1','0','0','20028','warp SAY_DEATH'),
-('-1553013','You won''t... get far.','11212','1','0','0','20019','Thorngrin YELL on Death'),
-('-1553014','I hate to say I told you so...','11207','1','0','0','20014','Thorngrind YELL on Player Kill'),
-('-1553015','Your life will be mine!','11208','1','0','0','20015','Thorngrin YELL on Sacrifice'),
-('-1553016','You seek a prize, eh? How about death?','11206','1','0','0','20013','Thorngrin YELL on 20% HP'),
-('-1553017','I revel in your pain!','11209','1','0','0','20016','Thorngrin YELL on 50% HP'),
-('-1553018','I''ll incinerate you!','11210','1','0','0','20017','Thorngrin YELL on Hellfire 1'),
-('-1553019','Scream while you burn! ','11211','1','0','0','20018','Thorngrin YELL on Hellfire 2'),
-('-1553020','What aggravation is this? You will die!','11205','1','0','0','20012','Thorngrin YELL on Aggro');
 
 -- -1 554 000 THE MECHANAR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

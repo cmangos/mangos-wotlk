@@ -29,12 +29,12 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1553007,
-    SAY_SLAY_1                  = -1553008,
-    SAY_SLAY_2                  = -1553009,
-    SAY_SUMMON_1                = -1553010,
-    SAY_SUMMON_2                = -1553011,
-    SAY_DEATH                   = -1553012,
+    SAY_AGGRO                   = 20024,
+    SAY_SLAY_1                  = 20025,
+    SAY_SLAY_2                  = 20026,
+    SAY_SUMMON_1                = 18376,
+    SAY_SUMMON_2                = 20022,
+    SAY_DEATH                   = 20028,
 
     SPELL_WAR_STOMP             = 34716,
     SPELL_SUMMON_SAPLINGS       = 34741,            // this will leech the health from all saplings
@@ -80,17 +80,17 @@ struct boss_warp_splinterAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -115,7 +115,7 @@ struct boss_warp_splinterAI : public ScriptedAI
             DoCastSpellIfCan(m_creature, saplingsSummonSpells[i], CAST_TRIGGERED);
 
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SAPLINGS, CAST_TRIGGERED);
-        DoScriptText(urand(0, 1) ? SAY_SUMMON_1 : SAY_SUMMON_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_SUMMON_1 : SAY_SUMMON_2, m_creature);
     }
 
     void UpdateAI(const uint32 uiDiff) override

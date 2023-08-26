@@ -25,14 +25,14 @@ EndScriptData */
 
 enum
 {
-    SAY_DEATH       = -1553013,
-    SAY_PLAYER_KILL = -1553014,
-    SAY_SACRIFICE   = -1553015,
-    SAY_20_HP       = -1553016,
-    SAY_50_HP       = -1553017,
-    SAY_HELLFIRE_1  = -1553018,
-    SAY_HELLFIRE_2  = -1553019,
-    SAY_AGGRO       = -1553020,
+    SAY_DEATH       = 20019,
+    SAY_PLAYER_KILL = 20014,
+    SAY_SACRIFICE   = 20015,
+    SAY_20_HP       = 20013,
+    SAY_50_HP       = 20016,
+    SAY_HELLFIRE_1  = 20017,
+    SAY_HELLFIRE_2  = 20018,
+    SAY_AGGRO       = 20012,
 
     SPELL_HELLFIRE      = 34659,
     SPELL_HELLFIRE_H    = 39131,
@@ -65,18 +65,18 @@ struct boss_thorngrinAI : ScriptedAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
     void KilledUnit(Unit* victim) override
     {
         if (victim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_PLAYER_KILL, m_creature);
+            DoBroadcastText(SAY_PLAYER_KILL, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
     }
 
     void UpdateAI(const uint32 diff) override
@@ -116,13 +116,13 @@ struct boss_thorngrinAI : ScriptedAI
 
         if (!m_below50 && m_creature->GetHealthPercent() <= 50.f)
         {
-            DoScriptText(SAY_50_HP, m_creature);
+            DoBroadcastText(SAY_50_HP, m_creature);
             m_below50 = true;
         }
 
         if (!m_below20 && m_creature->GetHealthPercent() <= 20.f)
         {
-            DoScriptText(SAY_20_HP, m_creature);
+            DoBroadcastText(SAY_20_HP, m_creature);
             m_below20 = true;
         }
 

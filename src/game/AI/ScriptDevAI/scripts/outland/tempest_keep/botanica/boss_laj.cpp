@@ -25,7 +25,7 @@ EndScriptData */
 
 enum
 {
-    EMOTE_SUMMON                = -1553006,
+    EMOTE_SUMMON                = 10755,
 
     SPELL_ALLERGIC_REACTION     = 34697,
     SPELL_TELEPORT_SELF         = 34673,
@@ -161,7 +161,7 @@ struct boss_lajAI : public ScriptedAI
             {
                 // Summon adds and restart chasing the victim
                 DoSummons();
-                DoScriptText(EMOTE_SUMMON, m_creature);
+                DoBroadcastText(EMOTE_SUMMON, m_creature);
 
                 if (m_creature->GetVictim())
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
