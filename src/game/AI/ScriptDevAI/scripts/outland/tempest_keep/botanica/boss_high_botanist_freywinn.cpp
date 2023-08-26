@@ -22,6 +22,7 @@ SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -40,165 +41,116 @@ enum
     SPELL_PLANT_BLUE            = 34762,
     SPELL_PLANT_RED             = 34763,
 
+    SPELL_CRYPT_SCARAB_CONFUSE  = 16420,
+    SPELL_PLANT_SPAWN_EFFECT    = 34770,
+    SPELL_BIND_FEET_PERIODIC    = 34781,
+
     NPC_FRAYER_PROTECTOR        = 19953,
+
+    SPELL_LIST_TREE_FORM        = 1797502,
+    SPELL_LIST_TREE_FORM_H      = 2155802,
 };
 
-struct boss_high_botanist_freywinnAI : public ScriptedAI
+enum FreywinnActions
 {
-    boss_high_botanist_freywinnAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    FREYWINN_ACTION_MAX,
+};
 
-    uint32 m_uiSummonSeedlingTimer;
-    uint32 m_uiTreeFormTimer;
-    uint32 m_uiFrayerTimer;
-    uint32 m_uiTreeFormEndTimer;
+struct boss_high_botanist_freywinnAI : public CombatAI
+{
+    boss_high_botanist_freywinnAI(Creature* creature) : CombatAI(creature, FREYWINN_ACTION_MAX),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    {
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
+    }
+
     uint8 m_uiFrayerAddsCount;
-    bool m_bCanMoveFree;
+    bool m_isRegularMode;
 
     void Reset() override
     {
-        m_uiSummonSeedlingTimer = 6000;
-        m_uiTreeFormTimer       = 30000;
-        m_uiTreeFormEndTimer    = 0;
-        m_uiFrayerAddsCount     = 0;
-        m_uiFrayerTimer         = 0;
-        m_bCanMoveFree          = true;
-        SetCombatMovement(true);
+        CombatAI::Reset();
+        m_creature->SetSpellList(m_creature->GetCreatureInfo()->SpellList);
+        m_uiFrayerAddsCount = 0;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_FRAYER_PROTECTOR)
-            ++m_uiFrayerAddsCount;
+        summoned->SetInCombatWithZone();
 
-        // Attack players
-        if (m_creature->GetVictim())
-            pSummoned->AI()->AttackStart(m_creature->GetVictim());
+        if (summoned->GetEntry() == NPC_FRAYER_PROTECTOR)
+        {
+            ++m_uiFrayerAddsCount;
+            summoned->CastSpell(nullptr, SPELL_CRYPT_SCARAB_CONFUSE, TRIGGERED_NONE);
+        }
+        else
+            summoned->CastSpell(nullptr, SPELL_PLANT_SPAWN_EFFECT, TRIGGERED_NONE);
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_FRAYER_PROTECTOR)
+        if (summoned->GetEntry() == NPC_FRAYER_PROTECTOR)
         {
             --m_uiFrayerAddsCount;
 
             // When all 3 Frayers are killed stop the tree form action (if not done this already)
-            if (!m_uiFrayerAddsCount && !m_bCanMoveFree)
+            if (!m_uiFrayerAddsCount && m_creature->HasAura(SPELL_TREE_FORM))
             {
-                m_uiTreeFormEndTimer = 0;
-
-                // Interrupt all spells and remove auras
-                m_creature->InterruptNonMeleeSpells(true);
-                m_creature->RemoveAllAuras();
-                m_bCanMoveFree = true;
-
-                SetCombatMovement(true, true);
+                InterruptTreeForm();
             }
         }
     }
 
-    // Wrapper to summon one seedling
-    void DoSummonSeedling()
+    void AddSeedlingCooldowns(uint32 spellId)
     {
-        switch (urand(0, 3))
-        {
-            case 0: DoCastSpellIfCan(nullptr, SPELL_PLANT_WHITE); break;
-            case 1: DoCastSpellIfCan(nullptr, SPELL_PLANT_GREEN); break;
-            case 2: DoCastSpellIfCan(nullptr, SPELL_PLANT_BLUE);  break;
-            case 3: DoCastSpellIfCan(nullptr, SPELL_PLANT_RED);   break;
-        }
+        if (spellId != SPELL_PLANT_WHITE)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_PLANT_WHITE), nullptr, false, 5000);
+        if (spellId != SPELL_PLANT_GREEN)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_PLANT_GREEN), nullptr, false, 5000);
+        if (spellId != SPELL_PLANT_BLUE)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_PLANT_BLUE), nullptr, false, 5000);
+        if (spellId != SPELL_PLANT_RED)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_PLANT_RED), nullptr, false, 5000);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoBroadcastText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoBroadcastText(SAY_DEATH, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
-        if (!m_creature->SelectHostileTarget())
-            return;
-
-        if (m_uiTreeFormTimer < uiDiff)
+        switch (spellInfo->Id)
         {
-            if (DoCastSpellIfCan(nullptr, SPELL_TRANQUILITY) == CAST_OK)
-            {
-                // Note: This should remove only negative auras
-                m_creature->RemoveAllAuras();
-
-                DoCastSpellIfCan(nullptr, SPELL_TREE_FORM, CAST_TRIGGERED);
+            case SPELL_PLANT_WHITE:
+            case SPELL_PLANT_GREEN:
+            case SPELL_PLANT_BLUE:
+            case SPELL_PLANT_RED: AddSeedlingCooldowns(spellInfo->Id); break;
+            case SPELL_TREE_FORM:
                 DoBroadcastText(urand(0, 1) ? SAY_TREE_1 : SAY_TREE_2, m_creature);
-
-                SetCombatMovement(false);
-                m_bCanMoveFree       = false;
-                m_uiFrayerTimer      = 1000;
-                m_uiTreeFormEndTimer = 45000;
-                m_uiTreeFormTimer    = 75000;
-            }
+                m_creature->CastSpell(nullptr, SPELL_SUMMON_FRAYER, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);
+                m_creature->SetSpellList(m_isRegularMode ? SPELL_LIST_TREE_FORM : SPELL_LIST_TREE_FORM_H);
+                break;
         }
-        else
-            m_uiTreeFormTimer -= uiDiff;
+    }
 
-        // The Frayer is summoned after one second in the tree phase
-        if (m_uiFrayerTimer)
-        {
-            if (m_uiFrayerTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_FRAYER, CAST_TRIGGERED) == CAST_OK)
-                    m_uiFrayerTimer = 0;
-            }
-            else
-                m_uiFrayerTimer -= uiDiff;
-        }
-
-        // Tree phase will be removed when the timer expires;
-        if (m_uiTreeFormEndTimer)
-        {
-            if (m_uiTreeFormEndTimer <= uiDiff)
-            {
-                SetCombatMovement(true);
-                m_bCanMoveFree = true;
-                m_uiTreeFormEndTimer = 0;
-            }
-            else
-                m_uiTreeFormEndTimer -= uiDiff;
-        }
-
-        // Don't do any other actions during tree form
-        if (!m_bCanMoveFree)
-            return;
-
-        // one random seedling every 5 secs, but not in tree form
-        if (m_uiSummonSeedlingTimer < uiDiff)
-        {
-            DoSummonSeedling();
-            m_uiSummonSeedlingTimer = 6000;
-        }
-        else
-            m_uiSummonSeedlingTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+    void InterruptTreeForm()
+    {
+        m_creature->InterruptNonMeleeSpells(true);
+        m_creature->RemoveAurasDueToSpell(SPELL_TREE_FORM);
+        m_uiFrayerAddsCount = 0;
     }
 };
-
-UnitAI* GetAI_boss_high_botanist_freywinn(Creature* pCreature)
-{
-    return new boss_high_botanist_freywinnAI(pCreature);
-}
 
 void AddSC_boss_high_botanist_freywinn()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_high_botanist_freywinn";
-    pNewScript->GetAI = &GetAI_boss_high_botanist_freywinn;
+    pNewScript->GetAI = &GetNewAIInstance<boss_high_botanist_freywinnAI>;
     pNewScript->RegisterSelf();
 }
