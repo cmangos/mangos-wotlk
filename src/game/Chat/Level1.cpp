@@ -1914,7 +1914,15 @@ bool ChatHandler::HandleGoXYZCommand(char* args)
     float z = (float)atof(pz);
     uint32 mapid;
     if (pmapid)
+    {
         mapid = (uint32)atoi(pmapid);
+        MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+        if (!mapEntry || mapEntry->IsBattleGroundOrArena())
+        {
+            PSendSysMessage("Map %u is battleground or arena. Not allowed through XYZ command.", mapid);
+            return false;
+        }
+    }
     else
         mapid = _player->GetMapId();
 
