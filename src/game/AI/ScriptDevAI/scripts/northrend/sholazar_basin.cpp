@@ -598,9 +598,9 @@ bool GOUse_go_quest_still_at_it_credit(Player* pPlayer, GameObject* pGo)
 // 51330 - Shoot RJR
 struct ShootRJR : public SpellScript
 {
-    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        if (!spell->m_targets.getUnitTargetGuid().IsCreature() || spell->m_targets.getUnitTargetGuid().GetEntry() != 28054) // Lucky Wilhelm
+        if (!spell->m_targets.getUnitTargetGuid().IsCreatureOrVehicle() || spell->m_targets.getUnitTargetGuid().GetEntry() != 28054) // Lucky Wilhelm
             return SPELL_FAILED_BAD_TARGETS;
         return SPELL_CAST_OK;
     }
