@@ -22,6 +22,7 @@ SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -35,10 +36,13 @@ enum
     SPELL_SUMMON_FLAYER_1       = 34682,
     SPELL_SUMMON_LASHER_2       = 34684,
     SPELL_SUMMON_FLAYER_2       = 34685,
+    // 3 and 4 not confirmed to be used
     SPELL_SUMMON_LASHER_3       = 34686,
     SPELL_SUMMON_FLAYER_4       = 34687,
     SPELL_SUMMON_LASHER_4       = 34688,
     SPELL_SUMMON_FLAYER_3       = 34690,
+
+    SPELL_ROOT_SELF             = 23973,
 
     MODEL_ID_DEFAULT            = 13109,
     MODEL_ID_ARCANE             = 14213,
@@ -47,9 +51,15 @@ enum
     MODEL_ID_NATURE             = 14214,
 };
 
-struct boss_lajAI : public ScriptedAI
+const std::vector<uint32> summonSpellsFirstLoc = { SPELL_SUMMON_LASHER_1, SPELL_SUMMON_FLAYER_1 };
+const std::vector<uint32> summonSpellsSecondLoc = { SPELL_SUMMON_LASHER_2, SPELL_SUMMON_FLAYER_2 };
+
+struct boss_lajAI : public CombatAI
 {
-    boss_lajAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_lajAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        Reset();
+    }
 
     uint32 m_uiTeleportTimer;
     uint32 m_uiSummonTimer;
@@ -123,31 +133,15 @@ struct boss_lajAI : public ScriptedAI
 
     void DoSummons()
     {
-        switch (urand(0, 3))
-        {
-            case 0:
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_LASHER_1, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_FLAYER_1, CAST_TRIGGERED);
-                break;
-            case 1:
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_LASHER_2, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_FLAYER_2, CAST_TRIGGERED);
-                break;
-            case 2:
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_LASHER_3, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_FLAYER_3, CAST_TRIGGERED);
-                break;
-            case 3:
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_LASHER_4, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_FLAYER_4, CAST_TRIGGERED);
-                break;
-        }
+        DoCastSpellIfCan(nullptr, summonSpellsFirstLoc[urand(0, summonSpellsFirstLoc.size() - 1)], CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, summonSpellsSecondLoc[urand(0, summonSpellsSecondLoc.size() - 1)], CAST_TRIGGERED);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_ROOT_SELF, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            summoned->AI()->AttackStart(target);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -211,15 +205,10 @@ struct boss_lajAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_laj(Creature* pCreature)
-{
-    return new boss_lajAI(pCreature);
-}
-
 void AddSC_boss_laj()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_laj";
-    pNewScript->GetAI = &GetAI_boss_laj;
+    pNewScript->GetAI = &GetNewAIInstance<boss_lajAI>;
     pNewScript->RegisterSelf();
 }
