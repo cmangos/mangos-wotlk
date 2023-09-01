@@ -718,6 +718,21 @@ struct SummonDrostan : public SpellScript
     }
 };
 
+// 51962 - Offer Jungle Punch
+
+struct OfferJunglePunch : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // can be cast only on these targets
+        if (target && target->GetEntry() != 27986 && target->GetEntry() != 28047 && target->GetEntry() != 28568)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -755,4 +770,5 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<ParachutePeriodicDummy>("spell_parachute_periodic_dummy");
     RegisterSpellScript<InitiateKillCheck>("spell_initiate_kill_check");
     RegisterSpellScript<SummonDrostan>("spell_summon_drostan");
+    RegisterSpellScript<OfferJunglePunch>("spell_offer_jungle_punch");
 }
