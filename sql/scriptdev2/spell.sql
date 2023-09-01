@@ -722,6 +722,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51330,'spell_shoot_rjr'),
 (51511,'spell_toss_ice_boulder'),
 (51590,'spell_toss_ice_boulder'),
+(51962,'spell_offer_jungle_punch'),
 (51519,'spell_death_knight_initiate_visual'),
 (51671,'spell_ghostly'),
 (51769,'spell_emblazon_runeblade_aura'),
