@@ -713,6 +713,7 @@ struct SummonDrostan : public SpellScript
                 break;
             case 56:
                 spell->GetCaster()->CastSpell(nullptr, 52731, TRIGGERED_OLD_TRIGGERED);
+                break;
         }
     }
 };
