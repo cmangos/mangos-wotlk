@@ -498,6 +498,7 @@ struct npc_tipsy_mcmanusAI : public ScriptedAI
                     // complete event
                     case 9:
                         DoScriptText(SAY_DISTILLATION_COMPLETE, m_creature);
+                        m_creature->GetMotionMaster()->MoveWaypoint();
                         if (GameObject* pPunch = GetClosestGameObjectWithEntry(m_creature, GO_THUNDERBREW_JUNGLE_PUNCH, 10.0f))
                         {
                             pPunch->SetRespawnTime(30);
@@ -660,9 +661,19 @@ struct InitiateKillCheck : public SpellScript
         uint32 questProgress = killer->GetReqKillOrCastCurrentCount(QUEST_THE_GREAT_HUNTERS_CHALLENGE, NPC_TIPSY_MCMANUS); // yes this is correct
         switch (questProgress)
         {
-            case 1: // spawn drostan
-                spell->GetUnitTarget()->CastSpell(nullptr, 52559, TRIGGERED_OLD_TRIGGERED);
+            case 6:
+            case 11:
+            case 21:
+            case 28:
+            case 35:
+            case 41:
+            case 49:
+            case 56:
+                // summon drostan
+            {
+                spell->GetUnitTarget()->CastSpell(nullptr, 52556, TRIGGERED_OLD_TRIGGERED); // spell 52559 should be used (replace when fixed) 
                 break;
+            }
         }
     }
 };
@@ -679,9 +690,29 @@ struct SummonDrostan : public SpellScript
         uint32 questProgress = caster->GetReqKillOrCastCurrentCount(QUEST_THE_GREAT_HUNTERS_CHALLENGE, NPC_TIPSY_MCMANUS);
         switch (questProgress)
         {
-            case 1:
-                // do stuff
+            case 6:
+                spell->GetCaster()->CastSpell(nullptr, 52585, TRIGGERED_OLD_TRIGGERED);
                 break;
+            case 11:
+                spell->GetCaster()->CastSpell(nullptr, 52725, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 21:
+                spell->GetCaster()->CastSpell(nullptr, 52726, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 28:
+                spell->GetCaster()->CastSpell(nullptr, 52727, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 35:
+                spell->GetCaster()->CastSpell(nullptr, 52728, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 41:
+                spell->GetCaster()->CastSpell(nullptr, 52729, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 49:
+                spell->GetCaster()->CastSpell(nullptr, 52730, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 56:
+                spell->GetCaster()->CastSpell(nullptr, 52731, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };
