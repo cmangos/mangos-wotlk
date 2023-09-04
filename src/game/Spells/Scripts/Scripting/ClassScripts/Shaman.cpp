@@ -256,6 +256,49 @@ struct HeroismBloodlust : public SpellScript
     }
 };
 
+// 1535 - Fire Nova
+struct FireNovaShaman : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        // fire totems slot
+        if (!spell->GetCaster()->GetTotemGuid(TOTEM_SLOT_FIRE))
+            return SPELL_FAILED_TOTEMS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        // fire totems slot
+        Totem* totem = spell->GetCaster()->GetTotem(TOTEM_SLOT_FIRE);
+        if (!totem)
+            return;
+
+        uint32 triggered_spell_id;
+        switch (spell->m_spellInfo->Id)
+        {
+            case 1535:  triggered_spell_id = 8349;  break;
+            case 8498:  triggered_spell_id = 8502;  break;
+            case 8499:  triggered_spell_id = 8503;  break;
+            case 11314: triggered_spell_id = 11306; break;
+            case 11315: triggered_spell_id = 11307; break;
+            case 25546: triggered_spell_id = 25535; break;
+            case 25547: triggered_spell_id = 25537; break;
+            case 61649: triggered_spell_id = 61650; break;
+            case 61657: triggered_spell_id = 61654; break;
+            default: return;
+        }
+
+        totem->CastSpell(totem, triggered_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
+
+        // Fire Nova Visual
+        totem->CastSpell(nullptr, 19823, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -273,4 +316,5 @@ void LoadShamanScripts()
     RegisterSpellScript<StoneclawTotem>("spell_stoneclaw_totem");
     RegisterSpellScript<StoneclawTotemAbsorb>("spell_stoneclaw_totem_absorb");
     RegisterSpellScript<HeroismBloodlust>("spell_heroism_bloodlust");
+    RegisterSpellScript<FireNovaShaman>("spell_fire_nova_shaman");
 }

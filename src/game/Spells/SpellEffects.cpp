@@ -4344,35 +4344,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 m_caster->CastCustomSpell(unitTarget, 39609, &EffectBasePoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_originalCasterGUID);
                 return;
             }
-            // Fire Nova
-            if (m_spellInfo->SpellIconID == 33)
-            {
-                // fire totems slot
-                Totem* totem = m_caster->GetTotem(TOTEM_SLOT_FIRE);
-                if (!totem)
-                    return;
-
-                uint32 triggered_spell_id;
-                switch (m_spellInfo->Id)
-                {
-                    case 1535:  triggered_spell_id = 8349;  break;
-                    case 8498:  triggered_spell_id = 8502;  break;
-                    case 8499:  triggered_spell_id = 8503;  break;
-                    case 11314: triggered_spell_id = 11306; break;
-                    case 11315: triggered_spell_id = 11307; break;
-                    case 25546: triggered_spell_id = 25535; break;
-                    case 25547: triggered_spell_id = 25537; break;
-                    case 61649: triggered_spell_id = 61650; break;
-                    case 61657: triggered_spell_id = 61654; break;
-                    default: return;
-                }
-
-                totem->CastSpell(totem, triggered_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
-
-                // Fire Nova Visual
-                totem->CastSpell(totem, 19823, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
-                return;
-            }
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:

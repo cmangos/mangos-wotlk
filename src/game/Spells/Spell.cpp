@@ -6158,13 +6158,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     else if (!m_caster->CanAssistSpell(target, m_spellInfo))
                         return SPELL_FAILED_BAD_TARGETS;
                 }
-                // Fire Nova
-                if (m_caster->IsPlayer() && m_spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN && m_spellInfo->SpellIconID == 33)
-                {
-                    // fire totems slot
-                    if (!m_caster->GetTotemGuid(TOTEM_SLOT_FIRE))
-                        return SPELL_FAILED_TOTEMS;
-                }
                 break;
             }
             case SPELL_EFFECT_DISTRACT:                     // All nearby enemies must not be in combat
