@@ -732,6 +732,15 @@ struct OfferJunglePunch : public SpellScript
     }
 };
 
+// 51759 - Summon and Mount Stampy
+struct SummonAndMountStampy : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -770,4 +779,5 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<InitiateKillCheck>("spell_initiate_kill_check");
     RegisterSpellScript<SummonDrostan>("spell_summon_drostan");
     RegisterSpellScript<OfferJunglePunch>("spell_offer_jungle_punch");
+    RegisterSpellScript<SummonAndMountStampy>("spell_summon_and_mount_stampy");
 }
