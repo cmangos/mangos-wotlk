@@ -44,6 +44,12 @@ enum
 
     SPELL_ROOT_SELF             = 23973,
 
+    SPELL_LAJ_ARCANE            = 34703,
+    SPELL_LAJ_FIRE              = 34704,
+    SPELL_LAJ_FROST             = 34705,
+    SPELL_LAJ_NATURE            = 34707,
+    SPELL_LAJ_SHADOW            = 34710,
+
     MODEL_ID_DEFAULT            = 13109,
     MODEL_ID_ARCANE             = 14213,
     MODEL_ID_FIRE               = 13110,
@@ -54,81 +60,46 @@ enum
 const std::vector<uint32> summonSpellsFirstLoc = { SPELL_SUMMON_LASHER_1, SPELL_SUMMON_FLAYER_1 };
 const std::vector<uint32> summonSpellsSecondLoc = { SPELL_SUMMON_LASHER_2, SPELL_SUMMON_FLAYER_2 };
 
+enum LajActions
+{
+    LAJ_ACTION_MAX,
+    LAJ_TELEPORT_SUMMON
+};
+
 struct boss_lajAI : public CombatAI
 {
     boss_lajAI(Creature* creature) : CombatAI(creature, 0)
     {
-        Reset();
+        AddCustomAction(LAJ_TELEPORT_SUMMON, true, [&]() { HandleTeleportSummon(); }, TIMER_COMBAT_COMBAT);
     }
 
-    uint32 m_uiTeleportTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiTransformTimer;
-    uint32 m_uiAllergicTimer;
-    uint32 m_uiTrashTimer;
-
-    void Reset() override
+    void AddTransformCooldowns(uint32 spellId)
     {
-        m_creature->SetDisplayId(MODEL_ID_DEFAULT);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, true);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, false);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, false);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
-
-        m_uiTeleportTimer   = urand(17000, 26000);
-        m_uiSummonTimer     = 0;
-        m_uiTransformTimer  = 30000;
-        m_uiAllergicTimer   = urand(8500, 30000);
-        m_uiTrashTimer      = urand(3600, 5000);
+        if (spellId != SPELL_LAJ_ARCANE)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_LAJ_ARCANE), nullptr, false, 5000);
+        if (spellId != SPELL_LAJ_FIRE)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_LAJ_FIRE), nullptr, false, 5000);
+        if (spellId != SPELL_LAJ_FROST)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_LAJ_FROST), nullptr, false, 5000);
+        if (spellId != SPELL_LAJ_NATURE)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_LAJ_NATURE), nullptr, false, 5000);
+        if (spellId != SPELL_LAJ_SHADOW)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_LAJ_SHADOW), nullptr, false, 5000);
     }
 
     void DoTransform()
     {
+        uint32 spellId = 0;
         // Random transform into a different form
         switch (urand(0, 4))
         {
-            case 0:
-                m_creature->SetDisplayId(MODEL_ID_DEFAULT);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, true);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
-                break;
-            case 1:
-                m_creature->SetDisplayId(MODEL_ID_ARCANE);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, true);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
-                break;
-            case 2:
-                m_creature->SetDisplayId(MODEL_ID_FIRE);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
-                break;
-            case 3:
-                m_creature->SetDisplayId(MODEL_ID_FROST);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
-                break;
-            case 4:
-                m_creature->SetDisplayId(MODEL_ID_NATURE);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, false);
-                m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
-                break;
+            case 0: spellId = SPELL_LAJ_ARCANE; break;
+            case 1: spellId = SPELL_LAJ_FIRE; break;
+            case 2: spellId = SPELL_LAJ_FROST; break;
+            case 3: spellId = SPELL_LAJ_NATURE; break;
+            case 4: spellId = SPELL_LAJ_SHADOW; break;
         }
+        DoCastSpellIfCan(nullptr, spellId);
     }
 
     void DoSummons()
@@ -144,64 +115,26 @@ struct boss_lajAI : public CombatAI
             summoned->AI()->AttackStart(target);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiSummonTimer)
+        switch (spellInfo->Id)
         {
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                // Summon adds and restart chasing the victim
-                DoSummons();
-                DoBroadcastText(EMOTE_SUMMON, m_creature);
-
-                if (m_creature->GetVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                m_uiSummonTimer = 0;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
+            case SPELL_LAJ_ARCANE:
+            case SPELL_LAJ_FIRE:
+            case SPELL_LAJ_FROST:
+            case SPELL_LAJ_NATURE:
+            case SPELL_LAJ_SHADOW: AddTransformCooldowns(spellInfo->Id); break;
+            case SPELL_TELEPORT_SELF: SetCombatMovement(false, true); ResetTimer(LAJ_TELEPORT_SUMMON, 4000); break;
         }
+    }
 
-        if (m_uiAllergicTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ALLERGIC_REACTION) == CAST_OK)
-                m_uiAllergicTimer = urand(21000, 32000);
-        }
-        else
-            m_uiAllergicTimer -= uiDiff;
+    void HandleTeleportSummon()
+    {
+        DoSummons();
+        DoBroadcastText(EMOTE_SUMMON, m_creature);
 
-        if (m_uiTeleportTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_SELF) == CAST_OK)
-            {
-                m_creature->GetMotionMaster()->MoveIdle();
-                m_uiTeleportTimer = urand(25000, 33000);
-                m_uiSummonTimer = 4000;
-            }
-        }
-        else
-            m_uiTeleportTimer -= uiDiff;
-
-        if (m_uiTransformTimer < uiDiff)
-        {
-            DoTransform();
-            m_uiTransformTimer = urand(25000, 40000);
-        }
-        else
-            m_uiTransformTimer -= uiDiff;
-
-        if (m_uiTrashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRASH) == CAST_OK)
-                m_uiTrashTimer = urand(10000, 24000);
-        }
-        else
-            m_uiTrashTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        if (m_creature->GetVictim())
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
     }
 };
 
