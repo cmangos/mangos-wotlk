@@ -123,7 +123,7 @@ struct boss_soccothratesAI : public CombatAI, private DialogueHelper
 
     void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_hasYelledIntro && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 75.0f) && m_creature->IsWithinLOSInMap(who))
+        if (!m_hasYelledIntro && who->IsPlayer() && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 75.0f) && m_creature->IsWithinLOSInMap(who))
         {
             StartNextDialogueText(SAY_SOCCOTHRATES_INTRO_1);
             m_hasYelledIntro = true;

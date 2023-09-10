@@ -22,9 +22,11 @@ SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
+    SAY_INTRO       = 16961,
     SAY_DEATH       = 20019,
     SAY_PLAYER_KILL = 20014,
     SAY_SACRIFICE   = 20015,
@@ -40,27 +42,35 @@ enum
     SPELL_ENRAGE        = 34670,
 };
 
-struct boss_thorngrinAI : ScriptedAI
+enum ThorngrinActions
 {
-    boss_thorngrinAI(Creature* creature) : ScriptedAI(creature)
+    THORNGRIN_20,
+    THORNGRIN_50,
+    THORNGRIN_ACTION_MAX,
+};
+
+struct boss_thorngrinAI : CombatAI
+{
+    boss_thorngrinAI(Creature* creature) : CombatAI(creature, THORNGRIN_ACTION_MAX), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_hasYelledIntro(false)
     {
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddTimerlessCombatAction(THORNGRIN_20, true);
+        AddTimerlessCombatAction(THORNGRIN_50, true);
+        AddOnKillText(SAY_PLAYER_KILL);
     }
 
     bool m_isRegularMode;
-    uint32 m_sacrificeTimer;
-    uint32 m_hellfireTimer;
-    uint32 m_enrageTimer;
-    bool m_below50;
-    bool m_below20;
+    bool m_hasYelledIntro;
 
-    void Reset() override
+    void MoveInLineOfSight(Unit* who) override
     {
-        m_hellfireTimer = urand(4500, 12500);
-        m_sacrificeTimer = urand(7000, 12000);
-        m_enrageTimer = urand(15000, 30000);
-        m_below50 = m_below20 = false;
+        if (!m_hasYelledIntro && who->IsPlayer() && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 75.0f) && m_creature->IsWithinLOSInMap(who))
+        {
+            DoBroadcastText(SAY_INTRO, m_creature);
+            m_hasYelledIntro = true;
+        }
+
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -68,77 +78,37 @@ struct boss_thorngrinAI : ScriptedAI
         DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() == TYPEID_PLAYER)
-            DoBroadcastText(SAY_PLAYER_KILL, m_creature);
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
         DoBroadcastText(SAY_DEATH, m_creature);
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Hellfire
-        if (m_hellfireTimer < diff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_HELLFIRE : SPELL_HELLFIRE_H) == CAST_OK)
-                m_hellfireTimer = urand(16000, 24000);
+            case THORNGRIN_20:
+                if (m_creature->GetHealthPercent() <= 20.f)
+                {
+                    DoBroadcastText(SAY_20_HP, m_creature);
+                    DisableCombatAction(action);
+                }
+                break;
+            case THORNGRIN_50:
+                if (m_creature->GetHealthPercent() <= 50.f)
+                {
+                    DoBroadcastText(SAY_50_HP, m_creature);
+                    DisableCombatAction(action);
+                }
+                break;
         }
-        else
-            m_hellfireTimer -= diff;
-
-        // Sacrifice
-        if (m_sacrificeTimer < diff)
-        {
-            m_sacrificeTimer = 0;
-            if (!m_creature->IsNonMeleeSpellCasted(false))
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER | SELECT_FLAG_IN_LOS))
-                    if (DoCastSpellIfCan(target, SPELL_SACRIFICE) == CAST_OK)
-                        m_sacrificeTimer = urand(22000, 34000);
-        }
-        else
-            m_sacrificeTimer -= diff;
-
-        // Enrage
-        if (m_enrageTimer < diff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                m_enrageTimer = urand(22000, 40000);
-        }
-        else
-            m_enrageTimer -= diff;
-
-        if (!m_below50 && m_creature->GetHealthPercent() <= 50.f)
-        {
-            DoBroadcastText(SAY_50_HP, m_creature);
-            m_below50 = true;
-        }
-
-        if (!m_below20 && m_creature->GetHealthPercent() <= 20.f)
-        {
-            DoBroadcastText(SAY_20_HP, m_creature);
-            m_below20 = true;
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_thorngrin(Creature* pCreature)
-{
-    return new boss_thorngrinAI(pCreature);
-}
 
 void AddSC_boss_thorngrin()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_thorngrin";
-    pNewScript->GetAI = &GetAI_boss_thorngrin;
+    pNewScript->GetAI = &GetNewAIInstance<boss_thorngrinAI>;
     pNewScript->RegisterSelf();
 }
