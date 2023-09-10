@@ -14288,6 +14288,9 @@ bool Unit::MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spell
         if (spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_PLAYER_CONTROLLED_NPC) && target->IsPlayerControlled() && target->GetTypeId() != TYPEID_PLAYER)
             return false;
 
+        if (!IsIgnoreLosSpellCast(spellInfo) && !IsWithinLOSInMap(target, true))
+            return false;
+
         switch (spellInfo->rangeIndex)
         {
             case SPELL_RANGE_IDX_ANYWHERE:  return true;
