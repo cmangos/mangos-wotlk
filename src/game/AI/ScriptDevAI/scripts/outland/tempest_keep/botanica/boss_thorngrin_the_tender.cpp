@@ -83,6 +83,16 @@ struct boss_thorngrinAI : CombatAI
         DoBroadcastText(SAY_DEATH, m_creature);
     }
 
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    {
+        switch (spellInfo->Id)
+        {
+            case SPELL_SACRIFICE: DoBroadcastText(SAY_SACRIFICE, m_creature); break;
+            case SPELL_HELLFIRE:
+            case SPELL_HELLFIRE_H: DoBroadcastText(urand(0, 1) ? SAY_HELLFIRE_1 : SAY_HELLFIRE_2, m_creature); break;
+        }
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
