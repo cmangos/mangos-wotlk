@@ -24,10 +24,10 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "mechanar.h"
 
-instance_mechanar::instance_mechanar(Map* pMap) : ScriptedInstance(pMap),
-    m_uiBridgeEventTimer(2000),
-    m_uiBridgeEventPhase(0),
-    m_uiPathaleonEngageTimer(0)
+instance_mechanar::instance_mechanar(Map* map) : ScriptedInstance(map),
+    m_bridgeEventTimer(2000),
+    m_bridgeEventPhase(0),
+    m_pathaleonEngageTimer(0)
 {
     Initialize();
 }
@@ -37,7 +37,7 @@ void instance_mechanar::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 }
 
-void instance_mechanar::OnPlayerEnter(Player* pPlayer)
+void instance_mechanar::OnPlayerEnter(Player* player)
 {
     // Check encounter states
     if (GetData(TYPE_SEPETHREA) != DONE || GetData(TYPE_BRIDGEEVENT) != DONE || GetData(TYPE_PATHALEON) == DONE)
@@ -47,15 +47,15 @@ void instance_mechanar::OnPlayerEnter(Player* pPlayer)
     if (GetSingleCreatureFromStorage(NPC_PATHALEON, true))
         return;
 
-    pPlayer->SummonCreature(aBridgeEventLocs[6][0].m_uiSpawnEntry, aBridgeEventLocs[6][0].m_fX, aBridgeEventLocs[6][0].m_fY, aBridgeEventLocs[6][0].m_fZ, aBridgeEventLocs[6][0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+    player->SummonCreature(aBridgeEventLocs[6][0].m_spawnEntry, aBridgeEventLocs[6][0].m_x, aBridgeEventLocs[6][0].m_y, aBridgeEventLocs[6][0].m_z, aBridgeEventLocs[6][0].m_o, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
-void instance_mechanar::OnCreatureCreate(Creature* pCreature)
+void instance_mechanar::OnCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_PATHALEON:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_ASTROMAGE:
         case NPC_PHYSICIAN:
@@ -63,26 +63,26 @@ void instance_mechanar::OnCreatureCreate(Creature* pCreature)
         case NPC_ENGINEER:
         case NPC_NETHERBINDER:
         case NPC_FORGE_DESTROYER:
-            if (pCreature->IsTemporarySummon())
+            if (creature->IsTemporarySummon())
             {
-                pCreature->GetCombatManager().SetLeashingDisable(true);
-                m_sBridgeTrashGuidSet.insert(pCreature->GetObjectGuid());
+                creature->GetCombatManager().SetLeashingDisable(true);
+                m_bridgeTrashGuidSet.insert(creature->GetObjectGuid());
             }
             break;
     }
 }
 
-void instance_mechanar::OnObjectCreate(GameObject* pGo)
+void instance_mechanar::OnObjectCreate(GameObject* go)
 {
-    switch (pGo->GetEntry())
+    switch (go->GetEntry())
     {
         case GO_MOARG_DOOR_1:
             if (m_auiEncounter[TYPE_GYRO_KILL] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_MOARG_DOOR_2:
             if (m_auiEncounter[TYPE_IRON_HAND] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_NETHERMANCER_DOOR:
         case GO_CACHE_OF_THE_LEGION:
@@ -90,45 +90,45 @@ void instance_mechanar::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
 }
 
-void instance_mechanar::SetData(uint32 uiType, uint32 uiData)
+void instance_mechanar::SetData(uint32 type, uint32 data)
 {
-    switch (uiType)
+    switch (type)
     {
         case TYPE_GYRO_KILL:
-            if (uiData == DONE)
+            if (data == DONE)
                 DoUseDoorOrButton(GO_MOARG_DOOR_1);
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_IRON_HAND:
-            if (uiData == DONE)
+            if (data == DONE)
                 DoUseDoorOrButton(GO_MOARG_DOOR_2);
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_CAPACITUS:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_SEPETHREA:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             DoUseDoorOrButton(GO_NETHERMANCER_DOOR);
             break;
         case TYPE_BRIDGEEVENT:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
         case TYPE_PATHALEON:
-            m_auiEncounter[uiType] = uiData;
+            m_auiEncounter[type] = data;
             break;
     }
 
-    if (uiData == TYPE_GYRO_KILL || uiData == TYPE_IRON_HAND)
+    if (data == TYPE_GYRO_KILL || data == TYPE_IRON_HAND)
         if (GetData(TYPE_GYRO_KILL) == DONE && GetData(TYPE_IRON_HAND) == DONE)
             if (GameObject* chest = GetSingleGameObjectFromStorage(instance->IsRegularDifficulty() ? GO_CACHE_OF_THE_LEGION : GO_CACHE_OF_THE_LEGION_H))
                 if (Player* player = GetPlayerInMap(false, false))
                     chest->GenerateLootFor(player);
 
-    if (uiData == DONE)
+    if (data == DONE)
     {
         OUT_SAVE_INST_DATA;
 
@@ -144,10 +144,10 @@ void instance_mechanar::SetData(uint32 uiType, uint32 uiData)
     }
 }
 
-uint32 instance_mechanar::GetData(uint32 uiType) const
+uint32 instance_mechanar::GetData(uint32 type) const
 {
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
+    if (type < MAX_ENCOUNTER)
+        return m_auiEncounter[type];
 
     return 0;
 }
@@ -175,9 +175,9 @@ void instance_mechanar::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_mechanar::OnCreatureDeath(Creature* pCreature)
+void instance_mechanar::OnCreatureDeath(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_GYRO_KILL:      SetData(TYPE_GYRO_KILL, DONE); break;
         case NPC_IRON_HAND:      SetData(TYPE_IRON_HAND, DONE); break;
@@ -189,14 +189,14 @@ void instance_mechanar::OnCreatureDeath(Creature* pCreature)
         case NPC_ENGINEER:
         case NPC_NETHERBINDER:
         case NPC_FORGE_DESTROYER:
-            if (m_sBridgeTrashGuidSet.find(pCreature->GetObjectGuid()) != m_sBridgeTrashGuidSet.end())
+            if (m_bridgeTrashGuidSet.find(creature->GetObjectGuid()) != m_bridgeTrashGuidSet.end())
             {
-                m_sBridgeTrashGuidSet.erase(pCreature->GetObjectGuid());
+                m_bridgeTrashGuidSet.erase(creature->GetObjectGuid());
 
-                if (m_sBridgeTrashGuidSet.empty())
+                if (m_bridgeTrashGuidSet.empty())
                 {
-                    if (m_uiBridgeEventPhase == 3)
-                        m_uiBridgeEventTimer = 2000;
+                    if (m_bridgeEventPhase == 3)
+                        m_bridgeEventTimer = 2000;
                     else
                         DoSpawnBridgeWave();
                 }
@@ -207,19 +207,19 @@ void instance_mechanar::OnCreatureDeath(Creature* pCreature)
 
 void instance_mechanar::DoSpawnBridgeWave()
 {
-    if (Player* pPlayer = GetPlayerInMap(true, false))
+    if (Player* player = GetPlayerInMap(true, false))
     {
         for (uint8 i = 0; i < MAX_BRIDGE_TRASH; ++i)
         {
             // Skip the blank entries
-            if (aBridgeEventLocs[m_uiBridgeEventPhase][i].m_uiSpawnEntry == 0)
+            if (aBridgeEventLocs[m_bridgeEventPhase][i].m_spawnEntry == 0)
                 break;
 
-            if (Creature* pTemp = pPlayer->SummonCreature(aBridgeEventLocs[m_uiBridgeEventPhase][i].m_uiSpawnEntry, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fX, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fY, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fZ, aBridgeEventLocs[m_uiBridgeEventPhase][i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+            if (Creature* temp = player->SummonCreature(aBridgeEventLocs[m_bridgeEventPhase][i].m_spawnEntry, aBridgeEventLocs[m_bridgeEventPhase][i].m_x, aBridgeEventLocs[m_bridgeEventPhase][i].m_y, aBridgeEventLocs[m_bridgeEventPhase][i].m_z, aBridgeEventLocs[m_bridgeEventPhase][i].m_o, TEMPSPAWN_DEAD_DESPAWN, 0))
             {
-                pTemp->CastSpell(pTemp, SPELL_ETHEREAL_TELEPORT, TRIGGERED_NONE);
+                temp->CastSpell(nullptr, SPELL_ETHEREAL_TELEPORT, TRIGGERED_NONE);
 
-                switch (m_uiBridgeEventPhase)
+                switch (m_bridgeEventPhase)
                 {
                     case 0:
                         SetData(TYPE_BRIDGEEVENT, IN_PROGRESS);
@@ -228,37 +228,37 @@ void instance_mechanar::DoSpawnBridgeWave()
                     case 3:
                     case 4:
                     case 5:
-                        pTemp->SetInCombatWithZone();
+                        temp->SetInCombatWithZone();
                         break;
                     case 6:                                 // Pathaleon
                         SetData(TYPE_BRIDGEEVENT, DONE);
-                        DoScriptText(SAY_PATHALEON_INTRO, pTemp);
-                        m_uiPathaleonEngageTimer = 30000;
+                        DoScriptText(SAY_PATHALEON_INTRO, temp);
+                        m_pathaleonEngageTimer = 30000;
                         break;
                 }
             }
         }
     }
-    ++m_uiBridgeEventPhase;
+    ++m_bridgeEventPhase;
 }
 
-void instance_mechanar::Update(uint32 uiDiff)
+void instance_mechanar::Update(uint32 diff)
 {
-    if (m_uiBridgeEventTimer)
+    if (m_bridgeEventTimer)
     {
-        if (m_uiBridgeEventTimer <= uiDiff)
+        if (m_bridgeEventTimer <= diff)
         {
-            m_uiBridgeEventTimer = 2000;
+            m_bridgeEventTimer = 2000;
             for (const auto& data : instance->GetPlayers())
             {
-                if (m_uiBridgeEventPhase == 0)
+                if (m_bridgeEventPhase == 0)
                 {
                     if (data.getSource()->GetPositionZ() > 26.3f && data.getSource()->GetPositionY() < -12.f && data.getSource()->GetPositionX() < 270.f)
                     {
                         DoSpawnBridgeWave();
                     }
                 }
-                else if (m_uiBridgeEventPhase == 3)
+                else if (m_bridgeEventPhase == 3)
                 {
                     if (data.getSource()->GetPositionZ() > 24.5f && data.getSource()->GetPositionY() > 2.5f && data.getSource()->GetPositionX() < 155.f)
                     {
@@ -268,25 +268,20 @@ void instance_mechanar::Update(uint32 uiDiff)
             }
         }
         else
-            m_uiBridgeEventTimer -= uiDiff;
+            m_bridgeEventTimer -= diff;
     }
 
-    if (m_uiPathaleonEngageTimer)
+    if (m_pathaleonEngageTimer)
     {
-        if (m_uiPathaleonEngageTimer <= uiDiff)
+        if (m_pathaleonEngageTimer <= diff)
         {
-            m_uiPathaleonEngageTimer = 0;
+            m_pathaleonEngageTimer = 0;
             if (Creature* Pathaleon = GetSingleCreatureFromStorage(NPC_PATHALEON))
                 Pathaleon->SetInCombatWithZone();
         }
         else
-            m_uiPathaleonEngageTimer -= uiDiff;
+            m_pathaleonEngageTimer -= diff;
     }
-}
-
-InstanceData* GetInstanceData_instance_mechanar(Map* pMap)
-{
-    return new instance_mechanar(pMap);
 }
 
 void instance_mechanar::ShowChatCommands(ChatHandler* handler)
@@ -302,9 +297,9 @@ void instance_mechanar::ExecuteChatCommand(ChatHandler* handler, char* args)
     std::string val = result;
     if (val == "resetgauntlet")
     {
-        m_uiBridgeEventPhase = 0;
-        m_sBridgeTrashGuidSet.clear();
-        m_uiBridgeEventTimer = 2000;
+        m_bridgeEventPhase = 0;
+        m_bridgeTrashGuidSet.clear();
+        m_bridgeEventTimer = 2000;
         SetData(TYPE_BRIDGEEVENT, NOT_STARTED);
     }
 }
@@ -313,6 +308,6 @@ void AddSC_instance_mechanar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_mechanar";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_mechanar;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_mechanar>;
     pNewScript->RegisterSelf();
 }

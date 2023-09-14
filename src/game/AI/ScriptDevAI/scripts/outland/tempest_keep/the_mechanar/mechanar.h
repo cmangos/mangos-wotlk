@@ -46,8 +46,8 @@ enum
 
 struct SpawnLocation
 {
-    uint32 m_uiSpawnEntry;
-    float m_fX, m_fY, m_fZ, m_fO;
+    uint32 m_spawnEntry;
+    float m_x, m_y, m_z, m_o;
 };
 
 static const SpawnLocation aBridgeEventLocs[MAX_BRIDGE_LOCATIONS][4] =
@@ -97,13 +97,13 @@ class instance_mechanar : public ScriptedInstance
 
         void Initialize() override;
 
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
+        void OnPlayerEnter(Player* player) override;
+        void OnObjectCreate(GameObject* go) override;
+        void OnCreatureCreate(Creature* creature) override;
 
-        void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureDeath(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
+        void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 uiType) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
@@ -120,11 +120,11 @@ class instance_mechanar : public ScriptedInstance
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
-        uint32 m_uiBridgeEventTimer;
-        uint8 m_uiBridgeEventPhase;
-        uint32 m_uiPathaleonEngageTimer;
+        uint32 m_bridgeEventTimer;
+        uint8 m_bridgeEventPhase;
+        uint32 m_pathaleonEngageTimer;
 
-        GuidSet m_sBridgeTrashGuidSet;
+        GuidSet m_bridgeTrashGuidSet;
 };
 
 #endif
