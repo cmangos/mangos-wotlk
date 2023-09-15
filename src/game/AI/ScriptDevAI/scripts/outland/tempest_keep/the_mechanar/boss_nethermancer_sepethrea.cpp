@@ -27,13 +27,13 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                       = -1554013,
-    SAY_SUMMON                      = -1554014,
-    SAY_DRAGONS_BREATH_1            = -1554015,
-    SAY_DRAGONS_BREATH_2            = -1554016,
-    SAY_SLAY1                       = -1554017,
-    SAY_SLAY2                       = -1554018,
-    SAY_DEATH                       = -1554019,
+    SAY_AGGRO                       = 19959,
+    SAY_SUMMON                      = 19965,
+    SAY_DRAGONS_BREATH_1            = 19963,
+    SAY_DRAGONS_BREATH_2            = 19964,
+    SAY_SLAY1                       = 19961,
+    SAY_SLAY2                       = 19962,
+    SAY_DEATH                       = 19966,
 
     SPELL_SUMMON_RAGING_FLAMES      = 35275,
     SPELL_SUMMON_RAGING_FLAMES_H    = 39084,
@@ -72,7 +72,7 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         m_creature->SetInCombatWithZone();
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
         DoCastSpellIfCan(nullptr, SPELL_FROST_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_RAGING_FLAMES : SPELL_SUMMON_RAGING_FLAMES_H);
 
@@ -82,12 +82,12 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SEPETHREA, DONE);
@@ -123,7 +123,7 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_DRAGONS_BREATH) == CAST_OK)
             {
                 if (urand(0, 1))
-                    DoScriptText(urand(0, 1) ? SAY_DRAGONS_BREATH_1 : SAY_DRAGONS_BREATH_2, m_creature);
+                    DoBroadcastText(urand(0, 1) ? SAY_DRAGONS_BREATH_1 : SAY_DRAGONS_BREATH_2, m_creature);
 
                 m_uiDragonsBreathTimer = urand(20000, 35000);
             }

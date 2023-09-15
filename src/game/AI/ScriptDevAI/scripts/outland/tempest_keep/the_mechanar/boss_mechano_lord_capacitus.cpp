@@ -28,12 +28,12 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                       = -1554005,
-    SAY_DEATH                       = -1554002,
-    SAY_ABILITY_USE_1               = -1554000,
-    SAY_ABILITY_USE_2               = -1554001,
-    SAY_PLAYER_KILL_1               = -1554003,
-    SAY_PLAYER_KILL_2               = -1554004,
+    SAY_AGGRO                       = 19952,
+    SAY_DEATH                       = 19957,
+    SAY_ABILITY_USE_1               = 19955,
+    SAY_ABILITY_USE_2               = 19956,
+    SAY_PLAYER_KILL_1               = 19953,
+    SAY_PLAYER_KILL_2               = 19954,
 
     SPELL_SUMMON_NETHER_CHARGE_NE   = 35153,
     SPELL_SUMMON_NETHER_CHARGE_NW   = 35904,
@@ -81,18 +81,18 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_PLAYER_KILL_1 : SAY_PLAYER_KILL_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_PLAYER_KILL_1 : SAY_PLAYER_KILL_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
         DespawnNetherCharges();
     }
 
@@ -145,8 +145,8 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
 
                 switch (urand(0, 3))
                 {
-                    case 0: DoScriptText(SAY_ABILITY_USE_1, m_creature); break;
-                    case 1: DoScriptText(SAY_ABILITY_USE_2, m_creature); break;
+                    case 0: DoBroadcastText(SAY_ABILITY_USE_1, m_creature); break;
+                    case 1: DoBroadcastText(SAY_ABILITY_USE_2, m_creature); break;
                     default: break;
                 }
             }
@@ -171,8 +171,8 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
 
             switch (urand(0, 3))
             {
-                case 0: DoScriptText(SAY_ABILITY_USE_1, m_creature); break;
-                case 1: DoScriptText(SAY_ABILITY_USE_2, m_creature); break;
+                case 0: DoBroadcastText(SAY_ABILITY_USE_1, m_creature); break;
+                case 1: DoBroadcastText(SAY_ABILITY_USE_2, m_creature); break;
                 default: break;
             }
         }

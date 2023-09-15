@@ -41,7 +41,7 @@ enum
 
     SPELL_ETHEREAL_TELEPORT = 34427,
 
-    SAY_PATHALEON_INTRO     = -1554028,
+    SAY_PATHALEON_INTRO     = 19059,
 };
 
 struct SpawnLocation

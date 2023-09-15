@@ -26,14 +26,14 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                       = -1554020,
-    SAY_DOMINATION_1                = -1554021,
-    SAY_DOMINATION_2                = -1554022,
-    SAY_SUMMON                      = -1554023,
-    SAY_ENRAGE                      = -1554024,
-    SAY_SLAY_1                      = -1554025,
-    SAY_SLAY_2                      = -1554026,
-    SAY_DEATH                       = -1554027,
+    SAY_AGGRO                       = 20041,
+    SAY_DOMINATION_1                = 18716,
+    SAY_DOMINATION_2                = 20040,
+    SAY_SUMMON                      = 18717,
+    SAY_ENRAGE                      = 18725,
+    SAY_SLAY_1                      = 20042,
+    SAY_SLAY_2                      = 20043,
+    SAY_DEATH                       = 20044,
 
     // Spells to be casted
     SPELL_MANA_TAP                  = 36021,
@@ -90,17 +90,17 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         m_creature->RemoveGuardians();
 
@@ -153,7 +153,7 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DOMINATION) == CAST_OK)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_DOMINATION_1 : SAY_DOMINATION_2, m_creature);
+                    DoBroadcastText(urand(0, 1) ? SAY_DOMINATION_1 : SAY_DOMINATION_2, m_creature);
                     m_uiDominationTimer = urand(25000, 30000);
                 }
             }
@@ -178,7 +178,7 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
             {
                 DoCastSpellIfCan(m_creature, SPELL_SUICIDE, CAST_TRIGGERED);
-                DoScriptText(SAY_ENRAGE, m_creature);
+                DoBroadcastText(SAY_ENRAGE, m_creature);
                 m_bIsEnraged = true;
             }
         }
@@ -192,7 +192,7 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
                 for (uint8 i = 0; i < uiMaxWraith; ++i)
                     DoCastSpellIfCan(m_creature, aWraithSummonSpells[i], CAST_TRIGGERED);
 
-                DoScriptText(SAY_SUMMON, m_creature);
+                DoBroadcastText(SAY_SUMMON, m_creature);
                 m_uiSummonTimer = urand(45000, 50000);
             }
             else

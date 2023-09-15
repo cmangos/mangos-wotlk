@@ -232,7 +232,7 @@ void instance_mechanar::DoSpawnBridgeWave()
                         break;
                     case 6:                                 // Pathaleon
                         SetData(TYPE_BRIDGEEVENT, DONE);
-                        DoScriptText(SAY_PATHALEON_INTRO, temp);
+                        DoBroadcastText(SAY_PATHALEON_INTRO, temp);
                         m_pathaleonEngageTimer = 30000;
                         break;
                 }
