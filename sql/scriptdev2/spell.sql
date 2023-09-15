@@ -232,6 +232,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (35139,'spell_throw_booms_doom'),
 (35150,'spell_nether_charge_passive'),
 (37670,'spell_nether_charge_timer'),
+(39096,'spell_polarity_shift_capacitus'),
 (33676,'spell_incite_chaos'),
 (30843,'spell_enfeeble'),
 (32325,'spell_void_blast'),
