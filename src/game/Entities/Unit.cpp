@@ -4347,7 +4347,7 @@ float Unit::CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolM
     {
         if (!i->isAffectedOnSpell(spellInfo))
             continue;
-        i->OnCritChanceCalculate(victim, chance);
+        i->OnCritChanceCalculate(victim, chance, spellInfo);
     }
     return std::max(0.0f, std::min(chance, 100.0f));
 }

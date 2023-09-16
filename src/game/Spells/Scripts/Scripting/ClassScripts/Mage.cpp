@@ -19,6 +19,7 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellMgr.h"
 
+// 11213 - Arcane Concentration
 struct ArcaneConcentration : public AuraScript
 {
     bool OnCheckProc(Aura* aura, ProcExecutionData& procData) const override
@@ -43,6 +44,28 @@ struct ArcaneConcentration : public AuraScript
             spell->RegisterAuraProc(aura);
         }
         return true;
+    }
+};
+
+// 11170 - Shatter
+struct ShatterMage : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        switch (aura->GetModifier()->m_miscvalue)
+        {
+            // Shatter
+            case 849: if (target->isFrozen() || aura->GetTarget()->IsIgnoreUnitState(spellInfo, IGNORE_UNIT_TARGET_NON_FROZEN)) chance += 17.0f; break;
+            case 910: if (target->isFrozen() || aura->GetTarget()->IsIgnoreUnitState(spellInfo, IGNORE_UNIT_TARGET_NON_FROZEN)) chance += 34.0f; break;
+            case 911: if (target->isFrozen() || aura->GetTarget()->IsIgnoreUnitState(spellInfo, IGNORE_UNIT_TARGET_NON_FROZEN)) chance += 50.0f; break;
+            default:
+                break;
+        }
     }
 };
 
@@ -171,6 +194,7 @@ struct FrostWarding : public AuraScript
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
+    RegisterSpellScript<ShatterMage>("spell_shatter_mage");
     RegisterSpellScript<Blizzard>("spell_blizzard");
     RegisterSpellScript<MageIgnite>("spell_mage_ignite");
     RegisterSpellScript<FingersOfFrostProc>("spell_fingers_of_frost_proc");
