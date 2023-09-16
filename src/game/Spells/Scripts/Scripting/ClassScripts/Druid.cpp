@@ -209,7 +209,7 @@ struct ImprovedInsectSwarm : public AuraScript
         if (target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x000000000000002), 0, aura->GetTarget()->GetObjectGuid())) chance += aura->GetModifier()->m_amount; // Weakened Soul
     }
 
-    void OnDamageCalculate(Aura* aura, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
     {
         if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x00200000), 0, aura->GetTarget()->GetObjectGuid())) totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
     }

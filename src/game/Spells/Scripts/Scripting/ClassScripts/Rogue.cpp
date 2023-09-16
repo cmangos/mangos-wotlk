@@ -125,7 +125,7 @@ struct DirtyDeeds : public AuraScript
             aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
     }
 
-    void OnDamageCalculate(Aura* aura, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
     {
         if (aura->GetEffIndex() == EFFECT_INDEX_0)
             return;
@@ -203,7 +203,7 @@ struct CheatingDeath : public AuraScript
         return false;
     }
 
-    void OnDamageCalculate(Aura* aura, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& totalMod) const override
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& totalMod) const override
     {
         if (!aura->GetTarget()->IsPlayer())
             return;

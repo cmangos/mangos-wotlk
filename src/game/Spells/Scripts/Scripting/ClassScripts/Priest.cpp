@@ -299,7 +299,7 @@ struct GlyphOfLightwell : public AuraScript
         aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
     }
 
-    void OnDamageCalculate(Aura* aura, Unit* /*victim*/, int32& advertisedBenefit, float& totalMod) const override
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* /*victim*/, int32& advertisedBenefit, float& totalMod) const override
     {
         advertisedBenefit += aura->GetModifier()->m_amount / 3; // ticks 3 times
     }
@@ -313,7 +313,7 @@ struct GlyphOfShadowWordDeath : public AuraScript
             aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
     }
 
-    void OnDamageCalculate(Aura* aura, Unit* victim, int32& advertisedBenefit, float& totalMod) const override
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& advertisedBenefit, float& totalMod) const override
     {
         if (victim->GetHealthPercent() <= 35.f)
             totalMod *= (float(100 + aura->GetModifier()->m_amount) / 100);
@@ -385,7 +385,7 @@ struct RenewedHopeDamageTaken : public AuraScript
         aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_TAKEN, apply);
     }
 
-    void OnDamageCalculate(Aura* aura, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& totalMod) const override
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& totalMod) const override
     {
         totalMod *= (aura->GetAmount() + 100) / 100;
     }

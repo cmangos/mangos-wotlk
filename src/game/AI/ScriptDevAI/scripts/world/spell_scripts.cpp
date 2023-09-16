@@ -1331,7 +1331,7 @@ struct IncreasedHealingDoneDummy : public AuraScript
         aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
     }
 
-    void OnDamageCalculate(Aura* aura, Unit* /*victim*/, int32& advertisedBenefit, float& /*totalMod*/) const override
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* /*victim*/, int32& advertisedBenefit, float& /*totalMod*/) const override
     {
         advertisedBenefit += aura->GetModifier()->m_amount;
     }
