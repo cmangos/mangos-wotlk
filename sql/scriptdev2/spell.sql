@@ -264,6 +264,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (31531,'spell_summon_gnomes'),
 (31532,'spell_repair_mekgineer'),
 (37936,'spell_repair_mekgineer'),
+(35284,'spell_summon_nether_wraiths'),
 (35781,'spell_countercharge'),
 (37866,'spell_summon_water_globules'),
 (38028,'spell_watery_grave'),
