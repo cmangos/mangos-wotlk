@@ -385,7 +385,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
     m_spellmod(nullptr), m_periodicTimer(0), m_periodicTick(0), m_removeMode(AURA_REMOVE_BY_DEFAULT),
     m_effIndex(eff), m_positive(false), m_isPeriodic(false), m_isAreaAura(false),
     m_isPersistent(false), m_magnetUsed(false), m_spellAuraHolder(holder),
-    m_scriptValue(0), m_storage(nullptr)
+    m_scriptValue(0), m_storage(nullptr), m_affectOverriden(false)
 {
     MANGOS_ASSERT(target);
     MANGOS_ASSERT(spellproto && spellproto == sSpellTemplate.LookupEntry<SpellEntry>(spellproto->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -942,9 +942,15 @@ void Aura::UpdateAuraScaling()
     }
 }
 
-bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
+bool Aura::isAffectedOnSpell(SpellEntry const* spellProto) const
 {
-    return spell->IsFitToFamily(SpellFamily(GetSpellProto()->SpellFamilyName), GetAuraSpellClassMask());
+    if (m_affectOverriden)
+        return OnAffectCheck(spellProto);
+
+    if (!spellProto)
+        return;
+
+    return spellProto->IsFitToFamily(SpellFamily(GetSpellProto()->SpellFamilyName), GetAuraSpellClassMask());
 }
 
 bool Aura::CanProcFrom(SpellEntry const* spell, uint32 /*procFlag*/, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
@@ -11553,6 +11559,13 @@ void Aura::OnHeartbeat()
     // TODO: move HB resist here
     if (AuraScript* script = GetAuraScript())
         script->OnHeartbeat(this);
+}
+
+bool Aura::OnAffectCheck(SpellEntry const* spellInfo) const
+{
+    if (AuraScript* script = GetAuraScript())
+        return script->OnAffectCheck(this, spellInfo);
+    return false;
 }
 
 uint32 Aura::GetAuraScriptCustomizationValue()
