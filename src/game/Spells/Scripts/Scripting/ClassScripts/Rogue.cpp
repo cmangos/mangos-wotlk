@@ -175,6 +175,47 @@ struct CheatDeathRogue : public AuraScript
     }
 };
 
+// 45182 - Cheating Death
+struct CheatingDeath : public AuraScript
+{
+    void OnAuraInit(Aura* aura) const override
+    {
+        aura->SetAffectOverriden();
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN, apply);
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_TAKEN, apply);
+    }
+
+    bool OnAffectCheck(Aura const* aura, SpellEntry const* spellInfo) const override
+    {
+        if (spellInfo == nullptr)
+            return false;
+
+        SpellSchoolMask mask = SPELL_SCHOOL_MASK_NORMAL;
+        if (spellInfo)
+            mask = GetSpellSchoolMask(spellInfo);
+        if (aura->GetModifier()->m_miscvalue & mask)
+            return true;
+
+        return false;
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (!aura->GetTarget()->IsPlayer())
+            return;
+
+        float mod = static_cast<Player*>(aura->GetTarget())->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE) * (-8.0f);
+        if (mod < float(aura->GetModifier()->m_amount))
+            mod = float(aura->GetModifier()->m_amount);
+
+        totalMod *= (mod + 100.0f) / 100.0f;
+    }
+};
+
 struct KillingSpreeStorage : public ScriptStorage
 {
     GuidSet targets;
@@ -273,6 +314,7 @@ void LoadRogueScripts()
     RegisterSpellScript<SetupRogue>("spell_setup_rogue");
     RegisterSpellScript<DirtyDeeds>("spell_dirty_deeds");
     RegisterSpellScript<CheatDeathRogue>("spell_cheat_death_rogue");
+    RegisterSpellScript<CheatingDeath>("spell_cheating_death");
     RegisterSpellScript<KillingSpree>("spell_killing_spree");
     RegisterSpellScript<PreyOnTheWeak>("spell_prey_on_the_weak");
     RegisterSpellScript<NervesOfSteel>("spell_nerves_of_steel");

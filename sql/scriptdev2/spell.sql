@@ -1399,6 +1399,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (31228,'spell_cheat_death_rogue'),
 (31229,'spell_cheat_death_rogue'),
 (31230,'spell_cheat_death_rogue'),
+(45182,'spell_cheating_death'),
 (14082,'spell_dirty_deeds'),
 (14083,'spell_dirty_deeds'),
 (13983,'spell_setup_rogue'),
