@@ -63,9 +63,9 @@ struct boss_mechano_lord_capacitusAI : public CombatAI
     {
         AddOnKillText(SAY_PLAYER_KILL_1, SAY_PLAYER_KILL_2);
         if (m_isRegularMode)
-            AddCustomAction(CAPACITUS_NETHER_CHARGE, 2000, 5000, [&]() { HandleSummonCharge(); });
+            AddCustomAction(CAPACITUS_NETHER_CHARGE, 2000, 5000, [&]() { HandleSummonCharge(); }, TIMER_COMBAT_COMBAT);
         else
-            AddCustomAction(CAPACITUS_NETHER_CHARGE, 9000, 11000, [&]() { HandleSummonCharge(); });
+            AddCustomAction(CAPACITUS_NETHER_CHARGE, 9000, 11000, [&]() { HandleSummonCharge(); }, TIMER_COMBAT_COMBAT);
     }
 
     bool m_isRegularMode;
