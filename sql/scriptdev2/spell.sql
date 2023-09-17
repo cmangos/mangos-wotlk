@@ -127,6 +127,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28091,'spell_despawner_self'),
 (28345,'spell_communique_trigger'),
 (31315,'spell_summon_boss'),
+(27855,'spell_increased_healing_done_dummy'),
+(28856,'spell_increased_healing_done_dummy'),
+(28851,'spell_increased_healing_done_dummy'),
+(28853,'spell_increased_healing_done_dummy'),
 (491,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (857,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (1804,'spell_gameobject_call_for_help_on_usage'), -- Pick Lock
@@ -272,7 +276,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30610,'spell_wrath_of_the_titans_stacker'),
 (30554,'spell_wrath_of_the_titans_proc_aura'),
 (39601,'spell_grasp_of_the_emerald_dream'),
-(34231,'spell_increased_holy_light_healing'),
+(34231,'spell_increased_healing_done_dummy'),
 (33793,'spell_vazruden_liquid_fire_script'),
 (33794,'spell_vazruden_liquid_fire_script'),
 (30926,'spell_vazruden_liquid_fire_script'),
@@ -582,6 +586,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47375,'spell_summon_direbrew_minion'),
 (49858,'spell_make_bunny_summon_mole_machine'),
 (47514,'spell_summon_mole_machine'),
+(32401,'spell_increased_healing_done_dummy'),
+(32402,'spell_increased_healing_done_dummy'),
+(32403,'spell_increased_healing_done_dummy'),
+(34246,'spell_increased_healing_done_dummy'),
+(37182,'spell_increased_healing_done_dummy'),
 (28695,'spell_gameobject_call_for_help_on_usage'), -- Herb Gathering (Master)
 (29354,'spell_gameobject_call_for_help_on_usage'), -- Mining (Master)
 (30434,'spell_gameobject_call_for_help_on_usage'), -- Elemental Seaforium Charge

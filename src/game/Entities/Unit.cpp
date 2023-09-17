@@ -8448,11 +8448,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, in
             continue;
         switch (i->GetModifier()->m_miscvalue)
         {
-            case 4415: // Increased Rejuvenation Healing
-            case 4953:
-            case 3736: // Hateful Totem of the Third Wind / Increased Lesser Healing Wave / LK Arena (4/5/6) Totem of the Third Wind / Savage Totem of the Third Wind
-                DoneAdvertisedBenefit += i->GetModifier()->m_amount;
-                break;
             case   21: // Test of Faith
             case 6935:
             case 6918:
@@ -8521,10 +8516,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, in
             continue;
         switch (i->GetSpellProto()->Id)
         {
-            case 28851: // Flash of Light - need to create generic container for this and the above
-            case 28853:
-            case 32403:
-            case 34246: // Lifebloom
             case 60779: // Idol of Lush Moss
                 DoneAdvertisedBenefit += i->GetModifier()->m_amount;
                 break;
