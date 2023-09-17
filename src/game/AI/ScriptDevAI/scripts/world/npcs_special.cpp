@@ -1727,13 +1727,14 @@ enum npc_aoe_damage_trigger
     NPC_VOID_ZONE = 16697,
     NPC_LESSER_SHADOW_FISSURE = 17471,
     NPC_LESSER_SHADOW_FISSURE_H = 20570,
-    NPC_WILD_SHADOW_FISSURE = 18370,
+    NPC_WILD_SHADOW_FISSURE = 18370, // nethekurse
     NPC_WILD_SHADOW_FISSURE_H = 20598,
 
     // m_uiAuraPassive
     SPELL_CONSUMPTION_NPC_16697 = 28874,
     SPELL_CONSUMPTION_NPC_17471 = 30497,
     SPELL_CONSUMPTION_NPC_20570 = 35952,
+    SPELL_CONSUMPTION_NPC_18370 = 32250,
 };
 
 struct npc_aoe_damage_triggerAI : public ScriptedAI
@@ -1761,6 +1762,9 @@ struct npc_aoe_damage_triggerAI : public ScriptedAI
                 return SPELL_CONSUMPTION_NPC_17471;
             case NPC_LESSER_SHADOW_FISSURE_H:
                 return SPELL_CONSUMPTION_NPC_20570;
+            case NPC_WILD_SHADOW_FISSURE:
+            case NPC_WILD_SHADOW_FISSURE_H:
+                return SPELL_CONSUMPTION_NPC_18370;
             default:
                 return SPELL_CONSUMPTION_NPC_17471;
         }
