@@ -83,6 +83,30 @@ struct Blizzard : public SpellScript
     }
 };
 
+// 30455 - Ice Lance
+struct IceLance : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (target->isFrozen() || spell->GetCaster()->IsIgnoreUnitState(spell->m_spellInfo, IGNORE_UNIT_TARGET_NON_FROZEN))
+        {
+            float multiplier = 3.0f;
+
+            // if target have higher level
+            if (target->GetLevel() > spell->GetCaster()->GetLevel())
+                // Glyph of Ice Lance
+                if (Aura* glyph = spell->GetCaster()->GetDummyAura(56377))
+                    multiplier = glyph->GetModifier()->m_amount;
+
+            spell->SetDamageDoneModifier(multiplier, EFFECT_INDEX_0);
+        }
+    }
+};
+
 struct MageIgnite : public AuraScript
 {
     // implemented this way because we do not support proccing in spellscript on empty aura slot
@@ -205,11 +229,13 @@ struct GlyphOfFireBlast : public AuraScript
     }
 };
 
+
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
     RegisterSpellScript<ShatterMage>("spell_shatter_mage");
     RegisterSpellScript<Blizzard>("spell_blizzard");
+    RegisterSpellScript<IceLance>("spell_ice_lance");
     RegisterSpellScript<MageIgnite>("spell_mage_ignite");
     RegisterSpellScript<FingersOfFrostProc>("spell_fingers_of_frost_proc");
     RegisterSpellScript<FingersOfFrostIgnore>("spell_fingers_of_frost_ignore");

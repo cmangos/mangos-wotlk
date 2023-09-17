@@ -1105,9 +1105,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-<<<<<<< HEAD
-(53407,'spell_judgement'),
-=======
 (21082,'spell_seal_of_the_crusader'),
 (20162,'spell_seal_of_the_crusader'),
 (20305,'spell_seal_of_the_crusader'),
@@ -1119,7 +1116,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19978,'spell_blessing_of_light'),
 (19979,'spell_blessing_of_light'),
 (27144,'spell_blessing_of_light'),
->>>>>>> 020b7fa454... Spell/Paladin: Add attacker to OnDamageCalculate hook and reimplement Blessing of Light
+(53407,'spell_judgement'),
 (20271,'spell_judgement'),
 (57774,'spell_judgement'),
 (53408,'spell_judgement'),
@@ -1321,6 +1318,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (11170,'spell_shatter_mage'),
 (12982,'spell_shatter_mage'),
 (12983,'spell_shatter_mage'),
+(30455,'spell_ice_lance'),
+(42913,'spell_ice_lance'),
+(42914,'spell_ice_lance'),
 (42208,'spell_blizzard'),
 (42209,'spell_blizzard'),
 (42210,'spell_blizzard'),

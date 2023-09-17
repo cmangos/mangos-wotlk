@@ -765,7 +765,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
         }
 
         if (damage >= 0)
-            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage);
+            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage, m_damageDoneMultiplier[eff_idx]);
     }
 }
 
@@ -5131,7 +5131,7 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
 
     new_damage = int32(new_damage * multiplier);
 
-    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, new_damage);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, new_damage, m_damageDoneMultiplier[eff_idx]);
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_BURN), unitTarget->GetPackGUID(), new_damage, uint32(powertype), multiplier);
 }
 
@@ -7932,7 +7932,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     bonus = int32(bonus * totalDamagePercentMod);
 
     // prevent negative damage
-    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus, m_damageDoneMultiplier[eff_idx]);
 
     // Hemorrhage
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & uint64(0x2000000)))

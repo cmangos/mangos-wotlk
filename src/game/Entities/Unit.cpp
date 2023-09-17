@@ -8146,22 +8146,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
     {
         case SPELLFAMILY_MAGE:
         {
-            // Ice Lance
-            if (spellInfo->SpellIconID == 186)
-            {
-                if (victim->isFrozen() || IsIgnoreUnitState(spellInfo, IGNORE_UNIT_TARGET_NON_FROZEN))
-                {
-                    float multiplier = 3.0f;
-
-                    // if target have higher level
-                    if (victim->GetLevel() > GetLevel())
-                        // Glyph of Ice Lance
-                        if (Aura* glyph = GetDummyAura(56377))
-                            multiplier = glyph->GetModifier()->m_amount;
-
-                    DoneTotalMod *= multiplier;
-                }
-            }
             // Torment the weak affected (Arcane Barrage, Arcane Blast, Frostfire Bolt, Arcane Missiles, Fireball)
             if ((spellInfo->SpellFamilyFlags & uint64(0x0000900020200021)) &&
                     (victim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || victim->HasAuraType(SPELL_AURA_HASTE_ALL)))
