@@ -439,6 +439,40 @@ struct GlyphOfShadowburn : public AuraScript
     }
 };
 
+// 17804 - Soul Siphon
+struct SoulSiphon : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* attacker, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // effect 1 m_amount
+        int32 maxPercent = aura->GetModifier()->m_amount;
+        // effect 0 m_amount
+        int32 stepPercent = attacker->CalculateSpellEffectValue(attacker, aura->GetSpellProto(), EFFECT_INDEX_0);
+        // count affliction effects and calc additional damage in percentage
+        int32 modPercent = 0;
+        Unit::SpellAuraHolderMap const& victimAuras = victim->GetSpellAuraHolderMap();
+        for (const auto& victimAura : victimAuras)
+        {
+            SpellEntry const* m_spell = victimAura.second->GetSpellProto();
+            if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK || !(m_spell->SpellFamilyFlags & uint64(0x0004071B8044C402)))
+                continue;
+            modPercent += stepPercent * victimAura.second->GetStackAmount();
+            if (modPercent >= maxPercent)
+            {
+                modPercent = maxPercent;
+                break;
+            }
+        }
+        totalMod *= (modPercent + 100.0f) / 100.0f;
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -452,6 +486,7 @@ void LoadWarlockScripts()
     RegisterSpellScript<SeedOfCorruptionDamage>("spell_seed_of_corruption_damage");
     RegisterSpellScript<CurseOfDoom>("spell_curse_of_doom");
     RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
+    RegisterSpellScript<SoulSiphon>("spell_soul_siphon");
     RegisterSpellScript<SiphonLifeWotlk>("spell_siphon_life_wotlk");
     RegisterSpellScript<ShadowBite>("spell_shadow_bite");
     RegisterSpellScript<DemonicCircleTeleport>("spell_demonic_circle_teleport");

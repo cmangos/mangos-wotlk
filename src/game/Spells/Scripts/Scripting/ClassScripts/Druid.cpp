@@ -215,12 +215,28 @@ struct ImprovedInsectSwarm : public AuraScript
     }
 };
 
+// 37327 - Starfire Bonus
+struct StarfireBonus : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x0000000000200002)))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterSpellScript<Regrowth>("spell_regrowth");
     RegisterSpellScript<FormScalingAttackPowerAuras>("spell_druid_form_scaling_ap_auras");
     RegisterSpellScript<ForceOfNatureSummon>("spell_force_of_nature_summon");
     RegisterSpellScript<GuardianAggroSpell>("spell_guardian_aggro_spell");
+    RegisterSpellScript<StarfireBonus>("spell_starfire_bonus");
     RegisterSpellScript<WildGrowth>("spell_wild_growth");
     RegisterSpellScript<Brambles>("spell_brambles");
     RegisterSpellScript<ShredDruid>("spell_shred_druid");

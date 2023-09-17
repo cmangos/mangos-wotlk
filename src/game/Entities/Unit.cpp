@@ -8034,40 +8034,12 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
             continue;
         switch (i->GetModifier()->m_miscvalue)
         {
-            case 4920: // Molten Fury
-            case 4919:
             case 6917: // Death's Embrace
             case 6926:
             case 6928:
             {
                 if (victim->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
                     DoneTotalMod *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
-                break;
-            }
-            // Soul Siphon
-            case 4992:
-            case 4993:
-            {
-                // effect 1 m_amount
-                int32 maxPercent = i->GetModifier()->m_amount;
-                // effect 0 m_amount
-                int32 stepPercent = CalculateSpellEffectValue(this, i->GetSpellProto(), EFFECT_INDEX_0);
-                // count affliction effects and calc additional damage in percentage
-                int32 modPercent = 0;
-                SpellAuraHolderMap const& victimAuras = victim->GetSpellAuraHolderMap();
-                for (const auto& victimAura : victimAuras)
-                {
-                    SpellEntry const* m_spell = victimAura.second->GetSpellProto();
-                    if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK || !(m_spell->SpellFamilyFlags & uint64(0x0004071B8044C402)))
-                        continue;
-                    modPercent += stepPercent * victimAura.second->GetStackAmount();
-                    if (modPercent >= maxPercent)
-                    {
-                        modPercent = maxPercent;
-                        break;
-                    }
-                }
-                DoneTotalMod *= (modPercent + 100.0f) / 100.0f;
                 break;
             }
             case 6916: // Death's Embrace
