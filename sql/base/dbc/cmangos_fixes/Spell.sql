@@ -3356,6 +3356,9 @@ INSERT INTO `spell_template` (Id, Attributes, CastingTimeIndex, DurationIndex, R
 -- Freya Dummy - 10 targets
 UPDATE spell_template SET MaxAffectedTargets = 10 WHERE id = 51318;
 
+-- Fierce Lightning Stike 51122
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 51122;
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
