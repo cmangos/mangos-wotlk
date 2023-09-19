@@ -741,6 +741,52 @@ struct SummonAndMountStampy : public SpellScript
     }
 };
 
+// 52218 - Vic's Flying Machine
+struct VicsFlyingMachine : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 51186 - Summon Goregek the Bristlepine Hunter
+struct SummonGoregekTheBristlepineHunter : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 51188 - Summon Dajik the Wasp Hunter
+struct SummonDajikTheWaspHunter : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 51189 - Summon Zepik the Gorloc Hunter
+struct SummonZepikTheGorlocHunter : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetDefaultGossipMenuId(summon->GetCreatureInfo()->GossipMenuId);
+    }
+};
+
+// 51257 - Summon Possessed Crocolisk
+struct SummonPossessedCrocolisk : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -780,4 +826,9 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<SummonDrostan>("spell_summon_drostan");
     RegisterSpellScript<OfferJunglePunch>("spell_offer_jungle_punch");
     RegisterSpellScript<SummonAndMountStampy>("spell_summon_and_mount_stampy");
+    RegisterSpellScript<VicsFlyingMachine>("spell_vics_flying_machine");
+    RegisterSpellScript<SummonGoregekTheBristlepineHunter>("spell_summon_goregek_the_bristlepine_hunter");
+    RegisterSpellScript<SummonDajikTheWaspHunter>("spell_summon_dajik_the_wasp_hunter");
+    RegisterSpellScript<SummonZepikTheGorlocHunter>("spell_summon_zepik_the_gorloc_hunter");
+    RegisterSpellScript<SummonPossessedCrocolisk>("spell_summon_possessed_crocolisk");
 }
