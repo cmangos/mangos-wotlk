@@ -131,6 +131,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28856,'spell_increased_healing_done_dummy'),
 (28851,'spell_increased_healing_done_dummy'),
 (28853,'spell_increased_healing_done_dummy'),
+(21056,'spell_mark_of_lord_kazzak'),
+(21063,'spell_twisted_reflection'),
 (491,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (857,'spell_gameobject_call_for_help_on_usage'), -- Khadgar's Unlocking
 (1804,'spell_gameobject_call_for_help_on_usage'), -- Pick Lock
@@ -386,6 +388,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34012,'spell_raise_dead'),
 (34019,'spell_raise_dead'),
 (41071,'spell_raise_dead'),
+(32960,'spell_mark_of_doomlord_kazzak'),
 (40567,'spell_ogrila_flasks'),
 (40568,'spell_ogrila_flasks'),
 (40572,'spell_ogrila_flasks'),
@@ -1334,13 +1337,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (11170,'spell_shatter_mage'),
 (12982,'spell_shatter_mage'),
 (12983,'spell_shatter_mage'),
-<<<<<<< HEAD
-=======
-(12984,'spell_shatter_mage'),
-(12985,'spell_shatter_mage'),
 (31679,'spell_molten_fury'),
 (31680,'spell_molten_fury'),
->>>>>>> 3a2451d477... Unit/Spell: Remove last batch of SCRIPT_LOCATION_SPELL_DAMAGE_DONE and implement T5 4 set warlock bonus
 (30455,'spell_ice_lance'),
 (42913,'spell_ice_lance'),
 (42914,'spell_ice_lance'),
@@ -1395,16 +1393,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (48443,'spell_regrowth'),
 (33831,'spell_force_of_nature_summon'),
 (41929,'spell_guardian_aggro_spell'),
-<<<<<<< HEAD
-=======
-(33876,'spell_mangle_druid_tbc'),
-(33878,'spell_mangle_druid_tbc'),
-(33982,'spell_mangle_druid_tbc'),
-(33983,'spell_mangle_druid_tbc'),
-(33986,'spell_mangle_druid_tbc'),
-(33987,'spell_mangle_druid_tbc'),
 (37327,'spell_starfire_bonus'),
->>>>>>> 3a2451d477... Unit/Spell: Remove last batch of SCRIPT_LOCATION_SPELL_DAMAGE_DONE and implement T5 4 set warlock bonus
 (1178,'spell_druid_form_scaling_ap_auras'),
 (3025,'spell_druid_form_scaling_ap_auras'),
 (9635,'spell_druid_form_scaling_ap_auras'),

@@ -8542,19 +8542,6 @@ void Aura::PeriodicTick()
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s power leech of %s for %u dmg inflicted by %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
 
-            switch (GetId())
-            {
-                case 32960:                                 // Mark of Kazzak
-                {
-                    if (target->GetTypeId() == TYPEID_PLAYER && target->GetPowerType() == POWER_MANA)
-                    {
-                        // Drain 5% of target's mana
-                        pdamage = target->GetMaxPower(POWER_MANA) * 5 / 100;
-                    }
-                    break;
-                }
-            }
-
             int32 drain_amount = target->GetPower(power) > pdamage ? pdamage : target->GetPower(power);
 
             drain_amount -= target->GetResilienceRatingDamageReduction(uint32(drain_amount), SpellDmgClass(spellProto->DmgClass), false, power);
@@ -8586,27 +8573,6 @@ void Aura::PeriodicTick()
                             pCaster->CastCustomSpell(pCaster, 32554, &pet_gain, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
 
                 target->AddThreat(pCaster, float(gain) * 0.5f, pInfo.critical, GetSpellSchoolMask(spellProto), spellProto);
-            }
-
-            // Some special cases
-            switch (GetId())
-            {
-                case 21056:                                 // Mark of Kazzak
-                case 32960:                                 // Mark of Kazzak
-                {
-                    uint32 triggerSpell = 0;
-                    switch (GetId())
-                    {
-                        case 21056: triggerSpell = 21058; break;
-                        case 32960: triggerSpell = 32961; break;
-                    }
-                    if (target->GetTypeId() == TYPEID_PLAYER && target->GetPower(power) == 0)
-                    {
-                        target->CastSpell(target, triggerSpell, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                        target->RemoveAurasDueToSpell(GetId());
-                    }
-                    break;
-                }
             }
             break;
         }

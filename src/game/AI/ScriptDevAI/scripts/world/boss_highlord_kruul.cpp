@@ -406,6 +406,22 @@ GameObjectAI* GetAI_go_infernaling_summoner(GameObject* go)
     return new go_infernaling_summoner(go);
 }
 
+// 21056 - Mark of Kazzak
+struct MarkOfLordKazzak : public AuraScript
+{
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (aura->GetTarget()->HasMana())
+        {
+            if (aura->GetTarget()->GetPower(POWER_MANA) == 0)
+            {
+                aura->GetTarget()->CastSpell(nullptr, 21058, TRIGGERED_OLD_TRIGGERED);
+                aura->GetTarget()->RemoveAurasDueToSpell(aura->GetId());
+            }
+        }
+    }
+};
+
 void AddSC_boss_highlord_kruul()
 {
     Script* pNewScript = new Script;
@@ -423,4 +439,6 @@ void AddSC_boss_highlord_kruul()
     pNewScript->Name = "go_infernaling_summoner";
     pNewScript->GetGameObjectAI = &GetAI_go_infernaling_summoner;
     pNewScript->RegisterSelf();*/
+
+    RegisterSpellScript<MarkOfLordKazzak>("spell_mark_of_lord_kazzak");
 }
