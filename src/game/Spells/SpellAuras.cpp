@@ -1526,10 +1526,6 @@ void Aura::TriggerSpell()
                     }
 //                    // Teleport Test
 //                    case 32236: break;
-                    case 32686:                             // Earthquake
-                        if (urand(0, 1)) // 50% chance to trigger
-                            triggerTarget->CastSpell(nullptr, 13360, TRIGGERED_OLD_TRIGGERED);
-                        break;
 //                    // Possess
 //                    case 33401: break;
 //                    // Draw Shadows
@@ -1646,8 +1642,6 @@ void Aura::TriggerSpell()
                         else
                             return;
                         break;
-//                    // Mark of Death
-//                    case 37125: break;
                     case 37268:                               // Arcane Flurry (Melee Component)
                     {
                         trigger_spell_id = 37271;       // (Range Component, parentspell 37269)
@@ -2470,12 +2464,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 25471:                             // Attack Order
                     {
                         target->CastSpell(nullptr, 25473, TRIGGERED_OLD_TRIGGERED);
-                        return;
-                    }
-                    case 37127:                             // Mark of Death
-                    {
-                        if (target->HasAura(37128))
-                            target->CastSpell(target, 37131, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
                         return;
                     }
                     case 26681:                             // Cologne

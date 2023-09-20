@@ -353,6 +353,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (37910,'spell_soaring'),
 (37962,'spell_soaring'),
 (37968,'spell_soaring'),
+(32686,'spell_earthquake_doomwalker'),
+(37127,'spell_mark_of_death'),
 (42783,'spell_wrath_of_the_astromancer'),
 (45043,'spell_power_circle'),
 (44006,'spell_teleport_self_akilzon'),

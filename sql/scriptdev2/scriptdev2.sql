@@ -2075,16 +2075,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1000156','Bloodmaul Brew? Me favorite!','0','0','0','0','18171','bladespire ogre SAY_BREW_1'),
 
-('-1000159','Do not proceed. You will be eliminated.','11344','1','0','0','20941','doomwalker SAY_AGGRO'),
-('-1000160','Tectonic disruption commencing.','11345','1','0','0','20942','doomwalker SAY_EARTHQUAKE_1'),
-('-1000161','Magnitude set. Release.','11346','1','0','0','20943','doomwalker SAY_EARTHQUAKE_2'),
-('-1000162','Trajectory locked.','11347','1','0','0','20944','doomwalker SAY_OVERRUN_1'),
-('-1000163','Engage maximum speed.','11348','1','0','0','20945','doomwalker SAY_OVERRUN_2'),
-('-1000164','Threat level zero.','11349','1','0','0','20946','doomwalker SAY_SLAY_1'),
-('-1000165','Directive accomplished.','11350','1','0','0','20947','doomwalker SAY_SLAY_2'),
-('-1000166','Target exterminated.','11351','1','0','0','20948','doomwalker SAY_SLAY_3'),
-('-1000167','System failure in five, f-o-u-r...','11352','1','0','0','20949','doomwalker SAY_DEATH'),
-
 ('-1000168','Who dares awaken Aquementas?','0','1','0','0','5465','aquementas AGGRO_YELL_AQUE'),
 
 ('-1000169','Muahahahaha! You fool! You''ve released me from my banishment in the interstices between space and time!','0','1','0','0','19468','nether_drake SAY_NIHIL_1'),
