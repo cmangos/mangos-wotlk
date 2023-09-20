@@ -102,7 +102,7 @@ struct boss_doomwalkerAI : public CombatAI
     void KilledUnit(Unit* victim) override
     {
         CombatAI::KilledUnit(victim);
-        if (victim->IsPlayer())
+        if (!victim->IsPlayer())
             return;
 
         victim->CastSpell(nullptr, SPELL_MARK_OF_DEATH_PLAYER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
