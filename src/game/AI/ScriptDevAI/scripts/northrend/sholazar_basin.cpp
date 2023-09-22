@@ -17,13 +17,12 @@
 /* ScriptData
 SDName: Sholazar_Basin
 SD%Complete: 100
-SDComment: Quest support: 12570, 12644, 12688
+SDComment: Quest support: 12644, 12688
 SDCategory: Sholazar Basin
 EndScriptData */
 
 /* ContentData
 npc_helice
-npc_injured_rainspeaker
 npc_tipsy_mcmanus
 npc_wants_fruit_credit
 go_quest_still_at_it_credit
@@ -196,133 +195,6 @@ bool QuestAccept_npc_helice(Player* pPlayer, Creature* pCreature, const Quest* p
 
     return false;
 }
-
-/*######
-## npc_injured_rainspeaker
-######*/
-
-enum
-{
-    QUEST_FORTUNATE_MISUNDERSTAND       = 12570,
-
-    GOSSIP_ITEM_READY                   = -3000103,
-
-    SAY_ACCEPT                          = -1000605,
-    SAY_START                           = -1000606,
-    SAY_END_1                           = -1000607,
-    SAY_END_2                           = -1000608,
-    SAY_TRACKER                         = -1000609,         // not used in escort (aggro text for trackers? something for vekjik?)
-
-    NPC_FRENZYHEART_TRACKER             = 28077,
-
-    SPELL_ORACLE_ESCORT_START           = 51341,            // unknown purpose
-    SPELL_FEIGN_DEATH                   = 51329,
-    SPELL_ORACLE_INTRO                  = 51448,
-};
-
-struct npc_injured_rainspeakerAI : public npc_escortAI
-{
-    npc_injured_rainspeakerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
-
-    void Reset() override { }
-
-    void JustStartedEscort() override
-    {
-        if (Player* pPlayer = GetPlayerForEscort())
-        {
-            DoScriptText(SAY_START, m_creature, pPlayer);
-            DoCastSpellIfCan(m_creature, SPELL_ORACLE_ESCORT_START);
-        }
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
-        {
-            case 23:
-            {
-                if (Player* pPlayer = GetPlayerForEscort())
-                {
-                    DoScriptText(SAY_END_1, m_creature, pPlayer);
-                    DoCastSpellIfCan(m_creature, SPELL_ORACLE_INTRO);
-                }
-                break;
-            }
-            case 24:
-            {
-                DoScriptText(SAY_END_2, m_creature);
-
-                // location behind
-                float fAngle = m_creature->GetOrientation();
-                fAngle += M_PI_F;
-
-                float fX, fY, fZ;
-                m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0.0f, 15.0f, fAngle);
-
-                m_creature->SummonCreature(NPC_FRENZYHEART_TRACKER, fX, fY, fZ, m_creature->GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 30000);
-                break;
-            }
-        }
-    }
-
-    void UpdateEscortAI(const uint32 /*uiDiff*/) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-UnitAI* GetAI_npc_injured_rainspeaker(Creature* pCreature)
-{
-    return new npc_injured_rainspeakerAI(pCreature);
-}
-
-bool QuestAccept_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_FORTUNATE_MISUNDERSTAND)
-    {
-        pCreature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-        DoScriptText(SAY_ACCEPT, pCreature, pPlayer);
-
-        // Workaround, GossipHello/GossipSelect doesn't work well when object already has gossip from database
-        if (npc_injured_rainspeakerAI* pEscortAI = dynamic_cast<npc_injured_rainspeakerAI*>(pCreature->AI()))
-        {
-            pEscortAI->Start(true, pPlayer, pQuest);
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
-        }
-    }
-
-    return false;
-}
-
-/*
-bool GossipHello_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature)
-{
-    if (pPlayer->GetQuestStatus(QUEST_FORTUNATE_MISUNDERSTAND) == QUEST_STATUS_INCOMPLETE)
-    {
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_READY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
-        return true;
-    }
-
-    return false;
-}
-
-bool GossipSelect_npc_injured_rainspeaker(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
-{
-    if (uiAction == GOSSIP_ACTION_INFO_DEF)
-    {
-        pPlayer->CLOSE_GOSSIP_MENU();
-
-        if (npc_injured_rainspeakerAI* pEscortAI = dynamic_cast<npc_injured_rainspeakerAI*>(pCreature->AI()))
-            pEscortAI->Start(true, pPlayer);
-    }
-
-    return false;
-}
-*/
 
 /*######
 ## npc_tipsy_mcmanus
@@ -793,14 +665,6 @@ void AddSC_sholazar_basin()
     pNewScript->Name = "npc_helice";
     pNewScript->GetAI = &GetAI_npc_helice;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_helice;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_injured_rainspeaker";
-    pNewScript->GetAI = &GetAI_npc_injured_rainspeaker;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_injured_rainspeaker;
-    // pNewScript->pGossipHello = &GossipHello_npc_injured_rainspeaker;
-    // pNewScript->pGossipSelect = &GossipSelect_npc_injured_rainspeaker;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
