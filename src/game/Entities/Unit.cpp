@@ -3525,7 +3525,7 @@ float Unit::CalculateEffectiveDodgeChance(const Unit* attacker, WeaponAttackType
     // Own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit is incapable
     if (chance < 0.005f)
         return 0.0f;
-    const bool weapon = (!ability || ability->EquippedItemClass == ITEM_CLASS_WEAPON);
+    const bool weapon = (!ability || IsSpellUseWeaponSkill(ability));
     // Skill difference can be negative (and reduce our chance to mitigate an attack), which means:
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
@@ -3603,7 +3603,7 @@ float Unit::CalculateEffectiveParryChance(const Unit* attacker, WeaponAttackType
     // Own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit is incapable
     if (chance < 0.005f)
         return 0.0f;
-    const bool weapon = (!ability || ability->EquippedItemClass == ITEM_CLASS_WEAPON);
+    const bool weapon = (!ability || IsSpellUseWeaponSkill(ability));
     // Skill difference can be negative (and reduce our chance to mitigate an attack), which means:
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
@@ -3672,7 +3672,7 @@ float Unit::CalculateEffectiveBlockChance(const Unit* attacker, WeaponAttackType
     // Own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit is incapable
     if (chance < 0.005f)
         return 0.0f;
-    const bool weapon = (!ability || ability->EquippedItemClass == ITEM_CLASS_WEAPON);
+    const bool weapon = (!ability || IsSpellUseWeaponSkill(ability));
     // Skill difference can be negative (and reduce our chance to mitigate an attack), which means:
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
@@ -4208,7 +4208,7 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     // Skip victim calculation if positive ability
     if (ability && IsPositiveSpell(ability, this, victim))
         return std::max(0.0f, std::min(chance, 100.0f));
-    const bool weapon = (!ability || ability->EquippedItemClass == ITEM_CLASS_WEAPON);
+    const bool weapon = (!ability || IsSpellUseWeaponSkill(ability));
     // Skill difference can be both negative and positive.
     // a) Positive means that attacker's level is higher or additional weapon +skill bonuses
     // b) Negative means that victim's level is higher or additional +defense bonuses
@@ -4254,7 +4254,7 @@ float Unit::CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType at
     if (chance < 0.005f)
         return 0.0f;
     const bool ranged = (attType == RANGED_ATTACK);
-    const bool weapon = (!ability || ability->EquippedItemClass == ITEM_CLASS_WEAPON);
+    const bool weapon = (!ability || IsSpellUseWeaponSkill(ability));
     // Check if dual wielding, add additional miss penalty - when mainhand has on next swing spell, offhand doesnt suffer penalty
     if (!ability && !ranged && hasOffhandWeaponForAttack() && (!m_currentSpells[CURRENT_MELEE_SPELL] || !IsNextMeleeSwingSpell(m_currentSpells[CURRENT_MELEE_SPELL]->m_spellInfo)))
         chance += 19.0f;
