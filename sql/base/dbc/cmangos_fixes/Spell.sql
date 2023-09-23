@@ -3362,6 +3362,11 @@ UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 51122;
 -- Player needs to board vics flying machine in seat 1, not seat 0 - and is first to board
 UPDATE spell_template SET EffectBasePoints1=1 WHERE Id=52218;
 
+-- 'Engine on Fire' should not be removed on evade
+UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (52255);
+-- 'Vic's Flying Machine Aggro Periodic' should not be removed on evade
+UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (52260);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
