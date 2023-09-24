@@ -177,19 +177,22 @@ enum
 {
     QUEST_MISTWHISPER_TREASURE          = 12575,
     NPC_TARTEK                          = 28105,
+    NPC_ZEPTEK                          = 28399,
 };
 
 // 5030
-bool AreaTrigger_at_spearborn_encampment(Player* pPlayer, AreaTriggerEntry const* pAt)
+bool AreaTrigger_at_spearborn_encampment(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     if (pPlayer->GetQuestStatus(QUEST_MISTWHISPER_TREASURE) == QUEST_STATUS_INCOMPLETE &&
             pPlayer->GetReqKillOrCastCurrentCount(QUEST_MISTWHISPER_TREASURE, NPC_TARTEK) == 0)
     {
-        // can only spawn one at a time, it's not a too good solution
+        // can only spawn one at a time
         if (GetClosestCreatureWithEntry(pPlayer, NPC_TARTEK, 50.0f))
             return false;
+        if (GetClosestCreatureWithEntry(pPlayer, NPC_ZEPTEK, 50.0f))
+            return false;
 
-        pPlayer->SummonCreature(NPC_TARTEK, pAt->x, pAt->y, pAt->z, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+        pPlayer->SummonCreature(NPC_ZEPTEK, 6710.399, 5162.64, -20.66248, 4.753422, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
     }
 
     return false;
