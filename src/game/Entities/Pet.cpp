@@ -1230,7 +1230,7 @@ void Pet::InitPetScalingAuras()
             case 30146: // Felguard
                 scalingAuras.insert(scalingAuras.end(), { 34947, 34956, 34957, 34958 });
                 break;
-            case 12740: // Infernal - Warlock - unique - isnt updated on stat changes
+            case 1122: // Infernal - Warlock - unique - isnt updated on stat changes
             case 18541: // Doomguard - Ritual of Doom
             case 18662: // Doomguard - Curse of Doom
                 scalingAuras.insert(scalingAuras.end(), { 36186, 36188, 36189, 36190 });
