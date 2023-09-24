@@ -4226,6 +4226,12 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     // Victim's crit taken chance
     const SpellDmgClass dmgClass = (ranged ? SPELL_DAMAGE_CLASS_RANGED : SPELL_DAMAGE_CLASS_MELEE);
     chance += victim->GetCritTakenChance(this, SPELL_SCHOOL_MASK_NORMAL, dmgClass, ability);
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_CRIT_CHANCE))
+    {
+        if (!i->isAffectedOnSpell(ability))
+            continue;
+        i->OnCritChanceCalculate(victim, chance, ability);
+    }
     return std::max(0.0f, std::min(chance, 100.0f));
 }
 
