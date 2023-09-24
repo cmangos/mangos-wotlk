@@ -11232,26 +11232,15 @@ void Spell::EffectActivateObject(SpellEffectIndex effIdx)
         case GameObjectActions::OPEN:
             switch (m_spellInfo->Id)
             {
-                case 24731:
-                case 40964:         // Fel Crystalforge: Create 1 Flask
-                case 40965:         // Fel Crystalforge: Create 5 Flasks
-                case 40968:         // Bash'ir Crystalforge: Create 1 Flask
-                case 40970:         // Bash'ir Crystalforge: Create 5 Flasks
-                case 42868:
-                case 45222:         // Zul'Aman Object Visual - This spell is a custom GO cast spell and similar to Ritual of Souls where only channel start should be sent
+                case 17731:         // Onyxia - Eruption
                     gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
-                    break;
-                case 36546:         // no delay meant to happen - activate trap immediately
-                case 38054:
-                case 39844:
-                    gameObjTarget->Use(m_caster, m_spellInfo);
                     break;
                 case 46638:         // Brutallus SWP - closes door
                     gameObjTarget->ResetDoorOrButton();
                     break;
                 default:
                     if (m_caster)
-                        gameObjTarget->Use(m_caster);
+                        gameObjTarget->Use(m_caster, m_spellInfo);
                     break;
             }
             break;
@@ -11320,19 +11309,6 @@ void Spell::EffectActivateObject(SpellEffectIndex effIdx)
                     gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
                     break;
                 }
-                case 40176:         // Simon Game pre-game Begin, blue
-                case 40177:         // Simon Game pre-game Begin, green
-                case 40178:         // Simon Game pre-game Begin, red
-                case 40179:         // Simon Game pre-game Begin, yellow
-                case 40283:         // Simon Game END, blue
-                case 40284:         // Simon Game END, green
-                case 40285:         // Simon Game END, red
-                case 40286:         // Simon Game END, yellow
-                case 40494:         // Simon Game, switched ON
-                case 40495:         // Simon Game, switched OFF
-                case 40512:         // Simon Game, switch...disable Off switch
-                    gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-                    break;
                 case 40632:         // Summon Gezzarak the Huntress
                 case 40640:         // Summon Karrog
                 case 40642:         // Summon Darkscreecher Akkarai
