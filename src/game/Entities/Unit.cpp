@@ -4174,7 +4174,7 @@ float Unit::GetMissChance(const SpellEntry* entry, SpellSchoolMask schoolMask) c
     if (!entry)
         return 0.0f;
 
-    if (entry->HasAttribute(SPELL_ATTR_EX5_ADD_MELEE_HIT_RATING))
+    if (entry->HasAttribute(SPELL_ATTR_EX5_ADD_MELEE_HIT_RATING) || entry->HasAttribute(SPELL_ATTR_EX3_NORMAL_RANGED_ATTACK))
         chance += GetMissChance(GetWeaponAttackType(entry));
     else
     {
@@ -4336,12 +4336,10 @@ float Unit::CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolM
 
     float chance = 0.0f;
 
-    switch (spellInfo->DmgClass)
-    {
-        case SPELL_DAMAGE_CLASS_MELEE:
-        case SPELL_DAMAGE_CLASS_RANGED:
-            return CalculateEffectiveCritChance(victim, GetWeaponAttackType(spellInfo), spellInfo);
-    }
+    // wands are spell attacks but qualify for ranged crit calculation
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX3_NORMAL_RANGED_ATTACK) || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
+        return CalculateEffectiveCritChance(victim, GetWeaponAttackType(spellInfo), spellInfo);
+
     chance += GetCritChance(spellInfo, schoolMask);
     // Own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit is incapable
     if (chance < 0.005f)
@@ -4366,23 +4364,16 @@ float Unit::CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolM
     float chance = 0.0f;
     const float minimum = 0.0f; // WotLK: no unavoidable miss chance
 
-    switch (spell->DmgClass)
-    {
-        case SPELL_DAMAGE_CLASS_MELEE:
-        case SPELL_DAMAGE_CLASS_RANGED:
-            return CalculateEffectiveMissChance(victim, GetWeaponAttackType(spell), spell);
-    }
-    if (spell->HasAttribute(SPELL_ATTR_EX5_ADD_MELEE_HIT_RATING))
-    {
-        // How it works:
-        // - First introduced in patch 2.3 for Taunt, Growl, Righteous Defense, Challenging Shout and Challenging Roar
-        // - Switches spell to use ability miss chance calculation, but leaves standard unavoidable miss percent
-        // In WotLK+:
-        // - Removed for Taunt, Growl and Righteous Defense, so these spells have 17% miss against bosses
-        // - Added glyphs for Taunt and Growl to negate remaining 8% of spell miss difference
-        // - AoE taunts on cooldowns still use ability miss calculation
+    // How it works: SPELL_ATTR_EX5_ADD_MELEE_HIT_RATING
+    // - First introduced in patch 2.3 for Taunt, Growl, Righteous Defense, Challenging Shout and Challenging Roar
+    // - Switches spell to use ability miss chance calculation, but leaves standard unavoidable miss percent
+    // In WotLK+:
+    // - Removed for Taunt, Growl and Righteous Defense, so these spells have 17% miss against bosses
+    // - Added glyphs for Taunt and Growl to negate remaining 8% of spell miss difference
+    // - AoE taunts on cooldowns still use ability miss calculation
+    if (spell->HasAttribute(SPELL_ATTR_EX3_NORMAL_RANGED_ATTACK) || spell->HasAttribute(SPELL_ATTR_EX5_ADD_MELEE_HIT_RATING) || spell->DmgClass == SPELL_DAMAGE_CLASS_MELEE || spell->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
         return CalculateEffectiveMissChance(victim, GetWeaponAttackType(spell), spell);
-    }
+
     chance += victim->GetMissChance(spell, schoolMask);
     // Victim's own chance appears to be zero / below zero / unmeaningful for some reason (debuffs?): skip calculation, unit can't be missed
     if (chance < 0.005f)
