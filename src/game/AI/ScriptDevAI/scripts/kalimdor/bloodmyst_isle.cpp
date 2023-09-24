@@ -406,21 +406,9 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         DialogueUpdate(uiDiff);
-
-        // Combat check
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // ToDo: research if there are any abilities involved
-
-        DoMeleeAttackIfReady();
+        npc_escortAI::UpdateEscortAI(uiDiff);
     }
 };
-
-UnitAI* GetAI_npc_demolitionist_legoso(Creature* pCreature)
-{
-    return new npc_demolitionist_legosoAI(pCreature);
-}
 
 bool QuestAccept_npc_demolitionist_legoso(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
@@ -439,7 +427,7 @@ void AddSC_bloodmyst_isle()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_demolitionist_legoso";
-    pNewScript->GetAI = &GetAI_npc_demolitionist_legoso;
+    pNewScript->GetAI = &GetNewAIInstance<npc_demolitionist_legosoAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_demolitionist_legoso;
     pNewScript->RegisterSelf();
 }
