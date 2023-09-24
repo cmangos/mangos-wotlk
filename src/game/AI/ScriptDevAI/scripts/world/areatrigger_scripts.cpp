@@ -192,7 +192,7 @@ bool AreaTrigger_at_spearborn_encampment(Player* pPlayer, AreaTriggerEntry const
         if (GetClosestCreatureWithEntry(pPlayer, NPC_ZEPTEK, 50.0f))
             return false;
 
-        pPlayer->SummonCreature(NPC_ZEPTEK, 6710.399, 5162.64, -20.66248, 4.753422, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
+        pPlayer->SummonCreature(NPC_ZEPTEK, 6710.399f, 5162.64f, -20.66248f, 4.753422f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, MINUTE * IN_MILLISECONDS);
     }
 
     return false;
