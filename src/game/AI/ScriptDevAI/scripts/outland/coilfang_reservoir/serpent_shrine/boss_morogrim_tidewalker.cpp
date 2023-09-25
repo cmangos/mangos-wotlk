@@ -248,11 +248,6 @@ struct mob_water_globuleAI : public ScriptedAI
 
     bool m_initialAggro;
 
-    void Reset() override
-    {
-        ResetAllTimers();
-    }
-
     void JustRespawned() override
     {
         ScriptedAI::JustRespawned();
