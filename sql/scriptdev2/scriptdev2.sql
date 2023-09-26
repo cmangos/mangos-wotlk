@@ -987,6 +987,8 @@ UPDATE creature_template SET ScriptName='boss_warchief_kargath_bladefist' WHERE 
 UPDATE creature_template SET ScriptName='npc_blade_dance_target' WHERE entry IN(20709);
 UPDATE creature_template SET ScriptName='npc_shattered_hand_zealot' WHERE entry=17462;
 UPDATE creature_template SET ScriptName='npc_shattered_hand_scout' WHERE entry=17693;
+UPDATE creature_template SET ScriptName='npc_shattered_hand_centurion' WHERE Entry=17465;
+UPDATE creature_template SET ScriptName='npc_shattered_hand_gladiator' WHERE Entry=17464;
 UPDATE instance_template SET ScriptName='instance_shattered_halls' WHERE map=540;
 UPDATE gameobject_template SET ScriptName='go_netherkurse_door' WHERE entry=182539;
 
