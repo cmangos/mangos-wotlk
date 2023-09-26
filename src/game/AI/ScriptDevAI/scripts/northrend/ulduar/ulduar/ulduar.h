@@ -625,6 +625,8 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         void GetThunderOrbsGuids(GuidList& lOrbs) const { lOrbs = m_lUpperThunderOrbsGuids; }
         void GetSmashTargetsGuids(GuidList& lTargets, bool bLeft) { lTargets = bLeft ? m_lLeftHandBunniesGuids : m_lRightHandBunniesGuids; }
         void GetOminousCloudGuids(GuidList& lClouds) const { lClouds = m_lOminousCloudsGuids; }
+        void GetHodirHelperGuids(GuidList& Helpers) const { Helpers = m_HodirHelperGuids; }
+        void ClearHodirHelpers() { m_HodirHelperGuids.clear(); }
 
         // Function that will trigger the tram turnaround object, based on the tram location
         void SetTramRotateTimer() { m_uiTramRotateTimer = m_bTramAtCenter ? 33000 : 30000; }
@@ -676,6 +678,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         GuidList m_lLeftHandBunniesGuids;
         GuidList m_lRightHandBunniesGuids;
         GuidList m_lOminousCloudsGuids;
+        GuidList m_HodirHelperGuids;
         GuidSet m_sColossusGuidSet;
 };
 

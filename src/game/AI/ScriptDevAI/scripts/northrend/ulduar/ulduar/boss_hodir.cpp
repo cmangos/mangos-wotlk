@@ -93,6 +93,8 @@ enum
     EVENT_ID_ATTACK_START               = 21045,
     EVENT_ID_SHATTER_CHEST              = 20907,
     FACTION_ID_FRIENDLY                 = 35,
+
+    VALUE_BITING_COLD_BASE_DAMAGE       = 400,
 };
 
 /*######
@@ -170,6 +172,17 @@ struct boss_hodirAI : public BossAI
             m_creature->GetMotionMaster()->MoveTargetedHome();
 
         m_creature->SetLootRecipient(nullptr);
+
+        if (instance_ulduar* instance = dynamic_cast<instance_ulduar*>(m_creature->GetInstanceData()))
+        {
+            GuidList helpers;
+            instance->GetHodirHelperGuids(helpers);
+            for (ObjectGuid& helperGuid : helpers)
+                if (Creature* helper = m_creature->GetMap()->GetCreature(helperGuid))
+                    if (helper->IsAlive())
+                        helper->Suicide();
+            instance->ClearHodirHelpers();
+        }
     }
 
     void JustPreventedDeath(Unit* attacker) override
@@ -194,16 +207,6 @@ struct boss_hodirAI : public BossAI
         m_creature->SetCanEnterCombat(false);
         m_creature->SetImmuneToNPC(true);
         EnterEvadeMode();
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_ICICLE)
-        {
-            pSummoned->CastSpell(pSummoned, SPELL_ICICLE_DUMMY, TRIGGERED_NONE);
-            pSummoned->CastSpell(pSummoned, SPELL_ICICLE, TRIGGERED_OLD_TRIGGERED);
-            pSummoned->ForcedDespawn(5000);
-        }
     }
 
     void ExecuteAction(uint32 action) override
@@ -260,7 +263,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
         AddCustomAction(0, true, [&]()
         {
             if (m_creature->GetHealthPercent() >=99.9f)
-                m_creature->CombatStop();
+                ;//m_creature->CombatStop();
         });
         m_instance = (instance_ulduar*)creature->GetInstanceData();
         Reset();
@@ -268,11 +271,16 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 
     instance_ulduar* m_instance;
 
+    Unit* summoner;
+
     bool m_bFreezeInit;
 
     void Reset() override
     {
         m_bFreezeInit = false;
+        summoner = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid());
+        m_creature->SetInCombatWith(summoner);
+        m_creature->FixateTarget(summoner);
     }
 
     void Aggro(Unit* who) override
@@ -306,6 +314,16 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
         if (!m_creature->IsTemporarySummon())
             return;
 
+        if (summoner)
+            if (!summoner->IsAlive())
+            {
+                if (summoner->IsCreature())
+                    ((Creature*)summoner)->ForcedDespawn(5000);
+                m_creature->ForcedDespawn();
+                summoner = nullptr;
+                return;
+            }
+
         // do the freezing on the first update tick
         if (!m_bFreezeInit)
         {
@@ -327,9 +345,9 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 
                     if (pSummoner->GetTypeId() == TYPEID_PLAYER && m_instance)
                         m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_CHEESE_FREEZE, false);
+
                 }
             }
-
             m_bFreezeInit = true;
         }
     }
@@ -403,8 +421,11 @@ struct FlashFreeze : public AuraScript
         if (!target)
             return;
         if (aura->GetAuraTicks() == 1 && !target->HasAura(SPELL_AURA_SAFE_AREA))
-            target->CastSpell(nullptr, SPELL_FLASH_FREEZE_SUMMON, TRIGGERED_INSTANT_CAST |
-                TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_CASTER_AURA_STATE | TRIGGERED_IGNORE_GCD, nullptr, aura);
+            if (target->IsCreature() && (target->HasAura(SPELL_FLASH_FREEZE_AURA) || target->HasAura(SPELL_FLASH_FREEZE_AURA_NPC)))
+                return;
+            else
+                target->CastSpell(nullptr, SPELL_FLASH_FREEZE_SUMMON, TRIGGERED_INSTANT_CAST |
+                    TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_CASTER_AURA_STATE | TRIGGERED_IGNORE_GCD, nullptr, aura);
     }
 };
 
@@ -428,9 +449,9 @@ struct BitingCold : public AuraScript
         Player* target = dynamic_cast<Player*>(aura->GetTarget());
         if (!target)
             return;
-        if (target->IsMoving())
+        if (target->IsMoving() || target->HasAura(SPELL_TOASTY_FIRE))
             target->RemoveAuraHolderFromStack(SPELL_BITING_COLD_AURA);
-        else if (aura->GetAuraTicks() % 3 && !target->HasAura(SPELL_TOASTY_FIRE))
+        else if (!(aura->GetAuraTicks() % 3) && !target->HasAura(SPELL_TOASTY_FIRE))
             target->CastSpell(target, SPELL_BITING_COLD_AURA, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
         return;
     }
@@ -444,7 +465,26 @@ struct BitingColdDamage : public AuraScript
         Unit* target = aura->GetTarget();
         if (!target)
             return;
-        target->CastSpell(target, SPELL_BITING_COLD_STACK, TRIGGERED_OLD_TRIGGERED);
+        int32 damage = VALUE_BITING_COLD_BASE_DAMAGE * std::pow(2, aura->GetStackAmount() - 1);
+        target->CastCustomSpell(target, SPELL_BITING_COLD_STACK, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 62457 Ice Shards
+
+struct IceShards : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_2)
+            return;
+        Creature* target = dynamic_cast<Creature*>(spell->GetUnitTarget());
+        if (target && target->GetEntry() == 33342)
+        {
+            if(GameObject* toastyFire = GetClosestGameObjectWithEntry(target, 194300, 4.f))
+                toastyFire->ForcedDespawn();
+            target->ForcedDespawn();
+        }
     }
 };
 
@@ -474,4 +514,5 @@ void AddSC_boss_hodir()
     RegisterSpellScript<ShatterChest>("spell_shatter_chest");
     RegisterSpellScript<BitingCold>("spell_biting_cold");
     RegisterSpellScript<BitingColdDamage>("spell_biting_cold_damage");
+    RegisterSpellScript<IceShards>("spell_ice_shards");
 }

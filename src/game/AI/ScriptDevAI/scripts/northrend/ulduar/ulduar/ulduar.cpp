@@ -298,6 +298,25 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
             else
                 m_vaporVezaxBunnyGuid = pCreature->GetObjectGuid();
             return;
+        case NPC_DRUID_HORDE_N:
+        case NPC_DRUID_HORDE_H:
+        case NPC_SHAMAN_HORDE_N:
+        case NPC_SHAMAN_HORDE_H:
+        case NPC_MAGE_HORDE_N:
+        case NPC_MAGE_HORDE_H:
+        case NPC_PRIEST_HORDE_N:
+        case NPC_PRIEST_HORDE_H:
+        case NPC_DRUID_ALLIANCE_N:
+        case NPC_DRUID_ALLIANCE_H:
+        case NPC_SHAMAN_ALLIANCE_N:
+        case NPC_SHAMAN_ALLIANCE_H:
+        case NPC_MAGE_ALLIANCE_N:
+        case NPC_MAGE_ALLIANCE_H:
+        case NPC_PRIEST_ALLIANCE_N:
+        case NPC_PRIEST_ALLIANCE_H:
+            m_HodirHelperGuids.push_back(pCreature->GetObjectGuid());
+            pCreature->SetImmuneToNPC(false);
+            return;
 
         default:
             return;
