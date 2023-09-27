@@ -88,7 +88,9 @@ enum
     // NPC_SNOWPACKED_ICICLE_TARGET     = 33174,                // entry used to handle safe area aura from Flash Freeze; handled in eventAI
     NPC_FLASH_FREEZE                    = 32926,                // entry used during the encounter
     NPC_FLASH_FREEZE_NPC                = 32938,                // entry which stuns the friendly npcs before the actual fight
+    NPC_TOASTY_FIRE                     = 33342,
 
+    GO_TOASTY_FIRE                      = 194300,
     // GO_SNOWDRIFT                     = 194173,
     EVENT_ID_ATTACK_START               = 21045,
     EVENT_ID_SHATTER_CHEST              = 20907,
@@ -156,9 +158,9 @@ struct boss_hodirAI : public BossAI
     bool m_eventFinished;
     uint8 m_epilogueStage;
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* who) override
     {
-        BossAI::Aggro();
+        BossAI::Aggro(who);
         if (m_instance)
             m_instance->SetData(TYPE_HODIR_HARD, DONE);
     }
@@ -179,7 +181,7 @@ struct boss_hodirAI : public BossAI
             instance->GetHodirHelperGuids(helpers);
             for (ObjectGuid& helperGuid : helpers)
                 if (Creature* helper = m_creature->GetMap()->GetCreature(helperGuid))
-                    if (helper->IsAlive())
+                    if (!m_eventFinished && helper->IsAlive())
                         helper->Suicide();
             instance->ClearHodirHelpers();
         }
@@ -260,11 +262,6 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 {
     npc_flash_freezeAI(Creature* creature) : Scripted_NoMovementAI(creature)
     {
-        AddCustomAction(0, true, [&]()
-        {
-            if (m_creature->GetHealthPercent() >=99.9f)
-                ;//m_creature->CombatStop();
-        });
         m_instance = (instance_ulduar*)creature->GetInstanceData();
         Reset();
     }
@@ -273,42 +270,35 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 
     Unit* summoner;
 
-    bool m_bFreezeInit;
+    bool m_freezeInit;
 
     void Reset() override
     {
-        m_bFreezeInit = false;
+        m_freezeInit = false;
         summoner = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid());
-        m_creature->SetInCombatWith(summoner);
-        m_creature->FixateTarget(summoner);
     }
 
-    void Aggro(Unit* who) override
-    {
-        ResetIfNotStarted(0, 5s);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void AttackStart(Unit* /*who*/) override { }
+    void MoveInLineOfSight(Unit* /*who*/) override { }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         // On Flash Freeze death, the owner should attack Hodir
         if (m_creature->GetEntry() == NPC_FLASH_FREEZE_NPC && m_creature->IsTemporarySummon() && m_instance)
         {
-            if (Creature* pHodir = m_instance->GetSingleCreatureFromStorage(NPC_HODIR))
+            if (Creature* hodir = m_instance->GetSingleCreatureFromStorage(NPC_HODIR))
             {
                 // ignore if event already completed
-                if (pHodir->GetFaction() == FACTION_ID_FRIENDLY)
+                if (hodir->GetFaction() == FACTION_ID_FRIENDLY)
                     return;
 
-                if (Creature* pSummoner = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid()))
-                    pSummoner->AI()->AttackStart(pHodir);
+                if (summoner)
+                    summoner->AI()->AttackStart(hodir);
             }
         }
     }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void UpdateAI(const uint32 /*diff*/) override
     {
         // Flash Freeze npcs should be always be summoned
         if (!m_creature->IsTemporarySummon())
@@ -325,7 +315,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
             }
 
         // do the freezing on the first update tick
-        if (!m_bFreezeInit)
+        if (!m_freezeInit)
         {
             // Flash Freeze npc will always stun or kill the summoner
             if (m_creature->GetEntry() == NPC_FLASH_FREEZE_NPC)
@@ -335,20 +325,19 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
             }
             else if (m_creature->GetEntry() == NPC_FLASH_FREEZE)
             {
-                if (Unit* pSummoner = m_creature->GetMap()->GetUnit(m_creature->GetSpawnerGuid()))
+                if (summoner)
                 {
                     // kill frozen players
-                    if (pSummoner->HasAura(SPELL_FREEZE))
-                        DoCastSpellIfCan(pSummoner, SPELL_FLASH_FREEZE_KILL);
+                    if (summoner->HasAura(SPELL_FREEZE))
+                        DoCastSpellIfCan(summoner, SPELL_FLASH_FREEZE_KILL);
                     else
                         DoCastSpellIfCan(m_creature, SPELL_FLASH_FREEZE_AURA);
 
-                    if (pSummoner->GetTypeId() == TYPEID_PLAYER && m_instance)
+                    if (summoner->GetTypeId() == TYPEID_PLAYER && m_instance)
                         m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_CHEESE_FREEZE, false);
-
                 }
             }
-            m_bFreezeInit = true;
+            m_freezeInit = true;
         }
     }
 };
@@ -357,38 +346,35 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 ## event_boss_hodir
 ######*/
 
-bool ProcessEventId_event_boss_hodir(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+bool ProcessEventId_event_boss_hodir(uint32 eventId, Object* source, Object* /*target*/, bool /*isStart*/)
 {
-    if (pSource->GetTypeId() == TYPEID_UNIT)
+    if (source->GetTypeId() == TYPEID_UNIT)
     {
-        instance_ulduar* pInstance = (instance_ulduar*)((Creature*)pSource)->GetInstanceData();
-        if (!pInstance)
+        instance_ulduar* instance = (instance_ulduar*)((Creature*)source)->GetInstanceData();
+        if (!instance)
             return true;
 
-        if (uiEventId == EVENT_ID_SHATTER_CHEST)
+        if (eventId == EVENT_ID_SHATTER_CHEST)
         {
             // Mark hard mode as failed and despawn the Rare cache
-            pInstance->SetData(TYPE_HODIR_HARD, FAIL);
+            instance->SetData(TYPE_HODIR_HARD, FAIL);
 
-            if (GameObject* pChest = pInstance->GetSingleGameObjectFromStorage(pInstance->instance->IsRegularDifficulty() ? GO_CACHE_OF_RARE_WINTER_10 : GO_CACHE_OF_RARE_WINTER_25))
-                pChest->SetLootState(GO_JUST_DEACTIVATED);
+            if (GameObject* chest = instance->GetSingleGameObjectFromStorage(instance->instance->IsRegularDifficulty() ? GO_CACHE_OF_RARE_WINTER_10 : GO_CACHE_OF_RARE_WINTER_25))
+                chest->SetLootState(GO_JUST_DEACTIVATED);
         }
-        else if (uiEventId == EVENT_ID_ATTACK_START)
+        else if (eventId == EVENT_ID_ATTACK_START)
         {
             // Start encounter
-            if (Creature* pHodir = pInstance->GetSingleCreatureFromStorage(NPC_HODIR))
+            if (Creature* hodir = instance->GetSingleCreatureFromStorage(NPC_HODIR))
             {
                 // ignore if event already completed
-                if (pHodir->GetFaction() == FACTION_ID_FRIENDLY)
+                if (hodir->GetFaction() == FACTION_ID_FRIENDLY)
                     return true;
-
-                pHodir->SetInCombatWithZone();
+                hodir->SetInCombatWithZone();
             }
         }
-
         return true;
     }
-
     return false;
 }
 
@@ -407,15 +393,15 @@ struct npc_icicle_targetAI : public Scripted_NoMovementAI
         DoCastSpellIfCan(m_creature, SPELL_SAFE_AREA);
     }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    void AttackStart(Unit* /*who*/) override { }
+    void MoveInLineOfSight(Unit* /*who*/) override { }
+    void UpdateAI(const uint32 /*diff*/) override { }
 };
 
 // 61968 Flash Freeze
 struct FlashFreeze : public AuraScript
 {
-    void OnPeriodicDummy(Aura* aura) const
+    void OnPeriodicDummy(Aura* aura) const override
     {
         Unit* target = aura->GetTarget();
         if (!target)
@@ -432,7 +418,7 @@ struct FlashFreeze : public AuraScript
 // 65272 Shatter Chest
 struct ShatterChest : public AuraScript
 {
-    void OnPeriodicDummy(Aura* aura) const
+    void OnPeriodicDummy(Aura* aura) const override
     {
         Unit* target = aura->GetTarget();
         if (!target)
@@ -444,7 +430,7 @@ struct ShatterChest : public AuraScript
 // 62038 Biting Cold
 struct BitingCold : public AuraScript
 {
-    void OnPeriodicDummy(Aura* aura) const
+    void OnPeriodicDummy(Aura* aura) const override
     {
         Player* target = dynamic_cast<Player*>(aura->GetTarget());
         if (!target)
@@ -460,7 +446,7 @@ struct BitingCold : public AuraScript
 // 62039 Biting Cold
 struct BitingColdDamage : public AuraScript
 {
-    void OnPeriodicDummy(Aura* aura) const
+    void OnPeriodicDummy(Aura* aura) const override
     {
         Unit* target = aura->GetTarget();
         if (!target)
@@ -474,14 +460,14 @@ struct BitingColdDamage : public AuraScript
 
 struct IceShards : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_2)
             return;
         Creature* target = dynamic_cast<Creature*>(spell->GetUnitTarget());
-        if (target && target->GetEntry() == 33342)
+        if (target && target->GetEntry() == NPC_TOASTY_FIRE)
         {
-            if(GameObject* toastyFire = GetClosestGameObjectWithEntry(target, 194300, 4.f))
+            if(GameObject* toastyFire = GetClosestGameObjectWithEntry(target, GO_TOASTY_FIRE, 4.f))
                 toastyFire->ForcedDespawn();
             target->ForcedDespawn();
         }
