@@ -613,15 +613,6 @@ struct SummonAndMountStampy : public SpellScript
     }
 };
 
-// 52218 - Vic's Flying Machine
-struct VicsFlyingMachine : public SpellScript
-{
-    void OnSummon(Spell* spell, Creature* summon) const override
-    {
-        summon->SelectLevel(spell->GetCaster()->GetLevel());
-    }
-};
-
 // 51186 - Summon Goregek the Bristlepine Hunter
 struct SummonGoregekTheBristlepineHunter : public SpellScript
 {
@@ -647,6 +638,43 @@ struct SummonZepikTheGorlocHunter : public SpellScript
     {
         summon->SelectLevel(spell->GetCaster()->GetLevel());
         summon->SetDefaultGossipMenuId(summon->GetCreatureInfo()->GossipMenuId);
+    }
+};
+
+// 51190 - Summon Lafoo
+struct SummonLafoo : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 51191 - Summon Jaloot
+struct SummonJaloot : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 51192 - Summon Moodle
+struct SummonMoodle : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetDefaultGossipMenuId(summon->GetCreatureInfo()->GossipMenuId);
+    }
+};
+
+// 52218 - Vic's Flying Machine
+struct VicsFlyingMachine : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
     }
 };
 
@@ -692,6 +720,9 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<SummonAndMountStampy>("spell_summon_and_mount_stampy");
     RegisterSpellScript<VicsFlyingMachine>("spell_vics_flying_machine");
     RegisterSpellScript<SummonGoregekTheBristlepineHunter>("spell_summon_goregek_the_bristlepine_hunter");
+    RegisterSpellScript<SummonLafoo>("spell_summon_lafoo");
+    RegisterSpellScript<SummonJaloot>("spell_summon_jaloot");
+    RegisterSpellScript<SummonMoodle>("spell_summon_moodle");
     RegisterSpellScript<SummonDajikTheWaspHunter>("spell_summon_dajik_the_wasp_hunter");
     RegisterSpellScript<SummonZepikTheGorlocHunter>("spell_summon_zepik_the_gorloc_hunter");
     RegisterSpellScript<SummonPossessedCrocolisk>("spell_summon_possessed_crocolisk");
