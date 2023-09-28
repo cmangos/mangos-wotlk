@@ -605,6 +605,62 @@ struct GargoyleDeathKnightAI : public CombatAI
     }
 };
 
+// 49024 - Merciless Combat
+struct MercilessCombat : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+            totalMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
+    }
+};
+
+// 49202 - Tundra Stalker
+struct TundraStalker : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
+        }
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Frost Fever (target debuff)
+        if (victim->GetAura(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0000000000000000), 0x00000002))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
+// 50117 - Rage of Rivendare
+struct RageOfRivendare : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
+        }
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Blood Plague (target debuff)
+        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0200000000000000)))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -631,6 +687,9 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<AntiMagicShellAbsorbSelf>("spell_anti_magic_shell_absorb_self");
     RegisterSpellScript<AntiMagicShellZone>("spell_anti_magic_shell_zone");
     RegisterSpellScript<AntiMagicZoneAbsorb>("spell_anti_zone_absorb");
+    RegisterSpellScript<MercilessCombat>("spell_merciless_combat");
+    RegisterSpellScript<TundraStalker>("spell_tundra_stalker");
+    RegisterSpellScript<RageOfRivendare>("spell_rage_of_rivendare");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_gargoyle_dk";

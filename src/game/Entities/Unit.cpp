@@ -8024,92 +8024,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
         i->OnDamageCalculate(this, victim, DoneAdvertisedBenefit, DoneTotalMod);
     }
 
-    AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for (auto i : mOverrideClassScript)
-    {
-        if (!i->isAffectedOnSpell(spellInfo))
-            continue;
-        switch (i->GetModifier()->m_miscvalue)
-        {
-            case 6917: // Death's Embrace
-            case 6926:
-            case 6928:
-            {
-                if (victim->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
-                    DoneTotalMod *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
-                break;
-            }
-            case 6916: // Death's Embrace
-            case 6925:
-            case 6927:
-                if (HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
-                    DoneTotalMod *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
-                break;
-            case 5481: // Starfire Bonus
-            {
-                if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x0000000000200002)))
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            }
-            // Subject to downranking, i.e. normal per spell spelldamage
-            case 4418: // Increased Shock Damage
-            case 4554: // Increased Lightning Damage
-            case 4555: // Improved Moonfire
-            case 5142: // Increased Lightning Damage
-            case 5147: // Improved Consecration / Libram of Resurgence
-            case 5148: // Idol of the Shooting Star
-            case 6008: // Increased Lightning Damage
-            case 8627: // Totem of Hex
-            {
-                DoneAdvertisedBenefit += i->GetModifier()->m_amount;
-                break;
-            }
-            // Tundra Stalker
-            // Merciless Combat
-            case 7277:
-            {
-                // Merciless Combat
-                if (i->GetSpellProto()->SpellIconID == 2656)
-                {
-                    if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                        DoneTotalMod *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
-                }
-                else // Tundra Stalker
-                {
-                    // Frost Fever (target debuff)
-                    if (victim->GetAura(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0000000000000000), 0x00000002))
-                        DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                    break;
-                }
-                break;
-            }
-            case 7293: // Rage of Rivendare
-            {
-                if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0200000000000000)))
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            }
-            // Twisted Faith
-            case 7377:
-            {
-                if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, uint64(0x0000000000008000), 0, GetObjectGuid()))
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            }
-            // Marked for Death
-            case 7598:
-            case 7599:
-            case 7600:
-            case 7601:
-            case 7602:
-            {
-                if (victim->GetAura(SPELL_AURA_MOD_STALKED, SPELLFAMILY_HUNTER, uint64(0x0000000000000400)))
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            }
-        }
-    }
-
     // Custom scripted damage
     switch (spellInfo->SpellFamilyName)
     {
@@ -8475,19 +8389,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, in
                 if (Aura* glyph = GetAura(62971, EFFECT_INDEX_0))// Glyph of Nourish
                     DoneTotalMod *= (glyph->GetModifier()->m_amount * ownHotCount + 100.0f) / 100.0f;
             }
-        }
-    }
-
-    AuraList const& auraDummy = owner->GetAurasByType(SPELL_AURA_DUMMY);
-    for (auto i : auraDummy)
-    {
-        if (!i->isAffectedOnSpell(spellInfo))
-            continue;
-        switch (i->GetSpellProto()->Id)
-        {
-            case 60779: // Idol of Lush Moss
-                DoneAdvertisedBenefit += i->GetModifier()->m_amount;
-                break;
         }
     }
 
@@ -8866,55 +8767,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     {
         if (victim->HasAuraState(AuraState(i->GetModifier()->m_miscvalue)))
             DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-    }
-
-    if (spellInfo)
-    {
-        // .. done (class scripts)
-        AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-        for (auto i : mOverrideClassScript)
-        {
-            if (!(i->isAffectedOnSpell(spellInfo)))
-                continue;
-            switch (i->GetMiscValue())
-            {
-                // Tundra Stalker
-                case 7277: // Merciless Combat
-                {
-                    // Merciless Combat
-                    if (i->GetSpellProto()->SpellIconID == 2656)
-                    {
-                        if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                            DoneTotalMod *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
-                    }
-                    else // Tundra Stalker
-                    {
-                        // Frost Fever (target debuff)
-                        if (victim->GetAura(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0000000000000000), 0x00000002))
-                            DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                        break;
-                    }
-                    break;
-                }
-                case 7293: // Rage of Rivendare
-                {
-                    if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0200000000000000)))
-                        DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                    break;
-                }
-                // Marked for Death
-                case 7598:
-                case 7599:
-                case 7600:
-                case 7601:
-                case 7602:
-                {
-                    if (victim->GetAura(SPELL_AURA_MOD_STALKED, SPELLFAMILY_HUNTER, uint64(0x0000000000000400)))
-                        DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                    break;
-                }
-            }
-        }
     }
 
     if (spellInfo)

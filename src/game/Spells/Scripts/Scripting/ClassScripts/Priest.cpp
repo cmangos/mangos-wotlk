@@ -406,6 +406,23 @@ struct ImprovedFlashHeal : public AuraScript
     }
 };
 
+// 47573 - TwistedFaith
+struct TwistedFaith : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Shadow Word: Pain
+        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, uint64(0x0000000000008000), 0, aura->GetTarget()->GetObjectGuid()))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -428,4 +445,5 @@ void LoadPriestScripts()
     RegisterSpellScript<RenewedHope>("spell_renewed_hope");
     RegisterSpellScript<RenewedHopeDamageTaken>("spell_renewed_hope_damage_taken");
     RegisterSpellScript<ImprovedFlashHeal>("spell_improved_flash_heal");
+    RegisterSpellScript<TwistedFaith>("spell_twisted_faith");
 }

@@ -473,6 +473,29 @@ struct SoulSiphon : public AuraScript
     }
 };
 
+// 47198 - Death's Embrace
+struct DeathsEmbrace : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            if (aura->GetTarget()->GetHealthPercent() <= 20.f)
+                totalMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
+        }
+        else
+        {
+            if (victim->GetHealthPercent() <= 35.f)
+                totalMod *= (100.0f + aura->GetModifier()->m_amount) / 100.0f;
+        }
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -492,4 +515,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<DemonicCircleTeleport>("spell_demonic_circle_teleport");
     RegisterSpellScript<DemonicCircleSummon>("spell_demonic_circle_summon");
     RegisterSpellScript<GlyphOfShadowburn>("spell_glyph_of_shadowburn");
+    RegisterSpellScript<DeathsEmbrace>("spell_deaths_embrace");
 }
