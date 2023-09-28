@@ -858,6 +858,7 @@ class Spell
         uint32 GetDamage() { return damage; }
         void SetDamage(uint32 newDamage) { damage = newDamage; }
         SpellSchoolMask GetSchoolMask() { return m_spellSchoolMask; }
+        void SetGuaranteedCrit() { m_guaranteedCrit = true; }
         // OnHit use only
         uint32 GetTotalTargetDamage() { return m_damage; }
         uint32 GetTotalTargetAbsorb() { return m_absorb; }
@@ -971,6 +972,7 @@ class Spell
         int32 m_healing;                                    // Healing in effects count here
         int32 m_healingPerEffect[MAX_EFFECT_INDEX];
         int32 m_healthLeech;                                // Health leech in effects for all targets count here
+        bool m_guaranteedCrit;                              // Used in effect handlers to guarantee crit
 
         //******************************************
         // Spell trigger system
