@@ -193,6 +193,28 @@ struct MoonkinFormPassive : public AuraScript
     }
 };
 
+// 57849 - Improved Insect Swarm
+struct ImprovedInsectSwarm : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* /*spellInfo*/) const override
+    {
+        if (target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x000000000000002), 0, aura->GetTarget()->GetObjectGuid())) chance += aura->GetModifier()->m_amount; // Weakened Soul
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x00200000), 0, aura->GetTarget()->GetObjectGuid())) totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterSpellScript<Regrowth>("spell_regrowth");
@@ -205,4 +227,5 @@ void LoadDruidScripts()
     RegisterSpellScript<SwiftFlightFormPassive>("spell_swift_flight_form_passive");
     RegisterSpellScript<PrimalTenacity>("spell_primal_tenacity");
     RegisterSpellScript<MoonkinFormPassive>("spell_moonkin_form_passive");
+    RegisterSpellScript<ImprovedInsectSwarm>("spell_improved_insect_swarm");
 }

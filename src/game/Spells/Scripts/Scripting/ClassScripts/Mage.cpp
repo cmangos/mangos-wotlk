@@ -191,6 +191,20 @@ struct FrostWarding : public AuraScript
     }
 };
 
+// 56369 - Glyph of Fire Blast
+struct GlyphOfFireBlast : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        if (target->IsStunned()) chance += aura->GetModifier()->m_amount;
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
@@ -203,4 +217,5 @@ void LoadMageScripts()
     RegisterSpellScript<DeepFreezeImmunityState>("spell_deep_freeze_immunity_state");
     RegisterSpellScript<Polymorph>("spell_polymorph");
     RegisterSpellScript<FrostWarding>("spell_frost_warding");
+    RegisterSpellScript<GlyphOfFireBlast>("spell_glyph_of_fire_blast");
 }

@@ -269,6 +269,31 @@ struct ArdentDefender : public AuraScript
     }
 };
 
+// 58597 - Sacred Shield
+struct SacredShieldCrit : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        if (aura->GetCasterGuid() == target->GetObjectGuid()) chance += aura->GetModifier()->m_amount; // Weakened Soul
+    }
+};
+
+// 879 - Exorcism
+struct ExorcismPaladin : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->GetUnitTarget()->GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD)
+            spell->SetGuaranteedCrit();
+    }
+};
+
 void LoadPaladinScripts()
 {
     RegisterSpellScript<IncreasedHolyLightHealing>("spell_increased_holy_light_healing");
@@ -281,4 +306,6 @@ void LoadPaladinScripts()
     RegisterSpellScript<JudgementsOfTheWise>("spell_judgements_of_the_wise");
     RegisterSpellScript<JudgementsOfTheWiseEnergize>("spell_judgements_of_the_wise_energize");
     RegisterSpellScript<ArdentDefender>("spell_ardent_defender");
+    RegisterSpellScript<ArdentDefender>("spell_sacred_shield_crit");
+    RegisterSpellScript<ExorcismPaladin>("spell_exorcism_paladin");
 }

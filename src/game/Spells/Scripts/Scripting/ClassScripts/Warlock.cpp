@@ -425,6 +425,20 @@ struct DemonicCircleSummon : public AuraScript
     }
 };
 
+// 56229 - Glyph of Shadowburn
+struct GlyphOfShadowburn : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        if (target->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT)) chance += aura->GetModifier()->m_amount;
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -442,4 +456,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<ShadowBite>("spell_shadow_bite");
     RegisterSpellScript<DemonicCircleTeleport>("spell_demonic_circle_teleport");
     RegisterSpellScript<DemonicCircleSummon>("spell_demonic_circle_summon");
+    RegisterSpellScript<GlyphOfShadowburn>("spell_glyph_of_shadowburn");
 }

@@ -8482,11 +8482,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, in
             case 3736: // Hateful Totem of the Third Wind / Increased Lesser Healing Wave / LK Arena (4/5/6) Totem of the Third Wind / Savage Totem of the Third Wind
                 DoneAdvertisedBenefit += i->GetModifier()->m_amount;
                 break;
-            case 7997: // Renewed Hope
-            case 7998:
-                if (victim->HasAura(6788))
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
             case   21: // Test of Faith
             case 6935:
             case 6918:

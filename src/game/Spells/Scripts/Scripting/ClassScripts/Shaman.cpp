@@ -310,6 +310,16 @@ struct AstralShiftShaman : public AuraScript
     }
 };
 
+// 51505 - Lava Burst
+struct LavaBurst : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->GetUnitTarget()->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_SHAMAN, uint64(0x0000000010000000), 0, spell->GetCaster()->GetObjectGuid()))
+            spell->SetGuaranteedCrit();
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -329,4 +339,5 @@ void LoadShamanScripts()
     RegisterSpellScript<HeroismBloodlust>("spell_heroism_bloodlust");
     RegisterSpellScript<FireNovaShaman>("spell_fire_nova_shaman");
     RegisterSpellScript<AstralShiftShaman>("spell_astral_shift_shaman");
+    RegisterSpellScript<LavaBurst>("spell_lava_burst");
 }

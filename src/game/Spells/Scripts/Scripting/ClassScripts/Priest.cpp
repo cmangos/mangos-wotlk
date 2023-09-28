@@ -355,6 +355,57 @@ struct GuardianSpiritPriest : public AuraScript
     }
 };
 
+// 57470 - Renewed Hope
+struct RenewedHope : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        if (target->HasAura(6788)) chance += aura->GetModifier()->m_amount; // Weakened Soul
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        procData.cooldown = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+// 63944 - RenewedHope
+struct RenewedHopeDamageTaken : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN, apply);
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_TAKEN, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        totalMod *= (aura->GetAmount() + 100) / 100;
+    }
+};
+
+// 63504 - Improved Flash Heal
+struct ImprovedFlashHeal : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        if (target->GetHealthPercent() <= 50.f) chance += aura->GetModifier()->m_amount;
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -374,4 +425,7 @@ void LoadPriestScripts()
     RegisterSpellScript<GlyphOfShadowWordDeath>("spell_glyph_of_shadow_word_death");
     RegisterSpellScript<ShadowAffinityDots>("spell_shadow_affinity_dots");
     RegisterSpellScript<GuardianSpiritPriest>("spell_guardian_spirit_priest");
+    RegisterSpellScript<RenewedHope>("spell_renewed_hope");
+    RegisterSpellScript<RenewedHopeDamageTaken>("spell_renewed_hope_damage_taken");
+    RegisterSpellScript<ImprovedFlashHeal>("spell_improved_flash_heal");
 }
