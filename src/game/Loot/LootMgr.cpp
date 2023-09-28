@@ -1327,7 +1327,7 @@ void Loot::Release(Player* player)
                 {
                     if (!IsLootedForAll())
                     {
-                        updateClients = true;
+                        go->SetChestDespawn(); // chests despawn after 5 min even if nothing looted
                         break;
                     }
 
