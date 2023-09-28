@@ -687,6 +687,15 @@ struct SummonPossessedCrocolisk : public SpellScript
     }
 };
 
+// 52276 - Summon Kartak
+struct SummonKartak : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -726,4 +735,5 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<SummonDajikTheWaspHunter>("spell_summon_dajik_the_wasp_hunter");
     RegisterSpellScript<SummonZepikTheGorlocHunter>("spell_summon_zepik_the_gorloc_hunter");
     RegisterSpellScript<SummonPossessedCrocolisk>("spell_summon_possessed_crocolisk");
+    RegisterSpellScript<SummonKartak>("spell_summon_kartak");
 }
