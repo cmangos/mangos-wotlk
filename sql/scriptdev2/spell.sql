@@ -595,7 +595,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47375,'spell_summon_direbrew_minion'),
 (49858,'spell_make_bunny_summon_mole_machine'),
 (47514,'spell_summon_mole_machine'),
-(27859,'spell_increased_spell_damage_done_dummy'),
 (33556,'spell_increased_spell_damage_done_dummy'),
 (34230,'spell_increased_spell_damage_done_dummy'),
 (41040,'spell_increased_spell_damage_done_dummy'),
