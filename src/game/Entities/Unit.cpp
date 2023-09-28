@@ -9148,6 +9148,8 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
     bool isWeaponDamageBasedSpell = !(spellInfo && (damagetype == DOT || IsSpellHaveEffect(spellInfo, SPELL_EFFECT_SCHOOL_DAMAGE)));
     schoolMask              = ((spellInfo && schoolMask != spellInfo->SchoolMask) ? SpellSchoolMask(spellInfo->SchoolMask) : schoolMask);
     uint32 mechanicMask     = spellInfo ? GetAllSpellMechanicMask(spellInfo) : 0;
+    if (spellInfo && spellInfo->IsFitToFamily(SPELLFAMILY_DRUID, 0x00008000)) // Shred - Affected by bleed
+        mechanicMask |= MECHANIC_BLEED;
 
     // FLAT damage bonus auras
     // =======================
