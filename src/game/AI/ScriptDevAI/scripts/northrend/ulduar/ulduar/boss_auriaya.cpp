@@ -151,13 +151,17 @@ struct boss_feral_defenderAI : public BossAI
         {
             DoCastSpellIfCan(m_creature, SPELL_FULL_HEAL, CAST_TRIGGERED);
             ResetTimer(FERAL_DEFENDER_RESTART_COMBAT, 3s);
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         });
         AddCustomAction(FERAL_DEFENDER_RESTART_COMBAT, true, [&]()
         {
             DoResetThreat();
             m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+            m_creature->SetImmobilizedState(false, true);
+            SetCombatScriptStatus(false);
+            if (Creature* seepingFeralStalker = m_creature->GetMap()->GetCreature(m_seepingGuid))
+                seepingFeralStalker->ForcedDespawn();
 
             m_creature->AI()->SpellListChanged();
             ResetTimer(FERAL_DEFENDER_FERAL_RUSH, 1s);
@@ -172,23 +176,26 @@ struct boss_feral_defenderAI : public BossAI
     uint8 m_maxFeralRush;
     uint8 m_deathCount;
 
+    ObjectGuid m_seepingGuid;
+
     void Reset() override
     {
         m_feralRushCount      = 0;
-        m_deathCount         = 0;
+        m_deathCount          = 0;
 
         DoCastSpellIfCan(m_creature, SPELL_FERAL_ESSENCE);
     }
 
     void JustPreventedDeath(Unit* attacker) override
     {
-        if (m_deathCount >= 7)
+        if (m_deathCount >= 8)
             SetDeathPrevention(false);
         DoCastSpellIfCan(m_creature, SPELL_FERAL_ESSENCE_REMOVAL, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_SEEPING_FERAL_ESSENCE_SUMMON, CAST_TRIGGERED);
-        DoFakeDeath(SPELL_FEIGN_DEATH);
+        DoLimitedFakeDeath(SPELL_FEIGN_DEATH);
         ++m_deathCount;
         ResetTimer(FERAL_DEFENDER_REVIVE, 30s);
+        SetCombatScriptStatus(true);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -202,7 +209,30 @@ struct boss_feral_defenderAI : public BossAI
     {
         // Cast seeping feral essence on the summoned
         if (summoned->GetEntry() == NPC_SEEPING_FERAL_ESSENCE)
+        {
+            m_seepingGuid = summoned->GetObjectGuid();
+            summoned->SetImmobilizedState(true);
             summoned->CastSpell(summoned, m_isRegularMode ? SPELL_SEEPING_FERAL_ESSENCE : SPELL_SEEPING_FERAL_ESSENCE_H, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+        }
+    }
+
+    void DoLimitedFakeDeath(uint32 spellId)
+    {
+        m_creature->InterruptNonMeleeSpells(false);
+        m_creature->InterruptMoving();
+        m_creature->ClearComboPointHolders();
+        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        m_creature->ClearAllReactives();
+        m_creature->SetTarget(nullptr);
+        m_creature->GetMotionMaster()->Clear();
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_creature->SetImmobilizedState(true, true);
+
+        if (spellId)
+            DoCastSpellIfCan(nullptr, spellId, CAST_INTERRUPT_PREVIOUS);
+        ResetDeathPrevented();
     }
 
     void ExecuteAction(uint32 action) override
@@ -228,6 +258,18 @@ struct boss_feral_defenderAI : public BossAI
     };
 };
 
+// 64386 - Terrifying Screech
+struct TerrifyingScreech : public SpellScript
+{
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        Creature* caster = dynamic_cast<Creature*>(spell->GetCaster());
+        if (!caster || !caster->AI())
+            return;
+        caster->AI()->DoCastSpellIfCan(nullptr, caster->GetMap()->IsRegularDifficulty() ? SPELL_SENTINEL_BLAST : SPELL_SENTINEL_BLAST_H);
+    }
+};
+
 void AddSC_boss_auriaya()
 {
     Script* pNewScript = new Script;
@@ -239,4 +281,6 @@ void AddSC_boss_auriaya()
     pNewScript->Name = "boss_feral_defender";
     pNewScript->GetAI = &GetNewAIInstance<boss_feral_defenderAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TerrifyingScreech>("spell_terrifying_screech");
 }

@@ -988,6 +988,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (64415,'spell_valanyr_equip_effect'),
 (64475,'spell_ignis_remove_strength'),
 (64503,'spell_ignis_water'),
+(64386,'spell_terrifying_screech'),
 (64568,'spell_blood_reserve_enchant'),
 (65121,'spell_searing_light'),
 (65272,'spell_shatter_chest'),
