@@ -305,21 +305,6 @@ struct GlyphOfLightwell : public AuraScript
     }
 };
 
-struct GlyphOfShadowWordDeath : public AuraScript
-{
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        if (aura->GetEffIndex() == EFFECT_INDEX_0)
-            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
-    }
-
-    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& advertisedBenefit, float& totalMod) const override
-    {
-        if (victim->GetHealthPercent() <= 35.f)
-            totalMod *= (float(100 + aura->GetModifier()->m_amount) / 100);
-    }
-};
-
 struct ShadowAffinityDots : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -474,7 +459,6 @@ void LoadPriestScripts()
     RegisterSpellScript<LightwellRenew>("spell_lightwell_renew");
     RegisterSpellScript<LightwellRelay>("spell_lightwell_relay");
     RegisterSpellScript<GlyphOfLightwell>("spell_glyph_of_lightwell");
-    RegisterSpellScript<GlyphOfShadowWordDeath>("spell_glyph_of_shadow_word_death");
     RegisterSpellScript<ShadowAffinityDots>("spell_shadow_affinity_dots");
     RegisterSpellScript<GuardianSpiritPriest>("spell_guardian_spirit_priest");
     RegisterSpellScript<RenewedHope>("spell_renewed_hope");

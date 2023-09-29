@@ -1230,7 +1230,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (32996,'spell_shadow_word_death'),
 (48157,'spell_shadow_word_death'),
 (48158,'spell_shadow_word_death'),
-(55682,'spell_glyph_of_shadow_word_death'),
 (589,'spell_shadow_affinity_dots'),
 (594,'spell_shadow_affinity_dots'),
 (970,'spell_shadow_affinity_dots'),
