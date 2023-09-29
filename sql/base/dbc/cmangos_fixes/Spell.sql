@@ -3453,6 +3453,11 @@ UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (52255);
 -- 'Vic's Flying Machine Aggro Periodic' should not be removed on evade
 UPDATE spell_template SET AttributesServerside = 4 WHERE id IN (52260);
 
+-- Torment the Weak - Correct masks
+UPDATE spell_template SET EffectSpellClassMask1_1=0x20200021,EffectSpellClassMask1_2=0x00009000,EffectSpellClassMask1_3=0x0 WHERE Id IN(29447);
+UPDATE spell_template SET EffectSpellClassMask1_1=0x20200021,EffectSpellClassMask1_2=0x00009000,EffectSpellClassMask1_3=0x0 WHERE Id IN(55339);
+UPDATE spell_template SET EffectSpellClassMask1_1=0x20200021,EffectSpellClassMask1_2=0x00009000,EffectSpellClassMask1_3=0x0 WHERE Id IN(55340);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

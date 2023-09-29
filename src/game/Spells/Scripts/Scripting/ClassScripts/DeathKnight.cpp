@@ -663,6 +663,26 @@ struct RageOfRivendare : public AuraScript
     }
 };
 
+// 49471 - Glacier Rot
+struct GlacierRot : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
+        }
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Blood Plague (target debuff)
+        if (victim->HasAuraHolder([](SpellAuraHolder* holder) { return holder->GetSpellProto()->Dispel == DISPEL_DISEASE; }))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -692,6 +712,7 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<MercilessCombat>("spell_merciless_combat");
     RegisterSpellScript<TundraStalker>("spell_tundra_stalker");
     RegisterSpellScript<RageOfRivendare>("spell_rage_of_rivendare");
+    RegisterSpellScript<GlacierRot>("spell_glacier_rot");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_gargoyle_dk";

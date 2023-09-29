@@ -316,6 +316,26 @@ struct BlessingOfLight : public AuraScript
     }
 };
 
+// 20911 - Blessing of Sanctuary, 25899 - Greater Blessing of Sanctuary
+struct BlessingOfSanctuary : public AuraScript
+{
+    void OnAuraInit(Aura* aura) const override
+    {
+        aura->SetAffectOverriden();
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN, apply);
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_TAKEN, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* /*victim*/, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f; // all damage
+    }
+};
+
 void LoadPaladinScripts()
 {
     RegisterSpellScript<IncreasedHolyLightHealing>("spell_increased_holy_light_healing");
@@ -331,4 +351,5 @@ void LoadPaladinScripts()
     RegisterSpellScript<ArdentDefender>("spell_ardent_defender");
     RegisterSpellScript<ArdentDefender>("spell_sacred_shield_crit");
     RegisterSpellScript<ExorcismPaladin>("spell_exorcism_paladin");
+    RegisterSpellScript<BlessingOfSanctuary>("spell_blessing_of_sanctuary");
 }

@@ -43,12 +43,19 @@ struct PowerInfusion : public SpellScript
     }
 };
 
+// 32379 - Shadow Word: Death
 struct ShadowWordDeath : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
         // ignores absorb - has to respect stuff like mitigation and partial resist
         int32 swdDamage = spell->GetTotalTargetDamage() + spell->GetTotalTargetAbsorb();
+        if (Aura* painAndSuffering = spell->GetCaster()->GetAura(47580, EFFECT_INDEX_1))
+            swdDamage *= (painAndSuffering->GetModifier()->m_amount + 100.0f) / 100.0f;
+        if (Aura* painAndSuffering = spell->GetCaster()->GetAura(47581, EFFECT_INDEX_1))
+            swdDamage *= (painAndSuffering->GetModifier()->m_amount + 100.0f) / 100.0f;
+        if (Aura* painAndSuffering = spell->GetCaster()->GetAura(47582, EFFECT_INDEX_1))
+            swdDamage *= (painAndSuffering->GetModifier()->m_amount + 100.0f) / 100.0f;
         spell->GetCaster()->CastCustomSpell(nullptr, 32409, &swdDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 };
@@ -443,6 +450,23 @@ struct TestOfFaith : public AuraScript
     }
 };
 
+// 55692 - Glyph of Smite
+struct GlyphOfSmite : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Shadow Word: Pain
+        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, uint64(0x00100000)))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -467,4 +491,5 @@ void LoadPriestScripts()
     RegisterSpellScript<TwistedFaith>("spell_twisted_faith");
     RegisterSpellScript<GlyphOfShadowWordDeath>("spell_glyph_of_shadow_word_death");
     RegisterSpellScript<TestOfFaith>("spell_test_of_faith");
+    RegisterSpellScript<GlyphOfSmite>("spell_glyph_of_smite");
 }

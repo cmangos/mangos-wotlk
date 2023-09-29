@@ -212,6 +212,23 @@ struct MarkedForDeathHunter : public AuraScript
     }
 };
 
+// 56826 - Glyph of Steady Shot
+struct GlyphOfSteadyShot : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_MELEE_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Steady Shot - Serpent Sting
+        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, uint64(0x0000000000004000)))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<Entrapment>("spell_entrapment");
@@ -227,4 +244,5 @@ void LoadHunterScripts()
     RegisterSpellScript<LockAndLoad>("spell_lock_and_load");
     RegisterSpellScript<LockAndLoadTrigger>("spell_lock_and_load_trigger");
     RegisterSpellScript<MarkedForDeathHunter>("spell_marked_for_death_hunter");
+    RegisterSpellScript<GlyphOfSteadyShot>("spell_glyph_of_steady_shot");
 }

@@ -243,8 +243,60 @@ struct GlyphOfRegrowth : public AuraScript
     void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
     {
         // Regrowth
-        if (victim->GetAura(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, uint64(0x0000000000000040), 0, aura->GetTarget()->GetObjectGuid()))
+        if (victim->GetAura(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, uint64(0x0000000000000040), 0, aura->GetTarget()->GetObjectGuid()))
             totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
+// 60137 - Nourish Heal Boost
+struct NourishHealBoost : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* attacker, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        int32 stepPercent = aura->GetModifier()->m_amount;
+
+        int ownHotCount = 0;                        // counted HoT types amount, not stacks
+
+        Unit::AuraList const& RejorRegr = victim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
+        for (auto itr : RejorRegr)
+            if (itr->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                itr->GetCasterGuid() == attacker->GetObjectGuid())
+                ++ownHotCount;
+
+        if (ownHotCount)
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f; 
+    }
+};
+
+// 50464 - Nourish
+struct Nourish : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        int ownHotCount = 0;                        // counted HoT types amount, not stacks
+        Unit::AuraList const& rejorRegr = target->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
+        for (auto i : rejorRegr)
+            if (i->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                i->GetCasterGuid() == caster->GetObjectGuid())
+                ++ownHotCount;
+
+        if (ownHotCount)
+        {
+            float doneMod = 1.2f; // base bonus at HoTs
+
+            if (Aura* glyph = caster->GetAura(62971, EFFECT_INDEX_0))// Glyph of Nourish
+                doneMod *= (glyph->GetModifier()->m_amount * ownHotCount + 100.0f) / 100.0f;
+
+            spell->SetDamageDoneModifier(doneMod, EFFECT_INDEX_0);
+        }
     }
 };
 
@@ -263,4 +315,6 @@ void LoadDruidScripts()
     RegisterSpellScript<MoonkinFormPassive>("spell_moonkin_form_passive");
     RegisterSpellScript<ImprovedInsectSwarm>("spell_improved_insect_swarm");
     RegisterSpellScript<GlyphOfRegrowth>("spell_glyph_of_regrowth");
+    RegisterSpellScript<NourishHealBoost>("spell_nourish_heal_boost");
+    RegisterSpellScript<Nourish>("spell_nourish");
 }

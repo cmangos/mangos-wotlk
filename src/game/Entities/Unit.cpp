@@ -8024,76 +8024,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
         i->OnDamageCalculate(this, victim, DoneAdvertisedBenefit, DoneTotalMod);
     }
 
-    // Custom scripted damage
-    switch (spellInfo->SpellFamilyName)
-    {
-        case SPELLFAMILY_MAGE:
-        {
-            // Torment the weak affected (Arcane Barrage, Arcane Blast, Frostfire Bolt, Arcane Missiles, Fireball)
-            if ((spellInfo->SpellFamilyFlags & uint64(0x0000900020200021)) &&
-                    (victim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || victim->HasAuraType(SPELL_AURA_HASTE_ALL)))
-            {
-                // Search for Torment the weak dummy aura
-                Unit::AuraList const& ttw = GetAurasByType(SPELL_AURA_DUMMY);
-                for (auto i : ttw)
-                {
-                    if (i->GetSpellProto()->SpellIconID == 3263)
-                    {
-                        DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                        break;
-                    }
-                }
-            }
-            break;
-        }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Smite
-            if (spellInfo->IsFitToFamilyMask(uint64(0x0000000000000080)))
-            {
-                // Holy Fire
-                if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_PRIEST, uint64(0x00100000)))
-                    // Glyph of Smite
-                    if (Aura* aur = GetAura(55692, EFFECT_INDEX_0))
-                        DoneTotalMod *= (aur->GetModifier()->m_amount + 100.0f) / 100.0f;
-            }
-            break;
-        }
-        case SPELLFAMILY_DEATHKNIGHT:
-        {
-            // Icy Touch and Howling Blast
-            if (spellInfo->SpellFamilyFlags & uint64(0x0000000200000002))
-            {
-                // search disease
-                bool found = false;
-                Unit::SpellAuraHolderMap const& auras = victim->GetSpellAuraHolderMap();
-                for (const auto& aura : auras)
-                {
-                    if (aura.second->GetSpellProto()->Dispel == DISPEL_DISEASE)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    break;
-
-                // search for Glacier Rot dummy aura
-                Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-                for (auto dummyAura : dummyAuras)
-                {
-                    if (dummyAura->GetSpellProto()->EffectMiscValue[dummyAura->GetEffIndex()] == 7244)
-                    {
-                        DoneTotalMod *= (dummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
-                        break;
-                    }
-                }
-            }
-        }
-        default:
-            break;
-    }
-
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
     DoneTotal = SpellBonusWithCoeffs(spellInfo, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
 
@@ -8123,26 +8053,6 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellSchoolMask schoolMask, Spe
 
     // ..taken
     TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, schoolMask);
-
-    // .. taken pct: dummy auras
-    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-    for (auto mDummyAura : mDummyAuras)
-    {
-        switch (mDummyAura->GetId())
-        {
-            case 20911:                                     // Blessing of Sanctuary
-            case 25899:                                     // Greater Blessing of Sanctuary
-                TakenTotalMod *= (mDummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            case 47580:                                     // Pain and Suffering (Rank 1)      TODO: can be pct modifier aura
-            case 47581:                                     // Pain and Suffering (Rank 2)
-            case 47582:                                     // Pain and Suffering (Rank 3)
-                // Shadow Word: Death
-                if (spellInfo->IsFitToFamilyMask(uint64(0x0000000200000000)))
-                    TakenTotalMod *= (mDummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-        }
-    }
 
     // From caster spells
     AuraList const& mOwnerTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
@@ -8273,56 +8183,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, in
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner();
     if (!owner) owner = this;
-
-    AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for (auto i : mOverrideClassScript)
-    {
-        if (!i->isAffectedOnSpell(spellInfo))
-            continue;
-        switch (i->GetModifier()->m_miscvalue)
-        {
-            case 8477: // Nourish Heal Boost
-            {
-                int32 stepPercent = i->GetModifier()->m_amount;
-
-                int ownHotCount = 0;                        // counted HoT types amount, not stacks
-
-                Unit::AuraList const& RejorRegr = victim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
-                for (auto itr : RejorRegr)
-                    if (itr->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
-                        itr->GetCasterGuid() == GetObjectGuid())
-                        ++ownHotCount;
-
-                if (ownHotCount)
-                    DoneTotalMod *= (stepPercent * ownHotCount + 100.0f) / 100.0f;
-                break;
-            }
-            default:
-                break;
-        }
-    }
-
-    if (spellInfo->SpellFamilyName == SPELLFAMILY_DRUID)
-    {
-        // Nourish 20% of heal increase if target is affected by Druids HOTs
-        if (spellInfo->SpellFamilyFlags & uint64(0x0200000000000000))
-        {
-            int ownHotCount = 0;                        // counted HoT types amount, not stacks
-            Unit::AuraList const& RejorRegr = victim->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
-            for (auto i : RejorRegr)
-                if (i->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
-                    i->GetCasterGuid() == GetObjectGuid())
-                    ++ownHotCount;
-
-            if (ownHotCount)
-            {
-                DoneTotalMod *= 1.2f;                       // base bonus at HoTs
-
-                if (Aura* glyph = GetAura(62971, EFFECT_INDEX_0))// Glyph of Nourish
-                    DoneTotalMod *= (glyph->GetModifier()->m_amount * ownHotCount + 100.0f) / 100.0f;
-            }
-        }
-    }
 
     for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_SPELL_HEALING_DONE))
     {
@@ -8701,48 +8561,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
             DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
-    if (spellInfo)
-    {
-        // Frost Strike
-        if (spellInfo->SpellFamilyName == SPELLFAMILY_DEATHKNIGHT && spellInfo->SpellFamilyFlags & uint64(0x0000000400000000))
-        {
-            // search disease
-            bool found = false;
-            Unit::SpellAuraHolderMap const& auras = victim->GetSpellAuraHolderMap();
-            for (const auto& aura : auras)
-            {
-                if (aura.second->GetSpellProto()->Dispel == DISPEL_DISEASE)
-                {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found)
-            {
-                // search for Glacier Rot dummy aura
-                Unit::AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-                for (auto dummyAura : dummyAuras)
-                {
-                    if (dummyAura->GetSpellProto()->EffectMiscValue[dummyAura->GetEffIndex()] == 7244)
-                    {
-                        DoneTotalMod *= (dummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
-                        break;
-                    }
-                }
-            }
-        }
-        // Glyph of Steady Shot (Steady Shot check)
-        else if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->SpellFamilyFlags & uint64(0x0000000100000000))
-        {
-            // search for glyph dummy aura
-            if (Aura* aur = GetDummyAura(56826))
-                // check for Serpent Sting at target
-                if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, uint64(0x0000000000004000)))
-                    DoneTotalMod *= (aur->GetModifier()->m_amount + 100.0f) / 100.0f;
-        }
-    }
-
     for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_DONE))
     {
         if (!i->isAffectedOnSpell(spellInfo))
@@ -8854,22 +8672,6 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
         TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, schoolMask);
         if (caster && !caster->IsPlayerControlled() || spellInfo->HasAttribute(SPELL_ATTR_EX7_TREAT_AS_NPC_AOE))
             TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CREATURE_AOE_DAMAGE_AVOIDANCE, schoolMask);
-    }
-
-    // special dummys/class scripts and other effects
-    // =============================================
-
-    // .. taken (dummy auras)
-    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-    for (auto mDummyAura : mDummyAuras)
-    {
-        switch (mDummyAura->GetId())
-        {
-            case 20911:                                     // Blessing of Sanctuary
-            case 25899:                                     // Greater Blessing of Sanctuary
-                TakenTotalMod *= (mDummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-        }
     }
 
     for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN))

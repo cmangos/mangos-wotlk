@@ -239,6 +239,21 @@ struct GlyphOfFireBlast : public AuraScript
     }
 };
 
+// 29447 - Torment the Weak
+struct TormentTheWeak : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (victim->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || victim->HasAuraType(SPELL_AURA_HASTE_ALL))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
 
 void LoadMageScripts()
 {
@@ -255,4 +270,5 @@ void LoadMageScripts()
     RegisterSpellScript<Polymorph>("spell_polymorph");
     RegisterSpellScript<FrostWarding>("spell_frost_warding");
     RegisterSpellScript<GlyphOfFireBlast>("spell_glyph_of_fire_blast");
+    RegisterSpellScript<TormentTheWeak>("spell_torment_the_weak");
 }

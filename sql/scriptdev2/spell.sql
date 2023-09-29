@@ -1057,6 +1057,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (50119,'spell_rage_of_rivendare'),
 (50120,'spell_rage_of_rivendare'),
 (50121,'spell_rage_of_rivendare'),
+(49471,'spell_glacier_rot'),
+(49790,'spell_glacier_rot'),
+(49791,'spell_glacier_rot'),
 (55090,'spell_scourge_strike'),
 (55265,'spell_scourge_strike'),
 (55270,'spell_scourge_strike'),
@@ -1093,7 +1096,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (53243,'spell_marked_for_death_hunter'),
 (53244,'spell_marked_for_death_hunter'),
 (53245,'spell_marked_for_death_hunter'),
-(53246,'spell_marked_for_death_hunter'), 
+(53246,'spell_marked_for_death_hunter'),
+(56826,'spell_glyph_of_steady_shot'),
 (781,'spell_disengage');
 
 -- Priest
@@ -1143,6 +1147,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47558,'spell_test_of_faith'),
 (47559,'spell_test_of_faith'),
 (47560,'spell_test_of_faith'),
+(55692,'spell_glyph_of_smite'),
 (34861,'spell_circle_of_healing'),
 (34863,'spell_circle_of_healing'),
 (34864,'spell_circle_of_healing'),
@@ -1187,6 +1192,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27138,'spell_exorcism_paladin'),
 (48800,'spell_exorcism_paladin'),
 (48801,'spell_exorcism_paladin'),
+(20911,'spell_blessing_of_sanctuary'),
+(25899,'spell_blessing_of_sanctuary'),
 (31850,'spell_ardent_defender'),
 (31851,'spell_ardent_defender'),
 (31852,'spell_ardent_defender');
@@ -1409,6 +1416,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28609,'spell_frost_warding'),
 (32796,'spell_frost_warding'),
 (43012,'spell_frost_warding'),
+(29447,'spell_torment_the_weak'),
+(55339,'spell_torment_the_weak'),
+(55340,'spell_torment_the_weak'),
 (56369,'spell_glyph_of_fire_blast'),
 (58838,'spell_inherit_masters_threat_list'),
 (59638,'spell_mirror_image_frostbolt');
@@ -1457,6 +1467,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57851,'spell_improved_insect_swarm'),
 (69366,'spell_moonkin_form_passive'),
 (54743,'spell_glyph_of_regrowth'),
+(60137,'spell_nourish_heal_boost'),
+(50464,'spell_nourish'),
 (40121,'spell_swift_flight_form_passive');
 
 -- Rogue
