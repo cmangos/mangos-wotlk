@@ -8046,16 +8046,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
             }
             break;
         }
-        case SPELLFAMILY_WARLOCK:
-        {
-            // Drain Soul
-            if (spellInfo->SpellFamilyFlags & uint64(0x0000000000004000))
-            {
-                if (victim->GetHealth() * 100 / victim->GetMaxHealth() <= 25)
-                    DoneTotalMod *= 4;
-            }
-            break;
-        }
         case SPELLFAMILY_PRIEST:
         {
             // Smite
@@ -8066,39 +8056,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
                     // Glyph of Smite
                     if (Aura* aur = GetAura(55692, EFFECT_INDEX_0))
                         DoneTotalMod *= (aur->GetModifier()->m_amount + 100.0f) / 100.0f;
-            }
-            // Shadow word: Death
-            else if (spellInfo->IsFitToFamilyMask(uint64(0x0000000200000000)))
-            {
-                // Glyph of Shadow word: Death
-                if (SpellAuraHolder const* glyph = GetSpellAuraHolder(55682))
-                {
-                    Aura const* hpPct = glyph->GetAuraByEffectIndex(EFFECT_INDEX_0);
-                    Aura const* dmPct = glyph->GetAuraByEffectIndex(EFFECT_INDEX_1);
-                    if (hpPct && dmPct && victim->GetHealth() * 100 <= victim->GetMaxHealth() * hpPct->GetModifier()->m_amount)
-                        DoneTotalMod *= (dmPct->GetModifier()->m_amount + 100.0f) / 100.0f;
-                }
-            }
-            break;
-        }
-        case SPELLFAMILY_DRUID:
-        {
-            // Improved Insect Swarm (Wrath part)
-            if (spellInfo->SpellFamilyFlags & uint64(0x0000000000000001))
-            {
-                // if Insect Swarm on target
-                if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x000000000200000), 0, GetObjectGuid()))
-                {
-                    Unit::AuraList const& improvedSwarm = GetAurasByType(SPELL_AURA_DUMMY);
-                    for (auto iter : improvedSwarm)
-                    {
-                        if (iter->GetSpellProto()->SpellIconID == 1771)
-                        {
-                            DoneTotalMod *= (iter->GetModifier()->m_amount + 100.0f) / 100.0f;
-                            break;
-                        }
-                    }
-                }
             }
             break;
         }
@@ -8132,13 +8089,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
                     }
                 }
             }
-            // Death Coil (bonus from Item - Death Knight T8 DPS Relic)
-            else if (spellInfo->SpellFamilyFlags & uint64(0x00002000))
-            {
-                if (Aura* sigil = GetDummyAura(64962))
-                    DoneTotal += sigil->GetModifier()->m_amount;
-            }
-            break;
         }
         default:
             break;
@@ -8331,18 +8281,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, in
             continue;
         switch (i->GetModifier()->m_miscvalue)
         {
-            case   21: // Test of Faith
-            case 6935:
-            case 6918:
-                if (victim->GetHealth() < victim->GetMaxHealth() / 2)
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            case 7798: // Glyph of Regrowth
-            {
-                if (victim->GetAura(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_DRUID, uint64(0x0000000000000040)))
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
-                break;
-            }
             case 8477: // Nourish Heal Boost
             {
                 int32 stepPercent = i->GetModifier()->m_amount;
@@ -8357,12 +8295,6 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, in
 
                 if (ownHotCount)
                     DoneTotalMod *= (stepPercent * ownHotCount + 100.0f) / 100.0f;
-                break;
-            }
-            case 7871: // Glyph of Lesser Healing Wave
-            {
-                if (victim->GetAura(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, uint64(0x0000040000000000), 0, GetObjectGuid()))
-                    DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
                 break;
             }
             default:

@@ -320,6 +320,23 @@ struct LavaBurst : public SpellScript
     }
 };
 
+// 55438 - Glyph of Lesser Healing Wave
+struct GlyphOfLesserHealingWave : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Earth Shield
+        if (victim->GetAura(SPELL_AURA_DUMMY, SPELLFAMILY_SHAMAN, uint64(0x0000040000000000), 0, aura->GetTarget()->GetObjectGuid()))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -340,4 +357,5 @@ void LoadShamanScripts()
     RegisterSpellScript<FireNovaShaman>("spell_fire_nova_shaman");
     RegisterSpellScript<AstralShiftShaman>("spell_astral_shift_shaman");
     RegisterSpellScript<LavaBurst>("spell_lava_burst");
+    RegisterSpellScript<GlyphOfLesserHealingWave>("spell_glyph_of_lesser_healing_wave");
 }

@@ -207,12 +207,12 @@ struct ImprovedInsectSwarm : public AuraScript
 
     void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* /*spellInfo*/) const override
     {
-        if (target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x000000000000002), 0, aura->GetTarget()->GetObjectGuid())) chance += aura->GetModifier()->m_amount; // Weakened Soul
+        if (target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x000000000000002), 0, aura->GetTarget()->GetObjectGuid())) chance += aura->GetModifier()->m_amount; // Starfire
     }
 
     void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
     {
-        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x00200000), 0, aura->GetTarget()->GetObjectGuid())) totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+        if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x00200000), 0, aura->GetTarget()->GetObjectGuid())) totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f; // Wrath
     }
 };
 
@@ -231,6 +231,23 @@ struct StarfireBonus : public AuraScript
     }
 };
 
+// 54743 - Glyph of Regrowth
+struct GlyphOfRegrowth : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        // Regrowth
+        if (victim->GetAura(SPELL_AURA_PERIODIC_HEAL, SPELLFAMILY_SHAMAN, uint64(0x0000000000000040), 0, aura->GetTarget()->GetObjectGuid()))
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadDruidScripts()
 {
     RegisterSpellScript<Regrowth>("spell_regrowth");
@@ -245,4 +262,5 @@ void LoadDruidScripts()
     RegisterSpellScript<PrimalTenacity>("spell_primal_tenacity");
     RegisterSpellScript<MoonkinFormPassive>("spell_moonkin_form_passive");
     RegisterSpellScript<ImprovedInsectSwarm>("spell_improved_insect_swarm");
+    RegisterSpellScript<GlyphOfRegrowth>("spell_glyph_of_regrowth");
 }

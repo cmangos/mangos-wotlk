@@ -107,6 +107,8 @@ struct DeathCoilDK : public SpellScript
         }
         else
         {
+            if (Aura* sigil = caster->GetDummyAura(64962))
+                damage += sigil->GetAmount();
             int32 bp = damage;
             caster->CastCustomSpell(target, 47632, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         }

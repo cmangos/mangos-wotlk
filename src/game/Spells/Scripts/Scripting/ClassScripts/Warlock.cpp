@@ -496,6 +496,16 @@ struct DeathsEmbrace : public AuraScript
     }
 };
 
+// 1120 - Drain Soul
+struct DrainSoul : public AuraScript
+{
+    void OnPeriodicCalculateAmount(Aura* aura, uint32& amount) const override
+    {
+        if (aura->GetTarget()->GetHealthPercent() <= 25.f)
+            amount *= 4; // can be done here because amount contains all done bonuses already
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -516,4 +526,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<DemonicCircleSummon>("spell_demonic_circle_summon");
     RegisterSpellScript<GlyphOfShadowburn>("spell_glyph_of_shadowburn");
     RegisterSpellScript<DeathsEmbrace>("spell_deaths_embrace");
+    RegisterSpellScript<DrainSoul>("spell_drain_soul");
 }

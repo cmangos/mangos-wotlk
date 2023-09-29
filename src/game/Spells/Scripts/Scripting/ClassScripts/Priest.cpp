@@ -423,6 +423,41 @@ struct TwistedFaith : public AuraScript
     }
 };
 
+// 55682 - Glyph of Shadow Word: Death
+struct GlyphOfShadowWordDeath : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_DAMAGE_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        SpellAuraHolder* holder = aura->GetHolder();
+        Aura const* hpPct = holder->GetAuraByEffectIndex(EFFECT_INDEX_0);
+        Aura const* dmPct = holder->GetAuraByEffectIndex(EFFECT_INDEX_1);
+        if (hpPct && dmPct && victim->GetHealth() * 100 <= victim->GetMaxHealth() * hpPct->GetModifier()->m_amount)
+            totalMod *= (dmPct->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
+// 47558 - Test of Faith
+struct TestOfFaith : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
+    }
+
+    void OnDamageCalculate(Aura* aura, Unit* /*attacker*/, Unit* victim, int32& /*advertisedBenefit*/, float& totalMod) const override
+    {
+        if (victim->GetHealth() < victim->GetMaxHealth() / 2)
+            totalMod *= (aura->GetModifier()->m_amount + 100.0f) / 100.0f;
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -446,4 +481,6 @@ void LoadPriestScripts()
     RegisterSpellScript<RenewedHopeDamageTaken>("spell_renewed_hope_damage_taken");
     RegisterSpellScript<ImprovedFlashHeal>("spell_improved_flash_heal");
     RegisterSpellScript<TwistedFaith>("spell_twisted_faith");
+    RegisterSpellScript<GlyphOfShadowWordDeath>("spell_glyph_of_shadow_word_death");
+    RegisterSpellScript<TestOfFaith>("spell_test_of_faith");
 }

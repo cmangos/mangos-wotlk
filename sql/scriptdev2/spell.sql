@@ -1139,6 +1139,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47578,'spell_twisted_faith'),
 (51166,'spell_twisted_faith'),
 (51167,'spell_twisted_faith'),
+(55682,'spell_glyph_of_shadow_word_death'),
+(47558,'spell_test_of_faith'),
+(47559,'spell_test_of_faith'),
+(47560,'spell_test_of_faith'),
 (34861,'spell_circle_of_healing'),
 (34863,'spell_circle_of_healing'),
 (34864,'spell_circle_of_healing'),
@@ -1262,6 +1266,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47198,'spell_deaths_embrace'),
 (47199,'spell_deaths_embrace'),
 (47200,'spell_deaths_embrace'),
+(1120,'spell_drain_soul'),
+(8288,'spell_drain_soul'),
+(8289,'spell_drain_soul'),
+(11675,'spell_drain_soul'),
+(27217,'spell_drain_soul'),
+(47855,'spell_drain_soul'),
 (48018,'spell_demonic_circle_summon'),
 (48020,'spell_demonic_circle_teleport');
 
@@ -1447,6 +1457,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57850,'spell_improved_insect_swarm'),
 (57851,'spell_improved_insect_swarm'),
 (69366,'spell_moonkin_form_passive'),
+(54743,'spell_glyph_of_regrowth'),
 (40121,'spell_swift_flight_form_passive');
 
 -- Rogue
@@ -1530,6 +1541,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51479,'spell_astral_shift_shaman'),
 (51505,'spell_lava_burst'),
 (60043,'spell_lava_burst'),
+(55438,'spell_glyph_of_lesser_healing_wave'),
 (2825,'spell_heroism_bloodlust'),
 (32182,'spell_heroism_bloodlust');
 
