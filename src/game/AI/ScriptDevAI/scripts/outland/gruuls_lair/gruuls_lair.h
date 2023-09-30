@@ -45,8 +45,6 @@ class instance_gruuls_lair : public ScriptedInstance
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strSaveData;
-
-        uint8 m_uiCouncilMembersDied;
 };
 
 #endif
