@@ -27,7 +27,7 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO               = -1542008,
+    SAY_AGGRO                       = 14259,
 
     SPELL_SUMMON_INCOMBAT_TRIGGER   = 26837,    // TODO: probably cast on spawn not sure what c.16006 does
     SPELL_SLIME_SPRAY               = 30913,
@@ -104,7 +104,7 @@ struct boss_broggokAI : public CombatAI
             return;
 
         if (pointId == POINT_EVENT_YELL) // verified its not actual aggro
-            DoScriptText(SAY_AGGRO, m_creature);
+            DoBroadcastText(SAY_AGGRO, m_creature);
         else if (pointId == POINT_EVENT_COMBAT)
         {
             m_creature->GetMotionMaster()->Clear(false, true);

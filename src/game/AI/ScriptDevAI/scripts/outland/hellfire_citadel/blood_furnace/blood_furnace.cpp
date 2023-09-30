@@ -144,7 +144,7 @@ void instance_blood_furnace::SetData(uint32 type, uint32 data)
                 if (Creature* broggok = GetSingleCreatureFromStorage(NPC_BROGGOK))
                 {
                     broggok->CastSpell(nullptr, SPELL_COMBAT_TRIGGER, TRIGGERED_OLD_TRIGGERED); // cast doesnt show in sniff
-                    DoScriptText(SAY_BROGGOK_INTRO, broggok);
+                    DoBroadcastText(SAY_BROGGOK_INTRO, broggok);
                 }
 
                 if (m_uiBroggokEventPhase <= MAX_ORC_WAVES)

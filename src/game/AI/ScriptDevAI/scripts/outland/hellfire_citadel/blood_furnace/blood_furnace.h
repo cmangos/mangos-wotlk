@@ -53,7 +53,7 @@ enum
 
     NPC_IN_COMBAT_TRIGGER           = 16006,
 
-    SAY_BROGGOK_INTRO               = -1542015,
+    SAY_BROGGOK_INTRO               = 15115,
 };
 
 // Random Magtheridon taunt

@@ -27,12 +27,12 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO_1                 = -1542009,
-    SAY_AGGRO_2                 = -1542010,
-    SAY_AGGRO_3                 = -1542011,
-    SAY_KILL_1                  = -1542012,
-    SAY_KILL_2                  = -1542013,
-    SAY_DIE                     = -1542014,
+    SAY_AGGRO_1                 = 17679,
+    SAY_AGGRO_2                 = 17680,
+    SAY_AGGRO_3                 = 17681,
+    SAY_KILL_1                  = 17683,
+    SAY_KILL_2                  = 17684,
+    SAY_DIE                     = 17685,
 
     SPELL_EXPLODING_BREAKER     = 30925,
     SPELL_EXPLODING_BREAKER_H   = 40059,
@@ -53,6 +53,7 @@ struct boss_the_makerAI : public CombatAI
     {
         AddCombatAction(MAKER_EXPLODING_BEAKER, 6000u);
         AddCombatAction(MAKER_DOMINATION, 20000u);
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
     ScriptedInstance* m_instance;
@@ -62,9 +63,9 @@ struct boss_the_makerAI : public CombatAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
 
         if (m_instance)
@@ -77,14 +78,9 @@ struct boss_the_makerAI : public CombatAI
             m_instance->SetData(TYPE_THE_MAKER_EVENT, FAIL);
     }
 
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DIE, m_creature);
+        DoBroadcastText(SAY_DIE, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_THE_MAKER_EVENT, DONE);
