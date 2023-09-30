@@ -26,15 +26,15 @@ EndScriptData */
 
 enum
 {
-    SAY_TAUNT                   = -1543000,
-    SAY_HEAL                    = -1543001,
-    SAY_SURGE                   = -1543002,
-    SAY_AGGRO_1                 = -1543003,
-    SAY_AGGRO_2                 = -1543004,
-    SAY_AGGRO_3                 = -1543005,
-    SAY_KILL_1                  = -1543006,
-    SAY_KILL_2                  = -1543007,
-    SAY_DIE                     = -1543008,
+    SAY_TAUNT                   = 13999,
+    SAY_HEAL                    = 17498,
+    SAY_SURGE                   = 17499,
+    SAY_AGGRO_1                 = 17502,
+    SAY_AGGRO_2                 = 17503,
+    SAY_AGGRO_3                 = 17504,
+    SAY_KILL_1                  = 17500,
+    SAY_KILL_2                  = 17501,
+    SOUND_DIE                   = 10336,
 
     SPELL_MORTAL_WOUND          = 30641,
     SPELL_MORTAL_WOUND_H        = 36814,
@@ -65,6 +65,7 @@ struct boss_watchkeeper_gargolmarAI : public CombatAI
         AddCombatAction(GARGOLMAR_ACTION_SURGE, 4800u);
         AddCombatAction(GARGOLMAR_ACTION_RETALIATION, 0u);
         AddCombatAction(GARGOLMAR_ACTION_OVERPOWER, 3600u, 14800u);
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
     ScriptedInstance* m_instance;
@@ -97,13 +98,13 @@ struct boss_watchkeeper_gargolmarAI : public CombatAI
         }
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
     }
 
@@ -111,21 +112,16 @@ struct boss_watchkeeper_gargolmarAI : public CombatAI
     {
         if (!m_HasTaunted && m_creature->IsWithinDistInMap(who, 60.0f))
         {
-            DoScriptText(SAY_TAUNT, m_creature);
+            DoBroadcastText(SAY_TAUNT, m_creature);
             m_HasTaunted = true;
         }
 
         ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DIE, m_creature);
+        DoPlaySoundToSet(m_creature, SOUND_DIE);
     }
 
     void ExecuteAction(uint32 action)
@@ -135,7 +131,7 @@ struct boss_watchkeeper_gargolmarAI : public CombatAI
             case GARGOLMAR_ACTION_YELL_FOR_HEAL:
                 if (m_creature->GetHealthPercent() < 40.0f)
                 {
-                    DoScriptText(SAY_HEAL, m_creature);
+                    DoBroadcastText(SAY_HEAL, m_creature);
 
                     CreatureList watcherList;
                     GetCreatureListWithEntryInGrid(watcherList, m_creature, NPC_HELLFIRE_WATCHER, 100.0f);
@@ -159,7 +155,7 @@ struct boss_watchkeeper_gargolmarAI : public CombatAI
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_FARTHEST_AWAY, 0, SPELL_SURGE, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(target, SPELL_SURGE) == CAST_OK)
-                        DoScriptText(SAY_SURGE, m_creature);
+                        DoBroadcastText(SAY_SURGE, m_creature);
 
                     ResetCombatAction(action, GetSubsequentActionTimer(GargolmarActions(action)));
                     return;

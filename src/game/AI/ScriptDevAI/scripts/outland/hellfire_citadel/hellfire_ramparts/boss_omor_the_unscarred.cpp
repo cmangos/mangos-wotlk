@@ -27,14 +27,14 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO_1                 = -1543009,
-    SAY_AGGRO_2                 = -1543010,
-    SAY_AGGRO_3                 = -1543011,
-    SAY_SUMMON                  = -1543012,
-    SAY_CURSE                   = -1543013,
-    SAY_KILL_1                  = -1543014,
-    SAY_DIE                     = -1543015,
-    SAY_WIPE                    = -1543016,
+    SAY_AGGRO_1                 = 17634,
+    SAY_AGGRO_2                 = 17633,
+    SAY_AGGRO_3                 = 17635,
+    SAY_SUMMON                  = 17637,
+    SAY_CURSE                   = 17636,
+    SAY_KILL_1                  = 17631,
+    SAY_KILL_2                  = 17632,
+    SAY_DIE                     = 17630,
 
     SPELL_ORBITAL_STRIKE        = 30637,
     SPELL_SHADOW_WHIP           = 30638,
@@ -71,6 +71,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
         AddCustomAction(OMOR_PULL_BACK, true, [&]() {HandlePullBack(); });
         SetCombatMovement(false);
         SetRangedMode(true, 100.f, TYPE_PROXIMITY);
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
     bool m_inRegularMode;
@@ -87,23 +88,15 @@ struct boss_omor_the_unscarredAI : public CombatAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO_1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO_2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO_3, m_creature); break;
         }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        if (urand(0, 1))
-            return;
-
-        DoScriptText(SAY_KILL_1, m_creature);
     }
 
     void JustSummoned(Creature* summoned) override
     {
-        DoScriptText(SAY_SUMMON, m_creature);
+        DoBroadcastText(SAY_SUMMON, m_creature);
 
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             summoned->AI()->AttackStart(pTarget);
@@ -111,14 +104,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DIE, m_creature);
-    }
-
-    void EnterEvadeMode() override
-    {
-        DoScriptText(SAY_WIPE, m_creature);
-
-        ScriptedAI::EnterEvadeMode();
+        DoBroadcastText(SAY_DIE, m_creature);
     }
 
     void HandlePullBack()
@@ -171,7 +157,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
                     if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_TREACHEROUS_AURA : SPELL_BANE_OF_TREACHERY_H) == CAST_OK)
                     {
                         ResetCombatAction(action, urand(8000, 16000));
-                        DoScriptText(SAY_CURSE, m_creature);
+                        DoBroadcastText(SAY_CURSE, m_creature);
                     }
                 }
                 break;

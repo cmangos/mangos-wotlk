@@ -28,15 +28,15 @@ EndScriptData */
 
 enum
 {
-    SAY_INTRO               = -1543017,
-    SAY_AGGRO1              = -1543018,
-    SAY_AGGRO2              = -1543019,
-    SAY_AGGRO3              = -1543020,
-    SAY_TAUNT               = -1543021,
-    SAY_KILL1               = -1543022,
-    SAY_KILL2               = -1543023,
-    SAY_DEATH               = -1543024,
-    EMOTE_DESCEND           = -1543025,
+    SAY_INTRO               = 13981,
+    SAY_AGGRO1              = 17492,
+    SAY_AGGRO2              = 17493,
+    SAY_AGGRO3              = 17494,
+    SAY_TAUNT               = 17491,
+    SAY_KILL1               = 17495,
+    SAY_KILL2               = 17496,
+    SAY_DEATH               = 17497,
+    EMOTE_DESCEND           = 20472,
 
     // vazruden
     SPELL_REVENGE = 19130,
@@ -168,7 +168,7 @@ struct boss_vazruden_heraldAI : public CombatAI
             {
                 if (vazruden->IsInCombat())
                 {
-                    DoScriptText(SAY_TAUNT, vazruden);
+                    DoBroadcastText(SAY_TAUNT, vazruden);
                     vazruden->AI()->EnterEvadeMode();
                 }
             }
@@ -221,7 +221,7 @@ struct boss_vazruden_heraldAI : public CombatAI
 
     void DoMoveToCenter()
     {
-        DoScriptText(SAY_INTRO, m_creature);
+        DoBroadcastText(SAY_INTRO, m_creature);
         SetCombatMovement(false);
         SetCombatScriptStatus(true);
         SetMeleeEnabled(false);
@@ -251,7 +251,7 @@ struct boss_vazruden_heraldAI : public CombatAI
         m_creature->SetWalk(false);
         m_creature->GetMotionMaster()->MovePoint(POINT_ID_LANDING, landingPhasePos.x, landingPhasePos.y, landingPhasePos.z);
         SetCombatScriptStatus(true);
-        DoScriptText(EMOTE_DESCEND, m_creature);
+        DoBroadcastText(EMOTE_DESCEND, m_creature);
     }
 
     void HandleAttackDelay()
@@ -391,6 +391,7 @@ struct boss_vazrudenAI : public CombatAI
         });
 
         DoCastSpellIfCan(nullptr, SPELL_DEFENSIVE_STATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        AddOnKillText(SAY_KILL1, SAY_KILL2);
     }
 
     ScriptedInstance* m_instance;
@@ -400,15 +401,15 @@ struct boss_vazrudenAI : public CombatAI
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            case 0: DoBroadcastText(SAY_AGGRO1, m_creature); break;
+            case 1: DoBroadcastText(SAY_AGGRO2, m_creature); break;
+            case 2: DoBroadcastText(SAY_AGGRO3, m_creature); break;
         }
     }
 
     void EnterEvadeMode() override
     {
-        DoScriptText(SAY_TAUNT, m_creature);
+        DoBroadcastText(SAY_TAUNT, m_creature);
         CombatAI::EnterEvadeMode();
         if (Creature* nazan = m_instance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
             if (nazan->IsInCombat())
@@ -417,7 +418,7 @@ struct boss_vazrudenAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_VAZRUDEN, DONE);
@@ -440,11 +441,6 @@ struct boss_vazrudenAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_VAZRUDEN, FAIL);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
