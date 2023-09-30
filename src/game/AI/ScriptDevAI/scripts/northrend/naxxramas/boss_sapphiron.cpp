@@ -33,6 +33,7 @@ enum
     EMOTE_SAPPHIRON_LAND        = 32802,
 
     // All phases spells
+    SPELL_DOUBLE_ATTACK         = 19818,
     SPELL_FROST_AURA            = 71387,            // Periodically triggers 28531
     SPELL_FROST_AURA_H          = 55799,
     SPELL_BERSERK               = 26662,
@@ -127,6 +128,7 @@ struct boss_sapphironAI : public BossAI
         SetCombatScriptStatus(false);
         m_creature->SetHover(false);
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
