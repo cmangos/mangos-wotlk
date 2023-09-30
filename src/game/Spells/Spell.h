@@ -579,8 +579,6 @@ class Spell
         uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
 
-        uint32 GetUsableHealthStoneItemType(Unit* unitTarget);
-
         struct CreaturePosition
         {
             CreaturePosition() :
