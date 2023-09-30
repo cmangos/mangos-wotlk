@@ -659,6 +659,55 @@ struct SummonPossessedCrocolisk : public SpellScript
     }
 };
 
+// 52862 - Devour Wind
+struct DevourWind : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || !target->IsCreature() || static_cast<Creature*>(target)->HasBeenHitBySpell(spell->m_spellInfo->Id))
+            return SPELL_FAILED_BAD_TARGETS;
+
+        if (target->GetEntry() != 28858)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+// 52864 - Devour Water
+struct DevourWater : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || !target->IsCreature() || static_cast<Creature*>(target)->HasBeenHitBySpell(spell->m_spellInfo->Id))
+            return SPELL_FAILED_BAD_TARGETS;
+
+        if (target->GetEntry() != 28862)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+// 52866 - Transform Visual
+struct TransformVisual : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (!spell->GetCaster()->IsCreature())
+            return;
+
+        Creature* caster = static_cast<Creature*>(spell->GetCaster());
+        caster->UpdateEntry(spell->GetCaster()->GetEntry() == 28985 ? 28999 : 28985);
+        caster->SetSpellList(spell->GetCaster()->GetEntry() * 100 + 1);
+        caster->GetCharmInfo()->InitVehicleCreateSpells();
+        if (Player* player = dynamic_cast<Player*>(caster->GetCharmer()))
+            player->VehicleSpellInitialize();
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -695,4 +744,7 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<SummonDajikTheWaspHunter>("spell_summon_dajik_the_wasp_hunter");
     RegisterSpellScript<SummonZepikTheGorlocHunter>("spell_summon_zepik_the_gorloc_hunter");
     RegisterSpellScript<SummonPossessedCrocolisk>("spell_summon_possessed_crocolisk");
+    RegisterSpellScript<DevourWind>("spell_devour_wind");
+    RegisterSpellScript<DevourWater>("spell_devour_water");
+    RegisterSpellScript<TransformVisual>("spell_transform_visual");
 }
