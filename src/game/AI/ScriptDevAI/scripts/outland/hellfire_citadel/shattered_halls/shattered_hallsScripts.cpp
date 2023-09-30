@@ -41,16 +41,16 @@ enum
 
     SPELL_DOUBLE_ATTACK = 19818,
 
-    NPC_SHATTERED_HAND_GLADIATIOR = 17464,
+    NPC_SHATTERED_HAND_GLADIATOR = 17464,
     NPC_SHATTERED_HAND_CENTURION = 17465,
 
     MAX_GLADIATORS = 3,
 };
 
-enum GladiatiorActions
+enum GladiatorActions
 {
     GLADIATOR_STOP_EVENT,
-    GLADIATIOR_EVENT_RP,
+    GLADIATOR_EVENT_RP,
     GLADIATOR_ACTION_MAX,
 };
 
@@ -59,7 +59,7 @@ struct npc_shattered_hand_gladiator : public CombatAI
     npc_shattered_hand_gladiator(Creature* creature) : CombatAI(creature, GLADIATOR_ACTION_MAX)
     {
         AddTimerlessCombatAction(GLADIATOR_STOP_EVENT, true);
-        AddCustomAction(GLADIATIOR_EVENT_RP, true, [&]() { DoDelayedReset(); });
+        AddCustomAction(GLADIATOR_EVENT_RP, true, [&]() { DoDelayedReset(); });
     }
 
     ObjectGuid m_sparringPartner;
@@ -77,7 +77,7 @@ struct npc_shattered_hand_gladiator : public CombatAI
     void DoDelayedReset()
     {
         EnterEvadeMode();
-        DisableTimer(GLADIATIOR_EVENT_RP);
+        DisableTimer(GLADIATOR_EVENT_RP);
     }
 
     void HandleEventStart(Creature* partner)
@@ -106,7 +106,7 @@ struct npc_shattered_hand_gladiator : public CombatAI
             m_creature->AttackStop();
             m_creature->ClearTemporaryFaction();
             m_creature->HandleEmote(EMOTE_ONESHOT_BOW);
-            ResetTimer(GLADIATIOR_EVENT_RP, 1000);
+            ResetTimer(GLADIATOR_EVENT_RP, 1000);
             m_eventStarted = false;
         }
         else if (eventType == AI_EVENT_CUSTOM_C) // Start Duel
@@ -203,7 +203,7 @@ struct npc_shattered_hand_centurion : public CombatAI
         // Get all 4 Gladiators in Range 
         std::list<Creature*> m_gladiator;
         GuidVector m_gladiatorGuid;
-        GetCreatureListWithEntryInGrid(m_gladiator, m_creature, NPC_SHATTERED_HAND_GLADIATIOR, 10.0f);
+        GetCreatureListWithEntryInGrid(m_gladiator, m_creature, NPC_SHATTERED_HAND_GLADIATOR, 10.0f);
         for (Creature* gladiator : m_gladiator)
             m_gladiatorGuid.push_back(gladiator->GetObjectGuid());
 
@@ -257,7 +257,7 @@ struct npc_shattered_hand_centurion : public CombatAI
                 DoBroadcastText(SAY_FINISH, m_creature);
 
                 CreatureList gladiatorList;
-                GetCreatureListWithEntryInGrid(gladiatorList, m_creature, NPC_SHATTERED_HAND_GLADIATIOR, 20.0f);
+                GetCreatureListWithEntryInGrid(gladiatorList, m_creature, NPC_SHATTERED_HAND_GLADIATOR, 20.0f);
                 for (Creature* gladiator : gladiatorList)
                 {
                     if (gladiator->IsAlive())
