@@ -22,6 +22,7 @@
 #include "AI/BaseAI/TotemAI.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
+// 6495 - Sentry Totem
 struct SentryTotem : public SpellScript, public AuraScript
 {
     void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex effIdx, bool targetB, float& radius) const override
@@ -88,6 +89,7 @@ struct SentryTotemAI : public TotemAI
     }
 };
 
+// 974 - Earth Shield
 struct EarthShield : public AuraScript
 {
     int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override

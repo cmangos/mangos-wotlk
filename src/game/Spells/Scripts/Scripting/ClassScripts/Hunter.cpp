@@ -20,6 +20,7 @@
 #include "Spells/SpellAuras.h"
 #include "Spells/SpellMgr.h"
 
+// 19185 - Entrapment
 struct Entrapment : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& procData) const override
@@ -30,6 +31,7 @@ struct Entrapment : public AuraScript
     }
 };
 
+// 34026 - Kill Command
 struct KillCommand : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
@@ -39,6 +41,7 @@ struct KillCommand : public SpellScript
     }
 };
 
+// 34477 - Misdirection
 struct Misdirection : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
@@ -57,6 +60,7 @@ struct Misdirection : public SpellScript
     }
 };
 
+// 34501 - Expose Weakness
 struct ExposeWeakness : public AuraScript
 {
     int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override

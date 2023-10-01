@@ -43,7 +43,7 @@ enum
 };
 
 // Warning: Also currently used by Prowl
-// 1784 - Stealth
+// 1784 - Stealth, 5215 - Prowl
 struct Stealth : public AuraScript
 {
     bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override // per 1.12.0 patch notes - no other indication of how it works

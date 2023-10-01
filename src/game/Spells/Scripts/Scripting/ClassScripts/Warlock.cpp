@@ -25,6 +25,7 @@ enum
     SPELL_UNSTABLE_AFFLICTION_SILENCE = 31117,
 };
 
+// 30108 - Unstable Affliction
 struct UnstableAffliction : public AuraScript
 {
     void OnDispel(SpellAuraHolder* holder, Unit* dispeller, uint32 dispellingSpellId, uint32 originalStacks) const override
@@ -38,6 +39,7 @@ struct UnstableAffliction : public AuraScript
     }
 };
 
+// 980 - Curse of Agony
 struct CurseOfAgony : public AuraScript
 {
     void OnPeriodicCalculateAmount(Aura* aura, uint32& amount) const override
@@ -52,6 +54,7 @@ struct CurseOfAgony : public AuraScript
     }
 };
 
+// 1454 - Life Tap
 struct LifeTap : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -201,6 +204,7 @@ struct CreateHealthStoneWarlock : public SpellScript
     }
 };
 
+// 35696 - Demonic Knowledge
 struct DemonicKnowledge : public AuraScript
 {
     int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
@@ -218,6 +222,7 @@ struct DemonicKnowledge : public AuraScript
     }
 };
 
+// 126 - Eye of Kilrogg (Summon)
 struct EyeOfKilrogg : public SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
@@ -229,6 +234,7 @@ struct EyeOfKilrogg : public SpellScript
     }
 };
 
+// 603 - Curse of Doom
 struct CurseOfDoom : public SpellScript, public AuraScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -249,6 +255,7 @@ struct CurseOfDoom : public SpellScript, public AuraScript
     }
 };
 
+// 18662 - Curse of Doom Effect
 struct CurseOfDoomEffect : public SpellScript
 {
     void OnSummon(Spell* /*spell*/, Creature* summon) const override
@@ -257,6 +264,7 @@ struct CurseOfDoomEffect : public SpellScript
     }
 };
 
+// 19505 - Devour Magic
 struct DevourMagic : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -288,6 +296,7 @@ enum
     SPELL_SEED_DAMAGE_3 = 47834,
 };
 
+// 27243 - Seed of Corruption
 struct SeedOfCorruption : public AuraScript
 {
     uint32 GetSeedDamageSpell(uint32 id) const
@@ -338,6 +347,7 @@ struct SeedOfCorruption : public AuraScript
     }
 };
 
+// 27285 - Seed of Corruption
 struct SeedOfCorruptionDamage : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override

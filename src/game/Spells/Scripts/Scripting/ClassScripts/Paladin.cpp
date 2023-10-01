@@ -20,6 +20,7 @@
 #include "Spells/SpellAuras.h"
 #include "Spells/SpellMgr.h"
 
+// 20271 - Judgement
 struct spell_judgement : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -81,13 +82,14 @@ struct spell_judgement : public SpellScript
         if (caster->HasAura(37188)) // improved judgement
             caster->CastSpell(nullptr, 43838, TRIGGERED_OLD_TRIGGERED);
 
-        if (caster->HasAura(40470)) // spell_paladin_tier_6_trinket
+        if (caster->HasAura(40470)) // PaladinTier6Trinket
             if (roll_chance_f(50.f))
                 caster->CastSpell(unitTarget, 40472, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
-struct spell_paladin_tier_6_trinket : public AuraScript
+// 40470 - Paladin Tier 6 Trinket
+struct PaladinTier6Trinket : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& procData) const override
     {
@@ -124,6 +126,7 @@ struct IncreasedHolyLightHealing : public AuraScript
     }
 };
 
+// 31789 - Righteous Defense
 struct RighteousDefense : public SpellScript
 {
     bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -319,7 +322,7 @@ void LoadPaladinScripts()
     RegisterSpellScript<IncreasedHolyLightHealing>("spell_increased_holy_light_healing");
     RegisterSpellScript<spell_judgement>("spell_judgement");
     RegisterSpellScript<RighteousDefense>("spell_righteous_defense");
-    RegisterSpellScript<spell_paladin_tier_6_trinket>("spell_paladin_tier_6_trinket");
+    RegisterSpellScript<PaladinTier6Trinket>("spell_paladin_tier_6_trinket");
     RegisterSpellScript<DivineStorm>("spell_divine_storm");
     RegisterSpellScript<DivineStormHeal>("spell_divine_storm_heal");
     RegisterSpellScript<DivineStormCooldown>("spell_divine_storm_cooldown");
