@@ -708,6 +708,15 @@ struct TransformVisual : public SpellScript
     }
 };
 
+// 53032 - Flurry of Claws
+struct FlurryOfClaws : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->CastSpell(nullptr, 74566, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -747,4 +756,5 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<DevourWind>("spell_devour_wind");
     RegisterSpellScript<DevourWater>("spell_devour_water");
     RegisterSpellScript<TransformVisual>("spell_transform_visual");
+    RegisterSpellScript<FlurryOfClaws>("spell_flurry_of_claws");
 }

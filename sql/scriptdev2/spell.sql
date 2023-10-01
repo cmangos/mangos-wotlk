@@ -811,6 +811,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52866,'spell_transform_visual'),
 (52942,'spell_pulsing_shockwave'),
 (53031,'spell_crusader_parachute'),
+(53032,'spell_flurry_of_claws'),
 (53035,'spell_summon_anubar_periodic_aura'),
 (53036,'spell_summon_anubar_periodic_aura'),
 (53037,'spell_summon_anubar_periodic_aura'),
