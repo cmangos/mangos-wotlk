@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "serpent_shrine.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 // Note: As of March 21 2007 Hydross should not crush tanks
 
@@ -40,8 +41,8 @@ enum
 
     SPELL_WATER_TOMB            = 38235,
     SPELL_VILE_SLUDGE           = 38246,
-    SPELL_CORRUPTION            = 37961,                    // transform spell
-    SPELL_ENRAGE                = 27680,                    // ToDo: this spell need verification
+    SPELL_CORRUPTION_SD         = 37961,                    // transform spell
+    SPELL_BERSERK               = 27680,                    // ToDo: this spell need verification
     SPELL_BLUE_BEAM             = 38015,
     SPELL_SUMMON_WATER_ELEMENT  = 36459,                    // spawn elemental on OOC timer
     SPELL_ELEMENTAL_SPAWNIN     = 25035,
@@ -61,12 +62,11 @@ enum
 static const uint32 aMarkHydross[MAX_HYDROSS_MARKS] = {38215, 38216, 38217, 38218, 38231, 40584};
 static const uint32 aMarkCorruption[MAX_HYDROSS_MARKS] = {38219, 38220, 38221, 38222, 38230, 40583};
 
-struct boss_hydross_the_unstableAI : public ScriptedAI
+struct boss_hydross_the_unstableAI : public CombatAI
 {
-    boss_hydross_the_unstableAI(Creature* creature) : ScriptedAI(creature)
+    boss_hydross_the_unstableAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<instance_serpentshrine_cavern*>(creature->GetInstanceData()))
     {
-        m_instance = dynamic_cast<instance_serpentshrine_cavern*>(creature->GetInstanceData());
-        Reset();
     }
 
     instance_serpentshrine_cavern* m_instance;
@@ -83,6 +83,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_uiBeamInitTimer           = 5000;
         m_uiElementalTimer          = 20000;
         m_uiPosCheckTimer           = 1000;
@@ -99,7 +100,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, false);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
@@ -107,7 +108,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             m_instance->SetData(TYPE_HYDROSS_EVENT, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         if (m_bCorruptedForm)
             DoScriptText(urand(0, 1) ? SAY_CORRUPT_SLAY1 : SAY_CORRUPT_SLAY2, m_creature);
@@ -115,7 +116,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             DoScriptText(urand(0, 1) ? SAY_CLEAN_SLAY1 : SAY_CLEAN_SLAY2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(m_bCorruptedForm ? SAY_CORRUPT_DEATH : SAY_CLEAN_DEATH, m_creature);
 
@@ -141,7 +142,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
     }
 
     // Wrapper to handle the blue beams animation
-    void DoHandleBeamHelpers(bool bReset)
+    void DoHandleBeamHelpers(bool reset)
     {
         if (!m_instance)
             return;
@@ -151,12 +152,12 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
 
         for (GuidList::const_iterator itr = lBeamHelpersGuid.begin(); itr != lBeamHelpersGuid.end(); ++itr)
         {
-            if (Creature* pBeam = m_creature->GetMap()->GetCreature(*itr))
+            if (Creature* beam = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (bReset)
-                    pBeam->InterruptNonMeleeSpells(false);
+                if (reset)
+                    beam->InterruptNonMeleeSpells(false);
                 else
-                    pBeam->CastSpell(m_creature, SPELL_BLUE_BEAM, TRIGGERED_NONE);
+                    beam->CastSpell(nullptr, SPELL_BLUE_BEAM, TRIGGERED_NONE);
             }
         }
     }
@@ -215,7 +216,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
                 if (CheckTransition())
                 {
                     DoScriptText(SAY_SWITCH_TO_CLEAN, m_creature);
-                    m_creature->RemoveAurasDueToSpell(SPELL_CORRUPTION);
+                    m_creature->RemoveAurasDueToSpell(SPELL_CORRUPTION_SD);
                     m_uiMarkCount = 0;
 
                     DoHandleBeamHelpers(false);
@@ -254,7 +255,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             {
                 if (!CheckTransition())
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTION) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTION_SD) == CAST_OK)
                     {
                         DoScriptText(SAY_SWITCH_TO_CORRUPT, m_creature);
                         m_uiMarkCount = 0;
@@ -298,7 +299,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
         {
             if (m_uiEnrageTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                     m_uiEnrageTimer = 0;
             }
             else
@@ -309,46 +310,17 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
     }
 };
 
-struct npc_spawn_of_hydrossAI : public ScriptedAI
+struct npc_spawn_of_hydrossAI : public CombatAI
 {
-    npc_spawn_of_hydrossAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_spawn_of_hydrossAI(Creature* creature) : CombatAI(creature, 0)
     {
-        Reset();
-        m_creature->CastSpell(m_creature, SPELL_ELEMENTAL_SPAWNIN, TRIGGERED_OLD_TRIGGERED);
-        m_uiAttackDelayTimer = 3000;
+        m_creature->CastSpell(nullptr, SPELL_ELEMENTAL_SPAWNIN, TRIGGERED_OLD_TRIGGERED);
         SetReactState(REACT_PASSIVE);
-    }
-
-    uint32 m_uiAttackDelayTimer;
-
-    void Reset() override {}
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (m_uiAttackDelayTimer)
-            return;
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiAttackDelayTimer)
+        AddCustomAction(0, 3000u, [&]()
         {
-            if (m_uiAttackDelayTimer <= uiDiff)
-            {
-                m_uiAttackDelayTimer = 0;
-                m_creature->SetInCombatWithZone();
-                SetReactState(REACT_AGGRESSIVE);
-            }
-            else
-                m_uiAttackDelayTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+            m_creature->SetInCombatWithZone();
+            SetReactState(REACT_AGGRESSIVE);
+        });
     }
 };
 
