@@ -2593,12 +2593,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000603','Do not test me, scurvy dog! I''m trained in the way of the Blood Knights!','0','0','0','0','23810','silvermoon harry SAY_AGGRO'),
 ('-1000604','I''ll pay! I''ll pay! Eeeek! Please don''t hurt me!','0','0','0','0','23812','silvermoon harry SAY_BEATEN'),
 
-('-1000605','We wait until you ready.','0','0','0','0','27824','rainspeaker SAY_ACCEPT'),
-('-1000606','Home time!','0','0','0','0','27751','rainspeaker SAY_START'),
-('-1000607','Thanks!','0','0','0','0','27752','rainspeaker SAY_END_1'),
-('-1000608','Oh no! Some puppy-men followed!','0','0','0','0','27799','rainspeaker SAY_END_2'),
-('-1000609','Dumb big-tongue lover! You not friend of Frenzyheart no more. Frenzyheart will get you good.','0','1','0','0','27798','rainspeaker SAY_TRACKER'),
-
 ('-1000621','All systems on-line.  Prepare yourself, we leave shortly.','0','0','0','0','19481','maxx SAY_START'),
 ('-1000622','Be careful in there and come back in one piece!','0','0','0','0','17003','maxx SAY_ALLEY_FAREWELL'),
 ('-1000623','Proceed.','0','0','0','0','19484','maxx SAY_CONTINUE'),
