@@ -5887,11 +5887,13 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     if (realCaster->GetTypeId() == TYPEID_GAMEOBJECT)
         responsibleCaster = ((GameObject*)realCaster)->GetOwner();
 
-    // Expected Amount: TODO - there are quite some exceptions (like totems, engineering dragonlings..)
-    uint32 amount = 1;
+    // Enumerated Strings enum Unk 240
     uint32 health = 0; // totems have HP in base points
-    uint32 unk = 0; // no idea what it means, but 4000-25000 cant be right for summon count
+    uint32 numUnits = 1;
+    uint32 seatNumber = 0;
+    uint32 rideSpell = 0;
     uint32 creatureLevel = 0;
+    uint32 unk = 0; // no idea what it means, but 4000-25000 cant be right for summon count
     if (prop_id == 121 || summon_prop->Title == UNITNAME_SUMMON_TITLE_TOTEM)
     {
         health = damage;
@@ -5903,28 +5905,44 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
             case SUMMON_PROP_GROUP_CONTROLLABLE:
                 unk = damage;
                 break;
+            case SUMMON_PROP_GROUP_VEHICLE:
+            case SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE:
+                switch (m_spellInfo->Id)
+                {
+                    case 52066:
+                        creatureLevel = damage;
+                        break;
+                    default:
+                        // should be specified as enum but oh well for now
+                        if (damage >= 0 && damage < MAX_VEHICLE_SEAT)
+                            seatNumber = damage;
+                        else
+                            rideSpell = seatNumber;
+                        break;
+                }
+                break;
             default:
                 if (m_spellInfo->Id == 18662 || m_spellInfo->Id == 1122)
                     creatureLevel = damage;
                 else
-                    amount = damage > 0 ? damage : 1; // old code
+                    numUnits = damage > 0 ? damage : 1; // old code
                 break;
         }
     }
 
     // basepoints of SUMMON_PROP_GROUP_VEHICLE is often a spellId, set amount to 1
     if (summon_prop->Group == SUMMON_PROP_GROUP_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE || summon_prop->Group == SUMMON_PROP_GROUP_CONTROLLABLE)
-        amount = 1;
+        numUnits = 1;
 
     // basepoints of summoned critters are unk - set amount to 1
     if (summon_prop->Slot == SUMMON_PROP_SLOT_CRITTER)
-        amount = 1;
+        numUnits = 1;
 
     if (m_CastItem)
     {
         ItemPrototype const* proto = m_CastItem->GetProto();
         if (proto && proto->RequiredSkill == SKILL_ENGINEERING && proto->InventoryType == INVTYPE_TRINKET)
-            amount = 1;
+            numUnits = 1;
     }
 
     // Expected Level
@@ -5967,7 +5985,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     // engineering trinkets do not scale with skill in wotlk
 
     CreatureSummonPositions summonPositions;
-    summonPositions.resize(amount, CreaturePosition());
+    summonPositions.resize(numUnits, CreaturePosition());
 
     // Set middle position
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
@@ -6097,7 +6115,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         case SUMMON_PROP_GROUP_VEHICLE:
         case SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE:
         {
-            summonResult = DoSummonVehicle(summonPositions, summon_prop, eff_idx, level);
+            summonResult = DoSummonVehicle(summonPositions, summon_prop, eff_idx, level, seatNumber, rideSpell);
             break;
         }
         default:
@@ -6123,7 +6141,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         MANGOS_ASSERT(creature || itr != summonPositions.begin());
         if (!creature)
         {
-            sLog.outError("EffectSummonType: Expected to have %u NPCs summoned, but some failed (Spell id %u)", amount, m_spellInfo->Id);
+            sLog.outError("EffectSummonType: Expected to have %u NPCs summoned, but some failed (Spell id %u)", numUnits, m_spellInfo->Id);
             continue;
         }
 
@@ -6691,7 +6709,7 @@ bool Spell::DoSummonPet(CreatureSummonPositions& list, SummonPropertiesEntry con
     return true;
 }
 
-bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx, uint32 /*level*/)
+bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx, uint32 level, uint32 seatNum, uint32 rideSpell)
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
@@ -6706,6 +6724,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     TempSpawnSettings spawnSettings(m_caster, creatureEntry, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation(), (m_duration == 0) ? TEMPSPAWN_CORPSE_DESPAWN : TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, m_duration);
     spawnSettings.spellId = m_spellInfo->Id;
     spawnSettings.ownerGuid = m_caster->GetObjectGuid();
+    spawnSettings.level = level;
     if (prop->FactionId)
         spawnSettings.faction = prop->FactionId;
     Creature* spawnCreature = WorldObject::SummonCreature(spawnSettings, m_caster->GetMap(), m_caster->GetPhaseMask());
@@ -6719,11 +6738,10 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     list[0].creature = spawnCreature;
 
     // Board the caster right after summoning
-    int32 basePoints = m_spellInfo->CalculateSimpleValue(effIdx);
     bool executed = false;
-    if (basePoints > MAX_VEHICLE_SEAT)
+    if (rideSpell)
     {
-        SpellEntry const* controlSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(basePoints);
+        SpellEntry const* controlSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(rideSpell);
         if (controlSpellEntry && IsSpellHaveAura(controlSpellEntry, SPELL_AURA_CONTROL_VEHICLE))
         {
             m_caster->CastSpell(spawnCreature, controlSpellEntry, TRIGGERED_OLD_TRIGGERED);
@@ -6732,8 +6750,11 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     }
     else
     {
-        if (basePoints > 0 && basePoints < MAX_VEHICLE_SEAT)
-            m_caster->CastCustomSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        if (seatNum > 0 && seatNum < MAX_VEHICLE_SEAT)
+        {
+            int32 points = seatNum;
+            m_caster->CastCustomSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, &points, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
         else
             m_caster->CastSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
     }
