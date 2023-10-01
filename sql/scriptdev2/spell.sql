@@ -811,7 +811,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52694,'spell_recall_eye_of_acherus'),
 (52751,'spell_death_gate'),
 (52812,'spell_molten_fury_flamebringer'),
-(52862,'spell_spell_devour_wind'),
+(52862,'spell_devour_wind'),
 (52864,'spell_devour_water'),
 (52866,'spell_transform_visual'),
 (52942,'spell_pulsing_shockwave'),
