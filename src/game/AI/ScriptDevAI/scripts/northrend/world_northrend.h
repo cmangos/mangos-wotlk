@@ -19,6 +19,7 @@ struct world_map_northrend : public ScriptedMap
         void OnCreatureCreate(Creature* creature) override;
 
         void SetData(uint32 /*uiType*/, uint32 /*uiData*/) override;
+        void SetData64(uint32 data, uint64 value) override;
 
         void SetDalaranCooldownTime(ObjectGuid playerGuid);
         bool IsDalaranCooldownForPlayer(ObjectGuid playerGuid) const;
