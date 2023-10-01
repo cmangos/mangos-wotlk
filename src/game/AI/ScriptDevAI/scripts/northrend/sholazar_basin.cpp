@@ -650,8 +650,54 @@ struct SummonZepikTheGorlocHunter : public SpellScript
     }
 };
 
+// 51190 - Summon Lafoo
+struct SummonLafoo : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 51191 - Summon Jaloot
+struct SummonJaloot : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 51192 - Summon Moodle
+struct SummonMoodle : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetDefaultGossipMenuId(summon->GetCreatureInfo()->GossipMenuId);
+    }
+};
+
 // 51257 - Summon Possessed Crocolisk
 struct SummonPossessedCrocolisk : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 52276 - Summon Kartak
+struct SummonKartak : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+    }
+};
+
+// 52333 - Summon Soo-holu
+struct SummonSooholu : public SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
     {
@@ -752,7 +798,12 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<SummonGoregekTheBristlepineHunter>("spell_summon_goregek_the_bristlepine_hunter");
     RegisterSpellScript<SummonDajikTheWaspHunter>("spell_summon_dajik_the_wasp_hunter");
     RegisterSpellScript<SummonZepikTheGorlocHunter>("spell_summon_zepik_the_gorloc_hunter");
+    RegisterSpellScript<SummonLafoo>("spell_summon_lafoo");
+    RegisterSpellScript<SummonJaloot>("spell_summon_jaloot");
+    RegisterSpellScript<SummonMoodle>("spell_summon_moodle");
     RegisterSpellScript<SummonPossessedCrocolisk>("spell_summon_possessed_crocolisk");
+    RegisterSpellScript<SummonKartak>("spell_summon_kartak");
+    RegisterSpellScript<SummonSooholu>("spell_summon_sooholu");
     RegisterSpellScript<DevourWind>("spell_devour_wind");
     RegisterSpellScript<DevourWater>("spell_devour_water");
     RegisterSpellScript<TransformVisual>("spell_transform_visual");
