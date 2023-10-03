@@ -113,7 +113,7 @@ struct TwistedReflection : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
-        procData.triggerTarget = procData.victim;
+        procData.triggerTarget = procData.attacker;
         procData.triggeredSpellId = 21064;
         return SPELL_AURA_PROC_OK;
     }
