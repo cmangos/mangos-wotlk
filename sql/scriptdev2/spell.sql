@@ -393,6 +393,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34012,'spell_raise_dead'),
 (34019,'spell_raise_dead'),
 (41071,'spell_raise_dead'),
+(37935,'spell_cleansing_field'),
 (32960,'spell_mark_of_doomlord_kazzak'),
 (40567,'spell_ogrila_flasks'),
 (40568,'spell_ogrila_flasks'),
