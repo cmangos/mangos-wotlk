@@ -86,72 +86,72 @@ bool GossipSelect_npc_erozion(Player* pPlayer, Creature* pCreature, uint32 /*uiS
 enum
 {
     // Thrall texts - part I
-    SAY_TH_START_EVENT_PART_1       = -1560023,
-    SAY_ARMORER_CALL_GUARDS         = -1560003,
-    SAY_TH_KILL_ARMORER             = -1560050,
-    SAY_TH_ARMORY_1                 = -1560024,
-    SAY_TH_ARMORY_2                 = -1560005,
-    SAY_TH_SKARLOC_MEET             = -1560025,
-    SAY_SKARLOC_ENTER               = -1560000,
-    SAY_TH_SKARLOC_TAUNT            = -1560026,
+    SAY_TH_START_EVENT_PART_1       = 17622,
+    SAY_ARMORER_CALL_GUARDS         = 15891,
+    SAY_TH_KILL_ARMORER             = 15892,
+    SAY_TH_ARMORY_1                 = 15893,
+    SAY_TH_ARMORY_2                 = 15894,
+    SAY_TH_SKARLOC_MEET             = 15908,
+    SAY_SKARLOC_ENTER               = 15909,
+    SAY_TH_SKARLOC_TAUNT            = 17623,
 
     // Thrall texts - part II
-    SAY_TH_START_EVENT_PART2        = -1560027,
-    SAY_TH_MOUNTS_UP                = -1560028,
-    EMOTE_TH_STARTLE_HORSE          = -1560006,
+    SAY_TH_START_EVENT_PART2        = 15916,
+    SAY_TH_MOUNTS_UP                = 15948,
+    EMOTE_TH_STARTLE_HORSE          = 16499,
 
     // Thrall texts part III (barn)
-    SAY_LOOKOUT_BARN_1              = -1560007,
-    SAY_PROTECTOR_BARN_2            = -1560008,
-    EMOTE_TH_CALM_HORSE             = -1560009,
-    SAY_PROTECTOR_BARN_3            = -1560010,
-    SAY_TH_HEAD_TOWN                = -1560011,
+    SAY_LOOKOUT_BARN_1              = 15958,
+    SAY_PROTECTOR_BARN_2            = 15968,
+    EMOTE_TH_CALM_HORSE             = 15970,
+    SAY_PROTECTOR_BARN_3            = 15969,
+    SAY_TH_HEAD_TOWN                = 15974,
 
     // Thrall texts part III (church)
-    SAY_TH_CHURCH_ENTER             = -1560012,
-    SAY_LOOKOUT_CHURCH              = -1560016,
-    SAY_TH_CHURCH_END               = -1560029,
+    SAY_TH_CHURCH_ENTER             = 15975,
+    SAY_LOOKOUT_CHURCH              = 15976,
+    SAY_TH_CHURCH_END               = 15977,
 
     // Thrall texts part III (inn)
-    SAY_LOOKOUT_INN                 = -1560017,
-    SAY_TA_ESCAPED                  = -1560049,
-    SAY_TH_MEET_TARETHA             = -1560030,
+    SAY_LOOKOUT_INN                 = 15986,
+    SAY_TA_ESCAPED                  = 15979,
+    SAY_TH_MEET_TARETHA             = 15978,
 
-    SAY_EPOCH_ENTER1                = -1560013,
-    SAY_TH_EPOCH_WONDER             = -1560031,
-    SAY_EPOCH_ENTER2                = -1560014,
-    SAY_TH_EPOCH_KILL_TARETHA       = -1560032,
-    SAY_EPOCH_ENTER3                = -1560015,
+    SAY_EPOCH_ENTER1                = 16016,
+    SAY_TH_EPOCH_WONDER             = 16017,
+    SAY_EPOCH_ENTER2                = 16019,
+    SAY_TH_EPOCH_KILL_TARETHA       = 16020,
+    SAY_EPOCH_ENTER3                = 16021,
 
     // infinite dragons texts
-    SAY_INFINITE_DRAGON_AGGRO_1     = -1560004,
-    SAY_INFINITE_DRAGON_AGGRO_2     = -1560018,
-    SAY_INFINITE_DRAGON_AGGRO_3     = -1560019,
-    SAY_INFINITE_DRAGON_AGGRO_4     = -1560020,
+    SAY_INFINITE_DRAGON_AGGRO_1     = 19537,
+    SAY_INFINITE_DRAGON_AGGRO_2     = 19536,
+    SAY_INFINITE_DRAGON_AGGRO_3     = 19538,
+    SAY_INFINITE_DRAGON_AGGRO_4     = 19534,
 
     // Thrall texts - misc
-    SAY_TH_RANDOM_LOW_HP1           = -1560034,
-    SAY_TH_RANDOM_LOW_HP2           = -1560035,
+    SAY_TH_RANDOM_LOW_HP1           = 17610,
+    SAY_TH_RANDOM_LOW_HP2           = 17611,
 
-    SAY_TH_RANDOM_DIE1              = -1560036,
-    SAY_TH_RANDOM_DIE2              = -1560037,
+    SAY_TH_RANDOM_DIE1              = 17612,
+    SAY_TH_RANDOM_DIE2              = 17613,
 
-    SAY_TH_RANDOM_AGGRO1            = -1560038,
-    SAY_TH_RANDOM_AGGRO2            = -1560039,
-    SAY_TH_RANDOM_AGGRO3            = -1560040,
-    SAY_TH_RANDOM_AGGRO4            = -1560041,
+    SAY_TH_RANDOM_AGGRO1            = 17600,
+    SAY_TH_RANDOM_AGGRO2            = 17601,
+    SAY_TH_RANDOM_AGGRO3            = 17602,
+    SAY_TH_RANDOM_AGGRO4            = 17603,
 
-    SAY_TH_RANDOM_KILL1             = -1560042,
-    SAY_TH_RANDOM_KILL2             = -1560043,
-    SAY_TH_RANDOM_KILL3             = -1560044,
+    SAY_TH_RANDOM_KILL1             = 17604,
+    SAY_TH_RANDOM_KILL2             = 17605,
+    SAY_TH_RANDOM_KILL3             = 17606,
 
-    SAY_TH_LEAVE_COMBAT1            = -1560045,
-    SAY_TH_LEAVE_COMBAT2            = -1560046,
-    SAY_TH_LEAVE_COMBAT3            = -1560047,
+    SAY_TH_LEAVE_COMBAT1            = 17607,
+    SAY_TH_LEAVE_COMBAT2            = 17608,
+    SAY_TH_LEAVE_COMBAT3            = 10457,
 
     // reset texts
-    SAY_ERONZION_RESET_THRALL       = -1560001,
-    SAY_ERONZION_RESET_LAST         = -1560002,
+    SAY_ERONZION_RESET_THRALL       = 16729,
+    SAY_ERONZION_RESET_LAST         = 16731,
 
     // gossip - start item
     GOSSIP_ITEM_START               = -3560000,             // "We are ready to get you out of here, Thrall"
@@ -287,10 +287,10 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
     {
         switch (urand(0, 3))
         {
-            case 0: DoScriptText(SAY_TH_RANDOM_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_TH_RANDOM_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_TH_RANDOM_AGGRO3, m_creature); break;
-            case 3: DoScriptText(SAY_TH_RANDOM_AGGRO4, m_creature); break;
+            case 0: DoBroadcastText(SAY_TH_RANDOM_AGGRO1, m_creature); break;
+            case 1: DoBroadcastText(SAY_TH_RANDOM_AGGRO2, m_creature); break;
+            case 2: DoBroadcastText(SAY_TH_RANDOM_AGGRO3, m_creature); break;
+            case 3: DoBroadcastText(SAY_TH_RANDOM_AGGRO4, m_creature); break;
         }
 
         if (m_creature->IsMounted())
@@ -304,9 +304,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_TH_RANDOM_KILL1, m_creature); break;
-            case 1: DoScriptText(SAY_TH_RANDOM_KILL2, m_creature); break;
-            case 2: DoScriptText(SAY_TH_RANDOM_KILL3, m_creature); break;
+            case 0: DoBroadcastText(SAY_TH_RANDOM_KILL1, m_creature); break;
+            case 1: DoBroadcastText(SAY_TH_RANDOM_KILL2, m_creature); break;
+            case 2: DoBroadcastText(SAY_TH_RANDOM_KILL3, m_creature); break;
         }
     }
 
@@ -316,7 +316,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
         if (m_pInstance)
             m_pInstance->SetData(TYPE_THRALL_EVENT, FAIL);
 
-        DoScriptText(urand(0, 1) ? SAY_TH_RANDOM_DIE1 : SAY_TH_RANDOM_DIE2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_TH_RANDOM_DIE1 : SAY_TH_RANDOM_DIE2, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_EROZION_IMAGE, CAST_TRIGGERED);
 
         // despawn the summons which won't self despawn
@@ -425,9 +425,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
         {
             switch (urand(0, 2))
             {
-                case 0: DoScriptText(SAY_TH_LEAVE_COMBAT1, m_creature); break;
-                case 1: DoScriptText(SAY_TH_LEAVE_COMBAT2, m_creature); break;
-                case 2: DoScriptText(SAY_TH_LEAVE_COMBAT3, m_creature); break;
+                case 0: DoBroadcastText(SAY_TH_LEAVE_COMBAT1, m_creature); break;
+                case 1: DoBroadcastText(SAY_TH_LEAVE_COMBAT2, m_creature); break;
+                case 2: DoBroadcastText(SAY_TH_LEAVE_COMBAT3, m_creature); break;
             }
         }
 
@@ -456,7 +456,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 {
                     if (!m_bHasInnYelled)
                     {
-                        DoScriptText(SAY_LOOKOUT_INN, pSummoned);
+                        DoBroadcastText(SAY_LOOKOUT_INN, pSummoned);
                         m_bHasInnYelled = true;
                     }
                     pSummoned->AI()->AttackStart(m_creature);
@@ -474,10 +474,10 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 {
                     switch (urand(0, 3))
                     {
-                        case 0: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_1, pSummoned); break;
-                        case 1: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_2, pSummoned); break;
-                        case 2: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_3, pSummoned); break;
-                        case 3: DoScriptText(SAY_INFINITE_DRAGON_AGGRO_4, pSummoned); break;
+                        case 0: DoBroadcastText(SAY_INFINITE_DRAGON_AGGRO_1, pSummoned); break;
+                        case 1: DoBroadcastText(SAY_INFINITE_DRAGON_AGGRO_2, pSummoned); break;
+                        case 2: DoBroadcastText(SAY_INFINITE_DRAGON_AGGRO_3, pSummoned); break;
+                        case 3: DoBroadcastText(SAY_INFINITE_DRAGON_AGGRO_4, pSummoned); break;
                     }
                     m_bHasEpochYelled = true;
                 }
@@ -491,7 +491,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case NPC_CHURCH_PROTECTOR:
                 if (!m_bHasChurchYelled)
                 {
-                    DoScriptText(SAY_LOOKOUT_CHURCH, pSummoned);
+                    DoBroadcastText(SAY_LOOKOUT_CHURCH, pSummoned);
                     m_bHasChurchYelled = true;
                 }
                 pSummoned->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -500,7 +500,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             // Spawned when Thrall is dead
             case NPC_IMAGE_OF_ERONZION:
                 if (m_pInstance)
-                    DoScriptText(m_pInstance->GetThrallEventCount() < MAX_WIPE_COUNTER ? SAY_ERONZION_RESET_THRALL : SAY_ERONZION_RESET_LAST, pSummoned);
+                    DoBroadcastText(m_pInstance->GetThrallEventCount() < MAX_WIPE_COUNTER ? SAY_ERONZION_RESET_THRALL : SAY_ERONZION_RESET_LAST, pSummoned);
                 pSummoned->CastSpell(pSummoned, SPELL_SPAWN_EROZION_IMAGE, TRIGGERED_NONE);
                 pSummoned->ForcedDespawn(30000);
                 break;
@@ -510,7 +510,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case NPC_EPOCH:
                 pSummoned->SetLevitate(true);
-                DoScriptText(SAY_EPOCH_ENTER1, pSummoned);
+                DoBroadcastText(SAY_EPOCH_ENTER1, pSummoned);
                 break;
             // Skarloc helpers - they have special behavior
             case NPC_WARDEN:
@@ -616,7 +616,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                         break;
                     case 2:
                         // taunt Thrall
-                        DoScriptText(SAY_SKARLOC_ENTER, pSummoned);
+                        DoBroadcastText(SAY_SKARLOC_ENTER, pSummoned);
                         SetEscortPaused(false);
                         break;
                 }
@@ -696,16 +696,16 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case 9:
                 if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
                 {
-                    DoScriptText(SAY_ARMORER_CALL_GUARDS, pArmorer);
+                    DoBroadcastText(SAY_ARMORER_CALL_GUARDS, pArmorer);
                     pArmorer->SetFacingToObject(m_creature);
                 }
                 break;
             case 10:
-                DoScriptText(SAY_TH_KILL_ARMORER, m_creature);
+                DoBroadcastText(SAY_TH_KILL_ARMORER, m_creature);
                 DoCastSpellIfCan(nullptr, SPELL_KNOCKOUT_ARMORER);
                 break;
             case 11:
-                DoScriptText(SAY_TH_ARMORY_1, m_creature);
+                DoBroadcastText(SAY_TH_ARMORY_1, m_creature);
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
             case 12:
@@ -723,7 +723,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case 16:
                 if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
                     m_creature->SetFacingToObject(pArmorer);
-                DoScriptText(SAY_TH_ARMORY_2, m_creature);
+                DoBroadcastText(SAY_TH_ARMORY_2, m_creature);
                 break;
             // *** Escort event - Part I - outside the keep ***
             case 21:
@@ -756,7 +756,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 m_creature->SummonCreature(NPC_SKARLOC, 2000.201f, 277.9190f, 66.4911f, 6.11f, TEMPSPAWN_DEAD_DESPAWN, 0);
                 m_creature->SummonCreature(NPC_VETERAN, 1997.969f, 274.4247f, 66.6181f, 5.67f, TEMPSPAWN_DEAD_DESPAWN, 0);
                 m_creature->SummonCreature(NPC_WARDEN,  2000.002f, 282.0754f, 66.2986f, 6.02f, TEMPSPAWN_DEAD_DESPAWN, 0);
-                DoScriptText(SAY_TH_SKARLOC_MEET, m_creature);
+                DoBroadcastText(SAY_TH_SKARLOC_MEET, m_creature);
                 SetEscortPaused(true);
                 break;
             case 37:
@@ -793,7 +793,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 }
                 break;
             case 40:
-                DoScriptText(SAY_TH_MOUNTS_UP, m_creature);
+                DoBroadcastText(SAY_TH_MOUNTS_UP, m_creature);
                 m_creature->SetFacingTo(5.33f);
                 m_creature->Mount(MODEL_SKARLOC_MOUNT);
                 break;
@@ -806,7 +806,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case 69:
                 if (Creature* pMount = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
                     m_creature->SetFacingToObject(pMount);
-                DoScriptText(EMOTE_TH_STARTLE_HORSE, m_creature);
+                DoBroadcastText(EMOTE_TH_STARTLE_HORSE, m_creature);
                 break;
             case 70:
                 if (Creature* pMount = m_creature->GetMap()->GetCreature(m_skarlocMountGuid))
@@ -839,11 +839,11 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 SetEscortPaused(true);
                 break;
             case 81:
-                DoScriptText(SAY_TH_HEAD_TOWN, m_creature);
+                DoBroadcastText(SAY_TH_HEAD_TOWN, m_creature);
                 break;
             // *** Escort event - Part III - church ***
             case 98:
-                DoScriptText(SAY_TH_CHURCH_ENTER, m_creature);
+                DoBroadcastText(SAY_TH_CHURCH_ENTER, m_creature);
                 m_creature->SetFacingTo(1.0f);
                 break;
             case 99:
@@ -853,7 +853,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 m_creature->SummonCreature(NPC_CHURCH_GUARDSMAN, 2629.98f, 656.96f, 55.96f, 4.34f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
                 break;
             case 100:
-                DoScriptText(SAY_TH_CHURCH_END, m_creature);
+                DoBroadcastText(SAY_TH_CHURCH_END, m_creature);
                 break;
             // *** Escort event - Part III - inside the inn ***
             case 111:
@@ -866,11 +866,11 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             // *** Escort event - Part III - meet Taretha ***
             case 112:
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
-                    DoScriptText(SAY_TA_ESCAPED, pTaretha, m_creature);
+                    DoBroadcastText(SAY_TA_ESCAPED, pTaretha, m_creature);
                 break;
             case 113:
                 // wait for player input
-                DoScriptText(SAY_TH_MEET_TARETHA, m_creature);
+                DoBroadcastText(SAY_TH_MEET_TARETHA, m_creature);
                 m_pInstance->SetData(TYPE_ESCORT_INN, DONE);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 if (Creature* pTaretha = m_pInstance->GetSingleCreatureFromStorage(NPC_TARETHA))
@@ -887,7 +887,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case 122:
                 if (Creature* pEpoch = m_pInstance->GetSingleCreatureFromStorage(NPC_EPOCH))
                 {
-                    DoScriptText(SAY_EPOCH_ENTER3, pEpoch);
+                    DoBroadcastText(SAY_EPOCH_ENTER3, pEpoch);
                     m_creature->SetFacingToObject(pEpoch);
                 }
                 break;
@@ -970,7 +970,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
 
         if (!m_bIsLowHp && m_creature->GetHealthPercent() < 20.0f)
         {
-            DoScriptText(urand(0, 1) ? SAY_TH_RANDOM_LOW_HP1 : SAY_TH_RANDOM_LOW_HP2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_TH_RANDOM_LOW_HP1 : SAY_TH_RANDOM_LOW_HP2, m_creature);
             m_bIsLowHp = true;
         }
 
@@ -1029,7 +1029,7 @@ bool GossipSelect_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature,
         {
             pPlayer->CLOSE_GOSSIP_MENU();
 
-            DoScriptText(SAY_TH_START_EVENT_PART_1, pCreature);
+            DoBroadcastText(SAY_TH_START_EVENT_PART_1, pCreature);
 
             if (pInstance)
                 pInstance->SetData(TYPE_THRALL_EVENT, IN_PROGRESS);
@@ -1059,7 +1059,7 @@ bool GossipSelect_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature,
         {
             pPlayer->CLOSE_GOSSIP_MENU();
 
-            DoScriptText(SAY_TH_START_EVENT_PART2, pCreature);
+            DoBroadcastText(SAY_TH_START_EVENT_PART2, pCreature);
 
             if (pInstance)
                 pInstance->SetData(TYPE_ESCORT_BARN, IN_PROGRESS);
@@ -1099,16 +1099,15 @@ bool GossipSelect_npc_thrall_old_hillsbrad(Player* pPlayer, Creature* pCreature,
 enum
 {
     // end event texts and spells
-    SAY_TA_FREE                     = -1560048,
-    SAY_TR_GLAD_SAFE                = -1560054,
-    SAY_TA_NEVER_MET                = -1560055,
-    SAY_TR_THEN_WHO                 = -1560056,
-    SAY_PRE_WIPE                    = -1560057,
-    SAY_WIPE_MEMORY                 = -1560051,
-    SAY_ABOUT_TARETHA               = -1560052,
-    SAY_TH_EVENT_COMPLETE           = -1560033,
-    SAY_TA_FAREWELL                 = -1560053,
-    SAY_AFTER_WIPE                  = -1560058,             // not sure when to use this one
+    SAY_TA_FREE                     = 16082,
+    SAY_TR_GLAD_SAFE                = 16083,
+    SAY_TA_NEVER_MET                = 16085,
+    SAY_TR_THEN_WHO                 = 16084,
+    SAY_PRE_WIPE                    = 16086,
+    SAY_WIPE_MEMORY                 = 16087,
+    SAY_ABOUT_TARETHA               = 16088,
+    SAY_TH_EVENT_COMPLETE           = 16089,
+    SAY_TA_FAREWELL                 = 16090,
 
     GOSSIP_ITEM_EPOCH_1             = -3560005,             // "Strange wizard?"
     TEXT_ID_EPOCH_1                 = 9610,                 // Thank you for helping Thrall escape, friends. Now I only hope
@@ -1162,7 +1161,7 @@ struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
         // Remove flags from the npc - the quest will be handled by the entrance version
         if (pSummoned->GetEntry() == NPC_EROZION)
         {
-            DoScriptText(SAY_PRE_WIPE, pSummoned);
+            DoBroadcastText(SAY_PRE_WIPE, pSummoned);
             pSummoned->CastSpell(pSummoned, SPELL_TELEPORT, TRIGGERED_NONE);
             pSummoned->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
         }
