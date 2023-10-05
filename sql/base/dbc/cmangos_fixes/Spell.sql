@@ -3458,6 +3458,20 @@ UPDATE spell_template SET EffectSpellClassMask1_1=0x20200021,EffectSpellClassMas
 UPDATE spell_template SET EffectSpellClassMask1_1=0x20200021,EffectSpellClassMask1_2=0x00009000,EffectSpellClassMask1_3=0x0 WHERE Id IN(55339);
 UPDATE spell_template SET EffectSpellClassMask1_1=0x20200021,EffectSpellClassMask1_2=0x00009000,EffectSpellClassMask1_3=0x0 WHERE Id IN(55340);
 
+-- DK glyphs
+-- Glyph of Chains of Ice
+UPDATE spell_template SET EffectSpellClassMask1_1=0x000004 WHERE Id IN(58620);
+-- Glyph of Heart Strike
+UPDATE spell_template SET EffectSpellClassMask1_1=0x01000000 WHERE Id IN(58616);
+-- glyph of obliterate - wrong effects
+UPDATE spell_template SET Effect1=0 WHERE Id=58671; -- WTF - was meant to be removed
+-- glyph of scourge strike - wrong trigger spell
+UPDATE spell_template SET EffectTriggerSpell1=69961 WHERE Id IN(58642);
+-- glyph of rune tap - wrong mask
+UPDATE spell_template SET EffectSpellClassMask1_1=0x08000000 WHERE Id IN(58620);
+-- glyph of death's embrace - wrong mask
+UPDATE spell_template SET EffectSpellClassMask1_1=0x00002000 WHERE Id IN(58620);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

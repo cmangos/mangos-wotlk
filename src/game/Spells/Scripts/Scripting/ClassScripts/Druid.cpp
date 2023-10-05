@@ -129,7 +129,7 @@ struct ShredDruid : public SpellScript
                 Unit* target = spell->GetUnitTarget();
                 if (Aura* rip = target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x0, 0x00200000, spell->GetCaster()->GetObjectGuid()))
                 {
-                    int32 increaseAmount = rip->GetAmount();
+                    int32 increaseAmount = glyphOfShred->GetAmount();
                     int32 maxIncreaseAmount = spell->GetCaster()->CalculateSpellEffectValue(target, rip->GetSpellProto(), EFFECT_INDEX_1);
                     if (rip->GetScriptValue() >= maxIncreaseAmount)
                         return;

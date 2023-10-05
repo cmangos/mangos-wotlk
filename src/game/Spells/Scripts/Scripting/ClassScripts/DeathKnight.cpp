@@ -683,6 +683,80 @@ struct GlacierRot : public AuraScript
     }
 };
 
+// 48792 - Icebound Fortitude
+struct IceboundFortitude : public AuraScript
+{
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.effIdx == EFFECT_INDEX_2)
+        {
+            if (data.caster)
+            {
+                if (Aura* aura = data.caster->GetAura(58625, EFFECT_INDEX_0))
+                    value = aura->GetAmount();
+
+                if (data.caster->IsPlayer())
+                {
+                    Player* player = static_cast<Player*>(data.caster);
+                    uint32 defValue = uint32(player->GetSkillValue(SKILL_DEFENSE)) + player->GetRatingBonusValue(CR_DEFENSE_SKILL);
+                    if (defValue > 400) // patch 3.0.8 - 35% reduction for 540 def
+                        value += int32((defValue - 400) * 0.11);
+                }
+            }
+        }
+        return value;
+    }
+};
+
+// 49020 - Obliterate
+struct ObliterateDK : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        // in official data, supposedly removed eff 1 is not removed, effect 0 that worked differently isnt removed, and actual functionality is stored in eff2
+        if (effIdx == EFFECT_INDEX_1)
+            if (Aura* glyphOfObliterate = spell->GetCaster()->GetAura(58671, EFFECT_INDEX_1))
+                spell->SetDamageDoneModifier(glyphOfObliterate->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2), EFFECT_INDEX_1);
+    }
+};
+
+// 69961 - Glyph of Scourge Strike
+struct GlyphOfScourgeStrike : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        SpellEntry const* spellInfo = spell->GetTriggeredByAuraSpellInfo();
+        Unit* target = spell->GetUnitTarget();
+        auto& auras = target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+        for (auto& aura : auras)
+        {
+            // your diseases
+            if (aura->GetSpellProto()->Dispel == DISPEL_DISEASE &&
+                aura->GetCasterGuid() == spell->GetCaster()->GetObjectGuid())
+            {
+                int32 increaseAmount = spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+                int32 maxIncreaseAmount = spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+                if (aura->GetScriptValue() >= maxIncreaseAmount)
+                    return;
+                SpellAuraHolder* holder = aura->GetHolder();
+                holder->SetAuraMaxDuration(holder->GetAuraMaxDuration() + increaseAmount);
+                holder->SetAuraDuration(holder->GetAuraDuration() + increaseAmount);
+                holder->SendAuraUpdate(false);
+                aura->SetScriptValue(aura->GetScriptValue() + increaseAmount);
+            }
+        }
+    }
+};
+
+// 58677 - Glyph of Death's Embrace
+struct GlyphOfDeathsEmbrace : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        return data.isHeal;
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -713,6 +787,10 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<TundraStalker>("spell_tundra_stalker");
     RegisterSpellScript<RageOfRivendare>("spell_rage_of_rivendare");
     RegisterSpellScript<GlacierRot>("spell_glacier_rot");
+    RegisterSpellScript<IceboundFortitude>("spell_icebound_fortitude");
+    RegisterSpellScript<ObliterateDK>("spell_obliterate_dk");
+    RegisterSpellScript<GlyphOfScourgeStrike>("spell_glyph_of_scourge_strike");
+    RegisterSpellScript<GlyphOfDeathsEmbrace>("spell_glyph_of_deaths_embrace");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_gargoyle_dk";
