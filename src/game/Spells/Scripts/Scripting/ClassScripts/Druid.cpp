@@ -321,7 +321,7 @@ struct GlyphOfStarfire : public AuraScript
             int32 increaseAmount = aura->GetAmount();
             int32 maxIncreaseAmount = aura->GetTarget()->CalculateSpellEffectValue(procData.victim, aura->GetSpellProto(), EFFECT_INDEX_1);
             if (moonfire->GetScriptValue() >= maxIncreaseAmount)
-                return;
+                return SPELL_AURA_PROC_OK;
             SpellAuraHolder* holder = moonfire->GetHolder();
             holder->SetAuraMaxDuration(holder->GetAuraMaxDuration() + increaseAmount);
             holder->SetAuraDuration(holder->GetAuraDuration() + increaseAmount);
