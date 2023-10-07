@@ -117,7 +117,7 @@ struct Brambles : public AuraScript
     }
 };
 
-// 1079 - Rip
+// 5221 - Shred
 struct ShredDruid : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo missInfo) const override
@@ -130,7 +130,7 @@ struct ShredDruid : public SpellScript
                 if (Aura* rip = target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x0, 0x00200000, spell->GetCaster()->GetObjectGuid()))
                 {
                     int32 increaseAmount = glyphOfShred->GetAmount();
-                    int32 maxIncreaseAmount = spell->GetCaster()->CalculateSpellEffectValue(target, rip->GetSpellProto(), EFFECT_INDEX_1);
+                    int32 maxIncreaseAmount = spell->GetCaster()->CalculateSpellEffectValue(target, glyphOfShred->GetSpellProto(), EFFECT_INDEX_1);
                     if (rip->GetScriptValue() >= maxIncreaseAmount)
                         return;
                     SpellAuraHolder* holder = rip->GetHolder();
@@ -300,6 +300,40 @@ struct Nourish : public SpellScript
     }
 };
 
+// 61391 - Typhoon
+struct GlyphOfTyphoon : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        // Glyph of Typhoon
+        if (spell->GetCaster()->HasAura(62135)) // does not knock back if glyphed
+            spell->SetEffectChance(0, EFFECT_INDEX_0);
+    }
+};
+
+// 54845 - Glyph of Starfire
+struct GlyphOfStarfire : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (Aura* moonfire = procData.victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, 0x00000002, 0, aura->GetTarget()->GetObjectGuid()))
+        {
+            int32 increaseAmount = aura->GetAmount();
+            int32 maxIncreaseAmount = aura->GetTarget()->CalculateSpellEffectValue(procData.victim, aura->GetSpellProto(), EFFECT_INDEX_1);
+            if (moonfire->GetScriptValue() >= maxIncreaseAmount)
+                return;
+            SpellAuraHolder* holder = moonfire->GetHolder();
+            holder->SetAuraMaxDuration(holder->GetAuraMaxDuration() + increaseAmount);
+            holder->SetAuraDuration(holder->GetAuraDuration() + increaseAmount);
+            holder->SendAuraUpdate(false);
+            moonfire->SetScriptValue(moonfire->GetScriptValue() + increaseAmount);
+        }
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+// TODO: Glyph of Entangling Roots
+
 void LoadDruidScripts()
 {
     RegisterSpellScript<Regrowth>("spell_regrowth");
@@ -317,4 +351,6 @@ void LoadDruidScripts()
     RegisterSpellScript<GlyphOfRegrowth>("spell_glyph_of_regrowth");
     RegisterSpellScript<NourishHealBoost>("spell_nourish_heal_boost");
     RegisterSpellScript<Nourish>("spell_nourish");
+    RegisterSpellScript<GlyphOfTyphoon>("spell_typhoon");
+    RegisterSpellScript<GlyphOfStarfire>("spell_glyph_of_starfire");
 }

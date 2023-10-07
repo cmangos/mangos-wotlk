@@ -1489,6 +1489,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54743,'spell_glyph_of_regrowth'),
 (60137,'spell_nourish_heal_boost'),
 (50464,'spell_nourish'),
+(61391,'spell_typhoon'),
+(61390,'spell_typhoon'),
+(61388,'spell_typhoon'),
+(61387,'spell_typhoon'),
+(53227,'spell_typhoon'),
+(54845,'spell_glyph_of_starfire'),
 (40121,'spell_swift_flight_form_passive');
 
 -- Rogue

@@ -3471,6 +3471,15 @@ UPDATE spell_template SET EffectTriggerSpell1=69961 WHERE Id IN(58642);
 UPDATE spell_template SET EffectSpellClassMask1_1=0x08000000 WHERE Id IN(58620);
 -- glyph of death's embrace - wrong mask
 UPDATE spell_template SET EffectSpellClassMask1_1=0x00002000 WHERE Id IN(58620);
+-- Druid glyphs
+-- Glyph of Hurricane should not increase damage done by insect swarm
+UPDATE spell_template SET Effect1=0 WHERE Id=54831;
+-- Glyph of Rake - should not affect swipe bear
+UPDATE spell_template SET EffectSpellClassMask1_2=0x00000000 WHERE Id IN(54821);
+-- Glyph of Starfall - should proc on damage done
+UPDATE spell_template SET ProcFlags=0x00001000 WHERE Id IN(54845);
+-- Glyph of Rejuvenation - wrong mask and wrong flags
+UPDATE spell_template SET EffectSpellClassMask1_2=0x00000000,EffectSpellClassMask1_1=0x00000010 WHERE Id IN(54754);
 
 -- ============================================================
 -- Missing WotLK Achievement Spells
