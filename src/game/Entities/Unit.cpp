@@ -12328,6 +12328,10 @@ void Unit::OnRelocated()
  */
 void Unit::SetVehicleId(uint32 entry, uint32 overwriteNpcEntry)
 {
+    // on update entry if target entry is same vehicle, do not clear vehicle
+    if (m_vehicleInfo && entry == m_vehicleInfo->GetVehicleEntry()->m_ID)
+        return;
+
     delete m_vehicleInfo;
 
     if (entry)
