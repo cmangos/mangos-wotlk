@@ -1453,6 +1453,12 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
 
     victim->SetKillerGuid(killer ? killer->GetObjectGuid() : ObjectGuid());
 
+    if (victim->GetSettings().HasFlag(CreatureStaticFlags::DESPAWN_INSTANTLY))
+    {
+        victim->ForcedDespawn(); // no loot or threat list management
+        return;
+    }
+
     if (isPet)
         return;                                             // Pets might have been unsummoned at this place, do not handle them further!
 
