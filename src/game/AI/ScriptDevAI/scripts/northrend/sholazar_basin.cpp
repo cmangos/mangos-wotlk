@@ -719,6 +719,22 @@ struct DevourWind : public SpellScript
 
         return SPELL_CAST_OK;
     }
+
+    void OnCast(Spell* spell) const override
+    {
+        // transform visual
+        spell->GetCaster()->CastSpell(nullptr, 52866, TRIGGERED_OLD_TRIGGERED);
+
+        if (!spell->GetCaster()->IsCreature())
+            return;
+
+        // change into water
+        Creature* caster = static_cast<Creature*>(spell->GetCaster());
+        caster->UpdateEntry(28985);
+        caster->GetCharmInfo()->InitVehicleCreateSpells();
+        if (Player* player = dynamic_cast<Player*>(caster->GetCharmer()))
+            player->VehicleSpellInitialize();
+    }
 };
 
 // 52864 - Devour Water
@@ -735,19 +751,18 @@ struct DevourWater : public SpellScript
 
         return SPELL_CAST_OK;
     }
-};
 
-// 52866 - Transform Visual
-struct TransformVisual : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    void OnCast(Spell* spell) const override
     {
+        // transform visual
+        spell->GetCaster()->CastSpell(nullptr, 52866, TRIGGERED_OLD_TRIGGERED);
+
         if (!spell->GetCaster()->IsCreature())
             return;
 
+        // change into water
         Creature* caster = static_cast<Creature*>(spell->GetCaster());
-        caster->UpdateEntry(spell->GetCaster()->GetEntry() == 28985 ? 28999 : 28985);
-        caster->SetSpellList(spell->GetCaster()->GetEntry() * 100 + 1);
+        caster->UpdateEntry(28999);
         caster->GetCharmInfo()->InitVehicleCreateSpells();
         if (Player* player = dynamic_cast<Player*>(caster->GetCharmer()))
             player->VehicleSpellInitialize();
@@ -806,6 +821,5 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<SummonSooholu>("spell_summon_sooholu");
     RegisterSpellScript<DevourWind>("spell_devour_wind");
     RegisterSpellScript<DevourWater>("spell_devour_water");
-    RegisterSpellScript<TransformVisual>("spell_transform_visual");
     RegisterSpellScript<FlurryOfClaws>("spell_flurry_of_claws");
 }

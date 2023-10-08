@@ -813,7 +813,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52812,'spell_molten_fury_flamebringer'),
 (52862,'spell_devour_wind'),
 (52864,'spell_devour_water'),
-(52866,'spell_transform_visual'),
 (52942,'spell_pulsing_shockwave'),
 (53031,'spell_crusader_parachute'),
 (53032,'spell_flurry_of_claws'),
