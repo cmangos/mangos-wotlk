@@ -27,13 +27,13 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO               = -1532018,
+    SAY_AGGRO               = 15079,
     SAY_SLAY1               = 15082,
     SAY_SLAY2               = 15083,
     SAY_SLAY3               = 15084,
-    SAY_REPENTANCE1         = -1532022,
-    SAY_REPENTANCE2         = -1532023,
-    SAY_DEATH               = -1532024,
+    SAY_REPENTANCE1         = 15080,
+    SAY_REPENTANCE2         = 13396,
+    SAY_DEATH               = 15081,
 
     SPELL_REPENTANCE        = 29511,
     SPELL_HOLYFIRE          = 29522,
@@ -88,7 +88,7 @@ struct boss_maiden_of_virtueAI : public CombatAI
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_REPENTANCE) == CAST_OK)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
+                    DoBroadcastText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
                 }
                 return;
@@ -118,7 +118,7 @@ struct boss_maiden_of_virtueAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_MAIDEN, DONE);
@@ -126,7 +126,7 @@ struct boss_maiden_of_virtueAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_MAIDEN, IN_PROGRESS);
