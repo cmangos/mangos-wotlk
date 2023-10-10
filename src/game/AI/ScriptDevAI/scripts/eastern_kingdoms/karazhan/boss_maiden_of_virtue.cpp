@@ -34,19 +34,10 @@ enum
     SAY_REPENTANCE1         = 15080,
     SAY_REPENTANCE2         = 13396,
     SAY_DEATH               = 15081,
-
-    SPELL_REPENTANCE        = 29511,
-    SPELL_HOLYFIRE          = 29522,
-    SPELL_HOLYWRATH         = 32445,
-    SPELL_HOLYGROUND        = 29512
 };
 
 enum MaidenOfVirtueActions
 {
-    MAIDEN_ACTION_REPENTANCE,
-    MAIDEN_ACTION_HOLY_FIRE,
-    MAIDEN_ACTION_HOLY_WRATH,
-    MAIDEN_ACTION_HOLY_GROUND,
     MAIDEN_ACTION_MAX,
 };
 
@@ -54,10 +45,6 @@ struct boss_maiden_of_virtueAI : public CombatAI
 {
     boss_maiden_of_virtueAI(Creature* creature) : CombatAI(creature, MAIDEN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        AddCombatAction(MAIDEN_ACTION_REPENTANCE, 42000, 44000);
-        AddCombatAction(MAIDEN_ACTION_HOLY_FIRE, 8000, 14000);
-        AddCombatAction(MAIDEN_ACTION_HOLY_WRATH, 15000, 25000);
-        AddCombatAction(MAIDEN_ACTION_HOLY_GROUND, 2000u);
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
         {
             return y > -2071.f && x > -10924.f;
@@ -67,54 +54,6 @@ struct boss_maiden_of_virtueAI : public CombatAI
     }
 
     ScriptedInstance* m_instance;
-
-    uint32 GetSubsequentActionTimer(uint32 id)
-    {
-        switch (id)
-        {
-            case MAIDEN_ACTION_REPENTANCE: return urand(28000, 36000);
-            case MAIDEN_ACTION_HOLY_FIRE: return urand(12000, 20000);
-            case MAIDEN_ACTION_HOLY_WRATH: return urand(25000, 35000);
-            case MAIDEN_ACTION_HOLY_GROUND: return 2000;
-            default: return 0; // never occurs but for compiler
-        }
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case MAIDEN_ACTION_REPENTANCE:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_REPENTANCE) == CAST_OK)
-                {
-                    DoBroadcastText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
-                }
-                return;
-            }
-            case MAIDEN_ACTION_HOLY_FIRE:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, SPELL_HOLYFIRE) == CAST_OK)
-                        ResetCombatAction(action, GetSubsequentActionTimer(action));
-                return;
-            }
-            case MAIDEN_ACTION_HOLY_WRATH:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYWRATH, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, SPELL_HOLYWRATH) == CAST_OK)
-                        ResetCombatAction(action, GetSubsequentActionTimer(action));
-                return;
-            }
-            case MAIDEN_ACTION_HOLY_GROUND:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_HOLYGROUND) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
-                return;
-            }
-        }
-    }
 
     void JustDied(Unit* /*killer*/) override
     {
