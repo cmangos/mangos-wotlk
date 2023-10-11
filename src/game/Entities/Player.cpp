@@ -1609,8 +1609,17 @@ void Player::Update(const uint32 diff)
     if (IsAlive())
     {
         m_regenTimer += diff;
-        if (m_regenTimer >= REGEN_TIME_FULL)
-            RegenerateAll(m_regenTimer / 100 * 100);
+        m_powerUpdateTimer += diff;
+        RegenerateAll(m_regenTimer);
+        if (m_powerUpdateTimer >= REGEN_TIME_FULL)
+        {
+            WorldPacket data(SMSG_POWER_UPDATE, 8 + 1 + 4);
+            data << GetPackGUID();
+            data << uint8(GetPowerType());
+            data << uint32(GetPower(GetPowerType()));
+            SendMessageToSet(data, GetTypeId() == TYPEID_PLAYER);
+            m_powerUpdateTimer = m_powerUpdateTimer - REGEN_TIME_FULL;
+        }
     }
 
     if (m_deathState == JUST_DIED)
