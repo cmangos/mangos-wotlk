@@ -7609,12 +7609,11 @@ SpellCastResult Spell::CheckPower(bool strict)
         return SPELL_CAST_OK;
 
     // Do precise power regen on spell cast
-    if (m_powerCost > 0 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_powerCost > 0 && m_caster->IsPlayer())
     {
-        Player* playerCaster = (Player*)m_caster;
+        Player* playerCaster = static_cast<Player*>(m_caster);
         uint32 diff = m_caster->GetRegenTimer();
-        if (diff >= REGEN_TIME_PRECISE)
-            playerCaster->RegenerateAll(diff);
+        playerCaster->RegenerateAll(diff);
     }
 
     m_powerCost = CalculatePowerCost(m_spellInfo, m_caster, this, m_CastItem, !strict);

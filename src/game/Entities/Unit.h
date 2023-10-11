@@ -1411,22 +1411,24 @@ class Unit : public WorldObject
         inline void SetResistance(SpellSchools school, int32 val) { SetInt32Value(UNIT_FIELD_RESISTANCES + school, val); }
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
+        float GetRealHealth() const { return m_unitHealth; }
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
         float GetHealthPercent() const { return (GetHealth() * 100.0f) / GetMaxHealth(); }
-        void SetHealth(uint32 val);
+        void SetHealth(float val);
         void SetMaxHealth(uint32 val);
         void SetHealthPercent(float percent);
-        int32 ModifyHealth(int32 dVal);
+        float ModifyHealth(float dVal);
         float OCTRegenHPPerSpirit() const;
         float OCTRegenMPPerSpirit() const;
 
         Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE)); }
         void SetPowerType(Powers new_powertype, bool sendUpdate = true);
         uint32 GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 + power); }
+        float GetRealPower(Powers power) const { return m_unitPower[power]; }
         uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1 + power); }
         float GetPowerPercent() const { return (GetMaxPower(GetPowerType()) == 0) ? 0.0f : (GetPower(GetPowerType()) * 100.0f) / GetMaxPower(GetPowerType()); }
         float GetPowerPercent(Powers power) const { return (GetMaxPower(power) == 0) ? 0.0f : (GetPower(power) * 100.0f) / GetMaxPower(power); }
-        void SetPower(Powers power, uint32 val, bool withPowerUpdate = true);
+        void SetPower(Powers power, float val, bool withPowerUpdate = true);
         void SetMaxPower(Powers power, uint32 val);
         int32 ModifyPower(Powers power, int32 dVal);
         void ApplyPowerMod(Powers power, uint32 val, bool apply);
@@ -2098,6 +2100,9 @@ class Unit : public WorldObject
                    form != FORM_SHADOW && form != FORM_STEALTH;
         }
 
+        float m_unitHealth;
+        float m_unitPower[POWER_RUNIC_POWER + 1];
+
         float m_modMeleeHitChance;
         float m_modRangedHitChance;
         float m_modSpellHitChance;
@@ -2694,6 +2699,7 @@ class Unit : public WorldObject
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
         uint32 m_regenTimer;
+        uint32 m_healthRegenTimer;
         uint32 m_lastManaUseTimer;
 
         bool m_canDodge;

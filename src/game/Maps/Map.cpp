@@ -215,7 +215,7 @@ void Map::LoadMapAndVMap(int gx, int gy)
 
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     : i_mapEntry(sMapStore.LookupEntry(id)), i_spawnMode(SpawnMode),
-      i_id(id), i_InstanceId(InstanceId), m_unloadTimer(0),
+      i_id(id), i_InstanceId(InstanceId), m_unloadTimer(0), m_clientUpdateTimer(0),
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(nullptr),
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
@@ -874,7 +874,12 @@ void Map::Update(const uint32& t_diff)
 #endif
 
     // Send world objects and item update field changes
-    SendObjectUpdates();
+    m_clientUpdateTimer += t_diff;
+    if (m_clientUpdateTimer >= 333)
+    {
+        m_clientUpdateTimer -= 333;
+        SendObjectUpdates();
+    }
 
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended

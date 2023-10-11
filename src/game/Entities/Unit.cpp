@@ -256,6 +256,8 @@ Unit::Unit() :
     m_charmInfo(nullptr),
     i_motionMaster(this),
     m_regenTimer(0),
+    m_healthRegenTimer(0),
+    m_unitHealth(0),
     m_vehicleInfo(nullptr),
     m_combatData(new CombatData(this)),
     m_guardianPetsIterator(m_guardianPets.end()),
@@ -319,6 +321,10 @@ Unit::Unit() :
         m_createResistance = 0;
 
     m_attacking = nullptr;
+
+    for (float& i : m_unitPower)
+        i = 0.0f;
+
     m_modMeleeHitChance = 0.0f;
     m_modRangedHitChance = 0.0f;
     m_modSpellHitChance = 0.0f;
@@ -9071,14 +9077,14 @@ void Unit::HandleExitCombat(bool pvpCombat)
     CallForAllControlledUnits([](Unit* unit) { unit->HandleExitCombat(); }, CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_TOTEMS);
 }
 
-int32 Unit::ModifyHealth(int32 dVal)
+float Unit::ModifyHealth(float dVal)
 {
     if (dVal == 0)
         return 0;
 
-    int32 curHealth = (int32)GetHealth();
+    float curHealth = GetRealHealth();
 
-    int32 val = dVal + curHealth;
+    float val = dVal + curHealth;
     if (val <= 0)
     {
         SetHealth(0);
@@ -9087,7 +9093,7 @@ int32 Unit::ModifyHealth(int32 dVal)
 
     int32 maxHealth = (int32)GetMaxHealth();
 
-    int32 gain;
+    float gain;
     if (val < maxHealth)
     {
         SetHealth(val);
@@ -10373,13 +10379,14 @@ void Unit::SetLevel(uint32 lvl)
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
 }
 
-void Unit::SetHealth(uint32 val)
+void Unit::SetHealth(float val)
 {
     uint32 maxHealth = GetMaxHealth();
     if (maxHealth < val)
         val = maxHealth;
 
-    SetUInt32Value(UNIT_FIELD_HEALTH, val);
+    SetUInt32Value(UNIT_FIELD_HEALTH, uint32(val));
+    m_unitHealth = val;
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
@@ -10423,16 +10430,17 @@ void Unit::SetHealthPercent(float percent)
     SetHealth(newHealth);
 }
 
-void Unit::SetPower(Powers power, uint32 val, bool withPowerUpdate /*= true*/)
+void Unit::SetPower(Powers power, float val, bool withPowerUpdate /*= true*/)
 {
-    if (GetPower(power) == val)
+    if (GetRealPower(power) == val)
         return;
 
     uint32 maxPower = GetMaxPower(power);
     if (maxPower < val)
         val = maxPower;
 
-    SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);
+    SetStatInt32Value(UNIT_FIELD_POWER1 + power, int32(val));
+    m_unitPower[power] = val;
 
     if (withPowerUpdate)
     {

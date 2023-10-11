@@ -1625,8 +1625,9 @@ void Player::Update(const uint32 diff)
     if (IsAlive())
     {
         m_regenTimer += diff;
-        if (m_regenTimer >= REGEN_TIME_FULL)
-            RegenerateAll(m_regenTimer / 100 * 100);
+        m_healthRegenTimer += diff;
+        if (m_regenTimer >= REGEN_TIME_PRECISE)
+            RegenerateAll(m_regenTimer);
     }
 
     if (m_deathState == JUST_DIED)
@@ -2433,32 +2434,40 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
 
 void Player::RegenerateAll(uint32 diff)
 {
-    // Not in combat or they have regeneration
-    if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
-            HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT))
+    if (m_healthRegenTimer >= REGEN_TIME_FULL)
     {
-        RegenerateHealth(diff);
-        if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-        {
-            Regenerate(POWER_RAGE, diff);
-            if (getClass() == CLASS_DEATH_KNIGHT)
-                Regenerate(POWER_RUNIC_POWER, diff);
-        }
+        if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) || HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT))
+            RegenerateHealth(REGEN_TIME_FULL);
+        m_healthRegenTimer -= REGEN_TIME_FULL;
     }
 
-    Regenerate(POWER_ENERGY, diff);
-
-    Regenerate(POWER_MANA, diff);
-
-    if (getClass() == CLASS_DEATH_KNIGHT)
-        Regenerate(POWER_RUNE, diff);
+    switch (getClass())
+    {
+        case CLASS_DRUID:
+            Regenerate(POWER_ENERGY, diff);
+            Regenerate(POWER_MANA, diff);
+        case CLASS_WARRIOR:
+            if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+                Regenerate(POWER_RAGE, diff);
+            break;
+        case CLASS_ROGUE:
+            Regenerate(POWER_ENERGY, diff);
+            break;
+        case CLASS_DEATH_KNIGHT:
+            if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+                Regenerate(POWER_RUNIC_POWER, diff);
+            Regenerate(POWER_RUNE, diff);
+            break;
+        default:
+            Regenerate(POWER_MANA, diff);
+    }
 
     m_regenTimer -= diff;
 }
 
 void Player::Regenerate(Powers power, uint32 diff)
 {
-    uint32 curValue = GetPower(power);
+    float curValue = GetRealPower(power);
     uint32 maxValue = GetMaxPower(power);
 
     float addvalue = 0.0f;
@@ -2475,17 +2484,17 @@ void Player::Regenerate(Powers power, uint32 diff)
             if (recentCast)
             {
                 // Mangos Updates Mana in intervals of 2s, which is correct
-                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * uint32(float(diff) / 1000);
+                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * (float(diff) / 1000);
             }
             else
             {
-                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * uint32(float(diff) / 1000);
+                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * (float(diff) / 1000);
             }
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RAGE_LOSS);
-            addvalue = uint32(float(diff) / 200) * 2.5 * RageDecreaseRate; // decay 2.5 rage per 2 seconds
+            addvalue = (float(diff) / 200) * 2.5 * RageDecreaseRate; // decay 2.5 rage per 2 seconds
 
             AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
             for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
@@ -2495,13 +2504,13 @@ void Player::Regenerate(Powers power, uint32 diff)
         case POWER_ENERGY:                                  // Regenerate energy
         {
             float EnergyRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
-            addvalue = uint32(float(diff) / 100) * EnergyRate * m_energyRegenRate;
+            addvalue = (float(diff) / 100) * EnergyRate * m_energyRegenRate;
             break;
         }
         case POWER_RUNIC_POWER:
         {
             float RunicPowerDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_LOSS);
-            addvalue = uint32(float(diff) / 200) * 2.5 * RunicPowerDecreaseRate; // decay 2.5 runic power per 2 seconds
+            addvalue = (float(diff) / 200) * 2.5 * RunicPowerDecreaseRate; // decay 2.5 runic power per 2 seconds
         }   break;
         case POWER_RUNE:
         {
@@ -2530,23 +2539,23 @@ void Player::Regenerate(Powers power, uint32 diff)
 
     if (power != POWER_RAGE && power != POWER_RUNIC_POWER)
     {
-        curValue += uint32(addvalue);
+        curValue += addvalue;
         if (curValue > maxValue)
             curValue = maxValue;
     }
     else
     {
-        if (curValue <= uint32(addvalue))
-            curValue = 0;
+        if (curValue <= addvalue)
+            curValue = 0.f;
         else
-            curValue -= uint32(addvalue);
+            curValue -= addvalue;
     }
     SetPower(power, curValue, false);
 }
 
 void Player::RegenerateHealth(uint32 diff)
 {
-    uint32 curValue = GetHealth();
+    float curValue = GetRealHealth();
     uint32 maxValue = GetMaxHealth();
 
     if (curValue >= maxValue) return;
@@ -2578,7 +2587,7 @@ void Player::RegenerateHealth(uint32 diff)
     if (addvalue < 0)
         addvalue = 0;
 
-    ModifyHealth(int32(addvalue * float(diff) / 1000));
+    ModifyHealth(addvalue * float(diff) / 1000);
 }
 
 Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)
