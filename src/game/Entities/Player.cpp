@@ -1609,7 +1609,8 @@ void Player::Update(const uint32 diff)
     if (IsAlive())
     {
         m_regenTimer += diff;
-        m_healthRegenTimer += diff;
+        if (!IsInCombat())
+            m_healthRegenTimer += diff;
         if (m_regenTimer >= REGEN_TIME_PRECISE)
             RegenerateAll(m_regenTimer);
     }

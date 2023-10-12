@@ -468,6 +468,7 @@ class Map : public GridRefManager<NGridType>
         uint32 i_id;
         uint32 i_InstanceId;
         uint32 m_unloadTimer;
+        uint32 m_clientUpdateTimer;
         float m_VisibleDistance;
         MapPersistentState* m_persistentState;
 
