@@ -1619,7 +1619,7 @@ void Player::Update(const uint32 diff)
                 data << GetPackGUID();
                 data << uint8(GetPowerType());
                 data << uint32(GetPower(GetPowerType()));
-                SendMessageToSet(data, GetTypeId() == TYPEID_PLAYER);
+                SendDirectMessage(data);
                 m_powerUpdateTimer -= REGEN_TIME_FULL;
             }
         }
