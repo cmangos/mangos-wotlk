@@ -256,6 +256,7 @@ Unit::Unit() :
     m_charmInfo(nullptr),
     i_motionMaster(this),
     m_regenTimer(0),
+    m_healthRegenTimer(0),
     m_vehicleInfo(nullptr),
     m_combatData(new CombatData(this)),
     m_guardianPetsIterator(m_guardianPets.end()),

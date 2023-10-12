@@ -1609,6 +1609,7 @@ void Player::Update(const uint32 diff)
     if (IsAlive())
     {
         m_regenTimer += diff;
+        m_healthRegenTimer += diff;
         if (m_regenTimer >= REGEN_TIME_PRECISE)
             RegenerateAll(m_regenTimer);
     }
@@ -2414,25 +2415,32 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
 
 void Player::RegenerateAll(uint32 diff)
 {
-    // Not in combat or they have regeneration
-    if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
-            HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT))
+    if (m_healthRegenTimer >= REGEN_TIME_FULL && (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
+        HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT)))
     {
-        RegenerateHealth(diff);
-        if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-        {
-            Regenerate(POWER_RAGE, diff);
-            if (getClass() == CLASS_DEATH_KNIGHT)
-                Regenerate(POWER_RUNIC_POWER, diff);
-        }
+        RegenerateHealth(m_healthRegenTimer);
+        m_healthRegenTimer -= REGEN_TIME_FULL;
     }
-
-    Regenerate(POWER_ENERGY, diff);
-
-    Regenerate(POWER_MANA, diff);
-
-    if (getClass() == CLASS_DEATH_KNIGHT)
-        Regenerate(POWER_RUNE, diff);
+    switch (getClass())
+    {
+        case CLASS_DRUID:
+            Regenerate(POWER_ENERGY, diff);
+            Regenerate(POWER_MANA, diff);
+        case CLASS_WARRIOR:
+            if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+                Regenerate(POWER_RAGE, diff);
+            break;
+        case CLASS_ROGUE:
+            Regenerate(POWER_ENERGY, diff);
+            break;
+        case CLASS_DEATH_KNIGHT:
+            if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
+                Regenerate(POWER_RUNIC_POWER, diff);
+            Regenerate(POWER_RUNE, diff);
+            break;
+        default:
+            Regenerate(POWER_MANA, diff);
+    }
 
     m_regenTimer -= diff;
 }
