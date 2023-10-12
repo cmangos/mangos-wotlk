@@ -10420,7 +10420,7 @@ void Unit::SetHealthPercent(float percent)
 
 void Unit::SetPower(Powers power, float val, bool withPowerUpdate /*= true*/)
 {
-    if (GetPower(power) == uint32(val))
+    if (GetRealPower(power) == val)
         return;
 
     uint32 maxPower = GetMaxPower(power);
