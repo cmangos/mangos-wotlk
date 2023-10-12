@@ -1610,7 +1610,7 @@ void Player::Update(const uint32 diff)
     {
         m_regenTimer += diff;
         m_powerUpdateTimer += diff;
-        if (m_powerUpdateTimer >= REGEN_TIME_PRECISE)
+        if (m_regenTimer >= REGEN_TIME_PRECISE)
         {
             RegenerateAll(m_regenTimer);
             if (m_powerUpdateTimer >= REGEN_TIME_FULL)
