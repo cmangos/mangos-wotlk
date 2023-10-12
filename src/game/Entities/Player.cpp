@@ -1610,15 +1610,18 @@ void Player::Update(const uint32 diff)
     {
         m_regenTimer += diff;
         m_powerUpdateTimer += diff;
-        RegenerateAll(m_regenTimer);
-        if (m_powerUpdateTimer >= REGEN_TIME_FULL)
+        if (m_powerUpdateTimer >= REGEN_TIME_PRECISE)
         {
-            WorldPacket data(SMSG_POWER_UPDATE, 8 + 1 + 4);
-            data << GetPackGUID();
-            data << uint8(GetPowerType());
-            data << uint32(GetPower(GetPowerType()));
-            SendMessageToSet(data, GetTypeId() == TYPEID_PLAYER);
-            m_powerUpdateTimer = m_powerUpdateTimer - REGEN_TIME_FULL;
+            RegenerateAll(m_regenTimer);
+            if (m_powerUpdateTimer >= REGEN_TIME_FULL)
+            {
+                WorldPacket data(SMSG_POWER_UPDATE, 8 + 1 + 4);
+                data << GetPackGUID();
+                data << uint8(GetPowerType());
+                data << uint32(GetPower(GetPowerType()));
+                SendMessageToSet(data, GetTypeId() == TYPEID_PLAYER);
+                m_powerUpdateTimer -= REGEN_TIME_FULL;
+            }
         }
     }
 
@@ -2448,7 +2451,7 @@ void Player::RegenerateAll(uint32 diff)
 
 void Player::Regenerate(Powers power, uint32 diff)
 {
-    uint32 curValue = GetPower(power);
+    float curValue = GetRealPower(power);
     uint32 maxValue = GetMaxPower(power);
 
     float addvalue = 0.0f;
@@ -2465,17 +2468,17 @@ void Player::Regenerate(Powers power, uint32 diff)
             if (recentCast)
             {
                 // Mangos Updates Mana in intervals of 2s, which is correct
-                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * uint32(float(diff) / 1000);
+                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER) *  ManaIncreaseRate * (float(diff) / 1000);
             }
             else
             {
-                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * uint32(float(diff) / 1000);
+                addvalue = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER) * ManaIncreaseRate * (float(diff) / 1000);
             }
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RAGE_LOSS);
-            addvalue = uint32(float(diff) / 200) * 2.5 * RageDecreaseRate; // decay 2.5 rage per 2 seconds
+            addvalue = (float(diff) / 200) * 2.5 * RageDecreaseRate; // decay 2.5 rage per 2 seconds
 
             AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
             for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
@@ -2485,13 +2488,13 @@ void Player::Regenerate(Powers power, uint32 diff)
         case POWER_ENERGY:                                  // Regenerate energy
         {
             float EnergyRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
-            addvalue = uint32(float(diff) / 100) * EnergyRate * m_energyRegenRate;
+            addvalue = (float(diff) / 100) * EnergyRate * m_energyRegenRate;
             break;
         }
         case POWER_RUNIC_POWER:
         {
             float RunicPowerDecreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RUNICPOWER_LOSS);
-            addvalue = uint32(float(diff) / 200) * 2.5 * RunicPowerDecreaseRate; // decay 2.5 runic power per 2 seconds
+            addvalue = (float(diff) / 200) * 2.5 * RunicPowerDecreaseRate; // decay 2.5 runic power per 2 seconds
         }   break;
         case POWER_RUNE:
         {
@@ -2520,16 +2523,16 @@ void Player::Regenerate(Powers power, uint32 diff)
 
     if (power != POWER_RAGE && power != POWER_RUNIC_POWER)
     {
-        curValue += uint32(addvalue);
+        curValue += addvalue;
         if (curValue > maxValue)
             curValue = maxValue;
     }
     else
     {
-        if (curValue <= uint32(addvalue))
-            curValue = 0;
+        if (curValue <= addvalue)
+            curValue = 0.f;
         else
-            curValue -= uint32(addvalue);
+            curValue -= addvalue;
     }
     SetPower(power, curValue, false);
 }

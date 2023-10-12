@@ -1418,10 +1418,11 @@ class Unit : public WorldObject
         Powers GetPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, UNIT_BYTES_0_OFFSET_POWER_TYPE)); }
         void SetPowerType(Powers new_powertype, bool sendUpdate = true);
         uint32 GetPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1 + power); }
+        float GetRealPower(Powers power) const { return m_unitPower[power]; }
         uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1 + power); }
         float GetPowerPercent() const { return (GetMaxPower(GetPowerType()) == 0) ? 0.0f : (GetPower(GetPowerType()) * 100.0f) / GetMaxPower(GetPowerType()); }
         float GetPowerPercent(Powers power) const { return (GetMaxPower(power) == 0) ? 0.0f : (GetPower(power) * 100.0f) / GetMaxPower(power); }
-        void SetPower(Powers power, uint32 val, bool withPowerUpdate = true);
+        void SetPower(Powers power, float val, bool withPowerUpdate = true);
         void SetMaxPower(Powers power, uint32 val);
         int32 ModifyPower(Powers power, int32 dVal);
         void ApplyPowerMod(Powers power, uint32 val, bool apply);
@@ -2091,6 +2092,8 @@ class Unit : public WorldObject
             return form != FORM_NONE && form != FORM_BATTLESTANCE && form != FORM_BERSERKERSTANCE && form != FORM_DEFENSIVESTANCE &&
                    form != FORM_SHADOW && form != FORM_STEALTH;
         }
+
+        float m_unitPower[POWER_RUNIC_POWER + 1];
 
         float m_modMeleeHitChance;
         float m_modRangedHitChance;

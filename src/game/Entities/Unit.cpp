@@ -320,6 +320,10 @@ Unit::Unit() :
         m_createResistance = 0;
 
     m_attacking = nullptr;
+
+    for (float& i : m_unitPower)
+        i = 0.0f;
+
     m_modMeleeHitChance = 0.0f;
     m_modRangedHitChance = 0.0f;
     m_modSpellHitChance = 0.0f;
@@ -10415,16 +10419,17 @@ void Unit::SetHealthPercent(float percent)
     SetHealth(newHealth);
 }
 
-void Unit::SetPower(Powers power, uint32 val, bool withPowerUpdate /*= true*/)
+void Unit::SetPower(Powers power, float val, bool withPowerUpdate /*= true*/)
 {
-    if (GetPower(power) == val)
+    if (GetRealPower(power) == val)
         return;
 
     uint32 maxPower = GetMaxPower(power);
     if (maxPower < val)
         val = maxPower;
 
-    SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);
+    SetStatInt32Value(UNIT_FIELD_POWER1 + power, int32(val));
+    m_unitPower[power] = val;
 
     if (withPowerUpdate)
     {
