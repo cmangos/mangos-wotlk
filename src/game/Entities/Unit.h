@@ -2673,7 +2673,6 @@ class Unit : public WorldObject
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
         uint32 m_regenTimer;
-        uint32 m_powerUpdateTimer;
         uint32 m_lastManaUseTimer;
 
         bool m_canDodge;
