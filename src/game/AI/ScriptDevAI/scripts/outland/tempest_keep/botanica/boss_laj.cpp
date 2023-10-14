@@ -115,7 +115,7 @@ struct boss_lajAI : public CombatAI
             summoned->AI()->AttackStart(target);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         switch (spellInfo->Id)
         {

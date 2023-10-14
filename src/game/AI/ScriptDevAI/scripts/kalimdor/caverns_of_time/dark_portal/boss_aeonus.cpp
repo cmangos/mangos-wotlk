@@ -86,7 +86,7 @@ struct boss_aeonusAI : public CombatAI
         DoBroadcastText(SAY_DEATH, m_creature);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_ENRAGE)
             DoBroadcastText(EMOTE_GENERIC_FRENZY, m_creature);

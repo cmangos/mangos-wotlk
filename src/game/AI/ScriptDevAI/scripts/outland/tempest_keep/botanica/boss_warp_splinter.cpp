@@ -112,7 +112,7 @@ struct boss_warp_splinterAI : public CombatAI
         DoBroadcastText(urand(0, 1) ? SAY_SUMMON_1 : SAY_SUMMON_2, m_creature);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         switch (spellInfo->Id)
         {

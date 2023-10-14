@@ -220,7 +220,7 @@ struct boss_soccothratesAI : public CombatAI, private DialogueHelper
         }
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_KNOCK_AWAY)
             ResetTimer(SOCCOTHRATES_FELFIRE_LINEUP, 2000);

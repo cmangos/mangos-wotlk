@@ -281,7 +281,7 @@ struct SacredShieldCrit : public AuraScript
             aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
     }
 
-    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* /*spellInfo*/) const override
     {
         if (aura->GetCasterGuid() == target->GetObjectGuid()) chance += aura->GetModifier()->m_amount; // Weakened Soul
     }

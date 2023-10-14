@@ -115,7 +115,7 @@ struct boss_blackheart_the_inciterAI : public CombatAI
             m_instance->SetData(TYPE_INCITER, FAIL);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_INCITE_CHAOS)
             HandleInciteStart();

@@ -178,7 +178,7 @@ struct npc_shattered_hand_centurion : public CombatAI
     ScriptedInstance* m_instance;
     bool m_eventStarted;
 
-    void Aggro(Unit* who) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 6))
         {
@@ -243,7 +243,7 @@ struct npc_shattered_hand_centurion : public CombatAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {

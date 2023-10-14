@@ -74,7 +74,7 @@ struct boss_doomlordkazzakAI : public CombatAI
         DoBroadcastText(urand(0, 1) ? SAY_DEATH : SAY_DEATH_2, m_creature);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         switch (spellInfo->Id)
         {
@@ -111,7 +111,7 @@ struct MarkOfDoomlordKazzak : public AuraScript
 // 21063 - Twisted Reflection
 struct TwistedReflection : public AuraScript
 {
-    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    SpellAuraProcResult OnProc(Aura* /*aura*/, ProcExecutionData& procData) const override
     {
         procData.triggerTarget = procData.attacker;
         procData.triggeredSpellId = 21064;

@@ -85,7 +85,7 @@ struct boss_thespiaAI : public CombatAI
             m_instance->SetData(TYPE_HYDROMANCER_THESPIA, IN_PROGRESS);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_LIGHTNING_CLOUD)
             if (urand(0, 1))

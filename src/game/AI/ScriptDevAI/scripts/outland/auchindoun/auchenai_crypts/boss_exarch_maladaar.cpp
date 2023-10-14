@@ -173,7 +173,7 @@ struct boss_exarch_maladaarAI : public CombatAI
             target->CastSpell(nullptr, SPELL_STOLEN_SOUL_SUMMON, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_STOLEN_SOUL && urand(0, 1))
             DoBroadcastText(urand(0, 1) ? SAY_ROAR : SAY_SOUL_CLEAVE, m_creature);

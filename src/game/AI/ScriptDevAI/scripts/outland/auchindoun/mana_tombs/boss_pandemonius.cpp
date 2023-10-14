@@ -66,7 +66,7 @@ struct boss_pandemoniusAI : public CombatAI
         }
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_DARK_SHELL || spellInfo->Id == SPELL_DARK_SHELL_H)
             DoBroadcastText(EMOTE_DARK_SHELL, m_creature);

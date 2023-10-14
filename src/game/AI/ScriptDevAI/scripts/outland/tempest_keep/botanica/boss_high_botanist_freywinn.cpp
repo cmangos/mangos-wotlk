@@ -123,7 +123,7 @@ struct boss_high_botanist_freywinnAI : public CombatAI
         DoBroadcastText(SAY_DEATH, m_creature);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         switch (spellInfo->Id)
         {

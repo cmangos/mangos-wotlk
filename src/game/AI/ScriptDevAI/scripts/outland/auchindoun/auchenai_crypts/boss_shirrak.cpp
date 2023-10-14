@@ -107,7 +107,7 @@ struct FocusTargetVisual : public AuraScript
 
 struct PingShirrak : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         if (!target)

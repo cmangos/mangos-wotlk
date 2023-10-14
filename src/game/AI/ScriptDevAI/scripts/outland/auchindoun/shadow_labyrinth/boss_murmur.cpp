@@ -161,7 +161,7 @@ struct boss_murmurAI : public CombatAI
         ResetTimer(MURMUR_OOC_CASTER_ATTACK, urand(3000, 8000));
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_SONIC_BOOM || spellInfo->Id == SPELL_SONIC_BOOM_H)
             DoBroadcastText(EMOTE_SONIC_BOOM, m_creature);

@@ -309,7 +309,7 @@ struct mob_fel_orc_convertAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         if (m_instance)
         {
@@ -389,7 +389,7 @@ bool AreaTrigger_at_shh_netherkurse(Player* player, AreaTriggerEntry const* /*at
     return true;
 }
 
-bool GOUse_go_netherkurse_door(Player* player, GameObject* go)
+bool GOUse_go_netherkurse_door(Player* player, GameObject* /*go*/)
 {
     if (ScriptedInstance* pInstance = (ScriptedInstance*)player->GetInstanceData())
     {

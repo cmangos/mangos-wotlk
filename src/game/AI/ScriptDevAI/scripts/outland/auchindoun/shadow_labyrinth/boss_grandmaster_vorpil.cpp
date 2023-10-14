@@ -168,7 +168,7 @@ struct boss_grandmaster_vorpilAI : public CombatAI
         DespawnGuids(m_spawns);
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_DRAW_SHADOWS)
         {
