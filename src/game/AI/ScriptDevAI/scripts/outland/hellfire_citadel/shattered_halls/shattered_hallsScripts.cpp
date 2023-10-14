@@ -180,7 +180,7 @@ struct npc_shattered_hand_centurion : public CombatAI
 
     void Aggro(Unit* who) override
     {
-        switch (urand(0, 5))
+        switch (urand(0, 6))
         {
             case 0: DoBroadcastText(SAY_AGGRO1, m_creature); break;
             case 1: DoBroadcastText(SAY_AGGRO2, m_creature); break;
