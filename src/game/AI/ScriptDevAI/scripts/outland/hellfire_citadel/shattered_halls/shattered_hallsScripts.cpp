@@ -274,7 +274,6 @@ struct npc_shattered_hand_centurion : public CombatAI
 void AddSC_shattered_halls()
 {
     Script* pNewScript = new Script;
-    pNewScript = new Script;
     pNewScript->Name = "npc_shattered_hand_centurion";
     pNewScript->GetAI = &GetNewAIInstance<npc_shattered_hand_centurion>;
     pNewScript->RegisterSelf();
