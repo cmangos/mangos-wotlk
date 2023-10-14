@@ -1608,17 +1608,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     pVictim->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                     return SPELL_AURA_PROC_OK;
                 }
-                // Blessing of Ancient Kings
-                case 64411:
-                {
-                    // for DOT procs
-                    if (!IsPositiveSpell(spellInfo->Id))
-                        return SPELL_AURA_PROC_FAILED;
-
-                    triggered_spell_id = 64413;
-                    basepoints[0] = damage * 15 / 100;
-                    break;
-                }
             }
             break;
         }
