@@ -158,38 +158,35 @@ struct ValanyrEquipEffect : public AuraScript
     }
 };
 
+enum
+{
+    SPELL_PROTECTION_OF_ANCIENT_KINGS = 64413,
+};
+
 // 64411 Blessing of Ancient Kings
 struct BlessingOfAncientKings : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
-        if (!IsPositiveSpell(aura->GetId()))
+        if (!IsPositiveSpell(procData.spellInfo->Id))
             return SPELL_AURA_PROC_FAILED;
 
-        procData.triggeredSpellId = 64413;
+        procData.triggeredSpellId = SPELL_PROTECTION_OF_ANCIENT_KINGS;
         procData.basepoints[0] = procData.damage * 15 / 100;
         procData.triggerTarget = procData.target;
+        if (procData.target->HasAura(SPELL_PROTECTION_OF_ANCIENT_KINGS))
+        {
+            Unit* target = procData.target;
+            Aura* triggeredAura = target->GetAura(SPELL_PROTECTION_OF_ANCIENT_KINGS, EFFECT_INDEX_0);
+            if (!triggeredAura)
+                return SPELL_AURA_PROC_OK;
+            triggeredAura->GetHolder()->RefreshHolder();
+            triggeredAura->GetModifier()->m_amount = std::min(triggeredAura->GetModifier()->m_amount + procData.basepoints[0], 20000);
+            return SPELL_AURA_PROC_CANT_TRIGGER;
+        }
         return SPELL_AURA_PROC_OK;
     }
 };
-
-// 64413 Protection of Ancient Kings
-struct ProtectionOfAncientKings : public AuraScript
-{
-    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
-    {
-        Unit* target = data.target;
-        if (!target)
-            return value;
-        if (target->HasAura(data.spellProto->Id))
-        {
-            Aura* oldAura = target->GetAura(data.spellProto->Id, EFFECT_INDEX_0);
-            return std::min(oldAura->GetModifier()->m_amount + value, 20000);
-        }
-        return value;
-    }
-};
-
 
 void AddSC_item_scripts_wotlk()
 {
@@ -199,5 +196,4 @@ void AddSC_item_scripts_wotlk()
     RegisterSpellScript<Icecrown25MeleeTrinket>("spell_icecrown_25_melee_trinket");
     RegisterSpellScript<ValanyrEquipEffect>("spell_valanyr_equip_effect");
     RegisterSpellScript<BlessingOfAncientKings>("spell_blessing_of_ancient_kings");
-    RegisterSpellScript<ProtectionOfAncientKings>("spell_protection_of_ancient_kings");
 }

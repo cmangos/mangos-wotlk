@@ -911,7 +911,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (63482,'spell_lightning_whirl_heroic'),
 (63845,'spell_create_lance'),
 (64411,'spell_blessing_of_ancient_kings'),
-(64413,'spell_protection_of_ancient_kings'),
 (64415,'spell_valanyr_equip_effect'),
 (64568,'spell_blood_reserve_enchant'),
 (65869,'spell_disengage'),
