@@ -3226,13 +3226,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                         caster->InterruptNonMeleeSpells(false);
                     return SPELL_AURA_PROC_OK;
                 }
-                case 64415:                                 // // Val'anyr Hammer of Ancient Kings - Equip Effect
-                {
-                    // for DOT procs
-                    if (!IsPositiveSpell(spellInfo->Id))
-                        return SPELL_AURA_PROC_FAILED;
-                    break;
-                }
                 case 64440:                                 // Blade Warding
                 {
                     trigger_spell_id = 64442;

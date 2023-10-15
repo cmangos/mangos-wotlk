@@ -153,6 +153,8 @@ struct ValanyrEquipEffect : public AuraScript
 
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
+        if (!IsPositiveSpell(procData.spellInfo->Id))
+            return SPELL_AURA_PROC_FAILED;
         procData.cooldown = 45;
         return SPELL_AURA_PROC_OK;
     }
