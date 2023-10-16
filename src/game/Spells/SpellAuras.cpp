@@ -1574,8 +1574,6 @@ void Aura::TriggerSpell()
                         return;
 //                    // Ethereal Channel (Red)
 //                    case 35518: break;
-//                    // Nether Vapor
-//                    case 35879: break;
 //                    // Dark Portal Storm
 //                    case 36018: break;
 //                    // Burning Maul
@@ -1584,35 +1582,6 @@ void Aura::TriggerSpell()
 //                    case 36061: break;
 //                    // Professor Dabiri Talks
 //                    case 36064: break;
-//                    // Kael Gaining Power
-                    case 36091:
-                    {
-                        switch (GetAuraTicks())
-                        {
-                            case 1:
-                                target->CastSpell(target, 36364, TRIGGERED_OLD_TRIGGERED);
-                                target->PlayDirectSound(27);
-                                target->PlayDirectSound(1136);
-                                break;
-                            case 2:
-                                target->RemoveAurasDueToSpell(36364);
-                                target->CastSpell(target, 36370, TRIGGERED_OLD_TRIGGERED);
-                                target->PlayDirectSound(27);
-                                target->PlayDirectSound(1136);
-                                break;
-                            case 3:
-                                target->RemoveAurasDueToSpell(36370);
-                                target->CastSpell(target, 36371, TRIGGERED_OLD_TRIGGERED);
-                                target->PlayDirectSound(27);
-                                target->PlayDirectSound(1136);
-                                break;
-                            case 4:
-                                if (target->GetTypeId() == TYPEID_UNIT && target->AI())
-                                    target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, static_cast<Creature*>(target));
-                                break;
-                        }
-                        break;
-                    }
 //                    // They Must Burn Bomb Aura
 //                    case 36344: break;        
                     case 36350:                             // They Must Burn Bomb Aura (self)
@@ -1636,12 +1605,6 @@ void Aura::TriggerSpell()
 //                    case 36785: break;
 //                    // Cannon Charging (self)
 //                    case 36860: break;
-                    case 37027:                             // Remote Toy
-                        if (urand(0, 4) == 0)               // 20% chance to apply trigger spell
-                            trigger_spell_id = 37029;
-                        else
-                            return;
-                        break;
                     case 37268:                               // Arcane Flurry (Melee Component)
                     {
                         trigger_spell_id = 37271;       // (Range Component, parentspell 37269)
@@ -2566,30 +2529,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->RemoveAurasDueToSpell(32346);
                         return;
                     }
-                    case 36550:                             // Floating Drowned
-                    {
-                        // Possibly need some of the below to fix Vengeful Harbinger flying
-
-                        //if (Unit* caster = GetCaster())
-                        //{
-                        //    caster->SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_FLY_ANIM);
-                        //    caster->RemoveByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_ALWAYS_STAND);
-                        //    caster->SetHover(true);
-                        //    caster->SetLevitate(true);
-                        //    caster->SetCanFly(true);
-                        //}
-                        return;
-                    }
-                    case 36089:
-                    case 36090:                             // Netherbeam - Kaelthas
-                    {
-                        float speed = target->GetBaseRunSpeed(); // fetch current base speed
-                        target->ApplyModPositiveFloatValue(OBJECT_FIELD_SCALE_X, float(m_modifier.m_amount) / 100, apply);
-                        target->UpdateModelData(); // resets speed
-                        target->SetBaseRunSpeed(speed + (1.f / 7.f));
-                        target->UpdateSpeed(MOVE_RUN, true); // sends speed packet
-                        return;
-                    }
                     case 36587:                             // Vision Guide
                     {
                         target->CastSpell(target, 36573, TRIGGERED_OLD_TRIGGERED, nullptr, this);
@@ -3085,11 +3024,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 float x, y, z;
                 static_cast<Creature*>(target)->GetRespawnCoord(x, y, z);
                 target->GetMotionMaster()->MovePoint(1, x, y, z);
-                return;
-            }
-            case 36730:                                     // Flame Strike
-            {
-                target->CastSpell(target, 36731, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
             case 39088:                                     // Positive Charge
@@ -8950,8 +8884,6 @@ void Aura::PeriodicDummyTick()
 //              case 45945: break;
 //              // Ahune's Shield
 //              case 45954: break;
-//              // Nether Vapor Lightning
-//              case 45960: break;
 //              // Darkness
 //              case 45996: break;
 //              // Transform Visual Missile Periodic
@@ -10378,9 +10310,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 }
                 case 33896: // Desperate Defense
                     boostSpells.push_back(33897);
-                    break;
-                case 36797: // Mind Control - Kaelthas
-                    boostSpells.push_back(36798);
                     break;
                 case 55053:                                 // Deathbloom (25 man)
                 {

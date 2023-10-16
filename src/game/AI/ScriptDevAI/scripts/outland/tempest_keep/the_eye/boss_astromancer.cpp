@@ -29,15 +29,15 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                           = -1550007,
-    SAY_SUMMON1                         = -1550008,
-    SAY_SUMMON2                         = -1550009,
-    SAY_KILL1                           = -1550010,
-    SAY_KILL2                           = -1550011,
-    SAY_KILL3                           = -1550012,
-    SAY_DEATH                           = -1550013,
-    SAY_VOIDA                           = -1550014,
-    SAY_VOIDB                           = -1550015,
+    SAY_AGGRO                           = 20849,
+    SAY_SUMMON1                         = 20854,
+    SAY_SUMMON2                         = 20855,
+    SAY_KILL1                           = 20851,
+    SAY_KILL2                           = 20852,
+    SAY_KILL3                           = 20853,
+    SAY_DEATH                           = 20850,
+    SAY_VOIDA                           = 20372,
+    SAY_VOIDB                           = 20373,
 
     SPELL_ARCANE_MISSILES               = 33031,
     SPELL_WRATH_OF_THE_ASTROMANCER      = 42783,
@@ -132,6 +132,7 @@ struct boss_high_astromancer_solarianAI : public CombatAI
         AddCustomAction(SOLARIAN_SPLIT_AGENTS, true, [&]() { HandleSplitAgents(); });
         AddCustomAction(SOLARIAN_SPLIT_PRIESTS, true, [&]() { HandleSplitPriests(); });
         m_uiDefaultArmor = m_creature->GetArmor();
+        AddOnKillText(SAY_KILL1, SAY_KILL2, SAY_KILL3);
     }
 
     ScriptedInstance* m_instance;
@@ -158,22 +159,9 @@ struct boss_high_astromancer_solarianAI : public CombatAI
         SetCombatMovement(true);
     }
 
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_KILL1, m_creature); break;
-            case 1: DoScriptText(SAY_KILL2, m_creature); break;
-            case 2: DoScriptText(SAY_KILL3, m_creature); break;
-        }
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_SOLARIAN, DONE);
@@ -181,7 +169,7 @@ struct boss_high_astromancer_solarianAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_SOLARIAN, IN_PROGRESS);
@@ -224,7 +212,7 @@ struct boss_high_astromancer_solarianAI : public CombatAI
 
     void HandlePhase2Delay()
     {
-        DoScriptText(SAY_VOIDB, m_creature);
+        DoBroadcastText(SAY_VOIDB, m_creature);
 
         SetCombatScriptStatus(false);
         SetCombatMovement(true);
@@ -249,7 +237,7 @@ struct boss_high_astromancer_solarianAI : public CombatAI
 
         m_creature->SetVisibility(VISIBILITY_OFF);
 
-        DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
         ResetTimer(SOLARIAN_SPLIT_AGENTS, 5000);
     }
 
@@ -296,7 +284,7 @@ struct boss_high_astromancer_solarianAI : public CombatAI
                 {
                     if (DoCastSpellIfCan(nullptr, SPELL_SOLARIAN_TRANSFORM) == CAST_OK)
                     {
-                        DoScriptText(SAY_VOIDA, m_creature);
+                        DoBroadcastText(SAY_VOIDA, m_creature);
                         ResetTimer(SOLARIAN_PHASE_2_DELAY, 2000);
 
                         m_creature->SetArmor(WV_ARMOR);

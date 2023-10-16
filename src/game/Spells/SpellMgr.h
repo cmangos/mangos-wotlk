@@ -1455,9 +1455,6 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 34190: // Arcane Orb - should be negative
                     /*34172 is cast onto friendly target, and fails bcs its delayed and we remove negative delayed on friendlies due to Duel code, if we change target pos code
                     bcs 34190 will be evaled as neg, 34172 will be evaled as neg, and hence be removed cos its negative delayed on a friendly*/
-        case 35941: // Gravity Lapse - Neutral spell with TARGET_ONLY_PLAYER attribute, should hit all players in the room
-        case 39495: // Remove Tainted Cores
-        case 39497: // Remove Enchanted Weapons - both should hit all players in zone with the given items, uses a neutral target type
         case 34700: // Allergic Reaction - Neutral target type - needs to be a debuff
         case 36717: // Neutral spells with SPELL_ATTR_EX3_TARGET_ONLY_PLAYER as a filter
         case 38829:

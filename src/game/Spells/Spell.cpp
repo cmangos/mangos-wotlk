@@ -9696,10 +9696,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() == TYPEID_PLAYER)
                 return false;
             break;
-        case 36819:                                         // Always should hit main tank, no clue why rigged as AOE
-            if (m_caster->GetVictim() && target != m_caster->GetVictim())
-                return false;
-            break;
         case 37144:                                         // Move - Chess event
         case 37146:
         case 37148:
@@ -9801,7 +9797,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
         }
         case 30769:                             // Pick Red Riding Hood
         case 30843:                             // Enfeeble
-        case 36797:                             // Mind Control (Kael'thas)
         case 40243:                             // Crushing Shadows - Teron Gorefiend
         case 41376:                             // Spite
         case 43550:                             // Mind Control - Malacrass

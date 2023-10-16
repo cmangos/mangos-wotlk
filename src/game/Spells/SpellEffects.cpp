@@ -2058,11 +2058,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 36197:
                 case 36198:
                 {
-                    if (!unitTarget)
-                        return;
 
-                    unitTarget->PlaySpellVisual(7234);
-                    unitTarget->PlaySpellVisual(7235);
                     return;
                 }
                 case 36677:                                 // Chaos Breath
@@ -8853,64 +8849,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 35597:                                 // Cancel Power of the Legion
                 {
                     unitTarget->RemoveAurasDueToSpell(35596); // remove aura Power of the Legion
-                    return;
-                }
-                case 35869:                                 // Nether Beam
-                {
-                    if (m_caster->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    ThreatList const& threatlist = m_caster->getThreatManager().getThreatList();
-                    if (threatlist.empty())
-                        return;
-
-                    std::vector<Unit*> suitableUnits;
-                    suitableUnits.reserve(threatlist.size());
-
-                    for (ThreatList::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
-                        if (Unit* pTarget = m_caster->GetMap()->GetUnit((*itr)->getUnitGuid()))
-                            if (pTarget->GetTypeId() == TYPEID_PLAYER)
-                                suitableUnits.push_back(pTarget);
-
-                    if (!suitableUnits.empty())
-                    {
-                        while (suitableUnits.size() > 5)
-                            suitableUnits.erase(suitableUnits.begin() + urand(0, suitableUnits.size() - 1));
-
-                        for (Unit* beamTarget : suitableUnits)
-                            m_caster->CastSpell(beamTarget, 35873, TRIGGERED_NONE);
-                    }
-
-                    return;
-                }
-                case 36092:                                 // Kael Explodes
-                {
-                    m_caster->CastSpell(nullptr, 36185, TRIGGERED_NONE);
-                    m_caster->CastSpell(nullptr, 36550, TRIGGERED_NONE);
-                    m_caster->PlayDirectSound(3320);
-                    m_caster->PlayDirectSound(10845);
-                    m_caster->PlayDirectSound(6539);
-                    return;
-                }
-                case 36201:                                 // Pure Nether Beam
-                case 36290:
-                case 36291:
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 spellId;
-                    switch (urand(0, 2))
-                    {
-                        case 0: spellId = 36196; break;
-                        case 1: spellId = 36197; break;
-                        case 2: spellId = 36198; break;
-                    }
-
-                    m_caster->PlayDirectSound(6477);
-                    m_caster->PlayDirectSound(44);
-
-                    unitTarget->CastSpell(nullptr, spellId, TRIGGERED_NONE); // also triggered in sniff, only SMSG_SPELL_GO
                     return;
                 }
                 case 36208:                                 // Steal Weapon

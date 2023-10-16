@@ -27,13 +27,13 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1550000,
-    SAY_SLAY1                   = -1550001,
-    SAY_SLAY2                   = -1550002,
-    SAY_SLAY3                   = -1550003,
-    SAY_DEATH                   = -1550004,
-    SAY_POUNDING1               = -1550005,
-    SAY_POUNDING2               = -1550006,
+    SAY_AGGRO                   = 20906,
+    SAY_SLAY1                   = 20908,
+    SAY_SLAY2                   = 20909,
+    SAY_SLAY3                   = 20910,
+    SAY_DEATH                   = 20907,
+    SAY_POUNDING1               = 20911,
+    SAY_POUNDING2               = 20912,
 
     SPELL_POUNDING              = 34162,
     SPELL_ARCANE_ORB_MISSILE    = 34172,
@@ -65,26 +65,14 @@ struct boss_void_reaverAI : public CombatAI
         {
             return m_creature->GetDistance2d(432.59f, 371.93f) > 105.0f;
         });
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
     }
 
     ScriptedInstance* m_instance;
 
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-        }
-    }
-
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_VOIDREAVER, DONE);
@@ -92,7 +80,7 @@ struct boss_void_reaverAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_VOIDREAVER, IN_PROGRESS);
@@ -118,7 +106,7 @@ struct boss_void_reaverAI : public CombatAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_POUNDING) == CAST_OK)
                 {
-                    DoScriptText(urand(0, 1) ? SAY_POUNDING1 : SAY_POUNDING2, m_creature);
+                    DoBroadcastText(urand(0, 1) ? SAY_POUNDING1 : SAY_POUNDING2, m_creature);
                     ResetCombatAction(action, 14000);
                 }
                 break;

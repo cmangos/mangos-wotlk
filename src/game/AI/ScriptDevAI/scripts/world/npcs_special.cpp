@@ -2453,6 +2453,7 @@ struct mob_phoenix_tkAI : public CombatAI
             SetMeleeEnabled(true);
             DoStartMovement(m_creature->GetVictim());
             SetCombatScriptStatus(false);
+            SetDeathPrevention(true);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             DoCastSpellIfCan(nullptr, m_burnSpellId, CAST_TRIGGERED);
