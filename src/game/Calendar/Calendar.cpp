@@ -18,6 +18,7 @@
 
 #include <utility>
 #include "Calendar/Calendar.h"
+#include "Database/DatabaseEnv.h"
 #include "Mails/Mail.h"
 #include "Globals/ObjectMgr.h"
 #include "Util/ProgressBar.h"
@@ -625,7 +626,7 @@ void CalendarMgr::LoadCalendarsFromDB()
             // delete all events (no event exist without at least one invite)
             m_EventStore.clear();
             m_MaxEventId = 0;
-            CharacterDatabase.DirectExecute("TRUNCATE TABLE calendar_events");
+            CharacterDatabase.DirectExecute(_TRUNCATE_ " calendar_events");
             sLog.outString(">> calendar_invites table is empty, cleared calendar_events table!");
         }
         else
@@ -673,7 +674,7 @@ void CalendarMgr::LoadCalendarsFromDB()
         else
         {
             // delete all invites (no invites exist without events)
-            CharacterDatabase.DirectExecute("TRUNCATE TABLE calendar_invites");
+            CharacterDatabase.DirectExecute(_TRUNCATE_ " calendar_invites");
             sLog.outString(">> calendar_invites table is cleared! (invites without events found)");
         }
     }

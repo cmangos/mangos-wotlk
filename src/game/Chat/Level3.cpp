@@ -5847,7 +5847,7 @@ bool ChatHandler::HandleBanInfoIPCommand(char* args)
 
 bool ChatHandler::HandleBanListCharacterCommand(char* args)
 {
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
 
     char* cFilter = ExtractLiteralArg(&args);
     if (!cFilter)

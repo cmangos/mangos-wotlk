@@ -952,7 +952,7 @@ void World::SetInitialWorldSettings()
     LoginDatabase.PExecute("UPDATE realmlist SET icon = %u, timezone = %u WHERE id = '%u'", server_type, realm_zone, realmID);
 
     ///- Remove the bones (they should not exist in DB though) and old corpses after a restart
-    CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0' OR time < (UNIX_TIMESTAMP()-'%u')", 3 * DAY);
+    CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0' OR time < (" _UNIXTIME_ "-'%u')", 3 * DAY);
 
     // load SQL dbcs first, other DBCs need them
     sObjectMgr.LoadSQLDBCs();
@@ -1474,7 +1474,8 @@ void World::SetInitialWorldSettings()
     CheckLootTemplates_Reference(ids_set);
 
     sLog.outString("Deleting expired bans...");
-    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=UNIX_TIMESTAMP() AND expires_at<>banned_at");
+
+    LoginDatabase.Execute("DELETE FROM ip_banned WHERE expires_at<=" _UNIXTIME_ " AND expires_at<>banned_at");
     sLog.outString();
 
     sLog.outString("Calculate next daily quest reset time...");
@@ -1994,17 +1995,17 @@ void World::WarnAccount(uint32 accountId, std::string from, std::string reason, 
     reason = std::string(type) + ": " + reason;
     LoginDatabase.escape_string(reason);
 
-    LoginDatabase.PExecute("INSERT INTO account_banned (account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+1, '%s', '%s', '0')",
+    LoginDatabase.PExecute("INSERT INTO account_banned (account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', " _UNIXTIME_ ", " _UNIXTIME_ "+1, '%s', '%s', '0')",
         accountId, from.c_str(), reason.c_str());
 }
 
 BanReturn World::BanAccount(WorldSession *session, uint32 duration_secs, const std::string& reason, const std::string& author)
 {
     if (duration_secs)
-        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
+        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', " _UNIXTIME_ ", " _UNIXTIME_ "+%u, '%s', '%s', '1')",
             session->GetAccountId(), duration_secs, author.c_str(), reason.c_str());
     else
-        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', UNIX_TIMESTAMP(), 0, '%s', '%s', '1')",
+        LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u',  " _UNIXTIME_ ", 0, '%s', '%s', '1')",
             session->GetAccountId(), author.c_str(), reason.c_str());
 
     session->KickPlayer();
@@ -2027,7 +2028,7 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
         case BAN_IP:
             // No SQL injection as strings are escaped
             resultAccounts = LoginDatabase.PQuery("SELECT accountId FROM account_logons WHERE ip = '%s' ORDER BY loginTime DESC LIMIT 1", nameOrIP.c_str());
-            LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+%u,'%s','%s')", nameOrIP.c_str(), duration_secs, safe_author.c_str(), reason.c_str());
+            LoginDatabase.PExecute("INSERT INTO ip_banned VALUES ('%s'," _UNIXTIME_ "," _UNIXTIME_ "+%u,'%s','%s')", nameOrIP.c_str(), duration_secs, safe_author.c_str(), reason.c_str());
             break;
         case BAN_ACCOUNT:
             // No SQL injection as string is escaped
@@ -2058,7 +2059,7 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
         if (mode != BAN_IP)
         {
             // No SQL injection as strings are escaped
-            LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
+            LoginDatabase.PExecute("INSERT INTO account_banned(account_id, banned_at, expires_at, banned_by, reason, active) VALUES ('%u', " _UNIXTIME_ ", " _UNIXTIME_ "+%u, '%s', '%s', '1')",
                                    account, duration_secs, safe_author.c_str(), reason.c_str());
         }
 
@@ -2091,7 +2092,7 @@ bool World::RemoveBanAccount(BanMode mode, const std::string& source, const std:
             return false;
 
         // NO SQL injection as account is uint32
-        LoginDatabase.PExecute("UPDATE account_banned SET active = '0', unbanned_at = UNIX_TIMESTAMP(), unbanned_by = '%s' WHERE account_id = '%u'", source.data(), account);
+        LoginDatabase.PExecute("UPDATE account_banned SET active = '0', unbanned_at = " _UNIXTIME_ ", unbanned_by = '%s' WHERE account_id = '%u'", source.data(), account);
         WarnAccount(account, source, message, "UNBAN");
     }
     return true;
@@ -2541,7 +2542,8 @@ void World::ResetWeeklyQuests()
 void World::ResetMonthlyQuests()
 {
     DETAIL_LOG("Monthly quests reset for all characters.");
-    CharacterDatabase.Execute("TRUNCATE character_queststatus_monthly");
+
+    CharacterDatabase.Execute(_TRUNCATE_ " character_queststatus_monthly");
 
     for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if (itr->second->GetPlayer())
