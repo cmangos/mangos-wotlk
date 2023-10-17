@@ -60,18 +60,18 @@ struct boss_doomlordkazzakAI : public CombatAI
     void JustRespawned() override
     {
         CombatAI::JustRespawned();
-        DoScriptText(urand(0, 1) ? SAY_INTRO : SAY_INTRO_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_INTRO : SAY_INTRO_2, m_creature);
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_AGGRO1 : SAY_AGGRO2, m_creature);
         DoCastSpellIfCan(nullptr, SPELL_CAPTURE_SOUL, CAST_TRIGGERED);
     }
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_DEATH : SAY_DEATH_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_DEATH : SAY_DEATH_2, m_creature);
     }
 
     void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
@@ -79,8 +79,8 @@ struct boss_doomlordkazzakAI : public CombatAI
         switch (spellInfo->Id)
         {
             case SPELL_ENRAGE:
-                DoScriptText(EMOTE_GENERIC_FRENZY, m_creature);
-                DoScriptText(urand(0, 1) ? SAY_SUPREME_1 : SAY_SUPREME_2, m_creature);
+                DoBroadcastText(EMOTE_GENERIC_FRENZY, m_creature);
+                DoBroadcastText(urand(0, 1) ? SAY_SUPREME_1 : SAY_SUPREME_2, m_creature);
                 break;
         }
     }
