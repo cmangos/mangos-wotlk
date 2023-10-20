@@ -2536,7 +2536,7 @@ void Player::Regenerate(Powers power, uint32 diff)
 
 void Player::RegenerateHealth(uint32 diff)
 {
-    uint32 curValue = GetHealth();
+    float curValue = GetRealHealth();
     uint32 maxValue = GetMaxHealth();
 
     if (curValue >= maxValue) return;
@@ -2568,7 +2568,7 @@ void Player::RegenerateHealth(uint32 diff)
     if (addvalue < 0)
         addvalue = 0;
 
-    ModifyHealth(int32(addvalue * float(diff) / 1000));
+    ModifyHealth(addvalue * float(diff) / 1000);
 }
 
 Creature* Player::GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask)

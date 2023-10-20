@@ -9070,14 +9070,14 @@ void Unit::HandleExitCombat(bool pvpCombat)
     CallForAllControlledUnits([](Unit* unit) { unit->HandleExitCombat(); }, CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_TOTEMS);
 }
 
-int32 Unit::ModifyHealth(int32 dVal)
+float Unit::ModifyHealth(float dVal)
 {
     if (dVal == 0)
         return 0;
 
-    int32 curHealth = (int32)GetHealth();
+    float curHealth = GetRealHealth();
 
-    int32 val = dVal + curHealth;
+    float val = dVal + curHealth;
     if (val <= 0)
     {
         SetHealth(0);
@@ -9086,7 +9086,7 @@ int32 Unit::ModifyHealth(int32 dVal)
 
     int32 maxHealth = (int32)GetMaxHealth();
 
-    int32 gain;
+    float gain;
     if (val < maxHealth)
     {
         SetHealth(val);
@@ -10369,13 +10369,14 @@ void Unit::SetLevel(uint32 lvl)
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
 }
 
-void Unit::SetHealth(uint32 val)
+void Unit::SetHealth(float val)
 {
     uint32 maxHealth = GetMaxHealth();
     if (maxHealth < val)
         val = maxHealth;
 
     SetUInt32Value(UNIT_FIELD_HEALTH, val);
+    m_unitHealth = val;
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)

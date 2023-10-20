@@ -1406,12 +1406,13 @@ class Unit : public WorldObject
         inline void SetResistance(SpellSchools school, int32 val) { SetInt32Value(UNIT_FIELD_RESISTANCES + school, val); }
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
+        float GetRealHealth() const { return m_unitHealth; }
         uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
         float GetHealthPercent() const { return (GetHealth() * 100.0f) / GetMaxHealth(); }
-        void SetHealth(uint32 val);
+        void SetHealth(float val);
         void SetMaxHealth(uint32 val);
         void SetHealthPercent(float percent);
-        int32 ModifyHealth(int32 dVal);
+        float ModifyHealth(float dVal);
         float OCTRegenHPPerSpirit() const;
         float OCTRegenMPPerSpirit() const;
 
@@ -2093,6 +2094,7 @@ class Unit : public WorldObject
                    form != FORM_SHADOW && form != FORM_STEALTH;
         }
 
+        float m_unitHealth;
         float m_unitPower[POWER_RUNIC_POWER + 1];
 
         float m_modMeleeHitChance;
