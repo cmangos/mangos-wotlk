@@ -10376,7 +10376,7 @@ void Unit::SetHealth(float val)
     if (maxHealth < val)
         val = maxHealth;
 
-    SetUInt32Value(UNIT_FIELD_HEALTH, val);
+    SetUInt32Value(UNIT_FIELD_HEALTH, uint32(val));
     m_unitHealth = val;
 
     // group update
