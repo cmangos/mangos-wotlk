@@ -333,12 +333,11 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         return;
     }
 
-    QueryResult* resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId());
+    auto resultacct = LoginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%u'", GetAccountId());
     if (resultacct)
     {
         Field* fields = resultacct->Fetch();
         uint32 acctcharcount = fields[0].GetUInt32();
-        delete resultacct;
 
         if (acctcharcount >= sWorld.getConfig(CONFIG_UINT32_CHARACTERS_PER_ACCOUNT))
         {
@@ -348,13 +347,12 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
         }
     }
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId());
+    auto queryResult = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%u'", GetAccountId());
     uint8 charcount = 0;
-    if (result)
+    if (queryResult)
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         charcount = fields[0].GetUInt8();
-        delete result;
 
         if (charcount >= sWorld.getConfig(CONFIG_UINT32_CHARACTERS_PER_REALM))
         {
@@ -392,13 +390,13 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
 
     if (!AllowTwoSideAccounts || skipCinematics == CINEMATICS_SKIP_SAME_RACE || class_ == CLASS_DEATH_KNIGHT)
     {
-        QueryResult* result2 = CharacterDatabase.PQuery("SELECT level,race,class FROM characters WHERE account = '%u' %s",
+        auto queryResult2 = CharacterDatabase.PQuery("SELECT level,race,class FROM characters WHERE account = '%u' %s",
                                GetAccountId(), (skipCinematics == CINEMATICS_SKIP_SAME_RACE || class_ == CLASS_DEATH_KNIGHT) ? "" : "LIMIT 1");
-        if (result2)
+        if (queryResult2)
         {
             Team team_ = Player::TeamForRace(race_);
 
-            Field* field = result2->Fetch();
+            Field* field = queryResult2->Fetch();
             uint8 acc_race  = field[1].GetUInt32();
 
             if (GetSecurity() == SEC_PLAYER && class_ == CLASS_DEATH_KNIGHT)
@@ -413,7 +411,6 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                     {
                         data << (uint8)CHAR_CREATE_UNIQUE_CLASS_LIMIT;
                         SendPacket(data);
-                        delete result2;
                         return;
                     }
                 }
@@ -434,7 +431,6 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                 {
                     data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
                     SendPacket(data);
-                    delete result2;
                     return;
                 }
             }
@@ -443,10 +439,10 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
             // TODO: check if cinematic already shown? (already logged in?; cinematic field)
             while ((skipCinematics == CINEMATICS_SKIP_SAME_RACE && !have_same_race) || class_ == CLASS_DEATH_KNIGHT)
             {
-                if (!result2->NextRow())
+                if (!queryResult2->NextRow())
                     break;
 
-                field = result2->Fetch();
+                field = queryResult2->Fetch();
                 acc_race = field[1].GetUInt32();
 
                 if (!have_same_race)
@@ -464,7 +460,6 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                         {
                             data << (uint8)CHAR_CREATE_UNIQUE_CLASS_LIMIT;
                             SendPacket(data);
-                            delete result2;
                             return;
                         }
                     }
@@ -477,7 +472,6 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recv_data)
                     }
                 }
             }
-            delete result2;
         }
     }
 
@@ -554,13 +548,12 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
     uint32 lowguid = guid.GetCounter();
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT account,name FROM characters WHERE guid='%u'", lowguid);
-    if (result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT account,name FROM characters WHERE guid='%u'", lowguid);
+    if (queryResult)
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         accountId = fields[0].GetUInt32();
         name = fields[1].GetCppString();
-        delete result;
     }
 
     // prevent deleting other players' characters using cheating tools
@@ -1428,8 +1421,8 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPacket& recv_data)
     uint8 gender, skin, face, hairStyle, hairColor, facialHair;
     recv_data >> gender >> skin >> hairColor >> hairStyle >> facialHair >> face;
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT at_login FROM characters WHERE guid ='%u'", guid.GetCounter());
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT at_login FROM characters WHERE guid ='%u'", guid.GetCounter());
+    if (!queryResult)
     {
         WorldPacket data(SMSG_CHAR_CUSTOMIZE, 1);
         data << uint8(CHAR_CREATE_ERROR);
@@ -1437,9 +1430,8 @@ void WorldSession::HandleCharCustomizeOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
     uint32 at_loginFlags = fields[0].GetUInt32();
-    delete result;
 
     if (!(at_loginFlags & AT_LOGIN_CUSTOMIZE))
     {

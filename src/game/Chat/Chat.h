@@ -847,18 +847,18 @@ class ChatHandler
         GameObject* GetGameObjectWithGuid(uint32 lowguid, uint32 entry) const;
 
         // Utility methods for commands
-        bool ShowAccountListHelper(QueryResult* result, uint32* limit = nullptr, bool title = true, bool error = true);
+        bool ShowAccountListHelper(std::unique_ptr<QueryResult> queryResult, uint32* limit = nullptr, bool title = true, bool error = true);
         void ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, time_t const* date = nullptr, Player* target = nullptr);
         void ShowAchievementCriteriaListHelper(AchievementCriteriaEntry const* criEntry, AchievementEntry const* achEntry, LocaleConstant loc, Player* target = nullptr);
         void ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState = nullptr, Player* target = nullptr);
         void ShowItemListHelper(uint32 itemId, int loc_idx, Player* target = nullptr);
         void ShowQuestListHelper(uint32 questId, int32 loc_idx, Player* target = nullptr);
-        bool ShowPlayerListHelper(QueryResult* result, uint32* limit = nullptr, bool title = true, bool error = true);
+        bool ShowPlayerListHelper(std::unique_ptr<QueryResult> queryResult, uint32* limit = nullptr, bool title = true, bool error = true);
         void ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc);
         void ShowPoolListHelper(uint16 pool_id);
         void ShowTriggerListHelper(AreaTriggerEntry const* atEntry);
         void ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, bool subpart = false);
-        bool LookupPlayerSearchCommand(QueryResult* result, uint32* limit = nullptr);
+        bool LookupPlayerSearchCommand(std::unique_ptr<QueryResult> queryResult, uint32* limit = nullptr);
         bool HandleBanListHelper(std::unique_ptr<QueryResult> queryResult);
         bool HandleBanHelper(BanMode mode, char* args);
         bool HandleBanInfoHelper(uint32 accountid, char const* accountname);

@@ -3720,18 +3720,17 @@ void PlayerbotAI::SetQuestNeedItems()
                 continue;
 
             // TODO: find faster way to handle this look up instead of using SQL lookup for each item
-            QueryResult* result;
             // determine if GOs are needed
-            result = WorldDatabase.PQuery("SELECT entry FROM gameobject_template WHERE questitem1='%u' "
+            auto queryResult = WorldDatabase.PQuery("SELECT entry FROM gameobject_template WHERE questitem1='%u' "
                                           "OR questitem2='%u' OR questitem3='%u' OR questitem4='%u' OR questitem5='%u' OR questitem6='%u'",
                                           qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i], qInfo->ReqItemId[i],
                                           qInfo->ReqItemId[i], qInfo->ReqItemId[i]);
 
-            if (result)
+            if (queryResult)
             {
                 do
                 {
-                    Field* fields = result->Fetch();
+                    Field* fields = queryResult->Fetch();
                     uint32 entry = fields[0].GetUInt32();
 
                     GameObjectInfo const* gInfo = ObjectMgr::GetGameObjectInfo(entry);
@@ -3746,9 +3745,7 @@ void PlayerbotAI::SetQuestNeedItems()
                         m_collectObjects.unique();
                     }
                 }
-                while (result->NextRow());
-
-                delete result;
+                while (queryResult->NextRow());
             }
         }
     }
@@ -4555,9 +4552,9 @@ Unit* PlayerbotAI::FindAttacker(ATTACKERINFOTYPE ait, Unit* victim)
 */
 void PlayerbotAI::BotDataRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_delay,autoequip FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
+    auto queryResult = CharacterDatabase.PQuery("SELECT combat_delay,autoequip FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
-    if (!result)
+    if (!queryResult)
     {
         sLog.outString();
         sLog.outString(">> [BotDataRestore()] Loaded `playerbot_saved_data`, found no match for guid %u.", m_bot->GetGUIDLow());
@@ -4566,10 +4563,9 @@ void PlayerbotAI::BotDataRestore()
     }
     else
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         m_DelayAttack = fields[0].GetUInt8();
         m_AutoEquipToggle = fields[1].GetBool();
-        delete result;
     }
 }
 
@@ -4580,9 +4576,9 @@ void PlayerbotAI::BotDataRestore()
 */
 void PlayerbotAI::CombatOrderRestore()
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT combat_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
+    auto queryResult = CharacterDatabase.PQuery("SELECT combat_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetGUIDLow());
 
-    if (!result)
+    if (!queryResult)
     {
         sLog.outString();
         sLog.outString(">> [CombatOrderRestore()] Loaded `playerbot_saved_data`, found no match for guid %u.", m_bot->GetGUIDLow());
@@ -4590,7 +4586,7 @@ void PlayerbotAI::CombatOrderRestore()
         return;
     }
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
     CombatOrderType combatOrders = (CombatOrderType)fields[0].GetUInt32();
     ObjectGuid PrimtargetGUID = ObjectGuid(fields[1].GetUInt64());
     ObjectGuid SectargetGUID = ObjectGuid(fields[2].GetUInt64());
@@ -4600,7 +4596,6 @@ void PlayerbotAI::CombatOrderRestore()
     m_FollowAutoGo = fields[6].GetUInt8();
     gPrimtarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(PrimtargetGUID), PrimtargetGUID);
     gSectarget = ObjectAccessor::GetUnit(*m_bot->GetMap()->GetWorldObject(SectargetGUID), SectargetGUID);
-    delete result;
 
     //Unit* target = nullptr;
     //ObjectGuid NoTargetGUID = m_bot->GetObjectGuid();
@@ -6356,9 +6351,9 @@ uint32 PlayerbotAI::GetTalentSpecsAmount()
 
 uint32 PlayerbotAI::GetTalentSpecsAmount(long specClass)
 {
-    QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM playerbot_talentspec WHERE class = '%li'", specClass);
+    auto queryResult = CharacterDatabase.PQuery("SELECT COUNT(*) FROM playerbot_talentspec WHERE class = '%li'", specClass);
 
-    if (!result)
+    if (!queryResult)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %li.", specClass);
@@ -6366,11 +6361,10 @@ uint32 PlayerbotAI::GetTalentSpecsAmount(long specClass)
         return 0;
     }
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
 
     uint32 count = fields[0].GetUInt32();
 
-    delete result;
     return count;
 }
 
@@ -6384,9 +6378,9 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
     TalentSpec ts;
     std::list<TalentSpec> tsList;
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %li ORDER BY talentspec_id ASC", specClass);
+    auto queryResult = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %li ORDER BY talentspec_id ASC", specClass);
 
-    if (!result)
+    if (!queryResult)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %li.", specClass);
@@ -6403,7 +6397,7 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
         4 to 74        talent_10 to 71
         75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
         */
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         /* ts_id = fields[0].GetUInt32(); // not used
         if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
@@ -6439,9 +6433,8 @@ std::list<TalentSpec> PlayerbotAI::GetTalentSpecs(long specClass)
 
         tsList.push_back(ts);
     }
-    while (result->NextRow());
+    while (queryResult->NextRow());
 
-    delete result;
     return tsList;
 }
 
@@ -6465,14 +6458,13 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
     // Weed out invalid choice - ts has been zero'd out anyway
     if (0 >= choice || (long) GetTalentSpecsAmount(specClass) < choice) return ts;
 
-    QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %li ORDER BY talentspec_id ASC", specClass);
+    auto queryResult = CharacterDatabase.PQuery("SELECT * FROM playerbot_talentspec WHERE class = %li ORDER BY talentspec_id ASC", specClass);
 
-    if (!result)
+    if (!queryResult)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, found no talentspecs for class %li.", specClass);
 
-        delete result;
         return ts; // empty
     }
 
@@ -6489,7 +6481,7 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
             4 to 74    talent_10 to 71
             75 to 80    major_glyph_15, 30, 80, minor_glyph_15, 50, 70
             */
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             /* ts_id = fields[0].GetUInt32(); // not used
             if (!ts_id)    // Nice bit of paranoia: ts_id is an AUTO_INCREMENT value
@@ -6505,7 +6497,6 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
 
                 ts.specName = "";
                 ts.specClass = 0;
-                delete result;
                 return ts;
             }
 
@@ -6526,15 +6517,13 @@ TalentSpec PlayerbotAI::GetTalentSpec(long specClass, long choice)
                 ts.glyphIdMajor[i] = fields[i + 78].GetUInt16();
             }
 
-            delete result;
             return ts;
         }
 
         // TODO: okay, this won't bog down the system, but it's still a waste. Figure out a better way.
-        result->NextRow();
+        queryResult->NextRow();
     }
 
-    delete result;
     return ts;
 }
 
@@ -8363,14 +8352,14 @@ void PlayerbotAI::Repair(const uint32 itemid, Creature* rCreature)
 
 bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
 {
-    QueryResult* result = CharacterDatabase.PQuery(
+    auto queryResult = CharacterDatabase.PQuery(
                               "SELECT houseid,itemguid,item_template,itemowner,buyoutprice,time,buyguid,lastbid,startbid,deposit FROM auction WHERE id = '%u'", auctionid);
 
     AuctionEntry* auction;
 
-    if (result)
+    if (queryResult)
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         auction = new AuctionEntry;
         auction->Id = auctionid;
@@ -8394,7 +8383,6 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
             auction->DeleteFromDB();
             sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->itemGuidLow);
             delete auction;
-            delete result;
             return false;
         }
 
@@ -8415,7 +8403,6 @@ bool PlayerbotAI::RemoveAuction(const uint32 auctionid)
         auction->DeleteFromDB();
 
         delete auction;
-        delete result;
     }
     return true;
 }
@@ -8610,14 +8597,14 @@ void PlayerbotAI::ListAuctions()
 {
     std::ostringstream report;
 
-    QueryResult* result = CharacterDatabase.PQuery(
+    auto queryResult = CharacterDatabase.PQuery(
                               "SELECT id,itemguid,item_template,time,buyguid,lastbid FROM auction WHERE itemowner = '%u'", m_bot->GetObjectGuid().GetCounter());
-    if (result)
+    if (queryResult)
     {
         report << "My active auctions are: \n";
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             uint32 Id = fields[0].GetUInt32();
             uint32 itemGuidLow = fields[1].GetUInt32();
@@ -8659,9 +8646,8 @@ void PlayerbotAI::ListAuctions()
                     report << " ends: " << aTm->tm_hour << "|cff0070dd|hH|h|r " << aTm->tm_min << "|cff0070dd|hmin|h|r";
             }
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
 
-        delete result;
         TellMaster(report.str().c_str());
     }
 }
@@ -9341,11 +9327,9 @@ void PlayerbotAI::_HandleCommandOrders(std::string& text, Player& fromPlayer)
             return;
         }
 
-        QueryResult* resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetObjectGuid().GetCounter());
+        auto resultlvl = CharacterDatabase.PQuery("SELECT guid FROM playerbot_saved_data WHERE guid = '%u'", m_bot->GetObjectGuid().GetCounter());
         if (!resultlvl)
             CharacterDatabase.DirectPExecute("INSERT INTO playerbot_saved_data (guid,combat_order,primary_target,secondary_target,pname,sname,combat_delay,auto_follow,autoequip) VALUES ('%u',0,0,0,'','',0,0,false)", m_bot->GetObjectGuid().GetCounter());
-        else
-            delete resultlvl;
 
         size_t protect = text.find("protect");
         size_t assist = text.find("assist");
@@ -11031,8 +11015,8 @@ void PlayerbotAI::_HandleCommandQuest(std::string& text, Player& fromPlayer)
 
             // Compare quest entry from [Quest Link] with quest ids listed DB table
             // if found the quest is autocompleted
-            QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM playerbot_quest_data WHERE autocomplete='%u'", entry);
-            if (!result)
+            auto queryResult = CharacterDatabase.PQuery("SELECT * FROM playerbot_quest_data WHERE autocomplete='%u'", entry);
+            if (!queryResult)
             {
                 MakeQuestLink(pQuest, msg);
                 msg << " can't be autocompleted\n";
@@ -11115,7 +11099,6 @@ void PlayerbotAI::_HandleCommandQuest(std::string& text, Player& fromPlayer)
                     MakeQuestLink(pQuest, msg);
                     msg << "\n";
                 }
-                delete result;
             }
         }
         ch.SendSysMessage(msg.str().c_str());
@@ -11449,7 +11432,6 @@ void PlayerbotAI::_HandleCommandSurvey(std::string& /*text*/, Player& fromPlayer
 {
     uint32 count = 0;
     std::ostringstream detectout;
-    QueryResult* result;
     GameEventMgr::ActiveEvents const& activeEventsList = sGameEventMgr.GetActiveEventList();
     std::ostringstream eventFilter;
     eventFilter << " AND (event IS NULL ";
@@ -11471,16 +11453,16 @@ void PlayerbotAI::_HandleCommandSurvey(std::string& /*text*/, Player& fromPlayer
     else
         eventFilter << ")";
 
-    result = WorldDatabase.PQuery("SELECT gameobject.guid, id, position_x, position_y, position_z, map, "
-                                  "(POW(position_x - %f, 2) + POW(position_y - %f, 2) + POW(position_z - %f, 2)) AS order_ FROM gameobject "
-                                  "LEFT OUTER JOIN game_event_gameobject on gameobject.guid=game_event_gameobject.guid WHERE map = '%i' %s ORDER BY order_ ASC LIMIT 10",
-                                  m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), m_bot->GetMapId(), eventFilter.str().c_str());
+    auto queryResult = WorldDatabase.PQuery("SELECT gameobject.guid, id, position_x, position_y, position_z, map, "
+                                            "(POW(position_x - %f, 2) + POW(position_y - %f, 2) + POW(position_z - %f, 2)) AS order_ FROM gameobject "
+                                            "LEFT OUTER JOIN game_event_gameobject on gameobject.guid=game_event_gameobject.guid WHERE map = '%i' %s ORDER BY order_ ASC LIMIT 10",
+                                            m_bot->GetPositionX(), m_bot->GetPositionY(), m_bot->GetPositionZ(), m_bot->GetMapId(), eventFilter.str().c_str());
 
-    if (result)
+    if (queryResult)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             uint32 guid = fields[0].GetUInt32();
             uint32 entry = fields[1].GetUInt32();
 
@@ -11494,9 +11476,8 @@ void PlayerbotAI::_HandleCommandSurvey(std::string& /*text*/, Player& fromPlayer
             detectout << "|cFFFFFF00|Hfound:" << guid << ":" << entry  << ":" <<  "|h[" << go->GetGOInfo()->name << "]|h|r";
             ++count;
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
 
-        delete result;
     }
     SendWhisper(detectout.str().c_str(), fromPlayer);
 }
@@ -11915,11 +11896,11 @@ void PlayerbotAI::_HandleCommandGM(std::string& text, Player& fromPlayer)
             }
 
             //check whether entry is already in database
-            QueryResult* result = CharacterDatabase.PQuery("SELECT * FROM playerbot_quest_data WHERE autocomplete='%u'", entry);
+            auto queryResult = CharacterDatabase.PQuery("SELECT * FROM playerbot_quest_data WHERE autocomplete='%u'", entry);
 
             if (add != std::string::npos)
             {
-                if (!result)
+                if (!queryResult)
                 {
                     // add new entry
                     out << "adding quest ";
@@ -11932,20 +11913,18 @@ void PlayerbotAI::_HandleCommandGM(std::string& text, Player& fromPlayer)
                     // entry found in table
                     MakeQuestLink(pQuest, out);
                     out << " already in table\n";
-                    delete result;
                     continue;
                 }
             }
             else if (del != std::string::npos)
             {
-                if (result)
+                if (queryResult)
                 {
                     // delete entry
                     out << "deleting ";
                     MakeQuestLink(pQuest, out);
                     out << " from table\n";
                     CharacterDatabase.DirectPExecute("DELETE FROM playerbot_quest_data WHERE autocomplete='%u'", entry);
-                    delete result;
                 }
                 else
                 {

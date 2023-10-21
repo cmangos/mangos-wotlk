@@ -444,22 +444,20 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
     {
         // Invitee offline, get data from database
         CharacterDatabase.escape_string(name);
-        QueryResult* result = CharacterDatabase.PQuery("SELECT guid,race FROM characters WHERE name ='%s'", name.c_str());
-        if (result)
+        auto queryResult = CharacterDatabase.PQuery("SELECT guid,race FROM characters WHERE name ='%s'", name.c_str());
+        if (queryResult)
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             inviteeGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
             inviteeTeam = Player::TeamForRace(fields[1].GetUInt8());
             inviteeGuildId = Player::GetGuildIdFromDB(inviteeGuid);
-            delete result;
 
-            result = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = %u AND friend = %u", inviteeGuid.GetCounter(), playerGuid.GetCounter());
-            if (result)
+            queryResult = CharacterDatabase.PQuery("SELECT flags FROM character_social WHERE guid = %u AND friend = %u", inviteeGuid.GetCounter(), playerGuid.GetCounter());
+            if (queryResult)
             {
-                fields = result->Fetch();
+                fields = queryResult->Fetch();
                 if (fields[0].GetUInt8() & SOCIAL_FLAG_IGNORED)
                     isIgnored = true;
-                delete result;
             }
         }
     }

@@ -2307,12 +2307,12 @@ void BattleGroundMgr::RewardArenaSeason(uint32 seasonId)
         }
         else
         {
-            QueryResult* result = CharacterDatabase.PQuery("SELECT knownTitles FROM characters WHERE guid = '%u'", data.first.GetCounter());
-            if (result)
+            auto queryResult = CharacterDatabase.PQuery("SELECT knownTitles FROM characters WHERE guid = '%u'", data.first.GetCounter());
+            if (queryResult)
             {
                 uint32 titleValueCount = 2;
                 uint32 titleValues[2];
-                std::string titlesData = result->Fetch()[0].GetCppString();
+                std::string titlesData = queryResult->Fetch()[0].GetCppString();
                 Tokens tokens = StrSplit(titlesData, " ");
                 if (tokens.size() != titleValueCount)
                     return;
@@ -2326,7 +2326,6 @@ void BattleGroundMgr::RewardArenaSeason(uint32 seasonId)
 
                 std::string newTitleData = std::to_string(titleValues[0]) + " " + std::to_string(titleValues[1]) + " ";
                 CharacterDatabase.PExecute("UPDATE characters SET knownTitles='%s' WHERE guid = '%u'", newTitleData.data(), data.first.GetCounter());
-                delete result;
             }
         }
     }

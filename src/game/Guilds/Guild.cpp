@@ -205,18 +205,17 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     else
     {
         //                                                     0    1     2     3      4    5
-        QueryResult* result = CharacterDatabase.PQuery("SELECT name,level,class,gender,zone,account FROM characters WHERE guid = '%u'", lowguid);
-        if (!result)
+        auto queryResult = CharacterDatabase.PQuery("SELECT name,level,class,gender,zone,account FROM characters WHERE guid = '%u'", lowguid);
+        if (!queryResult)
             return false;                                   // player doesn't exist
 
-        Field* fields    = result->Fetch();
+        Field* fields    = queryResult->Fetch();
         newmember.Name   = fields[0].GetCppString();
         newmember.Level  = fields[1].GetUInt8();
         newmember.Class  = fields[2].GetUInt8();
         newmember.Gender_ = fields[3].GetUInt8();
         newmember.ZoneId = fields[4].GetUInt32();
         newmember.accountId = fields[5].GetInt32();
-        delete result;
 
         if (newmember.Level < 1 || newmember.Class < 1 ||
                 !((1 << (newmember.Class - 1)) & CLASSMASK_ALL_PLAYABLE))
@@ -924,15 +923,15 @@ void Guild::DisplayGuildEventLog(WorldSession* session)
 void Guild::LoadGuildEventLogFromDB()
 {
     //                                                     0        1          2            3            4        5
-    QueryResult* result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid=%u ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, GUILD_EVENTLOG_MAX_RECORDS);
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid=%u ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, GUILD_EVENTLOG_MAX_RECORDS);
+    if (!queryResult)
         return;
     bool isNextLogGuidSet = false;
     // uint32 configCount = sWorld.getConfig(CONFIG_UINT32_GUILD_EVENT_LOG_COUNT);
     // First event in list will be the oldest and the latest event is last event in list
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         if (!isNextLogGuidSet)
         {
             m_GuildEventLogNextGuid = fields[0].GetUInt32();
@@ -953,8 +952,7 @@ void Guild::LoadGuildEventLogFromDB()
         // Add entry to list
         m_GuildEventLog.push_front(NewEvent);
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
 }
 
 // Add entry to guild eventlog
@@ -1179,8 +1177,8 @@ uint32 Guild::GetBankRights(uint32 rankId, uint8 TabId) const
 void Guild::LoadGuildBankFromDB()
 {
     //                                                     0      1        2        3
-    QueryResult* result = CharacterDatabase.PQuery("SELECT TabId, TabName, TabIcon, TabText FROM guild_bank_tab WHERE guildid='%u' ORDER BY TabId", m_Id);
-    if (!result)
+    auto queryResult = CharacterDatabase.PQuery("SELECT TabId, TabName, TabIcon, TabText FROM guild_bank_tab WHERE guildid='%u' ORDER BY TabId", m_Id);
+    if (!queryResult)
     {
         m_TabList.clear();
         return;
@@ -1188,7 +1186,7 @@ void Guild::LoadGuildBankFromDB()
 
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         uint8 tabId = fields[0].GetUInt8();
         if (tabId >= GetPurchasedTabs())
         {
@@ -1200,19 +1198,17 @@ void Guild::LoadGuildBankFromDB()
         m_TabList[tabId].Icon = fields[2].GetCppString();
         m_TabList[tabId].Text = fields[3].GetCppString();
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 
     // data needs to be at first place for Item::LoadFromDB
     //                                        0          1            2                3      4         5        6      7             8                 9           10          11    12     13      14         15
-    result = CharacterDatabase.PQuery("SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, TabId, SlotId, item_guid, item_entry FROM guild_bank_item JOIN item_instance ON item_guid = guid WHERE guildid='%u' ORDER BY TabId", m_Id);
-    if (!result)
+    queryResult = CharacterDatabase.PQuery("SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, TabId, SlotId, item_guid, item_entry FROM guild_bank_item JOIN item_instance ON item_guid = guid WHERE guildid='%u' ORDER BY TabId", m_Id);
+    if (!queryResult)
         return;
 
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         uint8 TabId = fields[12].GetUInt8();
         uint8 SlotId = fields[13].GetUInt8();
         uint32 ItemGuid = fields[14].GetUInt32();
@@ -1250,9 +1246,7 @@ void Guild::LoadGuildBankFromDB()
         pItem->AddToWorld();
         m_TabList[TabId].Slots[SlotId] = pItem;
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 }
 
 // *************************************************
@@ -1501,15 +1495,15 @@ void Guild::LoadGuildBankEventLogFromDB()
     // cycle through all purchased guild bank item tabs
     for (uint32 tabId = 0; tabId < uint32(GetPurchasedTabs()); ++tabId)
     {
-        //                                                     0        1          2           3            4               5          6
-        QueryResult* result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog WHERE guildid='%u' AND TabId='%u' ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, tabId, GUILD_BANK_MAX_LOGS);
-        if (!result)
+        //                                                  0        1          2           3            4               5          6
+        auto queryResult = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog WHERE guildid='%u' AND TabId='%u' ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, tabId, GUILD_BANK_MAX_LOGS);
+        if (!queryResult)
             continue;
 
         bool isNextLogGuidSet = false;
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
 
             GuildBankEventLogEntry NewEvent;
             NewEvent.EventType = fields[1].GetUInt8();
@@ -1538,20 +1532,19 @@ void Guild::LoadGuildBankEventLogFromDB()
                 isNextLogGuidSet = true;
             }
         }
-        while (result->NextRow());
-        delete result;
+        while (queryResult->NextRow());
     }
 
     // special handle for guild bank money log
-    //                                                     0        1          2           3            4               5          6
-    QueryResult* result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog WHERE guildid='%u' AND TabId='%u' ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, GUILD_BANK_MONEY_LOGS_TAB, GUILD_BANK_MAX_LOGS);
-    if (!result)
+    //                                                  0        1          2           3            4               5          6
+    auto queryResult = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog WHERE guildid='%u' AND TabId='%u' ORDER BY TimeStamp DESC,LogGuid DESC LIMIT %u", m_Id, GUILD_BANK_MONEY_LOGS_TAB, GUILD_BANK_MAX_LOGS);
+    if (!queryResult)
         return;
 
     bool isNextMoneyLogGuidSet = false;
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         if (!isNextMoneyLogGuidSet)
         {
             m_GuildBankEventLogNextGuid_Money = fields[0].GetUInt32();
@@ -1575,8 +1568,7 @@ void Guild::LoadGuildBankEventLogFromDB()
             // events are ordered from oldest (in beginning) to latest (in the end)
             m_GuildBankEventLog_Money.push_front(NewEvent);
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
 }
 
 void Guild::DisplayGuildBankLogs(WorldSession* session, uint8 TabId)

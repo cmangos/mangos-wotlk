@@ -123,14 +123,13 @@ bool ArenaTeam::AddMember(ObjectGuid playerGuid)
     }
     else
     {
-        //                                                     0     1
-        QueryResult* result = CharacterDatabase.PQuery("SELECT name, class FROM characters WHERE guid='%u'", playerGuid.GetCounter());
-        if (!result)
+        //                                                  0     1
+        auto queryResult = CharacterDatabase.PQuery("SELECT name, class FROM characters WHERE guid='%u'", playerGuid.GetCounter());
+        if (!queryResult)
             return false;
 
-        plName = (*result)[0].GetCppString();
-        plClass = (*result)[1].GetUInt8();
-        delete result;
+        plName = (*queryResult)[0].GetCppString();
+        plClass = (*queryResult)[1].GetUInt8();
 
         // check if player already in arenateam of that size
         if (Player::GetArenaTeamIdFromDB(playerGuid, GetType()) != 0)
