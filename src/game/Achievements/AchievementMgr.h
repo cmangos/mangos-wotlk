@@ -25,6 +25,7 @@
 #include "Entities/ObjectGuid.h"
 
 #include <map>
+#include <memory>
 
 struct AchievementEntry;
 struct AchievementCriteriaEntry;
@@ -280,7 +281,7 @@ class AchievementMgr
 
         void Reset();
         static void DeleteFromDB(ObjectGuid guid);
-        void LoadFromDB(QueryResult* achievementResult, QueryResult* criteriaResult);
+        void LoadFromDB(std::unique_ptr<QueryResult> achievementResult, std::unique_ptr<QueryResult> criteriaResult);
         void SaveToDB();
         void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0);
         void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime = 0);

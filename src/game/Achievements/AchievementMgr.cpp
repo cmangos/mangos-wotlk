@@ -626,7 +626,7 @@ void AchievementMgr::SaveToDB()
     }
 }
 
-void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* criteriaResult)
+void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, std::unique_ptr<QueryResult> criteriaResult)
 {
     // Note: this code called before any character data loading so don't must triggering any events req. inventory/etc
     // all like cases must be happens in CheckAllAchievementCriteria called after character data load
@@ -648,7 +648,6 @@ void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* cri
             ca.changed = false;
         }
         while (achievementResult->NextRow());
-        delete achievementResult;
     }
 
     if (criteriaResult)
@@ -704,7 +703,6 @@ void AchievementMgr::LoadFromDB(QueryResult* achievementResult, QueryResult* cri
             }
         }
         while (criteriaResult->NextRow());
-        delete criteriaResult;
     }
 }
 

@@ -293,12 +293,12 @@ void SocialMgr::BroadcastToFriendListers(Player* player, WorldPacket const& pack
     }
 }
 
-PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
+PlayerSocial* SocialMgr::LoadFromDB(std::unique_ptr<QueryResult> queryResult, ObjectGuid guid)
 {
     PlayerSocial* social = &m_socialMap[guid.GetCounter()];
     social->SetPlayerGuid(guid);
 
-    if (!result)
+    if (!queryResult)
         return social;
 
     // used to speed up check below. Using GetNumberOfSocialsWithFlag will cause unneeded iteration
@@ -306,7 +306,7 @@ PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
 
     do
     {
-        Field* fields  = result->Fetch();
+        Field* fields  = queryResult->Fetch();
 
         uint32 friend_guid = fields[0].GetUInt32();
         uint32 flags = fields[1].GetUInt32();
@@ -324,7 +324,6 @@ PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
         else
             ++friendCounter;
     }
-    while (result->NextRow());
-    delete result;
+    while (queryResult->NextRow());
     return social;
 }
