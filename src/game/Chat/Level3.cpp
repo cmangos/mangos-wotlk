@@ -5871,14 +5871,14 @@ bool ChatHandler::HandleBanListCharacterCommand(char* args)
 
     std::string filter = cFilter;
     LoginDatabase.escape_string(filter);
-    QueryResult* result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), filter.c_str());
+    std::unique_ptr<QueryResult> result(CharacterDatabase.PQuery("SELECT account FROM characters WHERE name " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), filter.c_str()));
     if (!result)
     {
         PSendSysMessage(LANG_BANLIST_NOCHARACTER);
         return true;
     }
 
-    return HandleBanListHelper(result);
+    return HandleBanListHelper(std::move(result));
 }
 
 bool ChatHandler::HandleBanListAccountCommand(char* args)
@@ -5889,30 +5889,30 @@ bool ChatHandler::HandleBanListAccountCommand(char* args)
     std::string filter = cFilter ? cFilter : "";
     LoginDatabase.escape_string(filter);
 
-    QueryResult* result;
+    std::unique_ptr<QueryResult> queryResult;
 
     if (filter.empty())
     {
-        result = LoginDatabase.Query("SELECT account.id, username FROM account, account_banned"
-                                     " WHERE account.id = account_banned.account_id AND active = 1 GROUP BY account.id");
+        queryResult = LoginDatabase.Query("SELECT account.id, username FROM account, account_banned"
+                                          " WHERE account.id = account_banned.account_id AND active = 1 GROUP BY account.id");
     }
     else
     {
-        result = LoginDatabase.PQuery("SELECT account.id, username FROM account, account_banned"
-                                      " WHERE account.id = account_banned.account_id AND active = 1 AND username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")" GROUP BY account.id",
-                                      filter.c_str());
+        queryResult.reset(LoginDatabase.PQuery("SELECT account.id, username FROM account, account_banned"
+                                               " WHERE account.id = account_banned.account_id AND active = 1 AND username " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")" GROUP BY account.id",
+                                               filter.c_str()));
     }
 
-    if (!result)
+    if (!queryResult)
     {
         PSendSysMessage(LANG_BANLIST_NOACCOUNT);
         return true;
     }
 
-    return HandleBanListHelper(result);
+    return HandleBanListHelper(std::move(queryResult));
 }
 
-bool ChatHandler::HandleBanListHelper(QueryResult* result)
+bool ChatHandler::HandleBanListHelper(std::unique_ptr<QueryResult> queryResult)
 {
     PSendSysMessage(LANG_BANLIST_MATCHINGACCOUNT);
 
@@ -5921,7 +5921,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             uint32 accountid = fields[0].GetUInt32();
 
             QueryResult* banresult = LoginDatabase.PQuery("SELECT account.username FROM account,account_banned WHERE account_banned.account_id='%u' AND account_banned.account_id=account.id", accountid);
@@ -5932,7 +5932,7 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                 delete banresult;
             }
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
     }
     // Console wide output
     else
@@ -5943,13 +5943,13 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
         do
         {
             SendSysMessage("-------------------------------------------------------------------------------");
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             uint32 account_id = fields[0].GetUInt32();
 
             std::string account_name;
 
             // "account" case, name can be get in same query
-            if (result->GetFieldCount() > 1)
+            if (queryResult->GetFieldCount() > 1)
                 account_name = fields[1].GetCppString();
             // "character" case, name need extract from another DB
             else
@@ -5985,11 +5985,10 @@ bool ChatHandler::HandleBanListHelper(QueryResult* result)
                 delete banInfo;
             }
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
         SendSysMessage("===============================================================================");
     }
 
-    delete result;
     return true;
 }
 
@@ -6001,22 +6000,22 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
     std::string filter = cFilter ? cFilter : "";
     LoginDatabase.escape_string(filter);
 
-    QueryResult* result;
+    std::unique_ptr<QueryResult> queryResult;
 
     if (filter.empty())
     {
-        result = LoginDatabase.Query("SELECT ip,banned_at,expires_at,banned_by,reason FROM ip_banned"
-                                     " WHERE (banned_at=expires_at OR expires_at>UNIX_TIMESTAMP())"
-                                     " ORDER BY expires_at");
+        queryResult = LoginDatabase.Query("SELECT ip,banned_at,expires_at,banned_by,reason FROM ip_banned"
+                                          " WHERE (banned_at=expires_at OR expires_at>UNIX_TIMESTAMP())"
+                                          " ORDER BY expires_at");
     }
     else
     {
-        result = LoginDatabase.PQuery("SELECT ip,banned_at,expires_at,banned_by,reason FROM ip_banned"
-                                      " WHERE (banned_at=expires_at OR expires_at>UNIX_TIMESTAMP()) AND ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")
-                                      " ORDER BY expires_at", filter.c_str());
+        queryResult.reset(LoginDatabase.PQuery("SELECT ip,banned_at,expires_at,banned_by,reason FROM ip_banned"
+                                               " WHERE (banned_at=expires_at OR expires_at>UNIX_TIMESTAMP()) AND ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'")
+                                               " ORDER BY expires_at", filter.c_str()));
     }
 
-    if (!result)
+    if (!queryResult)
     {
         PSendSysMessage(LANG_BANLIST_NOIP);
         return true;
@@ -6028,10 +6027,10 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             PSendSysMessage("%s", fields[0].GetString());
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
     }
     // Console wide output
     else
@@ -6042,7 +6041,7 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
         do
         {
             SendSysMessage("-------------------------------------------------------------------------------");
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             time_t t_ban = fields[1].GetUInt64();
             tm* aTm_ban = localtime(&t_ban);
             if (fields[1].GetUInt64() == fields[2].GetUInt64())
@@ -6061,11 +6060,10 @@ bool ChatHandler::HandleBanListIPCommand(char* args)
                                 fields[3].GetString(), fields[4].GetString());
             }
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
         SendSysMessage("===============================================================================");
     }
 
-    delete result;
     return true;
 }
 
@@ -6813,8 +6811,8 @@ bool ChatHandler::HandleInstanceSaveDataCommand(char* /*args*/)
 bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
 {
     ///- Get the accounts with GM Level >0
-    QueryResult* result = LoginDatabase.Query("SELECT username,gmlevel FROM account WHERE gmlevel > 0");
-    if (result)
+    auto queryResult = LoginDatabase.Query("SELECT username,gmlevel FROM account WHERE gmlevel > 0");
+    if (queryResult)
     {
         SendSysMessage(LANG_GMLIST);
         SendSysMessage("========================");
@@ -6824,13 +6822,12 @@ bool ChatHandler::HandleGMListFullCommand(char* /*args*/)
         ///- Circle through them. Display username and GM level
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             PSendSysMessage("|%15s|%6s|", fields[0].GetString(), fields[1].GetString());
         }
-        while (result->NextRow());
+        while (queryResult->NextRow());
 
         PSendSysMessage("========================");
-        delete result;
     }
     else
         PSendSysMessage(LANG_GMLIST_EMPTY);

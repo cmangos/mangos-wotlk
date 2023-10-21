@@ -2591,9 +2591,9 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 {
     m_criteriaRequirementMap.clear();                       // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT criteria_id, type, value1, value2 FROM achievement_criteria_requirement");
+    auto queryResult = WorldDatabase.Query("SELECT criteria_id, type, value1, value2 FROM achievement_criteria_requirement");
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -2605,11 +2605,11 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 
     uint32 count = 0;
     uint32 disabled_count = 0;
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
     do
     {
         bar.step();
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         uint32 criteria_id = fields[0].GetUInt32();
 
         AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(criteria_id);
@@ -2642,9 +2642,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
         // counting requirements
         ++count;
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 
     // post loading checks
     for (uint32 entryId = 0; entryId < sAchievementCriteriaStore.GetNumRows(); ++entryId)
@@ -2720,9 +2718,9 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 
 void AchievementGlobalMgr::LoadCompletedAchievements()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
+    auto queryResult = CharacterDatabase.Query("SELECT achievement FROM character_achievement GROUP BY achievement");
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -2732,11 +2730,11 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
     do
     {
         bar.step();
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         uint32 achievement_id = fields[0].GetUInt32();
         if (!sAchievementStore.LookupEntry(achievement_id))
@@ -2749,9 +2747,7 @@ void AchievementGlobalMgr::LoadCompletedAchievements()
 
         m_allCompletedAchievements.insert(achievement_id);
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 
     sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " realm completed achievements.", m_allCompletedAchievements.size());
@@ -2762,9 +2758,9 @@ void AchievementGlobalMgr::LoadRewards()
     m_achievementRewards.clear();                           // need for reload case
 
     //                                                0      1       2        3        4     5       6        7
-    QueryResult* result = WorldDatabase.Query("SELECT entry, gender, title_A, title_H, item, sender, subject, text FROM achievement_reward");
+    auto queryResult = WorldDatabase.Query("SELECT entry, gender, title_A, title_H, item, sender, subject, text FROM achievement_reward");
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
 
@@ -2776,13 +2772,13 @@ void AchievementGlobalMgr::LoadRewards()
     }
 
     uint32 count = 0;
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
         bar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         uint32 entry = fields[0].GetUInt32();
         if (!sAchievementStore.LookupEntry(entry))
         {
@@ -2881,9 +2877,7 @@ void AchievementGlobalMgr::LoadRewards()
         m_achievementRewards.insert(AchievementRewardsMap::value_type(entry, reward));
         ++count;
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 
     sLog.outString();
     sLog.outString(">> Loaded %u achievement rewards", count);
@@ -2893,9 +2887,9 @@ void AchievementGlobalMgr::LoadRewardLocales()
 {
     m_achievementRewardLocales.clear();                     // need for reload case
 
-    QueryResult* result = WorldDatabase.Query("SELECT entry,gender,subject_loc1,text_loc1,subject_loc2,text_loc2,subject_loc3,text_loc3,subject_loc4,text_loc4,subject_loc5,text_loc5,subject_loc6,text_loc6,subject_loc7,text_loc7,subject_loc8,text_loc8 FROM locales_achievement_reward");
+    auto queryResult = WorldDatabase.Query("SELECT entry,gender,subject_loc1,text_loc1,subject_loc2,text_loc2,subject_loc3,text_loc3,subject_loc4,text_loc4,subject_loc5,text_loc5,subject_loc6,text_loc6,subject_loc7,text_loc7,subject_loc8,text_loc8 FROM locales_achievement_reward");
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
 
@@ -2906,11 +2900,11 @@ void AchievementGlobalMgr::LoadRewardLocales()
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
         bar.step();
 
         uint32 entry = fields[0].GetUInt32();
@@ -2974,9 +2968,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
         m_achievementRewardLocales.insert(AchievementRewardLocalesMap::value_type(entry, data));
     }
-    while (result->NextRow());
-
-    delete result;
+    while (queryResult->NextRow());
 
     sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " achievement reward locale strings", m_achievementRewardLocales.size());

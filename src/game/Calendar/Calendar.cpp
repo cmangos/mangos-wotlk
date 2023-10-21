@@ -573,8 +573,8 @@ void CalendarMgr::LoadCalendarsFromDB()
 
     sLog.outString("Loading Calendar Events...");
 
-    //                                                          0        1            2        3     4      5          6          7      8
-    QueryResult* eventsQuery = CharacterDatabase.Query("SELECT eventId, creatorGuid, guildId, type, flags, dungeonId, eventTime, title, description FROM calendar_events ORDER BY eventId");
+    //                                                 0        1            2        3     4      5          6          7      8
+    auto eventsQuery = CharacterDatabase.Query("SELECT eventId, creatorGuid, guildId, type, flags, dungeonId, eventTime, title, description FROM calendar_events ORDER BY eventId");
     if (!eventsQuery)
     {
         BarGoLink bar(1);
@@ -610,12 +610,11 @@ void CalendarMgr::LoadCalendarsFromDB()
 
         sLog.outString(">> Loaded %u events!", uint32(eventsQuery->GetRowCount()));
         sLog.outString();
-        delete eventsQuery;
     }
 
     sLog.outString("Loading Calendar invites...");
-    //                                                           0         1        2            3           4       5               6
-    QueryResult* invitesQuery = CharacterDatabase.Query("SELECT inviteId, eventId, inviteeGuid, senderGuid, status, lastUpdateTime, `rank` FROM calendar_invites ORDER BY inviteId");
+    //                                                  0         1        2            3           4       5               6
+    auto invitesQuery = CharacterDatabase.Query("SELECT inviteId, eventId, inviteeGuid, senderGuid, status, lastUpdateTime, `rank` FROM calendar_invites ORDER BY inviteId");
     if (!invitesQuery)
     {
         BarGoLink bar(1);
@@ -677,7 +676,6 @@ void CalendarMgr::LoadCalendarsFromDB()
             CharacterDatabase.DirectExecute("TRUNCATE TABLE calendar_invites");
             sLog.outString(">> calendar_invites table is cleared! (invites without events found)");
         }
-        delete invitesQuery;
     }
     sLog.outString();
 }

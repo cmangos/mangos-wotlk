@@ -6223,12 +6223,11 @@ void PlayerbotAI::extractMailIds(const std::string& text, std::list<uint32>& mai
 * return x  -> return the talentspec_id of the first talentspec that errors out
 */
 
-// TODO: the way this is built is just begging for a memory leak (by adding a return case and forgetting to delete result)
 uint32 PlayerbotAI::TalentSpecDBContainsError()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT * FROM playerbot_talentspec ORDER BY class ASC");
+    auto queryResult = CharacterDatabase.Query("SELECT * FROM playerbot_talentspec ORDER BY class ASC");
 
-    if (!result)
+    if (!queryResult)
     {
         // Do you really need a progress bar? No, but all the other kids jumped off the bridge too...
         BarGoLink bar(1);
@@ -6241,7 +6240,7 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
         return 0;   // Because, well, no specs means none contain errors...
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
@@ -6254,7 +6253,7 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
         4 to 74        talent_10 to 71
         75 to 80        major_glyph_15, 30, 80, minor_glyph_15, 50, 70
         */
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         uint32 ts_id = fields[0].GetUInt32();
         if (!ts_id)    // Nice bit of paranoia: ts_id is a non-zero NOT NULL AUTO_INCREMENT value
@@ -6266,7 +6265,6 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
         {
         TellMaster("TalentSpec ID: %u does not have a name.", ts_id);
 
-        delete result;
         return ts_id;
         }
         */
@@ -6277,7 +6275,6 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
         {
             TellMaster("TalentSpec: %u. \"%s\" contains an invalid class: %i.", ts_id, ts_name.c_str(), ts_class);
 
-            delete result;
             return ts_id;    // invalid class
         }
 
@@ -6297,7 +6294,6 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
                     {
                         TellMaster("TalentSpec: %u. \"%s\" contains an empty talent for level: %u while a talent for level: %u exists.", ts_id, ts_name.c_str(), (i + 10), (j + 10));
 
-                        delete result;
                         return ts_id;
                     }
                 }
@@ -6307,7 +6303,6 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
             {
                 TellMaster("TalentSpec: %u. \"%s\" (class: %i) contains an invalid talent for level %u: %u", ts_id, ts_name.c_str(), ts_class, (i + 10), fields[fieldLoc].GetUInt16());
 
-                delete result;
                 return ts_id;    // invalid talent
             }
         }
@@ -6320,7 +6315,6 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
                 if (!ValidateGlyph(fields[i].GetUInt16(), ts_class))
                     TellMaster("In fact, according to our records, it's no glyph at all");
 
-                delete result;
                 return ts_id;
             }
         }
@@ -6332,22 +6326,20 @@ uint32 PlayerbotAI::TalentSpecDBContainsError()
                 if (!ValidateGlyph(fields[i].GetUInt16(), ts_class))
                     TellMaster("In fact, according to our records, it's no glyph at all");
 
-                delete result;
                 return ts_id;
             }
         }
     }
-    while (result->NextRow());
+    while (queryResult->NextRow());
 
-    delete result;
     return 0;
 }
 
 uint32 PlayerbotAI::GetTalentSpecsAmount()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT COUNT(*) FROM playerbot_talentspec");
+    auto queryResult = CharacterDatabase.Query("SELECT COUNT(*) FROM playerbot_talentspec");
 
-    if (!result)
+    if (!queryResult)
     {
         sLog.outString();
         sLog.outString(">> Loaded `playerbot_talentspec`, table is empty.");
@@ -6355,11 +6347,10 @@ uint32 PlayerbotAI::GetTalentSpecsAmount()
         return 0;
     }
 
-    Field* fields = result->Fetch();
+    Field* fields = queryResult->Fetch();
 
     uint32 count = fields[0].GetUInt32();
 
-    delete result;
     return count;
 }
 

@@ -59,15 +59,15 @@ void LoadSkillExtraItemTable()
     SkillExtraItemStore.clear();                            // need for reload
 
     //                                                 0        1                       2                       3
-    QueryResult* result = WorldDatabase.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
+    auto queryResult = WorldDatabase.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
 
-    if (result)
+    if (queryResult)
     {
-        BarGoLink bar(result->GetRowCount());
+        BarGoLink bar(queryResult->GetRowCount());
 
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             bar.step();
 
             uint32 spellId = fields[0].GetUInt32();
@@ -107,9 +107,7 @@ void LoadSkillExtraItemTable()
 
             ++count;
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
 
         sLog.outString(">> Loaded %u spell specialization definitions", count);
     }

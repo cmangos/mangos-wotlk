@@ -2301,11 +2301,11 @@ void World::_UpdateRealmCharCount(QueryResult* resultCharCount, uint32 accountId
 
 void World::InitWeeklyQuestResetTime()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT NextWeeklyQuestResetTime FROM saved_variables");
-    if (!result)
+    auto queryResult = CharacterDatabase.Query("SELECT NextWeeklyQuestResetTime FROM saved_variables");
+    if (!queryResult)
         m_NextWeeklyQuestReset = time_t(time(nullptr));        // game time not yet init
     else
-        m_NextWeeklyQuestReset = time_t((*result)[0].GetUInt64());
+        m_NextWeeklyQuestReset = time_t((*queryResult)[0].GetUInt64());
 
     // generate time by config
     time_t curTime = time(nullptr);
@@ -2327,19 +2327,17 @@ void World::InitWeeklyQuestResetTime()
     // normalize reset time
     m_NextWeeklyQuestReset = m_NextWeeklyQuestReset < curTime ? nextWeekResetTime - WEEK : nextWeekResetTime;
 
-    if (!result)
+    if (!queryResult)
         CharacterDatabase.PExecute("INSERT INTO saved_variables (NextWeeklyQuestResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextWeeklyQuestReset));
-    else
-        delete result;
 }
 
 void World::InitDailyQuestResetTime()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT NextDailyQuestResetTime FROM saved_variables");
-    if (!result)
+    auto queryResult = CharacterDatabase.Query("SELECT NextDailyQuestResetTime FROM saved_variables");
+    if (!queryResult)
         m_NextDailyQuestReset = time_t(time(nullptr));         // game time not yet init
     else
-        m_NextDailyQuestReset = time_t((*result)[0].GetUInt64());
+        m_NextDailyQuestReset = time_t((*queryResult)[0].GetUInt64());
 
     // generate time by config
     time_t curTime = time(nullptr);
@@ -2358,24 +2356,20 @@ void World::InitDailyQuestResetTime()
     // normalize reset time
     m_NextDailyQuestReset = m_NextDailyQuestReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
 
-    if (!result)
+    if (!queryResult)
         CharacterDatabase.PExecute("INSERT INTO saved_variables (NextDailyQuestResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextDailyQuestReset));
-    else
-        delete result;
 }
 
 void World::SetMonthlyQuestResetTime(bool initialize)
 {
     if (initialize)
     {
-        QueryResult* result = CharacterDatabase.Query("SELECT NextMonthlyQuestResetTime FROM saved_variables");
+        auto queryResult = CharacterDatabase.Query("SELECT NextMonthlyQuestResetTime FROM saved_variables");
 
-        if (!result)
+        if (!queryResult)
             m_NextMonthlyQuestReset = time_t(time(nullptr));
         else
-            m_NextMonthlyQuestReset = time_t((*result)[0].GetUInt64());
-
-        delete result;
+            m_NextMonthlyQuestReset = time_t((*queryResult)[0].GetUInt64());
     }
 
     // generate time
@@ -2448,18 +2442,16 @@ void World::GenerateEventGroupEvents(bool daily, bool weekly, bool deleteColumns
 
 void World::LoadEventGroupChosen()
 {
-    QueryResult* result = CharacterDatabase.Query("SELECT entry FROM event_group_chosen");
-    if (result)
+    auto queryResult = CharacterDatabase.Query("SELECT entry FROM event_group_chosen");
+    if (queryResult)
     {
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             m_eventGroupChosen.push_back(fields[0].GetUInt32());
             sGameEventMgr.StartEvent(fields[0].GetUInt32(), false, true);
         }
-        while (result->NextRow());
-
-        delete result;
+        while (queryResult->NextRow());
     }
     else // if table not set yet, generate quests
         GenerateEventGroupEvents(true, true, false);
@@ -2467,32 +2459,30 @@ void World::LoadEventGroupChosen()
 
 void World::LoadSpamRecords(bool reload)
 {
-    QueryResult* result = WorldDatabase.Query("SELECT record FROM spam_records");
+    auto queryResult = WorldDatabase.Query("SELECT record FROM spam_records");
 
-    if (result)
+    if (queryResult)
     {
         if (reload)
             m_spamRecords.clear();
 
         do
         {
-            Field* fields = result->Fetch();
+            Field* fields = queryResult->Fetch();
             std::string record = fields[0].GetCppString();
 
             m_spamRecords.push_back(record);
-        } while (result->NextRow());
-
-        delete result;
+        } while (queryResult->NextRow());
     }
 }
 
 void World::InitRandomBattlegroundResetTime()
 {
-    QueryResult * result = CharacterDatabase.Query("SELECT NextRandomBattlegroundResetTime FROM saved_variables");
-    if (!result)
+    auto queryResult = CharacterDatabase.Query("SELECT NextRandomBattlegroundResetTime FROM saved_variables");
+    if (!queryResult)
         m_NextRandomBattlegroundReset = time_t(time(NULL));         // game time not yet init
     else
-        m_NextRandomBattlegroundReset = time_t((*result)[0].GetUInt64());
+        m_NextRandomBattlegroundReset = time_t((*queryResult)[0].GetUInt64());
 
     // generate time by config
     time_t curTime = time(NULL);
@@ -2511,10 +2501,8 @@ void World::InitRandomBattlegroundResetTime()
     // normalize reset time
     m_NextRandomBattlegroundReset = m_NextRandomBattlegroundReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
 
-    if (!result)
+    if (!queryResult)
         CharacterDatabase.PExecute("INSERT INTO saved_variables (NextRandomBattlegroundResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextRandomBattlegroundReset));
-    else
-        delete result;
 }
 
 void World::ResetDailyQuests()
@@ -2611,17 +2599,16 @@ void World::SetOnlinePlayer(Team team, uint8 race, uint8 plClass, bool apply)
 
 void World::LoadDBVersion()
 {
-    QueryResult* result = WorldDatabase.Query("SELECT version, creature_ai_version, cache_id FROM db_version LIMIT 1");
-    if (result)
+    auto queryResult = WorldDatabase.Query("SELECT version, creature_ai_version, cache_id FROM db_version LIMIT 1");
+    if (queryResult)
     {
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         m_DBVersion              = fields[0].GetCppString();
         m_CreatureEventAIVersion = fields[1].GetCppString();
 
         // will be overwrite by config values if different and non-0
         setConfig(CONFIG_UINT32_CLIENTCACHE_VERSION, fields[2].GetUInt32());
-        delete result;
     }
 
     if (m_DBVersion.empty())
@@ -2893,11 +2880,11 @@ void World::LoadGraveyardZones()
     // query map_id | (1 << 31) instead.
     auto& graveyardMap = GetGraveyardManager().GetGraveyardMap();
 
-    QueryResult* result = WorldDatabase.Query("SELECT id,ghost_loc,link_kind,faction FROM game_graveyard_zone");
+    auto queryResult = WorldDatabase.Query("SELECT id,ghost_loc,link_kind,faction FROM game_graveyard_zone");
 
     uint32 count = 0;
 
-    if (!result)
+    if (!queryResult)
     {
         BarGoLink bar(1);
         bar.step();
@@ -2906,14 +2893,14 @@ void World::LoadGraveyardZones()
         return;
     }
 
-    BarGoLink bar(result->GetRowCount());
+    BarGoLink bar(queryResult->GetRowCount());
 
     do
     {
         ++count;
         bar.step();
 
-        Field* fields = result->Fetch();
+        Field* fields = queryResult->Fetch();
 
         uint32 safeLocId = fields[0].GetUInt32();
         uint32 locId = fields[1].GetUInt32();
@@ -2963,9 +2950,7 @@ void World::LoadGraveyardZones()
             data.team = Team(team);
             graveyardMap.insert(GraveYardMap::value_type(locKey, data));
         }
-    } while (result->NextRow());
-
-    delete result;
+    } while (queryResult->NextRow());
 
     sLog.outString(">> Loaded %u graveyard-zone links", count);
     sLog.outString();
