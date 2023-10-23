@@ -275,9 +275,6 @@ void LoadM2Attachments(std::string const& dataPath)
             filename.append("CreatureModels/");
             filename.append(dbcentry->ModelPath);
 
-            // Replace slashes
-            //std::replace(filename.begin(), filename.end(), '\\', '/');
-
             // Replace mdx to .m2
             size_t loc = filename.find(".mdx");
             if (loc != std::string::npos)

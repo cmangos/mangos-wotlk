@@ -119,20 +119,6 @@ struct M2Header
     uint32 nBlendMaps;             // This has to deal with blending. Exists IFF (flags & 0x8) != 0. When set, textures blending is overriden by the associated array. See M2/WotLK#Blend_mode_overrides
     uint32 ofsBlendMaps;           // Same as above. Points to an array of uint16 of nBlendMaps entries -- From WoD information.};
 };
-/*
-struct M2Array
-{
-    uint32_t number;
-    uint32 offset_elements;
-};
-struct M2Track
-{
-    uint16_t interpolation_type;
-    uint16_t global_sequence;
-    M2Array timestamps;
-    M2Array values;
-};
-*/
 
 template <typename T>
 struct M2Array {

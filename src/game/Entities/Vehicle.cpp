@@ -294,14 +294,11 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     DEBUG_LOG("VehicleInfo::Board: Board passenger: %s to seat %u", passenger->GetGuidStr().c_str(), seat);
 
-    // Calculate passengers local position
-    float lx = 0.f;
-    float ly = 0.f;
-    float lz = 0.f;
-    float lo = 0.f;
-
     if (GenericTransport* transport = passenger->GetTransport())
         transport->RemovePassenger(passenger);
+
+    // Calculate passengers local position
+    float lx, ly, lz, lo = 0.f;
     float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->scale;
     scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId)->Scale;
     for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
@@ -311,18 +308,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
             lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-        }
-    }
-    if (lx == 0.f && ly == 0.f && lz == 0.f)
-    {
-            for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
-        {
-            if (attachment.id == seatMap[seat])
-            {
-                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
-                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
-                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-            }
+            break;
         }
     }
 
@@ -412,10 +398,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     // Remove passenger modifications of the old seat
     RemoveSeatMods(passenger, seatEntry->m_flags);
 
-    float lx = 0.f;
-    float ly = 0.f;
-    float lz = 0.f;
-    float lo = 0.f;
+    float lx, ly, lz, lo = 0.f;
     float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->scale;
     scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId)->Scale;
     for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
@@ -425,18 +408,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
             lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-        }
-    }
-    if (lx == 0.f && ly == 0.f && lz == 0.f)
-    {
-            for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
-        {
-            if (attachment.id == seatMap[seat])
-            {
-                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
-                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
-                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-            }
+            break;
         }
     }
 

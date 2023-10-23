@@ -70,8 +70,6 @@ struct VehicleSeatParameters
 
 typedef std::map<uint8 /*seatPosition*/, VehicleSeatEntry const*> VehicleSeatMap;
 
-static const std::vector<uint8> seatMap = {39, 40, 41, 42, 43, 44, 45, 46};
-
 /**
  * A class to provide support for each vehicle. This includes
  * - Boarding and unboarding of passengers, including support to switch vehicles

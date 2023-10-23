@@ -1066,13 +1066,9 @@ void ExtractCreatureModelFiles(int locale, bool basicLocale)
     {
         std::string filename = path;
 
-        //filename += (thisFile.c_str() + strlen("CreatureModels\\"));
         auto pos = thisFile.find_last_of('\\');
         std::string pureName = thisFile;
-        //if (pos != std::string::npos)
-        //    pureName = thisFile.substr(pos + 1);
         filename += pureName;
-        //filename += thisFile;
 
         if (FileExists(filename.c_str()))
             continue;
