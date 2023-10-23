@@ -46,11 +46,23 @@
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
 
-// Hackfix until the proper relation between AttachmentIDs has been found
 constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
 {
     switch (seatEntry->m_attachmentID)
     {
+        case 0: return 20;
+        case 1: return 34;
+        case 2: return 19;
+        case 3: return 21;
+        case 4: return 22;
+        case 5: return 17;
+        case 6: return 23;
+        case 7: return 24;
+        case 8: return 25;
+        case 9: return 15;
+        case 10: return 16;
+        case 11: return 37;
+        case 12: return 38;
         case 13: return 39;
         case 14: return 40;
         case 15: return 41;
@@ -59,21 +71,7 @@ constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
         case 18: return 44;
         case 19: return 45;
         case 20: return 46;
-    }
-    switch (seatEntry->m_ID)
-    {
-        //Salvaged Demolisher
-        case 3147: return 40; // 4
-        //Ignis
-        case 3064: return 35; // 4
-        //Mimiron's Legs
-        case 3568: return 19; // 2 (Special Case? Local coordinates are 0,0,0)
-        case 3570: return 19; // 2 (Special Case? Local coordinates are 0,0,0)
-        case 3586: return 34; // 1 (could also be 17, both same source coordinates)
-        //Mimiron's Torso
-        case 3807: return 34; // 1
-        //Gal'Darah
-        case 2097: return 17; // 5
+        case 21: return 0;
     }
     return -1;
 }
