@@ -27,6 +27,13 @@ enum InstanceActions
     INSTANCE_CLOSE_ENTRANCE_DOOR = 250,
 };
 
+struct QueuedCast
+{
+    ObjectGuid target;
+    uint32 spellId;
+    uint32 flags;
+};
+
 class BossAI : public CombatAI
 {
     public:
@@ -83,6 +90,7 @@ class BossAI : public CombatAI
 
         void SetDataType(uint32 type) { m_instanceDataType = type; }
 
+        void Reset() override;
         void JustDied(Unit* killer = nullptr) override;
         void JustReachedHome() override;
         void Aggro(Unit* who = nullptr) override;
@@ -101,6 +109,49 @@ class BossAI : public CombatAI
             AddExitObject(fargs...);
         }
         void SetGateDelay(std::chrono::milliseconds delay) { m_gateDelay = delay; }
+        void EnterEvadeMode() override;
+
+        /**
+        * Adds one or more Spells to cast with DoCastSpellIfCan on creature death
+        * @param cast Initialized struct of QueuedCast type
+        */
+        void AddCastOnDeath(QueuedCast cast);
+        template <typename... Targs>
+        void AddCastOnDeath(QueuedCast cast, Targs... fargs)
+        {
+            AddCastOnDeath(cast);
+            AddCastOnDeath(fargs...);
+        }
+
+        /**
+        * Adds a timer to respawn the Creature on Evade (instead of walking back to spawn)
+        * @param delay The amount of time until the Creature is supposed to respawn as a std::chrono literal
+        */
+        void AddRespawnOnEvade(std::chrono::seconds delay);
+
+        /**
+        * Adds one or more Creatures to despawn alongside this Creature on Evade
+        * Uses the same timer for respawn as was set in AddRespawnOnEvade
+        * @param guid ObjectGuid of the creature to respawn
+        */
+        void DespawnSubordinateOnEvade(ObjectGuid guid);
+        template <typename... Targs>
+        void DespawnSubordinateOnEvade(ObjectGuid guid, Targs... fargs)
+        {
+            DespawnSubordinateOnEvade(guid);
+            DespawnSubordinateOnEvade(fargs...);
+        }
+
+        template<typename T, typename W>
+        void ResetValueTo(T& var, W val)
+        {
+            static_assert(std::is_convertible<W, T>::value, "Value must be of castable type to the variable!");
+            T* ptr = &var;
+            m_resetValues.emplace_back([&]()
+            {
+                *ptr = static_cast<T>(val);
+            });
+        }
 
         std::chrono::seconds TimeSinceEncounterStart()
         {
@@ -114,12 +165,18 @@ class BossAI : public CombatAI
     private:
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
+        std::vector<ObjectGuid> m_despawnSubordinateOnEvade;
 
         std::vector<uint32> m_entranceObjects;
         std::vector<uint32> m_exitObjects;
         std::chrono::milliseconds m_gateDelay = 3s;
+        std::vector<QueuedCast> m_castOnDeath;
+
+        std::vector<std::function<void()>> m_resetValues;
 
         uint32 m_instanceDataType = -1;
+
+        uint32 m_respawnDelay = -1;
 
         std::chrono::steady_clock::time_point m_combatStartTimestamp;
 };

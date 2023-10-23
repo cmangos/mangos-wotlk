@@ -910,6 +910,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (62138,'spell_teleport_inside_violet_hold'),
 (63482,'spell_lightning_whirl_heroic'),
 (63845,'spell_create_lance'),
+(64386,'spell_terrifying_screech'),
 (64568,'spell_blood_reserve_enchant'),
 (65869,'spell_disengage'),
 (65932,'spell_retaliation_dummy_creature'),
