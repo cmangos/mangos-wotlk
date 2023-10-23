@@ -2985,6 +2985,7 @@ UPDATE `spell_template` SET `EffectMiscValueB1`=64 WHERE `Id` IN(38107);
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 36630, -- Resistances (c.22000)
 37248, -- Power Converters: Electromental Visual
+38471, -- Spore Burst
 43119, -- Cyclone Visual
 43120, -- Cyclone
 43457  -- Ball of Energy
