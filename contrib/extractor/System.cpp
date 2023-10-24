@@ -936,7 +936,7 @@ bool ExtractFile(char const* mpq_name, std::string const& filename)
 
 bool ExtractMinimizedModelFile(char const* mpq_name, std::string const& filename)
 {
-    FILE* output = fopen(filename.c_str(), "ab");
+    FILE* output = fopen(filename.c_str(), "wb");
     if (!output)
     {
         printf("Can't create the output file '%s'\n", filename.c_str());
@@ -984,6 +984,8 @@ bool ExtractMinimizedModelFile(char const* mpq_name, std::string const& filename
             fwrite(&attachment.position, sizeof(G3D::Vector3), 1, output);
         }
     }
+
+    fclose(output);
     return true;
 }
 
