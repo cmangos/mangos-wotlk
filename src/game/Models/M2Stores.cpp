@@ -289,7 +289,7 @@ void LoadM2Attachments(std::string const& dataPath)
             std::streamoff const fileSize = m2file.tellg();
             if (fileSize == 0 || fileSize % sizeof(MiniM2Attachment))
             {
-                sLog.outDebug("M2 Attachment File invalid");
+                sLog.outDetail("M2 Attachment File %s invalid", filename.c_str());
                 m2file.close();
                 continue;
             }
