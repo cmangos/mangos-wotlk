@@ -299,9 +299,10 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Calculate passengers local position
     float lx, ly, lz, lo = 0.f;
-    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->scale;
-    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId)->Scale;
-    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
+    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
+    float scale = creatureDisplayInfo->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
     {
         if (attachment.id == attachmentLookup(seatEntry))
         {
@@ -339,9 +340,8 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     }
 
     Movement::MoveSplineInit init(*passenger);
-//    init.MoveTo(0.0f, 0.0f, 0.0f);                          // ToDo: Set correct local coords
     init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
-    init.SetFacing(0.f);                                   // local orientation ? ToDo: Set proper orientation!
+    init.SetFacing(lo);                                   // local orientation ? ToDo: Set proper orientation!
     init.SetBoardVehicle();
     init.Launch();
 
@@ -399,9 +399,10 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     RemoveSeatMods(passenger, seatEntry->m_flags);
 
     float lx, ly, lz, lo = 0.f;
-    float scale = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->scale;
-    scale *= sCreatureModelDataStore.LookupEntry(sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId)->Scale;
-    for (auto& attachment : sModelAttachmentStore[sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId())->ModelId])
+    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
+    float scale = creatureDisplayInfo->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
+    for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
     {
         if (attachment.id == attachmentLookup(seatEntry))
         {
