@@ -72,8 +72,9 @@ constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
         case 19: return 45;
         case 20: return 46;
         case 21: return 0;
+        default: return -1;
     }
-    return -1;
+    return -1; // unreachable
 }
 
 void ObjectMgr::LoadVehicleAccessory()
