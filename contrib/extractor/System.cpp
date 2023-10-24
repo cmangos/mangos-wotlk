@@ -1,9 +1,12 @@
+#include <sstream>
+#include <fstream>
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include <stdio.h>
 #include <deque>
 #include <set>
 #include <cstdlib>
+#include <iomanip>
 
 #ifdef _WIN32
 #include "direct.h"
@@ -39,6 +42,8 @@
 #endif
 
 #include "Maps/GridMapDefines.h"
+#include "G3D/Vector3.h"
+#include "Models/M2Structure.h"
 extern ArchiveSet gOpenArchives;
 
 typedef struct
@@ -929,6 +934,59 @@ bool ExtractFile(char const* mpq_name, std::string const& filename)
     return true;
 }
 
+bool ExtractMinimizedModelFile(char const* mpq_name, std::string const& filename)
+{
+    FILE* output = fopen(filename.c_str(), "ab");
+    if (!output)
+    {
+        printf("Can't create the output file '%s'\n", filename.c_str());
+        return false;
+    }
+
+    MPQFile m(mpq_name);
+    if (!m.isEof())
+    {
+        std::stringstream m2file;
+        m2file.write(m.getPointer(), m.getSize());
+        m2file.seekg(0, std::ios::end);
+        std::streamoff const fileSize = m2file.tellg();
+
+        if (static_cast<uint32_t const>(fileSize) < sizeof(M2Header))
+        {
+            printf("Creature Model file %s is damaged. File is smaller than header size\n", filename.c_str());
+            m2file.clear();
+            return false;
+        }
+        m2file.seekg(0, std::ios::beg);
+        char fileCheck[5];
+        m2file.read(fileCheck, 4);
+        fileCheck[4] = 0;
+
+        // Check file has correct magic (MD20)
+        if (strcmp(fileCheck, "MD20"))
+        {
+            printf("Creature Model file %s is damaged. File identifier not found\n", filename.c_str());
+            m2file.clear();
+            return false;
+        }
+        M2Array<M2Attachment> attachments;
+
+        m2file.seekg(0x0F0);
+        m2file.read(reinterpret_cast<char*>(&attachments), sizeof(attachments));
+
+        m2file.seekg(attachments.offset);
+        std::vector<M2Attachment> attachmentData(attachments.size);
+        m2file.read(reinterpret_cast<char*>(attachmentData.data()), attachments.size * sizeof(M2Attachment));
+
+        for (M2Attachment& attachment : attachmentData)
+        {
+            fwrite(&attachment.id, sizeof(uint32_t), 1, output);
+            fwrite(&attachment.position, sizeof(G3D::Vector3), 1, output);
+        }
+    }
+    return true;
+}
+
 void ExtractDBCFiles(int locale, bool basicLocale)
 {
     printf("Extracting dbc files...\n");
@@ -1073,7 +1131,7 @@ void ExtractCreatureModelFiles(int locale, bool basicLocale)
         if (FileExists(filename.c_str()))
             continue;
 
-        if (ExtractFile(thisFile.c_str(), filename))
+        if (ExtractMinimizedModelFile(thisFile.c_str(), filename))
             ++count;
     }
     printf("Extracted %u CreatureModel files\n", count);

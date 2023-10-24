@@ -161,6 +161,15 @@ struct M2Attachment
     M2Track<uint8_t> animate_attached;
 };
 
+struct MiniM2Attachment
+{
+    uint32_t id;
+    //uint16_t bone;
+    //uint16_t unknown;
+    G3D::Vector3 position;
+    //M2Track<uint8_t> animate_attached;
+};
+
 struct M2Camera
 {
     uint32_t type; // 0: portrait, 1: characterinfo; -1: else (flyby etc.); referenced backwards in the lookup table.

@@ -287,37 +287,17 @@ void LoadM2Attachments(std::string const& dataPath)
             // Get file size
             m2file.seekg(0, std::ios::end);
             std::streamoff const fileSize = m2file.tellg();
-
-            // Reject if not at least the size of the header
-            if (static_cast<uint32 const>(fileSize) < sizeof(M2Header))
+            if (fileSize == 0 || fileSize % sizeof(MiniM2Attachment))
             {
-                sLog.outError("Creature Model file %s is damaged. File is smaller than header size", filename.c_str());
+                sLog.outDebug("M2 Attachment File invalid");
                 m2file.close();
                 continue;
             }
 
-            // Read 4 bytes (signature)
-            m2file.seekg(0, std::ios::beg);
-            char fileCheck[5];
-            m2file.read(fileCheck, 4);
-            fileCheck[4] = 0;
-
-            // Check file has correct magic (MD20)
-            if (strcmp(fileCheck, "MD20"))
-            {
-                sLog.outError("Creature Model file %s is damaged. File identifier not found", filename.c_str());
-                m2file.close();
-                continue;
-            }
-
-            M2Array<M2Attachment> attachments;
-
-            m2file.seekg(0x0F0);
-            m2file.read(reinterpret_cast<char*>(&attachments), sizeof(attachments));
-
-            m2file.seekg(attachments.offset);
-            std::vector<M2Attachment> attachmentData(attachments.size);
-            m2file.read(reinterpret_cast<char*>(attachmentData.data()), attachments.size * sizeof(M2Attachment));
+            m2file.seekg(std::ios::beg);
+            uint32 numEles = fileSize / sizeof(MiniM2Attachment);
+            std::vector<MiniM2Attachment> attachmentData(numEles);
+            m2file.read(reinterpret_cast<char*>(attachmentData.data()), numEles * sizeof(MiniM2Attachment));
 
             sModelAttachmentStore[dbcentry->Id] = attachmentData;
 

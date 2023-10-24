@@ -33,6 +33,9 @@ list(APPEND AD_SOURCE
 
 include_directories(
      ../../src/game
+     ../../dep/g3dlite
+     ../../dep/libmpq
+     ../../dep/libmpq/libmpq
 )
 
 add_executable(${EXECUTABLE_NAME} ${AD_SOURCE})

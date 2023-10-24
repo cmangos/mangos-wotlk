@@ -36,7 +36,7 @@ struct FlyByCamera
 };
 
 typedef std::vector<FlyByCamera> FlyByCameraCollection;
-typedef std::vector<M2Attachment> AttachmentCollection;
+typedef std::vector<MiniM2Attachment> AttachmentCollection;
 
 extern std::unordered_map<uint32, FlyByCameraCollection> sFlyByCameraStore;
 extern std::unordered_map<uint32, AttachmentCollection> sModelAttachmentStore;
