@@ -21077,11 +21077,6 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
     {
         if (target->isVisibleForInState(this, viewPoint, false))
         {
-            if (target->GetTypeId() == TYPEID_UNIT)
-                if (Unit* unitTarget = static_cast<Unit*>(target))
-                    if (const Unit* rootVehicle = unitTarget->FindRootVehicle())
-                        if (!rootVehicle->isVisibleForInState(this, viewPoint, false))
-                            return;
             target->SendCreateUpdateToPlayer(this);
             if (target->GetTypeId() != TYPEID_GAMEOBJECT || !((GameObject*)target)->IsMoTransport())
                 AddAtClient(target);
@@ -21133,9 +21128,10 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
         {
             if (target->GetTypeId() == TYPEID_UNIT)
                 if (Unit* unitTarget = reinterpret_cast<Unit*>(target))
-                    if (const Unit* rootVehicle = unitTarget->FindRootVehicle())
-                        if (!rootVehicle->isVisibleForInState(this, viewPoint, false))
-                            return;
+                    if (unitTarget->GetTransportInfo())
+                        if (const Unit* rootVehicle = unitTarget->FindRootVehicle())
+                            if (!rootVehicle->isVisibleForInState(this, viewPoint, false))
+                                return;
             visibleNow.insert(target);
             target->BuildCreateUpdateBlockForPlayer(&data, this);
             AddAtClient(target);
