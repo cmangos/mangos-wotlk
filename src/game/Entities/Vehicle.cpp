@@ -46,9 +46,9 @@
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
 
-constexpr uint8 attachmentLookup(const VehicleSeatEntry* seatEntry)
+constexpr uint8 attachmentLookup(const int32 attachmentID)
 {
-    switch (seatEntry->m_attachmentID)
+    switch (attachmentID)
     {
         case 0: return 20;
         case 1: return 34;
@@ -305,7 +305,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
     for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
     {
-        if (attachment.id == attachmentLookup(seatEntry))
+        if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
         {
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
@@ -405,7 +405,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
     for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
     {
-        if (attachment.id == attachmentLookup(seatEntry))
+        if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
         {
             lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
             ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
