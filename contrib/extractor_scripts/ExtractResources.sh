@@ -276,6 +276,10 @@ fi
 ## Extract creature models
 if [ "$USE_MODELS" = "1" ] && [ "$USE_AD" = "0" ]
 then
+ if [ ! -d "${OUTPUT_PATH:-.}/vmaps" ]
+ then
+   mkdir "${OUTPUT_PATH:-.}/vmaps"
+ fi
  echo "$(date): Start extraction of model files..." | tee -a $LOG_FILE
  $PREFIX/ad -e 8 | tee -a $DETAIL_LOG_FILE
  echo "$(date): Extracting of model files finished" | tee -a $LOG_FILE

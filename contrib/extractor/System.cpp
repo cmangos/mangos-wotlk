@@ -1,6 +1,8 @@
+#define _CRT_SECURE_NO_DEPRECATE
+#define __STDC_LIMIT_MACROS
+
 #include <sstream>
 #include <fstream>
-#define _CRT_SECURE_NO_DEPRECATE
 
 #include <stdio.h>
 #include <deque>
@@ -129,7 +131,7 @@ void Usage(char* prg)
         "%s -[var] [value]\n"\
         "-i set input path\n"\
         "-o set output path\n"\
-        "-e extract only MAP(1)/DBC(2)/Camera(4) - standard: all(15)\n"\
+        "-e extract only MAP(1)/DBC(2)/Camera(4)/Attachment(8) - standard: all(15)\n"\
         "-f height stored as int (less map size but lost some accuracy) 1 by default\n"\
         "Example: %s -f 0 -i \"c:\\games\\game\"", prg, prg);
     exit(1);
@@ -1128,6 +1130,7 @@ void ExtractCreatureModelFiles(int locale, bool basicLocale)
 
         auto pos = thisFile.find_last_of('\\');
         std::string pureName = thisFile;
+        std::replace(pureName.begin(), pureName.end(), '\\', '_');
         filename += pureName;
 
         if (FileExists(filename.c_str()))
