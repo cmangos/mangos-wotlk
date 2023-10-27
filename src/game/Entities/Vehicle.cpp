@@ -40,6 +40,7 @@
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "Globals/ObjectMgr.h"
+#include "Models/M2Stores.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
@@ -303,16 +304,18 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
     float scale = creatureDisplayInfo->scale;
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
-    for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
-    {
-        if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
+    if (attachmentItr != sModelAttachmentStore.end())
+        for (auto& attachment : attachmentItr->second)
         {
-            lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
-            ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
-            lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-            break;
+            if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+            {
+                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+                break;
+            }
         }
-    }
 
     BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
 
@@ -403,16 +406,18 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
     float scale = creatureDisplayInfo->scale;
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
-    for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
-    {
-        if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
+    if (attachmentItr != sModelAttachmentStore.end())
+        for (auto& attachment : attachmentItr->second)
         {
-            lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
-            ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
-            lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-            break;
+            if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+            {
+                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+                break;
+            }
         }
-    }
 
     // Set to new seat
     itr->second->SetTransportSeat(seat);
