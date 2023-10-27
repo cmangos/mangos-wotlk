@@ -2597,6 +2597,9 @@ class Unit : public WorldObject
         virtual bool IsNoWeaponSkillGain() const { return false; }
         virtual bool IsPreventingDeath() const { return false; }
 
+        void SetRootVehicle(const ObjectGuid& guid) { m_rootVehicle = guid; }
+        const ObjectGuid& GetRootVehicle() const { return m_rootVehicle; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
 
@@ -2682,6 +2685,7 @@ class Unit : public WorldObject
         void DisableSpline();
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
+        ObjectGuid m_rootVehicle;
 
         CombatData* m_combatData;
         CombatManager m_combatManager;
