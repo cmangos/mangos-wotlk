@@ -77,7 +77,7 @@ enum
     // leviathan other spells
     SPELL_SMOKE_TRAIL                       = 63575,
     SPELL_EJECT_ALL_PASSENGERS              = 50630,                    // used by vehicles on death; currently handled by DB linking
-    // SPELL_EJECT_PASSENGER_4              = 64614,
+    SPELL_EJECT_PASSENGER_4                 = 64614,
     SPELL_EJECT_PASSENGER_1                 = 60603,
     SPELL_LOAD_INTO_CATAPULT                = 64414,
     SPELL_PASSENGER_LOADED                  = 62340,
@@ -120,6 +120,13 @@ enum
     SPELL_GENERAL_TRIGGER_2_TO_SELF         = 67395,
     SPELL_GRAB_PYRITE                       = 67372,
     SPELL_EJECT_PASSENGER                   = 67393,
+
+    // gauntlet spells
+    SPELL_DUSTY_EXPLOSION                   = 63360,
+    SPELL_DUST_CLOUD_IMPACT                 = 54740,
+    SPELL_SPAWN_PYRITE                      = 62543,
+    SPELL_COSMETIC_PARACHITE                = 56093,
+    SPELL_ROPE_BEAM                         = 63605,
 
     // vehicle accessories
     //NPC_LEVIATHAN_SEAT                      = 33114,
@@ -184,6 +191,7 @@ static const float afHodirFury[MAX_HODIR_FURY][3] =
 static const float afMimironInferno[3] = {329.1809f, 8.02577f, 410.887f};
 
 static const std::vector<uint32> addEntries = {NPC_LEVIATHAN_SEAT, NPC_LEVIATHAN_TURRET, NPC_DEFENSE_TURRET, NPC_OVERLOAD_DEVICE};
+static const std::vector<uint32> playerVehicleEntries = {NPC_SALVAGED_SIEGE_ENGINE, NPC_SALVAGED_SIEGE_TURRET, NPC_SALVAGED_CHOPPER, NPC_SALVAGED_DEMOLISHER, NPC_SALVAGED_DEMOLISHER_SEAT};
 
 /*######
 ## boss_flame_leviathan
@@ -272,6 +280,32 @@ struct boss_flame_leviathanAI : public BossAI
                     add->Suicide();
                 else if (add)
                     add->ForcedDespawn();
+            }
+        }
+
+        CreatureList playerVehicles;
+        for (const uint32& entry : playerVehicleEntries)
+        {
+            GetCreatureListWithEntryInGrid(playerVehicles, m_creature, entry, 1000.f); // probably very expensive. better solution?
+            for (auto* add : playerVehicles)
+            {
+                if (!add || !add->IsAlive())
+                    continue;
+                switch (add->GetEntry())
+                {
+                    case NPC_SALVAGED_SIEGE_ENGINE:
+                    case NPC_SALVAGED_CHOPPER:
+                        add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
+                        break;
+                    case NPC_SALVAGED_DEMOLISHER:
+                        add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_4, TRIGGERED_OLD_TRIGGERED);
+                        break;
+                    case NPC_SALVAGED_SIEGE_TURRET:
+                    case NPC_SALVAGED_DEMOLISHER_SEAT:
+                        add->CastSpell(nullptr, SPELL_EJECT_ALL_PASSENGERS, TRIGGERED_OLD_TRIGGERED);
+                        break;
+                    default: break;
+                }
             }
         }
 
@@ -757,7 +791,7 @@ struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
         DoCastSpellIfCan(m_creature, SPELL_LIQUID_PYRITE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void MovementInform(uint32 motionType, uint32 /*value*/)
+    void MovementInform(uint32 motionType, uint32 /*value*/) override
     {
         if (motionType != BOARD_VEHICLE_MOTION_TYPE)
             return;
@@ -774,7 +808,7 @@ struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
             Creature* lift = dynamic_cast<Creature*>(m_creature->GetSpawner());
             if (!lift)
                 return;
-            m_creature->CastSpell(lift, 63605, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(lift, SPELL_ROPE_BEAM, TRIGGERED_OLD_TRIGGERED);
         });
         AddCustomAction(1, true, [&]()
         {
@@ -784,9 +818,9 @@ struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
                 ResetTimer(1, 500ms);
                 return;
             }
-            m_creature->CastSpell(nullptr, 63360, TRIGGERED_OLD_TRIGGERED);
-            m_creature->CastSpell(nullptr, 54740, TRIGGERED_OLD_TRIGGERED);
-            m_creature->CastSpell(nullptr, 62543, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, SPELL_DUSTY_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, SPELL_DUST_CLOUD_IMPACT, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, SPELL_SPAWN_PYRITE, TRIGGERED_OLD_TRIGGERED);
             m_creature->ForcedDespawn(1000);
         });
     }
@@ -1069,7 +1103,7 @@ struct ThrowPassenger : public SpellScript
 
         if (caster->GetVehicleInfo())
             if (caster->GetVehicleInfo()->GetPassenger(3))
-                if (seat = static_cast<Unit*>(caster->GetVehicleInfo()->GetPassenger(3)))
+                if ((seat = static_cast<Unit*>(caster->GetVehicleInfo()->GetPassenger(3))))
                     if (seat->IsVehicle())
                         projectile = seat->GetVehicleInfo()->GetPassenger(0);
         if (!projectile)
@@ -1399,7 +1433,7 @@ struct RopeBeam : public AuraScript
         Unit* caster = aura->GetCaster();
         if (!caster || caster->GetEntry() != 33218)
             return;
-        caster->CastSpell(nullptr, 56093, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, SPELL_COSMETIC_PARACHITE, TRIGGERED_OLD_TRIGGERED);
         caster->GetMotionMaster()->MoveFall();
         if (caster->AI())
             caster->AI()->ResetTimer(1, 500ms);
