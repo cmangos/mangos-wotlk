@@ -40,6 +40,7 @@
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "Globals/ObjectMgr.h"
+#include "Models/M2Stores.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
@@ -303,8 +304,9 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
     float scale = creatureDisplayInfo->scale;
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
-    if (sModelAttachmentStore.find(creatureDisplayInfo->ModelId) != sModelAttachmentStore.end())
-        for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
+    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
+    if (attachmentItr != sModelAttachmentStore.end())
+        for (auto& attachment : attachmentItr->second)
         {
             if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
             {
@@ -404,8 +406,9 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
     float scale = creatureDisplayInfo->scale;
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
-    if (sModelAttachmentStore.find(creatureDisplayInfo->ModelId) != sModelAttachmentStore.end())
-        for (auto& attachment : sModelAttachmentStore[creatureDisplayInfo->ModelId])
+    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
+    if (attachmentItr != sModelAttachmentStore.end())
+        for (auto& attachment : attachmentItr->second)
         {
             if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
             {
