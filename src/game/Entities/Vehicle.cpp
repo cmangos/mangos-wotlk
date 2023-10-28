@@ -318,6 +318,8 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         }
 
     BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
+    if (auto* rootVehicle = static_cast<Unit*>(m_owner)->FindRootVehicle())
+        passenger->SetRootVehicle(rootVehicle->GetObjectGuid());
 
     // Set data for createobject packets
     passenger->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
@@ -459,6 +461,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     MANGOS_ASSERT(seatEntry);
 
     UnBoardPassenger(passenger);                            // Use TransportBase to remove the passenger from storage list
+    passenger->SetRootVehicle(ObjectGuid());
 
     // Remove passenger modifications
     RemoveSeatMods(passenger, seatEntry->m_flags);

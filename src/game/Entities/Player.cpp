@@ -20958,6 +20958,22 @@ void Player::AddAtClient(WorldObject* target)
 
 void Player::RemoveAtClient(WorldObject* target)
 {
+    if (target->GetTypeId() == TYPEID_UNIT)
+    {
+        Unit* unitTarget = static_cast<Unit*>(target);
+
+        if (VehicleInfo* info = unitTarget->GetVehicleInfo())
+        {
+            for (uint8 i = 0; i < 8; i++)
+            {
+                if (auto* passenger = info->GetPassenger(i))
+                {
+                    passenger->DestroyForPlayer(this);
+                    RemoveAtClient(passenger);
+                }
+            }
+        }
+    }
     m_clientGUIDs.erase(target->GetObjectGuid());
     target->RemoveClientIAmAt(this);
 }

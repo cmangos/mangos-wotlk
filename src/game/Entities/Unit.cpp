@@ -9164,6 +9164,9 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         // non visible at grid for any stealth state
         if (!IsVisibleInGridForPlayer((Player*)u))
             return false;
+        if (m_transportInfo)
+            if (!static_cast<const Player*>(u)->HasAtClient(m_rootVehicle))
+                return false;
 
         // if player is dead then he can't detect anyone in any cases
         if (!u->IsAlive())

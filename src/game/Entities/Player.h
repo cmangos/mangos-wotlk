@@ -2361,6 +2361,7 @@ class Player : public Unit
 
         // currently visible objects at player client
         bool HasAtClient(WorldObject const* u) { return u == this || m_clientGUIDs.find(u->GetObjectGuid()) != m_clientGUIDs.end(); }
+        bool HasAtClient(const ObjectGuid& guid) const { return guid == GetObjectGuid() || m_clientGUIDs.find(guid) != m_clientGUIDs.end(); }
         void AddAtClient(WorldObject* target);
         void RemoveAtClient(WorldObject* target);
         GuidSet& GetClientGuids() { return m_clientGUIDs; }
