@@ -31,6 +31,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Entities/Vehicle.h"
 
 /*######
 ## npc_squad_leader
@@ -977,6 +978,54 @@ struct spell_create_lance : public SpellScript
     }
 };
 
+// 56683 - Grab Captured Crusader
+struct GrabCapturedCrusader : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (VehicleInfo* vehicle = spell->GetCaster()->GetVehicleInfo())
+        {
+            if (vehicle->GetPassenger(1) != nullptr)
+            {
+                spell->SetParam1(SPELL_FAILED_CUSTOM_ERROR_43);
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+        }
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (!spell->GetUnitTarget())
+            return;
+
+        spell->GetUnitTarget()->CastSpell(spell->GetCaster(), spell->GetDamage(), TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 56684 - Drop Off Captured Crusader
+struct DropOffCapturedCrusader : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (VehicleInfo* vehicle = spell->GetCaster()->GetVehicleInfo())
+        {
+            if (vehicle->GetPassenger(1) == nullptr)
+            {
+                spell->SetParam1(SPELL_FAILED_CUSTOM_ERROR_41);
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+        }
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (VehicleInfo* vehicle = spell->GetCaster()->GetVehicleInfo())
+            vehicle->UnBoard(vehicle->GetPassenger(1), false);
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1009,4 +1058,6 @@ void AddSC_icecrown()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_create_lance>("spell_create_lance");
+    RegisterSpellScript<GrabCapturedCrusader>("spell_grab_captured_crusader");
+    RegisterSpellScript<DropOffCapturedCrusader>("spell_drop_off_captured_crusader");
 }

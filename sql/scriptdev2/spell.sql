@@ -862,6 +862,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (56265,'spell_vortex_aura'),
 (56266,'spell_vortex_aura'),
 (56430,'spell_arcane_bomb'),
+(56683,'spell_grab_captured_crusader'),
+(56684,'spell_drop_off_captured_crusader'),
 (57073,'spell_drink'),
 (57082,'spell_crystal_spikes'),
 (57083,'spell_crystal_spikes'),
