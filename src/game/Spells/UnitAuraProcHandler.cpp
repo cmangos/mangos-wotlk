@@ -1608,17 +1608,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     pVictim->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT);
                     return SPELL_AURA_PROC_OK;
                 }
-                // Blessing of Ancient Kings
-                case 64411:
-                {
-                    // for DOT procs
-                    if (!IsPositiveSpell(spellInfo->Id))
-                        return SPELL_AURA_PROC_FAILED;
-
-                    triggered_spell_id = 64413;
-                    basepoints[0] = damage * 15 / 100;
-                    break;
-                }
             }
             break;
         }
@@ -3236,13 +3225,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                     if (Unit* caster = triggeredByAura->GetCaster())
                         caster->InterruptNonMeleeSpells(false);
                     return SPELL_AURA_PROC_OK;
-                }
-                case 64415:                                 // // Val'anyr Hammer of Ancient Kings - Equip Effect
-                {
-                    // for DOT procs
-                    if (!IsPositiveSpell(spellInfo->Id))
-                        return SPELL_AURA_PROC_FAILED;
-                    break;
                 }
                 case 64440:                                 // Blade Warding
                 {

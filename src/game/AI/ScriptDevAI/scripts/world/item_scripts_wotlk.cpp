@@ -140,10 +140,62 @@ struct Icecrown25MeleeTrinket : public AuraScript
     }
 };
 
+
+// 64415 Val'anyr Hammer of Ancient Kings - Equip Effect
+struct ValanyrEquipEffect : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& procData) const override
+    {
+        if (procData.healthGain == 0)
+            return false;
+        return true;
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!IsPositiveSpell(procData.spellInfo->Id))
+            return SPELL_AURA_PROC_FAILED;
+        procData.cooldown = 45;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+enum
+{
+    SPELL_PROTECTION_OF_ANCIENT_KINGS = 64413,
+};
+
+// 64411 Blessing of Ancient Kings
+struct BlessingOfAncientKings : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!IsPositiveSpell(procData.spellInfo->Id))
+            return SPELL_AURA_PROC_FAILED;
+
+        procData.triggeredSpellId = SPELL_PROTECTION_OF_ANCIENT_KINGS;
+        procData.basepoints[0] = procData.damage * 15 / 100;
+        procData.triggerTarget = procData.target;
+        if (procData.target->HasAura(SPELL_PROTECTION_OF_ANCIENT_KINGS))
+        {
+            Unit* target = procData.target;
+            Aura* triggeredAura = target->GetAura(SPELL_PROTECTION_OF_ANCIENT_KINGS, EFFECT_INDEX_0);
+            if (!triggeredAura)
+                return SPELL_AURA_PROC_OK;
+            triggeredAura->GetHolder()->RefreshHolder();
+            triggeredAura->GetModifier()->m_amount = std::min(triggeredAura->GetModifier()->m_amount + procData.basepoints[0], 20000);
+            return SPELL_AURA_PROC_CANT_TRIGGER;
+        }
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void AddSC_item_scripts_wotlk()
 {
     RegisterSpellScript<SwiftHandOfJustice>("spell_swift_hand_of_justice");
     RegisterSpellScript<DiscerningEyeOfTheBeast>("spell_discerning_eye_of_the_beast");
     RegisterSpellScript<ProcOnlyBelow35Percent>("spell_proc_only_below_35_percent");
     RegisterSpellScript<Icecrown25MeleeTrinket>("spell_icecrown_25_melee_trinket");
+    RegisterSpellScript<ValanyrEquipEffect>("spell_valanyr_equip_effect");
+    RegisterSpellScript<BlessingOfAncientKings>("spell_blessing_of_ancient_kings");
 }
