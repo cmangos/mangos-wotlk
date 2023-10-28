@@ -87,7 +87,7 @@ enum
 
     // tower buffs to Leviathan (applied on combat start if the towers are alive)
     SPELL_TOWER_OF_FROST                    = 65077,
-    // SPELL_TOWER_OF_FROST_DEBUFF          = 65079,                    // removed by hotfix
+    SPELL_TOWER_OF_FROST_DEBUFF             = 65079,                    // removed by hotfix
     SPELL_TOWER_OF_LIFE                     = 64482,
     SPELL_TOWER_OF_STORMS                   = 65076,
     SPELL_TOWER_OF_FLAMES                   = 65075,
@@ -169,6 +169,10 @@ UPDATE vehicle_accessory SET seat=0 WHERE vehicle_entry IN (33364, 33369, 33108,
     TOWER_ID_FREYA                          = 1,
     TOWER_ID_MIMIRON                        = 2,
     TOWER_ID_THORIM                         = 3,
+
+    // string_ids
+    ULDUAR_PLAYER_VEHICLES                  = 6030001,
+    ULDUAR_FLAME_LEVIATHAN_PARTY            = 6030002,
 };
 
 static const int32 leviathanTowerYell[KEEPER_ENCOUNTER] = { SAY_TOWER_FROST, SAY_TOWER_NATURE, SAY_TOWER_FIRE, SAY_TOWER_ENERGY };
@@ -270,7 +274,7 @@ struct boss_flame_leviathanAI : public BossAI
                 orbital->RemoveAllAuras();
         }
 
-        auto* LeviAdds = m_creature->GetMap()->GetCreatures("ULDUAR_FLAME_LEVIATHAN_PARTY");
+        auto* LeviAdds = m_creature->GetMap()->GetCreatures(ULDUAR_FLAME_LEVIATHAN_PARTY);
         for (auto* leviPartyMember : *LeviAdds)
         {
             if (leviPartyMember)
@@ -296,7 +300,7 @@ struct boss_flame_leviathanAI : public BossAI
             }
         }
 
-        auto* playerVehicles = m_creature->GetMap()->GetCreatures("ULDUAR_PLAYER_VEHICLES");
+        auto* playerVehicles = m_creature->GetMap()->GetCreatures(ULDUAR_PLAYER_VEHICLES);
         for (auto* add : *playerVehicles)
         {
             if (!add || !add->IsAlive())
@@ -1450,6 +1454,17 @@ struct RopeBeam : public AuraScript
     }
 };
 
+// 65077 - Tower of Frost, 64482 - Tower of Life, 65076 - Tower of Storms, 65075 - Tower of Flames
+struct FlameLeviathanBuff : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const
+    {
+        if (target && target->HasStringId(ULDUAR_FLAME_LEVIATHAN_PARTY))
+            return true;
+        return false;
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -1523,4 +1538,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<ReadyToFly>("spell_ready_to_fly");
     RegisterSpellScript<AntiAirRocket>("spell_anti_air_rocket");
     RegisterSpellScript<RopeBeam>("spell_rope_beam");
+    RegisterSpellScript<FlameLeviathanBuff>("spell_flame_leviathan_buff");
 }
