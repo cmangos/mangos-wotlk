@@ -87,7 +87,7 @@ enum
 
     // tower buffs to Leviathan (applied on combat start if the towers are alive)
     SPELL_TOWER_OF_FROST                    = 65077,
-    // SPELL_TOWER_OF_FROST_DEBUFF          = 65079,                    // removed by hotfix
+    SPELL_TOWER_OF_FROST_DEBUFF             = 65079,                    // removed by hotfix
     SPELL_TOWER_OF_LIFE                     = 64482,
     SPELL_TOWER_OF_STORMS                   = 65076,
     SPELL_TOWER_OF_FLAMES                   = 65075,
@@ -169,6 +169,10 @@ UPDATE vehicle_accessory SET seat=0 WHERE vehicle_entry IN (33364, 33369, 33108,
     TOWER_ID_FREYA                          = 1,
     TOWER_ID_MIMIRON                        = 2,
     TOWER_ID_THORIM                         = 3,
+
+    // string_ids
+    ULDUAR_PLAYER_VEHICLES                  = 6030001,
+    ULDUAR_FLAME_LEVIATHAN_PARTY            = 6030002,
 };
 
 static const int32 leviathanTowerYell[KEEPER_ENCOUNTER] = { SAY_TOWER_FROST, SAY_TOWER_NATURE, SAY_TOWER_FIRE, SAY_TOWER_ENERGY };
@@ -270,8 +274,8 @@ struct boss_flame_leviathanAI : public BossAI
                 orbital->RemoveAllAuras();
         }
 
-        auto* LeviAdds = m_creature->GetMap()->GetCreatures("ULDUAR_FLAME_LEVIATHAN_PARTY");
-        for (auto* leviPartyMember : *LeviAdds)
+        auto* LeviAdds = m_creature->GetMap()->GetCreatures(ULDUAR_FLAME_LEVIATHAN_PARTY);
+        for (Creature* leviPartyMember : *LeviAdds)
         {
             if (leviPartyMember)
             {
@@ -288,6 +292,8 @@ struct boss_flame_leviathanAI : public BossAI
                     case NPC_OVERLOAD_DEVICE:
                     case NPC_ORBITAL_SUPPORT:
                     {
+                        if (leviPartyMember->IsAlive())
+                            leviPartyMember->Suicide();
                         leviPartyMember->ForcedDespawn();
                         break;
                     }
@@ -296,8 +302,8 @@ struct boss_flame_leviathanAI : public BossAI
             }
         }
 
-        auto* playerVehicles = m_creature->GetMap()->GetCreatures("ULDUAR_PLAYER_VEHICLES");
-        for (auto* add : *playerVehicles)
+        auto* playerVehicles = m_creature->GetMap()->GetCreatures(ULDUAR_PLAYER_VEHICLES);
+        for (Creature* add : *playerVehicles)
         {
             if (!add || !add->IsAlive())
                 continue;
@@ -308,6 +314,7 @@ struct boss_flame_leviathanAI : public BossAI
                     add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
                     break;
                 case NPC_SALVAGED_DEMOLISHER:
+                    add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
                     add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_4, TRIGGERED_OLD_TRIGGERED);
                     break;
                 case NPC_SALVAGED_SIEGE_TURRET:
@@ -343,7 +350,7 @@ struct boss_flame_leviathanAI : public BossAI
         CreatureList leviAdds;
         for (const uint32& entry : addEntries)
         {
-            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
+            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 30.f);
             for (auto add : leviAdds)
             {
                 if (add)
@@ -1122,7 +1129,7 @@ struct ThrowPassenger : public SpellScript
             return;
 
         std::unordered_set<uint32> spellIds;
-        for (auto aura : caster->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
+        for (Aura* aura : caster->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
         {
             if (aura->GetCasterGuid() == projectile->GetObjectGuid())
                 spellIds.emplace(aura->GetId());
@@ -1255,7 +1262,7 @@ struct SystemsShutdown : public AuraScript
             CreatureList leviAdds;
             for (const uint32& entry : addEntries)
             {
-                GetCreatureListWithEntryInGrid(leviAdds, target, entry, 50.f);
+                GetCreatureListWithEntryInGrid(leviAdds, target, entry, 30.f);
                 for (auto add : leviAdds)
                 {
                     if (add)
@@ -1276,7 +1283,7 @@ struct SystemsShutdown : public AuraScript
         }
         CreatureList leviSeats;
         GetCreatureListWithEntryInGrid(leviSeats, target, NPC_LEVIATHAN_SEAT, 50.f);
-        for (auto seat : leviSeats)
+        for (Creature* seat : leviSeats)
         {
             if (seat && seat->IsVehicle())
             {
@@ -1301,7 +1308,7 @@ struct EjectPassenger1 : public SpellScript
             return;
 
         std::unordered_set<uint32> spellIds;
-        for (auto aura : target->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
+        for (Aura* aura : target->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
         {
             if (aura->GetCasterGuid() == passenger->GetObjectGuid())
                 spellIds.emplace(aura->GetId());
@@ -1353,8 +1360,8 @@ struct GrabPyrite : public SpellScript
         Unit* target = spell->GetUnitTarget();
         if (!caster || !target)
             return;
-        if (auto transportInfo = caster->GetTransportInfo())
-            if (auto vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
+        if (TransportInfo* transportInfo = caster->GetTransportInfo())
+            if (Unit* vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
             {
                 uint32 val = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
                 target->CastSpell(vehicle, val, TRIGGERED_OLD_TRIGGERED);
@@ -1450,6 +1457,17 @@ struct RopeBeam : public AuraScript
     }
 };
 
+// 65077 - Tower of Frost, 64482 - Tower of Life, 65076 - Tower of Storms, 65075 - Tower of Flames
+struct FlameLeviathanBuff : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const
+    {
+        if (target && target->HasStringId(ULDUAR_FLAME_LEVIATHAN_PARTY))
+            return true;
+        return false;
+    }
+};
+
 void AddSC_boss_flame_leviathan()
 {
     Script* pNewScript = new Script;
@@ -1523,4 +1541,5 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<ReadyToFly>("spell_ready_to_fly");
     RegisterSpellScript<AntiAirRocket>("spell_anti_air_rocket");
     RegisterSpellScript<RopeBeam>("spell_rope_beam");
+    RegisterSpellScript<FlameLeviathanBuff>("spell_flame_leviathan_buff");
 }
