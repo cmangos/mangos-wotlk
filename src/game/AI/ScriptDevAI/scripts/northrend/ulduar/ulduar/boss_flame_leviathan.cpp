@@ -270,44 +270,54 @@ struct boss_flame_leviathanAI : public BossAI
                 orbital->RemoveAllAuras();
         }
 
-        CreatureList leviAdds;
-        for (const uint32& entry : addEntries)
+        auto* LeviAdds = m_creature->GetMap()->GetCreatures("ULDUAR_FLAME_LEVIATHAN_PARTY");
+        for (auto* leviPartyMember : *LeviAdds)
         {
-            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
-            for (auto add : leviAdds)
+            if (leviPartyMember)
             {
-                if (add && (add->GetEntry() == NPC_DEFENSE_TURRET || add->GetEntry() == NPC_LEVIATHAN_TURRET || add->GetEntry() == NPC_LEVIATHAN_SEAT))
-                    add->Suicide();
-                else if (add)
-                    add->ForcedDespawn();
-            }
-        }
-
-        CreatureList playerVehicles;
-        for (const uint32& entry : playerVehicleEntries)
-        {
-            GetCreatureListWithEntryInGrid(playerVehicles, m_creature, entry, 1000.f); // probably very expensive. better solution?
-            for (auto* add : playerVehicles)
-            {
-                if (!add || !add->IsAlive())
-                    continue;
-                switch (add->GetEntry())
+                switch (leviPartyMember->GetEntry())
                 {
-                    case NPC_SALVAGED_SIEGE_ENGINE:
-                    case NPC_SALVAGED_CHOPPER:
-                        add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
+                    case NPC_DEFENSE_TURRET:
+                    case NPC_LEVIATHAN_TURRET:
+                    case NPC_LEVIATHAN_SEAT:
+                    {
+                        if (leviPartyMember->IsAlive())
+                            leviPartyMember->Suicide();
                         break;
-                    case NPC_SALVAGED_DEMOLISHER:
-                        add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_4, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    case NPC_OVERLOAD_DEVICE:
+                    case NPC_ORBITAL_SUPPORT:
+                    {
+                        leviPartyMember->ForcedDespawn();
                         break;
-                    case NPC_SALVAGED_SIEGE_TURRET:
-                    case NPC_SALVAGED_DEMOLISHER_SEAT:
-                        add->CastSpell(nullptr, SPELL_EJECT_ALL_PASSENGERS, TRIGGERED_OLD_TRIGGERED);
-                        break;
+                    }
                     default: break;
                 }
             }
         }
+
+        auto* playerVehicles = m_creature->GetMap()->GetCreatures("ULDUAR_PLAYER_VEHICLES");
+        for (auto* add : *playerVehicles)
+        {
+            if (!add || !add->IsAlive())
+                continue;
+            switch (add->GetEntry())
+            {
+                case NPC_SALVAGED_SIEGE_ENGINE:
+                case NPC_SALVAGED_CHOPPER:
+                    add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case NPC_SALVAGED_DEMOLISHER:
+                    add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_4, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case NPC_SALVAGED_SIEGE_TURRET:
+                case NPC_SALVAGED_DEMOLISHER_SEAT:
+                    add->CastSpell(nullptr, SPELL_EJECT_ALL_PASSENGERS, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                default: break;
+            }
+        }
+
 
         // start epilogue event
         if (Creature* pFlyMachine = m_creature->SummonCreature(NPC_BRANN_FLYING_MACHINE, 175.2838f, -210.4325f, 501.2375f, 1.42f, TEMPSPAWN_CORPSE_DESPAWN, 0))
