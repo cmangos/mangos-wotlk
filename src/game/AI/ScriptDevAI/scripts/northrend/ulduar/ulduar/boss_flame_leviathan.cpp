@@ -275,7 +275,7 @@ struct boss_flame_leviathanAI : public BossAI
         }
 
         auto* LeviAdds = m_creature->GetMap()->GetCreatures(ULDUAR_FLAME_LEVIATHAN_PARTY);
-        for (auto* leviPartyMember : *LeviAdds)
+        for (Creature* leviPartyMember : *LeviAdds)
         {
             if (leviPartyMember)
             {
@@ -292,6 +292,8 @@ struct boss_flame_leviathanAI : public BossAI
                     case NPC_OVERLOAD_DEVICE:
                     case NPC_ORBITAL_SUPPORT:
                     {
+                        if (leviPartyMember->IsAlive())
+                            leviPartyMember->Suicide();
                         leviPartyMember->ForcedDespawn();
                         break;
                     }
@@ -301,7 +303,7 @@ struct boss_flame_leviathanAI : public BossAI
         }
 
         auto* playerVehicles = m_creature->GetMap()->GetCreatures(ULDUAR_PLAYER_VEHICLES);
-        for (auto* add : *playerVehicles)
+        for (Creature* add : *playerVehicles)
         {
             if (!add || !add->IsAlive())
                 continue;
@@ -312,6 +314,7 @@ struct boss_flame_leviathanAI : public BossAI
                     add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
                     break;
                 case NPC_SALVAGED_DEMOLISHER:
+                    add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_1, TRIGGERED_OLD_TRIGGERED);
                     add->CastSpell(nullptr, SPELL_EJECT_PASSENGER_4, TRIGGERED_OLD_TRIGGERED);
                     break;
                 case NPC_SALVAGED_SIEGE_TURRET:
@@ -347,7 +350,7 @@ struct boss_flame_leviathanAI : public BossAI
         CreatureList leviAdds;
         for (const uint32& entry : addEntries)
         {
-            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 50.f);
+            GetCreatureListWithEntryInGrid(leviAdds, m_creature, entry, 30.f);
             for (auto add : leviAdds)
             {
                 if (add)
@@ -1126,7 +1129,7 @@ struct ThrowPassenger : public SpellScript
             return;
 
         std::unordered_set<uint32> spellIds;
-        for (auto aura : caster->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
+        for (Aura* aura : caster->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
         {
             if (aura->GetCasterGuid() == projectile->GetObjectGuid())
                 spellIds.emplace(aura->GetId());
@@ -1259,7 +1262,7 @@ struct SystemsShutdown : public AuraScript
             CreatureList leviAdds;
             for (const uint32& entry : addEntries)
             {
-                GetCreatureListWithEntryInGrid(leviAdds, target, entry, 50.f);
+                GetCreatureListWithEntryInGrid(leviAdds, target, entry, 30.f);
                 for (auto add : leviAdds)
                 {
                     if (add)
@@ -1280,7 +1283,7 @@ struct SystemsShutdown : public AuraScript
         }
         CreatureList leviSeats;
         GetCreatureListWithEntryInGrid(leviSeats, target, NPC_LEVIATHAN_SEAT, 50.f);
-        for (auto seat : leviSeats)
+        for (Creature* seat : leviSeats)
         {
             if (seat && seat->IsVehicle())
             {
@@ -1305,7 +1308,7 @@ struct EjectPassenger1 : public SpellScript
             return;
 
         std::unordered_set<uint32> spellIds;
-        for (auto aura : target->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
+        for (Aura* aura : target->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
         {
             if (aura->GetCasterGuid() == passenger->GetObjectGuid())
                 spellIds.emplace(aura->GetId());
@@ -1357,8 +1360,8 @@ struct GrabPyrite : public SpellScript
         Unit* target = spell->GetUnitTarget();
         if (!caster || !target)
             return;
-        if (auto transportInfo = caster->GetTransportInfo())
-            if (auto vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
+        if (TransportInfo* transportInfo = caster->GetTransportInfo())
+            if (Unit* vehicle = static_cast<Unit*>(transportInfo->GetTransport()))
             {
                 uint32 val = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
                 target->CastSpell(vehicle, val, TRIGGERED_OLD_TRIGGERED);
