@@ -22351,6 +22351,8 @@ uint32 Player::GetCorpseReclaimDelay(bool pvp) const
     time_t now = time(nullptr);
     // 0..2 full period
     uint32 count = (now < m_deathExpireTime) ? uint32((m_deathExpireTime - now) / DEATH_EXPIRE_STEP) : 0;
+    if (count >= MAX_DEATH_COUNT)
+        count = MAX_DEATH_COUNT - 1;
     return corpseReclaimDelay[count];
 }
 
