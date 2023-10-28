@@ -177,13 +177,20 @@ void SpellCastTargets::setGOTarget(GameObject* target)
 
 void SpellCastTargets::setItemTarget(Item* item)
 {
-    if (!item)
-        return;
-
-    m_itemTarget = item;
-    m_itemTargetGUID = item->GetObjectGuid();
-    m_itemTargetEntry = item->GetEntry();
-    m_targetMask |= TARGET_FLAG_ITEM;
+    if (item)
+    {
+        m_itemTarget = item;
+        m_itemTargetGUID = item->GetObjectGuid();
+        m_itemTargetEntry = item->GetEntry();
+        m_targetMask |= TARGET_FLAG_ITEM;
+    }
+    else
+    {
+        m_itemTarget = nullptr;
+        m_itemTargetGUID = ObjectGuid();
+        m_itemTargetEntry = 0;
+        m_targetMask &= ~TARGET_FLAG_ITEM;
+    }
 }
 
 void SpellCastTargets::setTradeItemTarget(Player* caster)
