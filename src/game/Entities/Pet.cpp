@@ -769,6 +769,10 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
 
 void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
 {
+    // do not attempt to unsummon pet if already unsummoned
+    if (m_removed)
+        return;
+
     if (!owner)
         owner = GetOwner();
 
