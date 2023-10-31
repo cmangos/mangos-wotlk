@@ -13234,8 +13234,8 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
     if (!atMap)
         atMap = GetMap();
 
-    // non fly unit don't must be in air
-    // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
+    // non flying unit must not be in the air
+    // non swimming unit must be on the ground (mostly speedup, because it can't be in water and water level check less fast)
     if (!CanFly())
     {
         bool canSwim = CanSwim();
@@ -13246,6 +13246,9 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
             maxZ = groundZ;
         if (maxZ > INVALID_HEIGHT)
         {
+            float hoverOffset = GetHoverOffset();
+            maxZ+=hoverOffset;
+            groundZ+=hoverOffset;
             if (z > maxZ)
                 z = maxZ;
             else if (z < groundZ)
@@ -13254,7 +13257,7 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
     }
     else
     {
-        float groundZ = atMap->GetHeight(GetPhaseMask(), x, y, z);
+        float groundZ = atMap->GetHeight(GetPhaseMask(), x, y, z) + GetHoverOffset();
         if (z < groundZ)
             z = groundZ;
     }
@@ -13986,6 +13989,23 @@ void Unit::SetHover(bool enable)
             m_movementInfo.AddMovementFlag(MOVEFLAG_HOVER);
         else
             m_movementInfo.RemoveMovementFlag(MOVEFLAG_HOVER);
+    }
+
+    float hoverHeight = GetHoverHeight();
+
+    if (enable)
+    {
+        if (hoverHeight && GetPositionZ() - GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ()) < hoverHeight)
+            Relocate(GetPositionX(), GetPositionY(), GetPositionZ() + hoverHeight);
+    }
+    else
+    {
+        if (IsAlive() || GetTypeId() != TYPEID_UNIT)
+        {
+            float newZ = std::max<float>(GetMap()->GetHeight(GetPhaseMask(), GetPositionX(), GetPositionY(), GetPositionZ()), GetPositionZ() - hoverHeight);
+            UpdateAllowedPositionZ(GetPositionX(), GetPositionY(), newZ);
+            Relocate(GetPositionX(), GetPositionY(), newZ);
+        }
     }
 
     if (!IsInWorld()) // is sent on add to map

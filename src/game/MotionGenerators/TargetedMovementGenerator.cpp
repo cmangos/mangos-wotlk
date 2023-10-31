@@ -494,7 +494,6 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
         this->i_path = new PathFinder(&owner);
 
     bool gen = false;
-    z += owner.GetHoverOffset();
     if (owner.IsWithinDist3d(x, y, z, 200.f) && std::abs(owner.GetPositionZ() - z) < 5.f && owner.IsWithinLOS(x, y, z + i_target->GetCollisionHeight()) && !owner.IsInWater() && !i_target->IsInWater())
     {
         this->i_path->calculate(x, y, z, false, true);
