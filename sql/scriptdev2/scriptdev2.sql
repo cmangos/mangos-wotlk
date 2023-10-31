@@ -5962,18 +5962,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1603043','Harpoon Turret is ready for use!','0','3','0','0','33857','razorscale EMOTE_HARPOON_READY'),
 ('-1603044','Razorscale grounded permanently!','0','3','0','0','0','razorscale EMOTE_GROUNDED'),
 
-('-1603045','New toys? For me? I promise I won''t break them this time!','15724','1','0','0','33508','xt-002 SAY_AGGRO'),
-('-1603046','I... I think I broke it.','15728','1','0','0','33509','xt-002 SAY_SLAY_1'),
-('-1603047','I guess it doesn''t bend that way.','15729','1','0','0','33510','xt-002 SAY_SLAY_2'),
-('-1603048','I''m tired of these toys. I don''t want to play anymore!','15730','1','0','0','33512','xt-002 SAY_BERSERK'),
-('-1603049','Time for a new game! My old toys will fight my new toys!','15732','1','0','0','0','xt-002 SAY_ADDS'),
-('-1603050','You are bad... Toys... Very... Baaaaad!','15731','1','0','0','33511','xt-002 SAY_DEATH'),
-('-1603051','So tired. I will rest for just a moment!','15725','1','0','0','33446','xt-002 SAY_HEART_OPEN'),
-('-1603052','I''m ready to play!','15726','1','0','0','33448','xt-002 SAY_HEART_CLOSE'),
-('-1603053','NO! NO! NO! NO! NO!','15727','1','0','0','33453','xt-002 SAY_TANCTRUM'),
-('-1603054','%s''s heart is exposed and leaking energy.','0','3','0','0','33447','xt-002 EMOTE_EXPOSE_HEART'),
-('-1603055','%s consumes a scrapbot to repair himself!','0','3','0','0','33856','xt-002 EMOTE_REPAIR'),
-
 ('-1603056','Whether the world''s greatest gnats or the world''s greatest heroes, you''re still only mortal.','15684','1','0','0','0','brundir SAY_BRUNDIR_AGGRO'),
 ('-1603057','Stand still and stare into the light!','15687','1','0','0','33962','brundir SAY_BRUNDIR_WHIRL'),
 ('-1603058','The power of the storm lives on...','15689','1','0','0','34318','brundir SAY_BRUNDIR_DEATH_1'),
