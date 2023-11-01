@@ -2930,29 +2930,30 @@ SpellEntry const* GameObject::GetSpellForLock(Player const* player) const
 
 std::pair<float, float> GameObject::GetClosestChairSlotPosition(Unit* user) const
 {
+    Position pos = GetPosition(GetTransport());
     float outX, outY;
     // check if the db is sane
     if (GetGOInfo()->chair.slots > 0)
     {
         float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
 
-        float x_lowest = GetPositionX();
-        float y_lowest = GetPositionY();
+        float x_lowest = pos.GetPositionX();
+        float y_lowest = pos.GetPositionY();
 
         // the object orientation + 1/2 pi
         // every slot will be on that straight line
-        float orthogonalOrientation = GetOrientation() + M_PI_F * 0.5f;
+        float orthogonalOrientation = pos.GetPositionO() + M_PI_F * 0.5f;
         // find nearest slot
         for (uint32 i = 0; i < GetGOInfo()->chair.slots; ++i)
         {
             // the distance between this slot and the center of the go - imagine a 1D space
             float relativeDistance = (GetGOInfo()->size * i) - (GetGOInfo()->size * (GetGOInfo()->chair.slots - 1) / 2.0f);
 
-            float slotX = GetPositionX() + relativeDistance * cos(orthogonalOrientation);
-            float slotY = GetPositionY() + relativeDistance * sin(orthogonalOrientation);
+            float slotX = pos.GetPositionX() + relativeDistance * cos(orthogonalOrientation);
+            float slotY = pos.GetPositionY() + relativeDistance * sin(orthogonalOrientation);
 
             // calculate the distance between the user and this slot
-            float thisDistance = user->GetDistance2d(slotX, slotY, DIST_CALC_NONE);
+            float thisDistance = user->GetDistance2d(slotX, slotY, DIST_CALC_NONE, GetTransport());
 
             if (thisDistance <= lowestDist)
             {
@@ -2966,8 +2967,8 @@ std::pair<float, float> GameObject::GetClosestChairSlotPosition(Unit* user) cons
     }
     else
     {
-        outX = GetPositionX();
-        outY = GetPositionY();
+        outX = pos.GetPositionX();
+        outY = pos.GetPositionY();
     }
 
     return {outX, outY};

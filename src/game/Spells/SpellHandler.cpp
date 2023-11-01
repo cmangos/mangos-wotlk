@@ -346,7 +346,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     {
         float x, y;
         std::tie(x, y) = obj->GetClosestChairSlotPosition(_player);
-        if (_player->GetDistance(x, y, obj->GetPositionZ(), DIST_CALC_NONE) > 3.f * 3.f)
+        if (_player->GetDistance(x, y, obj->GetPositionZ(), DIST_CALC_NONE, obj->GetTransport()) > 3.f * 3.f)
             return;
     }
 

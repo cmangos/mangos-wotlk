@@ -1471,10 +1471,11 @@ float WorldObject::GetDistance(float x, float y, float z, DistanceCalculation di
     }
 }
 
-float WorldObject::GetDistance2d(float x, float y, DistanceCalculation distcalc) const
+float WorldObject::GetDistance2d(float x, float y, DistanceCalculation distcalc, bool transport) const
 {
-    float dx = GetPositionX() - x;
-    float dy = GetPositionY() - y;
+    Position const& pos = GetPosition(transport ? GetTransport() : nullptr);
+    float dx = pos.x - x;
+    float dy = pos.y - y;
     float dist = dx * dx + dy * dy;
 
     switch (distcalc)
