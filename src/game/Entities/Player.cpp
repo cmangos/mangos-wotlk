@@ -1609,8 +1609,7 @@ void Player::Update(const uint32 diff)
     if (IsAlive())
     {
         m_regenTimer += diff;
-        if (!IsInCombat())
-            m_healthRegenTimer += diff;
+        m_healthRegenTimer += diff;
         if (m_regenTimer >= REGEN_TIME_PRECISE)
             RegenerateAll(m_regenTimer);
     }
@@ -2422,6 +2421,11 @@ void Player::RegenerateAll(uint32 diff)
         RegenerateHealth(m_healthRegenTimer);
         m_healthRegenTimer -= REGEN_TIME_FULL;
     }
+    else if (IsInCombat())
+    {
+        m_healthRegenTimer -= diff;
+    }
+
     switch (getClass())
     {
         case CLASS_DRUID:
