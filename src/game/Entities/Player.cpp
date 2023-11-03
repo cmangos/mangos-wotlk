@@ -2418,7 +2418,7 @@ void Player::RegenerateAll(uint32 diff)
     if (m_healthRegenTimer >= REGEN_TIME_FULL)
     {
         if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) || HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT))
-            RegenerateHealth(m_healthRegenTimer);
+            RegenerateHealth(REGEN_TIME_FULL);
         m_healthRegenTimer -= REGEN_TIME_FULL;
     }
 
