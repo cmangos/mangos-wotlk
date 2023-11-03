@@ -2415,15 +2415,11 @@ void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacke
 
 void Player::RegenerateAll(uint32 diff)
 {
-    if (m_healthRegenTimer >= REGEN_TIME_FULL && (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
-        HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT)))
+    if (m_healthRegenTimer >= REGEN_TIME_FULL)
     {
-        RegenerateHealth(m_healthRegenTimer);
+        if (!IsInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) || HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT))
+            RegenerateHealth(m_healthRegenTimer);
         m_healthRegenTimer -= REGEN_TIME_FULL;
-    }
-    else if (IsInCombat())
-    {
-        m_healthRegenTimer -= diff;
     }
 
     switch (getClass())
