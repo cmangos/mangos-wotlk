@@ -2146,6 +2146,8 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- SPELL_ATTR_SS_IGNORE_EVADE
 -- ==========================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|4 WHERE `Id` IN (
+3235, -- Rancid Blood
+3338, -- Rancid Ooze
 3418, -- Improved Blocking
 5667, -- Bogling Passive
 5888, -- Darkshore Frenzy
