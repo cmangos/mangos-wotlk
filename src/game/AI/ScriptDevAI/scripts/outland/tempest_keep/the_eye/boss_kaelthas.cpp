@@ -447,6 +447,8 @@ struct boss_kaelthasAI : public CombatAI
         {
             case NPC_FLAME_STRIKE_TRIGGER:
             {
+                summoned->AI()->SetCombatMovement(false);
+                summoned->AI()->SetMeleeEnabled(false);
                 DoCastSpellIfCan(summoned, SPELL_FLAME_STRIKE_DUMMY, CAST_FORCE_TARGET_SELF | CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 break;
             }
@@ -1396,6 +1398,8 @@ struct FlameStrikeKael : public AuraScript
     void OnApply(Aura* aura, bool apply) const override
     {
         aura->GetTarget()->CastSpell(nullptr, 36731, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+        if (aura->GetTarget()->IsCreature())
+            static_cast<Creature*>(aura->GetTarget())->ForcedDespawn(10000);
     }
 };
 
