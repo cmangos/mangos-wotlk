@@ -229,6 +229,35 @@ struct GlyphOfSteadyShot : public AuraScript
     }
 };
 
+// 56842 - Glyph of Trueshot Aura
+struct GlyphOfTrueshotAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        // has trueshot aura
+        if (aura->GetTarget()->GetAura(SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT, SPELLFAMILY_HUNTER, aura->GetAuraSpellClassMask().Flags))
+            chance += aura->GetModifier()->m_amount;
+    }
+};
+
+// 3044 - Arcane Shot
+struct ArcaneShotHunter : public SpellScript
+{
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        if (Aura* glyph = spell->GetCaster()->GetAura(56841, EFFECT_INDEX_0)) // Glyph of Arcane Shot
+        {
+            int32 refund = spell->GetPowerCost() * glyph->GetAmount() / 100;
+            spell->GetCaster()->CastCustomSpell(nullptr, 61389, &refund, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<Entrapment>("spell_entrapment");
@@ -245,4 +274,6 @@ void LoadHunterScripts()
     RegisterSpellScript<LockAndLoadTrigger>("spell_lock_and_load_trigger");
     RegisterSpellScript<MarkedForDeathHunter>("spell_marked_for_death_hunter");
     RegisterSpellScript<GlyphOfSteadyShot>("spell_glyph_of_steady_shot");
+    RegisterSpellScript<GlyphOfTrueshotAura>("spell_glyph_of_trueshot_aura");
+    RegisterSpellScript<ArcaneShotHunter>("spell_arcane_shot_hunter");
 }

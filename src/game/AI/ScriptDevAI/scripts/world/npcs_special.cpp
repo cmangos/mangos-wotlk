@@ -1938,6 +1938,11 @@ enum
 
     SPELL_HUNTER_SNAKE_TRAP_SCALING_01 = 62915,
 
+    SPELL_AVOIDANCE_HUNTER      = 65220,
+
+    SPELL_GLYPH_OF_SNAKE_TRAP   = 56849,
+    SPELL_GLYPH_OF_SNAKE_TRAP_AVOIDANCE_CUSTOM = 80001, // no spell in sniff
+
     // SPELL_RANDOM_AGGRO = 34701 // unk purpose
 };
 
@@ -1954,6 +1959,9 @@ struct npc_snakesAI : public ScriptedAI
         m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 5.f);
         DoCastSpellIfCan(nullptr, SPELL_DEADLY_POISON_PASSIVE, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
         DoCastSpellIfCan(nullptr, SPELL_HUNTER_SNAKE_TRAP_SCALING_01, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
+        if (Unit* spawner = m_creature->GetSpawner())
+            if (spawner->HasAura(SPELL_GLYPH_OF_SNAKE_TRAP)) // Glyph of Snake Trap
+                DoCastSpellIfCan(nullptr, SPELL_GLYPH_OF_SNAKE_TRAP_AVOIDANCE_CUSTOM, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
     }
 
     void UpdateAI(const uint32 diff) override
@@ -1976,11 +1984,6 @@ struct npc_snakesAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_npc_snakes(Creature* pCreature)
-{
-    return new npc_snakesAI(pCreature);
-}
 
 enum
 {
@@ -3188,7 +3191,7 @@ void AddSC_npcs_special()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_snakes";
-    pNewScript->GetAI = &GetAI_npc_snakes;
+    pNewScript->GetAI = &GetNewAIInstance<npc_snakesAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

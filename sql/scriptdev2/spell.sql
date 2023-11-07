@@ -1120,7 +1120,19 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (53244,'spell_marked_for_death_hunter'),
 (53245,'spell_marked_for_death_hunter'),
 (53246,'spell_marked_for_death_hunter'),
+(56842,'spell_glyph_of_trueshot_aura'),
 (56826,'spell_glyph_of_steady_shot'),
+(3044,'spell_arcane_shot_hunter'),
+(14281,'spell_arcane_shot_hunter'),
+(14282,'spell_arcane_shot_hunter'),
+(14283,'spell_arcane_shot_hunter'),
+(14284,'spell_arcane_shot_hunter'),
+(14285,'spell_arcane_shot_hunter'),
+(14286,'spell_arcane_shot_hunter'),
+(14287,'spell_arcane_shot_hunter'),
+(27019,'spell_arcane_shot_hunter'),
+(49044,'spell_arcane_shot_hunter'),
+(49045,'spell_arcane_shot_hunter'),
 (781,'spell_disengage');
 
 -- Priest
