@@ -117,6 +117,7 @@ struct IceLance : public SpellScript
     }
 };
 
+// 12654 - Ignite
 struct MageIgnite : public AuraScript
 {
     // implemented this way because we do not support proccing in spellscript on empty aura slot
@@ -144,6 +145,7 @@ struct MageIgnite : public AuraScript
     }
 };
 
+// 44543, 44545 - Fingers of Frost
 struct FingersOfFrostProc : public AuraScript
 {
     bool OnCheckProc(Aura* aura, ProcExecutionData& /*data*/) const override
@@ -152,6 +154,7 @@ struct FingersOfFrostProc : public AuraScript
     }
 };
 
+// 44544 - Fingers of Frost
 struct FingersOfFrostIgnore : public SpellScript
 {
     void OnCast(Spell* spell) const override
@@ -160,6 +163,7 @@ struct FingersOfFrostIgnore : public SpellScript
     }
 };
 
+// 74396 - Fingers of Frost
 struct FingersOfFrostDummy : public AuraScript
 {
     void OnHolderInit(SpellAuraHolder* holder, WorldObject* /*caster*/) const override
@@ -180,6 +184,7 @@ struct FingersOfFrostDummy : public AuraScript
     }
 };
 
+// 44572 - Deep Freeze
 struct DeepFreezeImmunityState : public AuraScript
 {
     bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
@@ -255,6 +260,36 @@ struct TormentTheWeak : public AuraScript
     }
 };
 
+// 116 - Frostbolt
+struct FrostboltMage : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        if (spell->GetCaster()->HasAura(56370)) // Glyph of Frostbolt
+            spell->SetEffectSkipMask((1 << EFFECT_INDEX_0));
+    }
+};
+
+// 133 - Fireball
+struct FireballMage : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        if (spell->GetCaster()->HasAura(56368)) // Glyph of Fireball
+            spell->SetEffectSkipMask((1 << EFFECT_INDEX_1));
+    }
+};
+
+// 11113 - Blast Wave
+struct BlastWaveMage : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        if (spell->GetCaster()->HasAura(62126)) // Glyph of Blast Wave
+            spell->SetEffectSkipMask((1 << EFFECT_INDEX_2));
+    }
+};
+
 void LoadMageScripts()
 {
     RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
@@ -271,4 +306,7 @@ void LoadMageScripts()
     RegisterSpellScript<FrostWarding>("spell_frost_warding");
     RegisterSpellScript<GlyphOfFireBlast>("spell_glyph_of_fire_blast");
     RegisterSpellScript<TormentTheWeak>("spell_torment_the_weak");
+    RegisterSpellScript<FrostboltMage>("spell_frostbolt_mage");
+    RegisterSpellScript<FireballMage>("spell_fireball_mage");
+    RegisterSpellScript<BlastWaveMage>("spell_blast_wave_mage");
 }
