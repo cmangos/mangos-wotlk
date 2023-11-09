@@ -860,6 +860,8 @@ class Spell
         void SetDamage(uint32 newDamage) { damage = newDamage; }
         SpellSchoolMask GetSchoolMask() { return m_spellSchoolMask; }
         void SetGuaranteedCrit() { m_guaranteedCrit = true; }
+        // OnInit use only
+        void SetEffectSkipMask(uint32 mask) { m_effectSkipMask = mask; }
         // OnHit use only
         uint32 GetTotalTargetDamage() { return m_damage; }
         uint32 GetTotalTargetAbsorb() { return m_absorb; }
@@ -891,7 +893,7 @@ class Spell
         WorldObject* GetTrueCaster() const { return m_trueCaster; }
         Unit* GetAffectiveCasterOrOwner() const;
 
-        //Custom Spell Cast Results
+        // custom Spell Cast Results
         void SetParam1(uint32 param1) { m_param1 = param1; }
         void SetParam2(uint32 param2) { m_param2 = param2; }
 
@@ -1052,6 +1054,7 @@ class Spell
         SpellScript* m_spellScript;
         AuraScript* m_auraScript; // needed for some checks for value calculation
         int32 m_effectTriggerChance[MAX_EFFECT_INDEX]; // used by effects to roll if they should go off
+        uint32 m_effectSkipMask;
 
         uint32 m_spellState;
         uint32 m_timer;
