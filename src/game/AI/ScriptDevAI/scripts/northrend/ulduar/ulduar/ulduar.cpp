@@ -297,6 +297,25 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
             else
                 m_vaporVezaxBunnyGuid = pCreature->GetObjectGuid();
             return;
+        case NPC_DRUID_HORDE_N:
+        case NPC_DRUID_HORDE_H:
+        case NPC_SHAMAN_HORDE_N:
+        case NPC_SHAMAN_HORDE_H:
+        case NPC_MAGE_HORDE_N:
+        case NPC_MAGE_HORDE_H:
+        case NPC_PRIEST_HORDE_N:
+        case NPC_PRIEST_HORDE_H:
+        case NPC_DRUID_ALLIANCE_N:
+        case NPC_DRUID_ALLIANCE_H:
+        case NPC_SHAMAN_ALLIANCE_N:
+        case NPC_SHAMAN_ALLIANCE_H:
+        case NPC_MAGE_ALLIANCE_N:
+        case NPC_MAGE_ALLIANCE_H:
+        case NPC_PRIEST_ALLIANCE_N:
+        case NPC_PRIEST_ALLIANCE_H:
+            m_HodirHelperGuids.push_back(pCreature->GetObjectGuid());
+            pCreature->SetImmuneToNPC(false);
+            return;
 
         default:
             return;
@@ -1747,6 +1766,17 @@ bool ProcessEventId_event_ulduar(uint32 uiEventId, Object* pSource, Object* /*pT
             if (instance_ulduar* pInstance = (instance_ulduar*)((Creature*)pSource)->GetInstanceData())
             {
                 pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_NERF_ENG, false);
+                return true;
+            }
+        }
+    }
+    else if (uiEventId == EVENT_ID_FLASH_FREEZE)
+    {
+        if (pSource->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (instance_ulduar* instance = static_cast<instance_ulduar*>(static_cast<Player*>(pSource)->GetInstanceData()))
+            {
+                instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_CHEESE_FREEZE, false);
                 return true;
             }
         }
