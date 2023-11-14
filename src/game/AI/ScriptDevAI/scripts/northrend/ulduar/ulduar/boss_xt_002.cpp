@@ -82,6 +82,7 @@ enum
     SPELL_STATIC_CHARGED_H              = 64236,
     SPELL_SCRAP_REPAIR                  = 62832,            // cast on scrapbot in range to heal XT002; sends event 21606
     SPELL_RIDE_VEHICLE_SCRAPBOT         = 47020,            // cast by scrapbot on XT002 heal
+    SPELL_SHOCK                         = 64230,
 
     // NPC ids
     NPC_SCRAPBOT                        = 33343,
@@ -101,7 +102,6 @@ enum XT002Actions
 {
     XT002_TIRED,
     XT002_MOUNT_HEART,
-    XT002_BERSERK,
     XT002_HEALTH_CHECK,
     XT002_ACTIONS_MAX,
 };
@@ -116,8 +116,6 @@ struct boss_xt_002AI : public BossAI
         AddOnAggroText(SAY_AGGRO);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddOnDeathText(SAY_DEATH);
-        AddRespawnOnEvade(30s);
-        AddCombatAction(XT002_BERSERK, 10min);
         AddTimerlessCombatAction(XT002_HEALTH_CHECK, true);
         AddCustomAction(XT002_MOUNT_HEART, 1s, [&]()
         {
@@ -181,6 +179,7 @@ struct boss_xt_002AI : public BossAI
             // reset to normal phase and don't allow the boss to get back to heart phases
             DoResetToNormalPhase();
             m_heartStage = 5;
+            DisableCombatAction(XT002_HEALTH_CHECK);
 
             if (m_instance)
                 m_instance->SetData(TYPE_XT002_HARD, DONE);
@@ -190,6 +189,7 @@ struct boss_xt_002AI : public BossAI
 
             // no spell used for this action
             m_creature->SetHealth(m_creature->GetMaxHealth());
+            m_creature->SetSpellList(m_creature->GetSpellList().Id + 1);
         }
     }
 
@@ -207,15 +207,6 @@ struct boss_xt_002AI : public BossAI
     {
         switch (action)
         {
-            case XT002_BERSERK:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoBroadcastText(SAY_BERSERK, m_creature);
-                    DisableCombatAction(XT002_BERSERK);
-                }
-                return;
-            }
             case XT002_HEALTH_CHECK:
             {
                 if (m_creature->GetHealthPercent() < float(100 - 25 * m_heartStage))
@@ -249,6 +240,8 @@ struct boss_heart_deconstructorAI : public CombatAI
     boss_heart_deconstructorAI(Creature* creature) : CombatAI(creature, HEART_ACTIONS_MAX),
     m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData()))
     {
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
         SetReactState(REACT_PASSIVE);
     }
 
@@ -316,11 +309,12 @@ struct npc_scrapbotAI : public ScriptedAI
 ## npc_xt_toy_pile
 ######*/
 
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_xt_toy_pileAI : public Scripted_NoMovementAI
+struct npc_xt_toy_pileAI : public ScriptedAI
 {
-    npc_xt_toy_pileAI(Creature* creature) : Scripted_NoMovementAI(creature)
+    npc_xt_toy_pileAI(Creature* creature) : ScriptedAI(creature)
     {
+        SetMeleeEnabled(false);
+        SetCombatMovement(false);
         SetReactState(REACT_PASSIVE);
     }
 };
@@ -474,7 +468,7 @@ struct LifeSparkXT : public SpellScript
         auto value = spell->CalculateSpellEffectValue(EFFECT_INDEX_1, summon);
         summon->CastSpell(nullptr, isRegularMode ? SPELL_STATIC_CHARGED : SPELL_STATIC_CHARGED_H, TRIGGERED_OLD_TRIGGERED);
         summon->CastSpell(nullptr, SPELL_ARCANE_POWER_STATE, TRIGGERED_OLD_TRIGGERED);
-        summon->CastSpell(nullptr, 64230, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, SPELL_SHOCK, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -483,7 +477,11 @@ struct VoidZoneXT : public SpellScript
     void OnSummon(Spell* spell, Creature* summon) const override
     {
         if (summon->AI())
-            summon->AI()->SetRootSelf(true);
+        {
+            summon->AI()->SetCombatMovement(false);
+            summon->AI()->SetMeleeEnabled(false);
+            summon->AI()->SetAIImmobilizedState(true);
+        }
         auto value = spell->CalculateSpellEffectValue(EFFECT_INDEX_1, summon);
         summon->CastCustomSpell(nullptr, SPELL_CONSUMPTION, &value, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
