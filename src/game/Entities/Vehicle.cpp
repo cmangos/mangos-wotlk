@@ -300,7 +300,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         transport->RemovePassenger(passenger);
 
     // Calculate passengers local position
-    float lx, ly, lz, lo = 0.f;
+    float lx = 0.f, ly = 0.f, lz = 0.f, lo = 0.f;
     auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
     float scale = creatureDisplayInfo->scale;
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
