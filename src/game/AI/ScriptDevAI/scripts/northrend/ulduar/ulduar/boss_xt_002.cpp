@@ -23,23 +23,23 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
 {
-    SAY_AGGRO                           = -1603045,
-    SAY_SLAY_1                          = -1603046,
-    SAY_SLAY_2                          = -1603047,
-    SAY_BERSERK                         = -1603048,
-    SAY_ADDS                            = -1603049,
-    SAY_DEATH                           = -1603050,
-    SAY_HEART_OPEN                      = -1603051,
-    SAY_HEART_CLOSE                     = -1603052,
-    SAY_TANCTRUM                        = -1603053,
+    SAY_AGGRO                           = 33508,
+    SAY_SLAY_1                          = 33509,
+    SAY_SLAY_2                          = 33510,
+    SAY_BERSERK                         = 33512,
+    SAY_DEATH                           = 33511,
+    SAY_HEART_OPEN                      = 33446,
+    SAY_HEART_CLOSE                     = 33448,
+    SAY_TANCTRUM                        = 33453,
 
-    EMOTE_HEART                         = -1603054,
-    EMOTE_REPAIR                        = -1603055,
-    EMOTE_KILL_HEART                    = -1603236,
-    EMOTE_EARTH_QUAKE                   = -1603237,
+    EMOTE_HEART                         = 33447,
+    EMOTE_REPAIR                        = 33856,
+    EMOTE_KILL_HEART                    = 34023,
+    EMOTE_EARTH_QUAKE                   = 33454,
 
     // spells
     SPELL_TYMPANIC_TANTRUM              = 62776,
@@ -48,8 +48,9 @@ enum
     SPELL_GRAVITY_BOMB                  = 63024,
     SPELL_GRAVITY_BOMB_H                = 64234,
     SPELL_BERSERK                       = 26662,
-    // SPELL_SUBMERGED                  = 37751,            // cast before a heart phase. not used because it's unk purpose
-    // SPELL_STAND                      = 37752,            // cast after a heart phase. not used because it's unk purpose
+    SPELL_SUBMERGED                     = 37751,            // cast before a heart phase. not used because it's unk purpose
+    SPELL_STAND                         = 37752,            // cast after a heart phase. not used because it's unk purpose
+    SPELL_CUSTOM_COOLDOWN               = 64404,
 
     // hard mode spells
     SPELL_HEARTBREAK                    = 65737,
@@ -74,12 +75,14 @@ enum
     SPELL_RECHARGE_ROBOT_3              = 62831,            // summons 33344
 
     // summoned spells
-    SPELL_CONSUMPTION                   = 64208,            // cast by the void zone
+    SPELL_CONSUMPTION                   = 64209,            // cast by the void zone
+    SPELL_CONSUMPTION_PERIODIC          = 64208,
     SPELL_ARCANE_POWER_STATE            = 49411,            // cast by the life spark
     SPELL_STATIC_CHARGED                = 64227,            // cast by the life spark (needs to be confirmed)
     SPELL_STATIC_CHARGED_H              = 64236,
     SPELL_SCRAP_REPAIR                  = 62832,            // cast on scrapbot in range to heal XT002; sends event 21606
     SPELL_RIDE_VEHICLE_SCRAPBOT         = 47020,            // cast by scrapbot on XT002 heal
+    SPELL_SHOCK                         = 64230,
 
     // NPC ids
     NPC_SCRAPBOT                        = 33343,
@@ -88,11 +91,6 @@ enum
     NPC_VOIDZONE                        = 34001,
     NPC_LIFE_SPARK                      = 34004,
 
-    // phases
-    PHASE_NORMAL                        = 1,
-    PHASE_TRANSITION                    = 2,
-    PHASE_HEART                         = 3,
-
     MAX_SCRAPBOTS                       = 5,
 };
 
@@ -100,384 +98,184 @@ enum
 ## boss_xt_002
 ######*/
 
-struct boss_xt_002AI : public ScriptedAI
+enum XT002Actions
 {
-    boss_xt_002AI(Creature* pCreature) : ScriptedAI(pCreature)
+    XT002_TIRED,
+    XT002_MOUNT_HEART,
+    XT002_HEALTH_CHECK,
+    XT002_ACTIONS_MAX,
+};
+
+struct boss_xt_002AI : public BossAI
+{
+    boss_xt_002AI(Creature* creature) : BossAI(creature, XT002_ACTIONS_MAX),
+    m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
+    m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiMountTimer = 1000;
-        Reset();
+        SetDataType(TYPE_XT002);
+        AddOnAggroText(SAY_AGGRO);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
+        AddOnDeathText(SAY_DEATH);
+        AddTimerlessCombatAction(XT002_HEALTH_CHECK, true);
+        AddCustomAction(XT002_MOUNT_HEART, 1s, [&]()
+        {
+            Creature* heart = m_instance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR);
+            if (!heart)
+                return;
+                // safeguard in case the Heart isn't respawned
+            if (!heart->IsAlive())
+                heart->Respawn();
+
+            heart->AI()->EnterEvadeMode();
+            m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+            heart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+            heart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+        });
+        AddCustomAction(XT002_TIRED, true, [&]()
+        {
+            // inform the heart about the phase switch
+            if (Creature* heart = m_instance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
+                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, heart);
+
+            DoBroadcastText(EMOTE_HEART, m_creature);
+
+            m_creature->CastSpell(nullptr, SPELL_SUBMERGED, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        });
     }
 
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_ulduar* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiMountTimer;
+    uint8 m_heartStage;
 
-    uint8 m_uiPhase;
-    uint8 m_uiHeartStage;
-
-    uint32 m_uiHeartTimer;
-    uint32 m_uiLightBombTimer;
-    uint32 m_uiGravityBombTimer;
-    uint32 m_uiTanctrumTimer;
-
-    void Reset() override
+    void Aggro(Unit* who) override
     {
-        m_uiBerserkTimer = 10 * MINUTE * IN_MILLISECONDS;
+        BossAI::Aggro(who);
+        if (m_instance)
+            m_instance->SetData(TYPE_XT002_HARD, NOT_STARTED);
+    }
 
-        m_uiPhase               = PHASE_NORMAL;
-        m_uiHeartStage          = 1;
+    void EnterEvadeMode() override
+    {
+        BossAI::EnterEvadeMode();
+        if (Creature* heart = m_instance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
+            heart->ForcedDespawn();
+    }
 
-        m_uiLightBombTimer      = 10000;
-        m_uiGravityBombTimer    = 20000;
-        m_uiTanctrumTimer       = 35000;
-
-        // reset flags and stand state
+    void JustRespawned() override
+    {
+        StopTargeting(false);
+        SetCombatScriptStatus(false);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        m_heartStage = 1;
+        ResetTimer(XT002_MOUNT_HEART, 1s);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_XT002, DONE);
-
-        DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_XT002, IN_PROGRESS);
-            m_pInstance->SetData(TYPE_XT002_HARD, NOT_STARTED);
-        }
-
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_XT002, FAIL);
-
-            // mount the Heart back at the right seat after wipe or respawn (respawn handled in DB)
-            m_uiMountTimer = 1000;
-        }
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
     {
         // enable hard mode
-        if (eventType == AI_EVENT_CUSTOM_B && pInvoker->GetEntry() == NPC_HEART_DECONSTRUCTOR)
+        if (eventType == AI_EVENT_CUSTOM_B && invoker->GetEntry() == NPC_HEART_DECONSTRUCTOR)
         {
             // reset to normal phase and don't allow the boss to get back to heart phases
             DoResetToNormalPhase();
-            m_uiHeartStage = 4;
+            m_heartStage = 5;
+            DisableCombatAction(XT002_HEALTH_CHECK);
 
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_XT002_HARD, DONE);
+            if (m_instance)
+                m_instance->SetData(TYPE_XT002_HARD, DONE);
 
-            DoScriptText(EMOTE_KILL_HEART, m_creature);
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEARTBREAK : SPELL_HEARTBREAK_H, CAST_TRIGGERED);
+            DoBroadcastText(EMOTE_KILL_HEART, m_creature);
+            DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_HEARTBREAK : SPELL_HEARTBREAK_H, CAST_TRIGGERED);
 
             // no spell used for this action
             m_creature->SetHealth(m_creature->GetMaxHealth());
+            m_creature->SetSpellList(m_creature->GetSpellList().Id + 1);
         }
     }
 
     // wrapper to reset to normal phase
     void DoResetToNormalPhase()
     {
-        DoScriptText(SAY_HEART_CLOSE, m_creature);
-        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-
-        DoStartMovement(m_creature->GetVictim());
-
-        // reset timers as well
-        m_uiLightBombTimer = 10000;
-        m_uiGravityBombTimer = 20000;
-        m_uiPhase = PHASE_NORMAL;
+        DoBroadcastText(SAY_HEART_CLOSE, m_creature);
+        m_creature->CastSpell(nullptr, SPELL_STAND, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        m_creature->CastSpell(nullptr, SPELL_CUSTOM_COOLDOWN, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+        StopTargeting(false);
+        SetCombatScriptStatus(false);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_pInstance)
+        switch (action)
         {
-            script_error_log("Instance Ulduar: ERROR Failed to load instance data for this instace.");
-            return;
-        }
-
-        // The heart needs to be mounted manually, not by vehicle_accessories
-        if (m_uiMountTimer)
-        {
-            if (m_uiMountTimer <= uiDiff)
+            case XT002_HEALTH_CHECK:
             {
-                if (Creature* pHeart = m_pInstance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
+                if (m_creature->GetHealthPercent() < float(100 - 25 * m_heartStage))
                 {
-                    // safeguard in case the Heart isn't respawned
-                    if (!pHeart->IsAlive())
-                        pHeart->Respawn();
+                    DoBroadcastText(SAY_HEART_OPEN, m_creature);
 
-                    pHeart->AI()->EnterEvadeMode();
-                    m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-                    pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-                    pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+                    ++m_heartStage;
+                    ResetTimer(XT002_TIRED, 5s);
+                    SetCombatScriptStatus(true);
+                    DoStopAttack();
+                    m_creature->SetTarget(nullptr);
+                    StopTargeting(true);
                 }
-
-                m_uiMountTimer = 0;
+                return;
             }
-            else
-                m_uiMountTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
-                }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        switch (m_uiPhase)
-        {
-            case PHASE_NORMAL:
-
-                if (m_uiLightBombTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SEARING_LIGHT : SPELL_SEARING_LIGHT_H) == CAST_OK)
-                        m_uiLightBombTimer = 20000;
-                }
-                else
-                    m_uiLightBombTimer -= uiDiff;
-
-                if (m_uiGravityBombTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_GRAVITY_BOMB : SPELL_GRAVITY_BOMB_H) == CAST_OK)
-                        m_uiGravityBombTimer = 20000;
-                }
-                else
-                    m_uiGravityBombTimer -= uiDiff;
-
-                if (m_uiTanctrumTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TYMPANIC_TANTRUM) == CAST_OK)
-                    {
-                        DoScriptText(SAY_TANCTRUM, m_creature);
-                        DoScriptText(EMOTE_EARTH_QUAKE, m_creature);
-                        m_uiTanctrumTimer = 60000;
-                    }
-                }
-                else
-                    m_uiTanctrumTimer -= uiDiff;
-
-                // start heart stage transition
-                if (m_creature->GetHealthPercent() < float(100 - 25 * m_uiHeartStage))
-                {
-                    DoScriptText(SAY_HEART_OPEN, m_creature);
-
-                    ++m_uiHeartStage;
-                    m_uiHeartTimer = 5000;
-                    m_uiPhase = PHASE_TRANSITION;
-
-                    // stop all movement
-                    m_creature->GetMotionMaster()->MoveIdle();
-                }
-
-                DoMeleeAttackIfReady();
-
-                break;
-            case PHASE_TRANSITION:
-
-                if (m_uiHeartTimer < uiDiff)
-                {
-                    // inform the heart about the phase switch
-                    if (Creature* pHeart = m_pInstance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
-                        SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pHeart);
-
-                    DoScriptText(EMOTE_HEART, m_creature);
-
-                    m_creature->SetStandState(UNIT_STAND_STATE_CUSTOM);
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-
-                    m_uiHeartTimer = 30000;
-                    m_uiPhase = PHASE_HEART;
-                }
-                else
-                    m_uiHeartTimer -= uiDiff;
-
-                break;
-            case PHASE_HEART:
-
-                // reset to normal phase when timer expires
-                if (m_uiHeartTimer < uiDiff)
-                {
-                    DoResetToNormalPhase();
-                    m_uiHeartTimer = 0;
-
-                    // mount the heart back inside if not already killed
-                    if (m_pInstance && m_pInstance->GetData(TYPE_XT002_HARD) != DONE)
-                    {
-                        if (Creature* pHeart = m_pInstance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
-                        {
-                            pHeart->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-                            m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-                            pHeart->CastSpell(m_creature, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
-
-                            // no spell found for this
-                            pHeart->SetHealth(pHeart->GetMaxHealth());
-                        }
-                    }
-                }
-                else
-                    m_uiHeartTimer -= uiDiff;
-
-                break;
         }
     }
 };
-
-UnitAI* GetAI_boss_xt_002(Creature* pCreature)
-{
-    return new boss_xt_002AI(pCreature);
-}
 
 /*######
 ## boss_heart_deconstructor
 ######*/
 
-struct boss_heart_deconstructorAI : public ScriptedAI
+enum HeartActions
 {
-    boss_heart_deconstructorAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        Reset();
-    }
-
-    instance_ulduar* m_pInstance;
-
-    uint32 m_uiRobotTimer;
-
-    GuidVector m_vToyPileGuids;
-
-    void Reset() override
-    {
-        m_uiRobotTimer = 0;
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // notify XT that hard mode is enabled
-        if (m_pInstance)
-        {
-            if (Creature* pDeconstructor = m_pInstance->GetSingleCreatureFromStorage(NPC_XT002))
-                SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pDeconstructor);
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // handle spawned robots
-        if (m_pInstance)
-        {
-            if (Creature* pDeconstructor = m_pInstance->GetSingleCreatureFromStorage(NPC_XT002))
-            {
-                float fX, fY, fZ;
-                pDeconstructor->GetContactPoint(pSummoned, fX, fY, fZ, INTERACTION_DISTANCE);
-                pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-            }
-        }
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        // start XT phase switch and start recharging robots
-        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_XT002)
-        {
-            // remove flags and previous vehicle aura before applying the new one
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-            pInvoker->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-
-            DoCastSpellIfCan(pInvoker, SPELL_RIDE_VEHICLE, CAST_TRIGGERED);
-            DoCastSpellIfCan(pInvoker, SPELL_LIGHTNING_TETHER, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_HEART_OVERLOAD, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_EXPOSED_HEART, CAST_TRIGGERED);
-            m_uiRobotTimer = 1000;
-
-            // load the toy piles guids
-            if (m_pInstance && m_vToyPileGuids.empty())
-                m_pInstance->GetToyPileGuids(m_vToyPileGuids);
-        }
-    }
-
-    // TODO: Use the dummy effect on target when proper targeting will be supported in core
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
-    {
-        if (pTarget->GetEntry() == NPC_XT_TOY_PILE && pSpellEntry->Id == SPELL_ENERGY_ORB)
-        {
-            // spawn a bunch of scrap bots
-            for (uint8 i = 0; i < MAX_SCRAPBOTS; ++i)
-                pTarget->CastSpell(pTarget, SPELL_RECHARGE_ROBOT_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-
-            // spawn a boombot or pummeller, depending on chance
-            pTarget->CastSpell(pTarget, roll_chance_i(80) ? SPELL_RECHARGE_ROBOT_2 : SPELL_RECHARGE_ROBOT_3, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-        }
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiRobotTimer)
-        {
-            if (m_uiRobotTimer <= uiDiff)
-            {
-                // visual effect on XT (script target)
-                DoCastSpellIfCan(m_creature, SPELL_LIGHTNING_TETHER, CAST_TRIGGERED);
-
-                // cast the enerby orb on each pile one by one
-                if (Creature* pToyPile = m_creature->GetMap()->GetCreature(m_vToyPileGuids[urand(0, m_vToyPileGuids.size() - 1)]))
-                    DoCastSpellIfCan(pToyPile, SPELL_ENERGY_ORB, CAST_TRIGGERED);
-
-                // reset timer after the overload aura expires
-                if (m_creature->HasAura(SPELL_EXPOSED_HEART))
-                    m_uiRobotTimer = urand(1000, 3000);
-                else
-                    m_uiRobotTimer = 0;
-            }
-            else
-                m_uiRobotTimer -= uiDiff;
-        }
-    }
+    HEART_ACTIONS_MAX,
 };
 
-UnitAI* GetAI_boss_heart_deconstructor(Creature* pCreature)
+struct boss_heart_deconstructorAI : public CombatAI
 {
-    return new boss_heart_deconstructorAI(pCreature);
-}
+    boss_heart_deconstructorAI(Creature* creature) : CombatAI(creature, HEART_ACTIONS_MAX),
+    m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData()))
+    {
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+        SetReactState(REACT_PASSIVE);
+    }
+
+    instance_ulduar* m_instance;
+
+    void JustRespawned() override
+    {
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        // notify XT that hard mode is enabled
+        CombatAI::JustDied(nullptr);
+        if (!m_instance)
+            return;
+        if (Creature* pDeconstructor = m_instance->GetSingleCreatureFromStorage(NPC_XT002))
+            SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pDeconstructor);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
+    {
+        // start XT phase switch and start recharging robots
+        if (eventType != AI_EVENT_CUSTOM_A || invoker->GetEntry() != NPC_XT002)
+            return;
+        // remove flags and previous vehicle aura before applying the new one
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        invoker->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+        m_creature->CastSpell(nullptr, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
+        DoCastSpellIfCan(invoker, SPELL_RIDE_VEHICLE, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_HEART_OVERLOAD, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_EXPOSED_HEART, CAST_TRIGGERED);
+    }
+};
 
 /*######
 ## npc_scrapbot
@@ -485,7 +283,7 @@ UnitAI* GetAI_boss_heart_deconstructor(Creature* pCreature)
 
 struct npc_scrapbotAI : public ScriptedAI
 {
-    npc_scrapbotAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_scrapbotAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
 
     bool m_bIsHealed;
 
@@ -494,63 +292,239 @@ struct npc_scrapbotAI : public ScriptedAI
         m_bIsHealed = false;
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_bIsHealed && pWho->GetEntry() == NPC_XT002 && pWho->IsAlive() && pWho->IsWithinDistInMap(m_creature, 10.0f))
+        if (!m_bIsHealed && who->GetEntry() == NPC_XT002 && who->IsAlive() && who->IsWithinDistInMap(m_creature, 10.0f))
         {
-            DoCastSpellIfCan(pWho, SPELL_RIDE_VEHICLE_SCRAPBOT, CAST_TRIGGERED);
-            pWho->CastSpell(m_creature, SPELL_SCRAP_REPAIR, TRIGGERED_OLD_TRIGGERED);
-            DoScriptText(EMOTE_REPAIR, pWho);
+            DoCastSpellIfCan(who, SPELL_RIDE_VEHICLE_SCRAPBOT, CAST_TRIGGERED);
+            who->CastSpell(m_creature, SPELL_SCRAP_REPAIR, TRIGGERED_OLD_TRIGGERED);
+            DoBroadcastText(EMOTE_REPAIR, who);
             m_creature->ForcedDespawn(4000);
             m_bIsHealed = true;
         }
     }
 };
 
-UnitAI* GetAI_npc_scrapbot(Creature* pCreature)
-{
-    return new npc_scrapbotAI(pCreature);
-}
-
 /*######
 ## npc_xt_toy_pile
 ######*/
 
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_xt_toy_pileAI : public Scripted_NoMovementAI
+struct npc_xt_toy_pileAI : public ScriptedAI
 {
-    npc_xt_toy_pileAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    npc_xt_toy_pileAI(Creature* creature) : ScriptedAI(creature)
+    {
+        SetMeleeEnabled(false);
+        SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
+    }
 };
 
-UnitAI* GetAI_npc_xt_toy_pile(Creature* pCreature)
+struct ExposedHeart : public AuraScript
 {
-    return new npc_xt_toy_pileAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        instance_ulduar* instance = dynamic_cast<instance_ulduar*>(caster->GetInstanceData());
+        if (!instance)
+            return;
+        Creature* xt = instance->GetSingleCreatureFromStorage(NPC_XT002);
+        if (!xt || !xt->AI())
+            return;
+        auto* xt_ai = static_cast<boss_xt_002AI*>(xt->AI());
+        xt_ai->DoResetToNormalPhase();
+        if (instance->GetData(TYPE_XT002_HARD) == DONE)
+            return;        
+        caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        xt->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+        caster->CastSpell(xt, SPELL_HEART_RIDE_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+        int32 returnHealth(xt->GetHealth() - int32(caster->GetMaxHealth() - caster->GetHealth()));
+        xt->SetHealth(std::max(returnHealth, 1));
+        caster->RemoveAllAurasOnDeath();
+    }
+};
+
+struct HeartOverload : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster || !caster->IsAlive())
+            return;
+        instance_ulduar* instance = dynamic_cast<instance_ulduar*>(caster->GetInstanceData());
+        if (!instance)
+            return;
+        GuidVector toyPiles;
+        instance->GetToyPileGuids(toyPiles);
+        if (toyPiles.empty())
+            return;
+        Creature* toyPile;
+#ifndef PRENERF_3_1_0
+        for (int i = 0; i < toyPiles.size(); i++)
+        {
+#endif
+            std::shuffle(toyPiles.begin(), toyPiles.end(), *GetRandomGenerator());
+            toyPile = caster->GetMap()->GetCreature(toyPiles.at(0));
+            if (!toyPile)
+                return;
+#ifndef PRENERF_3_1_0
+            if (caster->GetDistance(toyPile) > 60.f)
+                break;
+        }
+#endif
+        caster->CastSpell(toyPile, SPELL_ENERGY_ORB, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, SPELL_LIGHTNING_TETHER, TRIGGERED_OLD_TRIGGERED);
+        data.spellInfo = nullptr;
+    }
+};
+
+struct EnergyOrbDummy : public SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
+    {
+        if (missInfo != SPELL_MISS_NONE)
+            return;
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+        if (target->GetEntry() == NPC_XT_TOY_PILE)
+        {
+            for (uint8 i = 0; i < MAX_SCRAPBOTS; ++i)
+                target->CastSpell(nullptr, SPELL_RECHARGE_ROBOT_1, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, roll_chance_i(80) ? SPELL_RECHARGE_ROBOT_2 : SPELL_RECHARGE_ROBOT_3, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct RechargeRobot : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+        instance_ulduar* instance = dynamic_cast<instance_ulduar*>(caster->GetInstanceData());
+        if (!instance)
+            return;
+        Creature* xt = instance->GetSingleCreatureFromStorage(NPC_XT002);
+        if (!xt)
+            return;
+        summon->GetMotionMaster()->MoveChase(xt, 0.f, 0.f, false, true);
+        xt->AddSummonForOnDeathDespawn(summon->GetObjectGuid());
+    }
+};
+
+struct SearingLight : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        instance_ulduar* instance = dynamic_cast<instance_ulduar*>(target->GetInstanceData());
+        if (!instance)
+            return;
+        if (instance->GetData(TYPE_XT002_HARD) != DONE)
+            return;
+        target->CastSpell(nullptr, SPELL_LIFE_SPARK, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+    }
+};
+
+struct GravityBomb : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+        instance_ulduar* instance = dynamic_cast<instance_ulduar*>(target->GetInstanceData());
+        if (!instance)
+            return;
+        if (instance->GetData(TYPE_XT002_HARD) != DONE)
+            return;
+        bool isRegularMode = target->GetMap()->IsRegularDifficulty();
+        target->CastSpell(nullptr, isRegularMode ? SPELL_VOIDZONE : SPELL_VOIDZONE_H, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CASTER_AURA_STATE);
+    }
+};
+
+struct LifeSparkXT : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        bool isRegularMode = spell->GetCaster()->GetMap()->IsRegularDifficulty();
+        auto value = spell->CalculateSpellEffectValue(EFFECT_INDEX_1, summon);
+        summon->CastSpell(nullptr, isRegularMode ? SPELL_STATIC_CHARGED : SPELL_STATIC_CHARGED_H, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, SPELL_ARCANE_POWER_STATE, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, SPELL_SHOCK, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct VoidZoneXT : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (summon->AI())
+        {
+            summon->AI()->SetCombatMovement(false);
+            summon->AI()->SetMeleeEnabled(false);
+            summon->AI()->SetAIImmobilizedState(true);
+        }
+        auto value = spell->CalculateSpellEffectValue(EFFECT_INDEX_1, summon);
+        summon->CastCustomSpell(nullptr, SPELL_CONSUMPTION, &value, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct ConsumptionXT : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        int32 bp = aura->GetBasePoints();
+        data.basePoints[0] = bp;
+    }
+};
 
 void AddSC_boss_xt_002()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_xt_002";
-    pNewScript->GetAI = GetAI_boss_xt_002;
+    pNewScript->GetAI = &GetNewAIInstance<boss_xt_002AI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_heart_deconstructor";
-    pNewScript->GetAI = GetAI_boss_heart_deconstructor;
+    pNewScript->GetAI = &GetNewAIInstance<boss_heart_deconstructorAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_scrapbot";
-    pNewScript->GetAI = GetAI_npc_scrapbot;
+    pNewScript->GetAI = &GetNewAIInstance<npc_scrapbotAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_xt_toy_pile";
-    pNewScript->GetAI = GetAI_npc_xt_toy_pile;
+    pNewScript->GetAI = &GetNewAIInstance<npc_xt_toy_pileAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ExposedHeart>("spell_exposed_heart");
+    RegisterSpellScript<HeartOverload>("spell_heart_overload");
+    RegisterSpellScript<EnergyOrbDummy>("spell_energy_orb_dummy");
+    RegisterSpellScript<RechargeRobot>("spell_recharge_robot");
+    RegisterSpellScript<SearingLight>("spell_searing_light");
+    RegisterSpellScript<GravityBomb>("spell_gravity_bomb");
+    RegisterSpellScript<LifeSparkXT>("spell_life_spark_xt");
+    RegisterSpellScript<VoidZoneXT>("spell_void_zone_xt");
+    RegisterSpellScript<ConsumptionXT>("spell_consumption_xt");
 }
