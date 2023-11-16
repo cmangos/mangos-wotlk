@@ -3453,6 +3453,10 @@ INSERT INTO `spell_template` (Id, Attributes, AttributesEx, AttributesEx3, Attri
 INSERT INTO `spell_template` (Id, Attributes, CastingTimeIndex, DurationIndex, RangeIndex, Effect1, EffectDieSides1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectMiscValue1, EffectMiscValueB1, SpellName, SchoolMask, IsServerSide) VALUES
 (62543, 384, 1, 25, 1, 28, 1, 22, 36, 33189, 64, '(Serverside/Non-DB2) Spawn Pyrite', 1, 1);
 
+-- Ulduar - XT-002 HM serverside spell
+INSERT INTO `spell_template` (Id, Attributes, AttributesEx, CastingTimeIndex, ProcChance, DurationIndex, RangeIndex, EquippedItemClass, Effect1, EffectDieSides1, EffectRealPointsPerLevel1, EffectBasePoints1, EffectMechanic1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectApplyAuraName1, EffectAmplitude1, EffectMultipleValue1, EffectChainTarget1, EffectItemType1, EffectMiscValue1, EffectMiscValueB1, EffectTriggerSpell1, EffectPointsPerComboPoint1, EffectSpellClassMask1_1, EffectSpellClassMask2_1, EffectSpellClassMask3_1, SpellVisual, SpellIconID, SpellName, DmgMultiplier1, SchoolMask) VALUES
+(64209, 256, 268435456, 1, 101, 21, 1, -1, 6, 1, 0, -1, 0, 1, 0, 0, 23, 1000, 0, 0, 0, 0, 0, 64208, 0, 0, 0, 0, 10334, 1, '(Serverside/Non-DB2) Consumption', 1, 32);
+
 -- Freya Dummy - 10 targets
 UPDATE spell_template SET MaxAffectedTargets = 10 WHERE id = 51318;
 
