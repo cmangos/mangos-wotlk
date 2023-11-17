@@ -9316,12 +9316,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 44364:                                 // Rock Falcon Primer
                 {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                    if (!unitTarget || !unitTarget->IsPlayer())
                         return;
 
                     // Are there anything special with this, a random chance or condition?
                     // Feeding Rock Falcon
-                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, unitTarget->GetObjectGuid(), m_spellInfo);
+                    unitTarget->CastSpell(nullptr, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 44455:                                 // Character Script Effect Reverse Cast
