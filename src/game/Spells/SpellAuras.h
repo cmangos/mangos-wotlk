@@ -523,7 +523,7 @@ class Aura
 
         ClassFamilyMask const& GetAuraSpellClassMask() const { return  m_spellAuraHolder->GetSpellProto()->GetEffectSpellClassMask(m_effIndex); }
         bool isAffectedOnSpell(SpellEntry const* spell) const;
-        bool CanProcFrom(SpellEntry const* spell, uint32 procFlag, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const;
+        bool CanProcFrom(SpellEntry const* spell, uint32 procFlag, uint32 EventProcEx, uint32 procEx, bool damaging, bool absorbing, bool useClassMask) const;
 
         SpellAuraHolder* GetHolder() { return m_spellAuraHolder; }
         SpellAuraHolder const* GetHolder() const { return m_spellAuraHolder; }
