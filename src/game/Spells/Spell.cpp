@@ -3806,17 +3806,23 @@ SpellCastResult Spell::cast(bool skipCheck)
             }
         }
 
+        uint32 procAttacker;
+        uint32 procVictim;
+        uint32 procEx = PROC_EX_NONE;
+        PrepareMasksForProcSystem(EFFECT_MASK_ALL, procAttacker, procVictim, m_trueCaster, nullptr);
         // on spell cast end proc,
         // critical hit related part is currently done on hit so proc there,
         // 0 damage since any damage based procs should be on hit
         // 0 victim proc since there is no victim proc dependent on successfull cast for caster
-        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procTarget, PROC_EX_NORMAL_HIT, 0, PROC_EX_CAST_END, 0, 0, m_attackType, m_spellInfo));
+        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procTarget, procAttacker, 0, PROC_EX_CAST_END, 0, 0, m_attackType, m_spellInfo));
     }
     else
     {
-        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procTarget, PROC_EX_NORMAL_HIT, 0, PROC_EX_CAST_END, 0, 0, m_attackType, m_spellInfo));
-
-        // Immediate spell, no big deal
+        uint32 procAttacker;
+        uint32 procVictim;
+        uint32 procEx = PROC_EX_NONE;
+        PrepareMasksForProcSystem(EFFECT_MASK_ALL, procAttacker, procVictim, m_trueCaster, nullptr);
+        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, procTarget, procAttacker, 0, PROC_EX_CAST_END, 0, 0, m_attackType, m_spellInfo));
         handle_immediate();
     }
 
