@@ -8210,7 +8210,7 @@ void Aura::PeriodicTick()
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
             Unit::DealDamage(caster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
 
-            Unit::ProcDamageAndSpell(ProcSystemArguments(caster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(caster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, absorb, BASE_ATTACK, spellProto));
 
             // Drain Soul (chance soul shard)
             if (caster && caster->GetTypeId() == TYPEID_PLAYER && spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProto->SpellFamilyFlags & uint64(0x0000000000004000))
@@ -8300,7 +8300,7 @@ void Aura::PeriodicTick()
             if (isCrit)
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
             int32 new_damage = Unit::DealDamage(pCaster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
-            Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, absorb, BASE_ATTACK, spellProto));
 
             if (!target->IsAlive() && pCaster->IsNonMeleeSpellCasted(false))
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
@@ -8405,7 +8405,7 @@ void Aura::PeriodicTick()
             if (pCaster->IsInCombat() && !pCaster->IsCrowdControlled())
                 target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
 
-            Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, procEx, gain, BASE_ATTACK, spellProto, nullptr, gain, true));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, procEx, gain, 0, BASE_ATTACK, spellProto, nullptr, gain, true));
             break;
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
@@ -8637,7 +8637,7 @@ void Aura::PeriodicTick()
 
             Unit::DealSpellDamage(pCaster, &spellDamageInfo, true, false);
 
-            Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, spellDamageInfo.target, procAttacker, procVictim, procEx, spellDamageInfo.damage, BASE_ATTACK, spellProto));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, spellDamageInfo.target, procAttacker, procVictim, procEx, spellDamageInfo.damage, spellDamageInfo.absorb, BASE_ATTACK, spellProto));
             break;
         }
         case SPELL_AURA_MOD_REGEN:
