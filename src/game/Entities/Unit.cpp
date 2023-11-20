@@ -5365,16 +5365,16 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 SpellEntry const* itr_spellEntry = itr->first;
                 ObjectGuid itr_targetGuid = itr->second;    // Target on whom the tracked aura is
 
-                if (itr_targetGuid == GetObjectGuid())      // Note: I don't understand this check (based on old aura concepts, kept when adding holders)
-                {
-                    ++itr;
-                    continue;
-                }
-
                 bool removed = false;
                 switch (trackedType)
                 {
                     case TRACK_AURA_TYPE_SINGLE_TARGET:
+                        if (itr_targetGuid == GetObjectGuid())      // Note: I don't understand this check (based on old aura concepts, kept when adding holders)
+                        {
+                            ++itr;
+                            continue;
+                        }
+
                         if (sSpellMgr.IsSingleTargetSpells(itr_spellEntry, aurSpellInfo))
                         {
                             removed = true;
@@ -5400,7 +5400,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
 
                             // remove from target if target found
                             if (Unit* itr_target = GetMap()->GetUnit(itr_targetGuid))
-                                itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, caster->GetObjectGuid());
+                                itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, caster->GetObjectGuid(), AURA_REMOVE_BY_TRACKING);
                             else                            // Normally the tracking will be removed by the AuraRemoval
                                 scTargets.erase(itr);
                         }
