@@ -169,7 +169,7 @@ struct CreateHealthStoneWarlock : public SpellScript
             }
         }
 
-        static uint32 const itypes[6][3] =
+        static uint32 const itypes[8][3] =
         {
             { 5512, 19004, 19005},              // Minor Healthstone
             { 5511, 19006, 19007},              // Lesser Healthstone
