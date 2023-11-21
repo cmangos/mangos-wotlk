@@ -377,8 +377,12 @@ void instance_sunwell_plateau::SetData(uint32 type, uint32 data)
                 for (uint32 i = 0; i < entries.size(); ++i)
                 {
                     if (Creature* bossNpc = GetSingleCreatureFromStorage(entries[i]))
+                    {
+                        bossNpc->SetRespawnDelay(30, true);
                         bossNpc->ForcedDespawn();
-                    instance->GetSpawnManager().AddCreature(30, guids[i]);
+                    }
+                    else
+                        instance->GetSpawnManager().RespawnCreature(guids[i], 30);
                 }
                 DespawnGuids(m_twinsSpawns);
             }
