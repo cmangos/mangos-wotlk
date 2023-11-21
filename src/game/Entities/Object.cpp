@@ -2140,15 +2140,19 @@ void WorldObject::AddToWorld()
 
 void WorldObject::RemoveFromWorld()
 {
-    if (m_isOnEventNotified)
-        m_currMap->RemoveFromOnEventNotified(this);
     if (!IsPlayer()) // players have their own logic due to cross map transports
         if (GenericTransport* transport = GetTransport())
             transport->RemovePassenger(this);
 
-    if (!m_stringIds.empty())
-        for (uint32 stringId : m_stringIds)
-            m_currMap->RemoveStringIdObject(stringId, this);
+    if (IsInWorld())
+    {
+        if (m_isOnEventNotified)
+            m_currMap->RemoveFromOnEventNotified(this);
+
+        if (!m_stringIds.empty())
+            for (uint32 stringId : m_stringIds)
+                m_currMap->RemoveStringIdObject(stringId, this);
+    }
 
     Object::RemoveFromWorld();
 }

@@ -10586,7 +10586,7 @@ void Unit::RemoveFromWorld()
         m_FollowingRefManager.clearReferences();
     }
 
-    Object::RemoveFromWorld();
+    WorldObject::RemoveFromWorld();
 }
 
 void Unit::CleanupsBeforeDelete()
