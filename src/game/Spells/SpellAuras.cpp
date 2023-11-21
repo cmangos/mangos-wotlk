@@ -3580,7 +3580,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->PlayDirectSound(14972, PlayPacketParameters(PLAY_TARGET, (Player*)target));
                     }
                     return;
-                case 27978:
                 case 40131:
                     if (apply)
                         target->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
