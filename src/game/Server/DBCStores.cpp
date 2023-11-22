@@ -421,6 +421,17 @@ void LoadDBCStores(const std::string& dataPath)
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sAuctionHouseStore,        dbcPath, "AuctionHouse.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sBankBagSlotPricesStore,   dbcPath, "BankBagSlotPrices.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sBattlemasterListStore,    dbcPath, "BattlemasterList.dbc");
+    {
+        // repairs entry for netherstorm - should be moved to SQL
+        if (BattlemasterListEntry const* bmEntry = sBattlemasterListStore.LookupEntry(32)) // random battleground
+        {
+            BattlemasterListEntry* randomBg = new BattlemasterListEntry(*bmEntry); // easier time dealing with it in code
+            randomBg->minLevel = 10;
+            randomBg->maxLevel = MAX_LEVEL_WOTLK;
+            sBattlemasterListStore.EraseEntry(32);
+            sBattlemasterListStore.InsertEntry(randomBg, 32);
+        }
+    }
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sBarberShopStyleStore,     dbcPath, "BarberShopStyle.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCharStartOutfitStore,     dbcPath, "CharStartOutfit.dbc");
     LoadDBC(availableDbcLocales, bar, bad_dbc_files, sCharTitlesStore,          dbcPath, "CharTitles.dbc");
