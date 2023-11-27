@@ -1925,14 +1925,17 @@ bool Player::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
         return false;
 
     // Custom mount (non-aura such as taxi or command) or in flight: unsummon any pet
-    if (!aura || IsFreeFlying() || IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
+    if (!sWorld.getConfig(CONFIG_BOOL_KEEP_PET_WHEN_MOUNTED) &&
+        (!aura || IsFreeFlying() || IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)))
+    {
         UnsummonPetTemporaryIfAny();
+    }
     // Land mount aura: unsummon only permanent pet
     else if (aura)
     {
         if (Pet* pet = GetPet())
         {
-            if (pet->isControlled() && (!(pet->isTemporarySummoned() || InArena())
+            if (pet->isControlled() && !sWorld.getConfig(CONFIG_BOOL_KEEP_PET_WHEN_MOUNTED) &&(!(pet->isTemporarySummoned() || InArena())
                                         || sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT)))
                 UnsummonPetTemporaryIfAny();
             else

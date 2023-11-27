@@ -349,6 +349,14 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
             mover = _player;
     }
 
+    if (opcode == CMSG_MOVE_SET_FLY)
+    {
+        if (plMover)
+            if (Pet* pet = plMover->GetPet())
+                if (pet->isControlled() && plMover->IsMounted())
+                    plMover->UnsummonPetTemporaryIfAny();
+    }
+
     if (!ProcessMovementInfo(movementInfo, mover, plMover, recv_data))
         return;
 

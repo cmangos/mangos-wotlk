@@ -793,6 +793,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_INTERACTION_PAUSE_TIMER, "InteractionPauseTimer", 180000);
 
     setConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT,      "PetUnsummonAtMount", false);
+    setConfig(CONFIG_BOOL_KEEP_PET_WHEN_MOUNTED,  "KeepPetWhenMounted", false);
     setConfig(CONFIG_BOOL_PET_ATTACK_FROM_BEHIND,     "PetAttackFromBehind", true);
 
     setConfig(CONFIG_BOOL_AUTO_DOWNRANK,              "AutoDownrank", true);
