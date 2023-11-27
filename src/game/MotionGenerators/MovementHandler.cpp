@@ -353,7 +353,7 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     {
         if (plMover)
             if (Pet* pet = plMover->GetPet())
-                if (pet->isControlled() && plMover->HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
+                if (pet->isControlled() && plMover->IsMounted())
                     plMover->UnsummonPetTemporaryIfAny();
     }
 
