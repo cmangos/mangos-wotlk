@@ -526,7 +526,14 @@ class ObjectMgr
 
         typedef std::unordered_map<uint32, PointOfInterest> PointOfInterestMap;
 
+<<<<<<< HEAD
         std::unordered_map<uint32, std::vector<uint32>> const& GetCreatureSpawnEntry() const { return m_creatureSpawnEntryMap; }
+=======
+
+        typedef std::unordered_map<uint32, PetCreateSpellEntry> PetCreateSpellMap;
+
+        std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> const& GetCreatureSpawnEntry() const { return m_creatureSpawnEntryMap; }
+>>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
 
         std::vector<uint32> LoadGameobjectInfo();
 
@@ -618,17 +625,29 @@ class ObjectMgr
             return nullptr;
         }
 
+<<<<<<< HEAD
         AccessRequirement const* GetAccessRequirement(uint32 mapid, Difficulty difficulty) const;
 
         std::vector<uint32> const* GetAllRandomEntries(std::unordered_map<uint32, std::vector<uint32>> const& map, uint32 dbguid) const
+=======
+        std::vector<uint32> const* GetAllRandomEntries(std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> const& map, uint32 dbguid) const
+>>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
         {
             auto itr = map.find(dbguid);
             if (itr != map.end())
-                return &(*itr).second;
+                return &((*itr).second).second;
             return nullptr;
         }
 
-        uint32 GetRandomEntry(std::unordered_map<uint32, std::vector<uint32>> const& map, uint32 dbguid) const
+        bool IsRandomDbGuidDynguided(std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> const& map, uint32 dbguid) const
+        {
+            auto itr = map.find(dbguid);
+            if (itr != map.end())
+                return &((*itr).second).first;
+            return false;
+        }
+
+        uint32 GetRandomEntry(std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> const& map, uint32 dbguid) const
         {
             if (auto spawnList = GetAllRandomEntries(map, dbguid))
                 return (*spawnList)[irand(0, spawnList->size() - 1)];
@@ -637,9 +656,11 @@ class ObjectMgr
 
         uint32 GetRandomGameObjectEntry(uint32 dbguid) const { return GetRandomEntry(m_gameobjectSpawnEntryMap, dbguid); }
         std::vector<uint32> const* GetAllRandomGameObjectEntries(uint32 dbguid) const { return GetAllRandomEntries(m_gameobjectSpawnEntryMap, dbguid); }
+        bool IsGameObjectDbGuidDynGuided(uint32 dbGuid) const { return IsRandomDbGuidDynguided(m_gameobjectSpawnEntryMap, dbGuid); }
 
         uint32 GetRandomCreatureEntry(uint32 dbguid) const { return GetRandomEntry(m_creatureSpawnEntryMap, dbguid); }
         std::vector<uint32> const* GetAllRandomCreatureEntries(uint32 dbguid) const { return GetAllRandomEntries(m_creatureSpawnEntryMap, dbguid); }
+        bool IsCreatureDbGuidDynGuided(uint32 dbGuid) const { return IsRandomDbGuidDynguided(m_creatureSpawnEntryMap, dbGuid); }
 
         AreaTrigger const* GetGoBackTrigger(uint32 map_id) const;
         AreaTrigger const* GetMapEntranceTrigger(uint32 Map) const;
@@ -1275,11 +1296,16 @@ class ObjectMgr
         bool HasWorldStateName(int32 Id) const;
         WorldStateName* GetWorldStateName(int32 Id);
 
+<<<<<<< HEAD
         // Transports
         std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
 
         // Vehicles
         VehicleSeatParameters const* GetVehicleSeatParameters(uint32 seatEntry) const;
+=======
+        std::vector<uint32>* GetCreatureDynGuidForMap(uint32 mapId);
+        std::vector<uint32>* GetGameObjectDynGuidForMap(uint32 mapId);
+>>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
     protected:
 
         // current locale settings
@@ -1334,8 +1360,8 @@ class ObjectMgr
         GossipMenusMap      m_mGossipMenusMap;
         GossipMenuItemsMap  m_mGossipMenuItemsMap;
 
-        std::unordered_map<uint32, std::vector<uint32>> m_creatureSpawnEntryMap;
-        std::unordered_map<uint32, std::vector<uint32>> m_gameobjectSpawnEntryMap;
+        std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> m_creatureSpawnEntryMap;
+        std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> m_gameobjectSpawnEntryMap;
         std::unordered_map<uint32, GameObjectTemplateAddon> m_gameobjectAddonTemplates;
 		
         PointOfInterestMap  mPointsOfInterest;
@@ -1453,12 +1479,17 @@ class ObjectMgr
         std::unique_ptr<WorldStateExpressionMgr> m_worldStateExpressionMgr;
         std::unique_ptr<CombatConditionMgr> m_combatConditionMgr;
 
+<<<<<<< HEAD
         std::unordered_map<uint32, AccessRequirement> m_accessRequirements;
 
         std::map<uint32, uint32> m_transportMaps;
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm
 
         std::map<uint32, VehicleSeatParameters> m_seatParameters;
+=======
+        std::map<uint32, std::vector<uint32>> m_dynguidCreatureDbGuids;
+        std::map<uint32, std::vector<uint32>> m_dynguidGameobjectDbGuids;
+>>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()
