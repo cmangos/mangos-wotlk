@@ -7029,7 +7029,11 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3000112,'I''m ready - let''s get out of here.','injured goblin miner GOSSIP_ITEM_ESCORT_READY'),
 (-3000113,'Go on, you''re free. Get out of here!','saronite mine slave GOSSIP_ITEM_SLAVE_FREE'),
 (-3000114,'I''m ready to start the distillation, uh, Tipsy.','tipsy mcmanus GOSSIP_ITEM_START_DISTILLATION'),
-(-3000115,'Turn the key to start the machine.','threshwackonator  GOSSIP_ITEM_TURN_KEY');
+(-3000115,'Turn the key to start the machine.','threshwackonator  GOSSIP_ITEM_TURN_KEY'),
+(-3000120,'Pardon the intrusion, Lady Prestor, but Highlord Bolvar suggested that I seek your advice.','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_1'),
+(-3000121,'My apologies, Lady Prestor.','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_2'),
+(-3000122,'Begging your pardon','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_3'),
+(-3000122,'Thank you for your time','npc_lady_katrana_prestor GOSSIP_ITEM_KAT_4');
 
 -- -3 033 000 SHADOWFANG KEEP
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
