@@ -395,6 +395,7 @@ struct world_map_kalimdor : public ScriptedMap
                         m_uiOmenResetTimer = 5 * MINUTE * IN_MILLISECONDS;       // Prevent another summoning of Omen for 5 minutes (based on spell duration)
                         break;
                 }
+                break;
             }
             case TYPE_TETHYR:
             {
@@ -415,6 +416,7 @@ struct world_map_kalimdor : public ScriptedMap
                         instance->SetZoneWeather(0, AREAID_THERAMORE_ISLE, 3, 0.5f);
                         break;
                 }
+                break;
             }
             case TYPE_HIVE:
             {
@@ -432,6 +434,7 @@ struct world_map_kalimdor : public ScriptedMap
                     if (m_freedSpriteDarter >= 6)
                         uiData = DONE;
                 }
+                break;
             }
             case TYPE_GONG_TIME:
                 // TODO: Handle initial first gong only
