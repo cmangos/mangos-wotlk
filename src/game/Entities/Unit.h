@@ -2711,6 +2711,7 @@ class Unit : public WorldObject
 
         VehicleInfo* m_vehicleInfo;
         void DisableSpline();
+        void EndSpline();
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
         ObjectGuid m_rootVehicle;

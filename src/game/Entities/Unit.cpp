@@ -5008,7 +5008,7 @@ void Unit::SetFacingTo(float ori)
     init.Launch();
     // orientation change is in-place
     UpdateSplinePosition();
-    DisableSpline();
+    EndSpline();
 }
 
 void Unit::SetFacingToObject(WorldObject* object)
@@ -5022,7 +5022,7 @@ void Unit::SetFacingToObject(WorldObject* object)
     init.Launch();
     // orientation change is in-place
     UpdateSplinePosition();
-    DisableSpline();
+    EndSpline();
 }
 
 bool Unit::isInAccessablePlaceFor(Unit const* unit) const
@@ -12499,6 +12499,12 @@ void Unit::DisableSpline()
 {
     m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
     movespline->_Interrupt();
+}
+
+void Unit::EndSpline()
+{
+    m_movementInfo.RemoveMovementFlag(MovementFlags(MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD));
+    movespline->_Finalize();
 }
 
 void Unit::SendCollisionHeightUpdate(float height)
