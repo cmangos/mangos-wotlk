@@ -887,7 +887,7 @@ class Spell
         static SpellCastResult CheckVehicle(Unit const* caster, SpellEntry const& spellInfo);
 
         // GO casting preparations
-        void SetFakeCaster(Unit* caster) { m_caster = caster; }
+        void SetFakeCaster(Unit* caster) { m_caster = caster; } // also used by dyngo caster emulation
         WorldObject* GetTrueCaster() const { return m_trueCaster; }
         Unit* GetAffectiveCasterOrOwner() const;
 

@@ -3327,7 +3327,7 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
     m_spellEvent = new SpellEvent(this);
     m_trueCaster->m_events.AddEvent(m_spellEvent, m_trueCaster->m_events.CalculateTime(1));
 
-    if (!m_trueCaster->IsGameObject()) // gameobjects dont have a sense of already casting a spell
+    if (m_trueCaster->IsUnit()) // gameobjects dont have a sense of already casting a spell
     {
         // Prevent casting at cast another spell (ServerSide check)
         if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count && !m_ignoreConcurrentCasts)
