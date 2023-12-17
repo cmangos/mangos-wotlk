@@ -803,6 +803,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51858,'spell_siphon_of_acherus'),
 (51859,'spell_siphon_of_acherus_aura'),
 (51904,'spell_summon_ghouls_scarlet_crusade'),
+(51922,'spell_lapsing_dream'),
 (51973,'spell_siphon_of_acherus_credit'),
 (51976,'spell_siphon_of_acherus_credit'),
 (51979,'spell_siphon_of_acherus_credit'),

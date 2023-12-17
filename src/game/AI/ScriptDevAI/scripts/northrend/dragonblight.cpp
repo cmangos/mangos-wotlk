@@ -462,6 +462,20 @@ struct DropOffGnome : public SpellScript
     }
 };
 
+// 51922 - Lapsing Dream
+struct LapsingDream : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        if (!data.caster)
+            return;
+        if (WorldObject* dynGo = data.caster->GetDynObject(aura->GetId(), EFFECT_INDEX_0, aura->GetTarget()))
+            data.trueCaster = dynGo; // yes dyngo is caster and unit is supplementary caster
+        data.target = aura->GetTarget();
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -493,4 +507,5 @@ void AddSC_dragonblight()
     RegisterSpellScript<HourglassOfEternity>("spell_hourglass_of_eternity");
     RegisterSpellScript<RescueVillager>("spell_rescue_villager");
     RegisterSpellScript<DropOffGnome>("spell_drop_off_gnome");
+    RegisterSpellScript<LapsingDream>("spell_lapsing_dream");
 }
