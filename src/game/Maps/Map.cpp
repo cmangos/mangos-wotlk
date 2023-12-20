@@ -1260,6 +1260,62 @@ void Map::SetNewDifficultyCooldown(TimePoint const& newCooldown)
         m_dynamicDifficultyCooldown = newCooldown;
 }
 
+float Map::GetPetKillXPMod() const
+{
+    switch (GetExpansion())
+    {
+        default:
+        case 0:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_VANILLA);
+        case 1:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_BC);
+        case 2:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_WOTLK);
+    }
+}
+
+float Map::GetQuestXPMod() const
+{
+    switch (GetExpansion())
+    {
+        default:
+        case 0:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_VANILLA);
+        case 1:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_BC);
+        case 2:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_WOTLK);
+    }
+}
+
+float Map::GetKillXPMod() const
+{
+    switch (GetExpansion())
+    {
+        default:
+        case 0:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_VANILLA);
+        case 1:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_BC);
+        case 2:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_WOTLK);
+    }
+}
+
+float Map::GetExploreXPMod() const
+{
+    switch (GetExpansion())
+    {
+        default:
+        case 0:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_VANILLA);
+        case 1:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_BC);
+        case 2:
+            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_WOTLK);
+    }
+}
+
 uint32 Map::GetMaxPlayers() const
 {
     if (MapDifficultyEntry const* mapDiff = GetMapDifficulty())

@@ -890,7 +890,7 @@ void Pet::GivePetXP(uint32 xp)
     if (level < maxlevel)
     {
 
-        xp *= sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL);
+        xp *= sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL) * GetMap()->GetPetKillXPMod();
 
         uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
         uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);

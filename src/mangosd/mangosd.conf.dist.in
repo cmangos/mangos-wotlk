@@ -1447,6 +1447,21 @@ Visibility.AIRelocationNotifyDelay = 1000
 #        XP rates
 #        Default: 1
 #
+#    Rate.Pet.XP.Kill.Vanilla
+#    Rate.Pet.XP.Kill.BC
+#    Rate.Pet.XP.Kill.Wrath
+#    Rate.XP.Kill.Vanilla
+#    Rate.XP.Kill.BC
+#    Rate.XP.Kill.Wrath
+#    Rate.XP.Quest.Vanilla
+#    Rate.XP.Quest.BC
+#    Rate.XP.Quest.Wrath
+#    Rate.XP.Explore.Vanilla
+#    Rate.XP.Explore.BC
+#    Rate.XP.Explore.Wrath
+#        XP rates for map areas belonging to each expansion (cumulative with generic XP modifiers)
+#        Default: 1
+#
 #    Rate.Rest.InGame
 #    Rate.Rest.Offline.InTavernOrCity
 #    Rate.Rest.Offline.InWilderness
@@ -1591,6 +1606,18 @@ Rate.Pet.XP.Kill = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
+Rate.Pet.XP.Kill.Vanilla = 1
+Rate.Pet.XP.Kill.BC      = 1
+Rate.Pet.XP.Kill.Wrath   = 1
+Rate.XP.Kill.Vanilla  = 1
+Rate.XP.Kill.BC       = 1
+Rate.XP.Kill.Wrath    = 1
+Rate.XP.Quest.Vanilla = 1
+Rate.XP.Quest.BC      = 1
+Rate.XP.Quest.Wrath   = 1
+Rate.XP.Explore.Vanilla = 1
+Rate.XP.Explore.BC      = 1
+Rate.XP.Explore.Wrath   = 1
 Rate.Rest.InGame = 1
 Rate.Rest.Offline.InTavernOrCity = 1
 Rate.Rest.Offline.InWilderness = 1
