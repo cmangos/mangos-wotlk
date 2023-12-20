@@ -221,8 +221,13 @@ class Map : public GridRefManager<NGridType>
         void ChangeMapDifficulty(Difficulty difficulty);
         void SetNewDifficultyCooldown(TimePoint const& newCooldown);
         TimePoint const& GetNewDifficultyCooldown() const { return m_dynamicDifficultyCooldown; }
+        float GetPetKillXPMod() const;
+        float GetQuestXPMod() const;
+        float GetKillXPMod() const;
+        float GetExploreXPMod() const;
 
         MapEntry const* GetEntry() const { return i_mapEntry; }
+        uint32 GetExpansion() const { return (i_mapEntry) ? i_mapEntry->Expansion() : 0u; }
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
         bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
