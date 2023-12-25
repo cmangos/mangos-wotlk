@@ -7375,7 +7375,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     if (plr->IsPvPSanctuary())
         pet->SetPvPSanctuary(true);
 
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+    pet->GetCharmInfo()->SetPetNumber(pet->GetObjectGuid().GetEntry(), true);
 
     // level of hunter pet can't be less owner level at 5 levels
     uint32 cLevel = creatureTarget->GetLevel();
