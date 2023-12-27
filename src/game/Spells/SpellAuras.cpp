@@ -7074,13 +7074,15 @@ void Aura::HandleModHitChance(bool apply, bool /*Real*/)
 
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
-        ((Player*)target)->UpdateMeleeHitChances();
-        ((Player*)target)->UpdateRangedHitChances();
+        static_cast<Player*>(target)->UpdateWeaponHitChances(BASE_ATTACK);
+        static_cast<Player*>(target)->UpdateWeaponHitChances(OFF_ATTACK);
+        static_cast<Player*>(target)->UpdateWeaponHitChances(RANGED_ATTACK);
     }
     else
     {
-        target->m_modMeleeHitChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
-        target->m_modRangedHitChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+        target->m_modWeaponHitChance[BASE_ATTACK] += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+        target->m_modWeaponHitChance[OFF_ATTACK] += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+        target->m_modWeaponHitChance[RANGED_ATTACK] += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
     }
 }
 

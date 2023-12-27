@@ -5598,10 +5598,11 @@ void Player::UpdateRating(CombatRating cr)
             UpdateBlockPercentage();
             break;
         case CR_HIT_MELEE:
-            UpdateMeleeHitChances();
+            UpdateWeaponHitChances(BASE_ATTACK);
+            UpdateWeaponHitChances(OFF_ATTACK);
             break;
         case CR_HIT_RANGED:
-            UpdateRangedHitChances();
+            UpdateWeaponHitChances(RANGED_ATTACK);
             break;
         case CR_HIT_SPELL:
             UpdateSpellHitChances();
@@ -11564,15 +11565,11 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         ApplyEquipCooldown(pItem);
 
         if (slot == EQUIPMENT_SLOT_MAINHAND)
-        {
-            UpdateExpertise(BASE_ATTACK);
-            UpdateArmorPenetration();
-        }
+            UpdateWeaponDependantStats(BASE_ATTACK);
         else if (slot == EQUIPMENT_SLOT_OFFHAND)
-        {
-            UpdateExpertise(OFF_ATTACK);
-            UpdateArmorPenetration();
-        }
+            UpdateWeaponDependantStats(OFF_ATTACK);
+        else if (slot == EQUIPMENT_SLOT_RANGED)
+            UpdateWeaponDependantStats(RANGED_ATTACK);
     }
     else
     {
@@ -11724,14 +11721,10 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
                             pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_1);
                         }
 
-                        UpdateExpertise(BASE_ATTACK);
-                        UpdateArmorPenetration();
+                        UpdateWeaponDependantStats(BASE_ATTACK);
                     }
                     else if (slot == EQUIPMENT_SLOT_OFFHAND)
-                    {
-                        UpdateExpertise(OFF_ATTACK);
-                        UpdateArmorPenetration();
-                    }
+                        UpdateWeaponDependantStats(OFF_ATTACK);
                 }
             }
             // need update known currency
@@ -11863,17 +11856,13 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
                 // remove item dependent auras and casts (only weapon and armor slots)
                 RemoveItemDependentAurasAndCasts(pItem);
 
-                // update expertise
+                // update weapon dependant stats
                 if (slot == EQUIPMENT_SLOT_MAINHAND)
-                {
-                    UpdateExpertise(BASE_ATTACK);
-                    UpdateArmorPenetration();
-                }
+                    UpdateWeaponDependantStats(BASE_ATTACK);
                 else if (slot == EQUIPMENT_SLOT_OFFHAND)
-                {
-                    UpdateExpertise(OFF_ATTACK);
-                    UpdateArmorPenetration();
-                }
+                    UpdateWeaponDependantStats(OFF_ATTACK);
+                else if (slot == EQUIPMENT_SLOT_RANGED)
+                    UpdateWeaponDependantStats(RANGED_ATTACK);
 
                 // equipment visual show
                 SetVisibleItemSlot(slot, nullptr);

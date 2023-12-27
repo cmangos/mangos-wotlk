@@ -2103,8 +2103,7 @@ class Unit : public WorldObject
         float m_unitHealth;
         float m_unitPower[POWER_RUNIC_POWER + 1];
 
-        float m_modMeleeHitChance;
-        float m_modRangedHitChance;
+        float m_modWeaponHitChance[MAX_ATTACK];
         float m_modSpellHitChance;
         float m_modSpellCritChance[MAX_SPELL_SCHOOL];
 
