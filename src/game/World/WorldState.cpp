@@ -381,26 +381,6 @@ void WorldState::HandleGameObjectUse(GameObject* go, Unit* user)
 {
     switch (go->GetEntry())
     {
-        case OBJECT_MAGTHERIDONS_HEAD:
-        {
-            std::lock_guard<std::mutex> guard(m_mutex);
-            if (Player* player = dynamic_cast<Player*>(user))
-            {
-                if (player->GetTeam() == HORDE)
-                {
-                    m_isMagtheridonHeadSpawnedHorde = true;
-                    m_guidMagtheridonHeadHorde = go->GetObjectGuid();
-                    BuffMagtheridonTeam(HORDE);
-                }
-                else
-                {
-                    m_isMagtheridonHeadSpawnedAlliance = true;
-                    m_guidMagtheridonHeadAlliance = go->GetObjectGuid();
-                    BuffMagtheridonTeam(ALLIANCE);
-                }
-            }
-            break;
-        }
         case OBJECT_EVENT_TRAP_THRALL:
         {
             HandleExternalEvent(CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER, LOVE_LEADER_THRALL);
@@ -456,28 +436,7 @@ void WorldState::HandleGameObjectUse(GameObject* go, Unit* user)
 
 void WorldState::HandleGameObjectRevertState(GameObject* go)
 {
-    switch (go->GetEntry())
-    {
-        case OBJECT_MAGTHERIDONS_HEAD:
-        {
-            std::lock_guard<std::mutex> guard(m_mutex);
-            if (go->GetObjectGuid() == m_guidMagtheridonHeadHorde)
-            {
-                m_isMagtheridonHeadSpawnedHorde = false;
-                m_guidMagtheridonHeadHorde = ObjectGuid();
-                DispelMagtheridonTeam(HORDE);
-            }
-            else if (go->GetObjectGuid() == m_guidMagtheridonHeadAlliance)
-            {
-                m_isMagtheridonHeadSpawnedAlliance = false;
-                m_guidMagtheridonHeadAlliance = ObjectGuid();
-                DispelMagtheridonTeam(ALLIANCE);
-            }
-            break;
-        }
-        default:
-            break;
-    }
+
 }
 
 void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
@@ -720,6 +679,11 @@ Map* WorldState::GetMap(uint32 mapId, Position const& invZone)
 
 void WorldState::BuffMagtheridonTeam(Team team)
 {
+    std::lock_guard<std::mutex> guard(m_mutex);
+    if (team == HORDE)
+        m_isMagtheridonHeadSpawnedHorde = true;
+    else
+        m_isMagtheridonHeadSpawnedAlliance = true;
     for (ObjectGuid& guid : m_magtheridonHeadPlayers)
     {
         if (Player* player = sObjectMgr.GetPlayer(guid))
@@ -746,6 +710,11 @@ void WorldState::BuffMagtheridonTeam(Team team)
 
 void WorldState::DispelMagtheridonTeam(Team team)
 {
+    std::lock_guard<std::mutex> guard(m_mutex);
+    if (team == HORDE)
+        m_isMagtheridonHeadSpawnedHorde = false;
+    else
+        m_isMagtheridonHeadSpawnedAlliance = false;
     for (ObjectGuid& guid : m_magtheridonHeadPlayers)
     {
         if (Player* player = sObjectMgr.GetPlayer(guid))

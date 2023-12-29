@@ -69,6 +69,8 @@ enum
     NPC_YSIEL_WINDSINGER = 17841,
 
     GO_HALAA_BANNER = 182210,
+
+    GO_MAGTHERIDONS_HEAD = 184640,
 };
 
 enum Shartuul

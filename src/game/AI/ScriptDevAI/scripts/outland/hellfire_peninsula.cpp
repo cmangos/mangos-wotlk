@@ -40,6 +40,8 @@ EndContentData */
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Entities/TemporarySpawn.h"
 #include "Spells/SpellAuras.h"
+#include "AI/ScriptDevAI/scripts/outland/world_outland.h"
+#include "World/WorldState.h"
 
 /*######
 ## npc_aeranas
@@ -1442,12 +1444,7 @@ enum
     YELL_NAZGREL_1 = -1000592,
     YELL_NAZGREL_2 = -1000593,
 
-    SPELL_TROLLBANES_COMMAND = 39911,
-    SPELL_NAZGRELS_FAVOR = 39913,
-
     MAX_SEARCH_DIST = 2170,
-
-    OBJECT_MAGTHERIDONS_HEAD = 184640
 
     //	NPC_DANATH_TROLLBANE = 16819,
     //	NPC_NAZGREL = 3230
@@ -1496,9 +1493,11 @@ struct npc_danath_trollbaneAI : public ScriptedAI
                 m_bOnYell2 = false;
 
                 // Mount Magtheridon's Head (update object)
-                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 120.0f))
-                    if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
-                        goHead->Use(invoker);
+                if (ScriptedInstance* instance = dynamic_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+                    if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, GO_MAGTHERIDONS_HEAD, 120.0f))
+                        instance->DoRespawnGameObject(goHead->GetObjectGuid(), 120 * MINUTE);
+
+                sWorldState.BuffMagtheridonTeam(ALLIANCE);
             }
             else
                 m_uiYell2DelayRemaining -= uiDiff;
@@ -1580,9 +1579,11 @@ struct npc_nazgrelAI : public ScriptedAI
                 m_bOnYell2 = false;
 
                 // Mount Magtheridon's Head (update object)
-                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 120.0f))
-                    if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
-                        goHead->Use(invoker);
+                if (ScriptedInstance* instance = dynamic_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+                    if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, GO_MAGTHERIDONS_HEAD, 120.0f))
+                        instance->DoRespawnGameObject(goHead->GetObjectGuid(), 120 * MINUTE);
+
+                sWorldState.BuffMagtheridonTeam(HORDE);
             }
             else
                 m_uiYell2DelayRemaining -= uiDiff;

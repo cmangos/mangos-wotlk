@@ -1765,6 +1765,16 @@ struct world_map_outland : public ScriptedMap, public TimerManager
         }
     }
 
+    void OnObjectDespawn(GameObject* go) override
+    {
+        switch (go->GetEntry())
+        {
+            case GO_MAGTHERIDONS_HEAD:
+                sWorldState.DispelMagtheridonTeam(go->GetPositionX() > 0.f ? HORDE : ALLIANCE);
+                break;
+        }
+    }
+
     void Update(const uint32 diff) override
     {
         UpdateTimers(diff);
