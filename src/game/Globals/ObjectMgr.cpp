@@ -1537,6 +1537,8 @@ void ObjectMgr::LoadSpawnGroups()
             {
                 CreatureData const* data = GetCreatureData(guidData.DbGuid);
                 RemoveCreatureFromGrid(guidData.DbGuid, data);
+                auto& creatureDynguidsForMap = m_dynguidCreatureDbGuids[data->mapid];
+                creatureDynguidsForMap.erase(std::remove(creatureDynguidsForMap.begin(), creatureDynguidsForMap.end(), guidData.DbGuid), creatureDynguidsForMap.end());
                 newContainer->spawnGroupByGuidMap.emplace(std::make_pair(guidData.DbGuid, uint32(TYPEID_UNIT)), &entry);
                 if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE))
                 {
@@ -1563,6 +1565,8 @@ void ObjectMgr::LoadSpawnGroups()
             {
                 GameObjectData const* data = GetGOData(guidData.DbGuid);
                 RemoveGameobjectFromGrid(guidData.DbGuid, data);
+                auto& goDynguidsForMap = m_dynguidGameobjectDbGuids[data->mapid];
+                goDynguidsForMap.erase(std::remove(goDynguidsForMap.begin(), goDynguidsForMap.end(), guidData.DbGuid), goDynguidsForMap.end());
                 newContainer->spawnGroupByGuidMap.emplace(std::make_pair(guidData.DbGuid, uint32(TYPEID_GAMEOBJECT)), &entry);
                 if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE))
                 {
