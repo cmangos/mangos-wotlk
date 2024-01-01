@@ -2321,7 +2321,8 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 21788, -- Deadly Poison
 21789, -- Hate to Half (Hate to Half)
 27791, -- Suicide (Suicide)
-28330  -- Flameshocker - Immolate Visual
+28330, -- Flameshocker - Immolate Visual
+30079 -- Retching Plague
 );
 
 -- missing trash cleave spell
