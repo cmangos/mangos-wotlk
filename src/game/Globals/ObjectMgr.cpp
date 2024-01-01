@@ -2255,7 +2255,7 @@ void ObjectMgr::LoadCreatures()
 
         if (m_transportMaps.find(data.mapid) != m_transportMaps.end())
             m_guidsForMap[data.mapid].emplace_back(TYPEID_UNIT, guid);
-        else if (dynGuid)
+        else if (dynGuid && !data.gameEvent)
         {
             m_dynguidCreatureDbGuids[data.mapid].push_back(guid);
         }
@@ -2494,7 +2494,7 @@ void ObjectMgr::LoadGameObjects()
 
         if (m_transportMaps.find(data.mapid) != m_transportMaps.end())
             m_guidsForMap[data.mapid].emplace_back(TYPEID_GAMEOBJECT, guid);
-        else if (dynGuid)
+        else if (dynGuid && !data.gameEvent)
         {
             m_dynguidGameobjectDbGuids[data.mapid].push_back(guid);
         }
