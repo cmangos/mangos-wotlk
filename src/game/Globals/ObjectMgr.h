@@ -526,14 +526,7 @@ class ObjectMgr
 
         typedef std::unordered_map<uint32, PointOfInterest> PointOfInterestMap;
 
-<<<<<<< HEAD
-        std::unordered_map<uint32, std::vector<uint32>> const& GetCreatureSpawnEntry() const { return m_creatureSpawnEntryMap; }
-=======
-
-        typedef std::unordered_map<uint32, PetCreateSpellEntry> PetCreateSpellMap;
-
         std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> const& GetCreatureSpawnEntry() const { return m_creatureSpawnEntryMap; }
->>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
 
         std::vector<uint32> LoadGameobjectInfo();
 
@@ -625,13 +618,9 @@ class ObjectMgr
             return nullptr;
         }
 
-<<<<<<< HEAD
         AccessRequirement const* GetAccessRequirement(uint32 mapid, Difficulty difficulty) const;
 
-        std::vector<uint32> const* GetAllRandomEntries(std::unordered_map<uint32, std::vector<uint32>> const& map, uint32 dbguid) const
-=======
         std::vector<uint32> const* GetAllRandomEntries(std::unordered_map<uint32, std::pair<bool, std::vector<uint32>>> const& map, uint32 dbguid) const
->>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
         {
             auto itr = map.find(dbguid);
             if (itr != map.end())
@@ -1296,16 +1285,14 @@ class ObjectMgr
         bool HasWorldStateName(int32 Id) const;
         WorldStateName* GetWorldStateName(int32 Id);
 
-<<<<<<< HEAD
+        std::vector<uint32>* GetCreatureDynGuidForMap(uint32 mapId);
+        std::vector<uint32>* GetGameObjectDynGuidForMap(uint32 mapId);
+
         // Transports
         std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
 
         // Vehicles
         VehicleSeatParameters const* GetVehicleSeatParameters(uint32 seatEntry) const;
-=======
-        std::vector<uint32>* GetCreatureDynGuidForMap(uint32 mapId);
-        std::vector<uint32>* GetGameObjectDynGuidForMap(uint32 mapId);
->>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
     protected:
 
         // current locale settings
@@ -1479,17 +1466,15 @@ class ObjectMgr
         std::unique_ptr<WorldStateExpressionMgr> m_worldStateExpressionMgr;
         std::unique_ptr<CombatConditionMgr> m_combatConditionMgr;
 
-<<<<<<< HEAD
+        std::map<uint32, std::vector<uint32>> m_dynguidCreatureDbGuids;
+        std::map<uint32, std::vector<uint32>> m_dynguidGameobjectDbGuids;
+
         std::unordered_map<uint32, AccessRequirement> m_accessRequirements;
 
         std::map<uint32, uint32> m_transportMaps;
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm
 
         std::map<uint32, VehicleSeatParameters> m_seatParameters;
-=======
-        std::map<uint32, std::vector<uint32>> m_dynguidCreatureDbGuids;
-        std::map<uint32, std::vector<uint32>> m_dynguidGameobjectDbGuids;
->>>>>>> 253f1e19452 (DynGuid: Fix spawning and respawning of dynguids using command and on map init)
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()
