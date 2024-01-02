@@ -1288,6 +1288,9 @@ class ObjectMgr
         std::vector<uint32>* GetCreatureDynGuidForMap(uint32 mapId);
         std::vector<uint32>* GetGameObjectDynGuidForMap(uint32 mapId);
 
+        uint32 GetMaxGoDbGuid() const { return m_maxGoDbGuid; }
+        uint32 GetMaxCreatureDbGuid() const { return m_maxCreatureDbGuid; }
+
         // Transports
         std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
 
@@ -1468,6 +1471,9 @@ class ObjectMgr
 
         std::map<uint32, std::vector<uint32>> m_dynguidCreatureDbGuids;
         std::map<uint32, std::vector<uint32>> m_dynguidGameobjectDbGuids;
+
+        uint32 m_maxGoDbGuid;
+        uint32 m_maxCreatureDbGuid;
 
         std::unordered_map<uint32, AccessRequirement> m_accessRequirements;
 
