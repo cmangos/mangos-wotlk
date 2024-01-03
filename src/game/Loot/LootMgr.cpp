@@ -65,7 +65,8 @@ class LootTemplate::LootGroup                               // A set of loot def
         bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
         bool HasQuestDropForPlayer(Player const* player) const;
         // The same for active quests of the player
-        void Process(Loot& loot, Player const* lootOwner) const; // Rolls an item from the group (if any) and adds the item to the loot
+        // Rolls an item from the group (if any) and adds the item to the loot
+        void Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate) const;
         float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
         float TotalChance() const;                          // Overall chance for the group
 
@@ -349,11 +350,6 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
         if (needs_quest)
         {
             sLog.outErrorDb("Table '%s' entry %d item %d: negative chance is given for a reference, skipped", store.GetName(), entry, itemid);
-            return false;
-        }
-        if (chance == 0)                               // no chance for the reference
-        {
-            sLog.outErrorDb("Table '%s' entry %d item %d: zero chance is given for a reference, reference will never be used, skipped", store.GetName(), entry, itemid);
             return false;
         }
     }
@@ -2558,11 +2554,25 @@ bool LootTemplate::LootGroup::HasQuestDropForPlayer(Player const* player) const
 }
 
 // Rolls an item from the group (if any takes its chance) and adds the item to the loot
-void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner) const
+void LootTemplate::LootGroup::Process(Loot& loot, Player const* lootOwner, LootStore const& store, bool rate) const
 {
     LootStoreItem const* item = Roll(loot, lootOwner);
     if (item != nullptr)
-        loot.AddItem(*item);
+    {
+        if (item->mincountOrRef > 0)
+            loot.AddItem(*item);
+        else
+        {
+            // we should continue and get next loot reference to process this loot list
+            LootTemplate const* lRef = LootTemplates_Reference.GetLootFor(-item->mincountOrRef);
+
+            if (lRef)
+            {
+                for (uint32 loop = 0; loop < item->maxcount; ++loop)
+                    lRef->Process(loot, lootOwner, store, rate);
+            }
+        }
+    }
 }
 
 // Overall chance for the group without equal chanced items
@@ -2634,7 +2644,7 @@ void LootTemplate::LootGroup::CheckLootRefs(LootIdSet* ref_set) const
 // Adds an entry to the group (at loading stage)
 void LootTemplate::AddEntry(LootStoreItem& item)
 {
-    if (item.group > 0 && item.mincountOrRef > 0)           // Group
+    if (item.group > 0)           // Group
     {
         if (item.group >= Groups.size())
             Groups.resize(item.group);                      // Adds new group the the loot template if needed
@@ -2652,7 +2662,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const&
         if (groupId > Groups.size())
             return;                                         // Error message already printed at loading stage
 
-        Groups[groupId - 1].Process(loot, lootOwner);
+        Groups[groupId - 1].Process(loot, lootOwner, store, rate);
         return;
     }
 
@@ -2682,7 +2692,7 @@ void LootTemplate::Process(Loot& loot, Player const* lootOwner, LootStore const&
 
     // Now processing groups
     for (const auto& Group : Groups)
-        Group.Process(loot, lootOwner);
+        Group.Process(loot, lootOwner, store, rate);
 }
 
 // True if template includes at least 1 quest drop entry
