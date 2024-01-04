@@ -824,10 +824,6 @@ class GameObject : public WorldObject
         void Refresh();
         void Delete();
 
-        // Functions spawn/remove gameobject with DB guid in all loaded map copies (if point grid loaded in map)
-        static void AddToRemoveListInMaps(uint32 db_guid, GameObjectData const* data);
-        static void SpawnInMaps(uint32 db_guid, GameObjectData const* data);
-
         GameobjectTypes GetGoType() const { return GameobjectTypes(GetByteValue(GAMEOBJECT_BYTES_1, 1)); }
         void SetGoType(GameobjectTypes type) { SetByteValue(GAMEOBJECT_BYTES_1, 1, type); }
         GOState GetGoState() const { return GOState(GetByteValue(GAMEOBJECT_BYTES_1, 0)); }
