@@ -231,7 +231,7 @@ class LootStore
 
         void LoadAndCollectLootIds(LootIdSet& ids_set);
         void LoadAndCheckReferenceNames();
-        void CheckLootRefs(LootIdSet* ref_set = nullptr) const; // check existence reference and remove it from ref_set
+        bool CheckLootRefs(LootIdSet* ref_set = nullptr); // check existence reference and remove it from ref_set
         void ReportUnusedIds(LootIdSet const& ids_set) const;
         void ReportNotExistedId(uint32 id) const;
 
@@ -274,7 +274,7 @@ class LootTemplate
 
         // Checks integrity of the template
         void Verify(LootStore const& lootstore, uint32 id) const;
-        void CheckLootRefs(LootIdSet* ref_set) const;
+        bool CheckLootRefs(LootIdSet* ref_set, LootIdSet& prevRefs);
     private:
         LootStoreItemList Entries;                          // not grouped only
         LootGroups        Groups;                           // groups have own (optimized) processing, grouped entries go there
