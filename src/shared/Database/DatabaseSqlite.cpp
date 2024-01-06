@@ -19,8 +19,8 @@
 #include "QueryResultSqlite.h"
 #include <cstdint>
 #include <cstring>
-#include <sqlite3.h>
 #ifdef DO_SQLITE
+#include <sqlite3.h>
 
 #include "Util/Util.h"
 #include "Policies/Singleton.h"
