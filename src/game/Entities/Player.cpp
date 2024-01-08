@@ -1924,9 +1924,10 @@ bool Player::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
     if (!Unit::Mount(displayid, aura))
         return false;
 
+    bool keepPetOnMount = !sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT);
+    bool keepPetOnFlyingMount = !keepPetOnMount ? false : sWorld.getConfig(CONFIG_BOOL_KEEP_PET_ON_FLYING_MOUNT);
     // Custom mount (non-aura such as taxi or command) or in flight: unsummon any pet
-    if (!sWorld.getConfig(CONFIG_BOOL_KEEP_PET_WHEN_MOUNTED) &&
-        (!aura || IsFreeFlying() || IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED)))
+    if (!aura || (!keepPetOnFlyingMount && (IsFreeFlying() || IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))))
     {
         UnsummonPetTemporaryIfAny();
     }
@@ -1935,8 +1936,7 @@ bool Player::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
     {
         if (Pet* pet = GetPet())
         {
-            if (pet->isControlled() && !sWorld.getConfig(CONFIG_BOOL_KEEP_PET_WHEN_MOUNTED) &&(!(pet->isTemporarySummoned() || InArena())
-                                        || sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT)))
+            if (pet->isControlled() && (!(pet->isTemporarySummoned() || InArena() || keepPetOnMount)))
                 UnsummonPetTemporaryIfAny();
             else
                 pet->SetModeFlags(PET_MODE_DISABLE_ACTIONS);
