@@ -34,6 +34,11 @@ enum
     SAY_REPENTANCE1         = 15080,
     SAY_REPENTANCE2         = 13396,
     SAY_DEATH               = 15081,
+
+    SPELL_REPENTANCE        = 29511,
+    SPELL_HOLYFIRE          = 29522,
+    SPELL_HOLYWRATH         = 32445,
+    SPELL_HOLYGROUND        = 29512
 };
 
 enum MaidenOfVirtueActions
@@ -75,6 +80,16 @@ struct boss_maiden_of_virtueAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_MAIDEN, FAIL);
+    }
+
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
+    {
+        switch (spellInfo->Id)
+        {
+            case SPELL_REPENTANCE:
+                DoBroadcastText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
+                break;
+        }
     }
 };
 
