@@ -769,6 +769,8 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
 
 void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
 {
+    MANGOS_ASSERT(!m_removed);
+
     if (!owner)
         owner = GetOwner();
 
