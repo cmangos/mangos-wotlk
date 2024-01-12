@@ -336,6 +336,19 @@ struct GlyphOfStarfire : public AuraScript
     }
 };
 
+// 467 - Thorns
+struct ThornsDruid : public AuraScript
+{
+    virtual int32 OnDurationCalculate(WorldObject const* caster, Unit const* target, int32 duration) const override
+    {
+        if (caster == target)
+            // Glyph of Thorns
+            if (Aura const* aur = target->GetAura(57862, EFFECT_INDEX_0))
+                duration += aur->GetModifier()->m_amount * MINUTE * IN_MILLISECONDS;
+        return duration;
+    }
+};
+
 // TODO: Glyph of Entangling Roots
 
 void LoadDruidScripts()
@@ -357,4 +370,5 @@ void LoadDruidScripts()
     RegisterSpellScript<Nourish>("spell_nourish");
     RegisterSpellScript<GlyphOfTyphoon>("spell_typhoon");
     RegisterSpellScript<GlyphOfStarfire>("spell_glyph_of_starfire");
+    RegisterSpellScript<ThornsDruid>("spell_thorns_druid");
 }

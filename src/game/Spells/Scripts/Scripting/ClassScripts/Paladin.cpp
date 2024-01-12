@@ -384,6 +384,32 @@ struct GlyphOfHolyLight : public AuraScript
     }
 };
 
+// 19740 - Blessing Of Might
+struct BlessingOfMight : public AuraScript
+{
+    virtual int32 OnDurationCalculate(WorldObject const* caster, Unit const* target, int32 duration) const override
+    {
+        if (caster == target)
+            // Glyph of Blessing of Might
+            if (Aura const* aur = target->GetAura(57958, EFFECT_INDEX_0))
+                duration += aur->GetModifier()->m_amount * MINUTE * IN_MILLISECONDS;
+        return duration;
+    }
+};
+
+// 19740 - Blessing Of Wisdom
+struct BlessingOfWisdom : public AuraScript
+{
+    virtual int32 OnDurationCalculate(WorldObject const* caster, Unit const* target, int32 duration) const override
+    {
+        if (caster == target)
+            // Glyph of Blessing of Wisdom
+            if (Aura const* aur = target->GetAura(57979, EFFECT_INDEX_0))
+                duration += aur->GetModifier()->m_amount * MINUTE * IN_MILLISECONDS;
+        return duration;
+    }
+};
+
 void LoadPaladinScripts()
 {
     RegisterSpellScript<IncreasedHolyLightHealing>("spell_increased_holy_light_healing");
@@ -404,4 +430,6 @@ void LoadPaladinScripts()
     RegisterSpellScript<GlyphOfSealOfCommandMana>("spell_glyph_of_seal_of_command_mana");
     RegisterSpellScript<GlyphOfDivinity>("spell_glyph_of_divinity");
     RegisterSpellScript<GlyphOfHolyLight>("spell_glyph_of_holy_light");
+    RegisterSpellScript<BlessingOfMight>("spell_blessing_of_might");
+    RegisterSpellScript<BlessingOfWisdom>("spell_blessing_of_wisdom");
 }

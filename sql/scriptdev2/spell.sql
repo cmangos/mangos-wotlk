@@ -1272,7 +1272,26 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54925,'spell_glyph_of_seal_of_command'),
 (68082,'spell_glyph_of_seal_of_command_mana'),
 (54939,'spell_glyph_of_divinity'),
-(54937,'spell_glyph_of_holy_light');
+(54937,'spell_glyph_of_holy_light'),
+(19740,'spell_blessing_of_might'),
+(19834,'spell_blessing_of_might'),
+(19835,'spell_blessing_of_might'),
+(19836,'spell_blessing_of_might'),
+(19837,'spell_blessing_of_might'),
+(19838,'spell_blessing_of_might'),
+(25291,'spell_blessing_of_might'),
+(27140,'spell_blessing_of_might'),
+(48931,'spell_blessing_of_might'),
+(48932,'spell_blessing_of_might'),
+(19742,'spell_blessing_of_wisdom'),
+(19850,'spell_blessing_of_wisdom'),
+(19852,'spell_blessing_of_wisdom'),
+(19853,'spell_blessing_of_wisdom'),
+(19854,'spell_blessing_of_wisdom'),
+(25290,'spell_blessing_of_wisdom'),
+(27142,'spell_blessing_of_wisdom'),
+(48935,'spell_blessing_of_wisdom'),
+(48936,'spell_blessing_of_wisdom');
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
@@ -1596,7 +1615,15 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61387,'spell_typhoon'),
 (53227,'spell_typhoon'),
 (54845,'spell_glyph_of_starfire'),
-(40121,'spell_swift_flight_form_passive');
+(40121,'spell_swift_flight_form_passive'),
+(467,'spell_thorns_druid'),
+(782,'spell_thorns_druid'),
+(1075,'spell_thorns_druid'),
+(8914,'spell_thorns_druid'),
+(9756,'spell_thorns_druid'),
+(9910,'spell_thorns_druid'),
+(26992,'spell_thorns_druid'),
+(53307,'spell_thorns_druid');
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
