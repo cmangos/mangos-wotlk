@@ -1729,7 +1729,19 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (60043,'spell_lava_burst'),
 (55438,'spell_glyph_of_lesser_healing_wave'),
 (2825,'spell_heroism_bloodlust'),
-(32182,'spell_heroism_bloodlust');
+(32182,'spell_heroism_bloodlust'),
+(39610,'spell_mana_tide_totem_effect'),
+(55440,'spell_glyph_of_healing_wave'),
+(63280,'spell_glyph_of_totem_of_wrath'),
+(52041,'spell_healing_stream_totem_effect'),
+(52046,'spell_healing_stream_totem_effect'),
+(52047,'spell_healing_stream_totem_effect'),
+(52048,'spell_healing_stream_totem_effect'),
+(52049,'spell_healing_stream_totem_effect'),
+(52050,'spell_healing_stream_totem_effect'),
+(58759,'spell_healing_stream_totem_effect'),
+(58760,'spell_healing_stream_totem_effect'),
+(58761,'spell_healing_stream_totem_effect');
 
 -- Food and Drink
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

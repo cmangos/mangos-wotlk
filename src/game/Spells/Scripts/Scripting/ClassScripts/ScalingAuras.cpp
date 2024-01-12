@@ -692,10 +692,13 @@ struct FeralSpiritPetScaling1 : public AuraScript
                 {
                     if (owner->IsPlayer())
                     {
+                        float mod = 0.5f;
+                        if (Aura* aura = owner->GetAura(63271, EFFECT_INDEX_0))
+                            mod += float(aura->GetAmount()) / 100;
                         int32 nature = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_NATURE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_NATURE);
                         if (nature < 0)
                             nature = 0;
-                        value = nature * 0.5f;
+                        value = nature * mod;
                     }
                 }
                 break;

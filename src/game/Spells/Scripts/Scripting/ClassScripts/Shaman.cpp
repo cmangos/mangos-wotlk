@@ -122,6 +122,28 @@ struct EarthShield : public AuraScript
     }
 };
 
+// 39610 - Mana Tide Totem
+struct ManaTideTotemEffect : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
+            return;
+
+        int32 damage = spell->GetDamage();
+
+        // Glyph of Mana Tide
+        if (Unit* owner = caster->GetOwner())
+            if (Aura* dummy = owner->GetDummyAura(55441))
+                damage += dummy->GetModifier()->m_amount;
+        // Regenerate 6% of Total Mana Every 3 secs
+        int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA) * damage / 100;
+        caster->CastCustomSpell(unitTarget, 39609, &EffectBasePoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 enum
 {
     SPELL_SHAMAN_ELEMENTAL_MASTERY = 16166,
@@ -339,6 +361,91 @@ struct GlyphOfLesserHealingWave : public AuraScript
     }
 };
 
+// 55440 - Glyph of Healing Wave
+struct GlyphOfHealingWave : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        // Not proc from self heals
+        if (procData.source == procData.target)
+            return SPELL_AURA_PROC_FAILED;
+        procData.basepoints[0] = aura->GetAmount() * procData.damage / 100;
+        procData.triggerTarget = procData.source;
+        procData.triggeredSpellId = 55533;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+// 63280 - Glyph of Totem of Wrath
+struct GlyphOfTotemOfWrath : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        Unit* source = procData.source;
+        Totem* totem = source->GetTotem(TOTEM_SLOT_FIRE);
+        if (!totem)
+            return SPELL_AURA_PROC_FAILED;
+
+        // find totem aura bonus
+        Unit::AuraList const& spellPower = totem->GetAurasByType(SPELL_AURA_NONE);
+        for (auto i : spellPower)
+        {
+            // select proper aura for format aura type in spell proto
+            if (i->GetTarget() == totem && i->GetSpellProto()->EffectApplyAuraName[i->GetEffIndex()] == SPELL_AURA_MOD_HEALING_DONE &&
+                i->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && i->GetSpellProto()->SpellFamilyFlags & uint64(0x0000000004000000))
+            {
+                procData.basepoints[0] = aura->GetAmount() * i->GetModifier()->m_amount / 100;
+                break;
+            }
+        }
+
+        if (!procData.basepoints[0])
+            return SPELL_AURA_PROC_FAILED;
+
+        procData.basepoints[1] = procData.basepoints[0];
+        procData.triggeredSpellId = 63283; // Totem of Wrath, caster bonus
+        procData.triggerTarget = source;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+// 52041 - Healing Stream Totem
+struct HealingStreamTotemEffect : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (Unit* unitTarget = spell->GetUnitTarget())
+        {
+            int32 damage = spell->GetDamage();
+            Unit* caster = spell->GetCaster();
+            if (Unit* owner = caster->GetOwner())
+            {
+                // spell have SPELL_DAMAGE_CLASS_NONE and not get bonuses from owner, use main spell for bonuses
+                if (spell->m_triggeredBySpellInfo)
+                {
+                    damage = int32(owner->SpellHealingBonusDone(unitTarget, spell->m_triggeredBySpellInfo, damage, HEAL));
+                    damage = int32(unitTarget->SpellHealingBonusTaken(owner, spell->m_triggeredBySpellInfo, damage, HEAL));
+                }
+
+                // Restorative Totems
+                Aura* restorativeTotems = owner->GetAura(16206, EFFECT_INDEX_1);
+                if (!restorativeTotems)
+                    restorativeTotems = owner->GetAura(16205, EFFECT_INDEX_1);
+                if (!restorativeTotems)
+                    restorativeTotems = owner->GetAura(16187, EFFECT_INDEX_1);
+
+                if (restorativeTotems)
+                    damage += restorativeTotems->GetModifier()->m_amount * damage / 100;
+
+                // Glyph of Healing Stream Totem
+                if (Aura* dummy = owner->GetDummyAura(55456))
+                    damage += dummy->GetModifier()->m_amount * damage / 100;
+            }
+            caster->CastCustomSpell(unitTarget, 52042, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -348,6 +455,7 @@ void LoadShamanScripts()
 
     RegisterSpellScript<SentryTotem>("spell_sentry_totem");
     RegisterSpellScript<EarthShield>("spell_earth_shield");
+    RegisterSpellScript<ManaTideTotemEffect>("spell_mana_tide_totem_effect");
     RegisterSpellScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
     RegisterSpellScript<EartbindTotem>("spell_earthbind_totem");
     RegisterSpellScript<LavaLash>("spell_lava_lash");
@@ -360,4 +468,7 @@ void LoadShamanScripts()
     RegisterSpellScript<AstralShiftShaman>("spell_astral_shift_shaman");
     RegisterSpellScript<LavaBurst>("spell_lava_burst");
     RegisterSpellScript<GlyphOfLesserHealingWave>("spell_glyph_of_lesser_healing_wave");
+    RegisterSpellScript<GlyphOfHealingWave>("spell_glyph_of_healing_wave");
+    RegisterSpellScript<GlyphOfTotemOfWrath>("spell_glyph_of_totem_of_wrath");
+    RegisterSpellScript<HealingStreamTotemEffect>("spell_healing_stream_totem_effect");
 }

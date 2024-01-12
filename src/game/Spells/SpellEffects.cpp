@@ -4239,35 +4239,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 52025, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
-            // Healing Stream Totem
-            if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000002000))
-            {
-                if (unitTarget)
-                {
-                    if (Unit* owner = m_caster->GetOwner())
-                    {
-                        // spell have SPELL_DAMAGE_CLASS_NONE and not get bonuses from owner, use main spell for bonuses
-                        if (m_triggeredBySpellInfo)
-                        {
-                            damage = int32(owner->SpellHealingBonusDone(unitTarget, m_triggeredBySpellInfo, damage, HEAL));
-                            damage = int32(unitTarget->SpellHealingBonusTaken(owner, m_triggeredBySpellInfo, damage, HEAL));
-                        }
-
-                        // Restorative Totems
-                        Unit::AuraList const& mDummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
-                        for (auto mDummyAura : mDummyAuras)
-                            // only its have dummy with specific icon
-                            if (mDummyAura->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && mDummyAura->GetSpellProto()->SpellIconID == 338)
-                                damage += mDummyAura->GetModifier()->m_amount * damage / 100;
-
-                        // Glyph of Healing Stream Totem
-                        if (Aura* dummy = owner->GetDummyAura(55456))
-                            damage += dummy->GetModifier()->m_amount * damage / 100;
-                    }
-                    m_caster->CastCustomSpell(unitTarget, 52042, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_originalCasterGUID);
-                }
-                return;
-            }
             // Mana Spring Totem
             if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000004000))
             {
@@ -4295,20 +4266,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 else
                     sLog.outError("Spell::EffectDummy: spell %i requires cast Item", m_spellInfo->Id);
 
-                return;
-            }
-            if (m_spellInfo->Id == 39610)                   // Mana Tide Totem effect
-            {
-                if (!unitTarget || unitTarget->GetPowerType() != POWER_MANA)
-                    return;
-
-                // Glyph of Mana Tide
-                if (Unit* owner = m_caster->GetOwner())
-                    if (Aura* dummy = owner->GetDummyAura(55441))
-                        damage += dummy->GetModifier()->m_amount;
-                // Regenerate 6% of Total Mana Every 3 secs
-                int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * damage / 100;
-                m_caster->CastCustomSpell(unitTarget, 39609, &EffectBasePoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_originalCasterGUID);
                 return;
             }
             break;
