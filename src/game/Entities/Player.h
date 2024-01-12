@@ -2529,6 +2529,7 @@ class Player : public Unit
         virtual void RemoveAllCooldowns(bool sendOnly = false);
         virtual void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration) override;
         void ModifyCooldown(uint32 spellId, int32 cooldownModMs);
+        void ModifyCooldownTo(uint32 spellId, std::chrono::milliseconds remainingCooldown);
         void RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32>* spellAlreadySent = nullptr);
         void SendClearCooldown(uint32 spell_id, Unit* target) const;
         void RemoveArenaSpellCooldowns();

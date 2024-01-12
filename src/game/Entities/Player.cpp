@@ -25074,7 +25074,7 @@ void Player::ModifyCooldown(uint32 spellId, int32 cooldownModMs)
     {
         auto& cdData = cdItr->second;
         TimePoint expireTime;
-        if (!cdData->GetSpellCDExpireTime(expireTime) && cdData->GetSpellId() == spellId)
+        if (cdData->GetSpellCDExpireTime(expireTime) && cdData->GetSpellId() == spellId)
         {
             if (GetMap()->GetCurrentClockTime() > expireTime + std::chrono::milliseconds(cooldownModMs))
             {
@@ -25090,6 +25090,35 @@ void Player::ModifyCooldown(uint32 spellId, int32 cooldownModMs)
     modifyCooldown << uint32(spellId);
     modifyCooldown << uint64(GetObjectGuid());
     modifyCooldown << int32(cooldownModMs);
+    SendDirectMessage(modifyCooldown);
+}
+
+void Player::ModifyCooldownTo(uint32 spellId, std::chrono::milliseconds remainingCooldown)
+{
+    TimePoint now = GetMap()->GetCurrentClockTime();
+    auto cdItr = m_cooldownMap.begin();
+    std::chrono::milliseconds cdChange;
+    bool found = false;
+    for (; cdItr != m_cooldownMap.end(); ++cdItr)
+    {
+        auto& cdData = cdItr->second;
+        TimePoint expireTime;
+        if (!cdData->GetSpellCDExpireTime(expireTime) && cdData->GetSpellId() == spellId)
+        {
+            auto newCdExpiry = now + remainingCooldown;
+            cdChange = newCdExpiry - expireTime;
+            cdData->SetSpellCDExpireTime(newCdExpiry);
+            found = true;
+        }
+    }
+
+    if (!found)
+        return;
+
+    WorldPacket modifyCooldown(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+    modifyCooldown << uint32(spellId);
+    modifyCooldown << uint64(GetObjectGuid());
+    modifyCooldown << int32(cdChange.count());
     SendDirectMessage(modifyCooldown);
 }
 
