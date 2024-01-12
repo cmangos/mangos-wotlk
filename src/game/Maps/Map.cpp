@@ -252,11 +252,7 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
     m_persistentState->SetUsedByMapState(this);
     m_persistentState->InitPools();
 
-    sObjectMgr.LoadActiveEntities(this);
-
     m_graveyardManager.Init(this);
-
-    LoadTransports();
 
     m_variableManager.Initialize(m_persistentState->GetCompletedEncountersMask());
 
@@ -264,6 +260,10 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
 
     // load navmesh
     MMAP::MMapFactory::createOrGetMMapManager()->loadMapData(GetId(), GetInstanceId());
+
+    sObjectMgr.LoadActiveEntities(this);
+
+    LoadTransports();
 }
 
 void Map::InitVisibilityDistance()
