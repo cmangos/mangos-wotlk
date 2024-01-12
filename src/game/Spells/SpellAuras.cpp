@@ -10505,22 +10505,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         }
         case SPELLFAMILY_PRIEST:
         {
-            // Power Word: Shield
-            if (apply && m_spellProto->SpellFamilyFlags & uint64(0x0000000000000001) && m_spellProto->Mechanic == MECHANIC_SHIELD)
-            {
-                Unit* caster = GetCaster();
-                if (!caster)
-                    return;
-
-                // Glyph of Power Word: Shield
-                if (Aura* glyph = caster->GetAura(55672, EFFECT_INDEX_0))
-                {
-                    Aura* shield = GetAuraByEffectIndex(EFFECT_INDEX_0);
-                    int32 heal = (glyph->GetModifier()->m_amount * shield->GetModifier()->m_amount) / 100;
-                    caster->CastCustomSpell(m_target, 56160, &heal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, shield);
-                }
-                return;
-            }
             switch (GetId())
             {
                 // Abolish Disease (remove 1 more poison effect with Body and Soul)

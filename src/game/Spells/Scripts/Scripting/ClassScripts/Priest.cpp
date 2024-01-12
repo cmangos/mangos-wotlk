@@ -65,6 +65,7 @@ struct ShadowWordDeath : public SpellScript
 enum
 {
     MANA_LEECH_PASSIVE = 28305,
+    SPELL_SHADOWFIEND_DEATH = 57989,
 };
 
 // 34433 - Shadowfiend
@@ -73,6 +74,7 @@ struct Shadowfiend : public SpellScript
     void OnSummon(Spell* spell, Creature* summon) const override
     {
         summon->CastSpell(summon, MANA_LEECH_PASSIVE, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, SPELL_SHADOWFIEND_DEATH, TRIGGERED_OLD_TRIGGERED);
         summon->AI()->AttackStart(spell->m_targets.getUnitTarget());
     }
 };
@@ -116,8 +118,13 @@ enum
 };
 
 // 33206 - Pain Suppression
-struct PainSuppression : public AuraScript
+struct PainSuppression : public SpellScript, public AuraScript
 {
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetUsableWhileStunned(spell->GetCaster()->HasAura(63248)); // Glyph of Pain Suppression
+    }
+
     void OnApply(Aura* aura, bool apply) const override
     {
         if (apply)
@@ -128,6 +135,16 @@ struct PainSuppression : public AuraScript
 // 17 - Power Word: Shield
 struct PowerWordShieldPriest : public AuraScript
 {
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
+    {
+        if (data.caster && data.caster->IsPlayer())
+        {
+            if (Aura* borrowedTime = static_cast<Player*>(data.caster)->GetKnownTalentRankAuraById(1202, EFFECT_INDEX_1))
+                value += (borrowedTime->GetAmount() * data.caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(data.spellProto)) / 100);
+        }
+        return value;
+    }
+
     void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& reflectedSpellId, int32& reflectDamage, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
     {
         Unit* caster = aura->GetTarget();
@@ -149,8 +166,23 @@ struct PowerWordShieldPriest : public AuraScript
             }
         }
     }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!apply || !caster || aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        // Glyph of Power Word: Shield
+        if (Aura* glyph = caster->GetAura(55672, EFFECT_INDEX_0))
+        {
+            int32 heal = (glyph->GetModifier()->m_amount * aura->GetAmount()) / 100;
+            caster->CastCustomSpell(aura->GetTarget(), 56160, &heal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
 };
 
+// 64844 - Divine Hymn
 struct DivineHymn : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -170,6 +202,7 @@ struct DivineHymn : public SpellScript
     }
 };
 
+// 64904 - Hymn of Hope
 struct HymnOfHope : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -189,6 +222,7 @@ struct HymnOfHope : public SpellScript
     }
 };
 
+// 34861 - Circle of Healing
 struct CircleOfHealing : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -205,19 +239,6 @@ struct CircleOfHealing : public SpellScript
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         return spell->GetCaster()->IsInGroup(target);
-    }
-};
-
-struct PowerWordShield : public AuraScript
-{
-    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
-    {
-        if (data.caster && data.caster->IsPlayer())
-        {
-            if (Aura* borrowedTime = static_cast<Player*>(data.caster)->GetKnownTalentRankAuraById(1202, EFFECT_INDEX_1))
-                value += (borrowedTime->GetAmount() * data.caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(data.spellProto)) / 100);
-        }
-        return value;
     }
 };
 
@@ -240,6 +261,7 @@ enum LightwellData
     SPELL_PRIEST_LIGHTWELL_CHARGES = 59907,
 };
 
+// 7001 - Lightwell Renew
 struct LightwellRenew : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -261,6 +283,7 @@ struct LightwellRenew : public AuraScript
     }
 };
 
+// 60123 - Lightwell Renew
 struct LightwellRelay : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -304,6 +327,7 @@ struct LightwellRelay : public SpellScript
     }
 };
 
+// 55673 - Glyph of Lightwell
 struct GlyphOfLightwell : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -349,6 +373,17 @@ struct GuardianSpiritPriest : public AuraScript
         aura->GetTarget()->CastCustomSpell(nullptr, 48153, &healAmount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         aura->GetTarget()->RemoveAurasDueToSpell(aura->GetSpellProto()->Id);
         remainingDamage = 0;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+        {
+            if (Unit* caster = aura->GetCaster())
+                if (caster->IsPlayer())
+                    if (Aura const* glyph = caster->GetAura(63231, EFFECT_INDEX_0))
+                        static_cast<Player*>(caster)->ModifyCooldown(47788, glyph->GetAmount() * 1000);
+        }
     }
 };
 
@@ -472,6 +507,67 @@ struct GlyphOfSmite : public AuraScript
     }
 };
 
+// 55680 - Glyph of Prayer of Healing
+struct GlyphOfPrayerOfHealing : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        procData.basepoints[0] = int32(procData.damage * aura->GetAmount() / 200);   // 10% each tick
+        procData.triggeredSpellId = 56161; // Glyph of Prayer of Healing
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+// 55689 - Glyph of Shadow
+struct GlyphOfShadow : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        if (data.procFlags & (PROC_FLAG_DEAL_HARMFUL_PERIODIC | PROC_FLAG_TAKE_HARMFUL_PERIODIC)) // do not proc on dots
+            return false;
+        return true;
+    }
+};
+
+// 57989 - Shadowfiend Death
+struct ShadowfiendDeath : public AuraScript
+{
+    bool OnCheckProc(Aura* aura, ProcExecutionData& /*data*/) const override
+    {
+        return !aura->GetTarget()->IsAlive();
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (Unit* spawner = aura->GetTarget()->GetSpawner())
+            if (spawner->HasAura(58228)) // Glyph of Shadowfiend
+                spawner->CastSpell(nullptr, 58227, TRIGGERED_OLD_TRIGGERED);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+// 71132 - Glyph of Shadow Word: Pain
+struct GlyphOfShadowWordPain : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->SetDamage(spell->GetCaster()->GetPower(POWER_MANA) / 100); // 1%
+    }
+};
+
+// 55677 - Glyph of Dispel Magic
+struct GlyphOfDispelMagic : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!aura->GetTarget()->CanAssist(procData.target))
+            return SPELL_AURA_PROC_FAILED;
+
+        procData.basepoints[0] = int32(procData.target->GetMaxHealth() * aura->GetAmount() / 100);
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -484,7 +580,6 @@ void LoadPriestScripts()
     RegisterSpellScript<DivineHymn>("spell_divine_hymn");
     RegisterSpellScript<HymnOfHope>("spell_hymn_of_hope");
     RegisterSpellScript<CircleOfHealing>("spell_circle_of_healing");
-    RegisterSpellScript<PowerWordShield>("spell_power_word_shield");
     RegisterSpellScript<LightwellRenew>("spell_lightwell_renew");
     RegisterSpellScript<LightwellRelay>("spell_lightwell_relay");
     RegisterSpellScript<GlyphOfLightwell>("spell_glyph_of_lightwell");
@@ -497,4 +592,9 @@ void LoadPriestScripts()
     RegisterSpellScript<GlyphOfShadowWordDeath>("spell_glyph_of_shadow_word_death");
     RegisterSpellScript<TestOfFaith>("spell_test_of_faith");
     RegisterSpellScript<GlyphOfSmite>("spell_glyph_of_smite");
+    RegisterSpellScript<GlyphOfPrayerOfHealing>("spell_glyph_of_prayer_of_healing");
+    RegisterSpellScript<GlyphOfShadow>("spell_glyph_of_shadow");
+    RegisterSpellScript<ShadowfiendDeath>("spell_shadowfiend_death");
+    RegisterSpellScript<GlyphOfShadowWordPain>("spell_glyph_of_shadow_word_pain");
+    RegisterSpellScript<GlyphOfDispelMagic>("spell_glyph_of_dispel_magic");
 }

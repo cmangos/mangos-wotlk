@@ -1236,7 +1236,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34865,'spell_circle_of_healing'),
 (34866,'spell_circle_of_healing'),
 (48088,'spell_circle_of_healing'),
-(48089,'spell_circle_of_healing');
+(48089,'spell_circle_of_healing'),
+(55680,'spell_glyph_of_prayer_of_healing'),
+(55689,'spell_glyph_of_shadow'),
+(57989,'spell_shadowfiend_death'),
+(71132,'spell_glyph_of_shadow_word_pain'),
+(55677,'spell_glyph_of_dispel_magic');
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

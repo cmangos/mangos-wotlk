@@ -1375,17 +1375,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     target = this;
                     break;
                 }
-                // Shadowfiend Death (Gain mana if pet dies with Glyph of Shadowfiend)
-                case 57989:
-                {
-                    Unit* owner = GetOwner();
-                    if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
-                        return SPELL_AURA_PROC_FAILED;
-
-                    // Glyph of Shadowfiend (need cast as self cast for owner, no hidden cooldown)
-                    owner->CastSpell(owner, 58227, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
-                    return SPELL_AURA_PROC_OK;
-                }
                 // Kill Command, pet aura
                 case 58914:
                 {
@@ -1836,23 +1825,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 case 28809:
                 {
                     triggered_spell_id = 28810;
-                    break;
-                }
-                // Glyph of Dispel Magic
-                case 55677:
-                {
-                    if (!target->CanAssist(this))
-                        return SPELL_AURA_PROC_FAILED;
-
-                    basepoints[0] = int32(target->GetMaxHealth() * triggerAmount / 100);
-                    // triggered_spell_id in spell data
-                    break;
-                }
-                // Glyph of Prayer of Healing
-                case 55680:
-                {
-                    basepoints[0] = int32(damage * triggerAmount  / 200);   // 10% each tick
-                    triggered_spell_id = 56161;             // Glyph of Prayer of Healing
                     break;
                 }
                 // Priest T10 Healer 2P Bonus
