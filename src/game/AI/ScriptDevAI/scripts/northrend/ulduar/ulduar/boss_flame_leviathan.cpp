@@ -741,7 +741,7 @@ struct npc_freya_wardAI : public Scripted_NoMovementAI
         {
             if (m_creature->IsBoarded())
             {
-                Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+                Unit* vehicle = static_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
                 if (vehicle && vehicle->GetVehicleInfo())
                     if (DoCastSpellIfCan(vehicle, SPELL_FREYA_WARD) == CAST_OK)
                         m_uiFreyaWardTimer = 30000;
@@ -790,7 +790,7 @@ struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
         {
             if (!m_creature->IsBoarded())
                 return;
-            Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+            Unit* vehicle = static_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
             if (!vehicle)
                 return;
             if (vehicle->GetEntry() == 33167 || vehicle->GetEntry() == NPC_SALVAGED_DEMOLISHER)
@@ -822,24 +822,22 @@ struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
     {
         AddCustomAction(0, 1s, [&]()
         {
-            Creature* lift = dynamic_cast<Creature*>(m_creature->GetSpawner());
-            if (!lift)
+            Creature* lift = static_cast<Creature*>(m_creature->GetSpawner());
+            if (!lift || !lift->IsCreature() || !lift->IsAlive())
                 return;
             m_creature->CastSpell(lift, SPELL_ROPE_BEAM, TRIGGERED_OLD_TRIGGERED);
         });
-        AddCustomAction(1, true, [&]()
+    }
+
+    void MovementInform(uint32 moveType, uint32 pointId) override
+    {
+        if (moveType == FALL_MOTION_TYPE && pointId == EVENT_FALL)
         {
-            float gZ = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-            if ((gZ + 0.1f) < m_creature->GetPositionZ())
-            {
-                ResetTimer(1, 500ms);
-                return;
-            }
             m_creature->CastSpell(nullptr, SPELL_DUSTY_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
             m_creature->CastSpell(nullptr, SPELL_DUST_CLOUD_IMPACT, TRIGGERED_OLD_TRIGGERED);
             m_creature->CastSpell(nullptr, SPELL_SPAWN_PYRITE, TRIGGERED_OLD_TRIGGERED);
             m_creature->ForcedDespawn(1000);
-        });
+        }
     }
 };
 
@@ -891,8 +889,8 @@ struct npc_salvaged_chopperAI : public CombatAI
 
     void OnPassengerRide(Unit* passenger, bool boarded, uint8 seat) override
     {
-        Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
-        if (!driver)
+        Player* driver = static_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
+        if (!driver || !driver->IsPlayer())
             return;
         if (!seat)
             return;
@@ -1412,7 +1410,7 @@ struct ReadyToFly : public SpellScript
         {
             if (!target->IsBoarded())
                 return;
-            Unit* vehicle = dynamic_cast<Unit*>(target->GetTransportInfo()->GetTransport());
+            Unit* vehicle = static_cast<Unit*>(target->GetTransportInfo()->GetTransport());
             if (!vehicle || !vehicle->IsVehicle())
                 return;
             Unit* driver = vehicle->GetVehicleInfo()->GetPassenger(0);
@@ -1452,8 +1450,6 @@ struct RopeBeam : public AuraScript
             return;
         caster->CastSpell(nullptr, SPELL_COSMETIC_PARACHITE, TRIGGERED_OLD_TRIGGERED);
         caster->GetMotionMaster()->MoveFall();
-        if (caster->AI())
-            caster->AI()->ResetTimer(1, 500ms);
     }
 };
 
