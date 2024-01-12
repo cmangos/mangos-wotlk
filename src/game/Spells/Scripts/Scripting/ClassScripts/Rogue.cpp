@@ -31,7 +31,7 @@ struct Preparation : public SpellScript
             if (spell->GetCaster()->HasAura(56819)) // Glyph of Preparation
                 mask |= 0x0010080000000010;
             // immediately finishes the cooldown on certain Rogue abilities
-            auto cdCheck = [](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & )); };
+            auto cdCheck = [mask](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & mask)); };
             static_cast<Player*>(spell->GetCaster())->RemoveSomeCooldown(cdCheck);
         }
     }
