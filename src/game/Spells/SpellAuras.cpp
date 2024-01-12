@@ -6165,15 +6165,6 @@ void Aura::HandleDamagePercentTaken(bool apply, bool Real)
     {
         if (loading)
             return;
-
-        // Hand of Salvation (only it have this aura and mask)
-        if (GetSpellProto()->IsFitToFamily(SPELLFAMILY_PALADIN, uint64(0x0000000000000100)))
-        {
-            // Glyph of Salvation
-            if (target->GetObjectGuid() == GetCasterGuid())
-                if (Aura* aur = target->GetAura(63225, EFFECT_INDEX_0))
-                    m_modifier.m_amount -= aur->GetModifier()->m_amount;
-        }
     }
     else
         if (GetSpellProto()->Id == 43421) // Malacrass - Lifebloom

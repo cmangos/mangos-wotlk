@@ -1267,7 +1267,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (25899,'spell_blessing_of_sanctuary'),
 (31850,'spell_ardent_defender'),
 (31851,'spell_ardent_defender'),
-(31852,'spell_ardent_defender');
+(31852,'spell_ardent_defender'),
+(1038,'spell_hand_of_salvation'),
+(54925,'spell_glyph_of_seal_of_command'),
+(68082,'spell_glyph_of_seal_of_command_mana'),
+(54939,'spell_glyph_of_divinity'),
+(54937,'spell_glyph_of_holy_light');
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

@@ -2375,13 +2375,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         CastSpell(target, 53739, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
                     break;
                 }
-                // Glyph of Holy Light
-                case 54937:
-                {
-                    triggered_spell_id = 54968;
-                    basepoints[0] = triggerAmount * damage / 100;
-                    break;
-                }
                 // Sacred Shield (buff)
                 case 58597:
                 {
@@ -4285,25 +4278,6 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(ProcExecutionData& data)
 
                 CastSpell(this, 28682, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                 return (procEx & PROC_EX_CRITICAL_HIT) ? SPELL_AURA_PROC_OK : SPELL_AURA_PROC_FAILED; // charge update only at crit hits, no hidden cooldowns
-            }
-            break;
-        }
-        case SPELLFAMILY_PALADIN:
-        {
-            // Glyph of Divinity
-            if (spellProto->Id == 54939)
-            {
-                // Lookup base amount mana restore
-                for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
-                {
-                    if (spellProto->Effect[i] == SPELL_EFFECT_ENERGIZE)
-                    {
-                        int32 mana = spellProto->CalculateSimpleValue(SpellEffectIndex(i));
-                        CastCustomSpell(this, 54986, nullptr, &mana, nullptr, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
-                        break;
-                    }
-                }
-                return SPELL_AURA_PROC_OK;
             }
             break;
         }
