@@ -901,6 +901,7 @@ class Spell
         void SetIgnoreRoot(bool state) { m_ignoreRoot = state; }
         void SetDamageDoneModifier(float mod, SpellEffectIndex effIdx);
         void SetIgnoreOwnerLevel(bool state) { m_ignoreOwnerLevel = state; }
+        void SetUsableWhileStunned(bool state) { m_usableWhileStunned = state; }
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
@@ -977,6 +978,7 @@ class Spell
         int32 m_healingPerEffect[MAX_EFFECT_INDEX];
         int32 m_healthLeech;                                // Health leech in effects for all targets count here
         bool m_guaranteedCrit;                              // Used in effect handlers to guarantee crit
+        bool m_usableWhileStunned;
 
         //******************************************
         // Spell trigger system
