@@ -302,6 +302,8 @@ class Pet : public Creature
         bool IgnoresOwnersDeath() const;
 
         std::vector<uint32> GetCharmSpells() const;
+
+        void Heartbeat() override;
     protected:
         uint32  m_happinessTimer;
         PetType m_petType;
@@ -318,6 +320,7 @@ class Pet : public Creature
         bool m_controllableGuardian;
         bool m_doNotFollowMounted;
         bool m_saveAutocast;
+        bool m_glyphedStat;
 
         void SaveToDB(uint32, uint8, uint32) override       // overwrite of Creature::SaveToDB     - don't must be called
         {

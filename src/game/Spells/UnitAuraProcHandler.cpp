@@ -1403,10 +1403,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     basepoints[EFFECT_INDEX_0] = damage;
                     break;
                 }
-                // Glyph of Life Tap
-                case 63320:
-                    triggered_spell_id = 63321;
-                    break;
                 // Retaliation
                 case 65932:
                     triggered_spell_id = 65934;

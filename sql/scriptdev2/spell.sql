@@ -1383,7 +1383,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27217,'spell_drain_soul'),
 (47855,'spell_drain_soul'),
 (48018,'spell_demonic_circle_summon'),
-(48020,'spell_demonic_circle_teleport');
+(48020,'spell_demonic_circle_teleport'),
+(63320,'spell_glyph_of_life_tap'),
+(63310,'spell_glyph_of_shadowflame'),
+(6358,'spell_seduction_succubus');
 
 -- Pet Scaling
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

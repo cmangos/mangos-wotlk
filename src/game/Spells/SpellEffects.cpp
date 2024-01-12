@@ -6875,6 +6875,9 @@ void Spell::EvaluateResultLists(std::list<std::pair<SpellAuraHolder*, uint32> >&
         {
             int32 heal_amount = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
             m_caster->CastCustomSpell(nullptr, 19658, &heal_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            if (m_caster->HasAura(56249)) // Glyph of Felhunter
+                if (Unit* owner = m_caster->GetOwner())
+                    owner->CastCustomSpell(nullptr, 19658, &heal_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         }
     }
     // Send fail log to client

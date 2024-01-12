@@ -980,6 +980,8 @@ bool Pet::UpdateStats(Stats stat)
 
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
+    if (GetUInt32Value(UNIT_CREATED_BY_SPELL) == 697 && m_glyphedStat)
+        value *= 1.2;
     
     float oldValue = GetStat(stat);
     SetStat(stat, int32(value));
@@ -1094,7 +1096,10 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     // in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
     float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
-    float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
+    float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT);
+    if (GetUInt32Value(UNIT_CREATED_BY_SPELL) == 30146 && m_glyphedStat)
+        attPowerMultiplier *= 1.2;
+    attPowerMultiplier -= 1.0f;
 
     // UNIT_FIELD_(RANGED)_ATTACK_POWER field
     SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32)base_attPower);

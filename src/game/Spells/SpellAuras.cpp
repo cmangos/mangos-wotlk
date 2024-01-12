@@ -10484,23 +10484,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 else
                     return;
             }
-            // Shadowflame (DoT)
-            else if (m_spellProto->IsFitToFamilyMask(uint64(0x0000000000000000), 0x00000002))
-            {
-                // Glyph of Shadowflame
-                if (!apply)
-                    boostSpells.push_back(63311);
-                else
-                {
-                    Unit* caster = GetCaster();
-                    if (caster && caster->HasAura(63310))
-                        boostSpells.push_back(63311);
-                    else
-                        return;
-                }
-            }
-            else
-                return;
             break;
         }
         case SPELLFAMILY_PRIEST:
