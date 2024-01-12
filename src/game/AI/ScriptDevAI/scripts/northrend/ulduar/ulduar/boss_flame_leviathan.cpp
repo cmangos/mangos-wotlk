@@ -741,7 +741,7 @@ struct npc_freya_wardAI : public Scripted_NoMovementAI
         {
             if (m_creature->IsBoarded())
             {
-                Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+                Unit* vehicle = static_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
                 if (vehicle && vehicle->GetVehicleInfo())
                     if (DoCastSpellIfCan(vehicle, SPELL_FREYA_WARD) == CAST_OK)
                         m_uiFreyaWardTimer = 30000;
@@ -790,7 +790,7 @@ struct npc_liquid_pyriteAI : public Scripted_NoMovementAI
         {
             if (!m_creature->IsBoarded())
                 return;
-            Unit* vehicle = dynamic_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
+            Unit* vehicle = static_cast<Unit*>(m_creature->GetTransportInfo()->GetTransport());
             if (!vehicle)
                 return;
             if (vehicle->GetEntry() == 33167 || vehicle->GetEntry() == NPC_SALVAGED_DEMOLISHER)
@@ -822,24 +822,22 @@ struct npc_pyrite_safety_containerAI : public Scripted_NoMovementAI
     {
         AddCustomAction(0, 1s, [&]()
         {
-            Creature* lift = dynamic_cast<Creature*>(m_creature->GetSpawner());
-            if (!lift)
+            Creature* lift = static_cast<Creature*>(m_creature->GetSpawner());
+            if (!lift || !lift->IsCreature() || !lift->IsAlive())
                 return;
             m_creature->CastSpell(lift, SPELL_ROPE_BEAM, TRIGGERED_OLD_TRIGGERED);
         });
-        AddCustomAction(1, true, [&]()
+    }
+
+    void MovementInform(uint32 moveType, uint32 pointId) override
+    {
+        if (moveType == FALL_MOTION_TYPE && pointId == EVENT_FALL)
         {
-            float gZ = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
-            if ((gZ + 0.1f) < m_creature->GetPositionZ())
-            {
-                ResetTimer(1, 500ms);
-                return;
-            }
             m_creature->CastSpell(nullptr, SPELL_DUSTY_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
             m_creature->CastSpell(nullptr, SPELL_DUST_CLOUD_IMPACT, TRIGGERED_OLD_TRIGGERED);
             m_creature->CastSpell(nullptr, SPELL_SPAWN_PYRITE, TRIGGERED_OLD_TRIGGERED);
             m_creature->ForcedDespawn(1000);
-        });
+        }
     }
 };
 
@@ -891,8 +889,8 @@ struct npc_salvaged_chopperAI : public CombatAI
 
     void OnPassengerRide(Unit* passenger, bool boarded, uint8 seat) override
     {
-        Player* driver = dynamic_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
-        if (!driver)
+        Player* driver = static_cast<Player*>(m_creature->GetVehicleInfo()->GetPassenger(0));
+        if (!driver || !driver->IsPlayer())
             return;
         if (!seat)
             return;
@@ -981,6 +979,7 @@ bool NpcSpellClick_npc_salvaged_demolisher(Player* player, Creature* clickedCrea
     return true;
 }
 
+// 62374 - Pursued
 struct PursueLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1026,6 +1025,7 @@ struct PursueLeviathan : public SpellScript
     }
 };
 
+// 62376 - Battering Ram
 struct BatteringRamLeviathan : public SpellScript
 {
     // TODO: Figure out Targeting issues
@@ -1070,11 +1070,11 @@ struct ThorimsHammerLeviathan : public SpellScript
 // 62910 Mimiron's Inferno
 struct MimironsInfernoLeviathan : public SpellScript, public AuraScript
 {
-    bool OnAreaAuraCheckTarget(DynamicObject* dynGo, Unit* target) const override
+    bool OnAreaAuraCheckTarget(Aura const* aura, Unit* target) const override
     {
         if (!target)
             return false;
-        Unit* caster = dynGo->GetCaster();
+        Unit* caster = aura->GetCaster();
         if (!caster)
             return false;
         if (caster->IsFriend(target))
@@ -1087,6 +1087,7 @@ struct MimironsInfernoLeviathan : public SpellScript, public AuraScript
     }
 };
 
+// 64414 - Load into Catapult
 struct LoadIntoCatapultLeviathan : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1145,6 +1146,7 @@ struct ThrowPassenger : public SpellScript
     }
 };
 
+// 62336 - Hookshot Aura
 struct HookshotAura : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -1161,6 +1163,7 @@ struct HookshotAura : public AuraScript
     }
 };
 
+// 62323 - Hookshot
 struct Hookshot : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
@@ -1200,6 +1203,7 @@ struct Hookshot : public SpellScript
     }
 };
 
+// 62399 - Overload Circuit
 struct OverloadCircuit : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1226,6 +1230,7 @@ struct OverloadCircuit : public AuraScript
     }
 };
 
+// 62475 - Systems Shutdown
 struct SystemsShutdown : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1293,6 +1298,7 @@ struct SystemsShutdown : public AuraScript
     }
 };
 
+// 60603 - Eject Passenger 1
 struct EjectPassenger1 : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -1320,6 +1326,7 @@ struct EjectPassenger1 : public SpellScript
     }
 };
 
+// 63575 - Smoke Trail
 struct SmokeTrailLeviathan : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
@@ -1336,6 +1343,7 @@ struct SmokeTrailLeviathan : public SpellScript
     }
 };
 
+// 61242 - Parachute
 struct ParachuteLeviathan : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -1350,6 +1358,7 @@ struct ParachuteLeviathan : public AuraScript
     }
 };
 
+// 67372 - Grab Pyrite
 struct GrabPyrite : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
@@ -1369,6 +1378,7 @@ struct GrabPyrite : public SpellScript
     }
 };
 
+// 63618 - Overload
 struct OverloadLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1380,6 +1390,7 @@ struct OverloadLeviathan : public SpellScript
     }
 };
 
+// 62907 - Freya's Ward
 struct FreyasWard : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -1389,6 +1400,7 @@ struct FreyasWard : public SpellScript
     }
 };
 
+// 65045 - Flames
 struct FlamesLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1400,6 +1412,7 @@ struct FlamesLeviathan : public SpellScript
     }
 };
 
+// 64998 - Say you're ready to fly!
 struct ReadyToFly : public SpellScript
 {
     const std::vector<uint32> bcts = {34429, 34433};
@@ -1412,7 +1425,7 @@ struct ReadyToFly : public SpellScript
         {
             if (!target->IsBoarded())
                 return;
-            Unit* vehicle = dynamic_cast<Unit*>(target->GetTransportInfo()->GetTransport());
+            Unit* vehicle = static_cast<Unit*>(target->GetTransportInfo()->GetTransport());
             if (!vehicle || !vehicle->IsVehicle())
                 return;
             Unit* driver = vehicle->GetVehicleInfo()->GetPassenger(0);
@@ -1427,6 +1440,7 @@ struct ReadyToFly : public SpellScript
     }
 };
 
+// 64979 - Anti-Air Rocket
 struct AntiAirRocket : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
@@ -1452,8 +1466,6 @@ struct RopeBeam : public AuraScript
             return;
         caster->CastSpell(nullptr, SPELL_COSMETIC_PARACHITE, TRIGGERED_OLD_TRIGGERED);
         caster->GetMotionMaster()->MoveFall();
-        if (caster->AI())
-            caster->AI()->ResetTimer(1, 500ms);
     }
 };
 
