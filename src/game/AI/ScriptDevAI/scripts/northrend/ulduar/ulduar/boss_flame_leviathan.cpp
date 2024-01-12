@@ -1070,11 +1070,11 @@ struct ThorimsHammerLeviathan : public SpellScript
 // 62910 Mimiron's Inferno
 struct MimironsInfernoLeviathan : public SpellScript, public AuraScript
 {
-    bool OnAreaAuraCheckTarget(DynamicObject* dynGo, Unit* target) const override
+    bool OnAreaAuraCheckTarget(Aura const* aura, Unit* target) const override
     {
         if (!target)
             return false;
-        Unit* caster = dynGo->GetCaster();
+        Unit* caster = aura->GetCaster();
         if (!caster)
             return false;
         if (caster->IsFriend(target))
