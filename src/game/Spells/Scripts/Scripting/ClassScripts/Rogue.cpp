@@ -27,8 +27,11 @@ struct Preparation : public SpellScript
     {
         if (spell->GetCaster()->IsPlayer())
         {
+            uint64 mask = uint64(0x0000024000000860);
+            if (spell->GetCaster()->HasAura(56819)) // Glyph of Preparation
+                mask |= 0x0010080000000010;
             // immediately finishes the cooldown on certain Rogue abilities
-            auto cdCheck = [](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & uint64(0x0000024000000860))); };
+            auto cdCheck = [](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & )); };
             static_cast<Player*>(spell->GetCaster())->RemoveSomeCooldown(cdCheck);
         }
     }
@@ -306,6 +309,53 @@ struct NervesOfSteel : public AuraScript
     }
 };
 
+// 58033 - Glyph of Safe Fall
+struct GlyphOfSafeFall : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (Aura* safeFall = aura->GetTarget()->GetAura(1860, EFFECT_INDEX_0))
+            safeFall->GetModifier()->m_amount += (apply ? aura->GetAmount() : -aura->GetAmount());
+    }
+};
+
+// 53 - Backstab
+struct BackstabRogue : public SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
+    {
+        if (missInfo == SPELL_MISS_NONE)
+        {
+            if (Aura* glyphOfBackstab = spell->GetCaster()->GetAura(56800, EFFECT_INDEX_0)) // Glyph of Backstab
+            {
+                Unit* target = spell->GetUnitTarget();
+                if (Aura* rupture = target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_ROGUE, 0x0, 0x00100000, spell->GetCaster()->GetObjectGuid()))
+                {
+                    int32 increaseAmount = glyphOfBackstab->GetAmount();
+                    int32 maxIncreaseAmount = spell->GetCaster()->CalculateSpellEffectValue(target, glyphOfBackstab->GetSpellProto(), EFFECT_INDEX_1);
+                    if (rupture->GetScriptValue() >= maxIncreaseAmount)
+                        return;
+                    SpellAuraHolder* holder = rupture->GetHolder();
+                    holder->SetAuraMaxDuration(holder->GetAuraMaxDuration() + increaseAmount);
+                    holder->SetAuraDuration(holder->GetAuraDuration() + increaseAmount);
+                    holder->SendAuraUpdate(false);
+                    rupture->SetScriptValue(rupture->GetScriptValue() + increaseAmount);
+                }
+            }
+        }
+    }
+};
+
+// 2983 - Sprint
+struct SprintRogue : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply && aura->GetTarget()->HasAura(58039)) // Glyph of Blurred Speed
+            aura->GetTarget()->CastSpell(nullptr, 61922, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<Preparation>("spell_preparation");
@@ -319,4 +369,7 @@ void LoadRogueScripts()
     RegisterSpellScript<KillingSpree>("spell_killing_spree");
     RegisterSpellScript<PreyOnTheWeak>("spell_prey_on_the_weak");
     RegisterSpellScript<NervesOfSteel>("spell_nerves_of_steel");
+    RegisterSpellScript<GlyphOfSafeFall>("spell_glyph_of_safe_fall");
+    RegisterSpellScript<BackstabRogue>("spell_backstab");
+    RegisterSpellScript<SprintRogue>("spell_sprint_rogue");
 }

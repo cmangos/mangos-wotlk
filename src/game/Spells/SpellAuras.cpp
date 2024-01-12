@@ -10555,17 +10555,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             break;
         }
         case SPELLFAMILY_ROGUE:
-            // Sprint (skip non player casted spells by category)
-            if (GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000040) && GetSpellProto()->Category == 44)
-            {
-                if (!apply || m_target->HasAura(58039))     // Glyph of Blurred Speed
-                    boostSpells.push_back(61922);                       // Sprint (waterwalk)
-                else
-                    return;
-            }
-            else
-                return;
-            break;
+            return;
         case SPELLFAMILY_HUNTER:
         {
             switch (GetId())

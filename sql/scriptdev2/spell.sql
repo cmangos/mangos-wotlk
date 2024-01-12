@@ -1660,7 +1660,23 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (51688,'spell_prey_on_the_weak'),
 (51689,'spell_prey_on_the_weak'),
 (31130,'spell_nerves_of_steel'),
-(31131,'spell_nerves_of_steel');
+(31131,'spell_nerves_of_steel'),
+(58033,'spell_glyph_of_safe_fall'),
+(53,'spell_backstab'),
+(2589,'spell_backstab'),
+(2590,'spell_backstab'),
+(2591,'spell_backstab'),
+(8721,'spell_backstab'),
+(11279,'spell_backstab'),
+(11280,'spell_backstab'),
+(11281,'spell_backstab'),
+(25300,'spell_backstab'),
+(26863,'spell_backstab'),
+(48656,'spell_backstab'),
+(48657,'spell_backstab'),
+(2983,'spell_sprint_rogue'),
+(8696,'spell_sprint_rogue'),
+(11305,'spell_sprint_rogue');
 
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
