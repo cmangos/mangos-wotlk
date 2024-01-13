@@ -528,7 +528,7 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
     SendTradeStatus(info);
 }
 
-void WorldSession::SendCancelTrade(TradeStatus status)
+void WorldSession::SendCancelTrade(TradeStatus status) const
 {
     if (m_playerRecentlyLogout)
         return;
