@@ -3539,20 +3539,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             break;
         case SPELLFAMILY_WARLOCK:
         {
-            // Haunt
-            if (GetSpellProto()->SpellIconID == 3172 && (GetSpellProto()->SpellFamilyFlags & uint64(0x0004000000000000)))
-            {
-                // NOTE: for avoid use additional field damage stored in dummy value (replace unused 100%
-                if (apply)
-                    m_modifier.m_amount = 0;                // use value as damage counter instead redundant 100% percent
-                else
-                {
-                    int32 bp0 = m_modifier.m_amount;
-
-                    if (Unit* caster = GetCaster())
-                        target->CastCustomSpell(caster, 48210, &bp0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                }
-            }
             break;
         }
         case SPELLFAMILY_DRUID:
