@@ -2066,6 +2066,18 @@ inline bool IsSpellSpecificIdentical(SpellSpecific specific, SpellSpecific speci
     return false;
 }
 
+inline bool IsSpellSpecificInterchangeable(SpellSpecific specific)
+{
+    switch (specific)
+    {
+        case SPELL_CORRUPTION_DEBUFF:
+        case SPELL_JUDGEMENT:
+            return true;
+        default: break;
+    }
+    return false;
+}
+
 inline bool IsSimilarAuraEffect(SpellEntry const* entry, uint32 effect, SpellEntry const* entry2, uint32 effect2)
 {
     return (entry2->EffectApplyAuraName[effect2] && entry->EffectApplyAuraName[effect] &&
