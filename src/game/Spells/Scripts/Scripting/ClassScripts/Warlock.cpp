@@ -640,6 +640,29 @@ struct SeductionSuccubus : public AuraScript
     }
 };
 
+// 48181, 59161, 59163, 59164 - Haunt
+struct Haunt : public AuraScript
+{
+    enum
+    {
+        SPELL_HAUNT_HEAL = 48210,
+    };
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            aura->GetModifier()->m_amount = 0;
+            return;
+        }
+        Unit* caster = aura->GetCaster();
+        Unit* target = aura->GetTarget();
+        if (!caster)
+            return;
+        int32 bp0 = aura->GetModifier()->m_amount;
+        target->CastCustomSpell(caster, SPELL_HAUNT_HEAL, &bp0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterSpellScript<UnstableAffliction>("spell_unstable_affliction");
@@ -665,4 +688,5 @@ void LoadWarlockScripts()
     RegisterSpellScript<GlyphOfLifeTap>("spell_glyph_of_life_tap");
     RegisterSpellScript<GlyphOfShadowflame>("spell_glyph_of_shadowflame");
     RegisterSpellScript<SeductionSuccubus>("spell_seduction_succubus");
+    RegisterSpellScript<Haunt>("spell_haunt");
 }

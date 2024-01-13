@@ -1401,7 +1401,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (48020,'spell_demonic_circle_teleport'),
 (63320,'spell_glyph_of_life_tap'),
 (63310,'spell_glyph_of_shadowflame'),
-(6358,'spell_seduction_succubus');
+(6358,'spell_seduction_succubus'),
+(48181,'spell_haunt'),
+(59161,'spell_haunt'),
+(59163,'spell_haunt'),
+(59164,'spell_haunt');
 
 -- Pet Scaling
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
