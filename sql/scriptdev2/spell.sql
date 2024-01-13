@@ -1246,9 +1246,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-<<<<<<< HEAD
-(53407,'spell_judgement'),
-=======
 (21082,'spell_seal_of_the_crusader'),
 (20162,'spell_seal_of_the_crusader'),
 (20305,'spell_seal_of_the_crusader'),
@@ -1263,9 +1260,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (19978,'spell_blessing_of_light'),
 (19979,'spell_blessing_of_light'),
 (27144,'spell_blessing_of_light'),
->>>>>>> 6bb83e22fe3 (Paladin: Make divine intervention bounce if target is carrying a BG flag)
 (20271,'spell_judgement'),
 (57774,'spell_judgement'),
+(53407,'spell_judgement'),
 (53408,'spell_judgement'),
 (31876,'spell_judgements_of_the_wise'),
 (31877,'spell_judgements_of_the_wise'),
