@@ -1480,7 +1480,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (50725,'spell_vigilance_trigger'),
 (59665,'spell_vigilance_redirect'),
 (58567,'spell_sunder_armor'),
-(56369,'spell_glyph_of_victory_rush');
+(58382,'spell_glyph_of_victory_rush');
 
 -- Mage
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
