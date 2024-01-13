@@ -5760,15 +5760,6 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
             if (!apply)
                 GetTarget()->RemoveAurasDueToSpell(40601);
             break;
-        case 50720:                                         // Vigilance (threat transfering)
-            if (apply)
-            {
-                if (Unit* caster = GetCaster())
-                    target->CastSpell(caster, 59665, TRIGGERED_OLD_TRIGGERED);
-            }
-            else
-                target->getHostileRefManager().ResetThreatRedirection(59665);
-            break;
         default:
             break;
     }

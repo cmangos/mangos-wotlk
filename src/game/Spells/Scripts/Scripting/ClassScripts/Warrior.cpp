@@ -24,8 +24,11 @@ struct WarriorExecute : public SpellScript
 {
     void OnCast(Spell* spell) const override // confirmed main spell can not hit and child still hits
     {
+        uint32 currentRage = spell->GetCaster()->GetPower(POWER_RAGE);
+        if (Aura* glyph = spell->GetCaster()->GetAura(58367, EFFECT_INDEX_0)) // Glyph of Execution
+            currentRage += glyph->GetAmount(); // simulates having more rage
         int32 basePoints0 = spell->GetCaster()->CalculateSpellEffectValue(spell->m_targets.getUnitTarget(), spell->m_spellInfo, SpellEffectIndex(0))
-            + int32((spell->GetCaster()->GetPower(POWER_RAGE)) * spell->m_spellInfo->DmgMultiplier[0]);
+            + int32((currentRage) * spell->m_spellInfo->DmgMultiplier[0]);
         SpellCastResult result = spell->GetCaster()->CastCustomSpell(spell->m_targets.getUnitTarget(), 20647, &basePoints0, nullptr, nullptr, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
     }
 };
@@ -250,6 +253,17 @@ struct SpellReflectionRaid : public SpellScript, public AuraScript
 // 50720 - Vigilance
 struct Vigilance : public AuraScript
 {
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            if (Unit* caster = aura->GetCaster())
+                aura->GetTarget()->CastSpell(caster, 59665, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+            aura->GetTarget()->getHostileRefManager().ResetThreatRedirection(59665);
+    }
+
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
         procData.triggeredSpellId = aura->GetSpellProto()->EffectTriggerSpell[aura->GetEffIndex()];
@@ -271,6 +285,18 @@ struct VigilanceTrigger : public SpellScript
     }
 };
 
+// 59665 - Vigilance
+struct VigilanceRedirect : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        int32 damage = spell->GetDamage();
+        if (Aura* glyph = spell->GetUnitTarget()->GetDummyAura(63326))  // Glyph of Vigilance
+            damage += glyph->GetModifier()->m_amount;
+        spell->SetDamage(damage);
+    }
+};
+
 // 3411 - Intervene
 struct Intervene : public SpellScript
 {
@@ -288,6 +314,20 @@ struct Intervene : public SpellScript
     }
 };
 
+// 58382 - Glyph of Victory Rush
+struct GlyphOfVictoryRush : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* spellInfo) const override
+    {
+        chance += aura->GetModifier()->m_amount;
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
@@ -302,5 +342,7 @@ void LoadWarriorScripts()
     RegisterSpellScript<SpellReflectionRaid>("spell_spell_reflection_raid");
     RegisterSpellScript<Vigilance>("spell_vigilance");
     RegisterSpellScript<VigilanceTrigger>("spell_vigilance_trigger");
+    RegisterSpellScript<VigilanceRedirect>("spell_vigilance_redirect");
     RegisterSpellScript<Intervene>("spell_intervene");
+    RegisterSpellScript<GlyphOfVictoryRush>("spell_glyph_of_victory_rush");
 }
