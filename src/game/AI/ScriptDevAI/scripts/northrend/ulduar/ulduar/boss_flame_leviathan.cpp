@@ -979,6 +979,7 @@ bool NpcSpellClick_npc_salvaged_demolisher(Player* player, Creature* clickedCrea
     return true;
 }
 
+// 62374 - Pursued
 struct PursueLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1024,6 +1025,7 @@ struct PursueLeviathan : public SpellScript
     }
 };
 
+// 62376 - Battering Ram
 struct BatteringRamLeviathan : public SpellScript
 {
     // TODO: Figure out Targeting issues
@@ -1085,6 +1087,7 @@ struct MimironsInfernoLeviathan : public SpellScript, public AuraScript
     }
 };
 
+// 64414 - Load into Catapult
 struct LoadIntoCatapultLeviathan : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1143,6 +1146,7 @@ struct ThrowPassenger : public SpellScript
     }
 };
 
+// 62336 - Hookshot Aura
 struct HookshotAura : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -1159,6 +1163,7 @@ struct HookshotAura : public AuraScript
     }
 };
 
+// 62323 - Hookshot
 struct Hookshot : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
@@ -1198,6 +1203,7 @@ struct Hookshot : public SpellScript
     }
 };
 
+// 62399 - Overload Circuit
 struct OverloadCircuit : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1224,6 +1230,7 @@ struct OverloadCircuit : public AuraScript
     }
 };
 
+// 62475 - Systems Shutdown
 struct SystemsShutdown : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1291,6 +1298,7 @@ struct SystemsShutdown : public AuraScript
     }
 };
 
+// 60603 - Eject Passenger 1
 struct EjectPassenger1 : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -1318,6 +1326,7 @@ struct EjectPassenger1 : public SpellScript
     }
 };
 
+// 63575 - Smoke Trail
 struct SmokeTrailLeviathan : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
@@ -1334,6 +1343,7 @@ struct SmokeTrailLeviathan : public SpellScript
     }
 };
 
+// 61242 - Parachute
 struct ParachuteLeviathan : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -1348,6 +1358,7 @@ struct ParachuteLeviathan : public AuraScript
     }
 };
 
+// 67372 - Grab Pyrite
 struct GrabPyrite : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
@@ -1367,6 +1378,7 @@ struct GrabPyrite : public SpellScript
     }
 };
 
+// 63618 - Overload
 struct OverloadLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1378,6 +1390,7 @@ struct OverloadLeviathan : public SpellScript
     }
 };
 
+// 62907 - Freya's Ward
 struct FreyasWard : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -1387,6 +1400,7 @@ struct FreyasWard : public SpellScript
     }
 };
 
+// 65045 - Flames
 struct FlamesLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1398,6 +1412,7 @@ struct FlamesLeviathan : public SpellScript
     }
 };
 
+// 64998 - Say you're ready to fly!
 struct ReadyToFly : public SpellScript
 {
     const std::vector<uint32> bcts = {34429, 34433};
@@ -1425,6 +1440,7 @@ struct ReadyToFly : public SpellScript
     }
 };
 
+// 64979 - Anti-Air Rocket
 struct AntiAirRocket : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
