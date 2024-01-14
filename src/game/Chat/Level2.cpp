@@ -582,11 +582,11 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
             {
                 std::string name = pParam1;
                 WorldDatabase.escape_string(name);
-                auto queryResult = WorldDatabase.PQuery("SELECT creature.guid, creature_spawn_entry.guid "
-                  "FROM creature, creature_template, creature_spawn_entry "
-                  "WHERE (creature.id = creature_template.entry "
-                    "OR (creature_spawn_entry.entry = creature_template.entry AND creature.guid = creature_spawn_entry.guid)) "
-                  "AND creature_template.name LIKE '%%%s%%' LIMIT 1;", name.c_str());
+                auto queryResult = WorldDatabase.PQuery("SELECT COALESCE(creature.guid, creature_spawn_entry.guid) AS guid "
+                  "FROM creature_template "
+                  "LEFT JOIN creature ON creature.id = creature_template.entry "
+                  "LEFT JOIN creature_spawn_entry ON creature_spawn_entry.entry = creature_template.entry "
+                  "WHERE creature_template.name LIKE '%%%s%%' LIMIT 1;", name.c_str());
                 if (!queryResult)
                 {
                     SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
@@ -613,6 +613,7 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
                     break;
 
                 data = &dataPair->second;
+                dbGuid = dataPair->first;
             }
             break;
         }
@@ -666,12 +667,12 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
             Creature* creature = nullptr;
             if (dbGuid)
             {
-                // check static creature store
-                creature = map->GetCreature(ObjectGuid(HIGHGUID_UNIT, dbGuid));
+                // check creature with dynamic guid
+                creature = map->GetCreature(dbGuid);
                 if (!creature)
                 {
-                    // check creature with dynamic guid
-                    creature = map->GetCreature(dbGuid);
+                    // check static creature store
+                    creature = map->GetCreature(ObjectGuid(HIGHGUID_UNIT, dbGuid));
                 }
             }
             /*else
