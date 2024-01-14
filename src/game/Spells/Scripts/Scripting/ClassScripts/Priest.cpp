@@ -568,6 +568,15 @@ struct GlyphOfDispelMagic : public AuraScript
     }
 };
 
+// 15407, 17311, 17312, 17313, 17314, 18807, 25387, 48155, 48156 - Mind Flay
+struct MindFlay : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        *data.basePoints = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
@@ -597,4 +606,5 @@ void LoadPriestScripts()
     RegisterSpellScript<ShadowfiendDeath>("spell_shadowfiend_death");
     RegisterSpellScript<GlyphOfShadowWordPain>("spell_glyph_of_shadow_word_pain");
     RegisterSpellScript<GlyphOfDispelMagic>("spell_glyph_of_dispel_magic");
+    RegisterSpellScript<MindFlay>("spell_mind_flay");
 }
