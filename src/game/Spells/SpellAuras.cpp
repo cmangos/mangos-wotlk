@@ -2342,15 +2342,10 @@ void Aura::TriggerSpellWithValue()
     SpellEntry const* triggeredSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(trigger_spell_id);
     int32 basePoints[3] = { 0,0,0 };
     // damage triggered from spell might not only be processed by first effect (but always EffectDieSides equal 1)
-    if (triggeredSpellInfo)
+    for (uint8 i = 0; i < 3; ++i)
     {
-        uint8 j = 0;
-        for (uint8 i = 0; i < 3; ++i)
-        {
-            if (triggeredSpellInfo->EffectDieSides[i] == 1)
-                j = i;
-        }
-        basePoints[j] = calculatedAmount;
+        if (triggeredSpellInfo->EffectDieSides[i] == 1)
+            basePoints[i] = calculatedAmount;
     }
     Unit* triggerCaster = triggerTarget;
     WorldObject* triggerTargetObject = nullptr;

@@ -1242,16 +1242,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (55689,'spell_glyph_of_shadow'),
 (57989,'spell_shadowfiend_death'),
 (71132,'spell_glyph_of_shadow_word_pain'),
-(55677,'spell_glyph_of_dispel_magic'),
-(15407,'spell_mind_flay'),
-(17311,'spell_mind_flay'),
-(17312,'spell_mind_flay'),
-(17313,'spell_mind_flay'),
-(17314,'spell_mind_flay'),
-(18807,'spell_mind_flay'),
-(25387,'spell_mind_flay'),
-(48155,'spell_mind_flay'),
-(48156,'spell_mind_flay');
+(55677,'spell_glyph_of_dispel_magic');
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
