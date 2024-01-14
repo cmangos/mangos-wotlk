@@ -2344,13 +2344,11 @@ void Aura::TriggerSpellWithValue()
     // damage triggered from spell might not only be processed by first effect (but always EffectDieSides equal 1)
     if (triggeredSpellInfo)
     {
-        uint8 j = 0;
         for (uint8 i = 0; i < 3; ++i)
         {
             if (triggeredSpellInfo->EffectDieSides[i] == 1)
-                j = i;
+                basePoints[i] = calculatedAmount;
         }
-        basePoints[j] = calculatedAmount;
     }
     Unit* triggerCaster = triggerTarget;
     WorldObject* triggerTargetObject = nullptr;
