@@ -582,35 +582,54 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
             {
                 std::string name = pParam1;
                 WorldDatabase.escape_string(name);
-                auto queryResult = WorldDatabase.PQuery("SELECT COALESCE(creature.guid, creature_spawn_entry.guid) AS guid "
-                  "FROM creature_template "
-                  "LEFT JOIN creature ON creature.id = creature_template.entry "
-                  "LEFT JOIN creature_spawn_entry ON creature_spawn_entry.entry = creature_template.entry "
-                  "WHERE creature_template.name LIKE '%%%s%%' LIMIT 1;", name.c_str());
-                if (!queryResult)
+                auto getGuid = [&](std::unique_ptr<QueryResult>& queryResult) -> CreatureDataPair const*
                 {
-                    SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
-                    SetSentErrorMessage(true);
-                    return false;
+                    if (!queryResult)
+                    {
+                        SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
+                        SetSentErrorMessage(true);
+                        return nullptr;
+                    }                        
+
+                    FindCreatureData worker(0, m_session ? m_session->GetPlayer() : nullptr);
+
+                    do
+                    {
+                        Field* fields = queryResult->Fetch();
+                        uint32 guid = fields[0].GetUInt32();
+
+                        CreatureDataPair const* cr_data = sObjectMgr.GetCreatureDataPair(guid);
+                        if (!cr_data)
+                            continue;
+
+                        worker(*cr_data);
+                    } while (queryResult->NextRow());
+
+                    return worker.GetResult();
+                };
+                CreatureDataPair const* dataPair;
+                {
+                    auto queryResult = WorldDatabase.PQuery("SELECT COALESCE(creature.guid, creature_spawn_entry.guid) AS guid "
+                        "FROM creature_template "
+                        "LEFT JOIN creature ON creature.id = creature_template.entry "
+                        "LEFT JOIN creature_spawn_entry ON creature_spawn_entry.entry = creature_template.entry "
+                        "WHERE creature_template.name LIKE '%%%s%%' LIMIT 1;", name.c_str());
+
+                    dataPair = getGuid(queryResult);
                 }
-
-                FindCreatureData worker(0, m_session ? m_session->GetPlayer() : nullptr);
-
-                do
-                {
-                    Field* fields = queryResult->Fetch();
-                    uint32 guid = fields[0].GetUInt32();
-
-                    CreatureDataPair const* cr_data = sObjectMgr.GetCreatureDataPair(guid);
-                    if (!cr_data)
-                        continue;
-
-                    worker(*cr_data);
-                } while (queryResult->NextRow());
-
-                CreatureDataPair const* dataPair = worker.GetResult();
                 if (!dataPair)
-                    break;
+                {
+                    auto queryResult = WorldDatabase.PQuery("SELECT creature.guid FROM creature_template "
+                        "LEFT JOIN spawn_group_entry ON spawn_group_entry.entry = creature_template.entry "
+                        "LEFT JOIN spawn_group ON spawn_group_entry.Id=spawn_group.Id "
+                        "LEFT JOIN spawn_group_spawn ON spawn_group_spawn.Id=spawn_group.Id "
+                        "LEFT JOIN creature ON creature.guid=spawn_group_spawn.Guid "
+                        "WHERE creature_template.name LIKE '%%%s%%' AND spawn_group.type=0 AND creature.Id=0 LIMIT 1;", name.c_str());
+
+                    dataPair = getGuid(queryResult);
+                    if (!dataPair)
+                        break;
+                }
 
                 data = &dataPair->second;
                 dbGuid = dataPair->first;
