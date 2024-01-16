@@ -4138,7 +4138,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     if (CreatureGroup* group = target->GetCreatureGroup())
         PSendSysMessage("Creature group: %u", group->GetGroupEntry().Id);
 
-    if (auto vector = sObjectMgr.GetAllRandomCreatureEntries(target->GetGUIDLow()))
+    if (auto vector = sObjectMgr.GetAllRandomCreatureEntries(target->GetDbGuid()))
     {
         std::string output;
         for (uint32 entry : *vector)
@@ -4155,7 +4155,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
         SendSysMessage(LANG_NPCINFO_TRAINER);
     }
 
-    ShowNpcOrGoSpawnInformation<Creature>(target->GetGUIDLow());
+    ShowNpcOrGoSpawnInformation<Creature>(target->GetDbGuid());
     return true;
 }
 
