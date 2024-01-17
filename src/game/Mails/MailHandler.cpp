@@ -836,21 +836,9 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
                     break;
             }
 
-            data << ObjectGuid(guidType, m->sender); // sender guid
-
-            switch (m->messageType)
-            {
-                case MAIL_AUCTION:
-                case MAIL_CREATURE:
-                case MAIL_GAMEOBJECT:
-                    data << uint32(m->sender);              // sender's id
-                    data << uint32(m->messageType);         // message type
-                    break;
-                default:
-                    data << uint32(0);
-                    data << uint32(0);
-                    break;
-            }
+            data << ObjectGuid(guidType, m->sender);     // sender guid
+            data << static_cast<uint32>(m->sender);      // sender id
+            data << static_cast<uint32>(m->messageType); // message type
 
             data << uint32(m->stationery);
             data << uint32(0xC6000000);                     // float unk, time or something
