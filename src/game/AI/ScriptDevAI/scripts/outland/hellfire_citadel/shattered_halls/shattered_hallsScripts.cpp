@@ -25,7 +25,6 @@
 #include "shattered_halls.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 
-
 enum
 {
     SAY_START = 14134,
@@ -270,6 +269,257 @@ struct npc_shattered_hand_centurion : public CombatAI
     }
 };
 
+/*######
+ ## npc_shattered_hand_legionnaire 16700
+ ######*/
+
+enum ShatteredHandLegionnairActions
+{
+    LEGIONNAIRE_PUMMEL,
+    LEGIONNAIRE_AURA_OF_DISCIPLIN,
+    LEGIONNAIRE_ACTION_MAX,
+    LEGIONNAIRE_CALL_FOR_REINFORCEMENTS,
+    LEGIONNAIRE_REINF_CD,
+};
+
+enum ShatteredHandLegionnair
+{
+    SPELL_AURA_OF_DISCIPLINE        = 30472,
+    SPELL_PUMMEL                    = 15615,
+    SPELL_ENRAGE                    = 30485,
+    EMOTE_ENRAGE                    = 1151,
+    MOB_FEL_ORC                     = 17083,   
+};
+
+static float FelOrcSpawnCoords[][4] =               // Coords needed for spawns 
+{
+    { 0.0f, 0.0f, 0.0f, 0.0f},                      // Legionnaire 001 spawn coords
+    { 79.9949f, 111.5607f, -13.1384f, 4.6949f},     // Legionnaire 002 right side felorc spawn
+    { 61.1264f, 110.8250f, -13.1384f, 6.1784f },    // Legionnaire 002 left side felorc spawn
+    { 88.4735f, 187.3315f, -13.1929f, 3.144f },     // Legionnaire 003 spawn
+    { 78.6885f, 218.2196f, -13.2166f, 4.013f },     // Legionnaire 004 spawn
+    { 83.5307f, 250.5344f, -13.1131f, 3.060f },     // Legionnaire 005 spawn
+    { 69.8188f, 239.513f, -13.193643f, 0.0 }         // Legionnaire 006 waypoint
+};
+
+static const int32 aRandomAggro[] = { 16700, 16703, 16698, 16701, 16702, 16697, 16699 };
+
+static const int32 aRandomReinf[] = { 16356, 16357, 16358, 16359, 16360, 16361, 16362 };
+static const int32 aRandomReinfSleeping[] = { 16363, 16364, 16365, 16366, 16367 };
+
+struct npc_shattered_hand_legionnaire : public CombatAI
+{
+    npc_shattered_hand_legionnaire(Creature* creature) : CombatAI(creature, LEGIONNAIRE_ACTION_MAX), m_instance(static_cast<instance_shattered_halls*>(creature->GetInstanceData())),
+    m_reinfCD(false)
+    {
+        AddCombatAction(LEGIONNAIRE_PUMMEL, 10000, 15000);
+        AddCombatAction(LEGIONNAIRE_AURA_OF_DISCIPLIN, 0, 5000);
+        AddCustomAction(LEGIONNAIRE_CALL_FOR_REINFORCEMENTS, true, [&]() { CallForReinforcements(); });
+        AddCustomAction(LEGIONNAIRE_REINF_CD, true, [&]() { DoReinfCD(); });
+        if (m_creature->HasStringId(FIRST_LEGIONNAIRE_STRING))
+            if (m_creature->IsAlive())
+                m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_001, 1);
+            else
+                m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_001, 0);
+        else if (m_creature->HasStringId(SECOND_LEGIONNAIRE_STRING))
+            legionnaireGuid = urand(1, 2);
+        else if (m_creature->HasStringId(THIRD_LEGIONNAIRE_STRING))
+            legionnaireGuid = 3;
+        else if (m_creature->HasStringId(FOURTH_LEGIONNAIRE_STRING))
+            legionnaireGuid = 4;
+        else if (m_creature->HasStringId(FIFTH_LEGIONNAIRE_STRING))
+            legionnaireGuid = 5;
+        else if (m_creature->HasStringId(SIX_LEGIONNAIRE_STRING))
+            legionnaireGuid = 6;
+    }
+
+    uint32 legionnaireGuid;
+    instance_shattered_halls* m_instance;
+    bool m_reinfCD;
+
+    void Aggro(Unit* /*who*/) override
+    {
+        if (urand(0, 4) > 2)
+            DoBroadcastText(aRandomAggro[urand(0, 6)], m_creature);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        if (m_creature->HasStringId(FIRST_LEGIONNAIRE_STRING))
+        {
+            // When Legionnaire 001 is dead change worldstate to false, heathen/savage group around him cant respawn anymore
+            m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_001, 0);
+        }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_JUST_DIED)
+            ResetTimer(LEGIONNAIRE_CALL_FOR_REINFORCEMENTS, 0u);
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        // There can always be just one reinforcement up, when summoned dies legionnaire can spawn a new one after ~5-15 seconds cooldown
+        if (m_reinfCD)
+            ResetTimer(LEGIONNAIRE_REINF_CD, urand(5000, 15000));
+    }
+
+    // also reset timer when summoned despawns 
+    void SummonedCreatureDespawn(Creature* /*summoned*/) override
+    {
+        if (m_reinfCD)
+            ResetTimer(LEGIONNAIRE_REINF_CD, urand(5000, 15000));
+    }
+
+    void SummonedMovementInform(Creature* summoned, uint32 /*motionType*/, uint32 pointId) override
+    {
+        // When last waypoint reached, search for players.
+        if (pointId == 100)
+        {
+            summoned->GetMotionMaster()->MoveIdle();
+            summoned->SetInCombatWithZone();            
+        }
+    }
+
+    void CallForReinforcements()
+    {
+        // reinforcement can get spawned even if legionnaire is outfight and has a cooldown between 10 and 15 seconds, but only one can be up
+        if (!m_reinfCD)
+        {
+            if (m_creature->HasStringId(SECOND_LEGIONNAIRE_STRING) || m_creature->HasStringId(THIRD_LEGIONNAIRE_STRING) || m_creature->HasStringId(FOURTH_LEGIONNAIRE_STRING) || m_creature->HasStringId(FIFTH_LEGIONNAIRE_STRING))
+            {
+                if (Creature* felorc = m_creature->SummonCreature(MOB_FEL_ORC, FelOrcSpawnCoords[legionnaireGuid][0], FelOrcSpawnCoords[legionnaireGuid][1], FelOrcSpawnCoords[legionnaireGuid][2], FelOrcSpawnCoords[legionnaireGuid][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, urand(20000, 25000), true, true))
+                {
+                    felorc->GetMotionMaster()->MoveWaypoint(legionnaireGuid, 0, 0, 0, FORCED_MOVEMENT_RUN);
+                    felorc->SetCanCallForAssistance(false);
+                    felorc->SetCanCheckForHelp(false);
+                    DoBroadcastText(aRandomReinf[urand(0, 6)], m_creature);
+                }
+            }
+            m_reinfCD = true;
+        }
+
+        // Legionnaire 006
+        if (m_creature->HasStringId(SIX_LEGIONNAIRE_STRING))
+        {
+            // there are 4 sleeping npcs around him, if one of his group members dies he will call for one of the sleeping creatures to get up and join the fight
+            // this doesnt have a cd, if all 4 npcs with sleeping aura are up, nothing more happens
+            auto m_sleepingReinf = m_creature->GetMap()->GetCreatures(SLEEPING_REINF_STRING);
+            Creature* closest = nullptr;
+            for (Creature* creature : *m_sleepingReinf)
+            {
+                // Only call alive creatures
+                // Only call creature that isnt in combat already
+                // Only call creature that still has sleeping aura
+                if (creature->IsAlive() && !creature->IsInCombat() && !creature->HasAura(AURA_SLEEPING))
+                    continue;
+
+                if (!closest)
+                    closest = creature;
+                else if (m_creature->GetDistance(creature, true, DIST_CALC_NONE) < m_creature->GetDistance(closest, true, DIST_CALC_NONE))
+                    closest = creature;
+            }
+            if (closest)
+            {
+                DoBroadcastText(aRandomReinfSleeping[urand(0, 4)], m_creature);
+                closest->RemoveAurasDueToSpell(AURA_SLEEPING);
+            }
+        }
+        else if (m_creature->HasStringId(SEVENTH_LEGIONNAIRE_STRING))
+        {
+            // For the legionnaire 07, if one of his group members dies he will inform the nearest npc staying at the dummys behind him
+            // all 3 npc at dummys have StringID assigned
+            auto m_dummyReinf = m_creature->GetMap()->GetCreatures(DUMMY_REINF_STRING_1);
+            Creature* closest = nullptr;
+            for (Creature* creature : *m_dummyReinf)
+            {
+                // Only call alive creatures
+                // Only call creature that isnt in combat already
+                if (creature->IsAlive() && !creature->IsInCombat())
+                    continue;
+
+                if (!closest)
+                    closest = creature;
+                else if (m_creature->GetDistance(creature, true, DIST_CALC_NONE) < m_creature->GetDistance(closest, true, DIST_CALC_NONE))
+                    closest = creature;
+            }
+            if (closest)
+            {
+                Unit* target = m_creature->GetVictim();
+                if (target)
+                {
+                    closest->AI()->AttackStart(target);
+                    DoBroadcastText(aRandomReinf[urand(0, 6)], m_creature);
+                }
+            }
+        }
+        else if (m_creature->HasStringId(EIGTH_LEGIONNAIRE_STRING))
+        {
+            // For the legionnaire 08, if one of his group members dies he will inform the nearest npc staying at the dummys behind him
+            // all 3 npc at dummys have StringID assigned
+            auto m_dummyReinf = m_creature->GetMap()->GetCreatures(DUMMY_REINF_STRING_2);
+            Creature* closest = nullptr;
+            for (Creature* creature : *m_dummyReinf)
+            {
+                // Only call alive creatures
+                // Only call creature that isnt in combat already
+                if (creature->IsAlive() && !creature->IsInCombat())
+                    continue;
+
+                if (!closest)
+                    closest = creature;
+                else if (m_creature->GetDistance(creature, true, DIST_CALC_NONE) < m_creature->GetDistance(closest, true, DIST_CALC_NONE))
+                    closest = creature;
+            }
+            if (closest)
+            {
+                Unit* target = m_creature->GetVictim();
+                if (target)
+                {
+                    closest->AI()->AttackStart(target);
+                    DoBroadcastText(aRandomReinf[urand(0, 6)], m_creature);
+                }
+            }
+        }
+
+        // Buff can only get casted when legionnaire is infight and doesnt already have the buff
+        if (!m_creature->IsInCombat() || !m_creature->GetVictim())
+            return;
+
+        if (!m_creature->HasAura(SPELL_ENRAGE))
+        {
+            m_creature->CastSpell(nullptr, SPELL_ENRAGE, TRIGGERED_NONE);
+            DoBroadcastText(EMOTE_ENRAGE, m_creature);
+        }
+    }
+
+    void DoReinfCD()
+    {
+        m_reinfCD = false;
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case LEGIONNAIRE_PUMMEL:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, (SELECT_FLAG_PLAYER | SELECT_FLAG_CASTING)))
+                    if (DoCastSpellIfCan(target, SPELL_PUMMEL) == CAST_OK)
+                        ResetCombatAction(action, urand(10000, 15000));
+                return;
+            }
+            case LEGIONNAIRE_AURA_OF_DISCIPLIN:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_AURA_OF_DISCIPLINE) == CAST_OK)
+                    ResetCombatAction(action, 240000);
+                return;
+            }
+        }
+    }
+};
+
 
 void AddSC_shattered_halls()
 {
@@ -281,5 +531,10 @@ void AddSC_shattered_halls()
     pNewScript = new Script;
     pNewScript->Name = "npc_shattered_hand_gladiator";
     pNewScript->GetAI = &GetNewAIInstance<npc_shattered_hand_gladiator>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_shattered_hand_legionnaire";
+    pNewScript->GetAI = &GetNewAIInstance<npc_shattered_hand_legionnaire>;
     pNewScript->RegisterSelf();
 }

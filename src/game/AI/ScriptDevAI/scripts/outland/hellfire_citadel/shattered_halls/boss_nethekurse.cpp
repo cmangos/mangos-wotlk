@@ -254,7 +254,7 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
     }
 };
 
-static const int32 aRandomAggro[] = { -1540200, -1540201, -1540202, -1540203, -1540204, -1540205, -1540206 };
+static const int32 aRandomAggro[] = { 16697, 16698, 16699, 16700, 16701, 16702, 16703 };
 
 struct mob_fel_orc_convertAI : public ScriptedAI
 {
@@ -313,6 +313,19 @@ struct mob_fel_orc_convertAI : public ScriptedAI
     {
         if (m_instance)
         {
+            if (m_creature->HasStringId(STRING_ID_FEL_ORC))
+            {
+                auto m_sleepingReinf = m_creature->GetMap()->GetCreatures(SIX_LEGIONNAIRE_STRING);
+                for (Creature* legionnaire : *m_sleepingReinf)
+                {
+                    // Only call alive creatures
+                    if (!legionnaire->IsAlive())
+                        return;
+
+                    SendAIEvent(AI_EVENT_JUST_DIED, m_creature, legionnaire);
+                }
+            }
+
             if (m_instance->GetData(TYPE_NETHEKURSE) != IN_PROGRESS)
                 return;
 

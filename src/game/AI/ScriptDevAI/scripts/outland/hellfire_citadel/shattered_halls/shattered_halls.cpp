@@ -32,6 +32,7 @@ instance_shattered_halls::instance_shattered_halls(Map* pMap) : ScriptedInstance
     m_team(0),
     m_executionStage(0),
     m_prisonersLeft(3),
+    m_legionnaireIntroTimer(1000),
     m_gauntletStopped(false)
 {
     Initialize();
@@ -41,6 +42,8 @@ void instance_shattered_halls::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
     GauntletReset();
+    instance->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_002, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_002, 0);
 }
 
 void instance_shattered_halls::OnPlayerEnter(Player* pPlayer)
@@ -125,9 +128,26 @@ void instance_shattered_halls::OnCreatureRespawn(Creature* creature)
         case NPC_FLAME_ARROW:
             creature->SetCanEnterCombat(false);
             break;
+        case NPC_SHATTERED_HAND_HEATHEN:
+        case NPC_SHATTERED_HAND_SAVAGE:
+            if (creature->HasStringId(STRING_ID_ENTRANCE_GROUP))
+            {
+                creature->SetNoXP(true);
+                creature->SetNoLoot(true);
+                creature->SetNoReputation(true);
+            }
+            break;
     }
     if (creature->GetRespawnDelay() == 5)
         creature->SetNoRewards();
+}
+
+// Hall of Fathers intro 
+// when SpawnGroup with 2 shattered hand sentry's die, legionnaire group will spawn and run to their positions.
+void instance_shattered_halls::OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* /*pCreature*/)
+{
+    if (pGroup->GetGroupId() == SPAWN_GROUP_SENTRY)
+        instance->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_002, 1);
 }
 
 void instance_shattered_halls::SetData(uint32 type, uint32 data)
@@ -368,6 +388,26 @@ void instance_shattered_halls::DoBeginArcherAttack(bool leftOrRight)
 
 void instance_shattered_halls::Update(uint32 diff)
 {
+    if (m_legionnaireIntroTimer)
+    {
+        if (m_legionnaireIntroTimer <= diff)
+        {
+            m_legionnaireIntroTimer = 1000;
+            for (const auto& data : instance->GetPlayers())
+            {
+                // Event got triggered on wotlk classic when player moved at
+                // Position: X: 69.95503 Y: 124.538864 Z: -13.209421 O: 1.5825446
+                if (data.getSource()->GetPositionY() > 124.5f)
+                {
+                    m_legionnaireIntroTimer = 0;                    
+                    // Trigger Legionnaire group 04 and 05
+                    instance->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_003, 1);
+                }
+            }            
+        }
+        else m_legionnaireIntroTimer -= diff;
+    }
+
     if (m_auiEncounter[TYPE_GAUNTLET] == IN_PROGRESS)
     {
         if (!GetPlayerInMap(true))
@@ -658,145 +698,6 @@ struct npc_Shattered_Hand_Scout : public ScriptedAI
     }
 };
 
-/*######
- ## npc_shattered_hand_legionnaire 16700
- ######*/
-
-enum ShatteredHandLegionnairActions
-{
-    LEGIONNAIRE_PUMMEL,
-    LEGIONNAIRE_AURA_OF_DISCIPLIN,
-    LEGIONNAIRE_ACTION_MAX,
-    LEGIONNAIRE_CALL_FOR_REINFORCEMENTS,
-};
-
-enum ShatteredHandLegionnair
-{
-    SPELL_AURA_OF_DISCIPLINE     = 30472,
-    SPELL_PUMMEL                = 15615,
-    SPELL_ENRAGE                = 30485,
-
-    EMOTE_ENRAGE                = -1540066,
-
-    MOB_FEL_ORC                 = 17083,
-
-    FIRST_LEGIONNAIRE_GUID      = 5400074,
-    SECOND_LEGIONNAIRE_GUID     = 5400077,
-    THIRD_LEGIONNAIRE_GUID      = 5400075,
-    FOURTH_LEGIONNAIRE_GUID     = 5400076,
-    FIFTH_LEGIONNAIRE_GUID      = 5400282,
-    SIXTH_LEGIONNAIRE_GUID      = 5400078,
-    SEVENTH_LEGIONNAIRE_GUID    = 5400062,
-    EIGHT_LEGIONNAIRE_GUID      = 5400264,
-    DEFAULT_LEGIONNAIRE         = 1
-};
-
-static float FelOrcCoords[][4] =                    // Coords needed for spawns and waypoints
-{
-    { 69.774910f, 46.661671f, -13.211f, 3.127f},    // Waypoint
-    { 81.417f, 113.488f, -13.223f, 3.127f },        // Spawn 1
-    { 49.958f, 151.284f, -13.229f, 6.169f },        // Spawn 2 guessed
-    { 89.46494293212890625f, 187.3341217041015625f, -13.1455421447753906f, 3.39255523681640625f },  // Spawn 3
-    { 79.96329498291015625f, 219.032073974609375f, -13.1396903991699218f, 3.984550714492797851f },  // Spawn 4
-    { 83.5307159423828125f, 250.534454345703125f, -13.1131420135498046f, 3.607418537139892578f }    // Spawn 5
-};
-
-static const int32 aRandomAggro[] = { -1540200, -1540201, -1540202, -1540203, -1540204, -1540205, -1540206 };
-static const int32 aRandomReinf[] = { -1540056, -1540057, -1540058, -1540059, -1540060, -1540061, -1540062, 1540063, 1540064, 1540065 };
-
-struct npc_shattered_hand_legionnaire : public CombatAI
-{
-    npc_shattered_hand_legionnaire(Creature* creature) : CombatAI(creature, LEGIONNAIRE_ACTION_MAX), m_instance(static_cast<instance_shattered_halls*>(creature->GetInstanceData()))
-    {
-        AddCombatAction(LEGIONNAIRE_PUMMEL, 10000, 15000);
-        AddCombatAction(LEGIONNAIRE_AURA_OF_DISCIPLIN, 0, 5000);
-        AddCustomAction(LEGIONNAIRE_CALL_FOR_REINFORCEMENTS, true, [&]() { CallForReinforcements(); });
-        uint32 guid = m_creature->GetDbGuid();
-        if (guid == SECOND_LEGIONNAIRE_GUID)
-            legionnaireGuid = 1;
-        else if (guid == THIRD_LEGIONNAIRE_GUID)
-            legionnaireGuid = 2;
-        else if (guid == FOURTH_LEGIONNAIRE_GUID)
-            legionnaireGuid = 3;
-        else if (guid == FIFTH_LEGIONNAIRE_GUID)
-            legionnaireGuid = 4;
-    }
-
-    uint32 legionnaireGuid;
-    instance_shattered_halls* m_instance;
-
-    void Aggro(Unit* /*who*/) override
-    {
-        if (urand(0, 4) > 2)
-            DoScriptText(aRandomAggro[urand(0, 6)], m_creature);
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_EVENTAI_B)
-            ResetTimer(LEGIONNAIRE_CALL_FOR_REINFORCEMENTS, 0u);
-    }
-
-    void SummonedMovementInform(Creature* summoned, uint32 /*motionType*/, uint32 pointId) override
-    {
-        // When last waypoint reached, search for players.
-        if (summoned->GetEntry() == MOB_FEL_ORC && pointId == 100)
-        {
-            m_creature->CastSpell(nullptr, SPELL_ENRAGE, TRIGGERED_NONE);
-            summoned->GetMotionMaster()->MoveIdle();
-            summoned->SetInCombatWithZone();
-        }
-    }
-
-    void CallForReinforcements()
-    {
-        if (!m_creature->HasAura(SPELL_ENRAGE))
-        {
-            m_creature->CastSpell(nullptr, SPELL_ENRAGE, TRIGGERED_NONE);
-            DoScriptText(EMOTE_ENRAGE, m_creature);
-        }
-
-        // only summons reinforcements in combat
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        uint32 guid = m_creature->GetDbGuid();
-        if (guid == SECOND_LEGIONNAIRE_GUID || guid == THIRD_LEGIONNAIRE_GUID || guid == FOURTH_LEGIONNAIRE_GUID || guid == FIFTH_LEGIONNAIRE_GUID)
-        {
-            if (Creature* felorc = m_creature->SummonCreature(MOB_FEL_ORC, FelOrcCoords[legionnaireGuid][0], FelOrcCoords[legionnaireGuid][1], FelOrcCoords[legionnaireGuid][2], FelOrcCoords[legionnaireGuid][3], TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true, true))
-            {
-                felorc->GetMotionMaster()->MovePoint(100, FelOrcCoords[0][0], FelOrcCoords[0][1], FelOrcCoords[0][2]);
-                DoScriptText(aRandomReinf[urand(0, 9)], m_creature);
-            }
-        }
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case LEGIONNAIRE_PUMMEL:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, (SELECT_FLAG_PLAYER | SELECT_FLAG_CASTING)))
-                    if (DoCastSpellIfCan(target, SPELL_PUMMEL) == CAST_OK)
-                        ResetCombatAction(action, urand(10000, 15000));
-                return;
-            }
-            case LEGIONNAIRE_AURA_OF_DISCIPLIN:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_AURA_OF_DISCIPLINE) == CAST_OK)
-                    ResetCombatAction(action, 240000);
-                return;
-            }
-            case LEGIONNAIRE_CALL_FOR_REINFORCEMENTS:
-            {
-                CallForReinforcements();
-                return;
-            }
-        }
-    }
-};
-
 bool AreaTrigger_at_shattered_halls(Player* player, AreaTriggerEntry const* /*at*/)
 {
     if (player->IsGameMaster() || !player->IsAlive())
@@ -841,10 +742,5 @@ void AddSC_instance_shattered_halls()
     pNewScript = new Script;
     pNewScript->Name = "npc_shattered_hand_scout";
     pNewScript->GetAI = &GetNewAIInstance<npc_Shattered_Hand_Scout>;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_shattered_hand_legionnaire";
-    pNewScript->GetAI = &GetNewAIInstance<npc_shattered_hand_legionnaire>;
     pNewScript->RegisterSelf();
 }
