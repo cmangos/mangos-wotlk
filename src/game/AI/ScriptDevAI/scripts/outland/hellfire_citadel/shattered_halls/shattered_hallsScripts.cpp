@@ -424,6 +424,7 @@ struct npc_shattered_hand_legionnaire : public CombatAI
             {
                 DoBroadcastText(aRandomReinfSleeping[urand(0, 4)], m_creature);
                 closest->RemoveAurasDueToSpell(AURA_SLEEPING);
+                SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_C, m_creature, closest);
             }
         }
         else if (m_creature->HasStringId(SEVENTH_LEGIONNAIRE_STRING))
@@ -520,6 +521,23 @@ struct npc_shattered_hand_legionnaire : public CombatAI
     }
 };
 
+// 37437 ClearAllDebuffs
+struct ClearAllDebuffs : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        auto holderMap = target->GetSpellAuraHolderMap();
+        for (auto holderPair : holderMap)
+        {
+            if (!holderPair.second->IsPositive() && !holderPair.second->IsPassive())
+            {
+                target->RemoveAurasDueToSpell(holderPair.second->GetId());
+            }
+        }
+        return;
+    }
+};
 
 void AddSC_shattered_halls()
 {
@@ -537,4 +555,6 @@ void AddSC_shattered_halls()
     pNewScript->Name = "npc_shattered_hand_legionnaire";
     pNewScript->GetAI = &GetNewAIInstance<npc_shattered_hand_legionnaire>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ClearAllDebuffs>("spell_clear_all_debuffs");
 }

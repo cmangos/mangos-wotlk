@@ -43,7 +43,7 @@ void instance_shattered_halls::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
     GauntletReset();
     instance->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_002, 0);
-    instance->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_002, 0);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_LEGIONNAIRE_003, 0);
 }
 
 void instance_shattered_halls::OnPlayerEnter(Player* pPlayer)
