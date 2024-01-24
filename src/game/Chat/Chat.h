@@ -287,7 +287,11 @@ class ChatHandler
         bool HandleDebugByteFields(char* args);
         bool HandleDebugSpellVisual(char* args);
         bool HandleDebugMoveflags(char* args);
-        bool HandleDebugLootDropStats(char* args);
+
+        bool LootStatsHelper(char* args, bool full);
+        bool HandleLootStatsCommand(char* args);
+        bool HandleLootFullStatsCommand(char* args);
+
         bool HandleDebugOverflowCommand(char* args);
         bool HandleDebugChatFreezeCommand(char* args);
         bool HandleDebugLfgCommand(char* args);
