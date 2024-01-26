@@ -90,15 +90,8 @@ class DatabaseSqlite : public Database
 {
         friend class MaNGOS::OperatorNew<DatabaseSqlite>;
 
-    public:
-        DatabaseSqlite();
-        ~DatabaseSqlite();
-
     protected:
         virtual SqlConnection* CreateConnection() override;
-
-    private:
-        static size_t db_count;
 };
 
 #endif
