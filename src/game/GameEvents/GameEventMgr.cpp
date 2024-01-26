@@ -1462,7 +1462,9 @@ void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data, time_t today
             data.end = mktime(&todayT);
             break;
         }
-        default: break;
+        case GAME_EVENT_SCHEDULE_SERVERSIDE:
+        case GAME_EVENT_SCHEDULE_DATE:
+            break;
     }
 }
 
