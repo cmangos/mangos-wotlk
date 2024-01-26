@@ -5929,7 +5929,7 @@ void Player::UpdateCombatSkills(Unit* /*pVictim*/, WeaponAttackType attType, boo
         return;
 
     // The farther player is from the cap, the easier it gets to level up the skill
-    float chance = ((float(std::max(1, (room / 5))) / (cap / 5)) * 100);
+    float chance = ((float(std::max(1, (room / 5))) / (cap / 5.f)) * 100);
 
     // Weapon skills: increase chance by intellect
     if (!defence)
@@ -6852,7 +6852,7 @@ void Player::CheckAreaExploreAndOutdoor()
             {
                 if (!spellInfo || !IsNeedCastSpellAtOutdoor(spellInfo) || HasAura(spellInfo->Id))
                     continue;
-                if ((spellInfo->Stances || spellInfo->StancesNot) && !IsNeedCastSpellAtFormApply(spellInfo, GetShapeshiftForm()))
+                if ((spellInfo->Stances[0] || spellInfo->StancesNot[0]) && !IsNeedCastSpellAtFormApply(spellInfo, GetShapeshiftForm()))
                     continue;
                 CastSpell(this, spellInfo, TRIGGERED_OLD_TRIGGERED);
             }
