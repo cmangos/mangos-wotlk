@@ -329,6 +329,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                     case FORM_MOONKIN:
                         val2 += m_baseFeralAP;
                         break;
+                    default: break;
                 }
                 break;
             }

@@ -155,7 +155,7 @@ struct boss_kazzakAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
     }
 
-    void ExecuteActions()
+    void ExecuteActions() override
     {
         if (!CanExecuteCombatAction())
             return;

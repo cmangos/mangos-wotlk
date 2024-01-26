@@ -151,7 +151,7 @@ struct boss_baltharusAI : public CombatAI
             m_instance->SetData(TYPE_BALTHARUS, FAIL);
     }
 
-    void JustSummoned(Creature* pSummoned)
+    void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_BALTHARUS_CLONE)
         {

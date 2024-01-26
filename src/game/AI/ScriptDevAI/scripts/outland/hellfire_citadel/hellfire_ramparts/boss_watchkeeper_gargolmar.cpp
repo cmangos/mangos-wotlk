@@ -124,7 +124,7 @@ struct boss_watchkeeper_gargolmarAI : public CombatAI
         DoPlaySoundToSet(m_creature, SOUND_DIE);
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         switch (action)
         {

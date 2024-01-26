@@ -217,7 +217,7 @@ struct npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
         m_creature->ForcedDespawn();
     }
 
-    void UpdateAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
+    void UpdateAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }
 };
 
 UnitAI* GetAI_npc_queen_lanathel_intro(Creature* pCreature)

@@ -707,7 +707,7 @@ struct npc_nexus_drake_hatchlingAI : public FollowerAI
         }
     }
 
-    void UpdateFollowerAI(const uint32 uiDiff)
+    void UpdateFollowerAI(const uint32 uiDiff) override
     {
         if (m_uiSubduedTimer)
         {
@@ -888,7 +888,7 @@ struct npc_scourged_flamespitterAI : public ScriptedAI
             m_uiNetExpireTimer = 20000;
     }
 
-    void UpdateAI(const uint32 uiDiff)
+    void UpdateAI(const uint32 uiDiff) override
     {
         if (m_uiNetExpireTimer)
         {

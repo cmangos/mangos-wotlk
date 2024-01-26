@@ -479,7 +479,7 @@ struct boss_essence_of_desireAI : public essence_base_AI
         ScriptedAI::DamageTaken(dealer, damage, damagetype, spellInfo);
     }
 
-    void OnSpellInterrupt(SpellEntry const* spellInfo)
+    void OnSpellInterrupt(SpellEntry const* spellInfo) override
     {
         if (spellInfo->Id == SPELL_SPIRIT_SHOCK)
             ResetCombatAction(DESIRE_ACTION_SPIRIT_SHOCK, 5000);

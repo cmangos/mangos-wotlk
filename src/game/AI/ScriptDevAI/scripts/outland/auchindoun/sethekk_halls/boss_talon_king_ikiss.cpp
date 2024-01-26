@@ -157,7 +157,7 @@ struct boss_talon_king_ikissAI : public CombatAI
         DoResetThreat();
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         switch (action)
         {

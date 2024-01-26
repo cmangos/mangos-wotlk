@@ -145,7 +145,7 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         void GetDungeonTrapsGUIDList(GuidList& lList) const { lList = m_lDungeonTrapsGuids; }
         void GetReflectionsGUIDList(GuidList& lList) const { lList = m_lSpiritReflectionsGuids; }
 
-        void Update(uint32 uiDiff);
+        void Update(uint32 uiDiff) override;
 
         void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 

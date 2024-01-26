@@ -202,7 +202,7 @@ struct boss_highlord_kruulAI : public ScriptedAI
         DoScriptText(SAY_KILL, m_creature, pVictim);
     }
 
-    void ExecuteActions()
+    void ExecuteActions() override
     {
         if (!CanExecuteCombatAction())
             return;

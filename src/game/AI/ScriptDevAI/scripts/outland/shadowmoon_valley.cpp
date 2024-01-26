@@ -3993,7 +3993,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI
         return 0;
     }
 
-    void ExecuteActions()
+    void ExecuteActions() override
     {
         if (!CanExecuteCombatAction())
             return;

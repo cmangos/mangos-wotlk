@@ -115,7 +115,7 @@ struct PaladinTier6Trinket : public AuraScript
 
 struct IncreasedHolyLightHealing : public AuraScript
 {
-    void OnApply(Aura* aura, bool apply) const
+    void OnApply(Aura* aura, bool apply) const override
     {
         aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_SPELL_HEALING_DONE, apply);
     }

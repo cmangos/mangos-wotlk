@@ -174,7 +174,7 @@ struct npc_barnesAI : public npc_escortAI, private DialogueHelper
         }
     }
 
-    void UpdateEscortAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
+    void UpdateEscortAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }
 };
 
 UnitAI* GetAI_npc_barnesAI(Creature* pCreature)
@@ -441,7 +441,7 @@ struct npc_image_of_medivhAI : public ScriptedAI, private DialogueHelper
 
     void SetEventStarter(ObjectGuid m_starterGuid) { m_eventStarterGuid = m_starterGuid; }
 
-    void UpdateAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
+    void UpdateAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }
 };
 
 UnitAI* GetAI_npc_image_of_medivhAI(Creature* pCreature)

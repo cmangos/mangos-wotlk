@@ -520,7 +520,7 @@ struct boss_kelthuzadAI : public BossAI
 // Summon one add (which type depends on spell)
 struct TriggerKTAdd : public SpellScript
 {
-    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         if (centerRoomKT.GetDistance(target->GetPosition()) > (60.f * 60.f) && centerRoomKT.GetDistance(target->GetPosition()) < (70.f * 70.f))
             return true;

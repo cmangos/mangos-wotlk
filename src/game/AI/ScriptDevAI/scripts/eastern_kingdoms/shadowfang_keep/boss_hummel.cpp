@@ -89,7 +89,7 @@ struct boss_apothecary_hummelAI : public CombatAI
         DoCastSpellIfCan(nullptr, SPELL_ALLURING_PERFUME, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustPreventedDeath(Unit* killer)
+    void JustPreventedDeath(Unit* killer) override
     {
         DoScriptText(SAY_HUMMEL_DEATH, m_creature);
 

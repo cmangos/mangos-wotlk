@@ -86,7 +86,7 @@ struct npc_sunblade_scoutAI : public CombatAI
         m_creature->SetInCombatWithZone(); // maybe callforhelp instead of linking
     }
 
-    void MovementInform(uint32 uiType, uint32 uiPointId)
+    void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
         if (uiType != POINT_MOTION_TYPE || !uiPointId)
             return;
@@ -101,7 +101,7 @@ struct npc_sunblade_scoutAI : public CombatAI
         }
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
@@ -201,7 +201,7 @@ struct npc_sunblade_protectorAI : public CombatAI
             DoScriptText(SAY_PROTECTOR_REACHED_HOME, m_creature);
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         switch (action)
         {

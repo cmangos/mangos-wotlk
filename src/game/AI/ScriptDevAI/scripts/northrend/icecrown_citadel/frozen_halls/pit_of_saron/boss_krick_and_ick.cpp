@@ -114,7 +114,7 @@ struct boss_ickAI : public CombatAI
         }
     }
 
-    void KilledUnit(Unit* victim)
+    void KilledUnit(Unit* victim) override
     {
         CombatAI::KilledUnit(victim);
 
@@ -245,7 +245,7 @@ struct boss_krickAI : public CombatAI
         AddCombatAction(KRICK_TOXIC_WASTE, 5000u);
     }
 
-    void KilledUnit(Unit* victim)
+    void KilledUnit(Unit* victim) override
     {
         CombatAI::KilledUnit(victim);
 
@@ -324,7 +324,7 @@ struct spell_explosive_barrage_aura : public AuraScript
 
 struct spell_pursuit : public SpellScript, public AuraScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_1)
             return;

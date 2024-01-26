@@ -35,13 +35,15 @@ size_t DatabaseSqlite::db_count = 0;
 DatabaseSqlite::DatabaseSqlite()
 {
     // before first connection
-    if (db_count++ == 0);
+    if (db_count++ == 0)
+    ;
 }
 
 DatabaseSqlite::~DatabaseSqlite()
 {
     StopServer();
-    if (--db_count == 0);
+    if (--db_count == 0)
+    ;
 }
 
 SqlConnection* DatabaseSqlite::CreateConnection()

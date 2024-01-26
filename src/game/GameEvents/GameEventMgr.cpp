@@ -1462,6 +1462,7 @@ void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data, time_t today
             data.end = mktime(&todayT);
             break;
         }
+        default: break;
     }
 }
 

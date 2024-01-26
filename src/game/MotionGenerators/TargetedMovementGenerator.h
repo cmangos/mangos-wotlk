@@ -53,7 +53,7 @@ class TargetedMovementGeneratorMedium
         ~TargetedMovementGeneratorMedium() { delete i_path; }
 
     public:
-        bool Update(T&, const uint32&);
+        bool Update(T&, const uint32&) override;
 
         virtual bool IsReachable() const override;
 
@@ -254,7 +254,7 @@ class FormationMovementGenerator : public FollowMovementGenerator
 
         bool Update(Unit&, const uint32&) override;
         void Interrupt(Unit& owner) override;
-        bool GetResetPosition(Unit&, float& x, float& y, float& z, float& o) const;
+        bool GetResetPosition(Unit&, float& x, float& y, float& z, float& o) const override;
 
     protected:
         void HandleTargetedMovement(Unit& owner, const uint32& time_diff) override;

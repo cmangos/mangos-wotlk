@@ -278,7 +278,7 @@ namespace MMAP
 
         mmapData->mmapLoadedTiles.insert(std::pair<uint32, dtTileRef>(packedGridPos, tileRef));
         ++m_loadedTiles;
-        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:loadMap: Loaded into %03i[%02i,%02i]", fileName, mapId, header->x, header->y);
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:loadMap:%s: Loaded into %03i[%02i,%02i]", fileName, mapId, header->x, header->y);
         return true;
     }
 

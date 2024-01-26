@@ -706,7 +706,7 @@ enum
 
 struct DemonBroiledSurprise : public SpellScript
 {
-    SpellCastResult OnCheckCast(Spell* spell, bool strict) const
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
     {
         if (strict)
         {

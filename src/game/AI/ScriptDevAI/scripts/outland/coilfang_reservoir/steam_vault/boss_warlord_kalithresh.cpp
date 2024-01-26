@@ -125,7 +125,7 @@ struct boss_warlord_kalithreshAI : public CombatAI
         ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void MovementInform(uint32 type, uint32 pointId)
+    void MovementInform(uint32 type, uint32 pointId) override
     {
         if (type != POINT_MOTION_TYPE || !pointId)
             return;

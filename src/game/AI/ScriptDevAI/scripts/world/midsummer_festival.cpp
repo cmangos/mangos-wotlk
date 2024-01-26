@@ -50,7 +50,7 @@ struct go_bonfire : GameObjectAI
         m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
     }
 
-    void ReceiveAIEvent(AIEventType eventType, uint32 /*miscValue*/ = 0)
+    void ReceiveAIEvent(AIEventType eventType, uint32 /*miscValue*/ = 0) override
     {
         if (m_state && eventType == AI_EVENT_CUSTOM_A)
             ChangeState(false);

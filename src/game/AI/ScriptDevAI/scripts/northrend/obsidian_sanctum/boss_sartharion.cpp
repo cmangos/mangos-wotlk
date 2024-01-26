@@ -836,12 +836,12 @@ struct mob_tenebronAI : public dummy_dragonAI
         }
     }
 
-    void DoHandleBreathYell()
+    void DoHandleBreathYell() override
     {
         DoScriptText(SAY_TENEBRON_BREATH, m_creature);
     }
 
-    void UpdateDragonAI(const uint32 uiDiff)
+    void UpdateDragonAI(const uint32 uiDiff) override
     {
         if (m_uiSpawnEggsTimer < uiDiff)
         {
@@ -957,12 +957,12 @@ struct mob_shadronAI : public dummy_dragonAI
         m_uiAcolyteShadronTimer = m_uiPortalRespawnTimer + 5000;
     }
 
-    void DoHandleBreathYell()
+    void DoHandleBreathYell() override
     {
         DoScriptText(SAY_SHADRON_BREATH, m_creature);
     }
 
-    void UpdateDragonAI(const uint32 uiDiff)
+    void UpdateDragonAI(const uint32 uiDiff) override
     {
         if (m_uiAcolyteShadronTimer)
         {
@@ -1062,12 +1062,12 @@ struct mob_vesperonAI : public dummy_dragonAI
         m_uiAcolyteVesperonTimer = m_uiPortalRespawnTimer + 5000;
     }
 
-    void DoHandleBreathYell()
+    void DoHandleBreathYell() override
     {
         DoScriptText(SAY_VESPERON_BREATH, m_creature);
     }
 
-    void UpdateDragonAI(const uint32 uiDiff)
+    void UpdateDragonAI(const uint32 uiDiff) override
     {
         if (m_uiAcolyteVesperonTimer)
         {

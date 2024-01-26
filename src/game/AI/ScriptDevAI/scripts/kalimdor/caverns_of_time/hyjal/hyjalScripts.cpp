@@ -141,7 +141,7 @@ struct npc_thrallAI : public hyjalAI
 
     GuidVector m_feralSpirits;
 
-    void JustSummoned(Creature* creature)
+    void JustSummoned(Creature* creature) override
     {
         if (creature->GetEntry() == NPC_FERAL_SPIRIT)
             m_feralSpirits.push_back(creature->GetObjectGuid());

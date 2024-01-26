@@ -383,7 +383,7 @@ struct boss_champion_warriorAI : public trial_companion_commonAI
         trial_companion_commonAI::Reset();
     }
 
-    bool UpdateChampionAI(const uint32 uiDiff)
+    bool UpdateChampionAI(const uint32 uiDiff) override
     {
         if (m_uiInterceptTimer < uiDiff)
         {
@@ -477,7 +477,7 @@ struct boss_champion_mageAI : public trial_companion_commonAI
         trial_companion_commonAI::AttackStart(pWho);
     }
 
-    bool UpdateChampionAI(const uint32 uiDiff)
+    bool UpdateChampionAI(const uint32 uiDiff) override
     {
         if (m_uiFireballTimer < uiDiff)
         {
@@ -560,7 +560,7 @@ struct boss_champion_shamanAI : public trial_companion_commonAI
         trial_companion_commonAI::Reset();
     }
 
-    bool UpdateChampionAI(const uint32 uiDiff)
+    bool UpdateChampionAI(const uint32 uiDiff) override
     {
         if (m_uiLightningTimer < uiDiff)
         {
@@ -654,7 +654,7 @@ struct boss_champion_hunterAI : public trial_companion_commonAI
         trial_companion_commonAI::AttackStart(pWho);
     }
 
-    bool UpdateChampionAI(const uint32 uiDiff)
+    bool UpdateChampionAI(const uint32 uiDiff) override
     {
         if (m_uiShootTimer < uiDiff)
         {

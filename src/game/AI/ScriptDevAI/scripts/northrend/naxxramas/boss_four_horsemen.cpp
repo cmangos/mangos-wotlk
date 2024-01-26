@@ -168,7 +168,7 @@ struct boss_lady_blaumeuxAI : public BossAI
         }
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/)
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_UNYIELDING_PAIN)
             DoBroadcastText(EMOTE_UNYIELDING_PAIN, m_creature);
@@ -432,7 +432,7 @@ struct boss_sir_zeliekAI : public BossAI
         }
     }
 
-    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/)
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
         if (spellInfo->Id == SPELL_CONDEMNATION)
             DoBroadcastText(EMOTE_CONDEMATION, m_creature);

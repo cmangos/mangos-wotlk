@@ -102,7 +102,7 @@ struct boss_ormorokAI : public CombatAI
 
     uint8 m_uiSpikeCount;
 
-    void Reset()
+    void Reset() override
     {
         CombatAI::Reset();
 

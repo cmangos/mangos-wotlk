@@ -195,7 +195,7 @@ struct boss_swamplord_muselekAI : public CombatAI
                     claw->getThreatManager().modifyThreatPercent(target, (0 - urand(30, 99))); // Freezing trap messes with bear aggro
     }
 
-    void Aggro(Unit* /*who*/)
+    void Aggro(Unit* /*who*/) override
     {
         uint8 yell = urand(0, 2);
         switch (yell)

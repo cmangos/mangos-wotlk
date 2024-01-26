@@ -107,7 +107,7 @@ struct boss_tyrannusAI : public CombatAI
         }
     }
 
-    void KilledUnit(Unit* victim)
+    void KilledUnit(Unit* victim) override
     {
         CombatAI::KilledUnit(victim);
 

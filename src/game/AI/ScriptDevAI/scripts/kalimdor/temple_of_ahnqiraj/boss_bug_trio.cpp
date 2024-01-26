@@ -108,7 +108,7 @@ struct boss_silithidRoyaltyAI : public CombatAI
     }
 
     // Handle damage to trigger consume when the two bosses that are killed first
-    void JustPreventedDeath(Unit* attacker)
+    void JustPreventedDeath(Unit* attacker) override
     {
         if (!m_instance)
             return;
@@ -146,7 +146,7 @@ struct boss_silithidRoyaltyAI : public CombatAI
         DoCastSpellIfCan(nullptr, m_deathAbility);
     }
 
-    void MovementInform(uint32 motionType, uint32 pointId)
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
         if (motionType != POINT_MOTION_TYPE)
             return;

@@ -482,7 +482,7 @@ struct boss_kaelthasAI : public CombatAI
             uint32 timer = 120000;
 #ifdef FAST_TIMERS
             timer = 10000;
-#elseif PRENERF_2_0_3
+#elif defined(PRENERF_2_0_3)
             timer = 90000; // very early pre 2.1 - 90s (90000), later 120s (120000);
 #endif
             ResetTimer(KAEL_PHASE_TWO, timer);
@@ -628,7 +628,7 @@ struct boss_kaelthasAI : public CombatAI
         }
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
@@ -788,7 +788,7 @@ struct boss_kaelthasAI : public CombatAI
                     m_uiPhaseSubphase = 1;
 #ifdef FAST_TIMERS
                     timer = 10000;
-#elseif PRENERF_2_0_3
+#elif defined(PRENERF_2_0_3)
                     timer = 120000;
 #else
                     timer = 180000;

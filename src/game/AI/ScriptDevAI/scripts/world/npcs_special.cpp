@@ -2020,7 +2020,7 @@ struct npc_nether_rayAI : public CombatAI
         }
     }
 
-    void OnSpellCooldownAdded(SpellEntry const* spellInfo) // spells should only reset their action timer on success
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) override // spells should only reset their action timer on success
     {
         switch (spellInfo->Id)
         {

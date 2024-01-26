@@ -1129,6 +1129,7 @@ void ScriptMgr::LoadScriptMap(ScriptMapType scriptType, bool reload)
             CheckRandomRelayTemplates();
             break;
         }
+        default: break;
     }
 
     if (reload)

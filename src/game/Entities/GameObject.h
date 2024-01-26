@@ -780,7 +780,7 @@ class GameObject : public WorldObject
 
         ObjectGuid const& GetOwnerGuid() const override { return GetGuidValue(OBJECT_FIELD_CREATED_BY); }
         void SetOwnerGuid(ObjectGuid guid) override;
-        ObjectGuid const GetSpawnerGuid() const { return m_spawnerGuid; }
+        ObjectGuid const GetSpawnerGuid() const override { return m_spawnerGuid; }
         void SetSpawnerGuid(ObjectGuid guid) { m_spawnerGuid = guid; }
 
         Unit* GetOwner() const;
@@ -834,7 +834,7 @@ class GameObject : public WorldObject
         void SetGoAnimProgress(uint8 animprogress) { SetByteValue(GAMEOBJECT_BYTES_1, 3, animprogress); }
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
-        void SetPhaseMask(uint32 newPhaseMask, bool update);
+        void SetPhaseMask(uint32 newPhaseMask, bool update) override;
         uint32 GetFaction() const override { return GetUInt32Value(GAMEOBJECT_FACTION); }
         void SetFaction(uint32 faction) { SetUInt32Value(GAMEOBJECT_FACTION, faction); }
         uint32 GetLevel() const override { return GetUInt32Value(GAMEOBJECT_LEVEL); }

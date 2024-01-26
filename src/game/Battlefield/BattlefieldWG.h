@@ -672,7 +672,7 @@ class BattlefieldWG : public Battlefield
     public:
         BattlefieldWG();
 
-        void Reset();
+        void Reset() override;
 
         // player enter / exit zone
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
