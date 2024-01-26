@@ -538,7 +538,7 @@ enum VehicleFlags
     VEHICLE_FLAG_UNK5               = 0x00001000,
     VEHICLE_FLAG_UNK6               = 0x00002000,
     VEHICLE_FLAG_UNK7               = 0x00004000,
-    VEHICLE_FLAG_PASSIVE            = 0x00008000,           // Vehicle has a passive reaction to hostiles?
+    VEHICLE_FLAG_UNK8               = 0x00008000,
     VEHICLE_FLAG_UNK9               = 0x00010000,
     VEHICLE_FLAG_UNK10              = 0x00020000,
     VEHICLE_FLAG_UNK11              = 0x00040000,

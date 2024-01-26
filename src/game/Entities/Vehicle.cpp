@@ -241,14 +241,6 @@ void VehicleInfo::Initialize()
     if (vehicleFlags & VEHICLE_FLAG_FIXED_POSITION)
         pVehicle->SetImmobilizedState(true);
 
-    // TODO: Guesswork, but it looks correct
-    if (vehicleFlags & VEHICLE_FLAG_PASSIVE)
-    {
-        if (pVehicle->AI())
-            pVehicle->AI()->SetReactState(REACT_PASSIVE);
-        pVehicle->SetCanEnterCombat(false);
-    }
-
     // Initialize power type based on DBC values (creatures only)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
     {
@@ -881,9 +873,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
                 // reset vehicle faction
                 ((Creature*)pVehicle)->SetFactionTemporary(m_originalFaction, TEMPFACTION_NONE);
 
-                // Reset react state
-                if (!(GetVehicleEntry()->m_flags & VEHICLE_FLAG_PASSIVE))
-                    pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
+                pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
             }
         }
 
