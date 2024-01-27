@@ -81,6 +81,7 @@ class VehicleInfo : public TransportBase
         explicit VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry);
         void Initialize();                                  ///< Initializes the accessories
         bool IsInitialized() const { return m_isInitialized; }
+        void SummonPassenger(uint32 entry, Position const& pos, uint8 seatId);
 
         ~VehicleInfo();
 
@@ -102,6 +103,10 @@ class VehicleInfo : public TransportBase
 
         void DisableAccessoryInit() { m_disabledAccessoryInit = true; }
 
+        void RecallAndRespawnAccessories(float distance = 0.f, int32 seatIndex = -1);
+        void RespawnAccessories(int32 seatIndex = -1);
+        void RecallAccessories(float distance = 0.f, int32 seatIndex = -1);
+
     private:
         // Internal use to calculate the boarding position
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;
@@ -122,15 +127,16 @@ class VehicleInfo : public TransportBase
         void RemoveSeatMods(Unit* passenger, uint32 seatFlags);
 
         VehicleEntry const* m_vehicleEntry;
-        VehicleSeatMap m_vehicleSeats;                      ///< Stores the available seats of the vehicle (filled in constructor)
-        uint8 m_creatureSeats;                              ///< Mask that stores which seats are avaiable for creatures
-        uint8 m_playerSeats;                                ///< Mask that stores which seats are avaiable for players
+        VehicleSeatMap m_vehicleSeats;                      // Stores the available seats of the vehicle (filled in constructor)
+        uint8 m_creatureSeats;                              // Mask that stores which seats are avaiable for creatures
+        uint8 m_playerSeats;                                // Mask that stores which seats are avaiable for players
 
         uint32 m_overwriteNpcEntry;                         // Internal use to store the entry with which the vehicle-accessories are fetched
         bool m_isInitialized;                               // Internal use to store if the accessory is initialized
         bool m_disabledAccessoryInit;
         uint32 m_originalFaction;                           // Internal use to store the original unit faction before taking control of the unit
-        GuidSet m_accessoryGuids;                           ///< Stores the summoned accessories of this vehicle
+        GuidSet m_accessoryGuids;                           // Stores the summoned accessories of this vehicle
+        std::vector<std::pair<ObjectGuid, uint8>> m_unboardedAccessories; // Stores unboarded accessories for purpose of recall
 };
 
 #endif

@@ -948,6 +948,18 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_RECALL_OR_RESPAWN_ACCESSORIES: // 56
+                if (tmp.recallOrRespawnPassenger.recallRespawnFlag > 0x3)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid recall respawn flags assigned %u", tablename, tmp.recallOrRespawnPassenger.recallRespawnFlag);
+                    continue;
+                }
+                if (tmp.textId[0] >= MAX_VEHICLE_SEAT || tmp.textId[0] < -1)
+                {
+                    sLog.outErrorDb("Table `%s` has seat index assigned %d", tablename, tmp.textId[0]);
+                    continue;
+                }
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping.", tablename, tmp.command);
@@ -3276,6 +3288,26 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         case SCRIPT_COMMAND_SET_STRING_ID:
         {
             pSource->SetStringId(m_script->stringId.stringId, m_script->stringId.apply);
+            break;
+        }
+        case SCRIPT_COMMAND_RECALL_OR_RESPAWN_ACCESSORIES:
+        {
+            if (LogIfNotUnit(pSource))
+                break;
+
+            if (!static_cast<Unit*>(pSource)->IsVehicle())
+            {
+                sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u source is not vehicle.",
+                    m_table, m_script->id, m_script->command);
+            }
+            uint32 flags = m_script->recallOrRespawnPassenger.recallRespawnFlag;
+            int32 seatIndex = m_script->textId[0];
+            if (flags == 1)
+                static_cast<Unit*>(pSource)->GetVehicleInfo()->RecallAccessories(m_script->recallOrRespawnPassenger.searchRadius, seatIndex);
+            else if (flags == 2)
+                static_cast<Unit*>(pSource)->GetVehicleInfo()->RespawnAccessories(seatIndex);
+            else if (flags == 3)
+                static_cast<Unit*>(pSource)->GetVehicleInfo()->RecallAndRespawnAccessories(m_script->recallOrRespawnPassenger.searchRadius, seatIndex);
             break;
         }
         default:

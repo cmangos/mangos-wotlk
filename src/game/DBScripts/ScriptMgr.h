@@ -139,6 +139,7 @@ enum ScriptCommand                                          // resSource, resTar
     SCRIPT_COMMAND_SET_WORLDSTATE           = 53,           // dataint = worldstate id, dataint2 = new value, 
     SCRIPT_COMMAND_SET_SHEATHE              = 54,           // dataint = worldstate id, dataint2 = new value,
     SCRIPT_COMMAND_SET_STRING_ID            = 55,           // datalong = string_id id, datalong2 = 0 unapply, 1 apply
+    SCRIPT_COMMAND_RECALL_OR_RESPAWN_ACCESSORIES = 56       // datalong = 0x1 recall, 0x2 respawn, 0x3 recall and respawn, datalong2 = search radius for recall
 };
 
 #define MAX_TEXT_ID 4                                       // used for SCRIPT_COMMAND_TALK, SCRIPT_COMMAND_EMOTE, SCRIPT_COMMAND_CAST_SPELL, SCRIPT_COMMAND_TERMINATE_SCRIPT
@@ -482,6 +483,12 @@ struct ScriptInfo
             uint32 stringId;                                // datalong
             uint32 apply;                                   // datalong2
         } stringId;
+
+        struct                                              // SCRIPT_COMMAND_RECALL_OR_RESPAWN_ACCESSORIES (56)
+        {
+            uint32 recallRespawnFlag;                       // datalong
+            uint32 searchRadius;                            // datalong2
+        } recallOrRespawnPassenger;
 
         struct
         {
