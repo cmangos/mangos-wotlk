@@ -1292,7 +1292,7 @@ struct SystemsShutdown : public AuraScript
         {
             if (seat && seat->IsVehicle())
             {
-                seat->GetVehicleInfo()->RepopulateSeat(1);
+                seat->GetVehicleInfo()->RespawnAccessories(1);
             }
         }
     }

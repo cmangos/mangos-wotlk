@@ -201,7 +201,6 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
     ObjectGuid playerGuid;
     recvPacket >> playerGuid;
 
-    //Player* vehicle = _player->GetMap()->GetPlayer(playerGuid);
     Unit* vehicle = _player->GetMap()->GetUnit(playerGuid);
 
     if (!vehicle || !vehicle->IsVehicle())
@@ -236,10 +235,10 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
         return;
 
     // _player is not on a vehicle
-    if (!_player->IsBoarded())
+    if (!_player->IsBoarded() && !_player->IsVehicle())
         return;
-
-    Unit* vehicle = dynamic_cast<Unit*>(_player->GetTransportInfo()->GetTransport());
+    
+    Unit* vehicle = static_cast<Unit*>(passenger->GetTransportInfo()->GetTransport());
 
     if (!vehicle)
         return;
