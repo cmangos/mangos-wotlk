@@ -204,26 +204,6 @@ VehicleInfo::~VehicleInfo()
     MANGOS_ASSERT(m_cleanedUp);
 }
 
-void VehicleInfo::RepopulateSeat(uint8 seatId)
-{
-    // Loading passengers (rough version only!)
-    SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
-    for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
-    {
-        auto* seatEntry = GetSeatEntry(itr->seatId);
-        if (seatId == itr->seatId && seatEntry && seatEntry->m_ID && !GetPassenger(seatId))
-        {
-            if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
-            {
-                DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
-                m_accessoryGuids.insert(summoned->GetObjectGuid());
-                int32 basepoint0 = itr->seatId + 1;
-                summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-            }
-        }
-    }
-}
-
 void VehicleInfo::Initialize()
 {
     if (!m_overwriteNpcEntry)
@@ -235,17 +215,9 @@ void VehicleInfo::Initialize()
         SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
         for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
         {
-            auto* seatEntry = GetSeatEntry(itr->seatId);
-            if (seatEntry && seatEntry->m_ID)
-            {
-                if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
-                {
-                    DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
-                    m_accessoryGuids.insert(summoned->GetObjectGuid());
-                    int32 basepoint0 = itr->seatId + 1;
-                    summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                }
-            }
+            Position pos = m_owner->GetPosition();
+            pos.o *= 2;
+            SummonPassenger(itr->passengerEntry, pos, itr->seatId);
         }
     }
 
@@ -340,21 +312,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Calculate passengers local position
     float lx = 0.f, ly = 0.f, lz = 0.f, lo = 0.f;
-    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
-    float scale = creatureDisplayInfo->scale;
-    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
-    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
-    if (attachmentItr != sModelAttachmentStore.end())
-        for (auto& attachment : attachmentItr->second)
-        {
-            if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
-            {
-                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
-                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
-                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-                break;
-            }
-        }
+    GetSeatCoordinates(seatEntry, lx, ly, lz);
 
     BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
     if (auto* rootVehicle = static_cast<Unit*>(m_owner)->FindRootVehicle())
@@ -366,7 +324,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
-        Player* pPlayer = (Player*)passenger;
+        Player* pPlayer = static_cast<Player*>(passenger);
         pPlayer->UnsummonPetTemporaryIfAny();
 
         WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA);
@@ -375,15 +333,12 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         data.Initialize(SMSG_BREAK_TARGET, m_owner->GetPackGUID().size());
         data << m_owner->GetPackGUID();
         pPlayer->GetSession()->SendPacket(data);
-
         pPlayer->SetTarget(nullptr);
-
-        pPlayer->SetImmobilizedState(true);
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
     {
         if (!passenger->IsRooted())
-            ((Creature*)passenger)->SetImmobilizedState(true);
+            (static_cast<Creature*>(passenger))->SetImmobilizedState(true);
     }
 
     Movement::MoveSplineInit init(*passenger);
@@ -447,28 +402,17 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     MANGOS_ASSERT(seatEntry);
 
     // Switching seats is only allowed if this flag is set
-    if (seatEntry->CanSwitchFromSeat())
+    if (!seatEntry->CanSwitchFromSeat())
         return;
 
     // Remove passenger modifications of the old seat
     RemoveSeatMods(passenger, seatEntry->m_flags);
 
+    // Get seatEntry of new seat
+    seatEntry = GetSeatEntry(seat);
+
     float lx = 0.f, ly = 0.f, lz = 0.f, lo = 0.f;
-    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
-    float scale = creatureDisplayInfo->scale;
-    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
-    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
-    if (attachmentItr != sModelAttachmentStore.end())
-        for (auto& attachment : attachmentItr->second)
-        {
-            if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
-            {
-                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
-                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
-                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-                break;
-            }
-        }
+    GetSeatCoordinates(seatEntry, lx, ly, lz);
 
     // Set to new seat
     itr->second->SetTransportSeat(seat);
@@ -670,6 +614,32 @@ void VehicleInfo::CalculateBoardingPositionOf(float gx, float gy, float gz, floa
     lo = MapManager::NormalizeOrientation(go - m_owner->GetOrientation());
 }
 
+void VehicleInfo::GetSeatCoordinates(const VehicleSeatEntry* seatEntry, float& lx, float& ly, float& lz) const
+{
+    uint32 displayId = 0;
+    if (m_owner->IsPlayer() && static_cast<Player*>(m_owner)->IsMounted())
+        displayId = static_cast<Player*>(m_owner)->GetMountID();
+    else
+        displayId = static_cast<Unit*>(m_owner)->GetNativeDisplayId();
+    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(displayId);
+    float scale = creatureDisplayInfo->scale;
+    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
+    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
+    if (attachmentItr != sModelAttachmentStore.end())
+    {
+        for (auto& attachment : attachmentItr->second)
+        {
+            if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+            {
+                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+                break;
+            }
+        }
+    }
+}
+
 void VehicleInfo::RemoveAccessoriesFromMap()
 {
     // Remove all accessories
@@ -863,7 +833,10 @@ bool VehicleInfo::IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) con
 /// Add control and such modifiers to a passenger if required
 void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 {
-    Unit* pVehicle = (Unit*)m_owner;                        // Vehicles are alawys Unit
+    if (m_owner->IsPlayer())
+        return;
+
+    Unit* pVehicle = static_cast<Unit*>(m_owner);                        // Vehicles are alawys Unit (except with multi-person mounts)
 
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
@@ -968,7 +941,10 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 /// Remove control and such modifiers to a passenger if they were added
 void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 {
-    Unit* pVehicle = (Unit*)m_owner;
+    if (m_owner->IsPlayer())
+        return;
+
+    Unit* pVehicle = static_cast<Unit*>(m_owner);
 
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
