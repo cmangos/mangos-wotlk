@@ -578,14 +578,17 @@ Expires when the creature(vehicle) is entered or exited based on param 1
 Parameter 1: Seat Id (-1 if triggering on any seat)
 Expires when the passenger in this seat returns to the vehicle
 
-
 -----------------------
 41 = EVENT_T_PASSENGER_SPAWN
 -----------------------
 Parameter 1: Seat Id (-1 if triggering on any seat)
 Expires when the vehicle spawns a passenger in this seat
 
-
+-----------------------
+42 = EVENT_T_PASSENGER_CONTROL_END
+-----------------------
+Parameter 1: Seat Id (-1 if triggering on any seat)
+Expires when the passenger switches from a seat that has control to a non-controlling seat
 
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------

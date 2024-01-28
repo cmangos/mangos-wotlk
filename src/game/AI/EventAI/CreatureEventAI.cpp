@@ -1667,6 +1667,16 @@ void CreatureEventAI::OnPassengerSpawn(uint8 seat)
     ProcessEvents();
 }
 
+void CreatureEventAI::OnPassengerControlEnd(uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_VEHICLE_RETURN)
+            if (i.event.passengerControlEnd.seat == seat || i.event.passengerControlEnd.seat == -1)
+                CheckAndReadyEventForExecution(i);
+    ProcessEvents();
+}
+
 void CreatureEventAI::EnterCombat(Unit* enemy)
 {
     CreatureAI::EnterCombat(enemy);

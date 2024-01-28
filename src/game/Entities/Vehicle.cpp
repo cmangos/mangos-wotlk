@@ -392,9 +392,9 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
 
     PassengerMap::const_iterator itr = m_passengers.find(passenger);
     MANGOS_ASSERT(itr != m_passengers.end());
-
+    uint8 oldSeat = itr->second->GetTransportSeat();
     // We are already boarded to this seat
-    if (itr->second->GetTransportSeat() == seat)
+    if (oldSeat == seat)
         return;
 
     // Check if it's a valid seat
@@ -449,7 +449,11 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     if (Unit* owner = dynamic_cast<Unit*>(m_owner))
     {
         if (owner->AI())
+        {
             owner->AI()->OnPassengerRide(passenger, true, seat);
+            if (!(seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL))
+                owner->AI()->OnPassengerControlEnd(oldSeat);
+        }
         if (passenger->AI())
             passenger->AI()->OnVehicleRide(owner, true, seat);
     }

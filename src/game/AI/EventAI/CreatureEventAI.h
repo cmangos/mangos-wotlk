@@ -81,6 +81,7 @@ enum EventAI_Type
     EVENT_T_PASSENGER_BOARDED       = 39,                   // Boarding, SeatID
     EVENT_T_VEHICLE_RETURN          = 40,                   // SeatID
     EVENT_T_PASSENGER_SPAWN         = 41,                   // SeatID
+    EVENT_T_PASSENGER_CONTROL_END   = 42,                   // SeatID
 
     EVENT_T_END,
 };
@@ -820,6 +821,11 @@ struct CreatureEventAI_Event
         {
             uint32 seat;
         } passengerSpawn;
+        // EVENT_T_PASSENGER_CONTROL_END                    = 42
+        struct
+        {
+            uint32 seat;
+        } passengerControlEnd;
         // RAW
         struct
         {
@@ -915,6 +921,7 @@ class CreatureEventAI : public CreatureAI
         void OnPassengerRide(Unit* passenger, bool boarded, uint8 seat) override;
         void OnVehicleReturn(uint8 seat) override;
         void OnPassengerSpawn(uint8 seat) override;
+        void OnPassengerControlEnd(uint8 seat) override;
         // bool IsControllable() const override { return true; }
 
         static int Permissible(const Creature* creature);
