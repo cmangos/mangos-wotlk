@@ -390,11 +390,14 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     MANGOS_ASSERT(seatEntry);
 
     // Switching seats is only allowed if this flag is set
-    if (seatEntry->CanSwitchFromSeat())
+    if (!seatEntry->CanSwitchFromSeat())
         return;
 
     // Remove passenger modifications of the old seat
     RemoveSeatMods(passenger, seatEntry->m_flags);
+
+    // Get seatEntry of new seat
+    seatEntry = GetSeatEntry(seat);
 
     float lx = 0.f, ly = 0.f, lz = 0.f, lo = 0.f;
     GetSeatCoordinates(seatEntry, lx, ly, lz);

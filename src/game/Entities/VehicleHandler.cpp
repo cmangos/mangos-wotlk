@@ -126,7 +126,7 @@ void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
     if (!transportInfo || !transportInfo->IsOnVehicle())
         return;
 
-    Unit* vehicle = (Unit*)transportInfo->GetTransport();
+    Unit* vehicle = static_cast<Unit*>(transportInfo->GetTransport());
 
     if (vehicleGuid != vehicle->GetObjectGuid())
     {
@@ -141,7 +141,7 @@ void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
 
         SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(destVehicle->GetEntry());
         for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
-            if (itr->second.IsFitToRequirements(_player, destVehicle->GetTypeId() == TYPEID_UNIT ? (Creature*)destVehicle : nullptr))
+            if (itr->second.IsFitToRequirements(_player, destVehicle->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(destVehicle) : nullptr))
                 _player->CastSpell(destVehicle, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
     }
     else
@@ -167,7 +167,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
     if (!transportInfo || !transportInfo->IsOnVehicle())
         return;
 
-    Unit* srcVehicle = (Unit*)transportInfo->GetTransport();
+    Unit* srcVehicle = static_cast<Unit*>(transportInfo->GetTransport());
 
     // Something went wrong
     if (srcVehicleGuid != srcVehicle->GetObjectGuid())
