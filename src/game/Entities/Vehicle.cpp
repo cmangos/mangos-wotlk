@@ -41,6 +41,7 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "Globals/ObjectMgr.h"
 #include "Models/M2Stores.h"
+#include "Server/DBCEnums.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
@@ -439,6 +440,8 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     // It seems that Seat switching is sent without SplineFlag BoardVehicle
     init.Launch();
 
+    bool hadControl = seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL;
+
     // Get seatEntry of new seat
     seatEntry = GetSeatEntry(seat);
     MANGOS_ASSERT(seatEntry);
@@ -451,7 +454,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
         if (owner->AI())
         {
             owner->AI()->OnPassengerRide(passenger, true, seat);
-            if (!(seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL))
+            if (hadControl && !(seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL))
                 owner->AI()->OnPassengerControlEnd(oldSeat);
         }
         if (passenger->AI())
