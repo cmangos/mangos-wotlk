@@ -669,6 +669,8 @@ void VehicleInfo::RespawnAccessories(int32 seatIndex)
         Position pos = m_owner->GetPosition();
         pos.o *= 2;
         SummonPassenger(itr->passengerEntry, pos, itr->seatId);
+        if (UnitAI* ownerAI = static_cast<Unit*>(m_owner)->AI())
+            ownerAI->OnPassengerSpawn(itr->seatId);
     }
 }
 
@@ -704,6 +706,8 @@ void VehicleInfo::RecallAccessories(float distance, int32 seatIndex)
             int32 basepoint0 = seat;
             creature->CastCustomSpell(static_cast<Unit*>(m_owner), SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
             itr = m_unboardedAccessories.erase(itr);
+            if (UnitAI* ownerAI = static_cast<Unit*>(m_owner)->AI())
+                ownerAI->OnVehicleReturn(seat);
         }
         else ++itr;
     }

@@ -1636,15 +1636,35 @@ void CreatureEventAI::OnVehicleRide(Unit* vehicle, bool boarded, uint8 seat)
     ProcessEvents(vehicle);
 }
 
-void CreatureEventAI::OnPassengerRide(Unit* vehicle, bool boarded, uint8 seat)
+void CreatureEventAI::OnPassengerRide(Unit* passenger, bool boarded, uint8 seat)
 {
     IncreaseDepthIfNecessary();
     for (auto& i : m_CreatureEventAIList)
         if (i.event.event_type == EVENT_T_PASSENGER_BOARDED)
             if (i.event.passengerBoard.board == boarded || i.event.passengerBoard.board == 2)
                 if (i.event.passengerBoard.seat == seat || i.event.passengerBoard.seat == -1)
-                    CheckAndReadyEventForExecution(i, vehicle);
-    ProcessEvents(vehicle);
+                    CheckAndReadyEventForExecution(i, passenger);
+    ProcessEvents(passenger);
+}
+
+void CreatureEventAI::OnVehicleReturn(uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_VEHICLE_RETURN)
+            if (i.event.vehicleReturn.seat == seat || i.event.vehicleReturn.seat == -1)
+                CheckAndReadyEventForExecution(i);
+    ProcessEvents();
+}
+
+void CreatureEventAI::OnPassengerSpawn(uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_VEHICLE_RETURN)
+            if (i.event.passengerSpawn.seat == seat || i.event.passengerSpawn.seat == -1)
+                CheckAndReadyEventForExecution(i);
+    ProcessEvents();
 }
 
 void CreatureEventAI::EnterCombat(Unit* enemy)
