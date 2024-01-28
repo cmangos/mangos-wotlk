@@ -572,6 +572,20 @@ Parameter 1: Board - 0 if creature(vehicle) is being exited, 1 if creature(vehic
 Parameter 2: Seat Id (-1 if triggering on any seat)
 Expires when the creature(vehicle) is entered or exited based on param 1
 
+-----------------------
+40 = EVENT_T_VEHICLE_RETURN
+-----------------------
+Parameter 1: Seat Id (-1 if triggering on any seat)
+Expires when the passenger in this seat returns to the vehicle
+
+
+-----------------------
+41 = EVENT_T_PASSENGER_SPAWN
+-----------------------
+Parameter 1: Seat Id (-1 if triggering on any seat)
+Expires when the vehicle spawns a passenger in this seat
+
+
 
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------
