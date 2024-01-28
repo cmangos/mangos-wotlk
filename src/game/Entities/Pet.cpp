@@ -2441,8 +2441,6 @@ void Pet::ForcedDespawn(uint32 timeMSToDespawn, bool onlyAlive)
     if (IsAlive())
         SetDeathState(JUST_DIED);
 
-    RemoveCorpse(true);                                     // force corpse removal in the same grid
-
     Unsummon(PET_SAVE_NOT_IN_SLOT, owner);
 }
 
