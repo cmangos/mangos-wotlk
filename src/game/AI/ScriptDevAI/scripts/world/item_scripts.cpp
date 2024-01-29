@@ -400,6 +400,27 @@ struct GoblinBomb : public SpellScript
     }
 };
 
+// 11403 - Dream Vision
+struct DreamVision : public SpellScript
+{
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    {
+        if (summon->GetEntry() != 7863)
+            return;
+
+        summon->SetHover(true);
+        summon->SetWaterWalk(true);
+        summon->SetFeatherFall(true);
+    }
+
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex effIdx, bool /*targetB*/, float& radius) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        radius = 2.f;
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -440,4 +461,5 @@ void AddSC_item_scripts()
     RegisterSpellScript<ArgussianCompass>("spell_argussian_compass");
     RegisterSpellScript<SummonGoblinBomb>("spell_summon_goblin_bomb");
     RegisterSpellScript<GoblinBomb>("spell_goblin_bomb");
+    RegisterSpellScript<DreamVision>("spell_dream_vision");
 }
