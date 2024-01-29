@@ -4184,7 +4184,7 @@ SpellAuraProcResult Unit::HandleAddFlatModifierAuraProc(ProcExecutionData& data)
         CastCustomSpell(pVictim, 68055, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, triggeredByAura);
     }
 
-    return SPELL_AURA_PROC_OK;
+    return SPELL_AURA_PROC_CANT_TRIGGER;
 }
 
 SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(ProcExecutionData& data)
@@ -4211,7 +4211,7 @@ SpellAuraProcResult Unit::HandleAddPctModifierAuraProc(ProcExecutionData& data)
             break;
         }
     }
-    return SPELL_AURA_PROC_OK;
+    return SPELL_AURA_PROC_CANT_TRIGGER;
 }
 
 SpellAuraProcResult Unit::HandleModDamagePercentDoneAuraProc(ProcExecutionData& data)
