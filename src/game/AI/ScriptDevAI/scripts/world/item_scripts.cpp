@@ -374,6 +374,7 @@ struct DreamVision : public SpellScript
             summon->SetCanEnterCombat(false);
             summon->SetImmuneToNPC(true);
             summon->SetImmuneToPlayer(true);
+            summon->SetHover(true);
             summon->SetVisibility(VISIBILITY_OFF);
         }
     }
