@@ -302,9 +302,9 @@ class WorldSession
         void SetSecurity(AccountTypes security) { _security = security; }
 #ifdef BUILD_DEPRECATED_PLAYERBOT
         // Players connected without socket are bot
-        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected/bot"; }
+        const std::string GetRemoteAddress() const { return m_socket ? m_socket->GetRemoteAddress() : "disconnected/bot"; }
 #else
-        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected"; }
+        const std::string GetRemoteAddress() const { return m_socket ? m_socket->GetRemoteAddress() : "disconnected"; }
 #endif
         const std::string& GetLocalAddress() const { return m_localAddress; }
 
@@ -1032,7 +1032,7 @@ class WorldSession
 
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
-        std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
+        std::shared_ptr<WorldSocket> m_socket;              // socket pointer is owned by the network thread which created it
         std::shared_ptr<WorldSocket> m_requestSocket;       // a new socket for this session is requested (double connection)
         std::string m_localAddress;
         WorldSessionState m_sessionState;                   // this session state

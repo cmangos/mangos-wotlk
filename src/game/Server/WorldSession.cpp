@@ -95,7 +95,7 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, std::string accountName, uint32 accountFlags, uint32 recruitingFriend, bool isARecruiter) :
-    m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), m_expansion(expansion), m_orderCounter(0),
+    m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_socket(sock ? sock->shared_from_this() : nullptr), _security(sec), _accountId(id), m_expansion(expansion), m_orderCounter(0),
     m_gameBuild(0), m_clientOS(CLIENT_OS_UNKNOWN), m_clientPlatform(CLIENT_PLATFORM_UNKNOWN), m_accountMaxLevel(0), m_lastAnticheatUpdate(0), m_anticheat(nullptr), _logoutTime(0), m_kickTime(0), m_localAddress("127.0.0.1"),
     m_inQueue(false), m_playerLoading(false), m_kickSession(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(true),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
@@ -112,12 +112,12 @@ WorldSession::~WorldSession()
 
     // marks this session as finalized in the socket which references (BUT DOES NOT OWN) it.
     // this lets the socket handling code know that the socket can be safely deleted
-    if (m_Socket)
+    if (m_socket)
     {
-        if (!m_Socket->IsClosed())
-            m_Socket->Close();
+        if (!m_socket->IsClosed())
+            m_socket->Close();
 
-        m_Socket->FinalizeSession();
+        m_socket->FinalizeSession();
     }
 }
 
@@ -131,14 +131,14 @@ void WorldSession::SetOffline()
     }
 
     // be sure its closed (may occur when second session is opened)
-    if (m_Socket)
+    if (m_socket)
     {
-        if (!m_Socket->IsClosed())
-            m_Socket->Close();
+        if (!m_socket->IsClosed())
+            m_socket->Close();
 
         // unexpected socket close, let it be deleted
-        m_Socket->FinalizeSession();
-        m_Socket = nullptr;
+        m_socket->FinalizeSession();
+        m_socket = nullptr;
     }
 
     m_sessionState = WORLD_SESSION_STATE_OFFLINE;
@@ -146,7 +146,7 @@ void WorldSession::SetOffline()
 
 void WorldSession::SetOnline()
 {
-    if (_player && m_Socket && !m_Socket->IsClosed())
+    if (_player && m_socket && !m_socket->IsClosed())
     {
         m_sessionState = WORLD_SESSION_STATE_READY;
         m_kickTime = 0;
@@ -165,7 +165,7 @@ bool WorldSession::RequestNewSocket(WorldSocket* socket)
     if (m_requestSocket)
         return false;
 
-    m_requestSocket = socket->shared<WorldSocket>();
+    m_requestSocket = socket->shared_from_this();
     m_sessionState = WORLD_SESSION_STATE_CREATED;
     return true;
 }
@@ -212,8 +212,11 @@ void WorldSession::SendPacket(WorldPacket const& packet) const
     }
 #endif
 
-    if (!m_Socket || m_Socket->IsClosed())
+    if (!m_socket)
+    {
+        //sLog.outDebug("Refused to send %s to %s", packet.GetOpcodeName(), _player ? _player->GetName() : "UKNOWN");
         return;
+    }
 
 #ifdef MANGOS_DEBUG
 
@@ -251,7 +254,7 @@ void WorldSession::SendPacket(WorldPacket const& packet) const
 
 #endif                                                  // !MANGOS_DEBUG
 
-    m_Socket->SendPacket(packet);
+    m_socket->SendPacket(packet);
 }
 
 /// Add an incoming packet to the queue
@@ -359,7 +362,7 @@ bool WorldSession::Update(uint32 /*diff*/)
         std::swap(recvQueueCopy, m_recvQueue);
     }
 
-    if (m_Socket && !m_Socket->IsClosed() && m_anticheat)
+    if (m_socket && !m_socket->IsClosed() && m_anticheat)
     {
         auto const now = WorldTimer::getMSTime();
         m_anticheat->Update(WorldTimer::getMSTimeDiff(m_lastAnticheatUpdate, now));
@@ -368,7 +371,7 @@ bool WorldSession::Update(uint32 /*diff*/)
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// not process packets if socket already closed
-    while (m_Socket && !m_Socket->IsClosed() && !recvQueueCopy.empty())
+    while (m_socket && !m_socket->IsClosed() && !recvQueueCopy.empty())
     {
         // sLog.outError("MOEP: %s (0x%.4X)", packet->GetOpcodeName(), packet->GetOpcode());
 
@@ -481,9 +484,9 @@ bool WorldSession::Update(uint32 /*diff*/)
                 if (!IsOffline())
                     SetOffline();
 
-                m_Socket = m_requestSocket;
+                m_socket = m_requestSocket;
                 m_requestSocket = nullptr;
-                sLog.outDetail("New Session key %s", m_Socket->GetSessionKey().AsHexStr());
+                sLog.outDetail("New Session key %s", m_socket->GetSessionKey().AsHexStr());
                 SendAuthOk();
             }
             else
@@ -500,7 +503,7 @@ bool WorldSession::Update(uint32 /*diff*/)
         {
             // waiting to go online
             // TODO:: Maybe check if have to send queue update?
-            if (!m_Socket || (m_Socket && m_Socket->IsClosed()))
+            if (!m_socket || (m_socket && m_socket->IsClosed()))
             {
                 // directly remove this session
                 return false;
@@ -519,7 +522,7 @@ bool WorldSession::Update(uint32 /*diff*/)
         }
         case WORLD_SESSION_STATE_READY:
         {
-            if (m_Socket && m_Socket->IsClosed())
+            if (m_socket && m_socket->IsClosed())
             {
                 if (!_player)
                     return false;
@@ -538,7 +541,7 @@ bool WorldSession::Update(uint32 /*diff*/)
             if (ShouldDisconnect(time(nullptr)))   // check if delayed logout is fired
             {
                 LogoutPlayer();
-                if (!m_requestSocket && (!m_Socket || m_Socket->IsClosed()))
+                if (!m_requestSocket && (!m_socket || m_socket->IsClosed()))
                     return false;
             }
 
@@ -559,7 +562,7 @@ void WorldSession::UpdateMap(uint32 diff)
         std::swap(recvQueueMapCopy, m_recvQueueMap);
     }
 
-    while (m_Socket && !m_Socket->IsClosed() && recvQueueMapCopy.size())
+    while (m_socket && !m_socket->IsClosed() && recvQueueMapCopy.size())
     {
         auto const packet = std::move(recvQueueMapCopy.front());
         recvQueueMapCopy.pop_front();
@@ -702,7 +705,7 @@ void WorldSession::LogoutPlayer()
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-        if (_player->GetGroup() && !_player->GetGroup()->IsRaidGroup() && m_Socket && !m_Socket->IsClosed())
+        if (_player->GetGroup() && !_player->GetGroup()->IsRaidGroup() && m_socket && !m_socket->IsClosed())
             _player->RemoveFromGroup();
 
         ///- Send update to group
@@ -775,10 +778,10 @@ void WorldSession::LogoutPlayer()
 
     if (m_kickSession)
     {
-        if (m_Socket)
+        if (m_socket)
         {
-            m_Socket->Close();
-            m_Socket = nullptr;
+            m_socket->Close();
+            m_socket = nullptr;
         }
         m_kickSession = false;
     }
@@ -1151,7 +1154,7 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port) const
 
     pkt << uint32(0);                                       // unknown
 
-    HMACSHA1 sha1(40, m_Socket->GetSessionKey().AsByteArray().data());
+    HMACSHA1 sha1(40, m_socket->GetSessionKey().AsByteArray().data());
     sha1.UpdateData((uint8*)&ip2, 4);
     sha1.UpdateData((uint8*)&port, 2);
     sha1.Finalize();
@@ -1213,24 +1216,24 @@ void WorldSession::SynchronizeMovement(MovementInfo& movementInfo)
 
 std::deque<uint32> WorldSession::GetOutOpcodeHistory()
 {
-    if (m_Socket)
-        return m_Socket->GetOutOpcodeHistory();
+    if (m_socket)
+        return m_socket->GetOutOpcodeHistory();
     else
         return std::deque<uint32>();
 }
 
 std::deque<uint32> WorldSession::GetIncOpcodeHistory()
 {
-    if (m_Socket)
-        return m_Socket->GetIncOpcodeHistory();
+    if (m_socket)
+        return m_socket->GetIncOpcodeHistory();
     else
         return std::deque<uint32>();
 }
 
 void WorldSession::SetPacketLogging(bool state)
 {
-    if (m_Socket)
-        m_Socket->SetPacketLogging(state);
+    if (m_socket)
+        m_socket->SetPacketLogging(state);
 }
 
 void WorldSession::SendAuthOk() const
