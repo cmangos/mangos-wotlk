@@ -5547,7 +5547,7 @@ bool ChatHandler::LootStatsHelper(char* args, bool full)
         " -> '.loot stats [#amountOfDropCheck]'\n"
         " else you have to provide loot type and loot entry\n"
         " -> '.loot stats lootType #lootEntry [#amountOfDropCheck]\n'"
-        " -> lootType can be 'creature', 'gameobject', 'fishing', 'item', 'pickpocketing', 'skinning', 'disenchanting', 'prospecting', 'mail', 'reference'\n"
+        " -> lootType can be 'creature', 'gameobject', 'fishing', 'item', 'pickpocketing', 'skinning', 'disenchanting', 'prospecting', 'milling', 'mail', 'spell', 'reference'\n"
         " -> ex: '.loot stats c 448' will show Hogger loot table";
 
     auto showError = [&]()
@@ -5591,8 +5591,10 @@ bool ChatHandler::LootStatsHelper(char* args, bool full)
                 lootStore = "item";
             else if (lootType.rfind("pi", 0) == 0)
                 lootStore = "pickpocketing";
-            else if (lootType.rfind("s", 0) == 0)
+            else if (lootType.rfind("sk", 0) == 0)
                 lootStore = "skinning";
+            else if (lootType.rfind("sp", 0) == 0)
+                lootStore = "spell";
             else if (lootType.rfind("dis", 0) == 0)
                 lootStore = "disenchanting";
             else if (lootType.rfind("pr", 0) == 0)
