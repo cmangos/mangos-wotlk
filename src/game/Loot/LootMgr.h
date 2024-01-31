@@ -300,10 +300,10 @@ class LootStore
 class LootTemplate
 {
     private:
-        class LootTemplate::LootGroup                           // A set of loot definitions for items (refs are not allowed)
+        class LootGroup                           // A set of loot definitions for items (refs are not allowed)
         {
             public:
-                void AddEntry(LootStoreItem& item);                 // Adds an entry to the group (at loading stage)
+                void AddEntry(LootStoreItem const& item);                 // Adds an entry to the group (at loading stage)
                 bool HasQuestDrop() const;                          // True if group includes at least 1 quest drop entry
                 bool HasQuestDropForPlayer(Player const* player) const;
                 // The same for active quests of the player
@@ -326,7 +326,7 @@ class LootTemplate
 
     public:
         // Adds an entry to the group (at loading stage)
-        void AddEntry(LootStoreItem& item);
+        void AddEntry(LootStoreItem const& item);
         // Rolls for every item in the template and adds the rolled items the the loot
         void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr) const;
 
