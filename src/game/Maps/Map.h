@@ -92,6 +92,15 @@ enum LevelRequirementVsMode
     LEVELREQUIREMENT_HEROIC = 70
 };
 
+enum class RateModType
+{
+    KILL    = 0,
+    QUEST   = 1,
+    EXPLORE = 2,
+    PETKILL = 3,
+    MAX     = 4
+};
+
 struct ZoneDynamicInfo
 {
     ZoneDynamicInfo() : musicId(0), weatherId(0), weatherGrade(0.0f),
@@ -221,13 +230,11 @@ class Map : public GridRefManager<NGridType>
         void ChangeMapDifficulty(Difficulty difficulty);
         void SetNewDifficultyCooldown(TimePoint const& newCooldown);
         TimePoint const& GetNewDifficultyCooldown() const { return m_dynamicDifficultyCooldown; }
-        float GetPetKillXPMod() const;
-        float GetQuestXPMod() const;
-        float GetKillXPMod() const;
-        float GetExploreXPMod() const;
+
+        uint32 GetExpansion() const { return (i_mapEntry) ? i_mapEntry->Expansion() : 0u; }
+        float GetXPModRate(RateModType type) const;
 
         MapEntry const* GetEntry() const { return i_mapEntry; }
-        uint32 GetExpansion() const { return (i_mapEntry) ? i_mapEntry->Expansion() : 0u; }
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
         bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
         bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }

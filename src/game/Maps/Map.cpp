@@ -1265,60 +1265,92 @@ void Map::SetNewDifficultyCooldown(TimePoint const& newCooldown)
         m_dynamicDifficultyCooldown = newCooldown;
 }
 
-float Map::GetPetKillXPMod() const
+// This is not retail like
+// Get xp rate for given type
+float Map::GetXPModRate(RateModType type) const
 {
-    switch (GetExpansion())
+    float expMod = 1.0f;
+    switch (type)
     {
-        default:
-        case 0:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_VANILLA);
-        case 1:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_BC);
-        case 2:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_WOTLK);
-    }
-}
+        case RateModType::QUEST:
+        {
+            switch (GetExpansion())
+            {
+                case 0:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_VANILLA);
+                    break;
+                case 1:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_BC);
+                    break;
 
-float Map::GetQuestXPMod() const
-{
-    switch (GetExpansion())
-    {
-        default:
-        case 0:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_VANILLA);
-        case 1:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_BC);
-        case 2:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_WOTLK);
-    }
-}
+                default:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_WOTLK);
+                    break;
+            }
+            expMod *= sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST);
+            break;
 
-float Map::GetKillXPMod() const
-{
-    switch (GetExpansion())
-    {
-        default:
-        case 0:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_VANILLA);
-        case 1:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_BC);
-        case 2:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_WOTLK);
-    }
-}
+        }
+        
+        case RateModType::KILL:
+        {
+            switch (GetExpansion())
+            {
+                case 0:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_VANILLA);
+                    break;
+                case 1:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_BC);
+                    break;
 
-float Map::GetExploreXPMod() const
-{
-    switch (GetExpansion())
-    {
-        default:
-        case 0:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_VANILLA);
-        case 1:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_BC);
-        case 2:
-            return sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_WOTLK);
+                default:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_WOTLK);
+                    break;
+            }
+            expMod *= sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL);
+            break;
+        }
+
+        case RateModType::EXPLORE:
+        {
+            switch (GetExpansion())
+            {
+                case 0:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_VANILLA);
+                    break;
+                case 1:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_BC);
+                    break;
+
+                default:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE_WOTLK);
+                    break;
+            }
+            expMod *= sWorld.getConfig(CONFIG_FLOAT_RATE_XP_EXPLORE);
+            break;
+        }
+
+        case RateModType::PETKILL:
+        {
+            switch (GetExpansion())
+            {
+                case 0:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_VANILLA);
+                    break;
+                case 1:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_BC);
+                    break;
+
+                default:
+                    expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL_WOTLK);
+                    break;
+            }
+            expMod *= sWorld.getConfig(CONFIG_FLOAT_RATE_PET_XP_KILL);
+            break;
+        }
     }
+
+    return expMod;
 }
 
 uint32 Map::GetMaxPlayers() const
