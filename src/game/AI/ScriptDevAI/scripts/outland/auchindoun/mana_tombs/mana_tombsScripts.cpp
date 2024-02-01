@@ -94,7 +94,7 @@ static const DialogueEntry aIntroDialogue[] =
 struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
 {
     npc_shaheenAI(Creature* pCreature) : npc_escortAI(pCreature),
-        DialogueHelper(aIntroDialogue)
+        DialogueHelper(aIntroDialogue), m_uiSummonCount(0)
     {
         StartNextDialogueText(SPELL_ETHEREAL_TELEPORT);
         Reset();
