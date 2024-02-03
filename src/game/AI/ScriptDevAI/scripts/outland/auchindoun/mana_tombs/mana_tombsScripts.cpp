@@ -98,6 +98,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
     {
         StartNextDialogueText(SPELL_ETHEREAL_TELEPORT);
         Reset();
+        SetRangedMode(true, 35.f, TYPE_FULL_CASTER);
     }
 
     ObjectGuid m_xiraxisGuid;
@@ -120,7 +121,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
         {
             case NPC_SHADOW_LORD_XIRAXIS:
                 m_xiraxisGuid = pSummoned->GetObjectGuid();
-                DoScriptText(SAY_XIRAXIS_SPAWN, pSummoned);
+                DoBroadcastText(SAY_XIRAXIS_SPAWN, pSummoned);
                 pSummoned->SetWalk(false);
                 pSummoned->GetMotionMaster()->MovePoint(1, -67.49f, -74.55f, -0.86f);
                 break;
@@ -164,7 +165,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
         {
             case 8:
                 SetEscortPaused(true);
-                DoScriptText(SAY_FIRST_STOP, m_creature);
+                DoBroadcastText(SAY_FIRST_STOP, m_creature);
                 // summon first wave
                 m_creature->SummonCreature(NPC_ETHEREAL_THEURGIST, -375.86f, -129.16f, -0.95f, 4.82f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_ETHEREAL_THEURGIST, -370.67f, -199.79f, -0.95f, 1.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
@@ -172,14 +173,14 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
                 m_creature->SummonCreature(NPC_ETHEREAL_SPELLBINDER, -375.18f, -199.58f, -0.95f, 1.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
             case 9:
-                DoScriptText(SAY_FIRST_STOP_COMPLETE, m_creature);
+                DoBroadcastText(SAY_FIRST_STOP_COMPLETE, m_creature);
                 break;
             case 14:
                 StartNextDialogueText(SAY_COLLECTOR_SEARCH);
                 break;
             case 18:
                 SetEscortPaused(true);
-                DoScriptText(SAY_SECOND_STOP, m_creature);
+                DoBroadcastText(SAY_SECOND_STOP, m_creature);
                 // summon second wave
                 m_creature->SummonCreature(NPC_ETHEREAL_SORCERER, -278.17f, -195.50f, 0.68f, 1.22f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_ETHEREAL_SORCERER, -234.51f, -197.03f, -0.95f, 1.92f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
@@ -194,14 +195,14 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
             case 27:
                 if (m_uiSummonCount)
                     SetEscortPaused(true);
-                DoScriptText(SAY_THIRD_STOP, m_creature);
+                DoBroadcastText(SAY_THIRD_STOP, m_creature);
                 break;
             case 30:
                 StartNextDialogueText(NPC_ETHEREAL_THEURGIST);
                 m_creature->HandleEmote(EMOTE_STATE_WORK);
                 break;
             case 31:
-                DoScriptText(SAY_BREAK_OVER, m_creature);
+                DoBroadcastText(SAY_BREAK_OVER, m_creature);
                 break;
             case 41:
                 SetEscortPaused(true);
@@ -226,7 +227,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
                 if (m_creature->IsTemporarySummon())
                 {
                     if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
-                        DoScriptText(SAY_SPAWN, m_creature, pSummoner);
+                        DoBroadcastText(SAY_SPAWN, m_creature, pSummoner);
                 }
                 break;
             case SAY_ESCORT_READY:
@@ -264,13 +265,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
     void UpdateEscortAI(const uint32 uiDiff) override
     {
         DialogueUpdate(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // ToDo: add combat spells
-
-        DoMeleeAttackIfReady();
+        ScriptedAI::UpdateAI(uiDiff);
     }
 };
 

@@ -748,6 +748,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 32942:         // Phasing Invisibility
         case 33460:         // Inhibit Magic
         case 33483:         // Mana Tap
+        case 33839:         // Vir'aani Concentration
         case 33900:         // Shroud of Death
         case 33908:         // Burning Spikes
         case 34343:         // Thorns
