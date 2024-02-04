@@ -351,7 +351,7 @@ struct Beatdown : public SpellScript
         if (itr == spell->GetTargetList().end())
             return;
 
-        caster->getThreatManager().modifyAllThreatPercent(100);
+        caster->getThreatManager().modifyAllThreatPercent(-100);
         caster->AI()->AttackStart(target);
     }
 };
