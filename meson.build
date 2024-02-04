@@ -16,6 +16,7 @@ dblib_dep = dependency('mariadb', 'libmariadb', 'mysql', 'libmysql', 'postgresql
 zlib_dep = dependency('zlib', version: '>=1.2.13', static: true, fallback: ['zlib', 'zlib_dep'], required: true)
 openssl_dep = dependency('openssl', version: '>=1.1.1', static: true, fallback: ['openssl'], required: true)
 utfcpp_dep = dependency('utf8cpp', 'utfcpp', static: true, required: false)
+sqlite_dep = dependency('sqlite3', static: true, fallback: ['sqlite3'], required: get_option('SQLITE'))
 
 global_includes = include_directories('src/game', 'dep/libmpq', 'src', 'src/framework', 'src/game/Vmap',
                                       'dep/json', 'dep/g3dlite', 'src/shared', 'dep/recastnavigation',
@@ -23,47 +24,55 @@ global_includes = include_directories('src/game', 'dep/libmpq', 'src', 'src/fram
                                       'src/game/MotionGenerators', 'dep/include/bzip2', 'dep/include/gsoap',
                                       'dep/include')
 
-if not dblib_dep.found()
-  if build_machine.system() == 'windows'
-    mysql_dirs = [
-      'C:\Program Files\MySQL\MySQL Server 8.0\lib',
-      'C:\Program Files\MySQL\MySQL Server 5.7\lib',
-      'C:\Program Files\MariaDB 11.0\lib',
-      'C:\Program Files\MariaDB 11.1\lib',
-      'C:\Program Files\MariaDB 11.2\lib',
-    ]
+if not get_option('SQLITE')
+  if not dblib_dep.found()
+    if build_machine.system() == 'windows'
+      mysql_dirs = [
+        'C:\Program Files\MySQL\MySQL Server 8.0\lib',
+        'C:\Program Files\MySQL\MySQL Server 5.7\lib',
+        'C:\Program Files\MariaDB 11.0\lib',
+        'C:\Program Files\MariaDB 11.1\lib',
+        'C:\Program Files\MariaDB 11.2\lib',
+      ]
 
-    fs = import('fs')
-    if fs.is_dir('C:\Program Files\MySQL\MySQL Server 8.0\lib')
-      mysql_dll = 'C:\Program Files\MySQL\MySQL Server 8.0\lib\libmysql.dll'
-    elif fs.is_dir('C:\Program Files\MySQL\MySQL Server 5.7\lib')
-      mysql_dll = 'C:\Program Files\MySQL\MySQL Server 5.7\lib\libmysql.dll'
-    elif fs.is_dir('C:\Program Files\MariaDB 11.2\lib')
-      mysql_dll = 'C:\Program Files\MariaDB 11.2\lib\libmariadb.dll'
-    elif fs.is_dir('C:\Program Files\MariaDB 11.1\lib')
-      mysql_dll = 'C:\Program Files\MariaDB 11.1\liblibmariadb.dll'
-    elif fs.is_dir('C:\Program Files\MariaDB 11.0\lib')
-      mysql_dll = 'C:\Program Files\MariaDB 11.0\lib\libmariadb.dll'
+      fs = import('fs')
+      if fs.is_dir('C:\Program Files\MySQL\MySQL Server 8.0\lib')
+        mysql_dll = 'C:\Program Files\MySQL\MySQL Server 8.0\lib\libmysql.dll'
+      elif fs.is_dir('C:\Program Files\MySQL\MySQL Server 5.7\lib')
+        mysql_dll = 'C:\Program Files\MySQL\MySQL Server 5.7\lib\libmysql.dll'
+      elif fs.is_dir('C:\Program Files\MariaDB 11.2\lib')
+        mysql_dll = 'C:\Program Files\MariaDB 11.2\lib\libmariadb.dll'
+      elif fs.is_dir('C:\Program Files\MariaDB 11.1\lib')
+        mysql_dll = 'C:\Program Files\MariaDB 11.1\liblibmariadb.dll'
+      elif fs.is_dir('C:\Program Files\MariaDB 11.0\lib')
+        mysql_dll = 'C:\Program Files\MariaDB 11.0\lib\libmariadb.dll'
+      else
+        error('No local MySQL Server installation found')
+      endif
+
+      dblib_dep = meson.get_compiler('cpp').find_library('mysql', dirs: mysql_dirs, static: true, required: false)
+      if not dblib_dep.found()
+        dblib_dep = meson.get_compiler('cpp').find_library('mariadb', dirs: mysql_dirs, static: true, required: false)
+      endif
+      install_data(mysql_dll, install_dir: get_option('bindir'))
     else
       error('No local MySQL Server installation found')
     endif
-
-    dblib_dep = meson.get_compiler('cpp').find_library('mysql', dirs: mysql_dirs, static: true, required: false)
-    if not dblib_dep.found()
-      dblib_dep = meson.get_compiler('cpp').find_library('mariadb', dirs: mysql_dirs, static: true, required: false)
-    endif
-    install_data(mysql_dll, install_dir: get_option('bindir'))
-  else
-    error('Either MySQL or MariaDB are required to build CMaNGOS')
   endif
+else
+  dblib_dep = sqlite_dep
 endif
 
 if not dblib_dep.found()
-  error('Either MySQL or MariaDB are required to build CMaNGOS')
+  error('No local SQL Server installation found')
 endif
 
 if get_option('POSTGRESQL')
   add_project_arguments('-DDO_POSTGRESQL', language: 'cpp')
+endif
+
+if get_option('SQLITE')
+  add_project_arguments('-DDO_SQLITE=1', language: 'cpp')
 endif
 
 if get_option('DEBUG')
