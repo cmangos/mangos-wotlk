@@ -1,6 +1,7 @@
 option('DEBUG',               type : 'boolean', value: false, description: 'Include additional debug-code in core')
 option('WARNINGS',            type : 'boolean', value: false, description: 'Show all warnings during compile')
 option('POSTGRESQL',          type : 'boolean', value: false, description: 'Use PostgreSQL')
+option('SQLITE',              type : 'boolean', value: false, description: 'Use SQLite')
 option('PCH',                 type : 'boolean', value: true,  description: 'Use precompiled headers')
 option('BUILD_GAME_SERVER',   type : 'boolean', value: true,  description: 'Build game server')
 option('BUILD_LOGIN_SERVER',  type : 'boolean', value: true,  description: 'Build login server')
