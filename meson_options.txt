@@ -14,3 +14,4 @@ option('BUILD_RECASTDEMOMOD', type : 'boolean', value: false, description: 'Buil
 option('BUILD_GIT_ID',        type : 'boolean', value: false, description: 'Build git_id')
 option('BUILD_DOCS',          type : 'boolean', value: false, description: 'Build documentation with doxygen')
 option('USE_ANTICHEAT',       type : 'boolean', value: true,  description: 'Use anticheat system')
+option('LIBMYSQL_PATH',       type : 'string',  value: '',    description: 'Path to the MySQL Library')
