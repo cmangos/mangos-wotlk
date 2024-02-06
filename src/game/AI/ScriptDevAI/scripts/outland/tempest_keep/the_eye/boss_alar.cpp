@@ -462,7 +462,7 @@ struct boss_alarAI : public CombatAI
         ResetCombatAction(ALAR_CHARGE, urand(25000, 30000));
     }
 
-    void ExecuteAction(uint32 action)
+    void ExecuteAction(uint32 action) override
     {
         switch (action)
         {

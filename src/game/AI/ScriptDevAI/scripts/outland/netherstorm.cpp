@@ -2827,7 +2827,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
         }
     }
 
-    void UpdateTimers(const uint32 diff)
+    void UpdateTimers(const uint32 diff) override
     {
         if (m_despawnTimer)
         {
@@ -2930,7 +2930,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
 
 struct ScrapReaverSpell : public SpellScript, public AuraScript
 {
-    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         // Only one player can control the scrap reaver
         if (target->HasAura(SPELL_SCRAP_REAVER))
@@ -3130,7 +3130,7 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 diff) override
     {
         if (m_eventStarted)
         {
@@ -3301,7 +3301,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
         m_timers[id] = timer;
     }
 
-    void UpdateTimers(const uint32 diff)
+    void UpdateTimers(const uint32 diff) override
     {
         std::vector<uint32> removedTimers;
 
@@ -3822,7 +3822,7 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
                 m_actionReadyStatus[KAYLAAN_ACTION_HEAL] = true;
     }
 
-    void ExecuteActions()
+    void ExecuteActions() override
     {
         if (m_creature->IsNonMeleeSpellCasted(false) || m_combatScriptHappening)
             return;

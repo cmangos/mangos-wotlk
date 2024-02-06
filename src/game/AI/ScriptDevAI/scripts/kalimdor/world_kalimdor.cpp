@@ -349,7 +349,7 @@ struct world_map_kalimdor : public ScriptedMap
             m_brewfestEvent.Update(diff);
     }
 
-    void SetData(uint32 uiType, uint32 uiData)
+    void SetData(uint32 uiType, uint32 uiData) override
     {
         switch (uiType)
         {

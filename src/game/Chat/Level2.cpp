@@ -5559,7 +5559,7 @@ bool ChatHandler::LootStatsHelper(char* args, bool full)
         }
 
         // Output to console
-        sLog.outError(usageStr.c_str());
+        sLog.outError("%s", usageStr.c_str());
 
         SetSentErrorMessage(true);
     };

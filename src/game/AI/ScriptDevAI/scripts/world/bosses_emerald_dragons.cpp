@@ -186,7 +186,7 @@ struct boss_emerissAI : public boss_emerald_dragonAI
     }
 
     // Corruption of Earth at 75%, 50% and 25%
-    bool DoSpecialDragonAbility()
+    bool DoSpecialDragonAbility() override
     {
         if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTION_OF_EARTH) == CAST_OK)
         {
@@ -199,7 +199,7 @@ struct boss_emerissAI : public boss_emerald_dragonAI
         return false;
     }
 
-    bool UpdateDragonAI(const uint32 uiDiff)
+    bool UpdateDragonAI(const uint32 uiDiff) override
     {
         // Volatile Infection Timer
         if (m_uiVolatileInfectionTimer < uiDiff)
@@ -252,7 +252,7 @@ struct boss_lethonAI : public boss_emerald_dragonAI
     }
 
     // Summon a spirit which moves toward the boss and heals him for each player hit by the spell; used at 75%, 50% and 25%
-    bool DoSpecialDragonAbility()
+    bool DoSpecialDragonAbility() override
     {
         if (DoCastSpellIfCan(m_creature, SPELL_DRAW_SPIRIT) == CAST_OK)
         {
@@ -398,7 +398,7 @@ struct boss_taerarAI : public boss_emerald_dragonAI
     }
 
     // Summon 3 Shades at 75%, 50% and 25% and Banish Self
-    bool DoSpecialDragonAbility()
+    bool DoSpecialDragonAbility() override
     {
         if (DoCastSpellIfCan(m_creature, SPELL_SELF_STUN) == CAST_OK)
         {
@@ -440,7 +440,7 @@ struct boss_taerarAI : public boss_emerald_dragonAI
         m_uiShadesDead = 0;
     }
 
-    bool UpdateDragonAI(const uint32 uiDiff)
+    bool UpdateDragonAI(const uint32 uiDiff) override
     {
         // Timer to unbanish the boss
         if (m_uiShadesTimeoutTimer)
@@ -515,7 +515,7 @@ struct boss_ysondreAI : public boss_emerald_dragonAI
     }
 
     // Summon Druids, one druid per player engaged in combat (actual summon handled in child spell 24795)
-    bool DoSpecialDragonAbility()
+    bool DoSpecialDragonAbility() override
     {
         if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_DRUIDS, CAST_TRIGGERED) == CAST_OK)
         {
@@ -526,7 +526,7 @@ struct boss_ysondreAI : public boss_emerald_dragonAI
         return false;
     }
 
-    bool UpdateDragonAI(const uint32 uiDiff)
+    bool UpdateDragonAI(const uint32 uiDiff) override
     {
         // Lightning Wave Timer
         if (m_uiLightningWaveTimer < uiDiff)

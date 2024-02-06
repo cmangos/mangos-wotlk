@@ -118,7 +118,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
         m_playerGuid.Clear();
     }
 
-    void OnSpellCooldownAdded(SpellEntry const* spellInfo)
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
     {
         if (spellInfo->Id == SPELL_ORBITAL_STRIKE)
             ResetTimer(OMOR_PULL_BACK, 2500);

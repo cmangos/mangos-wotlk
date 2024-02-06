@@ -1174,7 +1174,7 @@ struct npc_magister_aledisAI : public CombatAI
         }
     }
 
-    void Aggro(Unit* /*who*/)
+    void Aggro(Unit* /*who*/) override
     {
         if (m_creature->GetFaction() == FACTION_ALLEDIS_HOSTILE)
             SetDeathPrevention(true);
@@ -2284,7 +2284,7 @@ struct npc_razorthorn_ravager_pet : public PetAI
             HandleAnimations();
     }
 
-    void MovementInform(uint32 movementType, uint32 data)
+    void MovementInform(uint32 movementType, uint32 data) override
     {
         if (movementType == POINT_MOTION_TYPE)
             if (data == POINT_MOUND)

@@ -139,7 +139,7 @@ struct boss_eadricAI : public argent_champion_commonAI
         DoScriptText(urand(0, 1) ? SAY_EADRIC_KILL_1 : SAY_EADRIC_KILL_2, m_creature);
     }
 
-    void DoHandleEventEnd()
+    void DoHandleEventEnd() override
     {
         DoScriptText(SAY_EADRIC_DEFEAT, m_creature);
 
@@ -254,7 +254,7 @@ struct boss_paletressAI : public argent_champion_commonAI
         DoScriptText(urand(0, 1) ? SAY_PALETRESS_KILL_1 : SAY_PALETRESS_KILL_2, m_creature);
     }
 
-    void DoHandleEventEnd()
+    void DoHandleEventEnd() override
     {
         DoScriptText(SAY_PALETRESS_DEFEAT, m_creature);
 

@@ -428,6 +428,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
             return source->GetMapId() == mapId.mapId;
         case ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION:
             return IsConditionSatisfied(worldStateCondition.conditionEntry, nullptr, source->GetMap(), nullptr, CONDITION_FROM_WORLDSTATE);
+        case ACHIEVEMENT_CRITERIA_REQUIRE_UNUSED: break;
     }
     return false;
 }

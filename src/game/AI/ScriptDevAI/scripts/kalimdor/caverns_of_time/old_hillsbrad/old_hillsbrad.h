@@ -77,7 +77,7 @@ class instance_old_hillsbrad : public ScriptedInstance
         void OnObjectCreate(GameObject* pGo) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
+        void OnCreatureEvade(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;

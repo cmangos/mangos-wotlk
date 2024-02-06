@@ -1307,7 +1307,7 @@ struct npc_highlord_darion_mograineAI : public CombatAI, private DialogueHelper
         }
     }
 
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId)
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
     {
         if (uiMotionType != WAYPOINT_MOTION_TYPE || !m_instance)
             return;

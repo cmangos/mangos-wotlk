@@ -160,7 +160,7 @@ struct go_covertopsAI : public GameObjectAI
         Reset();
     }
 
-    void UpdateAI(const uint32 diff)
+    void UpdateAI(const uint32 diff) override
     {
         switch (m_phase)
         {

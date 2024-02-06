@@ -628,7 +628,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         // Function that will trigger the tram turnaround object, based on the tram location
         void SetTramRotateTimer() { m_uiTramRotateTimer = m_bTramAtCenter ? 33000 : 30000; }
 
-        void Update(uint32 uiDiff);
+        void Update(uint32 uiDiff) override;
 
     protected:
         void JustDidDialogueStep(int32 iEntry) override;

@@ -18,7 +18,7 @@ class instance_slave_pens : public ScriptedInstance
 {
     public:
         instance_slave_pens(Map* map);
-        void Initialize();
+        void Initialize() override;
 
         void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 type) const override;

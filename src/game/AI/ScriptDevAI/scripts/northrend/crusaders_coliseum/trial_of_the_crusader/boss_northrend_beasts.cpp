@@ -776,7 +776,7 @@ struct boss_acidmawAI : public twin_jormungars_commonAI
         }
     }
 
-    void OnJormungarPhaseChanged(uint8 uiPhase)
+    void OnJormungarPhaseChanged(uint8 uiPhase) override
     {
         if (uiPhase == PHASE_STATIONARY)
             m_creature->SetDisplayId(DISPLAY_ID_ACIDMAW_FIXED);
@@ -784,10 +784,10 @@ struct boss_acidmawAI : public twin_jormungars_commonAI
             m_creature->SetDisplayId(DISPLAY_ID_ACIDMWA_MOBILE);
     }
 
-    uint32 GetSplitSpell() { return SPELL_ACID_SPIT; }
-    uint32 GetSpewSpell() { return SPELL_ACID_SPEW; }
-    uint32 GetSpraySpell() { return SPELL_PARALYTIC_SPRAY; }
-    uint32 GetBiteSpell() { return SPELL_PARALYTIC_BITE; }
+    uint32 GetSplitSpell() override { return SPELL_ACID_SPIT; }
+    uint32 GetSpewSpell() override { return SPELL_ACID_SPEW; }
+    uint32 GetSpraySpell() override { return SPELL_PARALYTIC_SPRAY; }
+    uint32 GetBiteSpell() override { return SPELL_PARALYTIC_BITE; }
 };
 
 /*######
@@ -842,7 +842,7 @@ struct boss_dreadscaleAI : public twin_jormungars_commonAI
         }
     }
 
-    void OnJormungarPhaseChanged(uint8 uiPhase)
+    void OnJormungarPhaseChanged(uint8 uiPhase) override
     {
         if (uiPhase == PHASE_STATIONARY)
             m_creature->SetDisplayId(DISPLAY_ID_DREADSCALE_FIXED);
@@ -850,10 +850,10 @@ struct boss_dreadscaleAI : public twin_jormungars_commonAI
             m_creature->SetDisplayId(DISPLAY_ID_DREADSCALE_MOBILE);
     }
 
-    uint32 GetSplitSpell() { return SPELL_FIRE_SPIT; }
-    uint32 GetSpewSpell() { return SPELL_MOLTEN_SPEW; }
-    uint32 GetSpraySpell() { return SPELL_BURNING_SPRAY; }
-    uint32 GetBiteSpell() { return SPELL_BURNING_BITE; }
+    uint32 GetSplitSpell() override { return SPELL_FIRE_SPIT; }
+    uint32 GetSpewSpell() override { return SPELL_MOLTEN_SPEW; }
+    uint32 GetSpraySpell() override { return SPELL_BURNING_SPRAY; }
+    uint32 GetBiteSpell() override { return SPELL_BURNING_BITE; }
 };
 
 bool EffectDummyCreature_worm_emerge(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)

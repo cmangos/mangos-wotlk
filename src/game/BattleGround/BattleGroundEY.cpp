@@ -162,6 +162,7 @@ void BattleGroundEY::SetTowerOwner(EYNodes node, Team team)
             GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_EY_DRAENEI_RUINS_NEUTRAL, m_towerOwner[NODE_DRAENEI_RUINS] == TEAM_NONE);
             break;
         }
+        case EY_MAX_NODES: break;
     }
 }
 

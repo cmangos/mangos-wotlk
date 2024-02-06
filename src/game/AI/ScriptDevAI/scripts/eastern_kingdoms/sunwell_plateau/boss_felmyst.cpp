@@ -545,7 +545,7 @@ struct npc_demonic_vaporAI : public CombatAI
         });
     }
 
-    void JustRespawned()
+    void JustRespawned() override
     {
         CombatAI::JustRespawned();
         m_creature->CastSpell(nullptr, SPELL_DEMONIC_VAPOR_PER, TRIGGERED_OLD_TRIGGERED);

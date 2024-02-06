@@ -24,7 +24,7 @@ class instance_underbog : public ScriptedInstance
 {
     public:
         instance_underbog(Map* map);
-        void Initialize();
+        void Initialize() override;
 
         void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 type) const override;

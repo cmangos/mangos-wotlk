@@ -1129,7 +1129,7 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
             if (creature->IsTemporarySummon()) // only for non-static spawns
             {
                 int32 enemyCount = 0;
-                if (enemyCount = instance->GetVariableManager().GetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT))
+                if ((enemyCount = instance->GetVariableManager().GetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT)))
                 {
                     m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
                     instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, enemyCount - 1);

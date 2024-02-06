@@ -164,7 +164,7 @@ class instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper
         void OnCreatureEnterCombat(Creature* creature) override;
         void OnCreatureDeath(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature) override;
-        void OnPlayerDeath(Player* player);
+        void OnPlayerDeath(Player* player) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;

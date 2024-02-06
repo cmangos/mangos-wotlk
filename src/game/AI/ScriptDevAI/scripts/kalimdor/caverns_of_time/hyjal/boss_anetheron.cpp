@@ -110,7 +110,7 @@ struct boss_anetheronAI : public CombatAI
         DoScriptText(SAY_ENTER, m_creature);
     }
 
-    void Aggro(Unit* /*who*/)
+    void Aggro(Unit* /*who*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_VAMPIRIC_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
