@@ -824,34 +824,24 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
             if (now < m->deliver_time)
                 continue;
 
-            HighGuid guidType = HIGHGUID_PLAYER;
-
-            switch (m->messageType)
-            {
-                case MAIL_CREATURE:
-                    guidType = HIGHGUID_UNIT;
-                    break;
-                case MAIL_GAMEOBJECT:
-                    guidType = HIGHGUID_GAMEOBJECT;
-                    break;
-            }
+            HighGuid guidType = m->messageType == MAIL_CREATURE ? HIGHGUID_UNIT : HIGHGUID_PLAYER;
 
             data << ObjectGuid(guidType, m->sender);     // sender guid
             data << static_cast<uint32>(m->sender);      // sender id
             data << static_cast<uint32>(m->messageType); // message type
 
             data << uint32(m->stationery);
-            data << uint32(0xC6000000);                     // float unk, time or something
+            data << float(0);                            // delay hiding the sender (hide sender when hovering mail icon)
 
             ++count;
-            if (count == 2)                                 // do not display more than 2 mails
+            if (count == 2)                              // do not display more than 2 mails
                 break;
         }
         data.put<uint32>(4, count);
     }
     else
     {
-        data << uint32(0xC7A8C000);
+        data << float(-86400);
         data << uint32(0x00000000);
     }
     SendPacket(data);
