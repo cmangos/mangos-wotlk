@@ -1,5 +1,5 @@
 project('CMaNGOS WotLK', 'cpp', 'c',
-  default_options : ['cpp_std=c++17', 'buildtype=release', 'warning_level=0', 'default_library=static'])
+  default_options : ['cpp_std=vc++17,c++17', 'buildtype=release', 'warning_level=0', 'default_library=static'])
 
 if build_machine.system() == 'windows'
   add_project_arguments('/Zc:strictStrings-', language : 'cpp')
@@ -33,6 +33,7 @@ if not get_option('SQLITE')
         'C:\Program Files\MariaDB 11.0\lib',
         'C:\Program Files\MariaDB 11.1\lib',
         'C:\Program Files\MariaDB 11.2\lib',
+        get_option('LIBMYSQL_PATH'),
       ]
 
       fs = import('fs')
@@ -46,6 +47,8 @@ if not get_option('SQLITE')
         mysql_dll = 'C:\Program Files\MariaDB 11.1\liblibmariadb.dll'
       elif fs.is_dir('C:\Program Files\MariaDB 11.0\lib')
         mysql_dll = 'C:\Program Files\MariaDB 11.0\lib\libmariadb.dll'
+      elif fs.is_dir(get_option('LIBMYSQL_PATH'))
+        mysql_dll = get_option('LIBMYSQL_PATH') + '\libmysql.dll'
       else
         error('No local MySQL Server installation found')
       endif
@@ -86,6 +89,9 @@ endif
 if build_machine.system() == 'linux'
   add_project_arguments('-DSYSCONFDIR="../etc/"', language: 'cpp')
 endif
+
+if build_machine.system() == 'windows'
+  meson.get_compiler('cpp').
 
 add_project_arguments('-DBOOST_ALL_NO_LIB', language: 'cpp')
 
