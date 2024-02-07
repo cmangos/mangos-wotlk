@@ -90,9 +90,6 @@ if build_machine.system() == 'linux'
   add_project_arguments('-DSYSCONFDIR="../etc/"', language: 'cpp')
 endif
 
-if build_machine.system() == 'windows'
-  meson.get_compiler('cpp').
-
 add_project_arguments('-DBOOST_ALL_NO_LIB', language: 'cpp')
 
 if get_option('BUILD_SCRIPTDEV')
