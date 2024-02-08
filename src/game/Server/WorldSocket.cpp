@@ -202,14 +202,20 @@ bool WorldSocket::ProcessIncomingData()
         size_t packetSize = header->size - 4;
         std::shared_ptr<std::vector<uint8>> packetBuffer = std::make_shared<std::vector<uint8>>(packetSize);
 
-        self->Read(reinterpret_cast<char*>(packetBuffer->data()), packetBuffer->size(), [self, packetBuffer, opcode, packetSize](const boost::system::error_code& error, std::size_t read) -> void
+        self->Read(reinterpret_cast<char*>(packetBuffer->data()), packetBuffer->size(), [self, packetBuffer, opcode = opcode](const boost::system::error_code& error, std::size_t read) -> void
         {
-            std::unique_ptr<WorldPacket> pct = std::make_unique<WorldPacket>(opcode, packetSize);
+            std::unique_ptr<WorldPacket> pct = std::make_unique<WorldPacket>(opcode, packetBuffer->size());
             pct->append(*packetBuffer.get());
             if (sPacketLog->CanLogPacket() && self->IsLoggingPackets())
                 sPacketLog->LogPacket(*pct, CLIENT_TO_SERVER, self->GetRemoteIpAddress(), self->GetRemotePort());
 
             sLog.outWorldPacketDump(self->GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), *pct, true);
+
+            if (WorldSocket::m_packetCooldowns.size() <= size_t(opcode))
+            {
+                sLog.outError("WorldSocket::ProcessIncomingData: Received opcode beyond range of opcodes: %u", opcode);
+                return;
+            }
 
             if (WorldSocket::m_packetCooldowns[opcode])
             {
@@ -243,6 +249,7 @@ bool WorldSocket::ProcessIncomingData()
                         break;
                     case CMSG_TIME_SYNC_RESP:
                         pct->SetReceivedTime(std::chrono::steady_clock::now());
+                        [[fallthrough]];
                     default:
                     {
                         self->m_opcodeHistoryInc.push_front(uint32(pct->GetOpcode()));
