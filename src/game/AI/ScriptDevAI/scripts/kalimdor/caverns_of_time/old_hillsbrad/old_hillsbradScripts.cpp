@@ -1417,6 +1417,14 @@ bool AreaTrigger_at_beggar(Player* player, AreaTriggerEntry const* /*pAt*/)
     return true;
 }
 
+bool AreaTrigger_at_southshore_inn(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    instance_old_hillsbrad* instance = (instance_old_hillsbrad*)player->GetInstanceData();
+    if (Creature* mograine = instance->GetSingleCreatureFromStorage(NPC_COMMANDER_MOGRAINE))
+        mograine->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, player, mograine);
+    return true;
+}
+
 void AddSC_old_hillsbrad()
 {
     Script* pNewScript = new Script;
@@ -1452,5 +1460,10 @@ void AddSC_old_hillsbrad()
     pNewScript = new Script;
     pNewScript->Name = "at_beggar";
     pNewScript->pAreaTrigger = &AreaTrigger_at_beggar;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_southshore_inn";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_southshore_inn;
     pNewScript->RegisterSelf();
 }
