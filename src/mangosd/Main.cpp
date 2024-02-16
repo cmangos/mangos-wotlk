@@ -141,14 +141,12 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    if (!sConfig.SetSource(configFile))
+    if (!sConfig.SetSource(configFile, "Mangosd_"))
     {
         sLog.outError("Could not find configuration file %s.", configFile.c_str());
         Log::WaitBeforeContinueIfNeed();
         return 1;
     }
-
-    std::vector<std::string> overriddenConfKeys = sConfig.OverrideWithEnvVariablesIfAny();
 
 #ifndef _WIN32                                               // posix daemon commands need apply after config read
     if (vm.count("s"))
@@ -180,8 +178,6 @@ int main(int argc, char* argv[])
     sLog.outString("Built for %s", _ENDIAN_PLATFORM);
     sLog.outString("Using commit hash(%s) committed on %s", REVISION_ID, REVISION_DATE);
     sLog.outString("Using configuration file %s.", configFile.c_str());
-    for (std::string const& key : overriddenConfKeys)
-        sLog.outString("Configuration field '%s' was overridden with environment variable.", key.c_str());
 
     DETAIL_LOG("%s (Library: %s)", OPENSSL_VERSION_TEXT, OpenSSL_version(OPENSSL_VERSION));
 #if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
