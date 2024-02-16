@@ -126,6 +126,8 @@ int main(int argc, char* argv[])
         Log::WaitBeforeContinueIfNeed();
         return 1;
     }
+    
+    std::vector<std::string> overriddenConfKeys = sConfig.OverrideWithEnvVariablesIfAny();
 
 #ifndef _WIN32                                               // posix daemon commands need apply after config read
     if (vm.count("s"))
@@ -159,6 +161,8 @@ int main(int argc, char* argv[])
     sLog.outString("Built for %s", _ENDIAN_PLATFORM);
     sLog.outString("Using commit hash(%s) committed on %s", REVISION_ID, REVISION_DATE);
     sLog.outString("Using configuration file %s.", configFile.c_str());
+    for (std::string const& key : overriddenConfKeys)
+        sLog.outString("Configuration field '%s' was overridden with environment variable.", key.c_str());
 
     ///- Check the version of the configuration file
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);

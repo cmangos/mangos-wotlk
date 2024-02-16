@@ -32,10 +32,14 @@ class Config
     private:
         std::string m_filename;
         std::unordered_map<std::string, std::string> m_entries; // keys are converted to lower case.  values cannot be.
+        std::unordered_map<std::string, std::string> m_normalizedToOriginalKeysMap;
 
     public:
         bool SetSource(const std::string& file);
-        bool Reload();
+        bool Reload(bool isNewSource = false);
+
+        /// Overrides configuration with environment variables and returns overridden keys
+        std::vector<std::string> OverrideWithEnvVariablesIfAny();
 
         bool IsSet(const std::string& name) const;
 
