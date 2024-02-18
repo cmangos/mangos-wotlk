@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
         Log::WaitBeforeContinueIfNeed();
         return 1;
     }
-    
+
 #ifndef _WIN32                                               // posix daemon commands need apply after config read
     if (vm.count("s"))
     {

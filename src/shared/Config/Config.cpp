@@ -80,7 +80,7 @@ bool Config::Reload()
     while (in.good());
 
     m_entries = std::move(newEntries);
-    
+
     return true;
 }
 
