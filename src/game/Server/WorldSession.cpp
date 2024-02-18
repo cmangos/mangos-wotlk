@@ -41,6 +41,7 @@
 #include "GMTickets/GMTicketMgr.h"
 #include "Loot/LootMgr.h"
 #include "Anticheat/Anticheat.hpp"
+#include "TC9Sidecar/TC9Sidecar.h"
 
 #include <boost/asio/ip/address_v4.hpp>
 
@@ -1299,4 +1300,34 @@ void WorldSession::SetNoAnticheat()
 void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 {
     m_anticheat->WardenPacket(recv_data);
+}
+
+void WorldSession::HandleTC9PrepareForRedirect(WorldPacket& /*recvData*/)
+{
+    if (!sToCloud9Sidecar->ClusterModeEnabled())
+        return;
+
+    Player * player = this->GetPlayer();
+    if (player == nullptr)
+    {
+        WorldPacket data(TC9_SMSG_READY_FOR_REDIRECT, 1);
+        data << uint8(1); // 1 - Failed.
+        SendPacket(data);
+    }
+
+    DEBUG_LOG("Starting saving, AccountId = %d", GetAccountId());
+
+    player->SaveToDB();
+
+    // TODO: unfortunately mangos doesn't provide API to track saving progress :(
+    // So we need to add some delay and hope that save was successful.
+
+    WorldPacket data(TC9_SMSG_READY_FOR_REDIRECT, 1);
+    data << uint8(0); // 0 - Success, 1 - Failed.
+    SendPacket(data);
+
+    DEBUG_LOG("Saved, AccountId = %d", GetAccountId());
+
+//    KickPlayer("HandlePrepareForRedirect client redirected");
+    LogoutPlayer();
 }

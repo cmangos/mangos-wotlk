@@ -41,6 +41,7 @@
 #include "Policies/Singleton.h"
 #include "Network/Listener.hpp"
 #include "Network/Socket.hpp"
+#include "TC9Sidecar/TC9Sidecar.h"
 
 #include <memory>
 
@@ -232,6 +233,8 @@ int Master::Run()
         if (sConfig.GetBoolDefault("SOAP.Enabled", false))
             soapThread.reset(new SOAPThread(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878)));
 
+        sToCloud9Sidecar->Init(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD), realmID);
+        
         // wait for shut down and then let things go out of scope to close them down
         while (!World::IsStopped())
             std::this_thread::sleep_for(std::chrono::seconds(1));
@@ -269,6 +272,8 @@ int Master::Run()
     LogsDatabase.HaltDelayThread();
 
     sLog.outString("Halting process...");
+    
+    sToCloud9Sidecar->Deinit();
 
     if (cliThread)
     {

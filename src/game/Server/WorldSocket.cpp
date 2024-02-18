@@ -33,6 +33,7 @@
 #include "Server/DBCStores.h"
 #include "Util/CommonDefines.h"
 #include "Anticheat/Anticheat.hpp"
+#include "TC9Sidecar/TC9Sidecar.h"
 
 #include <chrono>
 #include <functional>
@@ -152,21 +153,24 @@ bool WorldSocket::Open()
     if (!Socket::Open())
         return false;
 
-    // Send startup packet.
-    WorldPacket packet(SMSG_AUTH_CHALLENGE, 40);
-    packet << uint32(1);                                    // 1...31
-    packet << m_seed;
+    if (!sToCloud9Sidecar->ClusterModeEnabled())
+    {
+        // Send startup packet.
+        WorldPacket packet(SMSG_AUTH_CHALLENGE, 40);
+        packet << uint32(1);                                    // 1...31
+        packet << m_seed;
 
-    BigNumber seed1;
-    seed1.SetRand(16 * 8);
-    packet.append(seed1.AsByteArray(16).data(), 16);               // new encryption seeds
+        BigNumber seed1;
+        seed1.SetRand(16 * 8);
+        packet.append(seed1.AsByteArray(16).data(), 16);               // new encryption seeds
 
-    BigNumber seed2;
-    seed2.SetRand(16 * 8);
-    packet.append(seed2.AsByteArray(16).data(), 16);               // new encryption seeds
+        BigNumber seed2;
+        seed2.SetRand(16 * 8);
+        packet.append(seed2.AsByteArray(16).data(), 16);               // new encryption seeds
 
-    SendPacket(packet);
-
+        SendPacket(packet);
+    }
+    
     return true;
 }
 
@@ -361,23 +365,23 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     // No SQL injection, username escaped.
 
     auto queryResult =
-        LoginDatabase.PQuery("SELECT "
-                             "a.id, "                    //0
-                             "gmlevel, "                 //1
-                             "sessionkey, "              //2
-                             "lockedIp, "                //3
-                             "locked, "                  //4
-                             "v, "                       //5
-                             "s, "                       //6
-                             "expansion, "               //7
-                             "mutetime, "                //8
-                             "locale, "                  //9
-                             "os, "                      //10
-                             "flags, "                   //11
-                             "platform "                 //12
-                             "FROM account a "
-                             "WHERE username = '%s'",
-                             safe_account.c_str());
+    LoginDatabase.PQuery("SELECT "
+                         "a.id, "                    //0
+                         "gmlevel, "                 //1
+                         "sessionkey, "              //2
+                         "lockedIp, "                //3
+                         "locked, "                  //4
+                         "v, "                       //5
+                         "s, "                       //6
+                         "expansion, "               //7
+                         "mutetime, "                //8
+                         "locale, "                  //9
+                         "os, "                      //10
+                         "flags, "                   //11
+                         "platform "                 //12
+                         "FROM account a "
+                         "WHERE username = '%s'",
+                         safe_account.c_str());
 
     // Stop if the account is not found
     if (!queryResult)
@@ -447,14 +451,14 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     os = fields[10].GetString();
 
     uint32 accountFlags = fields[11].GetUInt32();
-	std::string platform = fields[12].GetString();
+    std::string platform = fields[12].GetString();
 
     // Re-check account ban (same check as in realmd)
     auto banresult =
-        LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > " _UNIXTIME_ " OR expires_at = banned_at)"
-                             "UNION "
-                             "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'",
-                             id, GetRemoteAddress().c_str());
+    LoginDatabase.PQuery("SELECT 1 FROM account_banned WHERE account_id = %u AND active = 1 AND (expires_at > " _UNIXTIME_ " OR expires_at = banned_at)"
+                         "UNION "
+                         "SELECT 1 FROM ip_banned WHERE (expires_at = banned_at OR expires_at > " _UNIXTIME_ ") AND ip = '%s'",
+                         id, GetRemoteAddress().c_str());
 
     if (banresult) // if account banned
     {
@@ -480,28 +484,31 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         return false;
     }
 
-    // Check that Key and account name are the same on client and server
-    Sha1Hash sha;
-
-    uint32 t = 0;
-    uint32 seed = m_seed;
-
-    sha.UpdateData(account);
-    sha.UpdateData((uint8*) & t, 4);
-    sha.UpdateData((uint8*) & clientSeed, 4);
-    sha.UpdateData((uint8*) & seed, 4);
-    sha.UpdateBigNumbers(&K, nullptr);
-    sha.Finalize();
-
-    if (memcmp(sha.GetDigest(), digest, 20))
+    if (!sToCloud9Sidecar->ClusterModeEnabled())
     {
-        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
-        packet << uint8(AUTH_FAILED);
+        // Check that Key and account name are the same on client and server
+        Sha1Hash sha;
 
-        SendPacket(packet);
+        uint32 t = 0;
+        uint32 seed = m_seed;
 
-        sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (authentification failed), account ID: %u.", id);
-        return false;
+        sha.UpdateData(account);
+        sha.UpdateData((uint8*) & t, 4);
+        sha.UpdateData((uint8*) & clientSeed, 4);
+        sha.UpdateData((uint8*) & seed, 4);
+        sha.UpdateBigNumbers(&K, nullptr);
+        sha.Finalize();
+
+        if (memcmp(sha.GetDigest(), digest, 20))
+        {
+            WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+            packet << uint8(AUTH_FAILED);
+
+            SendPacket(packet);
+
+            sLog.outError("WorldSocket::HandleAuthSession: Sent Auth Response (authentification failed), account ID: %u.", id);
+            return false;
+        }
     }
 
     const std::string& address = GetRemoteAddress();
@@ -509,6 +516,16 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     DEBUG_LOG("WorldSocket::HandleAuthSession: Client '%s' authenticated successfully from %s.",
               account.c_str(),
               address.c_str());
+
+    if (sToCloud9Sidecar->ClusterModeEnabled())
+    {
+        // Since tocloud9 auth server at the moment doesn't set these data, set some default values.
+        if (os == "0" || os == "")
+            os = "Win";
+
+        if (platform == "0" || platform == "")
+            platform = "x86";
+    }
 
     ClientOSType clientOS;
     if (os == "Win")
@@ -528,7 +545,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "INSERT INTO account_logons(accountId,ip,loginTime,loginSource) VALUES(?,?," _NOW_ ",?)");
     stmt.PExecute(id, address.c_str(), std::to_string(LOGIN_TYPE_MANGOSD).c_str());
 
-    m_crypt.Init(&K);
+    if (!sToCloud9Sidecar->ClusterModeEnabled())
+        m_crypt.Init(&K);
 
     m_session = sWorld.FindSession(id);
 
@@ -567,7 +585,8 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         m_session->SetOS(clientOS);
         m_session->SetPlatform(clientPlatform);
 
-        m_session->SendAuthOk();
+        if (!sToCloud9Sidecar->ClusterModeEnabled())
+            m_session->SendAuthOk();
 
         std::unique_ptr<SessionAnticheatInterface> anticheat = sAnticheatLib->NewSession(m_session, K);
 
@@ -579,7 +598,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
                 account.c_str(), id, address.c_str());
             return false;
         }
-        else
+        else if (!sToCloud9Sidecar->ClusterModeEnabled())
             SendPacket(addonPacket);
 
         m_session->SetDelayedAnticheat(std::move(anticheat));
@@ -618,19 +637,20 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         m_session->SetOS(clientOS);
         m_session->SetPlatform(clientPlatform);
         m_session->InitializeAnticheat(K);
-
-        m_session->SendAuthOk();
+        
+        if (!sToCloud9Sidecar->ClusterModeEnabled())
+            m_session->SendAuthOk();
 
         // when false, the client sent invalid addon data.  kick!
-        WorldPacket addonPacket;
-        if (!m_session->GetAnticheat()->ReadAddonInfo(&recvPacket, addonPacket))
-        {
-            sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
-                account.c_str(), id, address.c_str());
-            return false;
-        }
-        else
-            SendPacket(addonPacket);
+//        WorldPacket addonPacket;
+//        if (!m_session->GetAnticheat()->ReadAddonInfo(&recvPacket, addonPacket))
+//        {
+//            sLog.outBasic("WorldSocket::HandleAuthSession: Account %s (id %u) IP %s sent bad addon info.  Kicking.",
+//                account.c_str(), id, address.c_str());
+//            return false;
+//        }
+//        else
+//            SendPacket(addonPacket);
 
         sWorld.AddSession(m_session);
     }

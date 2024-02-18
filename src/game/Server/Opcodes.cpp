@@ -1337,4 +1337,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x51C*/ { "SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT1",      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x51D*/ { "SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT2",      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x51E*/ { "SMSG_MULTIPLE_MOVES",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
+    /*0x51F*/ { "TC9_CMSG_PREPARE_FOR_REDIRECT",                STATUS_AUTHED,   PROCESS_THREADUNSAFE,   &WorldSession::HandleTC9PrepareForRedirect     },
+    /*0x520*/ {"TC9_SMSG_READY_FOR_REDIRECT", STATUS_NEVER,     PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
+
 };

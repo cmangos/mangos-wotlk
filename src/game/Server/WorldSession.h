@@ -1003,6 +1003,8 @@ class WorldSession
         void HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data);
         void HandleLfgPartyLockInfoRequestOpcode(WorldPacket& recv_data);
 
+        void HandleTC9PrepareForRedirect(WorldPacket& recvData);
+
         std::deque<uint32> GetOutOpcodeHistory();
         std::deque<uint32> GetIncOpcodeHistory();
 

@@ -74,13 +74,13 @@ bool Config::Reload()
         std::optional<std::string> envValue = EnvVarForIniKey(m_envVarPrefix, trimmedEntry);
         if (envValue)
             value = *envValue;
-        
+
         newEntries[entry] = value;
     }
     while (in.good());
 
     m_entries = std::move(newEntries);
-    
+
     return true;
 }
 

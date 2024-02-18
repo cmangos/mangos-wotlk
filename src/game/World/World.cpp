@@ -73,6 +73,7 @@
 #include "Anticheat/Anticheat.hpp"
 #include "LFG/LFGMgr.h"
 #include "Vmap/GameObjectModel.h"
+#include "TC9Sidecar/TC9Sidecar.h"
 
 #ifdef BUILD_AHBOT
  #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -255,12 +256,15 @@ World::AddSession_(WorldSession* s)
         return;
     }
 
-    WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
-    pkt << uint32(getConfig(CONFIG_UINT32_CLIENTCACHE_VERSION));
-    s->SendPacket(pkt);
+    if (!sToCloud9Sidecar->ClusterModeEnabled())
+    {
+        WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
+        pkt << uint32(getConfig(CONFIG_UINT32_CLIENTCACHE_VERSION));
+        s->SendPacket(pkt);
 
-    s->SendTutorialsData();
-
+        s->SendTutorialsData();
+    }
+    
     UpdateMaxSessionCounters();
 
     // Updates the population

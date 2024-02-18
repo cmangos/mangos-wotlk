@@ -1345,7 +1345,10 @@ enum Opcodes
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT1         = 0x51C,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST, CGCommentator::QueueNode
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT2         = 0x51D,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST
     SMSG_MULTIPLE_MOVES                             = 0x51E,// TODO: Implement from TC
-    NUM_MSG_TYPES                                   = 0x51F
+    // TODO: Move to gRPC.
+    TC9_CMSG_PREPARE_FOR_REDIRECT                   = 0x51F,
+    TC9_SMSG_READY_FOR_REDIRECT                     = 0x520,
+    NUM_MSG_TYPES                                   = 0x521
 };
 
 /// Player state
