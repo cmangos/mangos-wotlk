@@ -787,7 +787,7 @@ endif
 if not get_option('PCH')
   pch_files = []
 else
-  pch_files = ['../game/pchdef.h', '../game/pchdef.cpp']
+  pch_files = ['../game/pchdef.h']
 endif
 
 game_args = ['-DDT_POLYREF64', '-D__ASSERT_MACROS_DEFINE_VERSIONS_WITHOUT_UNDERSCORES=0']
