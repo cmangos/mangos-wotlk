@@ -18,6 +18,19 @@
 #include "world_northrend.h"
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 
+world_map_northrend::world_map_northrend(Map* map) : ScriptedMap(map)
+{
+    Initialize();
+}
+
+void world_map_northrend::Initialize()
+{
+}
+
+void world_map_northrend::OnCreatureGroupDespawn(CreatureGroup* creatureGroup, Creature* creature)
+{
+}
+
 void world_map_northrend::OnCreatureCreate(Creature* creature)
 {
     switch (creature->GetEntry())

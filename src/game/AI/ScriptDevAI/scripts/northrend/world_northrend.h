@@ -14,7 +14,11 @@
 struct world_map_northrend : public ScriptedMap
 {
     public:
-        world_map_northrend(Map* pMap) : ScriptedMap(pMap) {}
+        world_map_northrend(Map* map);
+
+        void Initialize() override;
+
+        void OnCreatureGroupDespawn(CreatureGroup* creatureGroup, Creature* creature) override;
 
         void OnCreatureCreate(Creature* creature) override;
 
