@@ -1,4 +1,6 @@
 project('CMaNGOS WotLK', 'cpp', 'c',
+  license: 'GPL-2.0-only',
+  meson_version: '>=1.3.1',
   default_options : ['cpp_std=vc++17,c++17', 'buildtype=release', 'warning_level=0', 'default_library=static'])
 
 if build_machine.system() == 'windows'
