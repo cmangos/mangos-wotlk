@@ -1762,6 +1762,13 @@ void World::Update(uint32 diff)
     // update the instance reset times
     sMapPersistentStateMgr.Update();
 
+    if (sToCloud9Sidecar->ClusterModeEnabled())
+    {
+        sToCloud9Sidecar->ProcessAsyncTasks();
+        sToCloud9Sidecar->ProcessHooks();
+        sToCloud9Sidecar->ProcessGrpcRequests();
+    }
+
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();
 

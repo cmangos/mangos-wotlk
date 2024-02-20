@@ -137,6 +137,8 @@ int Master::Run()
     ///- Catch termination signals
     _HookSignals();
 
+    sToCloud9Sidecar->Init(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD), realmID);
+
     ///- Launch WorldRunnable thread
     MaNGOS::Thread world_thread(new WorldRunnable);
     world_thread.setPriority(MaNGOS::Priority_Highest);
@@ -233,14 +235,14 @@ int Master::Run()
         if (sConfig.GetBoolDefault("SOAP.Enabled", false))
             soapThread.reset(new SOAPThread(sConfig.GetStringDefault("SOAP.IP", "127.0.0.1"), sConfig.GetIntDefault("SOAP.Port", 7878)));
 
-        sToCloud9Sidecar->Init(sWorld.getConfig(CONFIG_UINT32_PORT_WORLD), realmID);
-        
         // wait for shut down and then let things go out of scope to close them down
         while (!World::IsStopped())
             std::this_thread::sleep_for(std::chrono::seconds(1));
 
         world_thread.wait();
     }
+
+    sToCloud9Sidecar->Deinit();
 
     ///- Stop freeze protection before shutdown tasks
     if (freeze_thread)
@@ -272,8 +274,6 @@ int Master::Run()
     LogsDatabase.HaltDelayThread();
 
     sLog.outString("Halting process...");
-    
-    sToCloud9Sidecar->Deinit();
 
     if (cliThread)
     {

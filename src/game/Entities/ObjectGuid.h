@@ -241,12 +241,12 @@ class ObjectGuidGenerator
 
     public:                                                 // modifiers
         void Set(uint32 val) { m_nextGuid = val; }
-        uint32 Generate();
+        virtual uint32 Generate();
 
     public:                                                 // accessors
         uint32 GetNextAfterMaxUsed() const { return m_nextGuid; }
 
-    private:                                                // fields
+    protected:                                              // fields
         std::atomic<uint32> m_nextGuid;
 };
 

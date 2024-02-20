@@ -33,6 +33,7 @@
 #include "Maps/MapManager.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "Spells/SpellAuras.h"
+#include "TC9Sidecar/TC9Sidecar.h"
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #include "Config/Config.h"
@@ -116,7 +117,7 @@ bool Group::Create(ObjectGuid guid, const char* name)
 
     m_dungeonDifficulty = DUNGEON_DIFFICULTY_NORMAL;
     m_raidDifficulty = RAID_DIFFICULTY_10MAN_NORMAL;
-    if (!IsBattleGroup())
+    if (!IsBattleGroup() && !sToCloud9Sidecar->ClusterModeEnabled())
     {
         m_Id = sObjectMgr.GenerateGroupLowGuid();
 
@@ -497,6 +498,14 @@ void Group::ChangeLeader(ObjectGuid guid)
 
 void Group::Disband(bool hideDestroy)
 {
+    if (sToCloud9Sidecar->ClusterModeEnabled())
+        return;
+
+    _disband(hideDestroy);
+}
+
+void Group::_disband(bool hideDestroy)
+{
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
     {
         Player* player = sObjectMgr.GetPlayer(citr->guid);
@@ -711,6 +720,9 @@ void Group::SendUpdateTo(Player* player)
 
 void Group::SendUpdate()
 {
+    if (sToCloud9Sidecar->ClusterModeEnabled())
+        return;
+    
     for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
         SendUpdateTo(sObjectMgr.GetPlayer(citr->guid));
 }
@@ -922,7 +934,7 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
             m_targetIcon.Clear();
     }
 
-    if (!IsBattleGroup())
+    if (!IsBattleGroup() && !sToCloud9Sidecar->ClusterModeEnabled())
     {
         // insert into group table
         CharacterDatabase.PExecute("INSERT INTO group_member(groupId,memberGuid,assistant,subgroup) VALUES('%u','%u','%u','%u')",

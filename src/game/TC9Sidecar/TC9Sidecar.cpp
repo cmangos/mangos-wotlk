@@ -1,18 +1,19 @@
 /*
- * This file is part of the AzerothCore Project. See AUTHORS file for Copyright information
+ * This file is part of the CMaNGOS Project. See AUTHORS file for Copyright information
  *
- * This program is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Affero General Public License as published by the
- * Free Software Foundation; either version 3 of the License, or (at your
- * option) any later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
- * FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for
- * more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License along
- * with this program. If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "TC9Sidecar.h"
@@ -135,16 +136,19 @@ uint32 ToCloud9Sidecar::GenerateInstanceGuid()
 
 void ToCloud9Sidecar::OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uint32* removedMaps, int removedMapsSize)
 {
-//    for (int i = 0; i < addedMapsSize; i++)
-//        sToCloud9Sidecar->_assignedMapsByID[addedMaps[i]] = true;
-//
-//    for (int i = 0; i < removedMapsSize; i++)
-//        sToCloud9Sidecar->_assignedMapsByID[removedMaps[i]] = false;
-//
-//    if (addedMapsSize > 0)
-//    {
-//        std::vector<uint32_t> newMapIDs(addedMaps, addedMaps + addedMapsSize);
-//
+    for (int i = 0; i < addedMapsSize; i++)
+        sToCloud9Sidecar->_assignedMapsByID[addedMaps[i]] = true;
+
+    for (int i = 0; i < removedMapsSize; i++)
+        sToCloud9Sidecar->_assignedMapsByID[removedMaps[i]] = false;
+
+    if (addedMapsSize > 0)
+    {
+        std::vector<uint32_t> newMapIDs(addedMaps, addedMaps + addedMapsSize);
+
+        TC9ReadyToAcceptPlayersFromMaps((uint32_t*)newMapIDs.data(), newMapIDs.size());
+
+
 //        auto instanceSaveStoragePtr = std::make_shared<InstanceSaveMgr::InstanceSaveHashMap>();
 //        auto playerBindStoragePtr = std::make_shared<PlayerBindStorage>();
 //
@@ -165,5 +169,7 @@ void ToCloud9Sidecar::OnMapsReassigned(uint32* addedMaps, int addedMapsSize, uin
 //
 //        task.ExecuteAsync();
 //        sToCloud9Sidecar->_asyncTasksProcessor.AddCallback(std::move(task));
-//    }
+    }
+
+
 }

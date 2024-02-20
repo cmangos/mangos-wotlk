@@ -47,6 +47,8 @@
 #include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "World/WorldState.h"
+#include "TC9Sidecar/TC9Sidecar.h"
+#include "Config/Config.h"
 
 #include <limits>
 #include "Entities/ItemEnchantmentMgr.h"
@@ -162,6 +164,11 @@ ObjectMgr::ObjectMgr() :
     m_PetNumbers("Pet numbers"),
     m_FirstTemporaryCreatureGuid(1),
     m_FirstTemporaryGameObjectGuid(1),
+    m_CharGuids(std::make_unique<ObjectGuidGenerator<HIGHGUID_PLAYER>>()),
+    m_ItemGuids(std::make_unique<ObjectGuidGenerator<HIGHGUID_ITEM>>()),
+    m_CorpseGuids(std::make_unique<ObjectGuidGenerator<HIGHGUID_CORPSE>>()),
+    m_InstanceGuids(std::make_unique<ObjectGuidGenerator<HIGHGUID_INSTANCE>>()),
+    m_GroupGuids(std::make_unique<ObjectGuidGenerator<HIGHGUID_GROUP>>()),
     m_unitConditionMgr(std::make_unique<UnitConditionMgr>()),
     m_worldStateExpressionMgr(std::make_unique<WorldStateExpressionMgr>()),
     m_combatConditionMgr(std::make_unique<CombatConditionMgr>(*m_unitConditionMgr, *m_worldStateExpressionMgr)),
@@ -7232,10 +7239,18 @@ void ObjectMgr::PackGroupIds()
 
 void ObjectMgr::SetHighestGuids()
 {
+    bool clusteringEnabled = sConfig.GetBoolDefault("Cluster.Enabled", false);
+    if (clusteringEnabled)
+    {
+        m_CharGuids     = std::make_unique<DistributedObjectGuidGenerator<HIGHGUID_PLAYER>>();
+        m_ItemGuids     = std::make_unique<DistributedObjectGuidGenerator<HIGHGUID_ITEM>>();
+        m_InstanceGuids = std::make_unique<DistributedObjectGuidGenerator<HIGHGUID_INSTANCE>>();
+    }
+    
     auto result = CharacterDatabase.Query("SELECT MAX(guid) FROM characters");
     if (result)
     {
-        m_CharGuids.Set((*result)[0].GetUInt32() + 1);
+        m_CharGuids->Set((*result)[0].GetUInt32() + 1);
     }
 
     result = WorldDatabase.Query("SELECT MAX(guid) FROM creature");
@@ -7247,22 +7262,25 @@ void ObjectMgr::SetHighestGuids()
     result = CharacterDatabase.Query("SELECT MAX(guid) FROM item_instance");
     if (result)
     {
-        m_ItemGuids.Set((*result)[0].GetUInt32() + 1);
+        m_ItemGuids->Set((*result)[0].GetUInt32() + 1);
     }
 
     result = CharacterDatabase.Query("SELECT MAX(id) FROM instance");
     if (result)
     {
-        m_InstanceGuids.Set((*result)[0].GetUInt32() + 1);
+        m_InstanceGuids->Set((*result)[0].GetUInt32() + 1);
     }
 
-    // Cleanup other tables from nonexistent guids (>=m_hiItemGuid)
-    CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE item >= '%u'", m_ItemGuids.GetNextAfterMaxUsed());
-    CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid >= '%u'", m_ItemGuids.GetNextAfterMaxUsed());
-    CharacterDatabase.PExecute("DELETE FROM auction WHERE itemguid >= '%u'", m_ItemGuids.GetNextAfterMaxUsed());
-    CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE item_guid >= '%u'", m_ItemGuids.GetNextAfterMaxUsed());
-    CharacterDatabase.CommitTransaction();
+    if (!clusteringEnabled)
+    {
+        // Cleanup other tables from nonexistent guids (>=m_hiItemGuid)
+        CharacterDatabase.BeginTransaction();
+        CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE item >= '%u'", m_ItemGuids->GetNextAfterMaxUsed());
+        CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid >= '%u'", m_ItemGuids->GetNextAfterMaxUsed());
+        CharacterDatabase.PExecute("DELETE FROM auction WHERE itemguid >= '%u'", m_ItemGuids->GetNextAfterMaxUsed());
+        CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE item_guid >= '%u'", m_ItemGuids->GetNextAfterMaxUsed());
+        CharacterDatabase.CommitTransaction();
+    }
 
     result = WorldDatabase.Query("SELECT MAX(guid) FROM gameobject");
     if (result)
@@ -7285,7 +7303,7 @@ void ObjectMgr::SetHighestGuids()
     result = CharacterDatabase.Query("SELECT MAX(guid) FROM corpse");
     if (result)
     {
-        m_CorpseGuids.Set((*result)[0].GetUInt32() + 1);
+        m_CorpseGuids->Set((*result)[0].GetUInt32() + 1);
     }
 
     result = CharacterDatabase.Query("SELECT MAX(arenateamid) FROM arena_team");
@@ -7309,7 +7327,7 @@ void ObjectMgr::SetHighestGuids()
     result = CharacterDatabase.Query("SELECT MAX(groupId) FROM `groups`");
     if (result)
     {
-        m_GroupGuids.Set((*result)[0].GetUInt32() + 1);
+        m_GroupGuids->Set((*result)[0].GetUInt32() + 1);
     }
 
     // setup reserved ranges for static guids spawn

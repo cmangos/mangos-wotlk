@@ -28,6 +28,7 @@
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
 #include "LFG/LFG.h"
+#include "TC9Sidecar/TC9GroupHooks.h"
 
 struct ItemPrototype;
 
@@ -121,6 +122,8 @@ struct InstanceGroupBind
 /** todo: uninvite people that not accepted invite **/
 class Group
 {
+    friend class ToCloud9GroupHooks;
+
     public:
         struct MemberSlot
         {
@@ -299,6 +302,7 @@ class Group
         LFGData& GetLfgData() { return m_lfgData; }
 
     protected:
+        void _disband(bool hideDestroy = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group);
         bool _removeMember(ObjectGuid guid);                // returns true if leader has changed
