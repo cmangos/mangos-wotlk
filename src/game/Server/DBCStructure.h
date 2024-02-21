@@ -1919,13 +1919,14 @@ struct SpellEntry
         uint32    runeCostID;                               // 226      m_runeCostID
         uint32    spellMissileID;                           // 227      m_spellMissileID
         uint32    PowerDisplayId;                           // 228      m_powerDisplayID (PowerDisplay.dbc)
-        float     effectBonusCoefficient[3];                // 229-231  m_effectBonusCoefficient
-        uint32    spellDescriptionVariableID;               // 232      m_descriptionVariablesID
-        uint32    SpellDifficultyId;                        // 233      m_difficulty (SpellDifficulty.dbc)
+        float     effectBonusCoefficient[MAX_EFFECT_INDEX];         // 229-231  m_effectBonusCoefficient
+        float     effectBonusCoefficientFromAP[MAX_EFFECT_INDEX];   // 232-234  m_effectBonusCoefficientFromAP
+        uint32    spellDescriptionVariableID;               // 235      m_descriptionVariablesID
+        uint32    SpellDifficultyId;                        // 236      m_difficulty (SpellDifficulty.dbc)
 
         // custom
-        uint32    IsServerSide;                             // 234
-        uint32    AttributesServerside;                     // 235
+        uint32    IsServerSide;                             // 237
+        uint32    AttributesServerside;                     // 238
 
         // helpers
         int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(1); }
