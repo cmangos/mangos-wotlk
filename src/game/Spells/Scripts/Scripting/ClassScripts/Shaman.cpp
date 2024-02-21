@@ -97,8 +97,8 @@ struct EarthShield : public AuraScript
         Unit* target = data.target;
         if (Unit* caster = data.caster)
         {
-            value = caster->SpellHealingBonusDone(target, data.spellProto, value, SPELL_DIRECT_DAMAGE);
-            value = target->SpellHealingBonusTaken(caster, data.spellProto, value, SPELL_DIRECT_DAMAGE);
+            value = caster->SpellHealingBonusDone(target, data.spellProto, EFFECT_INDEX_0, value, SPELL_DIRECT_DAMAGE);
+            value = target->SpellHealingBonusTaken(caster, data.spellProto, EFFECT_INDEX_0, value, SPELL_DIRECT_DAMAGE);
         }
         return value;
     }
@@ -412,7 +412,7 @@ struct GlyphOfTotemOfWrath : public AuraScript
 // 52041 - Healing Stream Totem
 struct HealingStreamTotemEffect : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (Unit* unitTarget = spell->GetUnitTarget())
         {
@@ -423,8 +423,8 @@ struct HealingStreamTotemEffect : public SpellScript
                 // spell have SPELL_DAMAGE_CLASS_NONE and not get bonuses from owner, use main spell for bonuses
                 if (spell->m_triggeredBySpellInfo)
                 {
-                    damage = int32(owner->SpellHealingBonusDone(unitTarget, spell->m_triggeredBySpellInfo, damage, HEAL));
-                    damage = int32(unitTarget->SpellHealingBonusTaken(owner, spell->m_triggeredBySpellInfo, damage, HEAL));
+                    damage = int32(owner->SpellHealingBonusDone(unitTarget, spell->m_triggeredBySpellInfo, effIdx, damage, HEAL));
+                    damage = int32(unitTarget->SpellHealingBonusTaken(owner, spell->m_triggeredBySpellInfo, effIdx, damage, HEAL));
                 }
 
                 // Restorative Totems
