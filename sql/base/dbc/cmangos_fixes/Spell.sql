@@ -3572,3 +3572,45 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`
 ('68620','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Trial of the Crusader - Resilience Will Fix It'),
 ('72827','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Icecrown Citadel - Full House'),
 ('72845','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Pit of Saron - Don''t Look Up');
+
+-- Bonus coeff fixes
+UPDATE spell_template SET EffectBonusCoefficient1=0.805338 WHERE Id IN(1463,8494,8495,10191,10192,10193,27131,43019,43020); -- Mana Shield
+UPDATE spell_template SET EffectBonusCoefficient1=0.07,EffectBonusCoefficientFromAP1=0.039 WHERE Id IN(25742); -- Seal of Righteousness
+UPDATE spell_template SET EffectBonusCoefficient1=3.85 WHERE Id IN(8026,8028,8029,10445,16343,16344,25488,58786,58787,58788); -- Flametongue Weapon Proc
+UPDATE spell_template SET EffectBonusCoefficient1=0.4729 WHERE Id IN(48181,59161,59163,59164); -- Haunt
+UPDATE spell_template SET EffectBonusCoefficient1=1.8 WHERE Id IN(31117); -- Unstable Affliction - Dispel component
+UPDATE spell_template SET EffectBonusCoefficient1=1.2 WHERE Id IN(64085); -- Vampiric Touch  component
+UPDATE spell_template SET EffectBonusCoefficient1=0.3 WHERE Id IN(6229,11739,11740,28610,47890,47891); -- Warlock - Shadow Ward
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN(543,8457,8458,10223,10225,27128,43010); -- Mage - Fire Ward
+UPDATE spell_template SET EffectBonusCoefficient1=0.1 WHERE Id IN(6143,8461,8462,10177,28609,32796,43012); -- Mage - Frost Ward
+
+UPDATE spell_template SET EffectBonusCoefficient1=0.1,EffectBonusCoefficientFromAP1=0.1 WHERE Id IN(20267); -- Judgement of Light
+UPDATE spell_template SET EffectBonusCoefficient1=0.25,EffectBonusCoefficientFromAP1=0.16 WHERE Id IN(20467); -- Judgement of Command
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.003 WHERE Id IN(42463); -- Seal of Vengeance
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.003 WHERE Id IN(53739); -- Seal of Corruption
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.01,EffectBonusCoefficientFromAP2=0.01 WHERE Id IN(33745,48567,48568); -- Lacerate
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.2 WHERE Id IN(1495,14269,14270,14271,36916,53339); -- Mongoose Bite
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.15 WHERE Id IN(3044,14281,14282,14283,14284,14285,14286,14287,27019,49044,49045); -- Arcane Shot
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.2 WHERE Id IN(19306,20909,20910,27067,48998,48999); -- Counterattack
+UPDATE spell_template SET EffectBonusCoefficient1=0.25,EffectBonusCoefficientFromAP1=0.16 WHERE Id IN(31898); -- Judgement of Blood
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.08 WHERE Id IN(58621); -- Glyph of Chains of Ice
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.04 WHERE Id IN(48721,49939,49940,49941); -- Blood Boil
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.105 WHERE Id IN(50444); -- Corpse Explosion
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.0475 WHERE Id IN(52212); -- Death and Decay
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.15 WHERE Id IN(47632); -- Death Coil (Damage)
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.15 WHERE Id IN(47633); -- Death Coil (Heal)
+UPDATE spell_template SET EffectBonusCoefficientFromAP2=0.2 WHERE Id IN(49184,51409,51410,51411); -- Howling Blast
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.1 WHERE Id IN(45477,49896,49903,49904,49909); -- Icy Touch
+
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.013 WHERE Id IN(50536); -- Unholy Blight
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.03 WHERE Id IN(9007,9824,9826,27007,49804); -- Pounce Bleed
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.01,EffectBonusCoefficientFromAP2=0.06 WHERE Id IN(1822,1823,1824,9904,27003,48573,48574); -- Rake
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.07 WHERE Id IN(703,8631,8632,8633,8818,11289,11290,26839,26884,48675,48676); -- Garrote
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.04 WHERE Id IN(1978,13549,13550,13551,13552,13553,13554,13555,25295,27016,49000,49001); -- Serpent Sting
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.02 WHERE Id IN(13797,14298,14299,14300,14301,27024,49053,49054); -- Immolation trap
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.06325 WHERE Id IN(55095); -- Frost Fever
+UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.06325 WHERE Id IN(55078); -- Blood Plague
+
+
+
+
