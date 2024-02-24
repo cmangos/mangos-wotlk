@@ -332,13 +332,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                         damage = (20 - m_caster->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH))*(damage / 20);
                         break;
                     }
-                    // Intercept (warrior spell trigger)
-                    case 20253:
-                    case 61491:
-                    {
-                        damage += uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.12f);
-                        break;
-                    }
                     // percent max target health
                     case 29142:                             // Eyesore Blaster
                     case 35139:                             // Throw Boom's Doom
@@ -405,10 +398,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                         damage = unitTarget->GetMaxHealth() / 10;
                         break;
                     }
-                    // Hand of Rekoning (name not have typos ;) )
-                    case 67485:
-                        damage += uint32(0.5f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));
-                        break;
                     // Magic Bane normal (Forge of Souls - Bronjahm)
                     case 68793:
                     {
@@ -436,15 +425,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 // Shield Slam
                 else if ((m_spellInfo->SpellFamilyFlags & uint64(0x0000020000000000)) && m_spellInfo->Category == 1209)
                     damage += int32(m_caster->GetShieldBlockValue());
-                // Revenge ${$m1+$AP*0.310} to ${$M1+$AP*0.310}
-                else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000000400))
-                    damage += uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.310f);
-                // Heroic Throw ${$m1+$AP*.50}
-                else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000100000000))
-                    damage += uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
-                // Shattering Throw ${$m1+$AP*.50}
-                else if (m_spellInfo->SpellFamilyFlags & uint64(0x0040000000000000))
-                    damage += uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.5f);
                 // Shockwave ${$m3/100*$AP}
                 else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000800000000000))
                 {
@@ -722,24 +702,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     // + 10% for each application of Holy Vengeance on the target
                     if (stacks)
                         damage += damage * stacks * 10 / 100;
-                }
-                // Avenger's Shield ($m1+0.07*$SPH+0.07*$AP) - ranged sdb for future
-                else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000004000))
-                {
-                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 holy = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
-                    if (holy < 0)
-                        holy = 0;
-                    damage += int32(ap * 0.07f) + int32(holy * 7 / 100);
-                }
-                // Hammer of Wrath ($m1+0.15*$SPH+0.15*$AP) - ranged type sdb future fix
-                else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000008000000000))
-                {
-                    float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
-                    int32 holy = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
-                    if (holy < 0)
-                        holy = 0;
-                    damage += int32(ap * 0.15f) + int32(holy * 15 / 100);
                 }
                 // Hammer of the Righteous
                 else if (m_spellInfo->SpellFamilyFlags & uint64(0x0004000000000000))

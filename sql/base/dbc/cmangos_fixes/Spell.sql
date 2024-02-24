@@ -3611,6 +3611,8 @@ UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.02 WHERE Id IN(13797,1
 UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.06325 WHERE Id IN(55095); -- Frost Fever
 UPDATE spell_template SET EffectBonusCoefficientFromAP1=0.06325 WHERE Id IN(55078); -- Blood Plague
 
+UPDATE spell_template SET EffectBonusCoefficient1=0.07, EffectBonusCoefficientFromAP1=0.07 WHERE Id IN (31935,32699,32700,48826,48827); -- Avenger's Shield (previously 0.09?)
+
 
 
 
