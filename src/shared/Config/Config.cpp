@@ -27,6 +27,8 @@
 #include <string>
 #include <fstream>
 #include <cstdlib>
+#include <optional>
+#include <algorithm>
 
 INSTANTIATE_SINGLETON_1(Config);
 
@@ -143,7 +145,7 @@ std::optional<std::string> EnvVarForIniKey(std::string const& prefix, std::strin
     std::string envKey = prefix + escapedKey;
     char* val = std::getenv(envKey.c_str());
     if (!val)
-        return std::nullopt;
+        return {};
 
     return std::string(val);
 }
