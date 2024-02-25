@@ -96,7 +96,7 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, std::string accountName, uint32 accountFlags, uint32 recruitingFriend, bool isARecruiter) :
     m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_socket(sock ? sock->shared_from_this() : nullptr), _security(sec), _accountId(id), m_expansion(expansion), m_orderCounter(0),
-    m_gameBuild(0), m_clientOS(CLIENT_OS_UNKNOWN), m_clientPlatform(CLIENT_PLATFORM_UNKNOWN), m_accountMaxLevel(0), m_lastAnticheatUpdate(0), m_anticheat(nullptr), _logoutTime(0), m_kickTime(0), m_localAddress("127.0.0.1"),
+    m_gameBuild(0), m_clientOS(CLIENT_OS_UNKNOWN), m_clientPlatform(CLIENT_PLATFORM_UNKNOWN), m_accountMaxLevel(0), m_lastAnticheatUpdate(0), m_anticheat(nullptr), _logoutTime(0), m_afkTime(0), m_kickTime(0), m_localAddress("127.0.0.1"),
     m_inQueue(false), m_playerLoading(false), m_kickSession(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(true),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
@@ -530,8 +530,12 @@ bool WorldSession::Update(uint32 /*diff*/)
                 // give the opportunity for this player to reconnect within 20 sec
                 SetOffline();
             }
-            else if (ShouldLogOut(time(nullptr)) && !m_playerLoading)   // check if delayed logout is fired
-                LogoutPlayer();
+            else if (!m_playerLoading)
+            {
+                time_t curTime = time(nullptr);
+                if (ShouldAfkDisconnect(curTime) || ShouldLogOut(curTime)) // check if delayed logout or afk is fired
+                    LogoutPlayer();
+            }
 
             return true;
         }
@@ -775,6 +779,7 @@ void WorldSession::LogoutPlayer()
     SetInCharSelection();
 
     _logoutTime = 0;
+    m_afkTime = 0;
 
     if (m_kickSession)
     {
@@ -1293,6 +1298,14 @@ void WorldSession::SetNoAnticheat()
 }
 
 #endif
+
+void WorldSession::AfkStateChange(bool state)
+{
+    if (state)
+        m_afkTime = time(nullptr);
+    else
+        m_afkTime = 0;
+}
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 {

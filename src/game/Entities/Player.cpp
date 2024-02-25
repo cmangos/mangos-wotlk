@@ -1988,6 +1988,8 @@ void Player::ToggleAFK()
     // afk player not allowed in battleground
     if (isAFK() && InBattleGround() && !InArena() && !IsGameMaster())
         LeaveBattleground();
+
+    GetSession()->AfkStateChange(isAFK());
 }
 
 void Player::ToggleDND()
