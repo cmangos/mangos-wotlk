@@ -43,7 +43,7 @@ enum
 enum AmbassadorHellmawActions
 {
     AMBASSADOR_HELLMAW_ACTION_MAX,
-    AMBASSADOR_HELLMAW_UNBANISH_CHECK,
+    AMBASSADOR_HELLMAW_UNBANISH_CHECK
 };
 
 struct boss_ambassador_hellmawAI : public CombatAI
@@ -51,11 +51,8 @@ struct boss_ambassador_hellmawAI : public CombatAI
     boss_ambassador_hellmawAI(Creature* creature) : CombatAI(creature, AMBASSADOR_HELLMAW_ACTION_MAX),
         m_instance(static_cast<instance_shadow_labyrinth*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddCustomAction(AMBASSADOR_HELLMAW_UNBANISH_CHECK, 2000u, [&](){ UnbanishCheck(); });
-        m_creature->SetCanEnterCombat(false);
-        SetReactState(REACT_PASSIVE);
+        AddCustomAction(AMBASSADOR_HELLMAW_UNBANISH_CHECK, true, [&]() { UnbanishCheck(); });
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
-        Reset();
     }
 
     instance_shadow_labyrinth* m_instance;
@@ -63,8 +60,10 @@ struct boss_ambassador_hellmawAI : public CombatAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A)
+        if (eventType == AI_EVENT_CUSTOM_A) // all channelers killed
             Unbanish();
+        else if (AI_EVENT_CUSTOM_B) // respawn
+            ResetTimer(AMBASSADOR_HELLMAW_UNBANISH_CHECK, 2000);
     }
 
     void JustReachedHome() override
@@ -106,10 +105,14 @@ struct boss_ambassador_hellmawAI : public CombatAI
 
     void UnbanishCheck()
     {
-        if (m_instance->IsHellmawUnbanished())
-            Unbanish();
+        if (m_instance && !m_instance->IsHellmawUnbanished())
+        {
+            DoCastSpellIfCan(nullptr, SPELL_BANISH, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            m_creature->SetCanEnterCombat(false);
+            SetReactState(REACT_PASSIVE);
+        }
         else
-            ResetTimer(AMBASSADOR_HELLMAW_UNBANISH_CHECK, 2000);
+            Unbanish();
     }
 };
 

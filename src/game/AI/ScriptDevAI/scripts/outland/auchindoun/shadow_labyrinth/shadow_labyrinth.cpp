@@ -163,6 +163,16 @@ void instance_shadow_labyrinth::OnCreatureDeath(Creature* pCreature)
     }
 }
 
+void instance_shadow_labyrinth::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_HELLMAW:
+            creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, creature, creature);
+            break;
+    }
+}
+
 void instance_shadow_labyrinth::Load(const char* chrIn)
 {
     if (!chrIn)
