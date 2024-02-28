@@ -9656,8 +9656,9 @@ void Aura::HandleTriggerLinkedAura(bool apply, bool Real)
     if (apply)
     {
         SpellCastArgs args;
-        if (int32 points = GetAmount())
-            args.SetBasePoints(&points, nullptr, nullptr);
+        int32 points = GetAmount();
+        if (points)
+            args.SetBasePoints(&points, &points, &points);
         args.SetTarget(target);
         caster->CastSpell(args, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, this);
     }
