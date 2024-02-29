@@ -1630,6 +1630,12 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             std::tie(slotX, slotY) = GetClosestChairSlotPosition(user);
             user->NearTeleportTo(slotX, slotY, GetPositionZ(), GetOrientation());
             user->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR + info->chair.height);
+
+            if (uint32 eventId = GetGOInfo()->chair.triggeredEvent)
+            {
+                DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Chair ScriptStart id %u for %s (Used by %s).", eventId, GetGuidStr().c_str(), player->GetGuidStr().c_str());
+                StartEvents_Event(GetMap(), eventId, user, this);
+            }
             return;
         }
         case GAMEOBJECT_TYPE_SPELL_FOCUS:                   // 8
