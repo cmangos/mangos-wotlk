@@ -70,7 +70,7 @@ enum CreatureGroupFlags
     CREATURE_GROUP_RESPAWN_TOGETHER = 0x02,
     CREATURE_GROUP_EVADE_TOGETHER   = 0x04,
     // SPAWN_GROUP_DESPAWN_ON_COND_FAIL
-    CREATURE_GROUP_FORMATION_MIRRORING = 0x08, // mirrors position during linear path movement
+    CREATURE_GROUP_FORMATION_MIRRORING = 0x10, // mirrors position during linear path movement
 };
 
 enum CreatureGroupEvent : uint32
