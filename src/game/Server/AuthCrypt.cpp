@@ -19,7 +19,7 @@
 #include "AuthCrypt.h"
 #include "Auth/CryptoHash.h"
 #include "Auth/HMACSHA1.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Auth/BigNumber.h"
 
 AuthCrypt::AuthCrypt() : _clientDecrypt(Sha1Hash::GetLength()), _serverEncrypt(Sha1Hash::GetLength()), _initialized(false) {}

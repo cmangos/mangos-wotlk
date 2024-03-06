@@ -18,7 +18,7 @@
 
 #include "Server/WorldSession.h"
 #include "Server/WorldPacket.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
 #include "Arena/ArenaTeam.h"

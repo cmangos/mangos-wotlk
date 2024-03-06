@@ -18,7 +18,7 @@
 
 #include "Skills/SkillExtraItems.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/ProgressBar.h"
 #include "Entities/Player.h"
 #include "Server/DBCStores.h"

@@ -25,7 +25,7 @@
 #include "Server/WorldSocket.h"                                    // must be first to make ACE happy with ACE includes in it
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"

@@ -19,7 +19,7 @@
 #include "Entities/Player.h"
 #include "Tools/Language.h"
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Spells/SpellMgr.h"
 #include "World/World.h"

@@ -21,7 +21,7 @@
 #include "Maps/MapPersistentStateMgr.h"
 
 #include "Entities/Player.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Grids/CellImpl.h"
 #include "Maps/Map.h"
 #include "Maps/MapManager.h"

@@ -20,7 +20,7 @@
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
 #include "Entities/ObjectGuid.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Player.h"
 #include "Entities/Vehicle.h"
 #include "Globals/ObjectMgr.h"

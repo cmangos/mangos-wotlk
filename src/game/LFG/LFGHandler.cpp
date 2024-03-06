@@ -17,7 +17,7 @@
  */
 
 #include "Server/WorldSession.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Player.h"
 #include "Server/WorldPacket.h"
 #include "Globals/ObjectAccessor.h"

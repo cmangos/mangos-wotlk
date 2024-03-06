@@ -17,7 +17,7 @@
  */
 
 #include "Database/DatabaseEnv.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/ProgressBar.h"
 #include "Policies/Singleton.h"
 #include "World/World.h"

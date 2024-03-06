@@ -17,7 +17,7 @@
  */
 
 #include "Common.h"
-#include "Log.h"
+#include "Log/Log.h"
 
 void startDaemon(uint32_t timeout = 10);
 void stopDaemon();

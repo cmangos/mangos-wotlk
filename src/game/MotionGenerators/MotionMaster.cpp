@@ -35,7 +35,7 @@
 #include "Entities/Player.h"
 #include "Entities/Pet.h"
 #include "Server/DBCStores.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Maps/TransportSystem.h"
 #include "Metric/Metric.h"
 

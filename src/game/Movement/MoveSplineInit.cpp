@@ -20,7 +20,7 @@
 #include "MoveSpline.h"
 #include "packet_builder.h"
 #include "Entities/Unit.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Maps/TransportSystem.h"
 #include "Entities/Transports.h"
 

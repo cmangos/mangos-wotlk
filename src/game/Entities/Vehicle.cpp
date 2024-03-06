@@ -35,7 +35,7 @@
 #include "Common.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/ObjectGuid.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Unit.h"
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"

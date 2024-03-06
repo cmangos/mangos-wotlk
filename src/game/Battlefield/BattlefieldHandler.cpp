@@ -21,7 +21,7 @@
 #include "OutdoorPvP/OutdoorPvPMgr.h"
 #include "Battlefield/Battlefield.h"
 #include "Server/WorldPacket.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Server/Opcodes.h"
 #include "Entities/Player.h"
 

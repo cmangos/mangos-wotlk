@@ -25,7 +25,7 @@
 #include "Maps/Map.h"
 #include "World/World.h"
 #include "Server/WorldPacket.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Util/Util.h"
 #include "Util/ProgressBar.h"
 

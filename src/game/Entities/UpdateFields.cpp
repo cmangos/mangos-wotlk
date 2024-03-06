@@ -17,7 +17,7 @@
  */
 
 #include "UpdateFields.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "ObjectGuid.h"
 #include <array>
 #include <vector>

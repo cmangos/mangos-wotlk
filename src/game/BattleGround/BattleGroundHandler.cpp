@@ -20,7 +20,7 @@
 #include "Globals/SharedDefines.h"
 #include "Server/WorldPacket.h"
 #include "Server/Opcodes.h"
-#include "Log.h"
+#include "Log/Log.h"
 #include "Entities/Player.h"
 #include "Globals/ObjectMgr.h"
 #include "Server/WorldSession.h"
