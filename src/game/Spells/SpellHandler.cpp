@@ -441,7 +441,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     // client provided targets
     SpellCastTargets targets;
 
-#ifdef BUILD_PLAYERBOT
+#ifdef BUILD_DEPRECATED_PLAYERBOT
     recvPacket >> targets.ReadForCaster(caster);
 #else
     recvPacket >> targets.ReadForCaster(_player);
