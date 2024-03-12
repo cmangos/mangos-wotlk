@@ -36,6 +36,10 @@ void BossAI::Reset()
 {
     CombatAI::Reset();
     m_creature->SetSpellList(m_creature->GetCreatureInfo()->SpellList);
+    for (auto& func : m_resetValues)
+    {
+        func();
+    }
 }
 
 void BossAI::JustDied(Unit* killer)
@@ -92,6 +96,7 @@ void BossAI::AddExitObject(uint32 value)
 
 void BossAI::EnterEvadeMode()
 {
+    OpenEntrances();
     if (m_instanceDataType == -1)
         return;
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
@@ -103,7 +108,15 @@ void BossAI::EnterEvadeMode()
         return;
     }
     m_creature->SetRespawnDelay(m_respawnDelay, true);
-    m_creature->ForcedDespawn();
+    m_creature->ForcedDespawn(2000);
+    for (ObjectGuid& guid : m_despawnSubordinateOnEvade)
+    {
+        Creature* addToDespawn = m_creature->GetMap()->GetCreature(guid);
+        if (!addToDespawn)
+            continue;
+        addToDespawn->SetRespawnDelay(m_respawnDelay);
+        addToDespawn->ForcedDespawn();
+    }
 }
 
 void BossAI::AddCastOnDeath(QueuedCast cast)
@@ -114,4 +127,9 @@ void BossAI::AddCastOnDeath(QueuedCast cast)
 void BossAI::AddRespawnOnEvade(std::chrono::seconds delay)
 {
     m_respawnDelay = delay.count();
+}
+
+void BossAI::DespawnSubordinateOnEvade(ObjectGuid guid)
+{
+    m_despawnSubordinateOnEvade.push_back(guid);
 }
