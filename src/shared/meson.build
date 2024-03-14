@@ -3,7 +3,7 @@ shared_sources = [
     'Metric/Metric.cpp',
     'Util/Util.cpp',
     'Multithreading/Messager.cpp',
-    'Log.cpp',
+    'Log/Log.cpp',
     'Util/ProgressBar.cpp',
     'Multithreading/Threading.cpp',
     'Util/ByteBuffer.cpp',
