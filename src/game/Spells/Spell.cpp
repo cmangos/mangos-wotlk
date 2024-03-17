@@ -5704,6 +5704,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         // TODO: Find a nicer and more efficient way to check for this
         if (!IsSpellWithScriptUnitTarget(m_spellInfo))
         {
+            bool ignoreRestrictions = m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS) || m_spellInfo->HasAttribute(SPELL_ATTR_EX5_IGNORE_TARGET_REQUIREMENTS);
             // target state requirements (not allowed state), apply to self also
             if (m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
                 return SPELL_FAILED_TARGET_AURASTATE;
@@ -5744,13 +5745,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_TARGET_AURASTATE;
 
                 // Not allow casting on flying player
-                if (target->IsTaxiFlying())
+                if (!ignoreRestrictions && !m_spellInfo->HasAttribute(SPELL_ATTR_ALLOW_WHILE_MOUNTED) && target->IsTaxiFlying())
                 {
                     switch (m_spellInfo->Id)
                     {
                         // Except some spells from Taxi Flying cast
                         case 7720:                              // Ritual of Summoning Effect
-                        case 36573:                             // Vision Guide
                         case 42316:                             // Alcaz Survey Credit
                         case 42385:                             // Alcaz Survey Aura
                             break;
@@ -5842,7 +5842,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 return SPELL_FAILED_BAD_TARGETS;
             }
 
-            if (!selfTargeting && !m_spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE) &&  target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNTARGETABLE))
+            if (!selfTargeting && !ignoreRestrictions && !m_spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNTARGETABLE))
                 return SPELL_FAILED_BAD_TARGETS;
 
             // check creature type
@@ -7187,6 +7187,12 @@ SpellCastResult Spell::CheckCasterAuras(uint32& param1) const
         return SPELL_CAST_OK;
 
     if (!m_trueCaster->IsUnit())
+        return SPELL_CAST_OK;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS))
+        return SPELL_CAST_OK;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_IGNORE_CASTER_REQUIREMENTS))
         return SPELL_CAST_OK;
 
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX6_NOT_AN_ATTACK))
