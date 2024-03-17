@@ -3791,7 +3791,7 @@ SpellCastResult Spell::cast(bool skipCheck)
                         {
                             if (target->GetObjectGuid() == ihit.targetGUID)                 // Found in list
                             {
-                                if (m_caster->CanAttack(target)) // can attack
+                                if (m_caster->CanAttackSpell(target, m_spellInfo)) // can attack
                                     if ((!IsPositiveEffectMask(m_spellInfo, ihit.effectMask, m_caster, target)
                                         && m_caster->IsVisibleForOrDetect(target, target, false)
                                         && m_caster->CanEnterCombat() && target->CanEnterCombat())) // can see and enter combat
@@ -7167,7 +7167,7 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
                     // TARGET_UNIT is positive AND negative
                     duelvsplayertar |= (j == TARGET_UNIT);
                 }
-                if (!m_caster->CanAttack(target) && !duelvsplayertar)
+                if (!m_caster->CanAttackSpell(target, m_spellInfo) && !duelvsplayertar)
                 {
                     return SPELL_FAILED_BAD_TARGETS;
                 }

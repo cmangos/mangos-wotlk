@@ -354,7 +354,7 @@ bool Unit::IsFriend(const Unit* unit) const
 /// Dependent 2.0+ macro API condition: <tt>[harm]</tt>
 /// Altered - Added ignoreFlags for ignoring UNIT_FLAG_NON_ATTACKABLE_2
 /////////////////////////////////////////////////
-bool Unit::CanAttack(const Unit* unit, bool ignoreUntargetable) const
+bool Unit::CanAttack(const Unit* unit) const
 {
     MANGOS_ASSERT(unit)
 
@@ -372,11 +372,7 @@ bool Unit::CanAttack(const Unit* unit, bool ignoreUntargetable) const
     }
 
     // We can't attack unit when at least one of these flags is present on it:
-    uint32 mask = (UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_UNINTERACTIBLE);
-    // serverside only part start
-    if (ignoreUntargetable) // this ignore is present not in wotlk client - by default in mask
-        mask |= UNIT_FLAG_UNTARGETABLE;
-    // serverside only part end
+    uint32 mask = (UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_UNTARGETABLE | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_UNINTERACTIBLE);
     if (unit->HasFlag(UNIT_FIELD_FLAGS, mask))
         return false;
 
@@ -1214,16 +1210,23 @@ bool GameObject::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo)
 /////////////////////////////////////////////////
 bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool isAOE) const
 {
-    MANGOS_ASSERT(target)
+    MANGOS_ASSERT(target);
 
+    bool ignoreFlagsSource = false;
+    bool ignoreFlagsTarget = false;
+    bool ignoreUntargetable = false;
     if (spellInfo)
     {
         // inversealive is needed for some spells which need to be casted at dead targets (aoe)
         if (!target->IsAlive() && !spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_DEAD_TARGET))
             return false;
+
+        ignoreFlagsSource = spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS) || spellInfo->HasAttribute(SPELL_ATTR_EX5_IGNORE_CASTER_REQUIREMENTS);
+        ignoreFlagsTarget = spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS) || spellInfo->HasAttribute(SPELL_ATTR_EX5_IGNORE_TARGET_REQUIREMENTS);
+        ignoreUntargetable = spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE);
     }
 
-    if (CanAttackInCombat(target, spellInfo && spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE)))
+    if (CanAttackInCombat(target, ignoreFlagsSource, ignoreFlagsTarget, ignoreUntargetable))
     {
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
@@ -1318,9 +1321,9 @@ bool Unit::CanAttackOnSight(Unit const* target) const
 /// This function is not intented to have client-side counterpart by original design.
 /// Typically used for combat checks for at war case
 /////////////////////////////////////////////////
-bool Unit::CanAttackInCombat(Unit const* target, bool ignoreUntargetable) const
+bool Unit::CanAttackInCombat(Unit const* target, bool ignoreFlagsSource, bool ignoreFlagsTarget, bool ignoreUntargetable) const
 {
-    if (!CanAttack(target, ignoreUntargetable))
+    if (!CanAttackServerside(target, ignoreFlagsSource, ignoreFlagsTarget, ignoreUntargetable))
     {
         if (target->IsPlayerControlled()) // If this is not fine grained enough, incorporation into CanAttack or copypaste of that whole func will be necessary
         {
@@ -1342,6 +1345,124 @@ bool Unit::CanAttackInCombat(Unit const* target, bool ignoreUntargetable) const
     }
 
     return true;
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: Unit can attack a target on sight
+///
+/// @note Relations API Tier 3
+///
+/// This function is altered counterpart of CanAttack from clientside with added parameters for spells.
+/// Only used as customized CanAttack inside CanAttackSpell flow
+/////////////////////////////////////////////////
+bool Unit::CanAttackServerside(const Unit* unit, bool ignoreFlagsSource, bool ignoreFlagsTarget, bool ignoreUntargetable) const
+{
+    MANGOS_ASSERT(unit)
+
+    // Original logic
+
+    // TBC+: Arena Tournament commenatator
+    if (GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(this)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_COMMENTATOR))
+        return false;
+
+    // Creatures cannot attack player ghosts, unless it is a specially flagged ghost creature
+    if (GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(unit)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+    {
+        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_GHOST_VISIBLE))
+            return false;
+    }
+
+    // We can't attack unit when at least one of these flags is present on it:
+    uint32 mask = (UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_ATTACKABLE_1 | UNIT_FLAG_UNTARGETABLE | UNIT_FLAG_TAXI_FLIGHT | UNIT_FLAG_UNINTERACTIBLE);
+    if (ignoreUntargetable)
+        mask &= ~UNIT_FLAG_UNTARGETABLE;
+    if (unit->HasFlag(UNIT_FIELD_FLAGS, mask))
+        return false;
+
+    // Cross-check immunity and sanctuary flags: this <-> unit
+    const bool thisPlayerControlled = HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    const bool unitPlayerControlled = unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    
+    if (!ignoreFlagsTarget)
+    {
+        if (thisPlayerControlled)
+        {
+            if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
+                return false;
+        }
+        else if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+            return false;
+    }
+
+    if (!ignoreFlagsSource)
+    {
+        if (unitPlayerControlled)
+        {
+            if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER))
+                return false;
+        }
+        else if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC))
+            return false;
+    }
+
+    // WotLK+: Check for same root vehicle
+    // TODO: Rename flags appropriately after finding out it's usecases
+    if (HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK16) || unit->HasFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK16))
+    {
+        if (const VehicleInfo* thisVehicleInfo = GetVehicleInfo())
+        {
+            const VehicleEntry* thisVehicleEntry = thisVehicleInfo->GetVehicleEntry();
+            if (thisVehicleEntry && (thisVehicleEntry->m_flags & VEHICLE_FLAG_UNK21) && unit->FindRootVehicle(this) == this)
+                return false;
+        }
+
+        if (const VehicleInfo* unitVehicleInfo = unit->GetVehicleInfo())
+        {
+            const VehicleEntry* unitVehicleEntry = unitVehicleInfo->GetVehicleEntry();
+            if (unitVehicleEntry && (unitVehicleEntry->m_flags & VEHICLE_FLAG_UNK21) && FindRootVehicle(unit) == unit)
+                return false;
+        }
+    }
+
+    if (thisPlayerControlled || unitPlayerControlled)
+    {
+        if (thisPlayerControlled && unitPlayerControlled)
+        {
+            if (IsFriend(unit))
+                return false;
+
+            const Player* thisPlayer = GetControllingPlayer();
+            if (!thisPlayer)
+                return (!IsPvPSanctuary() && !unit->IsPvPSanctuary());
+
+            const Player* unitPlayer = unit->GetControllingPlayer();
+            if (!unitPlayer)
+                return (!IsPvPSanctuary() && !unit->IsPvPSanctuary());
+
+            if (thisPlayer->GetUInt32Value(PLAYER_DUEL_TEAM) && unitPlayer->GetUInt32Value(PLAYER_DUEL_TEAM) && thisPlayer->GetGuidValue(PLAYER_DUEL_ARBITER) == unitPlayer->GetGuidValue(PLAYER_DUEL_ARBITER))
+                return true;
+
+            if (unit->IsPvP())
+                return (!IsPvPSanctuary() && !unit->IsPvPSanctuary());
+
+            if (IsPvPFreeForAll() && unit->IsPvPFreeForAll())
+                return true;
+
+            // WotLK+ TODO: Find out the meaning of this flag and rename
+            if (HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1) || unit->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1))
+                return (!IsPvPSanctuary() && !unit->IsPvPSanctuary());
+
+            return false;
+        }
+        // WotLK+: generic sanctuary cross-check (moved down here from immunity flag checks in tbc)
+        if (thisPlayerControlled && unit->IsPvPSanctuary())
+            return false;
+
+        if (unitPlayerControlled && IsPvPSanctuary())
+            return false;
+        return (!IsFriend(unit));
+    }
+    return (IsEnemy(unit) || unit->IsEnemy(this));
 }
 
 /////////////////////////////////////////////////

@@ -1468,7 +1468,7 @@ class Unit : public WorldObject
         bool CanAssist(Unit const* unit, bool ignoreFlags = false) const;
         bool CanAssist(Corpse const* corpse) const;
 
-        bool CanAttack(Unit const* unit, bool ignoreUntargetable = false) const;
+        bool CanAttack(Unit const* unit) const;
         bool CanAttackNow(Unit const* unit) const;
 
         bool CanCooperate(Unit const* unit) const;
@@ -1494,7 +1494,8 @@ class Unit : public WorldObject
         virtual bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const override;
 
         bool CanAttackOnSight(Unit const* target) const; // Used in MoveInLineOfSight checks
-        bool CanAttackInCombat(Unit const* target, bool ignoreUntargetable = false) const;
+        bool CanAttackInCombat(Unit const* target, bool ignoreFlagsSource, bool ignoreFlagsTarget, bool ignoreUntargetable) const;
+        bool CanAttackServerside(Unit const* unit, bool ignoreFlagsSource, bool ignoreFlagsTarget, bool ignoreUntargetable) const;
         bool CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const;
         bool CanJoinInAttacking(Unit const* enemy) const;
 
