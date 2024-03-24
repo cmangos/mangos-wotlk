@@ -364,6 +364,22 @@ struct ArgussianCompass : public AuraScript
     }
 };
 
+// 11403 - Dream Vision
+struct DreamVision : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (summon && summon->GetEntry() == 7863)
+        {
+            summon->SetCanEnterCombat(false);
+            summon->SetImmuneToNPC(true);
+            summon->SetImmuneToPlayer(true);
+            summon->SetHover(true);
+            summon->SetVisibility(VISIBILITY_OFF);
+        }
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -402,4 +418,5 @@ void AddSC_item_scripts()
     RegisterSpellScript<BanishExile>("spell_banish_exile");
     RegisterSpellScript<OrbOfDeception>("spell_orb_of_deception");
     RegisterSpellScript<ArgussianCompass>("spell_argussian_compass");
+    RegisterSpellScript<DreamVision>("spell_dream_vision");
 }
