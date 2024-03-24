@@ -5854,22 +5854,21 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 
     // Expected Level
     WorldObject* petInvoker = responsibleCaster ? responsibleCaster : m_trueCaster;
-    uint32 level = 0;
     // Everything considered as guardian or critter pets uses its creature template level by default (may change depending on SpellEffect params)
     if (summon_prop->Title == UNITNAME_SUMMON_TITLE_COMPANION || m_ignoreOwnerLevel || summon_prop->Flags & SUMMON_PROP_FLAG_USE_CREATURE_LEVEL)
     {
         if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
-            level = urand(cInfo->MinLevel, cInfo->MaxLevel);
+            creatureLevel = urand(cInfo->MinLevel, cInfo->MaxLevel);
         else
         {
             sLog.outError("Spell Effect EFFECT_SUMMON (%u) - no creature template found for summoned NPC %u (spell id %u, effIndex %u)", m_spellInfo->Effect[eff_idx], m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id, eff_idx);
             return;
         }
     }
-    else    // Use invoker level in all other cases (to be confirmed)
+    else if (summon_prop->Title != UNITNAME_SUMMON_TITLE_NONE && summon_prop->Group != SUMMON_PROP_GROUP_WILD) // use invoker level for other cases than wild
     {
         if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
-            level = std::max(std::min(petInvoker->GetLevel(), cInfo->MaxLevel), cInfo->MinLevel);
+            creatureLevel = std::max(std::min(petInvoker->GetLevel(), cInfo->MaxLevel), cInfo->MinLevel);
         else
         {
             sLog.outError("Spell Effect EFFECT_SUMMON (%u) - no creature template found for summoned NPC %u (spell id %u, effIndex %u)", m_spellInfo->Effect[eff_idx], m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id, eff_idx);
@@ -5882,11 +5881,11 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         // If EffectMultipleValue <= 0, pets have their calculated level modified by EffectMultipleValue
         if (m_spellInfo->EffectMultipleValue[eff_idx] <= 0) // TODO: Check if instead of using level variable, should not use 0 in this check
         {
-            uint32 resultLevel = std::max(level + m_spellInfo->EffectMultipleValue[eff_idx], 0.0f);
+            uint32 resultLevel = std::max(creatureLevel + m_spellInfo->EffectMultipleValue[eff_idx], 0.0f);
 
             // Result level should be a valid level for creatures
             if (resultLevel > 0 && resultLevel <= DEFAULT_MAX_CREATURE_LEVEL)
-                level = resultLevel;
+                creatureLevel = resultLevel;
         }
 	}
     // engineering trinkets do not scale with skill in wotlk
@@ -5944,10 +5943,10 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                         switch (m_spellInfo->Id) // unable to distinguish based on prop_id, therefore spell by spell override
                         {
                             case 38544: // summon marmot, gives control of marmot pet
-                                summonResult = DoSummonPossessed(summonPositions, summon_prop, eff_idx, level);
+                                summonResult = DoSummonPossessed(summonPositions, summon_prop, eff_idx, creatureLevel);
                                 break;
                             default:
-                                summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, level);
+                                summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, creatureLevel);
                                 break;
                         }
                     }
@@ -5956,7 +5955,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 case UNITNAME_SUMMON_TITLE_PET:
                 case UNITNAME_SUMMON_TITLE_MINION:
                 case UNITNAME_SUMMON_TITLE_RUNEBLADE:
-                    summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+                    summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, creatureLevel);
                     break;
                 case UNITNAME_SUMMON_TITLE_GUARDIAN:
                 {
@@ -5975,15 +5974,15 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                             return;
                     }
 
-                    summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+                    summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, creatureLevel);
                     break;
                 }
                 case UNITNAME_SUMMON_TITLE_CONSTRUCT:
                 {
                     if (prop_id == 2913)                    // Scrapbot
-                        summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, level);
+                        summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, creatureLevel);
                     else
-                        summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+                        summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, creatureLevel);
                     break;
                 }
                 case UNITNAME_SUMMON_TITLE_TOTEM:
@@ -5992,16 +5991,16 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                 case UNITNAME_SUMMON_TITLE_COMPANION:
                     // slot 6 set for critters that can help to player in fighting
                     if (summon_prop->Slot == SUMMON_PROP_SLOT_QUEST_PLAYERS_ONLY)
-                        summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+                        summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, creatureLevel);
                     else
-                        summonResult = DoSummonCritter(summonPositions, summon_prop, eff_idx, level);
+                        summonResult = DoSummonCritter(summonPositions, summon_prop, eff_idx, creatureLevel);
                     break;
                 case UNITNAME_SUMMON_TITLE_OPPONENT:
                 case UNITNAME_SUMMON_TITLE_VEHICLE:
                 case UNITNAME_SUMMON_TITLE_MOUNT:
                 case UNITNAME_SUMMON_TITLE_LIGHTWELL:
                 case UNITNAME_SUMMON_TITLE_BUTLER:
-                    summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, level);
+                    summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, creatureLevel);
                     break;
                 default:
                     sLog.outError("EffectSummonType: Unhandled summon title %u", summon_prop->Title);
@@ -6011,18 +6010,18 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         }
         case SUMMON_PROP_GROUP_PETS:
         {
-            summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, level);
+            summonResult = DoSummonGuardian(summonPositions, summon_prop, eff_idx, creatureLevel);
             break;
         }
         case SUMMON_PROP_GROUP_CONTROLLABLE:
         {
-            summonResult = DoSummonPossessed(summonPositions, summon_prop, eff_idx, level);
+            summonResult = DoSummonPossessed(summonPositions, summon_prop, eff_idx, creatureLevel);
             break;
         }
         case SUMMON_PROP_GROUP_VEHICLE:
         case SUMMON_PROP_GROUP_UNCONTROLLABLE_VEHICLE:
         {
-            summonResult = DoSummonVehicle(summonPositions, summon_prop, eff_idx, level, seatNumber, rideSpell);
+            summonResult = DoSummonVehicle(summonPositions, summon_prop, eff_idx, creatureLevel, seatNumber, rideSpell);
             break;
         }
         default:
