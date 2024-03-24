@@ -77,6 +77,11 @@ enum EventAI_Type
     EVENT_T_DEATH_PREVENTED         = 35,                   //
     EVENT_T_TARGET_NOT_REACHABLE    = 36,                   //
     EVENT_T_SPELL_CAST              = 37,                   // SpellId
+    EVENT_T_BOARD_VEHICLE           = 38,                   // Boarding, SeatID
+    EVENT_T_PASSENGER_BOARDED       = 39,                   // Boarding, SeatID
+    EVENT_T_VEHICLE_RETURN          = 40,                   // SeatID
+    EVENT_T_PASSENGER_SPAWN         = 41,                   // SeatID
+    EVENT_T_PASSENGER_CONTROL_END   = 42,                   // SeatID
 
     EVENT_T_END,
 };
@@ -794,6 +799,33 @@ struct CreatureEventAI_Event
         {
             uint32 spellId;
         } spellCast;
+        // EVENT_T_BOARD_VEHICLE                            = 38
+        struct
+        {
+            uint32 board;
+            uint32 seat;
+        } boardVehicle;
+        // EVENT_T_PASSENGER_BOARDED                        = 39
+        struct
+        {
+            uint32 board;
+            uint32 seat;
+        } passengerBoard;
+        // EVENT_T_VEHICLE_RETURN                           = 40
+        struct
+        {
+            uint32 seat;
+        } vehicleReturn;
+        // EVENT_T_PASSENGER_SPAWN                          = 41
+        struct
+        {
+            uint32 seat;
+        } passengerSpawn;
+        // EVENT_T_PASSENGER_CONTROL_END                    = 42
+        struct
+        {
+            uint32 seat;
+        } passengerControlEnd;
         // RAW
         struct
         {
@@ -885,6 +917,11 @@ class CreatureEventAI : public CreatureAI
         void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 miscValue) override;
         void CorpseRemoved(uint32& respawnDelay) override;
         void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override;
+        void OnVehicleRide(Unit* vehicle, bool boarded, uint8 seat) override;
+        void OnPassengerRide(Unit* passenger, bool boarded, uint8 seat) override;
+        void OnVehicleReturn(uint8 seat) override;
+        void OnPassengerSpawn(uint8 seat) override;
+        void OnPassengerControlEnd(uint8 seat) override;
         // bool IsControllable() const override { return true; }
 
         static int Permissible(const Creature* creature);

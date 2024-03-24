@@ -582,6 +582,9 @@ bool CreatureEventAI::CheckEvent(CreatureEventAIHolder& holder, Unit* actionInvo
             if (!m_creature->GetVictim() || !IsCombatMovement() || m_creature->GetMotionMaster()->GetCurrent()->IsReachable())
                 return false;
             break;
+        case EVENT_T_BOARD_VEHICLE:
+        case EVENT_T_PASSENGER_BOARDED:
+            break;
         default:
             sLog.outErrorEventAI("Creature %u using Event %u has invalid Event Type(%u), missing from ProcessEvent() Switch.", m_creature->GetEntry(), holder.event.event_id, holder.event.event_type);
             return false;
@@ -1620,6 +1623,58 @@ void CreatureEventAI::OnSpellCast(SpellEntry const* spellInfo, Unit* target)
                 CheckAndReadyEventForExecution(i, target);
 
     ProcessEvents(target);
+}
+
+void CreatureEventAI::OnVehicleRide(Unit* vehicle, bool boarded, uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_BOARD_VEHICLE)
+            if (i.event.boardVehicle.board == boarded || i.event.boardVehicle.board == 2)
+                if (i.event.boardVehicle.seat == seat || i.event.boardVehicle.seat == -1)
+                    CheckAndReadyEventForExecution(i, vehicle);
+    ProcessEvents(vehicle);
+}
+
+void CreatureEventAI::OnPassengerRide(Unit* passenger, bool boarded, uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_PASSENGER_BOARDED)
+            if (i.event.passengerBoard.board == boarded || i.event.passengerBoard.board == 2)
+                if (i.event.passengerBoard.seat == seat || i.event.passengerBoard.seat == -1)
+                    CheckAndReadyEventForExecution(i, passenger);
+    ProcessEvents(passenger);
+}
+
+void CreatureEventAI::OnVehicleReturn(uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_VEHICLE_RETURN)
+            if (i.event.vehicleReturn.seat == seat || i.event.vehicleReturn.seat == -1)
+                CheckAndReadyEventForExecution(i);
+    ProcessEvents();
+}
+
+void CreatureEventAI::OnPassengerSpawn(uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_VEHICLE_RETURN)
+            if (i.event.passengerSpawn.seat == seat || i.event.passengerSpawn.seat == -1)
+                CheckAndReadyEventForExecution(i);
+    ProcessEvents();
+}
+
+void CreatureEventAI::OnPassengerControlEnd(uint8 seat)
+{
+    IncreaseDepthIfNecessary();
+    for (auto& i : m_CreatureEventAIList)
+        if (i.event.event_type == EVENT_T_VEHICLE_RETURN)
+            if (i.event.passengerControlEnd.seat == seat || i.event.passengerControlEnd.seat == -1)
+                CheckAndReadyEventForExecution(i);
+    ProcessEvents();
 }
 
 void CreatureEventAI::EnterCombat(Unit* enemy)

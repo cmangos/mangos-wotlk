@@ -558,6 +558,38 @@ Expires when main aggro target is not reachable by ChaseMovementGenerator - exam
 Parameter 1: SpellID
 Expires when spellId is successfully cast by spell lists
 
+-----------------------
+38 = EVENT_T_BOARD_VEHICLE
+-----------------------
+Parameter 1: Board - 0 if creature is exiting a vehicle, 1 if entering a vehicle, 2 both
+Parameter 2: Seat Id (-1 if triggering on any seat)
+Expires when a vehicle is entered or exited based on param 1
+
+-----------------------
+39 = EVENT_T_PASSENGER_BOARDED
+-----------------------
+Parameter 1: Board - 0 if creature(vehicle) is being exited, 1 if creature(vehicle) is being entered , 2 both
+Parameter 2: Seat Id (-1 if triggering on any seat)
+Expires when the creature(vehicle) is entered or exited based on param 1
+
+-----------------------
+40 = EVENT_T_VEHICLE_RETURN
+-----------------------
+Parameter 1: Seat Id (-1 if triggering on any seat)
+Expires when the passenger in this seat returns to the vehicle
+
+-----------------------
+41 = EVENT_T_PASSENGER_SPAWN
+-----------------------
+Parameter 1: Seat Id (-1 if triggering on any seat)
+Expires when the vehicle spawns a passenger in this seat
+
+-----------------------
+42 = EVENT_T_PASSENGER_CONTROL_END
+-----------------------
+Parameter 1: Seat Id (-1 if triggering on any seat)
+Expires when the passenger switches from a seat that has control to a non-controlling seat
+
 (Name ==> School ==> School Bitmask Values)
 -------------------------------------------
 SPELL_SCHOOL_NORMAL = 0 ==> 1

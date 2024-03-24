@@ -41,6 +41,7 @@
 #include "AI/BaseAI/CreatureAI.h"
 #include "Globals/ObjectMgr.h"
 #include "Models/M2Stores.h"
+#include "Server/DBCEnums.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
@@ -392,9 +393,9 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
 
     PassengerMap::const_iterator itr = m_passengers.find(passenger);
     MANGOS_ASSERT(itr != m_passengers.end());
-
+    uint8 oldSeat = itr->second->GetTransportSeat();
     // We are already boarded to this seat
-    if (itr->second->GetTransportSeat() == seat)
+    if (oldSeat == seat)
         return;
 
     // Check if it's a valid seat
@@ -439,6 +440,8 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     // It seems that Seat switching is sent without SplineFlag BoardVehicle
     init.Launch();
 
+    bool hadControl = seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL;
+
     // Get seatEntry of new seat
     seatEntry = GetSeatEntry(seat);
     MANGOS_ASSERT(seatEntry);
@@ -449,7 +452,11 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     if (Unit* owner = dynamic_cast<Unit*>(m_owner))
     {
         if (owner->AI())
+        {
             owner->AI()->OnPassengerRide(passenger, true, seat);
+            if (hadControl && !(seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL))
+                owner->AI()->OnPassengerControlEnd(oldSeat);
+        }
         if (passenger->AI())
             passenger->AI()->OnVehicleRide(owner, true, seat);
     }
@@ -669,6 +676,8 @@ void VehicleInfo::RespawnAccessories(int32 seatIndex)
         Position pos = m_owner->GetPosition();
         pos.o *= 2;
         SummonPassenger(itr->passengerEntry, pos, itr->seatId);
+        if (UnitAI* ownerAI = static_cast<Unit*>(m_owner)->AI())
+            ownerAI->OnPassengerSpawn(itr->seatId);
     }
 }
 
@@ -704,6 +713,8 @@ void VehicleInfo::RecallAccessories(float distance, int32 seatIndex)
             int32 basepoint0 = seat;
             creature->CastCustomSpell(static_cast<Unit*>(m_owner), SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
             itr = m_unboardedAccessories.erase(itr);
+            if (UnitAI* ownerAI = static_cast<Unit*>(m_owner)->AI())
+                ownerAI->OnVehicleReturn(seat);
         }
         else ++itr;
     }
