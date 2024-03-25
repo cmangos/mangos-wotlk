@@ -3365,6 +3365,9 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
     {
         switch (itr->type)
         {
+            case GAMEOBJECT_TYPE_CHAIR:
+                eventIds.insert(itr->chair.triggeredEvent);
+                break;
             case GAMEOBJECT_TYPE_GOOBER:
                 eventIds.insert(itr->goober.eventId);
                 break;
