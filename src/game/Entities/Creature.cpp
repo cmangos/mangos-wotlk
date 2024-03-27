@@ -58,6 +58,30 @@ ObjectGuid CreatureData::GetObjectGuid(uint32 lowguid) const
     return ObjectMgr::GetCreatureTemplate(id)->GetObjectGuid(lowguid);
 }
 
+uint32 CreatureData::GetRandomRespawnTime() const
+{
+    uint32 secs = urand(spawntimesecsmin, spawntimesecsmax);
+    const float rate = sWorld.getConfig(CONFIG_FLOAT_RATE_CREATURE_RESPAWN);
+    if (rate > 0.0f)
+    {
+        secs /= rate;
+    }
+    const uint32 minSecs = sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_MIN_SECS);
+    const uint32 maxSecs = sWorld.getConfig(CONFIG_UINT32_CREATURE_RESPAWN_MAX_SECS);
+    if (secs < minSecs)
+    {
+        return minSecs;
+    }
+    else if (maxSecs && (secs > maxSecs))
+    {
+        return maxSecs;
+    }
+    else
+    {
+        return secs;
+    }
+}
+
 TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
 {
     TrainerSpellMap::const_iterator itr = spellList.find(spell_id);

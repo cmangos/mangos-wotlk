@@ -1033,6 +1033,18 @@ TalentsInspecting = 1
 #        The delay between when a creature spawns and when it can be aggroed by nearby movement.
 #        Default: 5000 (5s)
 #
+#    Rate.Creature.Respawn
+#        Multiplier for creature respawn rate (larger value = shorter respawn time)
+#        Default: 1
+#
+#    Creature.RespawnMinSecs
+#        Minimum seconds of respawn time for creatures
+#        Default: 0
+#
+#    Creature.RespawnMaxSecs
+#        Maximum seconds of respawn time for creatures
+#        Default: 0 (unlimited)
+#
 #    LeashRadius
 #        Radius for default leash due to being too far from refresh position
 #        Default: 30 (yards)
@@ -1145,6 +1157,9 @@ TalentsInspecting = 1
 
 Rate.Creature.Aggro = 1
 CreatureRespawnAggroDelay = 5000
+Rate.Creature.Respawn = 1
+Creature.RespawnMinSecs = 0
+Creature.RespawnMaxSecs = 0
 LeashRadius = 30
 CreatureFamilyFleeAssistanceRadius = 30
 CreatureFamilyAssistanceRadius = 5
