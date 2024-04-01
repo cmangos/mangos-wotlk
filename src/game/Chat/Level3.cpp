@@ -6101,7 +6101,7 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleGMInvincibleCommand(char* args)
+bool ChatHandler::HandleGMUnkillableCommand(char* args)
 {
     bool value;
     if (!ExtractOnOff(&args, value))
@@ -6112,7 +6112,7 @@ bool ChatHandler::HandleGMInvincibleCommand(char* args)
     }
     Player* target = m_session->GetPlayer();
     target->SetPreventDeath(value);
-    PSendSysMessage("GM Invincibility %s.", value ? "enabled" : "disabled");
+    PSendSysMessage("GM Unkillability %s.", value ? "enabled" : "disabled");
     return true;
 }
 

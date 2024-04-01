@@ -558,7 +558,7 @@ enum PlayerExtraFlags
     PLAYER_EXTRA_WHISP_RESTRICTION  = 0x0200,
 
     // death prevention
-    PLAYER_EXTRA_INVINCIBLE         = 0x0400,
+    PLAYER_EXTRA_GM_UNKILLABLE         = 0x0400,
 };
 
 // 2^n values

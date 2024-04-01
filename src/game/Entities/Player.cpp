@@ -24812,14 +24812,14 @@ void Player::SendLootError(ObjectGuid guid, LootError error) const
 void Player::SetPreventDeath(bool enable)
 {
     if (enable)
-        m_ExtraFlags |= PLAYER_EXTRA_INVINCIBLE;
+        m_ExtraFlags |= PLAYER_EXTRA_GM_UNKILLABLE;
     else
-        m_ExtraFlags &= ~PLAYER_EXTRA_INVINCIBLE;
+        m_ExtraFlags &= ~PLAYER_EXTRA_GM_UNKILLABLE;
 }
 
 bool Player::IsPreventingDeath() const
 {
-    return m_ExtraFlags & PLAYER_EXTRA_INVINCIBLE;
+    return m_ExtraFlags & PLAYER_EXTRA_GM_UNKILLABLE;
 }
 
 void Player::ResetDeathTimer()
