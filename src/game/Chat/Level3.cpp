@@ -6101,6 +6101,21 @@ bool ChatHandler::HandleGMFlyCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleGMInvincibleCommand(char* args)
+{
+    bool value;
+    if (!ExtractOnOff(&args, value))
+    {
+        SendSysMessage(LANG_USE_BOL);
+        SetSentErrorMessage(true);
+        return false;
+    }
+    Player* target = m_session->GetPlayer();
+    target->SetPreventDeath(value);
+    PSendSysMessage("GM Invincibility %s.", value ? "enabled" : "disabled");
+    return true;
+}
+
 bool ChatHandler::HandlePDumpLoadCommand(char* args)
 {
     char* file = ExtractQuotedOrLiteralArg(&args);

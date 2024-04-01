@@ -24809,6 +24809,19 @@ void Player::SendLootError(ObjectGuid guid, LootError error) const
     SendDirectMessage(data);
 }
 
+void Player::SetPreventDeath(bool enable)
+{
+    if (enable)
+        m_ExtraFlags |= PLAYER_EXTRA_INVINCIBLE;
+    else
+        m_ExtraFlags &= ~PLAYER_EXTRA_INVINCIBLE;
+}
+
+bool Player::IsPreventingDeath() const
+{
+    return m_ExtraFlags & PLAYER_EXTRA_INVINCIBLE;
+}
+
 void Player::ResetDeathTimer()
 {
     // 6 minutes until repop at graveyard
