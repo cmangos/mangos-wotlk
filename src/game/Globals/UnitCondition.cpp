@@ -30,7 +30,7 @@ std::shared_ptr<std::map<int32, UnitConditionEntry>> UnitConditionMgr::Load()
 {
     auto unitConditions = std::make_shared<std::map<int32, UnitConditionEntry>>();
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT * FROM unit_condition"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id,Flags,Variable_0,Variable_1,Variable_2,Variable_3,Variable_4,Variable_5,Variable_6,Variable_7,Op_0,Op_1,Op_2,Op_3,Op_4,Op_5,Op_6,Op_7,Value_0,Value_1,Value_2,Value_3,Value_4,Value_5,Value_6,Value_7 FROM unit_condition"));
     if (!result)
     {
         sLog.outString(">> Loaded 0 unit_condition definitions - table is empty.");

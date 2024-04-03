@@ -34,7 +34,7 @@ std::shared_ptr<std::map<int32, CombatConditionEntry>> CombatConditionMgr::Load(
 {
     auto combatConditions = std::make_shared<std::map<int32, CombatConditionEntry>>();
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT * FROM combat_condition"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id,WorldStateExpressionID,SelfConditionID,TargetConditionID,FriendConditionLogic,EnemyConditionLogic,FriendConditionID_0,FriendConditionID_1,FriendConditionOp_0,FriendConditionOp_1,FriendConditionCount_0,FriendConditionCount_1,EnemyConditionID_0,EnemyConditionID_1,EnemyConditionOp_0,EnemyConditionOp_1,EnemyConditionCount_0,EnemyConditionCount_1 FROM combat_condition"));
     if (!result)
     {
         sLog.outString(">> Loaded 0 combat_condition definitions - table is empty.");

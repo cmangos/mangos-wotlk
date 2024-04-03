@@ -386,7 +386,7 @@ std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> WorldStateExpression
 {
     auto expressions = std::make_shared<std::map<int32, WorldStateExpressionEntry>>();
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT * FROM worldstate_expression"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id,Expression FROM worldstate_expression"));
     if (!result)
     {
         sLog.outString(">> Loaded 0 worldstate_expression definitions - table is empty.");
