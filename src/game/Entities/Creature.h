@@ -172,6 +172,7 @@ struct CreatureInfo
     uint32  InteractionPauseTimer;
     uint32  CorpseDelay;
     uint32  SpellList;
+    uint32  CharmedSpellList;
     uint32  StringID1;
     uint32  StringID2;
     char const* AIName;

@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14082_01_mangos_spell_template` bit(1) DEFAULT NULL
+  `required_14084_01_mangos_charmed_spell_list` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1590,6 +1590,7 @@ CREATE TABLE `creature_template` (
   `InteractionPauseTimer` INT(10) NOT NULL DEFAULT -1,
   `CorpseDecay` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'Time before corpse despawns',
   `SpellList` INT NOT NULL DEFAULT '0' COMMENT 'creature_spell_list_entry',
+  `CharmedSpellList` INT NOT NULL DEFAULT '0' COMMENT 'creature_spell_list_entry during charm',
   `StringId1` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   `StringId2` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   `AIName` char(64) NOT NULL DEFAULT '',
