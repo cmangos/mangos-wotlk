@@ -6,6 +6,7 @@
 #define DEF_SHATTERED_H
 
 #include "World/WorldStateDefines.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -121,7 +122,7 @@ static SpawnLocation aSoldiersLocs[] =
     {NPC_OFFICER_ALLIANCE,   NPC_OFFICER_HORDE,   138.241f, -84.198f, 1.907f, 0.055f}
 };
 
-class instance_shattered_halls : public ScriptedInstance
+class instance_shattered_halls : public ScriptedInstance, public TimerManager
 {
     public:
         instance_shattered_halls(Map* map);
@@ -158,6 +159,8 @@ class instance_shattered_halls : public ScriptedInstance
 
         void Update(const uint32 diff) override;
 
+        void AddInstanceEvent(uint32 id, std::function<bool(Unit const*)> check, std::function<void()> successEvent);
+
     private:
         void DoCastGroupDebuff(uint32 spellId);
         void FailGauntlet();
@@ -171,7 +174,6 @@ class instance_shattered_halls : public ScriptedInstance
         uint32 m_team;
         uint8 m_executionStage;
         uint8 m_prisonersLeft;
-        uint32 m_legionnaireIntroTimer;
 
         std::vector<uint32> m_gauntletPermanentGuids;
         GuidVector m_gauntletTemporaryGuids;
