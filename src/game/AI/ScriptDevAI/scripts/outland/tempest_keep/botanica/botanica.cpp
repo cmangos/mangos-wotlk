@@ -37,7 +37,7 @@ instance_botanica::instance_botanica(Map* map) : ScriptedInstance(map)
 
 void instance_botanica::AddInstanceEvent(uint32 id, std::function<bool(Unit const*)> check, std::function<void()> successEvent)
 {
-    AddCustomAction(id, false, [instance = this->instance, check = check, successEvent = successEvent]()
+    AddCustomAction(id, false, [instance = this->instance, check = check, successEvent = successEvent, id, this]()
     {
         for (const auto& data : instance->GetPlayers())
         {
@@ -47,6 +47,7 @@ void instance_botanica::AddInstanceEvent(uint32 id, std::function<bool(Unit cons
                 return;
             }
         }
+        ResetTimer(id, 1000);
     });
 }
 

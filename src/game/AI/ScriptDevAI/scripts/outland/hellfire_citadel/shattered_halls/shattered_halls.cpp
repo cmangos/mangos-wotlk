@@ -550,7 +550,7 @@ void instance_shattered_halls::Update(uint32 diff)
 
 void instance_shattered_halls::AddInstanceEvent(uint32 id, std::function<bool(Unit const*)> check, std::function<void()> successEvent)
 {
-    AddCustomAction(id, false, [instance = this->instance, check = check, successEvent = successEvent]()
+    AddCustomAction(id, false, [instance = this->instance, check = check, successEvent = successEvent, id, this]()
     {
         for (const auto& data : instance->GetPlayers())
         {
@@ -560,6 +560,7 @@ void instance_shattered_halls::AddInstanceEvent(uint32 id, std::function<bool(Un
                 return;
             }
         }
+        ResetTimer(id, 1000);
     });
 }
 
