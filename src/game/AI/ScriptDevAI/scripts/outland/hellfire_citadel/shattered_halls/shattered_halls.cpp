@@ -554,6 +554,9 @@ void instance_shattered_halls::AddInstanceEvent(uint32 id, std::function<bool(Un
     {
         for (const auto& data : instance->GetPlayers())
         {
+            if (data.getSource()->IsGameMaster())
+                continue;
+
             if (check(data.getSource()))
             {
                 successEvent();

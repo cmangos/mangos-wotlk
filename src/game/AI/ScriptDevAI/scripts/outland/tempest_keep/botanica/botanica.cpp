@@ -41,6 +41,9 @@ void instance_botanica::AddInstanceEvent(uint32 id, std::function<bool(Unit cons
     {
         for (const auto& data : instance->GetPlayers())
         {
+            if (data.getSource()->IsGameMaster())
+                continue;
+
             if (check(data.getSource()))
             {
                 successEvent();
