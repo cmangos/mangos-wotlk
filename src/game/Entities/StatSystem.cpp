@@ -919,7 +919,15 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     }
     else
     {
-        val2 = (GetStat(STAT_STRENGTH) - 10.0f) * 2.f;
+        switch (getClass())
+        {
+            case CLASS_ROGUE:
+                val2 = (GetStat(STAT_STRENGTH) - 10.0f) + GetStat(STAT_AGILITY);
+                break;
+            default:
+                val2 = (GetStat(STAT_STRENGTH) - 10.0f) * 2.f;
+                break;
+        }
     }
 
     SetModifierValue(unitMod, BASE_VALUE, val2);
