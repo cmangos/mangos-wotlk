@@ -907,7 +907,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     // initialize data array
     memset(&m_creatureClassLvlStats, 0, sizeof(m_creatureClassLvlStats));
 
-    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor";
+    std::string queryStr = "SELECT Class, Level, BaseMana, BaseMeleeAttackPower, BaseRangedAttackPower, BaseArmor, Strength, Agility, Stamina, Intellect, Spirit";
 
     std::string expData;
     for (int i = 0; i <= MAX_EXPANSION; ++i)
@@ -957,6 +957,11 @@ void ObjectMgr::LoadCreatureClassLvlStats()
         float   baseMeleeAttackPower       = fields[3].GetFloat();
         float   baseRangedAttackPower      = fields[4].GetFloat();
         uint32  baseArmor                  = fields[5].GetUInt32();
+        uint32  strength                   = fields[6].GetUInt32();
+        uint32  agility                    = fields[7].GetUInt32();
+        uint32  stamina                    = fields[8].GetUInt32();
+        uint32  intellect                  = fields[9].GetUInt32();
+        uint32  spirit                     = fields[10].GetUInt32();
 
         for (int i = 0; i <= MAX_EXPANSION; ++i)
         {
@@ -966,9 +971,23 @@ void ObjectMgr::LoadCreatureClassLvlStats()
             cCLS.BaseMeleeAttackPower       = baseMeleeAttackPower;
             cCLS.BaseRangedAttackPower      = baseRangedAttackPower;
             cCLS.BaseArmor                  = baseArmor;
+            cCLS.Strength                   = strength;
+            cCLS.Agility                    = agility;
+            cCLS.Stamina                    = stamina;
+            cCLS.Intellect                  = intellect;
+            cCLS.Spirit                     = spirit;
 
-            cCLS.BaseHealth = fields[6 + (i * 2)].GetUInt32();
-            cCLS.BaseDamage = fields[7 + (i * 2)].GetFloat();
+            cCLS.BaseHealth = fields[11 + (i * 2)].GetUInt32();
+            cCLS.BaseDamage = fields[11 + (i * 2)].GetFloat();
+
+            // should ensure old data does not need change (not wanting to recalculate to avoid losing data)
+            // if any mistake is made, it will be in these formulae that make asumptions about the new calculations
+            // AP, RAP, HP, Mana and armor should stay the same pre-change and post-change when using multipliers == 1
+            cCLS.BaseHealth -= std::min(cCLS.BaseHealth, std::max(0u, (uint32)Unit::GetHealthBonusFromStamina(cCLS.Stamina)));
+            cCLS.BaseMana -= std::min(cCLS.BaseMana, std::max(0u, (uint32)Unit::GetManaBonusFromIntellect(cCLS.Intellect)));
+            cCLS.BaseMeleeAttackPower -= std::min(cCLS.BaseMeleeAttackPower, std::max(0.f, float(cCLS.Strength >= 10 ? (cCLS.Strength - 10) * 2 : 0)));
+            cCLS.BaseRangedAttackPower -= std::min(cCLS.BaseRangedAttackPower, std::max(0.f, float(cCLS.Agility >= 10 ? (cCLS.Agility - 10) : 0)));
+            cCLS.BaseArmor -= std::min(cCLS.BaseArmor, std::max(0u, cCLS.Agility * 2));
         }
         ++storedRow;
     }

@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14084_01_mangos_charmed_spell_list` bit(1) DEFAULT NULL
+  `required_14085_01_mangos_creature_cls_stats` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1540,6 +1540,11 @@ CREATE TABLE `creature_template` (
   `DamageVariance` float NOT NULL DEFAULT '1',
   `ArmorMultiplier` float NOT NULL DEFAULT '1',
   `ExperienceMultiplier` float NOT NULL DEFAULT '1',
+  `StrengthMultiplier` float NOT NULL DEFAULT '1',
+  `AgilityMultiplier` float NOT NULL DEFAULT '1',
+  `StaminaMultiplier` float NOT NULL DEFAULT '1',
+  `IntellectMultiplier` float NOT NULL DEFAULT '1',
+  `SpiritMultiplier` float NOT NULL DEFAULT '1',
   `MinLevelHealth` int(10) unsigned NOT NULL DEFAULT '0',
   `MaxLevelHealth` int(10) unsigned NOT NULL DEFAULT '0',
   `MinLevelMana` int(10) unsigned NOT NULL DEFAULT '0',

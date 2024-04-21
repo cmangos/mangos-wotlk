@@ -3,5 +3,5 @@
  #define REVISION_DB_REALMD "required_14083_01_realmd_joindate_datetime"
  #define REVISION_DB_LOGS "required_14039_01_logs_anticheat"
  #define REVISION_DB_CHARACTERS "required_14061_01_characters_fishingSteps"
- #define REVISION_DB_MANGOS "required_14084_01_mangos_charmed_spell_list"
+ #define REVISION_DB_MANGOS "required_14085_01_mangos_creature_cls_stats"
 #endif // __REVISION_SQL_H__
