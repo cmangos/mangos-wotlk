@@ -12620,6 +12620,8 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     if (player)
     {
         // Initialize pet bar
+        if (uint32 charmedSpellList = possessed->GetCreatureInfo()->CharmedSpellList)
+            possessed->SetSpellList(charmedSpellList);
         charmInfo->InitPossessCreateSpells();
         player->PossessSpellInitialize();
 
@@ -12687,6 +12689,9 @@ bool Unit::TakePossessOf(Unit* possessed)
         charmInfo->SetCharmState("PossessedAI");
         possessedCreature->SetWalk(IsWalking(), true);
         getHostileRefManager().deleteReference(possessedCreature);
+
+        if (uint32 charmedSpellList = possessedCreature->GetCreatureInfo()->CharmedSpellList)
+            possessedCreature->SetSpellList(charmedSpellList);
     }
     else if (possessed->GetTypeId() == TYPEID_PLAYER)
     {
@@ -12796,7 +12801,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
 
     Position combatStartPosition;
 
-    if (charmed->GetTypeId() == TYPEID_PLAYER)
+    if (charmed->IsPlayer())
     {
         Player* charmedPlayer = static_cast<Player*>(charmed);
         if (charmerPlayer && charmerPlayer->IsInDuelWith(charmedPlayer))
@@ -12821,7 +12826,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
 
         charmedPlayer->SendForcedObjectUpdate();
     }
-    else if (charmed->GetTypeId() == TYPEID_UNIT)
+    else if (charmed->IsCreature())
     {
         Creature* charmedCreature = static_cast<Creature*>(charmed);
 
@@ -12837,6 +12842,9 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         getHostileRefManager().deleteReference(charmedCreature);
 
         charmedCreature->SetFactionTemporary(GetFaction(), TEMPFACTION_NONE);
+
+        if (uint32 charmedSpellList = charmedCreature->GetCreatureInfo()->CharmedSpellList)
+            charmedCreature->SetSpellList(charmedSpellList);
 
         if (isPossessCharm)
             charmInfo->InitPossessCreateSpells();
@@ -13020,7 +13028,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     // TODO: maybe should be done on HomeMovementGenerator::MovementExpires
     charmed->GetCombatManager().SetEvadeState(EVADE_NONE);
 
-    if (charmed->GetTypeId() == TYPEID_UNIT)
+    if (charmed->IsCreature())
     {
         // now we have to clean threat list to be able to restore normal creature behavior
         Creature* charmedCreature = static_cast<Creature*>(charmed);
@@ -13052,9 +13060,12 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             charmed->DeleteCharmInfo();
         }
 
+        if (charmedCreature->GetCreatureInfo()->CharmedSpellList)
+            charmedCreature->SetSpellList(charmedCreature->GetCreatureInfo()->SpellList);
+
         charmed->SetTarget(charmed->GetVictim());
     }
-    else if (charmed->GetTypeId() == TYPEID_PLAYER)
+    else if (charmed->IsPlayer())
     {
         charmed->AttackStop(true, true);
 

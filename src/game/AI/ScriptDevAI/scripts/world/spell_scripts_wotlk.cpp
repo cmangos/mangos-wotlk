@@ -99,6 +99,70 @@ struct BloodReserveEnchant : public AuraScript
     }
 };
 
+// 5782 - Fear, 339 - Entangling Roots, 122 - Frost Nova, 51514 - Hex
+struct AutoBreakProc : public AuraScript
+{
+    void OnAuraInit(Aura* aura) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_1)
+        {
+            Unit* caster = aura->GetCaster();
+            // fear - rank 3 - at 80 - 2600
+            // not impacted by gear
+            // not impacted by target level
+            // not impacted by rank
+            // asumption - depends on caster level
+            uint32 damageThreshold = 0;
+            auto stats = sObjectMgr.GetCreatureClassLvlStats(caster->GetLevel(), CLASS_WARRIOR, EXPANSION_WOTLK);
+
+            switch (aura->GetId()) // keeping them separate for future research
+            {
+                case 5782: // Fear
+                case 6213:
+                case 6215:
+                    damageThreshold = stats->BaseHealth / 4.75;
+                    break;
+                case 51514: // Hex
+                    damageThreshold = stats->BaseHealth / 4.75;
+                    break;
+                case 339: // Entangling Roots
+                case 1062:
+                case 5195:
+                case 5196:
+                case 9852:
+                case 9853:
+                case 26989:
+                case 53308:
+                    damageThreshold = stats->BaseHealth / 4.75;
+                    break;
+                case 122: // Frost nova
+                case 865:
+                case 6131:
+                case 10230:
+                case 27088:
+                case 42917:
+                    damageThreshold = stats->BaseHealth / 4.75;
+                    break;
+            }
+            if (Aura* script = aura->GetCaster()->GetOverrideScript(7801)) // Glyph of Fear, Glyph of Hex, Glyph of Entangling Roots, Glyph of Frost Nova
+                damageThreshold *= script->GetAmount() / 100;
+            aura->SetScriptValue(damageThreshold);
+        }
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_1)
+            return SPELL_AURA_PROC_OK;
+
+        if (int32(aura->GetScriptValue()) - procData.damage <= 0)
+            return SPELL_AURA_PROC_OK;
+
+        aura->SetScriptValue(aura->GetScriptValue() - procData.damage);
+        return SPELL_AURA_PROC_CANT_TRIGGER;
+    }
+};
+
 void AddSC_spell_scripts_wotlk()
 {
     RegisterSpellScript<Replenishment>("spell_replenishment");
@@ -106,4 +170,5 @@ void AddSC_spell_scripts_wotlk()
     RegisterSpellScript<Shadowmeld>("spell_shadowmeld");
     RegisterSpellScript<StoicismAbsorb>("spell_stoicism");
     RegisterSpellScript<BloodReserveEnchant>("spell_blood_reserve_enchant");
+    RegisterSpellScript<AutoBreakProc>("spell_auto_break_proc");
 }
