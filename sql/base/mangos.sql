@@ -1502,10 +1502,14 @@ CREATE TABLE `creature_template` (
   `DifficultyEntry1` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `DifficultyEntry2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `DifficultyEntry3` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ModelId1` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ModelId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ModelId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ModelId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId1` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `DisplayIdProbability1` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `DisplayIdProbability2` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `DisplayIdProbability3` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  `DisplayIdProbability4` SMALLINT UNSIGNED NOT NULL DEFAULT 0,
   `Faction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Scale` float NOT NULL DEFAULT '1',
   `Family` tinyint(4) NOT NULL DEFAULT '0',
@@ -1610,7 +1614,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,0,0,10045,0,0,0,35,1,0,8,7,1,0,0,4096,0,0,130,5242886,0,0,0,0,0.91,1.14286,1,20,0,0,0,0,8,0,-1,1,1,1,1,1,1,1,1,1,1,1,64,64,0,0,2,3,1,2,5,10,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
+(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,0,0,10045,0,0,0,100,0,0,0,35,1,0,8,7,1,0,0,4096,0,0,130,5242886,0,0,0,0,0.91,1.14286,1,20,0,0,0,0,8,0,-1,1,1,1,1,1,1,1,1,1,1,1,64,64,0,0,2,3,1,2,5,10,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
