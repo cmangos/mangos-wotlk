@@ -26,10 +26,6 @@ shared_sources = [
     'Auth/HMACSHA1.cpp',
     'Auth/BigNumber.cpp',
     'Common.cpp',
-    'Network/Socket.cpp',
-    'Network/PacketBuffer.cpp',
-    'Network/NetworkThread.cpp',
-    'Network/Listener.cpp',
     'Config/Config.cpp'
 ]
 
