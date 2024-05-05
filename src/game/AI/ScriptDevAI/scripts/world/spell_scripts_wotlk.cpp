@@ -15,6 +15,7 @@
  */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Globals/ObjectMgr.h"
 
 struct Replenishment : public SpellScript
 {

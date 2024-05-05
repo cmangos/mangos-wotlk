@@ -45,7 +45,7 @@ class instance_shadow_labyrinth : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
 
         void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureRespawn(Creature* creature);
+        void OnCreatureRespawn(Creature* creature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;

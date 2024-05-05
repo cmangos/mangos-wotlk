@@ -588,20 +588,20 @@ void ObjectMgr::LoadCreatureTemplates()
 
         for (int j = 0; j < MAX_CREATURE_MODEL; ++j)
         {
-            if (cInfo->ModelId[j])
+            if (cInfo->DisplayId[j])
             {
-                CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->ModelId[j]);
+                CreatureDisplayInfoEntry const* displayEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->DisplayId[j]);
                 if (!displayEntry)
                 {
-                    sLog.outErrorDb("Creature (Entry: %u) has nonexistent `ModelId%d` (%u), can crash client", cInfo->Entry, j + 1, cInfo->ModelId[j]);
-                    const_cast<CreatureInfo*>(cInfo)->ModelId[j] = 0;
+                    sLog.outErrorDb("Creature (Entry: %u) has nonexistent modelid_%d (%u), can crash client", cInfo->Entry, j + 1, cInfo->DisplayId[j]);
+                    const_cast<CreatureInfo*>(cInfo)->DisplayId[j] = 0;
                 }
                 else if (!displayScaleEntry)
                     displayScaleEntry = displayEntry;
 
-                CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->ModelId[j]);
+                CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayId[j]);
                 if (!minfo)
-                    sLog.outErrorDb("Creature (Entry: %u) are using `ModelId%d` (%u), but creature_model_info are missing for this model.", cInfo->Entry, j + 1, cInfo->ModelId[j]);
+                    sLog.outErrorDb("Creature (Entry: %u) are using modelid_%d (%u), but creature_model_info are missing for this model.", cInfo->Entry, j + 1, cInfo->DisplayId[j]);
             }
         }
 
@@ -980,12 +980,25 @@ void ObjectMgr::LoadCreatureClassLvlStats()
             cCLS.BaseHealth = fields[11 + (i * 2)].GetUInt32();
             cCLS.BaseDamage = fields[12 + (i * 2)].GetFloat();
 
+            uint32 apCoeffStr = 2;
+            uint32 apCoeffAgi = 0;
+            switch (creatureClass)
+            {
+                case CLASS_ROGUE:
+                    apCoeffStr = 1;
+                    apCoeffAgi = 1;
+                    break;
+                case CLASS_MAGE:
+                    apCoeffStr = 1;
+                    break;
+            }
+
             // should ensure old data does not need change (not wanting to recalculate to avoid losing data)
             // if any mistake is made, it will be in these formulae that make asumptions about the new calculations
             // AP, RAP, HP, Mana and armor should stay the same pre-change and post-change when using multipliers == 1
             cCLS.BaseHealth -= std::min(cCLS.BaseHealth, std::max(0u, (uint32)Unit::GetHealthBonusFromStamina(cCLS.Stamina)));
             cCLS.BaseMana -= std::min(cCLS.BaseMana, std::max(0u, (uint32)Unit::GetManaBonusFromIntellect(cCLS.Intellect)));
-            cCLS.BaseMeleeAttackPower -= std::min(cCLS.BaseMeleeAttackPower, std::max(0.f, float(cCLS.Strength >= 10 ? (cCLS.Strength - 10) * 2 : 0)));
+            cCLS.BaseMeleeAttackPower -= std::min(cCLS.BaseMeleeAttackPower, std::max(0.f, float(((std::max(cCLS.Strength, 10u) - 10) * apCoeffStr + (std::max(cCLS.Agility, 10u) - 10) * apCoeffAgi))));
             cCLS.BaseRangedAttackPower -= std::min(cCLS.BaseRangedAttackPower, std::max(0.f, float(cCLS.Agility >= 10 ? (cCLS.Agility - 10) : 0)));
             cCLS.BaseArmor -= std::min(cCLS.BaseArmor, std::max(0u, cCLS.Agility * 2));
         }
@@ -1004,7 +1017,7 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
 
     CreatureClassLvlStats const* cCLS = &m_creatureClassLvlStats[level][classToIndex[unitClass]][expansion];
 
-    if (cCLS->BaseHealth != 0 && cCLS->BaseDamage > 0.1f)
+    if ((cCLS->BaseHealth != 0 || cCLS->Stamina > 0) && cCLS->BaseDamage > 0.1f)
         return cCLS;
 
     return nullptr;

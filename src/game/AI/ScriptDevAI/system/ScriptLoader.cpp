@@ -470,6 +470,7 @@ extern void AddSC_boss_warbringer_omrogg();
 extern void AddSC_boss_warchief_kargath_bladefist();
 extern void AddSC_shattered_halls();
 extern void AddSC_instance_shattered_halls();
+extern void AddSC_instance_botanica();
 extern void AddSC_arcatraz();                               // TK, arcatraz
 extern void AddSC_boss_dalliah();
 extern void AddSC_boss_harbinger_skyriss();
@@ -972,6 +973,7 @@ void AddScripts()
     AddSC_boss_warchief_kargath_bladefist();
     AddSC_shattered_halls();
     AddSC_instance_shattered_halls();
+    AddSC_instance_botanica();
     AddSC_arcatraz();                                       // TK, arcatraz
     AddSC_boss_dalliah();
     AddSC_boss_harbinger_skyriss();

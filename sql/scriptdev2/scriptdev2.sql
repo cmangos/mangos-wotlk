@@ -1600,6 +1600,7 @@ UPDATE creature_template SET ScriptName='boss_laj' WHERE entry=17980;
 UPDATE creature_template SET ScriptName='boss_warp_splinter' WHERE entry=17977;
 UPDATE creature_template SET ScriptName='mob_warp_splinter_treant' WHERE entry=19949;
 UPDATE creature_template SET ScriptName='boss_thorngrin' WHERE entry IN(17978);
+UPDATE instance_template SET ScriptName='instance_botanica' WHERE map=553;
 
 /* THE ARCATRAZ */
 UPDATE instance_template SET ScriptName='instance_arcatraz' WHERE map=552;

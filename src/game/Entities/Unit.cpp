@@ -3156,7 +3156,8 @@ SpellMissInfo Unit::SpellHitResult(WorldObject* caster, Unit* pVictim, SpellEntr
 
     // All positive spells can`t miss
     // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
-    if (IsPositiveEffectMask(spellInfo, effectMask, caster, pVictim))
+    bool ignoreRestrictions = spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS) || spellInfo->HasAttribute(SPELL_ATTR_EX5_IGNORE_TARGET_REQUIREMENTS);
+    if (!ignoreRestrictions && IsPositiveEffectMask(spellInfo, effectMask, caster, pVictim))
     {
         if (pVictim->IsImmuneToSpell(spellInfo, reflected ? false : (caster == pVictim), effectMask, caster))
             return SPELL_MISS_IMMUNE;
@@ -7926,11 +7927,9 @@ void Unit::EnergizeBySpell(Unit* victim, SpellEntry const* spellInfo, uint32 dam
  */
 int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, SpellEffectIndex effectIndex, int32 total, int32 benefit, int32 ap_benefit,  DamageEffectType damagetype, bool donePart, float defCoeffMod)
 {
-    // Distribute Damage over multiple effects, reduce by AoE
-    float coeff = 1.0f;
-
-    // Not apply this to creature casted spells
-    if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
+    float coeff = 0.f; // no coefficient by default
+    // does not apply to creatures
+    if (IsCreature() && !IsPlayerControlled())
         coeff = 1.0f;
     // Check for table values
     if (spellProto->effectBonusCoefficient[effectIndex] > 0 || spellProto->effectBonusCoefficientFromAP[effectIndex] > 0)
@@ -7951,9 +7950,6 @@ int32 Unit::SpellBonusWithCoeffs(SpellEntry const* spellProto, SpellEffectIndex 
             total += int32(ap_bonus * (GetTotalAttackPowerValue(IsSpellRequiresRangedAP(spellProto) ? RANGED_ATTACK : BASE_ATTACK) + ap_benefit));
         }
     }
-    // Default calculation
-    else if (benefit)
-        coeff = CalculateDefaultCoefficient(spellProto, damagetype) * defCoeffMod;
 
     if (benefit)
     {
