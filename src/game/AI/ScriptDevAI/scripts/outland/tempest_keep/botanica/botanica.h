@@ -7,6 +7,13 @@
 
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
+const std::string FIRST_BLOODWARDER_STRING  = "BLOODWARDER_PROTECTOR_GROUP_01";
+const std::string SECOND_BLOODWARDER_STRING = "BLOODWARDER_PROTECTOR_GROUP_02";
+const std::string THIRD_BLOODWARDER_STRING  = "BLOODWARDER_PROTECTOR_GROUP_03";
+const std::string FOURTH_BLOODWARDER_STRING = "BLOODWARDER_PROTECTOR_GROUP_04";
+const std::string FIFTH_BLOODWARDER_STRING = "BLOODWARDER_PROTECTOR_GROUP_05";
+const std::string SIX_BLOODWARDER_STRING = "BLOODWARDER_PROTECTOR_GROUP_06";
+
 class instance_botanica : public ScriptedInstance, public TimerManager
 {
     public:
