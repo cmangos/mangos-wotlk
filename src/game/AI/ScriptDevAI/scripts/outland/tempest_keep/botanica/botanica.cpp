@@ -45,7 +45,7 @@ instance_botanica::instance_botanica(Map* map) : ScriptedInstance(map)
             for (Creature* creature : *m_bloodwarderGroup)
             {
                 if (!creature->IsAlive())
-                    return;
+                    continue;
 
                 creature->GetMotionMaster()->MoveWaypoint();
             }
