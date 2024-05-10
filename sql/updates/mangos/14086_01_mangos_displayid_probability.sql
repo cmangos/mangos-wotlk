@@ -1,3 +1,5 @@
+ALTER TABLE db_version CHANGE COLUMN required_14085_01_mangos_creature_cls_stats required_14086_01_mangos_displayid_probability bit;
+
 ALTER TABLE `creature_template` CHANGE `ModelId1` `DisplayId1` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0;
 ALTER TABLE `creature_template` CHANGE `ModelId2` `DisplayId2` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0;
 ALTER TABLE `creature_template` CHANGE `ModelId3` `DisplayId3` MEDIUMINT UNSIGNED NOT NULL DEFAULT 0;
