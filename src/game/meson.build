@@ -500,6 +500,7 @@ scriptdev_sources = [
     'AI/ScriptDevAI/scripts/outland/tempest_keep/botanica/boss_warp_splinter.cpp',
     'AI/ScriptDevAI/scripts/outland/tempest_keep/botanica/boss_high_botanist_freywinn.cpp',
     'AI/ScriptDevAI/scripts/outland/tempest_keep/botanica/boss_thorngrin_the_tender.cpp',
+    'AI/ScriptDevAI/scripts/outland/tempest_keep/botanica/botanica.cpp',
     'AI/ScriptDevAI/scripts/outland/tempest_keep/arcatraz/boss_harbinger_skyriss.cpp',
     'AI/ScriptDevAI/scripts/outland/tempest_keep/arcatraz/arcatrazScripts.cpp',
     'AI/ScriptDevAI/scripts/outland/tempest_keep/arcatraz/boss_soccothrates.cpp',
