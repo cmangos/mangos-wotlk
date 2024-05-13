@@ -23,6 +23,7 @@ enum BotanicaActions
     BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_02,
     BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_03,
     BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_04,
+    BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_05,
     BOTANICA_ACTION_MAX,
 };
 
@@ -36,6 +37,8 @@ instance_botanica::instance_botanica(Map* map) : ScriptedInstance(map)
     auto posCheckTrigger03 = [](Unit const* unit) -> bool { return unit->GetPositionY() > 219.038f; };
     // trigger 4 X: -8.046078 Y: 288.01355 Z: 0.2993633
     auto posCheckTrigger04 = [](Unit const* unit) -> bool { return unit->GetPositionX() > -8.046f && unit->GetPositionY() > 288.013f; };
+    // trigger 5 X: -157.25734, Y: 498.22766,  Z:-17.824787, 
+    auto posCheckTrigger05 = [](Unit const* unit) -> bool { return unit->GetPositionX() < -157.257f && unit->GetPositionY() < 498.22f; };
 
     auto successEvent01 = [&]()
     {
@@ -96,10 +99,26 @@ instance_botanica::instance_botanica(Map* map) : ScriptedInstance(map)
             }
         }
     };
+
+    auto successEvent05 = [&]()
+        {
+            auto m_bloodwarderGroup = instance->GetCreatures(SEVEN_BLOODWARDER_STRING);
+            if (m_bloodwarderGroup != nullptr)
+            {
+                for (Creature* creature : *m_bloodwarderGroup)
+                {
+                    if (!creature->IsAlive())
+                        continue;
+
+                    creature->GetMotionMaster()->MoveWaypoint();
+                }
+            }
+        };
     AddInstanceEvent(BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_01, posCheckTrigger01, successEvent01);
     AddInstanceEvent(BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_02, posCheckTrigger02, successEvent02);
     AddInstanceEvent(BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_03, posCheckTrigger03, successEvent03);
     AddInstanceEvent(BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_04, posCheckTrigger04, successEvent04);
+    AddInstanceEvent(BOTANICA_TRIGGER_BLOODWARDER_PROTECTOR_05, posCheckTrigger05, successEvent05);
 }
 
 void instance_botanica::AddInstanceEvent(uint32 id, std::function<bool(Unit const*)> check, std::function<void()> successEvent)
