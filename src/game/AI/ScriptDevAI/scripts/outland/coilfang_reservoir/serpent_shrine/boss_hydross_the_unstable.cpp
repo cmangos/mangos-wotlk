@@ -59,9 +59,9 @@ enum
     MAX_HYDROSS_ADDS            = 4,
     MAX_HYDROSS_MARKS           = 6,
 
-    SPELL_LIST_CLEAN_INITIAL    = 1,
-    SPELL_LIST_CORRUPT          = 2,
-    SPELL_LIST_CLEAN_REPEAT     = 3, // does not incur berserk cooldown
+    SPELL_LIST_CLEAN_INITIAL    = 2121601,
+    SPELL_LIST_CORRUPT          = 2121602,
+    SPELL_LIST_CLEAN_REPEAT     = 2121603, // does not incur berserk cooldown
 };
 
 static const uint32 aMarkHydross[MAX_HYDROSS_MARKS] = {38215, 38216, 38217, 38218, 38231, 40584};
