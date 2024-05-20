@@ -53,6 +53,8 @@ void ScriptedAI::EnterCombat(Unit* enemy)
 void ScriptedAI::EnterEvadeMode()
 {
     CreatureAI::EnterEvadeMode();
+
+    ResetTimersOnEvade();
     Reset();
 }
 
