@@ -107,7 +107,7 @@ struct boss_terokkAI : public CombatAI
             Creature* target = GetClosestCreatureWithEntry(m_creature, NPC_SKYGUARD_TARGET, 70.f);
             if (Creature* ace = m_creature->GetMap()->GetCreature(m_aces[1]))
                 ace->AI()->DoCastSpellIfCan(target, SPELL_ANCIENT_FLAMES);
-        });
+        }, TIMER_COMBAT_COMBAT);
         AddTimerlessCombatAction(TEROKK_COMBAT_ACTION_SPAWN_ACE, true);
         AddTimerlessCombatAction(TEROKK_COMBAT_ACTION_PHASE_2, true);
         AddCombatAction(TEROKK_COMBAT_ACTION_DIVINE_SHIELD, GetInitialActionTimer(TEROKK_COMBAT_ACTION_DIVINE_SHIELD));

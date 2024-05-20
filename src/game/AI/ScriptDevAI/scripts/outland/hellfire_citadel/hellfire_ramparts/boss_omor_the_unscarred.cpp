@@ -68,7 +68,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
         AddCombatAction(OMOR_TREACHERY, 12300, 23300);
         AddCombatAction(OMOR_ORBITAL_STRIKE, 25000u);
         AddCombatAction(OMOR_SHADOW_BOLT, 0u);
-        AddCustomAction(OMOR_PULL_BACK, true, [&]() {HandlePullBack(); });
+        AddCustomAction(OMOR_PULL_BACK, true, [&]() { HandlePullBack(); }, TIMER_COMBAT_COMBAT);
         SetCombatMovement(false);
         SetRangedMode(true, 100.f, TYPE_PROXIMITY);
         AddOnKillText(SAY_KILL_1, SAY_KILL_2);

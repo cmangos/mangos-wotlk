@@ -134,7 +134,7 @@ struct boss_felblood_kaelthasAI : public CombatAI
         AddCustomAction(KAEL_GRAVITY_LAPSE_SCRIPT, true, [&]()
         {
             HandleGravityLapse();
-        });
+        }, TIMER_COMBAT_COMBAT);
         AddCustomAction(KAEL_OUTRO, true, [&]()
         {
             HandleOutro();

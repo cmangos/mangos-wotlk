@@ -58,8 +58,8 @@ struct boss_murmurAI : public CombatAI
     boss_murmurAI(Creature* creature) : CombatAI(creature, MURMUR_ACTION_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddCustomAction(MURMUR_OOC_RP_ATTACK, true, [&]() { HandleOocAttack(); });
-        AddCustomAction(MURMUR_OOC_CASTER_ATTACK, true, [&]() { HandleOocCasterAttack(); });
+        AddCustomAction(MURMUR_OOC_RP_ATTACK, true, [&]() { HandleOocAttack(); }, TIMER_COMBAT_OOC);
+        AddCustomAction(MURMUR_OOC_CASTER_ATTACK, true, [&]() { HandleOocCasterAttack(); }, TIMER_COMBAT_OOC);
     }
 
     ScriptedInstance* m_instance;

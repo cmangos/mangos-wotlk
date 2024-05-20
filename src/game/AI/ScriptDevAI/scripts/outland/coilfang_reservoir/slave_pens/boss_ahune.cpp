@@ -101,7 +101,7 @@ struct boss_ahuneAI : public CombatAI
     boss_ahuneAI(Creature* creature) : CombatAI(creature, AHUNE_ACTION_MAX)
     {
         AddCustomAction(AHUNE_ATTACK, 3000u, [&]() { HandleAttackDelay(); });
-        AddCustomAction(AHUNE_EMERGE, true, [&]() { HandleEmerge(); });
+        AddCustomAction(AHUNE_EMERGE, true, [&]() { HandleEmerge(); }, TIMER_COMBAT_COMBAT);
         AddCombatAction(AHUNE_SUBMERGE, 90000u);
         AddCombatAction(AHUNE_COLD_SLAP, 2000u);
         AddCombatAction(AHUNE_HAILSTONE, 1000u);

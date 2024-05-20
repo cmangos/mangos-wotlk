@@ -99,7 +99,7 @@ struct boss_warp_splinterAI : public CombatAI
 
     void EnterEvadeMode() override
     {
-        ScriptedAI::EnterEvadeMode();
+        CombatAI::EnterEvadeMode();
         DespawnGuids(m_saplings);
     }
 

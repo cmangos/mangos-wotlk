@@ -119,6 +119,8 @@ struct boss_soccothratesAI : public CombatAI, private DialogueHelper
 
         if (m_instance)
             m_instance->SetData(TYPE_SOCCOTHRATES, IN_PROGRESS);
+
+        m_creature->SetCombatStartPosition(Position(aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]));
     }
 
     void MoveInLineOfSight(Unit* who) override
@@ -142,20 +144,10 @@ struct boss_soccothratesAI : public CombatAI, private DialogueHelper
 
     void EnterEvadeMode() override
     {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        // should evade to the attack position
-        if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]);
+        CombatAI::EnterEvadeMode();
 
         if (m_instance)
             m_instance->SetData(TYPE_SOCCOTHRATES, FAIL);
-
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
     }
 
     void MovementInform(uint32 moveType, uint32 pointId) override

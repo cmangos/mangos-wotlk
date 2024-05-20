@@ -59,6 +59,7 @@ void ScriptedAI::EnterEvadeMode()
 /// This function calls Reset() to reset variables as expected
 void ScriptedAI::JustRespawned()
 {
+    ResetAllTimers();
     Reset();
 }
 

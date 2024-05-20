@@ -147,7 +147,7 @@ struct boss_teron_gorefiendAI : public CombatAI
             m_instance->SetData(TYPE_GOREFIEND, FAIL);
         DespawnSummons();
         DoCastSpellIfCan(nullptr, SPELL_DESTROY_ALL_SPIRITS);
-        ScriptedAI::EnterEvadeMode();
+        CombatAI::EnterEvadeMode();
     }
 
     void Aggro(Unit* /*pWho*/) override

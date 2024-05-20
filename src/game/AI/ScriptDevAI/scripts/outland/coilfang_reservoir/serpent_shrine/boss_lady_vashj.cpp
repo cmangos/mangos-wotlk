@@ -158,12 +158,12 @@ struct boss_lady_vashjAI : public CombatAI
         AddCombatAction(VASHJ_ACTION_SHOOT, 2000u);
         AddCombatAction(VASHJ_ACTION_FORKED_LIGHTNING, true);
         AddTimerlessCombatAction(VASHJ_ACTION_MELEE_MODE, true);
-        AddCustomAction(VASHJ_INTRO, true, [&]() { HandleIntroText(); });
-        AddCustomAction(VASHJ_COILFANG_ELITE, true, [&]() { HandleCoilfangElite(); });
-        AddCustomAction(VASHJ_COILFANG_STRIDER, true, [&]() { HandleCoilfangStrider(); });
-        AddCustomAction(VASHJ_SPOREBAT, true, [&]() { HandleSporebat(); });
-        AddCustomAction(VASHJ_ENCHANTED_ELEMENTAL, true, [&]() { HandleEnchantedElemental(); });
-        AddCustomAction(VASHJ_TAINTED_ELEMENTAL, true, [&]() { HandleTaintedElemental(); });
+        AddCustomAction(VASHJ_INTRO, true, [&]() { HandleIntroText(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(VASHJ_COILFANG_ELITE, true, [&]() { HandleCoilfangElite(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(VASHJ_COILFANG_STRIDER, true, [&]() { HandleCoilfangStrider(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(VASHJ_SPOREBAT, true, [&]() { HandleSporebat(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(VASHJ_ENCHANTED_ELEMENTAL, true, [&]() { HandleEnchantedElemental(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(VASHJ_TAINTED_ELEMENTAL, true, [&]() { HandleTaintedElemental(); }, TIMER_COMBAT_COMBAT);
         SetRangedMode(true, 40.f, TYPE_PROXIMITY);
         AddMainSpell(SPELL_SHOOT);
         AddDistanceSpell(SPELL_ENTANGLE);

@@ -79,6 +79,8 @@ struct boss_dalliahAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_DALLIAH, IN_PROGRESS);
+
+        m_creature->SetCombatStartPosition(Position(aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]));
     }
 
     void JustDied(Unit* /*who*/) override
@@ -91,20 +93,10 @@ struct boss_dalliahAI : public CombatAI
 
     void EnterEvadeMode() override
     {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        // should evade to the attack position
-        if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]);
+        CombatAI::EnterEvadeMode();
 
         if (m_instance)
             m_instance->SetData(TYPE_DALLIAH, FAIL);
-
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
     }
 
     void MovementInform(uint32 moveType, uint32 pointId) override

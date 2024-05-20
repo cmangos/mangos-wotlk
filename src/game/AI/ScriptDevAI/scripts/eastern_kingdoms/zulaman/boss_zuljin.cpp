@@ -158,12 +158,12 @@ struct boss_zuljinAI : public CombatAI
         AddCustomAction(ZULJIN_SPIRIT_ACQUIRED, true, [&]()
         {
             SpiritAcquired();
-        });
+        }, TIMER_COMBAT_COMBAT);
         AddCustomAction(ZULJIN_FIRE_WALL_DELAY, true, [&]()
         {
             if (m_creature->IsInCombat() && !m_creature->GetCombatManager().IsEvadingHome())
                 m_instance->DoUseDoorOrButton(GO_FIRE_DOOR);
-        });
+        }, TIMER_COMBAT_COMBAT);
         m_creature->SetWalk(true);
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float /*x*/, float y, float /*z*/)
             {
@@ -220,8 +220,6 @@ struct boss_zuljinAI : public CombatAI
         for (const auto& aZuljinPhase : aZuljinPhases)
             if (Creature* spirit = m_instance->GetSingleCreatureFromStorage(aZuljinPhase.spiritId))
                 spirit->RemoveAurasDueToSpell(SPELL_SPIRIT_DRAINED);
-
-        m_creature->SetHealthPercent(100.f); // TODO: Remove this hack once evade issues are resolved
 
         CombatAI::EnterEvadeMode();
     }

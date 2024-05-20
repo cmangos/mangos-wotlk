@@ -125,7 +125,7 @@ struct boss_alythessAI : public CombatAI
         AddCombatAction(ALYTHESS_CONFLAGRATION, 15000u);
         AddCombatAction(ALYTHESS_BLAZE, 1000u);
         AddCombatAction(ALYTHESS_FLAME_SEAR, 10000u);
-        AddCustomAction(ALYTHESS_DELAY, true, [&]() { HandleEmpowerDelay(); });
+        AddCustomAction(ALYTHESS_DELAY, true, [&]() { HandleEmpowerDelay(); }, TIMER_COMBAT_COMBAT);
         AddOnKillText(SAY_ALYTHESS_KILL_1, SAY_ALYTHESS_KILL_2);
     }
 
@@ -311,7 +311,7 @@ struct boss_sacrolashAI : public CombatAI
         AddCombatAction(SACROLASH_CONFOUNDING_BLOW, 25000, 27000);
         AddCombatAction(SACROLASH_SHADOW_BLADES, 10000, 11000);
         AddCombatAction(SACROLASH_SUMMON_SHADOW_IMAGE, 10000u);
-        AddCustomAction(ALYTHESS_DELAY, true, [&]() { HandleEmpowerDelay(); });
+        AddCustomAction(ALYTHESS_DELAY, true, [&]() { HandleEmpowerDelay(); }, TIMER_COMBAT_COMBAT);
         AddOnKillText(SAY_SACROLASH_KILL_1, SAY_SACROLASH_KILL_2);
         m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float) -> bool
         {

@@ -82,6 +82,7 @@ void hyjalAI::Reset()
 
 void hyjalAI::EnterEvadeMode()
 {
+    ResetTimersOnEvade();
     m_creature->RemoveAllAurasOnEvade();
     m_creature->CombatStop(true);
 

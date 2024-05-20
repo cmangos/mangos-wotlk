@@ -162,11 +162,6 @@ struct npc_shivan_assassinAI : public CombatAI
             m_instance->SetData(TYPE_SHARTUUL, EVENT_FAIL);
     }
 
-    void EnterEvadeMode() override
-    {
-        CombatAI::EnterEvadeMode();
-    }
-
     void JustReachedHome() override
     {
         if (m_instance)

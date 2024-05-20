@@ -116,8 +116,8 @@ struct boss_muruAI : public CombatAI
         AddTimerlessCombatAction(MURU_TRANSITION, false);
         AddCombatAction(MURU_DARK_FIENDS, true);
         AddCombatAction(MURU_HUMANOIDS, 15000u);
-        AddCustomAction(MURU_SPAWN_ENTROPIUS, true, [&]() { HandleSpawnEntropius(); });
-        AddCustomAction(MURU_ATTACK_SPAWNS, true, [&]() { HandleSpawnAttack(); });
+        AddCustomAction(MURU_SPAWN_ENTROPIUS, true, [&]() { HandleSpawnEntropius(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(MURU_ATTACK_SPAWNS, true, [&]() { HandleSpawnAttack(); }, TIMER_COMBAT_COMBAT);
         SetDeathPrevention(true);
     }
 

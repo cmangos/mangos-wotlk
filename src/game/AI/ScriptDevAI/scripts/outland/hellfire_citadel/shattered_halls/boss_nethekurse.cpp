@@ -85,9 +85,9 @@ struct boss_grand_warlock_nethekurseAI : public CombatAI
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
         m_introOnce(false), m_peonRPCD(false)
     {
-        AddCustomAction(NETHEKURSE_TAUNT_PEONS, true, [&]() { DoTauntPeons(); });
-        AddCustomAction(NETHEKURSE_START_FIGHT, true, [&]() { DoStartFight(); });
-        AddCustomAction(NETHEKURSE_PEON_RP_CD, true, [&]() { DoPeonCD(); });
+        AddCustomAction(NETHEKURSE_TAUNT_PEONS, true, [&]() { DoTauntPeons(); }, TIMER_COMBAT_OOC);
+        AddCustomAction(NETHEKURSE_START_FIGHT, true, [&]() { DoStartFight(); }, TIMER_COMBAT_OOC);
+        AddCustomAction(NETHEKURSE_PEON_RP_CD, true, [&]() { DoPeonCD(); }, TIMER_COMBAT_OOC);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2, SAY_SLAY_3, SAY_SLAY_4);
         SetReactState(REACT_DEFENSIVE);
     }
