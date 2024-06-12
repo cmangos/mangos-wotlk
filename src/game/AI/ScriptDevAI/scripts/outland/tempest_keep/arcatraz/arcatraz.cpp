@@ -90,28 +90,17 @@ static const DialogueEntry aArcatrazDialogue[] =
 };
 
 instance_arcatraz::instance_arcatraz(Map* map) : ScriptedInstance(map), DialogueHelper(aArcatrazDialogue),
-    m_resetDelayTimer(0),
-    m_entranceEventTimer(0),
-    m_killedWarders(0),
-    m_killedDefenders(0)
+    m_resetDelayTimer(0), m_WardenGroup(false)
 {
     Initialize();
 }
 
 void instance_arcatraz::Initialize()
 {
+    instance->GetVariableManager().SetVariable(WORLD_STATE_PROTEAN_HORROR, 1);
+    instance->GetVariableManager().SetVariable(WORLD_STATE_PROTEAN_NIGHTMARE, 1);
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
     InitializeDialogueHelper(this);
-}
-
-void instance_arcatraz::OnPlayerEnter(Player* /*player*/)
-{
-    // Check encounter states
-    if (GetData(TYPE_ENTRANCE) == DONE || GetData(TYPE_ENTRANCE) == IN_PROGRESS)
-        return;
-
-    SetData(TYPE_ENTRANCE, IN_PROGRESS);
-    m_entranceEventTimer = 1000;
 }
 
 void instance_arcatraz::OnObjectCreate(GameObject* go)
@@ -171,12 +160,52 @@ void instance_arcatraz::OnCreatureCreate(Creature* creature)
             break;
     }
 }
+void instance_arcatraz::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_PROTEAN_NIGHTMARE:
+        case NPC_PROTEAN_HORROR:
+            if (creature->HasStringId(STRING_ID_ENTRANCE_GROUP))
+            {
+                creature->SetNoXP(true);
+                creature->SetNoLoot(true);
+                creature->SetNoReputation(true);
+            }
+        break;
+    }
+}
+
+// Intro Handling
+// When both Arcatraz Warder spawn_groups are dead, Protean Horror stop spawning
+// When Arcatraz Defender spawn_group is dead, Protean Nightmare stop spawning
+void instance_arcatraz::OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* /*pCreature*/)
+{
+    if (pGroup->GetGroupId() == SPAWN_GROUP_WARDEN_01)
+    {
+        if (m_WardenGroup)
+            instance->GetVariableManager().SetVariable(WORLD_STATE_PROTEAN_HORROR, 0);
+        else
+            m_WardenGroup = true;
+    }
+
+    if (pGroup->GetGroupId() == SPAWN_GROUP_WARDEN_02)
+    {
+        if (m_WardenGroup)
+    
+            instance->GetVariableManager().SetVariable(WORLD_STATE_PROTEAN_HORROR, 0);
+        else
+            m_WardenGroup = true;
+    }
+
+    if (pGroup->GetGroupId() == SPAWN_GROUP_DEFENDER)
+        instance->GetVariableManager().SetVariable(WORLD_STATE_PROTEAN_NIGHTMARE, 0);
+}
 
 void instance_arcatraz::SetData(uint32 type, uint32 data)
 {
     switch (type)
     {
-        case TYPE_ENTRANCE:
         case TYPE_ZEREKETH:
             m_auiEncounter[type] = data;
             break;
@@ -429,31 +458,6 @@ void instance_arcatraz::JustDidDialogueStep(int32 dialogueEntry)
     }
 }
 
-void instance_arcatraz::OnCreatureDeath(Creature* creature)
-{
-    switch (creature->GetEntry())
-    {
-        case NPC_ARCATRAZ_WARDER:
-            ++m_killedWarders;
-            break;
-        case NPC_ARCATRAZ_DEFENDER:
-            ++m_killedDefenders;
-            break;
-        case NPC_PROTEAN_NIGHTMARE:
-        case NPC_PROTEAN_HORROR:
-            // intro Protean spawn corpses should despawn after about 5 seconds
-            creature->ForcedDespawn(5000);
-            break;
-    }
-
-    // Stop the intro spawns when the wardens are killed
-    if (m_killedDefenders == MAX_DEFENDERS && m_killedWarders == MAX_WARDERS)
-    {
-        SetData(TYPE_ENTRANCE, DONE);
-        m_entranceEventTimer = 0;
-    }
-}
-
 void instance_arcatraz::Update(uint32 diff)
 {
     DialogueUpdate(diff);
@@ -468,35 +472,6 @@ void instance_arcatraz::Update(uint32 diff)
         }
         else
             m_resetDelayTimer -= diff;
-    }
-
-    if (m_entranceEventTimer)
-    {
-        if (m_entranceEventTimer <= diff)
-        {
-            Player* player = GetPlayerInMap();
-            if (!player)
-                return;
-
-            uint32 entry = urand(0, 10) ? NPC_PROTEAN_HORROR : NPC_PROTEAN_NIGHTMARE;
-
-            // Protean Horrors stop spawning once 4 warders are killed
-            // Protean Nightmares stop spawning once 3 defenders are killed
-            if ((entry == NPC_PROTEAN_HORROR && m_killedWarders == MAX_WARDERS) || (entry == NPC_PROTEAN_NIGHTMARE && m_killedDefenders == MAX_DEFENDERS))
-            {
-                m_entranceEventTimer = urand(0, 10) ? urand(2000, 3500) : urand(5000, 7000);
-                return;
-            }
-
-            // Summon and move the intro creatures into combat positions
-            if (Creature* pTemp = player->SummonCreature(entry, aEntranceSpawnLoc[0], aEntranceSpawnLoc[1], aEntranceSpawnLoc[2], aEntranceSpawnLoc[3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000))
-            {
-                pTemp->GetMotionMaster()->MoveWaypoint(1);
-            }
-            m_entranceEventTimer = urand(0, 10) ? urand(2000, 3500) : urand(5000, 7000);
-        }
-        else
-            m_entranceEventTimer -= diff;
     }
 }
 

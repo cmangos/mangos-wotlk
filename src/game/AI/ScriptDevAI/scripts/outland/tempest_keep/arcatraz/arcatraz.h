@@ -5,13 +5,12 @@
 #ifndef DEF_ARCATRAZ_H
 #define DEF_ARCATRAZ_H
 
+#include "World/WorldStateDefines.h"
+
 enum
 {
     MAX_ENCOUNTER                   = 10,
-    MAX_WARDERS                     = 4,
-    MAX_DEFENDERS                   = 3,
 
-    TYPE_ENTRANCE                   = 0,
     TYPE_ZEREKETH                   = 1,
     TYPE_DALLIAH                    = 2,
     TYPE_SOCCOTHRATES               = 3,
@@ -22,6 +21,10 @@ enum
     TYPE_WARDEN_4                   = 8,                    // Handled with ACID (20910 - Twilight Drakonaar, 20911 - Blackwing Drakonaar)
     TYPE_WARDEN_5                   = 9,
 
+    // intro event related
+    NPC_PROTEAN_NIGHTMARE           = 20864,
+    NPC_PROTEAN_HORROR              = 20865,
+
     NPC_DALLIAH                     = 20885,
     NPC_SOCCOTHRATES                = 20886,
     NPC_WRATH_SCRYER_FELFIRE        = 20978,
@@ -31,12 +34,6 @@ enum
     NPC_PRISON_DELTA_POD            = 21438,
     NPC_PRISON_GAMMA_POD            = 21439,
     NPC_PRISON_BOSS_POD             = 21440,
-
-    // intro event related
-    NPC_PROTEAN_NIGHTMARE           = 20864,
-    NPC_PROTEAN_HORROR              = 20865,
-    NPC_ARCATRAZ_WARDER             = 20859,
-    NPC_ARCATRAZ_DEFENDER           = 20857,
 
     // Harbinger Skyriss event related (trash mobs are scripted in ACID)
     NPC_BLAZING_TRICKSTER           = 20905,                // phase 1
@@ -58,7 +55,14 @@ enum
     GO_POD_OMEGA                    = 183965,               // Pod fifth boss wave
 
     SPELL_TARGET_OMEGA              = 36852,                // Visual spell used by Mellichar
+
+    // Intro related
+    SPAWN_GROUP_WARDEN_01           = 5520001,              // Both Warden groups have to be dead to prevent Protean Horror to respawn
+    SPAWN_GROUP_WARDEN_02           = 5520002,              // 
+    SPAWN_GROUP_DEFENDER            = 5520003,              // SpawnGroup that handles Protean Nightmare respawn
 };
+
+const std::string STRING_ID_ENTRANCE_GROUP = "ARCATRAZ_ENTRANCE_GROUP";     // StringID assigned to entrance group to prevent rep/xp farm abuse
 
 struct SpawnLocation
 {
@@ -77,7 +81,6 @@ static const SpawnLocation aSummonPosition[5] =
 static const float aDalliahStartPos[4] = {118.6038f, 96.84682f, 22.44115f, 1.012f};
 static const float aSoccotharesStartPos[4] = {122.1035f, 192.7203f, 22.44115f, 5.235f};
 
-static const float aEntranceSpawnLoc[4] = {173.471f, -0.138f, -10.101f, 3.123f};
 
 class instance_arcatraz : public ScriptedInstance, private DialogueHelper
 {
@@ -86,10 +89,10 @@ class instance_arcatraz : public ScriptedInstance, private DialogueHelper
 
         void Initialize() override;
 
-        void OnPlayerEnter(Player* player) override;
         void OnObjectCreate(GameObject* go) override;
         void OnCreatureCreate(Creature* creature) override;
-        void OnCreatureDeath(Creature* creature) override;
+        void OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 type) const override;
@@ -106,9 +109,8 @@ class instance_arcatraz : public ScriptedInstance, private DialogueHelper
         std::string m_strInstData;
 
         uint32 m_resetDelayTimer;
-        uint32 m_entranceEventTimer;
-        uint8 m_killedWarders;
-        uint8 m_killedDefenders;
+
+        bool m_WardenGroup;
 
         GuidVector m_skyrissEventMobsGuids;
 };
