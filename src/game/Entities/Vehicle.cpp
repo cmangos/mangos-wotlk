@@ -682,6 +682,8 @@ void VehicleInfo::RespawnAccessories(int32 seatIndex)
     {
         if (seatIndex != -1 && seatIndex != itr->seatId)
             continue;
+        if (m_vehicleSeats.find(itr->seatId) == m_vehicleSeats.end())
+            continue;
         Position pos = m_owner->GetPosition();
         pos.o *= 2;
         SummonPassenger(itr->passengerEntry, pos, itr->seatId);
