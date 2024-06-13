@@ -32,7 +32,6 @@
 #include "Entities/Vehicle.h"
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
-#include "Log.h"
 
 /* **************************************** TransportBase ****************************************/
 
