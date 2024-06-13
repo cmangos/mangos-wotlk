@@ -54,6 +54,7 @@ class BossAI : public CombatAI
             for (auto& id : m_entranceObjects)
                 instance->DoUseOpenableObject(id, open);
         }
+
         void OpenExits()
         {
             ScriptedInstance* instance = dynamic_cast<ScriptedInstance*>(m_creature->GetInstanceData());
