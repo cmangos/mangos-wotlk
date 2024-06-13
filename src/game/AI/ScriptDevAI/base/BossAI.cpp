@@ -99,7 +99,6 @@ void BossAI::EnterEvadeMode()
     }
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, FAIL);
-    OpenEntrances();
     if (m_respawnDelay == -1)
     {
         CombatAI::EnterEvadeMode();

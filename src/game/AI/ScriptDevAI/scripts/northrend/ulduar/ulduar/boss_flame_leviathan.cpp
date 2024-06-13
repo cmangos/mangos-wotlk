@@ -365,7 +365,13 @@ struct boss_flame_leviathanAI : public BossAI
                 orbital->RemoveAllAuras();
         }
         BossAI::EnterEvadeMode();
-        m_creature->ForcedDespawn(3000);
+        //m_creature->ForcedDespawn(3000);
+    }
+
+    void JustReachedHome() override
+    {
+        BossAI::JustReachedHome();
+        m_creature->GetVehicleInfo()->RecallAndRespawnAccessories();
     }
 
     void JustSummoned(Creature* summoned) override
