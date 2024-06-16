@@ -193,16 +193,16 @@ struct BlessingOfAncientKings : public AuraScript
 // 67799 - Mind Amplification Dish
 struct MindAmplificationDish : public SpellScript
 {
-    enum class MindAmplificationOutcomes : uint32
+    enum
     {
-        MIND_CONTROL = 13181,
-        DULLARD = 67809,
+        MIND_CONTROL  = 13181,
+        DULLARD       = 67809,
         MENTAL_BATTLE = 67810,
     };
 
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        if (spell->GetAffectiveCaster()->HasAura(static_cast<uint32>(MindAmplificationOutcomes::DULLARD)))
+        if (spell->GetAffectiveCaster()->HasAura(DULLARD))
             return SPELL_FAILED_CASTER_AURASTATE;
         return SPELL_CAST_OK;
     }
@@ -219,13 +219,13 @@ struct MindAmplificationDish : public SpellScript
 
         uint32 roll = urand(0, 9);
         if (roll < 7)
-            caster->CastSpell(target, static_cast<uint32>(MindAmplificationOutcomes::MIND_CONTROL), TRIGGERED_NONE, spell->GetCastItem());
+            caster->CastSpell(target, MIND_CONTROL, TRIGGERED_NONE, spell->GetCastItem());
         else if (roll < 8)
-            caster->CastSpell(nullptr, static_cast<uint32>(MindAmplificationOutcomes::DULLARD), TRIGGERED_NONE, spell->GetCastItem());
+            caster->CastSpell(nullptr, DULLARD, TRIGGERED_NONE, spell->GetCastItem());
         else if (roll < 9)
-            caster->CastSpell(target, static_cast<uint32>(MindAmplificationOutcomes::MENTAL_BATTLE), TRIGGERED_NONE, spell->GetCastItem());
+            caster->CastSpell(target, MENTAL_BATTLE, TRIGGERED_NONE, spell->GetCastItem());
         else
-            target->CastSpell(caster, static_cast<uint32>(MindAmplificationOutcomes::MIND_CONTROL), TRIGGERED_NONE, spell->GetCastItem());
+            target->CastSpell(caster, MIND_CONTROL, TRIGGERED_NONE, spell->GetCastItem());
     }
 };
 
