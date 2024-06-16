@@ -190,6 +190,45 @@ struct BlessingOfAncientKings : public AuraScript
     }
 };
 
+// 67799 - Mind Amplification Dish
+struct MindAmplificationDish : public SpellScript
+{
+    enum class MindAmplificationOutcomes : uint32
+    {
+        MIND_CONTROL = 13181,
+        DULLARD = 67809,
+        MENTAL_BATTLE = 67810,
+    };
+
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->GetAffectiveCaster()->HasAura(static_cast<uint32>(MindAmplificationOutcomes::DULLARD)))
+            return SPELL_FAILED_CASTER_AURASTATE;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+
+        if (!caster || !target)
+            return;
+
+        uint32 roll = urand(0, 9);
+        if (roll < 7)
+            caster->CastSpell(target, static_cast<uint32>(MindAmplificationOutcomes::MIND_CONTROL), TRIGGERED_NONE, spell->GetCastItem());
+        else if (roll < 8)
+            caster->CastSpell(nullptr, static_cast<uint32>(MindAmplificationOutcomes::DULLARD), TRIGGERED_NONE, spell->GetCastItem());
+        else if (roll < 9)
+            caster->CastSpell(target, static_cast<uint32>(MindAmplificationOutcomes::MENTAL_BATTLE), TRIGGERED_NONE, spell->GetCastItem());
+        else
+            target->CastSpell(caster, static_cast<uint32>(MindAmplificationOutcomes::MIND_CONTROL), TRIGGERED_NONE, spell->GetCastItem());
+    }
+};
+
 void AddSC_item_scripts_wotlk()
 {
     RegisterSpellScript<SwiftHandOfJustice>("spell_swift_hand_of_justice");
@@ -198,4 +237,5 @@ void AddSC_item_scripts_wotlk()
     RegisterSpellScript<Icecrown25MeleeTrinket>("spell_icecrown_25_melee_trinket");
     RegisterSpellScript<ValanyrEquipEffect>("spell_valanyr_equip_effect");
     RegisterSpellScript<BlessingOfAncientKings>("spell_blessing_of_ancient_kings");
+    RegisterSpellScript<MindAmplificationDish>("spell_mind_amplification_dish");
 }
