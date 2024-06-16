@@ -1026,6 +1026,26 @@ struct DropOffCapturedCrusader : public SpellScript
     }
 };
 
+// 56839 - To Icecrown Airship (A) - Summon Vehicle
+struct ToIcecrownAirshipASummonVehicle : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
+// 57418 - To Icecrown Airship (H) - Summon Vehicle
+struct ToIcecrownAirshipHSummonVehicle : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1060,4 +1080,6 @@ void AddSC_icecrown()
     RegisterSpellScript<spell_create_lance>("spell_create_lance");
     RegisterSpellScript<GrabCapturedCrusader>("spell_grab_captured_crusader");
     RegisterSpellScript<DropOffCapturedCrusader>("spell_drop_off_captured_crusader");
+    RegisterSpellScript<ToIcecrownAirshipASummonVehicle>("spell_to_icecrown_air_ship_a_summon_vehicle");
+    RegisterSpellScript<ToIcecrownAirshipHSummonVehicle>("spell_to_icecrown_air_ship_h_summon_vehicle");
 }
