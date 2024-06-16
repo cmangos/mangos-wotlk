@@ -992,6 +992,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (67547,'spell_clear_valkyr_essence'),
 (67590,'spell_powering_up'),
 (67630,'spell_leeching_swarm_aura'),
+(67799,'spell_mind_amplification_dish'),
 (68084,'spell_clear_valkyr_touch'),
 (68614,'spell_irresistible_cologne_spill_aura'),
 (68644,'spell_valentine_boss_validate_area'),
