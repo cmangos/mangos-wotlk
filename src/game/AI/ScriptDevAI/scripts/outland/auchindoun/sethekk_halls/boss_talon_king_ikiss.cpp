@@ -59,7 +59,9 @@ enum TalonKingIkissActions // order based on priority
     TALON_KING_IKISS_ACTION_POLYMORPH,
     TALON_KING_IKISS_ACTION_ARCANE_VOLLEY,
     TALON_KING_IKISS_ACTION_MAX,
-    TALON_KING_IKISS_BLINK
+    TALON_KING_IKISS_ARCANE_EXPLOSION_EMOTE,
+    TALON_KING_IKISS_ARCANE_EXPLOSION_CAST,
+    TALON_KING_IKISS_ARCANE_EXPLOSION_ATTACK_START,
 };
 
 struct boss_talon_king_ikissAI : public CombatAI
@@ -73,7 +75,9 @@ struct boss_talon_king_ikissAI : public CombatAI
         AddCombatAction(TALON_KING_IKISS_ACTION_SLOW, 9000, 13000);
         AddCombatAction(TALON_KING_IKISS_ACTION_POLYMORPH, 6000, 10000);
         AddCombatAction(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY, 5000, 12000);
-        AddCustomAction(TALON_KING_IKISS_BLINK, true, [&]() { HandleBlink(); });
+        AddCustomAction(TALON_KING_IKISS_ARCANE_EXPLOSION_EMOTE, true, [&]() { HandleExplosionEmote(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(TALON_KING_IKISS_ARCANE_EXPLOSION_CAST, true, [&]() { HandleArcaneExplosionCast(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(TALON_KING_IKISS_ARCANE_EXPLOSION_ATTACK_START, true, [&]() { HandleArcaneExplosionAttackStart(); }, TIMER_COMBAT_COMBAT);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
@@ -90,6 +94,7 @@ struct boss_talon_king_ikissAI : public CombatAI
 
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
 
         m_uiBlinkPhase = 0;
         m_HealthPercent = 80.0f;
@@ -147,14 +152,23 @@ struct boss_talon_king_ikissAI : public CombatAI
             m_instance->SetData(TYPE_IKISS, FAIL);
     }
 
-    void HandleBlink()
+    void HandleArcaneExplosionCast()
     {
+        DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_ARCANE_EXPLOSION : SPELL_ARCANE_EXPLOSION_H);
+        DoCastSpellIfCan(nullptr, SPELL_ARCANE_BUBBLE, CAST_TRIGGERED);
+    }
+
+    void HandleExplosionEmote()
+    {
+        DoBroadcastText(EMOTE_ARCANE_EXP, m_creature);
+    }
+
+    void HandleArcaneExplosionAttackStart()
+    {
+        DoResetThreat();
         SetCombatMovement(true);
         SetMeleeEnabled(true);
         SetCombatScriptStatus(false);
-        DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_ARCANE_EXPLOSION : SPELL_ARCANE_EXPLOSION_H);
-        DoCastSpellIfCan(nullptr, SPELL_ARCANE_BUBBLE, CAST_TRIGGERED);
-        DoResetThreat();
     }
 
     void ExecuteAction(uint32 action) override
@@ -174,8 +188,10 @@ struct boss_talon_king_ikissAI : public CombatAI
                         SetMeleeEnabled(false);
                         SetCombatMovement(false);
                         SetCombatScriptStatus(true);
-                        ResetTimer(TALON_KING_IKISS_BLINK, 1000);
-                        DoBroadcastText(EMOTE_ARCANE_EXP, m_creature);
+                        ResetTimer(TALON_KING_IKISS_ARCANE_EXPLOSION_EMOTE, 1500);
+                        ResetTimer(TALON_KING_IKISS_ARCANE_EXPLOSION_CAST, 2500);
+                        ResetTimer(TALON_KING_IKISS_ARCANE_EXPLOSION_ATTACK_START, 8500);
+                        
 
                         // There is no relationship between the health percentages
                         switch (m_uiBlinkPhase)
