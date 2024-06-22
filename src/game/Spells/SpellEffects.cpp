@@ -5824,7 +5824,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
                         if (damage >= 0 && damage < MAX_VEHICLE_SEAT)
                             seatNumber = damage;
                         else
-                            rideSpell = seatNumber;
+                            rideSpell = damage;
                         break;
                 }
                 break;
