@@ -1019,8 +1019,11 @@ struct DropOffCapturedCrusader : public SpellScript
         return SPELL_CAST_OK;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         if (VehicleInfo* vehicle = spell->GetCaster()->GetVehicleInfo())
             vehicle->UnBoard(vehicle->GetPassenger(1), false);
     }
