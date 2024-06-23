@@ -197,6 +197,8 @@ namespace Movement
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
             if (transportInfo)
             {
+                if (unit.AI())
+                    unit.AI()->MovementInform(BOARD_VEHICLE_MOTION_TYPE, transportInfo->GetTransportSeat());
                 data << transportInfo->GetTransportGuid().WriteAsPacked();
                 data << int8(transportInfo->GetTransportSeat());
             }

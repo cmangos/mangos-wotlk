@@ -303,6 +303,11 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     if (GetGOInfo()->IsLargeGameObject() && GetVisibilityData().GetVisibilityDistance() < VISIBILITY_DISTANCE_LARGE)
         GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Large);
 
+    if (GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
+        GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
+    if (GetGOInfo()->id == 194484)
+        GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Gigantic);
+
     return true;
 }
 
