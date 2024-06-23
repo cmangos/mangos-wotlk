@@ -9500,15 +9500,14 @@ void Aura::HandlePhase(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-    // always non stackable
-    if (apply)
-    {
-        Unit::AuraList const& phases = target->GetAurasByType(SPELL_AURA_PHASE);
-        if (!phases.empty())
-            target->RemoveAurasDueToSpell(phases.front()->GetId(), GetHolder());
-    }
+    // 57673 and 56678 - specifically stack
+    uint32 newPhase = 0;
+    Unit::AuraList const& phases = target->GetAurasByType(SPELL_AURA_PHASE);
+    if (!phases.empty())
+        for (auto itr = phases.begin(); itr != phases.end(); ++itr)
+            newPhase |= (*itr)->GetMiscValue();
 
-    target->SetPhaseMask(apply ? GetMiscValue() : uint32(PHASEMASK_NORMAL), true);
+    target->SetPhaseMask(newPhase ? newPhase : uint32(PHASEMASK_NORMAL), true);
     // no-phase is also phase state so same code for apply and remove
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
