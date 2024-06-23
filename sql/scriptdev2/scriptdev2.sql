@@ -963,7 +963,6 @@ UPDATE instance_template SET ScriptName='instance_gundrak' WHERE map=604;
 
 /* BLOOD FURNACE */
 /* The Maker,Broggok,Kelidan,Broggok's cloud */
-UPDATE creature_template SET ScriptName='boss_the_maker' WHERE entry=17381;
 UPDATE creature_template SET ScriptName='boss_broggok' WHERE entry=17380;
 UPDATE creature_template SET ScriptName='boss_kelidan_the_breaker' WHERE entry=17377;
 UPDATE creature_template SET ScriptName='mob_shadowmoon_channeler' WHERE entry=17653;
