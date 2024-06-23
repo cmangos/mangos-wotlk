@@ -25,7 +25,7 @@ EndScriptData */
 #include "hellfire_ramparts.h"
 
 instance_ramparts::instance_ramparts(Map* pMap) : ScriptedInstance(pMap),
-    m_uiSentryCounter(0), m_sentryGroup(nullptr)
+    m_uiSentryCounter(0)
 {
     Initialize();
 }
@@ -38,21 +38,15 @@ void instance_ramparts::Initialize()
 void instance_ramparts::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
-    {
-        case NPC_VAZRUDEN_HERALD:
+    {        
         case NPC_VAZRUDEN:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
-    }
-}
-
-void instance_ramparts::OnCreatureRespawn(Creature* creature)
-{
-    switch (creature->GetEntry())
-    {
         case NPC_HELLFIRE_SENTRY:
-            if (CreatureGroup* group = creature->GetCreatureGroup())
-                m_sentryGroup = group;
+            if (pCreature->IsTemporarySummon())
+                m_VazrudenTemporaryGuids.push_back(pCreature->GetObjectGuid());
+            else
+                m_VazrudenPermanentGuids.push_back(pCreature->GetDbGuid());
             break;
     }
 }
@@ -137,24 +131,18 @@ void instance_ramparts::DoFailVazruden()
 
     // Restore Sentries (counter and respawn them)
     m_uiSentryCounter = 0;
-    // respawns sentry group
-    m_sentryGroup->Spawn(true);
 
-    // Respawn or Reset Vazruden the herald
+    RespawnDbGuids(m_VazrudenPermanentGuids, 30);
+ 
     if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
     {
-        if (!pVazruden->IsAlive())
-            pVazruden->Respawn();
-        else
-        {
-            if (ScriptedAI* pVazrudenAI = dynamic_cast<ScriptedAI*>(pVazruden->AI()))
-                pVazrudenAI->EnterEvadeMode();
-        }
+        pVazruden->SetRespawnDelay(30, true);
+        pVazruden->ForcedDespawn();
     }
 
-    // Despawn Vazruden
     if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN))
         pVazruden->ForcedDespawn();
+
 }
 
 InstanceData* GetInstanceData_instance_ramparts(Map* pMap)

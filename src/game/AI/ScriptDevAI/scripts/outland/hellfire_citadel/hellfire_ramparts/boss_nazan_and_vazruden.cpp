@@ -204,7 +204,8 @@ struct boss_vazruden_heraldAI : public CombatAI
                     m_creature->SetHover(false);
                     m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                     m_creature->SetCanFly(false);
-                    HandleAttackDelay();
+                    m_creature->GetMotionMaster()->Clear(false, true);
+                    ResetTimer(NAZAN_ATTACK_DELAY, 5000);
                     break;
                 }
                 case POINT_ID_FLYING:
