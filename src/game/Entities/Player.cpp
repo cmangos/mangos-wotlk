@@ -16524,7 +16524,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
                 DEBUG_LOG("Player %s using client without required expansion tried login at transport at non accessible map %u", GetName(), transport->GetMapId());
             else
             {
-                transport->AddPassenger(this);
+                transport->AddPassenger(this, false);
                 SetLocationMapId(transport->GetMapId());
                 transport->UpdatePassengerPosition(this);
                 SetMap(map);
