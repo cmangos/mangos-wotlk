@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Magtheridon
-SD%Complete: 80
-SDComment: Phase 3 transition requires additional research. The Manticron cubes require additional core support. Timers need to be revised.
+SD%Complete: 100
+SDComment:
 SDCategory: Hellfire Citadel, Magtheridon's lair
 EndScriptData */
 
@@ -272,9 +272,8 @@ struct boss_magtheridonAI : public CombatAI
         {
             case MAGTHERIDON_PHASE_3:
             {
-                if (m_creature->GetHealthPercent() < 30.0f)
+                if (m_creature->GetHealthPercent() < 30.0f) // no spell exists - AI event
                 {
-                    // ToDo: maybe there is a spell here - requires additional research
                     DoBroadcastText(SAY_CHAMBER_DESTROY, m_creature);
                     m_creature->HandleEmote(EMOTE_STATE_TALK);
                     ResetTimer(MAGTHERIDON_TRANSITION_TIMER, 5000);
