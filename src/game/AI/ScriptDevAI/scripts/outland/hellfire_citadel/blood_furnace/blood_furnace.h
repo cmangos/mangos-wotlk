@@ -8,6 +8,10 @@
 enum
 {
     MAX_ENCOUNTER                   = 3,
+    FIRST_ORC_WAVE                  = 0,
+    SECOND_ORC_WAVE                 = 1,
+    THIRD_ORC_WAVE                  = 2,
+    FOURTH_ORC_WAVE                 = 3,
     MAX_ORC_WAVES                   = 4,
 
     TYPE_THE_MAKER_EVENT            = 0,
@@ -54,19 +58,29 @@ enum
     NPC_IN_COMBAT_TRIGGER           = 16006,
 
     SAY_BROGGOK_INTRO               = 15115,
+
+    // Prison Cell SpawnGroups
+    SPAWN_GROUP_PRISON_CELL_1       = 5420044,              // Back Left
+    SPAWN_GROUP_PRISON_CELL_2       = 5420045,              // Back Right
+    SPAWN_GROUP_PRISON_CELL_3       = 5420042,              // Front Left
+    SPAWN_GROUP_PRISON_CELL_4       = 5420043,              // Front Right    
 };
+
+const std::string FIRST_BROGGOK_CELL_STRING = "BF_PRISON_CELL_GROUP_01";
+const std::string SECOND_BROGGOK_CELL_STRING = "BF_PRISON_CELL_GROUP_02";
+const std::string THIRD_BROGGOK_CELL_STRING = "BF_PRISON_CELL_GROUP_03";
+const std::string FOURTH_BROGGOK_CELL_STRING = "BF_PRISON_CELL_GROUP_04";
+const std::string FIFTH_BROGGOK_CELL_STRING = "BF_PRISON_CELL_GROUP_05";
 
 // Random Magtheridon taunt
 static const int32 aRandomTaunt[] = { -1544000, -1544001, -1544002, -1544003, -1544004, -1544005};
 
 struct BroggokEventInfo
 {
-    BroggokEventInfo() : m_bIsCellOpened(false), m_uiKilledOrcCount(0) {}
+    BroggokEventInfo() : m_bIsCellOpened(false) {}
 
     ObjectGuid m_cellGuid;
     bool m_bIsCellOpened;
-    uint8 m_uiKilledOrcCount;
-    GuidSet m_sSortedOrcGuids;
 };
 
 class instance_blood_furnace : public ScriptedInstance
@@ -76,13 +90,12 @@ class instance_blood_furnace : public ScriptedInstance
 
         void Initialize() override;
 
-        void OnPlayerEnter(Player* player) override;
-
         void OnCreatureCreate(Creature* creature) override;
         void OnObjectCreate(GameObject* go) override;
 
-        void OnCreatureDeath(Creature* creature) override;
-        void OnCreatureEvade(Creature* creature) override;
+        void OnCreatureRespawn(Creature* creature) override;
+
+        void OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* pCreature) override;
 
         void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 type) const override;
@@ -98,7 +111,6 @@ class instance_blood_furnace : public ScriptedInstance
         void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 
     private:
-        void DoSortBroggokOrcs();
         void DoNextBroggokEventPhase();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
@@ -106,18 +118,21 @@ class instance_blood_furnace : public ScriptedInstance
 
         BroggokEventInfo m_aBroggokEvent[MAX_ORC_WAVES];
 
-        uint32 m_uiBroggokEventTimer;                       // Timer for opening the event cages; 90s on normal, 30s on heroic difficulty
+        uint32 m_uiBroggokEventTimer;                       // Timer for opening the event cages; 90s on normal and heroic
         uint32 m_uiBroggokEventPhase;
         uint32 m_uiRandYellTimer;                           // Random yell for Magtheridon
         uint32 m_crackTimer;
+        uint32 m_uiBroggokEventDelay;
+        bool m_uiBroggokEventDelaySpawn;
+        std::vector<uint32> m_broggokEventGuids;
+
+        CreatureGroup* m_cellGroup;
 
         GameObject* m_lLeverGO;
 
         GuidList m_cracks;
         GuidList m_luiNascentOrcGuids;
         GuidList m_lChannelersGuids;
-
-        bool m_firstPlayer;
 };
 
 #endif

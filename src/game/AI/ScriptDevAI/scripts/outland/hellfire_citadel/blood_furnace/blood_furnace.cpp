@@ -26,10 +26,11 @@ EndScriptData */
 
 instance_blood_furnace::instance_blood_furnace(Map* map) : ScriptedInstance(map),
     m_uiBroggokEventTimer(90 * IN_MILLISECONDS),
+    m_uiBroggokEventDelay(0),
     m_uiBroggokEventPhase(0),
     m_uiRandYellTimer(90000),
     m_crackTimer(30000),
-    m_firstPlayer(false)
+    m_uiBroggokEventDelaySpawn(false)
 {
     Initialize();
 }
@@ -50,16 +51,30 @@ void instance_blood_furnace::OnCreatureCreate(Creature* creature)
         case NPC_IN_COMBAT_TRIGGER:
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
-        case NPC_NASCENT_FEL_ORC:
-        case NPC_FEL_ORC_NEOPHYTE:
-            m_luiNascentOrcGuids.push_back(creature->GetObjectGuid());
-            break;
         case NPC_SHADOWMOON_CHANNELER:
             m_lChannelersGuids.push_back(creature->GetObjectGuid());
             break;
     }
 }
 
+void instance_blood_furnace::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_NASCENT_FEL_ORC:
+        case NPC_FEL_ORC_NEOPHYTE:
+            if (creature->HasStringId(FIRST_BROGGOK_CELL_STRING) || creature->HasStringId(SECOND_BROGGOK_CELL_STRING) || creature->HasStringId(THIRD_BROGGOK_CELL_STRING) || creature->HasStringId(FOURTH_BROGGOK_CELL_STRING))
+            {
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE); // ones in cages
+                creature->setFaction(14); // sniffed value
+                m_broggokEventGuids.push_back(creature->GetDbGuid());
+            }
+            else if (creature->HasStringId(FIFTH_BROGGOK_CELL_STRING))
+                creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_NPC);
+            break;
+    }
+}
+           
 void instance_blood_furnace::OnObjectCreate(GameObject* go)
 {
     switch (go->GetEntry())
@@ -117,6 +132,30 @@ void instance_blood_furnace::OnObjectCreate(GameObject* go)
     m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
 }
 
+void instance_blood_furnace::OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* /*pCreature*/)
+{
+    switch (pGroup->GetGroupId())
+    {
+        // Only release next group if not already released from timer 
+        case SPAWN_GROUP_PRISON_CELL_1:
+            if (m_uiBroggokEventPhase == SECOND_ORC_WAVE)
+                DoNextBroggokEventPhase();
+            break;
+        case SPAWN_GROUP_PRISON_CELL_2:
+            if (m_uiBroggokEventPhase == THIRD_ORC_WAVE)
+                DoNextBroggokEventPhase();
+            break;
+        case SPAWN_GROUP_PRISON_CELL_3:
+            if (m_uiBroggokEventPhase == FOURTH_ORC_WAVE)
+                DoNextBroggokEventPhase();
+            break;
+        case SPAWN_GROUP_PRISON_CELL_4:
+            if (m_uiBroggokEventPhase == MAX_ORC_WAVES)
+                DoNextBroggokEventPhase();
+            break;
+    }
+}
+
 void instance_blood_furnace::SetData(uint32 type, uint32 data)
 {
     switch (type)
@@ -150,46 +189,37 @@ void instance_blood_furnace::SetData(uint32 type, uint32 data)
                 if (m_uiBroggokEventPhase <= MAX_ORC_WAVES)
                 {
                     m_uiBroggokEventPhase = 0;
-
-                    if (m_aBroggokEvent[0].m_sSortedOrcGuids.empty())
-                        DoSortBroggokOrcs();
     
                     // open first cage
                     DoNextBroggokEventPhase();
+
+                    // Confirmed on Sniffs that lever gets uninteractable while even is in progress
+                    m_lLeverGO->ApplyModFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT, true);
                 }
             }
             else if (data == FAIL)
             {
                 // On wipe we reset only the orcs; if the party wipes at the boss itself then the orcs don't reset
                 if (m_uiBroggokEventPhase <= MAX_ORC_WAVES)
-                {
+                {          
+                    // Respawn all Groups
+                    RespawnDbGuids(m_broggokEventGuids, 0);
+                    m_broggokEventGuids.clear();
+
+                    // Close all Cells
                     for (auto& i : m_aBroggokEvent)
                     {
-                        // Reset Orcs
                         if (!i.m_bIsCellOpened)
                             continue;
-
-                        i.m_uiKilledOrcCount = 0;
-                        for (GuidSet::const_iterator itr = i.m_sSortedOrcGuids.begin(); itr != i.m_sSortedOrcGuids.end(); ++itr)
-                        {
-                            if (Creature* pOrc = instance->GetCreature(*itr))
-                            {
-                                pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-                                
-                                if (pOrc->IsAlive())
-                                    pOrc->ForcedDespawn();
-                                 
-                                pOrc->Respawn();
-                            }
-                        }
 
                         // Close Door
                         DoUseDoorOrButton(i.m_cellGuid);
                         i.m_bIsCellOpened = false;
                     }
- 
+
                     if (m_lLeverGO)
                     {
+                        m_lLeverGO->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                         m_lLeverGO->SetRespawnTime(time(nullptr));
                         m_lLeverGO->Respawn();
                     }
@@ -227,33 +257,6 @@ void instance_blood_furnace::SetData(uint32 type, uint32 data)
     }
 }
 
-void instance_blood_furnace::OnPlayerEnter(Player* /*player*/)
-{
-    if (!m_firstPlayer)
-    {
-        m_firstPlayer = true;
-        for (GuidList::const_iterator itr = m_luiNascentOrcGuids.begin(); itr != m_luiNascentOrcGuids.end(); ++itr)
-        {
-            if (Creature* pOrc = instance->GetCreature(*itr))
-            {
-                for (uint8 i = 0; i < MAX_ORC_WAVES; ++i)
-                {
-                    if (GameObject* pDoor = instance->GetGameObject(m_aBroggokEvent[i].m_cellGuid))
-                    {
-                        if (pOrc->IsWithinDistInMap(pDoor, 15.0f) && pOrc->GetPositionZ() < 15.0f)
-                        {
-                            pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE); // ones in cages
-                            pOrc->setFaction(14); // sniffed value
-                        }
-                    }
-                }
-                if (pOrc->GetPositionZ() > 20.0f) // ones above
-                    pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_NPC);
-            }
-        }
-    }
-}
-
 void instance_blood_furnace::DoNextBroggokEventPhase()
 {
     // Open door to the final boss now and move boss to the center of the room
@@ -277,86 +280,91 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
 
         m_aBroggokEvent[m_uiBroggokEventPhase].m_bIsCellOpened = true;
 
-        // TODO: add small delay - after gate opened
-        for (auto m_sSortedOrcGuid : m_aBroggokEvent[m_uiBroggokEventPhase].m_sSortedOrcGuids)
+        // First Wave spawns instantly
+        if (m_uiBroggokEventPhase == FIRST_ORC_WAVE)
         {
-            if (Creature* pOrc = instance->GetCreature(m_sSortedOrcGuid))
+            auto pOrc = instance->GetCreatures(FIRST_BROGGOK_CELL_STRING);
+            for (Creature* creature : *pOrc)
             {
-                pOrc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-                pOrc->SetInCombatWithZone();
+                creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                creature->SetInCombatWithZone();
             }
+            ++m_uiBroggokEventPhase;
         }
-    }
-
-    // Prepare for further handling
-    m_uiBroggokEventTimer = 90 * IN_MILLISECONDS;
-    ++m_uiBroggokEventPhase;
-}
-
-void instance_blood_furnace::OnCreatureEvade(Creature* creature)
-{
-    if (m_auiEncounter[TYPE_BROGGOK_EVENT] == FAIL)
-        return;
-
-    if (creature->GetEntry() == NPC_BROGGOK)
-        SetData(TYPE_BROGGOK_EVENT, FAIL);
-
-    else if (creature->GetEntry() == NPC_NASCENT_FEL_ORC || creature->GetEntry() == NPC_FEL_ORC_NEOPHYTE)
-    {
-        for (uint8 i = 0; i < std::min<uint32>(m_uiBroggokEventPhase, MAX_ORC_WAVES); ++i)
+        else
         {
-            if (m_aBroggokEvent[i].m_sSortedOrcGuids.find(creature->GetObjectGuid()) != m_aBroggokEvent[i].m_sSortedOrcGuids.end())
-                SetData(TYPE_BROGGOK_EVENT, FAIL);
-        }
-    }
-}
-
-void instance_blood_furnace::OnCreatureDeath(Creature* creature)
-{
-    if (m_auiEncounter[TYPE_BROGGOK_EVENT] != IN_PROGRESS)
-        return;
-
-    if (creature->GetEntry() == NPC_NASCENT_FEL_ORC || creature->GetEntry() == NPC_FEL_ORC_NEOPHYTE)
-    {
-        uint8 uiClearedCells = 0;
-        for (uint8 i = 0; i < std::min<uint32>(m_uiBroggokEventPhase, MAX_ORC_WAVES); ++i)
-        {
-            if (m_aBroggokEvent[i].m_sSortedOrcGuids.size() == m_aBroggokEvent[i].m_uiKilledOrcCount)
-            {
-                ++uiClearedCells;
-                continue;
-            }
-
-            // Increase kill counter, if we found a mob of this cell
-            if (m_aBroggokEvent[i].m_sSortedOrcGuids.find(creature->GetObjectGuid()) != m_aBroggokEvent[i].m_sSortedOrcGuids.end())
-                m_aBroggokEvent[i].m_uiKilledOrcCount++;
-
-            if (m_aBroggokEvent[i].m_sSortedOrcGuids.size() == m_aBroggokEvent[i].m_uiKilledOrcCount)
-                ++uiClearedCells;
+            // All other waves have a 2 second delay after cell openes
+            m_uiBroggokEventDelay = 2000;
+            m_uiBroggokEventDelaySpawn = true;
         }
 
-        // Increase phase when all opened cells are cleared
-        if (uiClearedCells == m_uiBroggokEventPhase)
-            DoNextBroggokEventPhase();
+        // Always reset Timer if a cell already got opened because the previous group died
+        m_uiBroggokEventTimer = 90000;
     }
 }
 
 void instance_blood_furnace::Update(uint32 uiDiff)
 {
-    // Broggok Event: For the last wave we don't check the timer; the boss is released only when all mobs die
     if (m_auiEncounter[TYPE_BROGGOK_EVENT] == IN_PROGRESS)
+    {
+        // 2nd, 3rd and 4th Orc wave will attack 2 seconds after cell opened
+        if (m_uiBroggokEventDelaySpawn)
+        {
+            if (m_uiBroggokEventDelay < uiDiff)
+            {
+                if (m_uiBroggokEventPhase == SECOND_ORC_WAVE)
+                {
+                    auto pOrc = instance->GetCreatures(SECOND_BROGGOK_CELL_STRING);
+                    for (Creature* creature : *pOrc)
+                    {
+                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                        creature->SetInCombatWithZone();
+                    }
+                    ++m_uiBroggokEventPhase;
+                    m_uiBroggokEventDelaySpawn = false;
+                    m_uiBroggokEventDelay = 2000;
+                }
+                else if (m_uiBroggokEventPhase == THIRD_ORC_WAVE)
+                {
+                    auto pOrc = instance->GetCreatures(THIRD_BROGGOK_CELL_STRING);
+                    for (Creature* creature : *pOrc)
+                    {
+                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                        creature->SetInCombatWithZone();
+                    }
+                    ++m_uiBroggokEventPhase;
+                    m_uiBroggokEventDelaySpawn = false;
+                    m_uiBroggokEventDelay = 2000;
+                }
+                else if (m_uiBroggokEventPhase == FOURTH_ORC_WAVE)
+                {
+                    auto pOrc = instance->GetCreatures(FOURTH_BROGGOK_CELL_STRING);
+                    for (Creature* creature : *pOrc)
+                    {
+                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                        creature->SetInCombatWithZone();
+                    }
+                    ++m_uiBroggokEventPhase;
+                    m_uiBroggokEventDelaySpawn = false;
+                    m_uiBroggokEventDelay = 2000;
+                }
+            }
+            else
+                m_uiBroggokEventDelay -= uiDiff;
+        }
+
+        // Broggok Event: For the last wave we don't check the timer; the boss is released only when all mobs die
         if (m_uiBroggokEventPhase <= MAX_ORC_WAVES)
         {
-            if (!GetPlayerInMap(true, false))
-                SetData(TYPE_BROGGOK_EVENT, FAIL);
-            else if (!instance->IsRegularDifficulty())
-            {
-                if (m_uiBroggokEventTimer < uiDiff)
-                    DoNextBroggokEventPhase();
-                else
-                    m_uiBroggokEventTimer -= uiDiff;
-            }
+            // on wotlk ptr normal and heroic both used 90 seconds timer 
+            if (m_uiBroggokEventTimer < uiDiff)            
+                DoNextBroggokEventPhase();
+            else
+                m_uiBroggokEventTimer -= uiDiff;
+            
         }
+    }
+
 
     if (m_uiRandYellTimer < uiDiff)
     {
@@ -437,31 +445,6 @@ void instance_blood_furnace::ExecuteChatCommand(ChatHandler* handler, char* args
     {
         if (GetData(TYPE_BROGGOK_EVENT) == IN_PROGRESS)
             SetData(TYPE_BROGGOK_EVENT, FAIL);
-    }
-}
-
-// Sort all nascent orcs & fel orc neophytes in the instance in order to get only those near broggok doors
-void instance_blood_furnace::DoSortBroggokOrcs()
-{
-    for (GuidList::const_iterator itr = m_luiNascentOrcGuids.begin(); itr != m_luiNascentOrcGuids.end(); ++itr)
-    {
-        if (Creature* pOrc = instance->GetCreature(*itr))
-        {
-            for (auto& i : m_aBroggokEvent)
-            {
-                if (GameObject* pDoor = instance->GetGameObject(i.m_cellGuid))
-                {
-                    Position orcPos = pOrc->GetRespawnPosition();
-                    if (pDoor->IsWithinDist3d(orcPos.x, orcPos.y, orcPos.z, 16.0f) && orcPos.GetPositionZ() < 15.0f)
-                    {
-                        i.m_sSortedOrcGuids.insert(pOrc->GetObjectGuid());
-                        if (!pOrc->IsAlive())
-                            pOrc->Respawn();
-                        break;
-                    }
-                }
-            }
-        }
     }
 }
 

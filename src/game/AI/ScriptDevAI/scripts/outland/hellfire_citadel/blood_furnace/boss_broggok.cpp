@@ -29,6 +29,8 @@ enum
 {
     SAY_AGGRO                       = 14259,
 
+    SAY_FEL_ORC_AGGRO               = 11999,
+
     SPELL_SUMMON_INCOMBAT_TRIGGER   = 26837,    // TODO: probably cast on spawn not sure what c.16006 does
     SPELL_SLIME_SPRAY               = 30913,
     SPELL_SLIME_SPRAY_H             = 38458,
@@ -48,21 +50,13 @@ enum
 
 enum BroggokActions
 {
-    BROGGOK_SLIME_SPRAY,
-    BROGGOK_POISON_BOLT,
-    BROGGOK_POISON_CLOUD,
     BROGGOK_ACTION_MAX,
 };
 
 struct boss_broggokAI : public CombatAI
 {
     boss_broggokAI(Creature* creature) : CombatAI(creature, BROGGOK_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
-    {
-        AddCombatAction(BROGGOK_SLIME_SPRAY, 10000u);
-        AddCombatAction(BROGGOK_POISON_BOLT, 12000u);
-        AddCombatAction(BROGGOK_POISON_CLOUD, 10000u);
-    }
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()){}
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
@@ -71,6 +65,12 @@ struct boss_broggokAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (m_instance)
+            m_instance->SetData(TYPE_BROGGOK_EVENT, FAIL);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -113,24 +113,32 @@ struct boss_broggokAI : public CombatAI
             AttackClosestEnemy();
         }
     }
+};
 
-    void ExecuteAction(uint32 action) override
+enum FelOrcAction
+{
+    FEL_ORC_ACTION_MAX,
+};
+
+struct npc_fel_orc : public CombatAI
+{
+    npc_fel_orc(Creature* creature) : CombatAI(creature, FEL_ORC_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())) {}
+
+    ScriptedInstance* m_instance;
+
+    void Aggro(Unit* /*who*/) override
     {
-        switch (action)
-        {
-            case BROGGOK_SLIME_SPRAY:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_SLIME_SPRAY : SPELL_SLIME_SPRAY_H) == CAST_OK)
-                    ResetCombatAction(action, urand(4000, 12000));
-                break;
-            case BROGGOK_POISON_BOLT:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_POISON_BOLT : SPELL_POISON_BOLT_H) == CAST_OK)
-                    ResetCombatAction(action, urand(4000, 12000));
-                break;
-            case BROGGOK_POISON_CLOUD:
-                if (DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD) == CAST_OK)
-                    ResetCombatAction(action, 20000);
-                break;
-        }
+        if (urand(0, 4) > 2)
+            DoBroadcastText(SAY_FEL_ORC_AGGRO, m_creature);
+    }
+
+    void JustReachedHome() override
+    {
+        CombatAI::JustReachedHome();
+         // Only Event Envolved NPCs should trigger fail condition
+        if (m_creature->HasStringId(FIRST_BROGGOK_CELL_STRING) || m_creature->HasStringId(SECOND_BROGGOK_CELL_STRING) || m_creature->HasStringId(THIRD_BROGGOK_CELL_STRING) || m_creature->HasStringId(FOURTH_BROGGOK_CELL_STRING))
+            if (m_instance->GetData(TYPE_BROGGOK_EVENT == IN_PROGRESS))
+                m_instance->SetData(TYPE_BROGGOK_EVENT, FAIL);
     }
 };
 
@@ -139,5 +147,10 @@ void AddSC_boss_broggok()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_broggok";
     pNewScript->GetAI = &GetNewAIInstance<boss_broggokAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_fel_orc";
+    pNewScript->GetAI = &GetNewAIInstance<npc_fel_orc>;
     pNewScript->RegisterSelf();
 }
