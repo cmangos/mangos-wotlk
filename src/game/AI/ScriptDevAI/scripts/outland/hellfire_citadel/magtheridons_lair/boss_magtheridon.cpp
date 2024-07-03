@@ -31,16 +31,17 @@ EndScriptData */
 enum
 {
     // yells
-    SAY_AGGRO                   = -1544006,
-    SAY_UNUSED                  = -1544007,
-    SAY_BANISH                  = -1544008,
-    SAY_CHAMBER_DESTROY         = -1544009,
-    SAY_PLAYER_KILLED           = -1544010,
-    SAY_DEATH                   = -1544011,
+    SAY_AGGRO                   = 17346,
+    SAY_BANISH                  = 17348,
+    SAY_CHAMBER_DESTROY         = 17336,
+    SAY_PLAYER_KILLED           = 17349,
+    SAY_DEATH                   = 17347,
 
-    EMOTE_GENERIC_ENRAGED       = -1000003,
-    EMOTE_BLASTNOVA             = -1544013,
-    EMOTE_FREED                 = -1544015,
+    EMOTE_GENERIC_ENRAGED       = 2384,
+    EMOTE_BLASTNOVA             = 18739,
+    EMOTE_FREED                 = 13691,
+    EMOTE_EVENT_BEGIN           = 13689,
+    EMOTE_NEARLY_FREE           = 13690,
 
     // Maghteridon spells
     SPELL_SHADOW_CAGE_DUMMY     = 30205,                    // dummy aura - in creature_template_addon
@@ -82,6 +83,9 @@ enum
     NPC_RAID_TRIGGER            = 17376,
 
     MAX_QUAKE_COUNT             = 7,
+
+    SPELL_LIST_PHASE_1          = 1725701,
+    SPELL_LIST_PHASE_2          = 1725702,
 };
 
 /*######
@@ -92,14 +96,11 @@ enum MagtheridonActions
 {
     MAGTHERIDON_PHASE_3,
     MAGTHERIDON_BERSERK,
-    MAGTHERIDON_BLAST_NOVA,
     MAGTHERIDON_DEBRIS,
-    MAGTHERIDON_QUAKE,
-    MAGTHERIDON_CLEAVE,
-    MAGTHERIDON_BLAZE,
     MAGTHERIDON_ACTION_MAX,
     MAGTHERIDON_QUAKE_TIMER,
     MAGTHERIDON_TRANSITION_TIMER,
+    MAGTHERIDON_ATTACK_DELAY
 };
 
 struct boss_magtheridonAI : public CombatAI
@@ -108,11 +109,6 @@ struct boss_magtheridonAI : public CombatAI
     {
         AddTimerlessCombatAction(MAGTHERIDON_PHASE_3, true);
         AddCombatAction(MAGTHERIDON_DEBRIS, true);
-        AddCombatAction(MAGTHERIDON_BERSERK, true);
-        AddCombatAction(MAGTHERIDON_BLAZE, true);
-        AddCombatAction(MAGTHERIDON_QUAKE, true);
-        AddCombatAction(MAGTHERIDON_BLAST_NOVA, true);
-        AddCombatAction(MAGTHERIDON_CLEAVE, true);
         AddCustomAction(MAGTHERIDON_QUAKE_TIMER, true, [&]()
         {
             m_creature->SetStunned(false);
@@ -120,7 +116,16 @@ struct boss_magtheridonAI : public CombatAI
             DoStartMovement(m_creature->GetVictim());
         });
         AddCustomAction(MAGTHERIDON_TRANSITION_TIMER, true, [&]() { HandlePhaseTransition(); });
+        AddCustomAction(MAGTHERIDON_ATTACK_DELAY, true, [&]() { HandleStartAttack(); });
         Reset();
+
+        // Magtheridon gets respawned after a wipe 
+        DoCastSpellIfCan(nullptr, SPELL_SHADOW_CAGE_DUMMY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* /*unit*/, float /*x*/, float /*y*/, float /*z*/)->bool
+        {
+            return m_creature->GetDistance2d(-16.683f, 2.34519f) > 55.0f;
+        });
     }
 
     ScriptedInstance* m_instance;
@@ -153,33 +158,30 @@ struct boss_magtheridonAI : public CombatAI
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->SetInCombatWithZone();
 
-            DoScriptText(EMOTE_FREED, m_creature);
-            DoScriptText(SAY_AGGRO, m_creature);
-
-            SetCombatScriptStatus(false);
+            DoBroadcastText(EMOTE_FREED, m_creature);
+            m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
+            DoBroadcastText(SAY_AGGRO, m_creature);
+            ResetTimer(MAGTHERIDON_ATTACK_DELAY, 3000);
+            
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_CAGE_DUMMY);
-
-            SetReactState(REACT_AGGRESSIVE);
-
+           
             DoResetThreat(); // clear threat at start
-
-            // timers here so they dont start at combat initiate
-            ResetCombatAction(MAGTHERIDON_BERSERK, uint32(20 * MINUTE * IN_MILLISECONDS));
-            ResetCombatAction(MAGTHERIDON_BLAZE, urand(10000, 15000));
-            ResetCombatAction(MAGTHERIDON_QUAKE, 40000);
-            ResetCombatAction(MAGTHERIDON_BLAST_NOVA, 55000);
-            ResetCombatAction(MAGTHERIDON_CLEAVE, urand(8000, 12000));
+            
         }
         else if (eventType == AI_EVENT_CUSTOM_B)
         {
-            DoScriptText(EMOTE_EVENT_BEGIN, m_creature);
+            DoBroadcastText(EMOTE_EVENT_BEGIN, m_creature);
+        }
+        else if (eventType == AI_EVENT_CUSTOM_C)
+        {
+            DoBroadcastText(EMOTE_NEARLY_FREE, m_creature);
         }
     }
 
     void KilledUnit(Unit* victim) override
     {
         if (victim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_PLAYER_KILLED, m_creature);
+            DoBroadcastText(SAY_PLAYER_KILLED, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -187,30 +189,31 @@ struct boss_magtheridonAI : public CombatAI
         if (m_instance)
             m_instance->SetData(TYPE_MAGTHERIDON_EVENT, DONE);
 
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         m_creature->CastSpell(nullptr, SPELL_QUAKE_REMOVAL, TRIGGERED_OLD_TRIGGERED);
     }
 
     void EnterEvadeMode() override
     {
-        m_creature->SetStunned(false);
-        CombatAI::EnterEvadeMode();
-    }
-
-    void JustReachedHome() override
-    {
         if (m_instance)
             m_instance->SetData(TYPE_MAGTHERIDON_EVENT, FAIL);
 
-        DoCastSpellIfCan(nullptr, SPELL_SHADOW_CAGE_DUMMY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        m_creature->SetStunned(false);
+        CombatAI::EnterEvadeMode();
     }
 
     void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
     {
         // When banished by the cubes
         if (spellInfo->Id == SPELL_SHADOW_CAGE)
-            DoScriptText(SAY_BANISH, m_creature);
+            DoBroadcastText(SAY_BANISH, m_creature);
+    }
+
+    void HandleStartAttack()
+    {
+        SetReactState(REACT_AGGRESSIVE);
+        SetCombatScriptStatus(false);
     }
 
     void HandlePhaseTransition()
@@ -232,12 +235,35 @@ struct boss_magtheridonAI : public CombatAI
                 SetCombatScriptStatus(false);
                 SetMeleeEnabled(true);
                 SetCombatMovement(true, true);
+                m_creature->SetSpellList(SPELL_LIST_PHASE_2);
+                if (Unit* victim = m_creature->GetVictim())
+                {
+                    m_creature->SetTarget(victim);
+                    DoStartMovement(victim);
+                }
                 break;
         }
 
         ++m_uiTransitionCount;
         if (timer)
             ResetTimer(MAGTHERIDON_TRANSITION_TIMER, timer);
+    }
+
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
+    {
+        switch (spellInfo->Id)
+        {
+            case SPELL_BLASTNOVA:
+                DoBroadcastText(EMOTE_BLASTNOVA, m_creature);
+                break;
+            case SPELL_QUAKE:
+                m_creature->SetStunned(true);
+                ResetTimer(MAGTHERIDON_QUAKE_TIMER, 7000);
+                break;
+            case SPELL_BERSERK:
+                DoBroadcastText(EMOTE_GENERIC_ENRAGED, m_creature);
+                break;
+        }
     }
 
     void ExecuteAction(uint32 action) override
@@ -249,61 +275,15 @@ struct boss_magtheridonAI : public CombatAI
                 if (m_creature->GetHealthPercent() < 30.0f)
                 {
                     // ToDo: maybe there is a spell here - requires additional research
-                    DoScriptText(SAY_CHAMBER_DESTROY, m_creature);
+                    DoBroadcastText(SAY_CHAMBER_DESTROY, m_creature);
                     m_creature->HandleEmote(EMOTE_STATE_TALK);
                     ResetTimer(MAGTHERIDON_TRANSITION_TIMER, 5000);
+                    m_creature->SetTarget(nullptr);
                     SetCombatScriptStatus(true);
                     SetMeleeEnabled(false);
                     SetCombatMovement(false);
                     SetActionReadyStatus(action, false);
-                    ResetCombatAction(MAGTHERIDON_DEBRIS, urand(20000, 30000));
                 }
-                break;
-            }
-            case MAGTHERIDON_BERSERK:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_GENERIC_ENRAGED, m_creature);
-                    DisableCombatAction(action);
-                }
-                break;
-            }
-            case MAGTHERIDON_BLAST_NOVA:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_BLASTNOVA) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_BLASTNOVA, m_creature);
-                    ResetCombatAction(action, 55000);
-                }
-                break;
-            }
-            case MAGTHERIDON_DEBRIS:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_DEBRIS_1) == CAST_OK)
-                    ResetCombatAction(action, urand(10000, 15000));
-                break;
-            }
-            case MAGTHERIDON_QUAKE:
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_QUAKE) == CAST_OK)
-                {
-                    m_creature->SetStunned(true);
-                    ResetTimer(MAGTHERIDON_QUAKE_TIMER, 7000);
-                    ResetCombatAction(action, 50000);
-                }
-                break;
-            }
-            case MAGTHERIDON_CLEAVE:
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
-                    ResetCombatAction(action, urand(8000, 16000));
-                break;
-            }
-            case MAGTHERIDON_BLAZE:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_BLAZE) == CAST_OK)
-                    ResetCombatAction(action, urand(10000, 15000));
                 break;
             }
         }
@@ -316,10 +296,6 @@ struct boss_magtheridonAI : public CombatAI
 
 enum ChannelerActions
 {
-    CHANNELER_INFERNAL,
-    CHANNELER_DARK_MENDING,
-    CHANNELER_FEAR,
-    CHANNELER_SHADOW_BOLT,
     CHANNELER_ACTION_MAX,
     CHANNELER_SHADOW_GRASP,
 };
@@ -328,12 +304,13 @@ struct mob_hellfire_channelerAI : public CombatAI
 {
     mob_hellfire_channelerAI(Creature* creature) : CombatAI(creature, CHANNELER_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        AddCombatAction(CHANNELER_INFERNAL, 10000, 50000);
-        AddCombatAction(CHANNELER_DARK_MENDING, 10000u);
-        AddCombatAction(CHANNELER_FEAR, 15000, 20000);
-        AddCombatAction(CHANNELER_SHADOW_BOLT, 8000, 10000);
-        AddCustomAction(CHANNELER_SHADOW_GRASP, 10000u, [&]() { DoCastSpellIfCan(m_creature, SPELL_SHADOW_GRASP_DUMMY); });
         SetReactState(REACT_DEFENSIVE);
+        AddCustomAction(CHANNELER_SHADOW_GRASP, 5000u, [&]() { DoCastSpellIfCan(m_creature, SPELL_SHADOW_GRASP_DUMMY); },  TIMER_COMBAT_OOC);
+
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* /*unit*/, float /*x*/, float /*y*/, float /*z*/)->bool
+        {
+            return m_creature->GetDistance2d(-16.683f, 2.34519f) > 55.0f;
+        });
     }
 
     ScriptedInstance* m_instance;
@@ -351,44 +328,11 @@ struct mob_hellfire_channelerAI : public CombatAI
         m_creature->CastSpell(m_creature, SPELL_SOUL_TRANSFER, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         if (m_instance)
             m_instance->SetData(TYPE_CHANNELER_EVENT, FAIL);
-    }
-
-    void ExecuteAction(uint32 action) override
-    {
-        switch (action)
-        {
-            case CHANNELER_INFERNAL:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BURNING_ABYSSAL, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, SPELL_BURNING_ABYSSAL) == CAST_OK)
-                        ResetCombatAction(action, 45000);
-                break;
-            }
-            case CHANNELER_DARK_MENDING:
-            {
-                if (Unit* target = DoSelectLowestHpFriendly(30.0f))
-                    if (DoCastSpellIfCan(target, SPELL_DARK_MENDING) == CAST_OK)
-                        ResetCombatAction(action, urand(10000, 20000));
-                break;
-            }
-            case CHANNELER_FEAR:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_FEAR, (SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA)))
-                    if (DoCastSpellIfCan(target, SPELL_FEAR) == CAST_OK)
-                        ResetCombatAction(action, urand(25000, 40000));
-                break;
-            }
-            case CHANNELER_SHADOW_BOLT:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
-                    ResetCombatAction(action, urand(10000, 20000));
-                break;
-            }
-        }
+        CombatAI::EnterEvadeMode();
     }
 };
 
@@ -483,16 +427,6 @@ struct QuakeMagth : public SpellScript
     }
 };
 
-struct QuakeMagthKnockback : public SpellScript
-{
-    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
-    {
-        if (target->IsFalling())
-            return false;
-        return true;
-    }
-};
-
 struct DebrisMagtheridon : public AuraScript
 {
     void OnPersistentAreaAuraEnd(DynamicObject* dynGo) const override
@@ -523,6 +457,5 @@ void AddSC_boss_magtheridon()
     RegisterSpellScript<ShadowGraspCube>("spell_shadow_grasp_cube");
     RegisterSpellScript<ShadowGraspMagth>("spell_shadow_grasp_magtheridon");
     RegisterSpellScript<QuakeMagth>("spell_quake_magtheridon");
-    RegisterSpellScript<QuakeMagthKnockback>("spell_quake_magtheridon_knockback");
     RegisterSpellScript<DebrisMagtheridon>("spell_magtheridon_debris");
 }

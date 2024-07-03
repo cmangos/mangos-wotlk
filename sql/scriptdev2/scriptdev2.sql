@@ -4662,24 +4662,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 -- -1 543 000 HELLFIRE RAMPARTS
 
 -- -1 544 000 MAGTHERIDON'S LAIR
-INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1544000','Wretched, meddling insects. Release me and perhaps i will grant you a merciful death!','10247','6','0','0','17339','magtheridon SAY_TAUNT1'),
-('-1544001','Vermin! Leeches! Take my blood and choke on it!','10248','6','0','0','17340','magtheridon SAY_TAUNT2'),
-('-1544002','Illidan is an arrogant fool. I will crush him and reclaim Outland as my own.','10249','6','0','0','17341','magtheridon SAY_TAUNT3'),
-('-1544003','Away, you mindless parasites. My blood is my own!','10250','6','0','0','17342','magtheridon SAY_TAUNT4'),
-('-1544004','How long do you believe your pathetic sorcery can hold me?','10251','6','0','0','17343','magtheridon SAY_TAUNT5'),
-('-1544005','My blood will be the end of you!','10252','6','0','0','17344','magtheridon SAY_TAUNT6'),
-('-1544006','I... am... unleashed!','10253','1','0','0','17346','magtheridon SAY_FREED'),
-('-1544007','Thank you for releasing me. Now...die!','10254','1','0','0','0','magtheridon SAY_AGGRO'),
-('-1544008','Not again... NOT AGAIN!','10256','1','0','0','17348','magtheridon SAY_BANISH'),
-('-1544009','I will not be taken so easily! Let the walls of this prison tremble... and fall!','10257','1','0','0','17336','magtheridon SAY_CHAMBER_DESTROY'),
-('-1544010','Did you think me weak? Soft? Who is the weak one now?!','10255','1','0','0','17349','magtheridon SAY_PLAYER_KILLED'),
-('-1544011','The Legion will consume you all!','10258','1','0','0','17347','magtheridon SAY_DEATH'),
-('-1544012','REUSE_ME','0','0','0','0','0','REUSE_ME'),
-('-1544013','%s begins to cast Blast Nova!','0','3','0','0','18739','magtheridon EMOTE_BLASTNOVA'),
-('-1544014','%s''s bonds begin to weaken!','0','2','0','0','13689','magtheridon EMOTE_BEGIN'),
-('-1544015','%s breaks free!','0','2','0','0','13691','magtheridon EMOTE_FREED'),
-('-1544016','%s is nearly free of his bonds!','0','2','0','0','13690','magtheridon EMOTE_NEARLY_FREE');
 
 -- -1 545 000 THE STEAMVAULT
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

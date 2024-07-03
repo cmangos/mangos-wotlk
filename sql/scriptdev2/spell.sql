@@ -237,7 +237,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30166,'spell_shadow_grasp_magtheridon'),
 (30410,'spell_shadow_grasp_cube'),
 (30658,'spell_quake_magtheridon'),
-(30571,'spell_quake_magtheridon_knockback'),
 (30425,'spell_portal_attunement'),
 (30469,'spell_nether_beam'),
 (38546,'spell_face_random_target'),

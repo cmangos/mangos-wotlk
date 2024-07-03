@@ -57,12 +57,25 @@ void instance_magtheridons_lair::OnCreatureCreate(Creature* pCreature)
             m_npcEntryGuidStore[NPC_MAGTHERIDON] = pCreature->GetObjectGuid();
             break;
         case NPC_CHANNELER:
-            m_lChannelerGuidList.push_back(pCreature->GetObjectGuid());
+            m_lChannelerGuidList.push_back(pCreature->GetDbGuid());
             break;
         case NPC_BURNING_ABYSSAL:
-            m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+            m_abyssalTemporaryGuids.push_back(pCreature->GetObjectGuid());
             break;
     }
+}
+
+void instance_magtheridons_lair::OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* /*pCreature*/)
+{
+    // Confirmed on TBC Classic: instantly free magtheridon when all channelers are dead
+    if (pGroup->GetGroupId() == SPAWN_GROUP_CHANNELER)
+    {
+        if (GetData(TYPE_CHANNELER_EVENT) == IN_PROGRESS)
+        {
+            SetData(TYPE_MAGTHERIDON_EVENT, IN_PROGRESS);
+            m_uiCageBreakTimer = 0;
+        }
+    }        
 }
 
 void instance_magtheridons_lair::OnObjectCreate(GameObject* pGo)
@@ -84,6 +97,10 @@ void instance_magtheridons_lair::OnObjectCreate(GameObject* pGo)
         case GO_MANTICRON_CUBE:
             m_lCubeGuidList.push_back(pGo->GetObjectGuid());
             break;
+        case GO_MAGHERIDON_BLAZE:
+            m_lBlazeGuidList.push_back(pGo->GetObjectGuid());
+            break;
+
     }
 }
 
@@ -94,40 +111,9 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
         case TYPE_MAGTHERIDON_EVENT:
             switch (uiData)
             {
-                case FAIL:
-                    // Reset channelers
-                    for (GuidList::const_iterator itr = m_lChannelerGuidList.begin(); itr != m_lChannelerGuidList.end(); ++itr)
-                    {
-                        if (Creature* pChanneler = instance->GetCreature(*itr))
-                        {
-                            if (!pChanneler->IsAlive())
-                                pChanneler->Respawn();
-                        }
-                    }
-
-                    // Reset columns
-                    for (GuidList::const_iterator itr = m_lColumnGuidList.begin(); itr != m_lColumnGuidList.end(); ++itr)
-                    {
-                        if (GameObject* pColumn = instance->GetGameObject(*itr))
-                            pColumn->ResetDoorOrButton();
-                    }
-
-                    {
-                        GuidVector abyssals;
-                        GetCreatureGuidVectorFromStorage(NPC_BURNING_ABYSSAL, abyssals);
-                        DespawnGuids(abyssals);
-                    }
-
-                    // Reset cubes
-                    for (GuidList::const_iterator itr = m_lCubeGuidList.begin(); itr != m_lCubeGuidList.end(); ++itr)
-                        DoToggleGameObjectFlags(*itr, GO_FLAG_NO_INTERACT, true);
-
-                    // Reset timers and doors
-                    SetData(TYPE_CHANNELER_EVENT, NOT_STARTED);
-                    m_uiCageBreakTimer = 0;
-                    m_uiCageBreakStage = 0;
-
-                    [[fallthrough]];
+                case FAIL:                   
+                    FailBoss();
+                    break;
                 case DONE:
                     // Reset door on Fail or Done
                     DoUseOpenableObject(GO_DOODAD_HF_MAG_DOOR01, true);
@@ -157,21 +143,8 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
             if (m_auiEncounter[1] == uiData)
                 break;
             // stop the event timer on fail
-            if (uiData == FAIL)
-            {
-                m_uiCageBreakTimer = 0;
-                m_uiCageBreakStage = 0;
-
-                // Reset door on Fail
-                DoUseOpenableObject(GO_DOODAD_HF_MAG_DOOR01, true);
-
-                // Reset Magtheridon
-                if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
-                {
-                    if (pMagtheridon->IsAlive())
-                        pMagtheridon->AI()->EnterEvadeMode();
-                }
-            }
+            if (uiData == FAIL)           
+                FailBoss();
             // prepare Magtheridon for release
             if (uiData == IN_PROGRESS)
             {
@@ -202,6 +175,49 @@ uint32 instance_magtheridons_lair::GetData(uint32 uiType) const
     return 0;
 }
 
+void instance_magtheridons_lair::FailBoss()
+{
+    // Reset Timers and stages
+    m_uiCageBreakTimer = 0;
+    m_uiCageBreakStage = 0;
+    SetData(TYPE_CHANNELER_EVENT, NOT_STARTED);
+
+    // Reset door on Fail
+    DoUseOpenableObject(GO_DOODAD_HF_MAG_DOOR01, true);
+
+    for (GuidList::const_iterator itr = m_lColumnGuidList.begin(); itr != m_lColumnGuidList.end(); ++itr)
+    {
+        if (GameObject* pColumn = instance->GetGameObject(*itr))
+            pColumn->ResetDoorOrButton();
+    }
+
+    // Reset cubes
+    for (GuidList::const_iterator itr = m_lCubeGuidList.begin(); itr != m_lCubeGuidList.end(); ++itr)
+        DoToggleGameObjectFlags(*itr, GO_FLAG_NO_INTERACT, true);
+
+    // Despawn all Blaze objects
+    for (GuidList::const_iterator itr = m_lBlazeGuidList.begin(); itr != m_lBlazeGuidList.end(); ++itr)
+    {
+        if (GameObject* pBlaze = instance->GetGameObject(*itr))
+            pBlaze->AddObjectToRemoveList();
+    }
+
+    // Despawn all abyssals
+    for (ObjectGuid& guid : m_abyssalTemporaryGuids)
+        if (Creature* creature = instance->GetCreature(guid))
+            creature->ForcedDespawn();
+
+    // Despawn and Respawn all Channelers for 30 seconds
+    RespawnDbGuids(m_lChannelerGuidList, 30);
+    m_lChannelerGuidList.clear();
+
+    if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
+    {
+        pMagtheridon->SetRespawnDelay(30, true);
+        pMagtheridon->ForcedDespawn();
+    }
+}
+
 void instance_magtheridons_lair::Update(uint32 uiDiff)
 {
     // Prepare to release Magtheridon
@@ -216,7 +232,7 @@ void instance_magtheridons_lair::Update(uint32 uiDiff)
                     {
                         if (pMagtheridon->IsAlive())
                         {
-                            DoScriptText(EMOTE_NEARLY_FREE, pMagtheridon);
+                            pMagtheridon->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pMagtheridon, pMagtheridon);                            
                             m_uiCageBreakTimer = MINUTE * IN_MILLISECONDS;
                         }
                     }
@@ -239,24 +255,19 @@ void instance_magtheridons_lair::Update(uint32 uiDiff)
 
     if (m_uiRandYellTimer < uiDiff)
     {
-        DoOrSimulateScriptTextForThisInstance(aRandomTaunt[urand(0, 5)], NPC_MAGTHERIDON);
+        if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
+        {
+            if (pMagtheridon->IsAlive())
+            {
+                DoBroadcastText(aRandomTaunt[urand(0, 5)], pMagtheridon);
+                m_uiCageBreakTimer = MINUTE * IN_MILLISECONDS;
+            }
+        }
         m_uiRandYellTimer = 90000;
     }
     else
         m_uiRandYellTimer -= uiDiff;
 }
-
-struct MentalInterferenceSpellScript : public SpellScript
-{
-    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
-    {
-        if (ObjectGuid target = spell->m_targets.getUnitTargetGuid())
-            if (target.GetEntry() != 16943 && target.GetEntry() != 20928)  // Mental Interference can be cast only on these two targets
-                return SPELL_FAILED_BAD_TARGETS;
-
-        return SPELL_CAST_OK;
-    }
-};
 
 InstanceData* GetInstanceData_instance_magtheridons_lair(Map* pMap)
 {
@@ -268,7 +279,5 @@ void AddSC_instance_magtheridons_lair()
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_magtheridons_lair";
     pNewScript->GetInstanceData = &GetInstanceData_instance_magtheridons_lair;
-    pNewScript->RegisterSelf();
-
-    RegisterSpellScript<MentalInterferenceSpellScript>("spell_mental_interference");
+    pNewScript->RegisterSelf();    
 }

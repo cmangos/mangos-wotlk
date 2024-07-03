@@ -4041,6 +4041,19 @@ struct RingOfFlame : public AuraScript
     }
 };
 
+
+struct MentalInterferenceSpellScript : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (ObjectGuid target = spell->m_targets.getUnitTargetGuid())
+            if (target.GetEntry() != 16943 && target.GetEntry() != 20928)  // Mental Interference can be cast only on these two targets
+                return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_netherstorm()
 {
     Script* pNewScript = new Script;
@@ -4161,4 +4174,5 @@ void AddSC_netherstorm()
     RegisterSpellScript<UltraDeconsolodationZapper>("spell_ultra_deconsolodation_zapper");
     RegisterSpellScript<ThrowBoomsDoom>("spell_throw_booms_doom");
     RegisterSpellScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
+    RegisterSpellScript<MentalInterferenceSpellScript>("spell_mental_interference");
 }
