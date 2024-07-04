@@ -275,12 +275,15 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     uint16 index = UNIT_FIELD_ATTACK_POWER;
     uint16 index_mod = UNIT_FIELD_ATTACK_POWER_MODS;
     uint16 index_mult = UNIT_FIELD_ATTACK_POWER_MULTIPLIER;
+    AttackPowerMod mod = AttackPowerMod::MELEE_ATTACK_POWER;
 
     if (ranged)
     {
         index = UNIT_FIELD_RANGED_ATTACK_POWER;
         index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MODS;
         index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
+
+        mod = AttackPowerMod::RANGED_ATTACK_POWER;
 
         switch (getClass())
         {
@@ -379,7 +382,8 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
     SetInt32Value(index, (uint32)base_attPower);            // UNIT_FIELD_(RANGED)_ATTACK_POWER field
-    SetInt32Value(index_mod, (uint32)attPowerMod);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    SetInt16Value(index_mod, 0, m_attackPowerMod[size_t(mod)][size_t(AttackPowerModSign::MOD_SIGN_POS)]);
+    SetInt16Value(index_mod, 1, m_attackPowerMod[size_t(mod)][size_t(AttackPowerModSign::MOD_SIGN_NEG)]);
     SetFloatValue(index_mult, attPowerMultiplier);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     // automatically update weapon damage after attack power modification
@@ -920,12 +924,15 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     uint16 index = UNIT_FIELD_ATTACK_POWER;
     uint16 index_mod = UNIT_FIELD_ATTACK_POWER_MODS;
     uint16 index_mult = UNIT_FIELD_ATTACK_POWER_MULTIPLIER;
+    AttackPowerMod mod = AttackPowerMod::MELEE_ATTACK_POWER;
 
     if (ranged)
     {
         index = UNIT_FIELD_RANGED_ATTACK_POWER;
         index_mod = UNIT_FIELD_RANGED_ATTACK_POWER_MODS;
         index_mult = UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER;
+
+        mod = AttackPowerMod::RANGED_ATTACK_POWER;
 
         val2 = GetStat(STAT_AGILITY) - 10.0f;
     }
@@ -952,7 +959,8 @@ void Creature::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
     SetInt32Value(index, (uint32)base_attPower);            // UNIT_FIELD_(RANGED)_ATTACK_POWER field
-    SetInt32Value(index_mod, (uint32)attPowerMod);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    SetInt16Value(index_mod, 0, m_attackPowerMod[size_t(mod)][size_t(AttackPowerModSign::MOD_SIGN_POS)]);
+    SetInt16Value(index_mod, 1, m_attackPowerMod[size_t(mod)][size_t(AttackPowerModSign::MOD_SIGN_NEG)]);
     SetFloatValue(index_mult, attPowerMultiplier);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     // automatically update weapon damage after attack power modification
@@ -1145,8 +1153,8 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
 
     // in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
     float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
-    float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
-    float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT);
+    // float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
+    float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
     if (GetUInt32Value(UNIT_CREATED_BY_SPELL) == 30146 && m_glyphedStat)
         attPowerMultiplier *= 1.2;
     attPowerMultiplier -= 1.0f;
@@ -1154,7 +1162,8 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     // UNIT_FIELD_(RANGED)_ATTACK_POWER field
     SetInt32Value(UNIT_FIELD_ATTACK_POWER, (int32)base_attPower);
     // UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
-    SetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, (int32)attPowerMod);
+    SetInt16Value(UNIT_FIELD_ATTACK_POWER_MODS, 0, m_attackPowerMod[size_t(AttackPowerMod::MELEE_ATTACK_POWER)][size_t(AttackPowerModSign::MOD_SIGN_POS)]);
+    SetInt16Value(UNIT_FIELD_ATTACK_POWER_MODS, 1, m_attackPowerMod[size_t(AttackPowerMod::MELEE_ATTACK_POWER)][size_t(AttackPowerModSign::MOD_SIGN_NEG)]);
     // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
 

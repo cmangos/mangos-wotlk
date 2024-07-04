@@ -314,6 +314,10 @@ Unit::Unit() :
     // implement 50% base damage from offhand
     m_auraModifiersGroup[UNIT_MOD_DAMAGE_OFFHAND][TOTAL_PCT] = 0.5f;
 
+    for (auto& i : m_attackPowerMod)
+        for (auto& k : i)
+            k = 0;
+
     for (float& m_createStat : m_createStats)
         m_createStat = 0.0f;
 
@@ -10123,6 +10127,15 @@ bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, f
         case BASE_VALUE:
         case TOTAL_VALUE:
             m_auraModifiersGroup[unitMod][modifierType] += apply ? amount : -amount;
+
+            if (modifierType == TOTAL_VALUE)
+            {
+                auto sign = amount > 0 ? AttackPowerModSign::MOD_SIGN_POS : AttackPowerModSign::MOD_SIGN_NEG;
+                if (unitMod == UNIT_MOD_ATTACK_POWER)
+                    m_attackPowerMod[size_t(AttackPowerMod::MELEE_ATTACK_POWER)][size_t(sign)] += apply ? amount : -amount;
+                else if (unitMod == UNIT_MOD_ATTACK_POWER_RANGED)
+                    m_attackPowerMod[size_t(AttackPowerMod::RANGED_ATTACK_POWER)][size_t(sign)] += apply ? amount : -amount;
+            }
             break;
         case BASE_PCT:
         case TOTAL_PCT:
@@ -10317,7 +10330,7 @@ float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
             return 0.0f;
         return ap * (1.0f + GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER));
     }
-    int32 ap = GetInt32Value(UNIT_FIELD_ATTACK_POWER) + GetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
+    int32 ap = GetInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt16Value(UNIT_FIELD_ATTACK_POWER_MODS, 0) - GetUInt16Value(UNIT_FIELD_ATTACK_POWER_MODS, 1);
     if (ap < 0)
         return 0.0f;
     return ap * (1.0f + GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER));
