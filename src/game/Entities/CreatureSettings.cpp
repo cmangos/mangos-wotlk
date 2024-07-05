@@ -40,6 +40,18 @@ void CreatureSettings::ResetStaticFlags(CreatureStaticFlags staticFlags, Creatur
         m_owner->GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Gigantic);
     if (HasFlag(CreatureStaticFlags3::INFINITE_AOI))
         m_owner->GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
+
+    if (HasFlag(CreatureStaticFlags::UNINTERACTIBLE))
+        m_owner->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+    if (HasFlag(CreatureStaticFlags::IMMUNE_TO_PC))
+        m_owner->SetImmuneToPlayer(true);
+    if (HasFlag(CreatureStaticFlags::IMMUNE_TO_NPC))
+        m_owner->SetImmuneToNPC(true);
+
+    if (HasFlag(CreatureStaticFlags2::NO_OWNER_THREAT))
+        m_owner->DisableThreatPropagationToOwner();
+    if (HasFlag(CreatureStaticFlags2::HIDE_BODY))
+        m_owner->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_HIDE_BODY);
 }
 
 void CreatureSettings::SetFlag(CreatureStaticFlags flag)
