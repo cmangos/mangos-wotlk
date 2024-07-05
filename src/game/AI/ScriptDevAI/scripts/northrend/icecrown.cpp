@@ -1063,6 +1063,39 @@ struct FrozenSiegebolt : public SpellScript
     }
 };
 
+// 57385 - Argent Cannon
+struct ArgentCannon : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        uint32 damage = spell->GetDamage();
+        Position pos = spell->m_targets.getDestination();
+        SpellCastArgs args;
+        args.SetDestination(pos);
+        spell->GetCaster()->CastSpell(args, damage, TRIGGERED_OLD_TRIGGERED);
+
+        spell->GetCaster()->CastSpell(nullptr, 57608, TRIGGERED_OLD_TRIGGERED); // Powering Up The Core
+    }
+};
+
+// 57412 - Reckoning Bomb
+struct ReckoningBomb : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        uint32 damage = spell->GetDamage();
+        Position pos = spell->m_targets.getDestination();
+        SpellCastArgs args;
+        args.SetDestination(pos);
+        spell->GetCaster()->CastSpell(args, damage, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_icecrown()
 {
@@ -1101,4 +1134,6 @@ void AddSC_icecrown()
     RegisterSpellScript<ToIcecrownAirshipASummonVehicle>("spell_to_icecrown_air_ship_a_summon_vehicle");
     RegisterSpellScript<ToIcecrownAirshipHSummonVehicle>("spell_to_icecrown_air_ship_h_summon_vehicle");
     RegisterSpellScript<FrozenSiegebolt>("spell_frozen_siegebolt");
+    RegisterSpellScript<ArgentCannon>("spell_argent_cannon");
+    RegisterSpellScript<ReckoningBomb>("spell_reckoning_bomb");
 }
