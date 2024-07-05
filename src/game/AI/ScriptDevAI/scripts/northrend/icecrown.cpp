@@ -1049,6 +1049,21 @@ struct ToIcecrownAirshipHSummonVehicle : public SpellScript
     }
 };
 
+// 57534 - Frozen Siegebolt
+// 57650 - Frozen Siegebolt
+// 57666 - Frozen Siegebolt
+// 57667 - Frozen Siegebolt
+
+struct FrozenSiegebolt : public SpellScript
+{
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex effIdx, bool /*targetB*/, float& radius) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+            radius = 100.f;
+    }
+};
+
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1085,4 +1100,5 @@ void AddSC_icecrown()
     RegisterSpellScript<DropOffCapturedCrusader>("spell_drop_off_captured_crusader");
     RegisterSpellScript<ToIcecrownAirshipASummonVehicle>("spell_to_icecrown_air_ship_a_summon_vehicle");
     RegisterSpellScript<ToIcecrownAirshipHSummonVehicle>("spell_to_icecrown_air_ship_h_summon_vehicle");
+    RegisterSpellScript<FrozenSiegebolt>("spell_frozen_siegebolt");
 }
