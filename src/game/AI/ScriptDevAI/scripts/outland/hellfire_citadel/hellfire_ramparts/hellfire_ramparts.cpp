@@ -39,14 +39,12 @@ void instance_ramparts::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {        
+        case NPC_VAZRUDEN_HERALD:
         case NPC_VAZRUDEN:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_HELLFIRE_SENTRY:
-            if (pCreature->IsTemporarySummon())
-                m_VazrudenTemporaryGuids.push_back(pCreature->GetObjectGuid());
-            else
-                m_VazrudenPermanentGuids.push_back(pCreature->GetDbGuid());
+            m_VazrudenPermanentGuids.push_back(pCreature->GetDbGuid());
             break;
     }
 }

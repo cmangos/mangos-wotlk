@@ -42,7 +42,6 @@ class instance_ramparts : public ScriptedInstance
 
         uint32 m_uiSentryCounter;
         std::vector<uint32> m_VazrudenPermanentGuids;
-        GuidVector m_VazrudenTemporaryGuids;
 };
 
 #endif
