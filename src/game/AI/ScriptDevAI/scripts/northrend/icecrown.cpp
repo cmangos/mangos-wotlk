@@ -1075,9 +1075,12 @@ struct ArgentCannon : public SpellScript
         Position pos = spell->m_targets.getDestination();
         SpellCastArgs args;
         args.SetDestination(pos);
-        spell->GetCaster()->CastSpell(args, damage, TRIGGERED_OLD_TRIGGERED);
+        Unit* caster = spell->GetCaster();
+        caster->CastSpell(args, damage, TRIGGERED_OLD_TRIGGERED);
 
-        spell->GetCaster()->CastSpell(nullptr, 57608, TRIGGERED_OLD_TRIGGERED); // Powering Up The Core
+        caster->CastSpell(nullptr, 57608, TRIGGERED_OLD_TRIGGERED); // Powering Up The Core
+        if (caster->GetPower(caster->GetPowerType()) == caster->GetMaxPower(caster->GetPowerType()))
+            DoBroadcastText(31367, caster, nullptr, CHAT_TYPE_BOSS_EMOTE); // reckoning bomb ready text
     }
 };
 
@@ -1095,6 +1098,13 @@ struct ReckoningBomb : public SpellScript
         args.SetDestination(pos);
         spell->GetCaster()->CastSpell(args, damage, TRIGGERED_OLD_TRIGGERED);
     }
+};
+
+// 57415 - The Reckoning
+struct TheReckoning : public SpellScript
+{
+    // should hit nothing at this time
+    bool OnCheckTarget(const Spell* /*spell*/, GameObject* /*target*/, SpellEffectIndex /*eff*/) const { return false; }
 };
 
 void AddSC_icecrown()
@@ -1136,4 +1146,5 @@ void AddSC_icecrown()
     RegisterSpellScript<FrozenSiegebolt>("spell_frozen_siegebolt");
     RegisterSpellScript<ArgentCannon>("spell_argent_cannon");
     RegisterSpellScript<ReckoningBomb>("spell_reckoning_bomb");
+    RegisterSpellScript<TheReckoning>("spell_the_reckoning");
 }
