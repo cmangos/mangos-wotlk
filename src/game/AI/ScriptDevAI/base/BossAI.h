@@ -114,7 +114,7 @@ class BossAI : public CombatAI
         void EnterEvadeMode() override;
 
         /**
-        * Adds one or more Spells to cast with DoCastSpellIfCan on creature death
+        * Adds one or more Spells to cast with CastSpell on creature death
         * @param cast Initialized struct of QueuedCast type
         */
         void AddCastOnDeath(QueuedCast cast);
