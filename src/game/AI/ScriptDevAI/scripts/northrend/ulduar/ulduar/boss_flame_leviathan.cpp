@@ -195,7 +195,6 @@ static const float afHodirFury[MAX_HODIR_FURY][3] =
 static const float afMimironInferno[3] = {329.1809f, 8.02577f, 410.887f};
 
 static const std::vector<uint32> addEntries = {NPC_LEVIATHAN_SEAT, NPC_LEVIATHAN_TURRET, NPC_DEFENSE_TURRET, NPC_OVERLOAD_DEVICE};
-static const std::vector<uint32> playerVehicleEntries = {NPC_SALVAGED_SIEGE_ENGINE, NPC_SALVAGED_SIEGE_TURRET, NPC_SALVAGED_CHOPPER, NPC_SALVAGED_DEMOLISHER, NPC_SALVAGED_DEMOLISHER_SEAT};
 
 /*######
 ## boss_flame_leviathan
@@ -994,7 +993,7 @@ struct PursueLeviathan : public SpellScript
             return false;
         if (!target->IsVehicle())
             return false;
-        if (auto vehicleInfo = target->GetVehicleInfo())
+        if (VehicleInfo* vehicleInfo = target->GetVehicleInfo())
             if (vehicleInfo->GetPassenger(0))
                 return true;
         return false;
@@ -1172,6 +1171,7 @@ struct HookshotAura : public AuraScript
 // 62323 - Hookshot
 struct Hookshot : public SpellScript
 {
+    static constexpr float checkDist = 30.f * 30.f;
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
         if (eff != EFFECT_INDEX_0)
@@ -1179,7 +1179,7 @@ struct Hookshot : public SpellScript
         Unit* caster = spell->GetCaster();
         if (!caster || !target)
             return true;
-        if (caster->GetPosition().GetDistance(target->GetPosition()) > 30.f * 30.f)
+        if (caster->GetPosition().GetDistance(target->GetPosition()) > checkDist)
             return false;
         if (target->HasAura(SPELL_SYSTEMS_SHUTDOWN))
             return false;
@@ -1446,6 +1446,10 @@ struct ReadyToFly : public SpellScript
     }
 };
 
+enum SafetyContainerID : uint32
+{
+    NPC_PYRITE_SAFETY_CONTAINER = 33218,
+};
 // 64979 - Anti-Air Rocket
 struct AntiAirRocket : public SpellScript
 {
@@ -1454,7 +1458,7 @@ struct AntiAirRocket : public SpellScript
         Unit* caster = spell->GetAffectiveCaster();
         if (!caster->IsEnemy(target))
             return false;
-        if (target->GetEntry() == 33218)
+        if (target->GetEntry() == NPC_PYRITE_SAFETY_CONTAINER)
             return false;
         return true;
     }
@@ -1468,7 +1472,7 @@ struct RopeBeam : public AuraScript
         if (apply)
             return;
         Unit* caster = aura->GetCaster();
-        if (!caster || caster->GetEntry() != 33218)
+        if (!caster || caster->GetEntry() != NPC_PYRITE_SAFETY_CONTAINER)
             return;
         caster->CastSpell(nullptr, SPELL_COSMETIC_PARACHITE, TRIGGERED_OLD_TRIGGERED);
         caster->GetMotionMaster()->MoveFall();
