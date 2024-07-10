@@ -197,7 +197,7 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
 
 VehicleInfo::~VehicleInfo()
 {
-    ((Unit*)m_owner)->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+    (static_cast<Unit*>(m_owner))->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
 
     RemoveAccessoriesFromMap();                             // Remove accessories (for example required with player vehicles)
 }
@@ -221,28 +221,28 @@ void VehicleInfo::Initialize()
 
     // Initialize movement limitations
     uint32 vehicleFlags = GetVehicleEntry()->m_flags;
-    Unit* pVehicle = (Unit*)m_owner;
+    Unit* vehicle = static_cast<Unit*>(m_owner);
 
     if (vehicleFlags & VEHICLE_FLAG_NO_STRAFE)
-        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
+        vehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_STRAFE);
     if (vehicleFlags & VEHICLE_FLAG_NO_JUMPING)
-        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_JUMPING);
+        vehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_NO_JUMPING);
     if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDTURNING)
-        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDTURNING);
+        vehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDTURNING);
     if (vehicleFlags & VEHICLE_FLAG_ALLOW_PITCHING)
-        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
+        vehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_ALLOW_PITCHING);
     if (vehicleFlags & VEHICLE_FLAG_FULLSPEEDPITCHING)
-        pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
+        vehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
 
     // NOTE: this is the best possible combination to root a vehicle
     if ((vehicleFlags & VEHICLE_FLAG_FIXED_POSITION) || m_owner->GetEntry() == 30236 || m_owner->GetEntry() == 39759)
-        pVehicle->SetImmobilizedState(true);
+        vehicle->SetImmobilizedState(true);
 
     // Initialize power type based on DBC values (creatures only)
-    if (pVehicle->GetTypeId() == TYPEID_UNIT)
+    if (vehicle->GetTypeId() == TYPEID_UNIT)
     {
         if (PowerDisplayEntry const* powerEntry = sPowerDisplayStore.LookupEntry(GetVehicleEntry()->m_powerDisplayID))
-            pVehicle->SetPowerType(Powers(powerEntry->power));
+            vehicle->SetPowerType(Powers(powerEntry->power));
     }
 
     m_isInitialized = true;
@@ -255,7 +255,7 @@ void VehicleInfo::SummonPassenger(uint32 entry, Position const& pos, uint8 seatI
         DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), seatId);
         m_accessoryGuids.insert(summoned->GetObjectGuid());
         int32 basepoint0 = seatId + 1;
-        summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        summoned->CastCustomSpell(static_cast<Unit*>(m_owner), SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 }
 
@@ -313,15 +313,15 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
-        Player* pPlayer = static_cast<Player*>(passenger);
-        pPlayer->UnsummonPetTemporaryIfAny();
+        Player* player = static_cast<Player*>(passenger);
+        player->UnsummonPetTemporaryIfAny();
 
         WorldPacket data(SMSG_ON_CANCEL_EXPECTED_RIDE_VEHICLE_AURA);
-        pPlayer->GetSession()->SendPacket(data);
+        player->GetSession()->SendPacket(data);
 
         data.Initialize(SMSG_BREAK_TARGET, m_owner->GetPackGUID().size());
         data << m_owner->GetPackGUID();
-        pPlayer->GetSession()->SendPacket(data);
+        player->GetSession()->SendPacket(data);
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
     {
@@ -483,11 +483,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
         if (passenger->IsPlayer())
         {
-            Player* pPlayer = (Player*)passenger;
-            pPlayer->ResummonPetTemporaryUnSummonedIfAny();
-            pPlayer->SetFallInformation(0, pPlayer->GetPositionZ());
-
-            // SMSG_PET_DISMISS_SOUND (?)
+            Player* player = static_cast<Player*>(passenger);
+            player->ResummonPetTemporaryUnSummonedIfAny();
+            player->SetFallInformation(0, player->GetPositionZ());
         }
 
         if (passenger->hasUnitState(UNIT_STAT_ROOT) && !passenger->HasAuraType(SPELL_AURA_MOD_ROOT))
@@ -588,7 +586,7 @@ Unit* VehicleInfo::GetPassenger(uint8 seat) const
 {
     for (const auto& m_passenger : m_passengers)
         if (m_passenger.second->GetTransportSeat() == seat)
-            return (Unit*)m_passenger.first;
+            return static_cast<Unit*>(m_passenger.first);
 
     return nullptr;
 }
@@ -643,7 +641,7 @@ void VehicleInfo::TeleportPassengers(uint32 mapId)
     {
         if (passenger.first->IsPlayer())
         {
-            players.push_back((Player*)passenger.first);
+            players.push_back(static_cast<Player*>(passenger.first));
         }
     }
     GenericTransport* transport = GetOwner()->GetTransport();
@@ -826,7 +824,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
     if (m_owner->IsPlayer())
         return;
 
-    Unit* pVehicle = static_cast<Unit*>(m_owner);                        // Vehicles are alawys Unit (except with multi-person mounts)
+    Unit* vehicle = static_cast<Unit*>(m_owner);                        // Vehicles are alawys Unit (except with multi-person mounts)
 
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
@@ -835,84 +833,84 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
-        Player* pPlayer = (Player*)passenger;
+        Player* player = static_cast<Player*>(passenger);
 
         // group update
-        if (pPlayer->GetGroup())
-            pPlayer->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
+        if (player->GetGroup())
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
 
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            pPlayer->GetCamera().SetView(pVehicle);
+            player->GetCamera().SetView(vehicle);
 
-            pPlayer->SetCharm(pVehicle);
-            pVehicle->SetCharmer(pPlayer);
+            player->SetCharm(vehicle);
+            vehicle->SetCharmer(player);
 
-            pVehicle->SetCanEnterCombat(true);
+            vehicle->SetCanEnterCombat(true);
 
-            pVehicle->GetMotionMaster()->Clear();
-            pVehicle->GetMotionMaster()->MoveIdle();
-            pVehicle->StopMoving(true);
+            vehicle->GetMotionMaster()->Clear();
+            vehicle->GetMotionMaster()->MoveIdle();
+            vehicle->StopMoving(true);
 
-            pVehicle->addUnitState(UNIT_STAT_POSSESSED);
-            pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
+            vehicle->addUnitState(UNIT_STAT_POSSESSED);
+            vehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
-            pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            vehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
-            if (pPlayer->IsPvP())
-                pVehicle->SetPvP(true);
+            if (player->IsPvP())
+                vehicle->SetPvP(true);
 
-            if (pPlayer->IsPvPFreeForAll())
-                pVehicle->SetPvPFreeForAll(true);
+            if (player->IsPvPFreeForAll())
+                vehicle->SetPvPFreeForAll(true);
 
-            pPlayer->UpdateClientControl(pVehicle, true);
-            pPlayer->SetMover(pVehicle);
+            player->UpdateClientControl(vehicle, true);
+            player->SetMover(vehicle);
 
             // Unconfirmed - default speed handling
-            if (pVehicle->GetTypeId() == TYPEID_UNIT)
+            if (vehicle->GetTypeId() == TYPEID_UNIT)
             {
-                if (!pPlayer->IsWalking() && pVehicle->IsWalking())
+                if (!player->IsWalking() && vehicle->IsWalking())
                 {
-                    ((Creature*)pVehicle)->SetWalk(false, true);
+                    (static_cast<Creature*>(vehicle))->SetWalk(false, true);
                 }
-                else if (pPlayer->IsWalking() && !pVehicle->IsWalking())
+                else if (player->IsWalking() && !vehicle->IsWalking())
                 {
-                    ((Creature*)pVehicle)->SetWalk(true, true);
+                    (static_cast<Creature*>(vehicle))->SetWalk(true, true);
                 }
 
                 // set vehicle faction as per the controller faction
-                m_originalFaction = pVehicle->GetFaction();
-                ((Creature*)pVehicle)->SetFactionTemporary(pPlayer->GetFaction(), TEMPFACTION_NONE);
+                m_originalFaction = vehicle->GetFaction();
+                (static_cast<Creature*>(vehicle))->SetFactionTemporary(player->GetFaction(), TEMPFACTION_NONE);
 
                 // set vehicle react state to passive; player will control the vehicle
-                pVehicle->AI()->SetReactState(REACT_PASSIVE);
+                vehicle->AI()->SetReactState(REACT_PASSIVE);
             }
         }
 
-        pVehicle->SendForcedObjectUpdate(); // TODO: both of these should be one packet
-        pPlayer->SendForcedObjectUpdate();
+        vehicle->SendForcedObjectUpdate(); // TODO: both of these should be one packet
+        player->SendForcedObjectUpdate();
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
         {
-            CharmInfo* charmInfo = pVehicle->InitCharmInfo(pVehicle);
+            CharmInfo* charmInfo = vehicle->InitCharmInfo(vehicle);
             charmInfo->InitVehicleCreateSpells();
 
-            pPlayer->VehicleSpellInitialize();
+            player->VehicleSpellInitialize();
         }
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
     {
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            passenger->SetCharm(pVehicle);
-            pVehicle->SetCharmer(passenger);
+            passenger->SetCharm(vehicle);
+            vehicle->SetCharmer(passenger);
 
             // Change vehicle react state; ToDo: also change the vehicle faction?
-            if (pVehicle->GetTypeId() == TYPEID_UNIT)
-                pVehicle->AI()->SetReactState(passenger->AI()->GetReactState());
+            if (vehicle->GetTypeId() == TYPEID_UNIT)
+                vehicle->AI()->SetReactState(passenger->AI()->GetReactState());
         }
 
-        ((Creature*)passenger)->AI()->SetCombatMovement(false);
+        (static_cast<Creature*>(passenger))->AI()->SetCombatMovement(false);
         // Not entirely sure how this must be handled in relation to CONTROL
         // But in any way this at least would require some changes in the movement system most likely
         passenger->GetMotionMaster()->Clear(false, true);
@@ -926,7 +924,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     if (m_owner->IsPlayer())
         return;
 
-    Unit* pVehicle = static_cast<Unit*>(m_owner);
+    Unit* vehicle = static_cast<Unit*>(m_owner);
 
     if (seatFlags & SEAT_FLAG_NOT_SELECTABLE)
         passenger->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
@@ -935,65 +933,63 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
-        Player* pPlayer = (Player*)passenger;
+        Player* player = static_cast<Player*>(passenger);
 
         // group update
-        if (pPlayer->GetGroup())
-            pPlayer->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
+        if (player->GetGroup())
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_VEHICLE_SEAT);
 
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            pPlayer->SetCharm(nullptr);
-            pVehicle->SetCharmer(nullptr);
+            player->SetCharm(nullptr);
+            vehicle->SetCharmer(nullptr);
 
-            pPlayer->UpdateClientControl(pVehicle, false);
-            pPlayer->SetMover(nullptr);
+            player->UpdateClientControl(vehicle, false);
+            player->SetMover(nullptr);
 
-            pVehicle->StopMoving(true);
-            pVehicle->GetMotionMaster()->Clear();
+            vehicle->StopMoving(true);
+            vehicle->GetMotionMaster()->Clear();
 
-            pVehicle->clearUnitState(UNIT_STAT_POSSESSED);
-            pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
+            vehicle->clearUnitState(UNIT_STAT_POSSESSED);
+            vehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
-            pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+            vehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
-            if (pPlayer->IsPvP())
-                pVehicle->SetPvP(false);
+            if (player->IsPvP())
+                vehicle->SetPvP(false);
 
-            if (pPlayer->IsPvPFreeForAll())
-                pVehicle->SetPvPFreeForAll(false);
+            if (player->IsPvPFreeForAll())
+                vehicle->SetPvPFreeForAll(false);
 
-            // // must be called after movement control unapplying
-            // pPlayer->GetCamera().ResetView();
-
-            if (pVehicle->GetTypeId() == TYPEID_UNIT)
+            if (vehicle->GetTypeId() == TYPEID_UNIT)
             {
                 // reset vehicle faction
-                ((Creature*)pVehicle)->SetFactionTemporary(m_originalFaction, TEMPFACTION_NONE);
+                (static_cast<Creature*>(vehicle))->SetFactionTemporary(m_originalFaction, TEMPFACTION_NONE);
 
-                pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
+                vehicle->AI()->SetReactState(REACT_AGGRESSIVE);
+                
             }
 
-            pVehicle->SetTarget(nullptr);
+            vehicle->SetTarget(nullptr);
         }
 
         // must be called after movement control unapplying
-        pPlayer->GetCamera().ResetView();
+        player->GetCamera().ResetView();
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
-            pPlayer->RemovePetActionBar();
+            player->RemovePetActionBar();
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
     {
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
             passenger->SetCharm(nullptr);
-            pVehicle->SetCharmer(nullptr);
+            vehicle->SetCharmer(nullptr);
         }
 
         // Reinitialize movement
-        if (((Creature*)passenger)->AI())
-            ((Creature*)passenger)->AI()->SetCombatMovement(true, true);
+        if ((static_cast<Creature*>(passenger))->AI())
+            (static_cast<Creature*>(passenger))->AI()->SetCombatMovement(true, true);
         if (!passenger->GetVictim())
             passenger->GetMotionMaster()->Initialize();
     }
