@@ -460,10 +460,8 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
 
     Player* player = GetMenuSession()->GetPlayer();
     Unit* giver = player->GetMap()->GetUnit(guid);
-    if (giver &&  pQuest->IsAutoAccept() && player->CanTakeQuest(pQuest, false))
-    {
+    if (giver &&  pQuest->IsAutoAccept() && player->CanTakeQuest(pQuest, false) && player->CanAddQuest(pQuest, false))
         player->AddQuest(pQuest, giver);
-    }
 
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS - for %s of %s, questid = %u", GetMenuSession()->GetPlayer()->GetGuidStr().c_str(), guid.GetString().c_str(), pQuest->GetQuestId());
 }
