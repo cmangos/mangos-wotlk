@@ -131,19 +131,6 @@ class BossAI : public CombatAI
         */
         void AddRespawnOnEvade(std::chrono::seconds delay);
 
-        /**
-        * Adds one or more Creatures to despawn alongside this Creature on Evade
-        * Uses the same timer for respawn as was set in AddRespawnOnEvade
-        * @param guid ObjectGuid of the creature to respawn
-        */
-        void DespawnSubordinateOnEvade(ObjectGuid guid);
-        template <typename... Targs>
-        void DespawnSubordinateOnEvade(ObjectGuid guid, Targs... fargs)
-        {
-            DespawnSubordinateOnEvade(guid);
-            DespawnSubordinateOnEvade(fargs...);
-        }
-
         std::chrono::seconds TimeSinceEncounterStart()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
@@ -156,7 +143,6 @@ class BossAI : public CombatAI
     private:
         std::vector<uint32> m_onKilledTexts;
         std::vector<uint32> m_onAggroTexts;
-        std::vector<ObjectGuid> m_despawnSubordinateOnEvade;
 
         std::vector<uint32> m_entranceObjects;
         std::vector<uint32> m_exitObjects;

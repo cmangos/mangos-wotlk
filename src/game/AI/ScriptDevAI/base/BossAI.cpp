@@ -14,11 +14,9 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/include/sc_instance.h"
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
-#include "Spells/Spell.h"
 #include "Spells/SpellMgr.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
@@ -104,14 +102,6 @@ void BossAI::EnterEvadeMode()
     }
     m_creature->SetRespawnDelay(m_respawnDelay, true);
     m_creature->ForcedDespawn(2000);
-    for (ObjectGuid& guid : m_despawnSubordinateOnEvade)
-    {
-        Creature* addToDespawn = m_creature->GetMap()->GetCreature(guid);
-        if (!addToDespawn)
-            continue;
-        addToDespawn->SetRespawnDelay(m_respawnDelay);
-        addToDespawn->ForcedDespawn();
-    }
 }
 
 void BossAI::AddCastOnDeath(QueuedCast cast)
@@ -122,9 +112,4 @@ void BossAI::AddCastOnDeath(QueuedCast cast)
 void BossAI::AddRespawnOnEvade(std::chrono::seconds delay)
 {
     m_respawnDelay = delay.count();
-}
-
-void BossAI::DespawnSubordinateOnEvade(ObjectGuid guid)
-{
-    m_despawnSubordinateOnEvade.push_back(guid);
 }
