@@ -247,6 +247,14 @@ void VehicleInfo::Initialize()
             vehicle->SetPowerType(Powers(powerEntry->power));
     }
 
+    // Experimental
+    if (vehicleFlags & (VEHICLE_FLAG_UNK8 | VEHICLE_FLAG_UNK7))
+    {
+        vehicle->SetCanEnterCombat(false);
+        if (vehicle->AI())
+            vehicle->AI()->SetReactState(REACT_PASSIVE);
+    }
+
     m_isInitialized = true;
 }
 
@@ -314,7 +322,9 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     float lx = 0.f, ly = 0.f, lz = 0.f, lo = 0.f;
     GetSeatCoordinates(seatEntry, lx, ly, lz);
 
-    BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
+    if(!BoardPassenger(passenger, lx, ly, lz, lo, seat)) // Use TransportBase to store the passenger
+        return;
+
     if (auto* rootVehicle = static_cast<Unit*>(m_owner)->FindRootVehicle())
         passenger->SetRootVehicle(rootVehicle->GetObjectGuid());
 
