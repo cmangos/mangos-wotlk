@@ -157,11 +157,10 @@ bool TransportBase::HasOnBoard(WorldObject const* passenger) const
 
 bool TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat)
 {
-    TransportInfo* transportInfo = new TransportInfo(passenger, this, lx, ly, lz, lo, seat);
-
     for (const auto& m_passenger : m_passengers)
     {
-        if (transportInfo->GetTransportSeat() == m_passenger.second->GetTransportSeat())
+        if (seat == m_passenger.second->GetTransportSeat())
+        {
             if (m_passenger.first->IsUnit())
             {
                 if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
@@ -170,7 +169,11 @@ bool TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, f
                     return false;
                 }
             }
+        }
     }
+
+    TransportInfo* transportInfo = new TransportInfo(passenger, this, lx, ly, lz, lo, seat);
+
     // Insert our new passenger
     m_passengers.insert(PassengerMap::value_type(passenger, transportInfo));
 
