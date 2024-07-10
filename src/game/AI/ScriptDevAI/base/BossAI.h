@@ -18,8 +18,8 @@
 #define BOSS_AI_H
 
 #include "AI/ScriptDevAI/include/sc_instance.h"
-#include "Entities/Creature.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
+#include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum InstanceActions
@@ -144,17 +144,6 @@ class BossAI : public CombatAI
             DespawnSubordinateOnEvade(fargs...);
         }
 
-        template<typename T, typename W>
-        void ResetValueTo(T& var, W val)
-        {
-            static_assert(std::is_convertible<W, T>::value, "Value must be of castable type to the variable!");
-            T* ptr = &var;
-            m_resetValues.emplace_back([&]()
-            {
-                *ptr = static_cast<T>(val);
-            });
-        }
-
         std::chrono::seconds TimeSinceEncounterStart()
         {
             return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_combatStartTimestamp);
@@ -173,8 +162,6 @@ class BossAI : public CombatAI
         std::vector<uint32> m_exitObjects;
         std::chrono::milliseconds m_gateDelay = 3s;
         std::vector<QueuedCast> m_castOnDeath;
-
-        std::vector<std::function<void()>> m_resetValues;
 
         uint32 m_instanceDataType = -1;
 
