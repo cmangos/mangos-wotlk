@@ -300,9 +300,6 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
             else
                 m_vaporVezaxBunnyGuid = pCreature->GetObjectGuid();
             return;
-        case NPC_LEVIATHAN_SEAT:
-            m_leviathanSeatGuids.insert(pCreature->GetObjectGuid());
-            return;
         default:
             return;
     }
@@ -1343,9 +1340,6 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
             SetData(TYPE_FREYA_CONSPEEDATORY, DONE);
         }
         break;
-        case NPC_LEVIATHAN_SEAT:
-            m_leviathanSeatGuids.erase(pCreature->GetObjectGuid());
-            break;
     }
 }
 
