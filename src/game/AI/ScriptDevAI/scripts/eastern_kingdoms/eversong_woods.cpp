@@ -24,7 +24,6 @@ EndScriptData */
 /* ContentData
 npc_kelerun_bloodmourn
 go_harbinger_second_trial
-npc_prospector_anvilward
 npc_apprentice_mirveda
 npc_infused_crystal
 EndContentData */
@@ -250,89 +249,6 @@ bool GOUse_go_harbinger_second_trial(Player* /*pPlayer*/, GameObject* pGO)
     return false;
 }
 
-/*######
-## npc_prospector_anvilward
-######*/
-enum
-{
-    SAY_ANVIL1            = 11734,
-    SAY_ANVIL2            = 11735,
-
-    GOSSIP_ITEM_MOMENT    = -3000108,
-    GOSSIP_ITEM_SHOW      = -3000110,
-
-    GOSSIP_TEXT_ID_MOMENT = 8239,
-    GOSSIP_TEXT_ID_SHOW   = 8240,
-
-    FACTION_HOSTILE       = 14,
-
-    QUEST_THE_DWARVEN_SPY = 8483
-};
-
-struct npc_prospector_anvilwardAI : public npc_escortAI
-{
-    // UnitAI functions
-    npc_prospector_anvilwardAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
-
-    void Reset() override { }
-
-    // Pure Virtual Functions
-    void WaypointReached(uint32 uiPointId) override
-    {
-        Player* pPlayer = GetPlayerForEscort();
-
-        if (!pPlayer)
-            return;
-
-        switch (uiPointId)
-        {
-            case 11:
-                DoBroadcastText(SAY_ANVIL2, m_creature, pPlayer);
-                m_creature->GetMotionMaster()->Clear(false, true);
-                m_creature->GetMotionMaster()->MoveIdle();
-                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN);
-                m_creature->AI()->SetReactState(REACT_DEFENSIVE);
-                m_creature->ForcedDespawn(60000);
-                break;
-        }
-    }
-};
-
-UnitAI* GetAI_npc_prospector_anvilward(Creature* pCreature)
-{
-    return new npc_prospector_anvilwardAI(pCreature);
-}
-
-bool GossipHello_npc_prospector_anvilward(Player* pPlayer, Creature* pCreature)
-{
-    if (pPlayer->GetQuestStatus(QUEST_THE_DWARVEN_SPY) == QUEST_STATUS_INCOMPLETE)
-        pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_MOMENT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-
-    pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_MOMENT, pCreature->GetObjectGuid());
-    return true;
-}
-
-bool GossipSelect_npc_prospector_anvilward(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
-{
-    switch (uiAction)
-    {
-        case GOSSIP_ACTION_INFO_DEF+1:
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SHOW, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
-            pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_SHOW, pCreature->GetObjectGuid());
-            break;
-        case GOSSIP_ACTION_INFO_DEF+2:
-            pPlayer->CLOSE_GOSSIP_MENU();
-
-            if (npc_prospector_anvilwardAI* pEscortAI = dynamic_cast<npc_prospector_anvilwardAI*>(pCreature->AI()))
-            {
-                DoBroadcastText(SAY_ANVIL1, pCreature, pPlayer);
-                pEscortAI->Start(false, pPlayer);
-            }
-
-            break;
-    }
-    return true;
-}
 
 /*######
 ## npc_apprentice_mirveda
@@ -576,13 +492,6 @@ void AddSC_eversong_woods()
     pNewScript = new Script;
     pNewScript->Name = "go_harbinger_second_trial";
     pNewScript->pGOUse = &GOUse_go_harbinger_second_trial;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_prospector_anvilward";
-    pNewScript->GetAI = &GetAI_npc_prospector_anvilward;
-    pNewScript->pGossipHello =  &GossipHello_npc_prospector_anvilward;
-    pNewScript->pGossipSelect = &GossipSelect_npc_prospector_anvilward;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

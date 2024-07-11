@@ -904,7 +904,6 @@ UPDATE gameobject_template SET ScriptName='go_plague_cauldron' WHERE entry = 190
 /* EVERSONG WOODS */
 UPDATE creature_template SET ScriptName='npc_kelerun_bloodmourn' WHERE entry=17807;
 UPDATE gameobject_template SET ScriptName='go_harbinger_second_trial' WHERE entry=182052;
-UPDATE creature_template SET ScriptName='npc_prospector_anvilward' WHERE entry=15420;
 UPDATE creature_template SET ScriptName='npc_apprentice_mirveda' WHERE entry=15402;
 UPDATE creature_template SET ScriptName='npc_infused_crystal' WHERE entry=16364;
 
@@ -8608,17 +8607,6 @@ INSERT INTO script_waypoint (Entry, PathId, Point, PositionX, PositionY, Positio
 (12858,0,21,1776.9,-2024.56,109.83,0,0,0,'win'),
 (12858,0,22,1776.87,-2028.31,109.83,0,60000,0,'stay'),
 (12858,0,23,1776.9,-2028.3,109.83,0,0,0,''),
-(15420, 0, 1, 9296.278, -6676.996, 22.358725, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 2, 9299.323, -6668.9614, 22.41846, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 3, 9303.353, -6666.7637, 22.432236, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 4, 9307.93, -6660.8057, 22.43064, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 5, 9309.302, -6656.1987, 23.005793, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 6, 9307.386, -6651.9053, 24.834118, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 7, 9300.505, -6648.1587, 28.052294, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 8, 9293.393, -6650.7246, 30.57717, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 9, 9290.5205, -6654.362, 31.830189, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 10, 9289.944, -6657.774, 31.828085, 100, 0, 0, 'Prospector Anvilward'),
-(15420, 0, 11, 9290.866, -6658.0156, 31.823935, 0.104719758033752441, 60000, 0, 'Prospector Anvilward'),
 (16812,0,1,-10868.3,-1779.84,90.476,0,2500,0,'Open door, begin walking'),
 (16812,0,2,-10875.6,-1779.58,90.478,0,0,0,''),
 (16812,0,3,-10887.4,-1779.26,90.476,0,0,0,''),
