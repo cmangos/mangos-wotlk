@@ -1178,7 +1178,7 @@ void Map::Remove(T* obj, bool remove)
             obj->SaveRespawnTime(); // requires map not being reset
 
     obj->ResetMap();
-        
+
     if (remove) // Note: In case resurrectable corpse and pet its removed from global lists in own destructor
         delete obj;
 }
