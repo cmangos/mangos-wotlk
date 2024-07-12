@@ -38,6 +38,7 @@
 #include "Globals/GraveyardManager.h"
 #include "Maps/SpawnManager.h"
 #include "Maps/MapDataContainer.h"
+#include "Util/UniqueTrackablePtr.h"
 #include "World/WorldStateVariableManager.h"
 
 #include <bitset>
@@ -214,6 +215,10 @@ class Map : public GridRefManager<NGridType>
         bool CreatureRespawnRelocation(Creature* c);        // used only in CreatureRelocation and ObjectGridUnloader
 
         uint32 GetInstanceId() const { return i_InstanceId; }
+
+        MaNGOS::unique_weak_ptr<Map> GetWeakPtr() const { return m_weakRef; }
+        void SetWeakPtr(MaNGOS::unique_weak_ptr<Map> weakRef) { m_weakRef = std::move(weakRef); }
+
         virtual bool CanEnter(Player* player);
         const char* GetMapName() const;
 
@@ -479,6 +484,7 @@ class Map : public GridRefManager<NGridType>
         uint8 i_spawnMode;
         uint32 i_id;
         uint32 i_InstanceId;
+        MaNGOS::unique_weak_ptr<Map> m_weakRef;
         uint32 m_unloadTimer;
         uint32 m_clientUpdateTimer;
         float m_VisibleDistance;

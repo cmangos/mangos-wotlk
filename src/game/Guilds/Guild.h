@@ -26,6 +26,7 @@
 #include "Entities/Item.h"
 #include "Globals/ObjectAccessor.h"
 #include "Globals/SharedDefines.h"
+#include "Util/UniqueTrackablePtr.h"
 
 class Item;
 
@@ -446,6 +447,9 @@ class Guild
         void   LogBankEvent(uint8 EventType, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount = 0, uint8 DestTabId = 0);
         bool   AddGBankItemToDB(uint32 GuildId, uint32 BankTab, uint32 BankTabSlot, uint32 GUIDLow, uint32 Entry) const;
 
+        MaNGOS::unique_weak_ptr<Guild> GetWeakPtr() const { return m_weakRef; }
+        void SetWeakPtr(MaNGOS::unique_weak_ptr<Guild> weakRef) { m_weakRef = std::move(weakRef); }
+
     protected:
         void AddRank(const std::string& name_, uint32 rights, uint32 money);
 
@@ -481,6 +485,8 @@ class Guild
         uint32 m_GuildBankEventLogNextGuid_Item[GUILD_BANK_MAX_TABS];
 
         uint64 m_GuildBankMoney;
+
+        MaNGOS::unique_weak_ptr<Guild> m_weakRef;
 
     private:
         void UpdateAccountsNumber() { m_accountsNumber = 0;}// mark for lazy calculation at request in GetAccountsNumber
