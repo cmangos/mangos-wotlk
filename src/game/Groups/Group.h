@@ -28,6 +28,7 @@
 #include "Server/DBCEnums.h"
 #include "Globals/SharedDefines.h"
 #include "LFG/LFG.h"
+#include "Util/UniqueTrackablePtr.h"
 
 struct ItemPrototype;
 
@@ -298,6 +299,8 @@ class Group
 
         LFGData& GetLfgData() { return m_lfgData; }
 
+        MaNGOS::unique_weak_ptr<Group> GetWeakPtr() const { return m_scriptRef; }
+
     protected:
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant = false);
         bool _addMember(ObjectGuid guid, const char* name, bool isAssistant, uint8 group);
@@ -392,5 +395,8 @@ class Group
         uint8*              m_subGroupsCounts;
 
         LFGData             m_lfgData;
+
+        struct NoopGroupDeleter { void operator()(Group*) const { /*noop - not managed*/ } };
+        MaNGOS::unique_trackable_ptr<Group> m_scriptRef;
 };
 #endif

@@ -1537,7 +1537,8 @@ class Unit : public WorldObject
         virtual bool Mount(uint32 displayid, const Aura* aura = nullptr);
         virtual bool Unmount(const Aura* aura = nullptr);
 
-        VehicleInfo* GetVehicleInfo() const { return m_vehicleInfo; }
+        VehicleInfo* GetVehicleInfo() const { return m_vehicleInfo.get(); }
+        MaNGOS::unique_weak_ptr<VehicleInfo> GetVehicleInfoWeakPtr() const { return m_vehicleInfo; }
         bool IsVehicle() const { return m_vehicleInfo != nullptr; }
         void SetVehicleId(uint32 entry, uint32 overwriteNpcEntry);
         Unit const* FindRootVehicle(const Unit* whichVehicle = nullptr) const;
@@ -2716,7 +2717,7 @@ class Unit : public WorldObject
 
         bool m_canDualWield = false;
 
-        VehicleInfo* m_vehicleInfo;
+        MaNGOS::unique_trackable_ptr<VehicleInfo> m_vehicleInfo;
         void DisableSpline();
         void EndSpline();
         bool m_isCreatureLinkingTrigger;

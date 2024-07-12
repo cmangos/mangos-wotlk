@@ -172,9 +172,6 @@ ObjectMgr::ObjectMgr() :
 
 ObjectMgr::~ObjectMgr()
 {
-    for (auto& mQuestTemplate : mQuestTemplates)
-        delete mQuestTemplate.second;
-
     for (auto& i : petInfo)
         delete[] i.second;
 
@@ -4870,9 +4867,6 @@ void ObjectMgr::LoadGroups()
 void ObjectMgr::LoadQuests()
 {
     // For reload case
-    for (QuestMap::const_iterator itr = mQuestTemplates.begin(); itr != mQuestTemplates.end(); ++itr)
-        delete itr->second;
-
     mQuestTemplates.clear();
 
     m_ExclusiveQuestGroups.clear();
@@ -4942,7 +4936,8 @@ void ObjectMgr::LoadQuests()
         Field* fields = queryResult->Fetch();
 
         Quest* newQuest = new Quest(fields);
-        mQuestTemplates[newQuest->GetQuestId()] = newQuest;
+        auto itr = mQuestTemplates.try_emplace(newQuest->GetQuestId(), newQuest).first;
+        newQuest->m_weakRef = itr->second;
     }
     while (queryResult->NextRow());
 
@@ -4952,7 +4947,7 @@ void ObjectMgr::LoadQuests()
 
     for (auto& mQuestTemplate : mQuestTemplates)
     {
-        Quest* qinfo = mQuestTemplate.second;
+        Quest* qinfo = mQuestTemplate.second.get();
 
         // additional quest integrity checks (GO, creature_template and item_template must be loaded already)
 
@@ -5532,7 +5527,7 @@ void ObjectMgr::LoadQuests()
     // Prevent any breadcrumb loops, and inform target quests of their breadcrumbs
     for (auto& mQuestTemplate : mQuestTemplates)
     {
-        Quest* qinfo = mQuestTemplate.second;
+        Quest* qinfo = mQuestTemplate.second.get();
         uint32   qid = qinfo->GetQuestId();
         uint32 breadcrumbForQuestId = qinfo->BreadcrumbForQuestId;
         std::set<uint32> questSet;
@@ -6035,7 +6030,7 @@ void ObjectMgr::LoadConditions()
 
     for (auto& mQuestTemplate : mQuestTemplates) // needs to be checked after loading conditions
     {
-        Quest* qinfo = mQuestTemplate.second;
+        Quest* qinfo = mQuestTemplate.second.get();
 
         if (qinfo->RequiredCondition)
         {

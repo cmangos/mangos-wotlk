@@ -33,6 +33,7 @@
 #include "PlayerDefines.h"
 #include "Entities/ObjectVisibility.h"
 #include "Grids/Cell.h"
+#include "Util/UniqueTrackablePtr.h"
 #include "Utilities/EventProcessor.h"
 
 #include <set>
@@ -389,22 +390,9 @@ class Object
         virtual ~Object();
 
         const bool& IsInWorld() const { return m_inWorld; }
-        virtual void AddToWorld()
-        {
-            if (m_inWorld)
-                return;
+        virtual void AddToWorld();
 
-            m_inWorld = true;
-
-            // synchronize values mirror with values array (changes will send in updatecreate opcode any way
-            ClearUpdateMask(false);                         // false - we can't have update data in update queue before adding to world
-        }
-        virtual void RemoveFromWorld()
-        {
-            // if we remove from world then sending changes not required
-            ClearUpdateMask(true);
-            m_inWorld = false;
-        }
+        virtual void RemoveFromWorld();
 
         ObjectGuid const& GetObjectGuid() const { return GetGuidValue(OBJECT_FIELD_GUID); }
         uint32 GetGUIDLow() const { return GetObjectGuid().GetCounter(); }
@@ -682,6 +670,9 @@ class Object
         Object& operator=(Object const&);                   // prevent generation assigment operator
 
         uint32 m_dbGuid;
+
+        struct NoopObjectDeleter { void operator()(Object*) const { /*noop - not managed*/ } };
+        MaNGOS::unique_trackable_ptr<Object> m_scriptRef;
 
     public:
         // for output helpfull error messages from ASSERTs

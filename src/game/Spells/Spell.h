@@ -28,6 +28,7 @@
 #include "Entities/Player.h"
 #include "Server/SQLStorages.h"
 #include "Spells/SpellEffectDefines.h"
+#include "Util/UniqueTrackablePtr.h"
 
 class WorldSession;
 class WorldPacket;
@@ -327,9 +328,9 @@ class SpellEvent : public BasicEvent
         virtual void Abort(uint64 e_time) override;
         virtual bool IsDeletable() const override;
 
-        Spell* GetSpell() const { return m_Spell; }
+        Spell* GetSpell() const { return m_Spell.get(); }
         protected:
-        Spell* m_Spell;
+        MaNGOS::unique_trackable_ptr<Spell> m_Spell;
 };
 
 class SpellModRAII
