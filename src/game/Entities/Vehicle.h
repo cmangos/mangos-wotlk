@@ -107,6 +107,8 @@ class VehicleInfo : public TransportBase
         void RespawnAccessories(int32 seatIndex = -1);
         void RecallAccessories(float distance = 0.f, int32 seatIndex = -1);
 
+        MaNGOS::unique_weak_ptr<VehicleInfo> GetWeakPtr() const;
+
     private:
         // Internal use to calculate the boarding position
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;

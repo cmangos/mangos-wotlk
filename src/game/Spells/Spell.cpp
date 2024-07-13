@@ -9980,3 +9980,7 @@ SpellCastResult Spell::CheckVehicle(Unit const* caster, SpellEntry const& spellI
     return SPELL_CAST_OK;
 }
 
+MaNGOS::unique_weak_ptr<Spell> Spell::GetWeakPtr() const
+{
+    return m_spellEvent->GetSpellWeakPtr();
+}

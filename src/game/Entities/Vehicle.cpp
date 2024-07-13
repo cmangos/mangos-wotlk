@@ -969,4 +969,10 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
     }
 }
 
+MaNGOS::unique_weak_ptr<VehicleInfo> VehicleInfo::GetWeakPtr() const
+{
+    Unit* pVehicle = (Unit*)m_owner;
+    return pVehicle->GetVehicleInfoWeakPtr();
+}
+
 /*! @} */
