@@ -329,7 +329,9 @@ class SpellEvent : public BasicEvent
         virtual bool IsDeletable() const override;
 
         Spell* GetSpell() const { return m_Spell.get(); }
-        protected:
+        MaNGOS::unique_weak_ptr<Spell> GetSpellWeakPtr() const { return m_Spell; }
+
+    protected:
         MaNGOS::unique_trackable_ptr<Spell> m_Spell;
 };
 
@@ -903,6 +905,9 @@ class Spell
         void SetDamageDoneModifier(float mod, SpellEffectIndex effIdx);
         void SetIgnoreOwnerLevel(bool state) { m_ignoreOwnerLevel = state; }
         void SetUsableWhileStunned(bool state) { m_usableWhileStunned = state; }
+
+        MaNGOS::unique_weak_ptr<Spell> GetWeakPtr() const;
+
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
