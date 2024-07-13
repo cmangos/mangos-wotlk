@@ -257,7 +257,7 @@ struct IceBolt : public SpellScript
         if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
             caster->CastSpell(target, SPELL_ICEBOLT, TRIGGERED_NONE);
 
-        if (boss_ai->m_iceboltCount >= (boss_ai->m_isRegularMode ? 2 : 3))
+        if (boss_ai->m_iceboltCount >= (boss_ai->m_isRegularMode ? 2u : 3u))
         {
             caster->CastSpell(nullptr, SPELL_FROST_BREATH, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_GCD);
             caster->CastSpell(nullptr, SPELL_FROST_BREATH_DUMMY, TRIGGERED_IGNORE_COOLDOWNS | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_GCD);

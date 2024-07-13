@@ -1063,7 +1063,7 @@ bool Pet::UpdateStats(Stats stat)
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
     if (GetUInt32Value(UNIT_CREATED_BY_SPELL) == 697 && m_glyphedStat)
-        value *= 1.2;
+        value *= 1.2f;
     
     float oldValue = GetStat(stat);
     SetStat(stat, int32(value));
@@ -1156,7 +1156,7 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     // float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
     if (GetUInt32Value(UNIT_CREATED_BY_SPELL) == 30146 && m_glyphedStat)
-        attPowerMultiplier *= 1.2;
+        attPowerMultiplier *= 1.2f;
     attPowerMultiplier -= 1.0f;
 
     // UNIT_FIELD_(RANGED)_ATTACK_POWER field

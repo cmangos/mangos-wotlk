@@ -1659,7 +1659,7 @@ struct HodirsProtectiveGaze : AuraScript
         Player* player = dynamic_cast<Player*>(aura->GetTarget());
         if (!player)
             return;
-        if (player->GetHealth() > remainingDamage)
+        if (player->GetHealth() > uint32(remainingDamage))
             return;
         instance_ulduar* instance = dynamic_cast<instance_ulduar*>(player->GetMap()->GetInstanceData());
         if (!instance)

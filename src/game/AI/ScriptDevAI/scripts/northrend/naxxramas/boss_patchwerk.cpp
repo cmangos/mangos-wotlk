@@ -112,7 +112,7 @@ struct HatefulStrikePrimer : public SpellScript
 
         auto const& threatList = spell->GetCaster()->getThreatManager().getThreatList();
         uint32 i = 0;
-        for (auto itr = threatList.begin(); itr != threatList.end() && i < (spell->GetCaster()->GetMap()->IsRegularDifficulty() ? 2 : 3); ++itr, ++i)
+        for (auto itr = threatList.begin(); itr != threatList.end() && i < (spell->GetCaster()->GetMap()->IsRegularDifficulty() ? 2u : 3u); ++itr, ++i)
             if ((*itr)->getTarget() == target)
                 return true;
         return false;
