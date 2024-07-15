@@ -3574,6 +3574,9 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- fixes error due to being used by items
 UPDATE spell_template SET Speed=0 WHERE Id IN(44333);
 
+-- Torch 58121
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 58121;
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
