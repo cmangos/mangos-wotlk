@@ -16,7 +16,7 @@ if not boost_dep.found()
 endif
 dblib_dep = dependency('mariadb', 'libmariadb', 'mysql', 'libmysql', 'postgresql', required: false)
 zlib_dep = dependency('zlib', version: '>=1.2.13', static: true, fallback: ['zlib', 'zlib_dep'], required: true)
-openssl_dep = dependency('openssl', version: '>=1.1.1', static: true, fallback: ['openssl'], required: true)
+openssl_dep = dependency('openssl', version: '>=3.0.14', static: true, fallback: ['openssl'], required: true)
 utfcpp_dep = dependency('utf8cpp', 'utfcpp', static: true, required: false)
 sqlite_dep = dependency('sqlite3', static: true, fallback: ['sqlite3'], required: get_option('SQLITE'))
 
