@@ -1406,7 +1406,7 @@ struct FreyasWard : public SpellScript
     }
 };
 
-// 65045 - Flames
+// 65045, 65044 - Flames
 struct FlamesLeviathan : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -1450,7 +1450,7 @@ enum SafetyContainerID : uint32
 {
     NPC_PYRITE_SAFETY_CONTAINER = 33218,
 };
-// 64979 - Anti-Air Rocket
+// 64979, 62363 - Anti-Air Rocket
 struct AntiAirRocket : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
@@ -1459,6 +1459,18 @@ struct AntiAirRocket : public SpellScript
         if (!caster->IsEnemy(target))
             return false;
         if (target->GetEntry() == NPC_PYRITE_SAFETY_CONTAINER)
+            return false;
+        return true;
+    }
+};
+
+// 62634, 62635 - Mortar
+struct DemolisherMortar : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster->IsEnemy(target))
             return false;
         return true;
     }
@@ -1562,6 +1574,7 @@ void AddSC_boss_flame_leviathan()
     RegisterSpellScript<FreyasWard>("spell_freyas_ward_leviathan");
     RegisterSpellScript<ReadyToFly>("spell_ready_to_fly");
     RegisterSpellScript<AntiAirRocket>("spell_anti_air_rocket");
+    RegisterSpellScript<DemolisherMortar>("spell_demolisher_mortar");
     RegisterSpellScript<RopeBeam>("spell_rope_beam");
     RegisterSpellScript<FlameLeviathanBuff>("spell_flame_leviathan_buff");
 }
