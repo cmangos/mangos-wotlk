@@ -42,12 +42,20 @@ void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
 
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
 
+    if (!vehicle)
+        return;
     // Something went wrong
     if (vehicleGuid != vehicle->GetObjectGuid())
         return;
+    if (vehicle->IsBoarded())
+    {
+        vehicle = static_cast<Unit*>(vehicle->GetTransportInfo()->GetTransport());
+    }
 
     // Remove Vehicle Control Aura
     vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());
+
+    vehicle->GetVehicleInfo()->UnBoard(_player, false);
 }
 
 void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
@@ -61,10 +69,19 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
 
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
 
+    if (!vehicle)
+        return;
+    if (vehicle->IsBoarded())
+    {
+        vehicle = static_cast<Unit*>(vehicle->GetTransportInfo()->GetTransport());
+    }
     // Check for exit flag
     if (VehicleSeatEntry const* seatEntry = vehicle->GetVehicleInfo()->GetSeatEntry(transportInfo->GetTransportSeat()))
         if (seatEntry->m_flags & SEAT_FLAG_CAN_EXIT)
+        {
             vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());
+            vehicle->GetVehicleInfo()->UnBoard(_player, false);
+        }
 }
 
 void WorldSession::HandleRequestVehicleNextSeat(WorldPacket& recvPacket)
@@ -109,7 +126,7 @@ void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
     if (!transportInfo || !transportInfo->IsOnVehicle())
         return;
 
-    Unit* vehicle = (Unit*)transportInfo->GetTransport();
+    Unit* vehicle = static_cast<Unit*>(transportInfo->GetTransport());
 
     if (vehicleGuid != vehicle->GetObjectGuid())
     {
@@ -124,7 +141,7 @@ void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
 
         SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(destVehicle->GetEntry());
         for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
-            if (itr->second.IsFitToRequirements(_player, destVehicle->GetTypeId() == TYPEID_UNIT ? (Creature*)destVehicle : nullptr))
+            if (itr->second.IsFitToRequirements(_player, destVehicle->GetTypeId() == TYPEID_UNIT ? static_cast<Creature*>(destVehicle) : nullptr))
                 _player->CastSpell(destVehicle, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
     }
     else
@@ -150,7 +167,7 @@ void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)
     if (!transportInfo || !transportInfo->IsOnVehicle())
         return;
 
-    Unit* srcVehicle = (Unit*)transportInfo->GetTransport();
+    Unit* srcVehicle = static_cast<Unit*>(transportInfo->GetTransport());
 
     // Something went wrong
     if (srcVehicleGuid != srcVehicle->GetObjectGuid())
@@ -184,7 +201,7 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
     ObjectGuid playerGuid;
     recvPacket >> playerGuid;
 
-    Player* vehicle = _player->GetMap()->GetPlayer(playerGuid);
+    Unit* vehicle = _player->GetMap()->GetUnit(playerGuid);
 
     if (!vehicle || !vehicle->IsVehicle())
         return;
@@ -192,8 +209,16 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
     // Only allowed if in same raid
     if (!vehicle->IsInGroup(_player))
         return;
-
-    _player->CastSpell(vehicle, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(vehicle->GetEntry());
+    bool spellFound = false;
+    for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+        if (itr->second.IsFitToRequirements(_player, vehicle->GetTypeId() == TYPEID_UNIT ? (Creature*)vehicle : nullptr))
+        {
+            _player->CastSpell(vehicle, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
+            spellFound = true;
+        }
+    if (!spellFound)
+        _player->CastSpell(vehicle, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
 }
 
 void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
@@ -209,11 +234,30 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
     if (!passenger || !passenger->IsBoarded())
         return;
 
-    // _player is not a vehicle
-    if (!_player->IsVehicle())
+    // _player is not on a vehicle
+    if (!_player->IsBoarded() && !_player->IsVehicle())
+        return;
+    
+    Unit* vehicle = static_cast<Unit*>(passenger->GetTransportInfo()->GetTransport());
+
+    if (!vehicle)
         return;
 
-    VehicleInfo* vehicleInfo = _player->GetVehicleInfo();
+    VehicleInfo* vehicleInfo = vehicle->GetVehicleInfo();
+
+    for (int i = 0; i < MAX_VEHICLE_SEAT; i++)
+    {
+        if (Unit* psg = vehicleInfo->GetPassenger(i))
+            if (psg->IsVehicle())
+            {
+                if (VehicleInfo* vi = psg->GetVehicleInfo())
+                    if (vi->HasOnBoard(passenger))
+                    {
+                        vehicleInfo = vi;
+                        break;
+                    }
+            }
+    }
 
     // _player must be transporting passenger
     if (!vehicleInfo->HasOnBoard(passenger))
@@ -222,5 +266,5 @@ void WorldSession::HandleEjectPassenger(WorldPacket& recvPacket)
     // Check for eject flag
     if (VehicleSeatEntry const* seatEntry = vehicleInfo->GetSeatEntry(passenger->GetTransportInfo()->GetTransportSeat()))
         if (seatEntry->m_flagsB & SEAT_FLAG_B_EJECTABLE)
-            _player->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, passengerGuid);
+            vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, passengerGuid);
 }
