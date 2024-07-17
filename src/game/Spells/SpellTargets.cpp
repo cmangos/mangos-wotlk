@@ -206,7 +206,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[58]*/     { "SPELL_EFFECT_WEAPON_DAMAGE",                TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[59]*/     { "SPELL_EFFECT_CREATE_RANDOM_ITEM",           TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[60]*/     { "SPELL_EFFECT_PROFICIENCY",                  TARGET_TYPE_NONE,           TARGET_NONE }, // confirmed none
-    /*[61]*/     { "SPELL_EFFECT_SEND_EVENT",                   TARGET_TYPE_UNIT,           TARGET_UNIT_CASTER },
+    /*[61]*/     { "SPELL_EFFECT_SEND_EVENT",                   TARGET_TYPE_NONE,           TARGET_NONE },
     /*[62]*/     { "SPELL_EFFECT_POWER_BURN",                   TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[63]*/     { "SPELL_EFFECT_THREAT",                       TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[64]*/     { "SPELL_EFFECT_TRIGGER_SPELL",                TARGET_TYPE_DYNAMIC,        TARGET_NONE }, // confirmed none
