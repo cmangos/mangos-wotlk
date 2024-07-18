@@ -1107,6 +1107,18 @@ struct TheReckoning : public SpellScript
     bool OnCheckTarget(const Spell* /*spell*/, GameObject* /*target*/, SpellEffectIndex /*eff*/) const { return false; }
 };
 
+// 57413 - Fitful Dream
+struct FitfulDream : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT)
+        {
+            aura->GetTarget()->CastSpell(nullptr, 57515, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1147,4 +1159,5 @@ void AddSC_icecrown()
     RegisterSpellScript<ArgentCannon>("spell_argent_cannon");
     RegisterSpellScript<ReckoningBomb>("spell_reckoning_bomb");
     RegisterSpellScript<TheReckoning>("spell_the_reckoning");
+    RegisterSpellScript<FitfulDream>("spell_fitful_dream");
 }
