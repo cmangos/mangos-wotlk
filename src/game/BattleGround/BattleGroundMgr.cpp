@@ -1554,12 +1554,17 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
   @param    packet
   @param    result
 */
-void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, GroupJoinBattlegroundResult result) const
+void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, BattleGroundGroupJoinStatus result) const
 {
     data.Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
     data << int32(result);
-    if (result == ERR_BATTLEGROUND_JOIN_TIMED_OUT || result == ERR_BATTLEGROUND_JOIN_FAILED)
-        data << uint64(0);                                 // player guid
+    switch (result)
+    {
+        case BG_GROUP_JOIN_STATUS_JOIN_TIMED_OUT:
+        case BG_GROUP_JOIN_STATUS_JOIN_FAILED:
+            data << uint64(0); // player guid
+            break;
+    }
 }
 
 /**

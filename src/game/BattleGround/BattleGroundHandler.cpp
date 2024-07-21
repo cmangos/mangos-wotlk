@@ -134,7 +134,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
     if (!bracketEntry)
         return;
 
-    GroupJoinBattlegroundResult err = ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
+    BattleGroundGroupJoinStatus err = BG_GROUP_JOIN_STATUS_BATTLEGROUND_FAIL;
 
     // check queue conditions
     if (!joinAsGroup)
@@ -143,7 +143,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         if (!_player->CanJoinToBattleground())
         {
             WorldPacket data;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, BG_GROUP_JOIN_STATUS_DESERTERS);
             _player->GetSession()->SendPacket(data);
             return;
         }
@@ -152,7 +152,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         if (_player->GetBattleGroundQueueIndex(bgQueueTypeIdRandom) < PLAYER_MAX_BATTLEGROUND_QUEUES)
         {
             WorldPacket data;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, ERR_IN_RANDOM_BG);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, BG_GROUP_JOIN_STATUS_IN_RANDOM_BG);
             _player->GetSession()->SendPacket(data);
             return;
         }
@@ -161,7 +161,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         if(_player->InBattleGroundQueue() && bgTypeId == BATTLEGROUND_RB)
         {
             WorldPacket data;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, ERR_IN_NON_RANDOM_BG);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, BG_GROUP_JOIN_STATUS_IN_NON_RANDOM_BG);
             _player->GetSession()->SendPacket(data);
             return;
         }
@@ -175,7 +175,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         if (!_player->HasFreeBattleGroundQueueId())
         {
             WorldPacket data;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, ERR_BATTLEGROUND_TOO_MANY_QUEUES);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, BG_GROUP_JOIN_STATUS_TOO_MANY_QUEUES);
             _player->GetSession()->SendPacket(data);
             return;
         }
@@ -201,7 +201,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
         GroupQueueInfo* queueInfo = nullptr;
         uint32 avgTime = 0;
 
-        if (err > ERR_GROUP_JOIN_BATTLEGROUND_FAIL)
+        if (err > BG_GROUP_JOIN_STATUS_BATTLEGROUND_FAIL)
         {
             DEBUG_LOG("Battleground: the following players are joining as group:");
             queueInfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, ARENA_TYPE_NONE, false, isPremade, instanceId, 0);
@@ -216,7 +216,7 @@ void WorldSession::HandleBattlemasterJoinOpcode(WorldPacket& recv_data)
 
             WorldPacket data;
 
-            if (err <= ERR_GROUP_JOIN_BATTLEGROUND_FAIL)
+            if (err <= BG_GROUP_JOIN_STATUS_BATTLEGROUND_FAIL)
             {
                 sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, err);
                 member->GetSession()->SendPacket(data);
@@ -461,7 +461,7 @@ void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
         {
             // send bg command result to show nice message
             WorldPacket data2;
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data2, ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data2, BG_GROUP_JOIN_STATUS_DESERTERS);
             _player->GetSession()->SendPacket(data2);
             action = 0;
 
@@ -745,7 +745,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     if (!bracketEntry)
         return;
 
-    GroupJoinBattlegroundResult err = ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
+    BattleGroundGroupJoinStatus err = BG_GROUP_JOIN_STATUS_BATTLEGROUND_FAIL;
 
     Group* group = nullptr;
 
@@ -818,7 +818,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     {
         uint32 avgTime = 0;
 
-        if (err > ERR_GROUP_JOIN_BATTLEGROUND_FAIL)
+        if (err > BG_GROUP_JOIN_STATUS_BATTLEGROUND_FAIL)
         {
             DEBUG_LOG("Battleground: arena join as group start");
             if (isRated)
@@ -839,7 +839,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
 
             WorldPacket data;
 
-            if (err <= ERR_GROUP_JOIN_BATTLEGROUND_FAIL)
+            if (err <= BG_GROUP_JOIN_STATUS_BATTLEGROUND_FAIL)
             {
                 sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(data, err);
                 member->GetSession()->SendPacket(data);
