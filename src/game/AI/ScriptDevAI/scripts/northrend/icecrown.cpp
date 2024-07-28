@@ -1119,6 +1119,18 @@ struct FitfulDream : public AuraScript
     }
 };
 
+// 57346 - Ride Vehicle
+struct RideVehicle_57346 : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_DEFAULT)
+        {
+            aura->GetCaster()->CastSpell(aura->GetCaster(), 45472, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1160,4 +1172,5 @@ void AddSC_icecrown()
     RegisterSpellScript<ReckoningBomb>("spell_reckoning_bomb");
     RegisterSpellScript<TheReckoning>("spell_the_reckoning");
     RegisterSpellScript<FitfulDream>("spell_fitful_dream");
+    RegisterSpellScript<RideVehicle_57346>("spell_ride_vehicle_57346");
 }

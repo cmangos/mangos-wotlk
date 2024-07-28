@@ -893,6 +893,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57082,'spell_crystal_spikes'),
 (57083,'spell_crystal_spikes'),
 (57283,'spell_remove_mushroom_power'),
+(57346,'spell_ride_vehicle_57346'),
 (57385,'spell_argent_cannon'),
 (57412,'spell_reckoning_bomb'),
 (57413,'spell_fitful_dream'),
