@@ -34,6 +34,8 @@ void world_map_northrend::Initialize()
     instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_06, urand(0, 1));
     instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_07, urand(0, 1));
     instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_08, urand(0, 1));
+    instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_09, urand(0, 2));
+    instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_10, urand(0, 2));
 }
 
 void world_map_northrend::OnCreatureGroupDespawn(CreatureGroup* creatureGroup, Creature* creature)
@@ -63,6 +65,12 @@ void world_map_northrend::OnCreatureGroupDespawn(CreatureGroup* creatureGroup, C
         break;
     case 25014: case 25015:
         instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_08, urand(0, 1));
+        break;
+    case 25016: case 25017: case 25018
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_09, urand(0, 2));
+        break;
+    case 25019: case 25020: case 25021
+        instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_10, urand(0, 2));
         break;
     }
 }
