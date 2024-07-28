@@ -382,6 +382,8 @@ enum WorldStateID : int32
     WORLD_STATE_CUSTOM_ICC_GRP_06                   = 350006,
     WORLD_STATE_CUSTOM_ICC_GRP_07                   = 350007,
     WORLD_STATE_CUSTOM_ICC_GRP_08                   = 350008,
+    WORLD_STATE_CUSTOM_ICC_GRP_09                   = 350009,
+    WORLD_STATE_CUSTOM_ICC_GRP_10                   = 350010,
 
     // Obsidian Sanctum
     WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_LEFT    = 20004,
