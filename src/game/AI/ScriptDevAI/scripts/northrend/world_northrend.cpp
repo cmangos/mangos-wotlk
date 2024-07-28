@@ -66,10 +66,10 @@ void world_map_northrend::OnCreatureGroupDespawn(CreatureGroup* creatureGroup, C
     case 25014: case 25015:
         instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_08, urand(0, 1));
         break;
-    case 25016: case 25017: case 25018
+    case 25016: case 25017: case 25018:
         instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_09, urand(0, 2));
         break;
-    case 25019: case 25020: case 25021
+    case 25019: case 25020: case 25021:
         instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_ICC_GRP_10, urand(0, 2));
         break;
     }
