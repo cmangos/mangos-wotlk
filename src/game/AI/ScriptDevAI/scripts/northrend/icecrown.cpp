@@ -1131,6 +1131,15 @@ struct RideVehicle_57346 : public AuraScript
     }
 };
 
+// 59303 - Summon Frost Wyrm
+struct SummonFrostWyrm : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 50.f;
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1173,4 +1182,5 @@ void AddSC_icecrown()
     RegisterSpellScript<TheReckoning>("spell_the_reckoning");
     RegisterSpellScript<FitfulDream>("spell_fitful_dream");
     RegisterSpellScript<RideVehicle_57346>("spell_ride_vehicle_57346");
+    RegisterSpellScript<SummonFrostWyrm>("spell_summon_frost_wyrm");
 }
