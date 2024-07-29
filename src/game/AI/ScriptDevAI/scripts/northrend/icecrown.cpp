@@ -1140,6 +1140,15 @@ struct SummonFrostWyrm : public SpellScript
     }
 };
 
+// 4328 - Drag and Drop: Summon Aldur'thar Sentry
+struct DragAndDropSummonAldurtharSentry : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 20.f;
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1183,4 +1192,5 @@ void AddSC_icecrown()
     RegisterSpellScript<FitfulDream>("spell_fitful_dream");
     RegisterSpellScript<RideVehicle_57346>("spell_ride_vehicle_57346");
     RegisterSpellScript<SummonFrostWyrm>("spell_summon_frost_wyrm");
+    RegisterSpellScript<DragAndDropSummonAldurtharSentry>("spell_drag_and_drop_summon_aldurthar_sentry");
 }
