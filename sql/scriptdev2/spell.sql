@@ -632,6 +632,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(4328,'spell_drag_and_drop_summon_aldurthar_sentry'),
 (16836,'spell_brambles'),
 (16839,'spell_brambles'),
 (16840,'spell_brambles'),
