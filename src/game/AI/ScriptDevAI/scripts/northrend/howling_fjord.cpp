@@ -945,7 +945,6 @@ struct BurnBody : public SpellScript
             if (target->IsCreature())
             {
                 static_cast<Creature*>(target)->RegisterHitBySpell(spell->m_spellInfo->Id);
-                target->CastSpell(spell->GetCaster(), 43297, TRIGGERED_OLD_TRIGGERED);
                 static_cast<Creature*>(target)->ForcedDespawn(16000);
             }
         }
