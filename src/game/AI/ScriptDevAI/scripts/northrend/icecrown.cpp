@@ -1149,6 +1149,36 @@ struct DragAndDropSummonAldurtharSentry : public SpellScript
     }
 };
 
+// 60528 - Rod of Siphoning
+struct RodOfSiphoning : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        data.target = nullptr;
+    }
+};
+
+// 60561 - Summon Dark Messenger Beam
+struct SummonDarkMessengerBeam : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        data.target = nullptr;
+    }
+};
+
+// 60831 - Alumeth's Remains
+struct AlumethsRemains : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        data.target = nullptr;
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1193,4 +1223,7 @@ void AddSC_icecrown()
     RegisterSpellScript<RideVehicle_57346>("spell_ride_vehicle_57346");
     RegisterSpellScript<SummonFrostWyrm>("spell_summon_frost_wyrm");
     RegisterSpellScript<DragAndDropSummonAldurtharSentry>("spell_drag_and_drop_summon_aldurthar_sentry");
+    RegisterSpellScript<RodOfSiphoning>("spell_rod_of_siphoning");
+    RegisterSpellScript<SummonDarkMessengerBeam>("spell_summon_dark_messenger_beam");
+    RegisterSpellScript<AlumethsRemains>("spell_alumeths_remains");
 }
