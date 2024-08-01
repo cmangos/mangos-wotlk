@@ -275,71 +275,75 @@ void ReputationMgr::Initialize()
     }
 }
 
-void ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental)
+bool ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standing, bool incremental, bool noSpillover)
 {
     if (!factionEntry)
-        return;
+        return false;
 
     bool anyRankIncreased = false;
-    // if spillover definition exists in DB, override DBC
-    if (const RepSpilloverTemplate* repTemplate = sObjectMgr.GetRepSpilloverTemplate(factionEntry->ID))
+    if (!noSpillover)
     {
-        for (uint32 i = 0; i < MAX_SPILLOVER_FACTIONS; ++i)
+        // if spillover definition exists in DB, override DBC
+        if (const RepSpilloverTemplate* repTemplate = sObjectMgr.GetRepSpilloverTemplate(factionEntry->ID))
         {
-            if (repTemplate->faction[i])
+            for (uint32 i = 0; i < MAX_SPILLOVER_FACTIONS; ++i)
             {
-                if (m_player->GetReputationRank(repTemplate->faction[i]) <= ReputationRank(repTemplate->faction_rank[i]))
+                if (repTemplate->faction[i])
                 {
-                    // bonuses are already given, so just modify standing by rate
-                    int32 spilloverRep = standing * repTemplate->faction_rate[i];
-                    if (SetOneFactionReputation(sFactionStore.LookupEntry(repTemplate->faction[i]), spilloverRep, incremental))
-                        anyRankIncreased = true;
-                }
-            }
-        }
-    }
-    else
-    {
-        float spillOverRepOut = standing;
-        // check for sub-factions that receive spillover
-        SimpleFactionsList const* flist = GetFactionTeamList(factionEntry->ID);
-        // if has no sub-factions, check for factions with same parent
-        if (!flist && factionEntry->team && factionEntry->spilloverRateOut != 0.0f)
-        {
-            spillOverRepOut *= factionEntry->spilloverRateOut;
-            if (FactionEntry const* parent = sFactionStore.LookupEntry(factionEntry->team))
-            {
-                FactionStateList::iterator parentState = m_factions.find(parent->reputationListID);
-                // some team factions have own reputation standing, in this case do not spill to other sub-factions
-                if (parentState != m_factions.end() && (parentState->second.Flags & FACTION_FLAG_TEAM_REPUTATION))
-                {
-                    if (SetOneFactionReputation(parent, int32(spillOverRepOut), incremental))
-                        anyRankIncreased = true;
-                }
-                else    // spill to "sister" factions
-                {
-                    flist = GetFactionTeamList(factionEntry->team);
-                }
-            }
-        }
-        if (flist)
-        {
-            // Spillover to affiliated factions
-            for (uint32 itr : *flist)
-            {
-                if (FactionEntry const* factionEntryCalc = sFactionStore.LookupEntry(itr))
-                {
-                    if (factionEntryCalc == factionEntry || GetRank(factionEntryCalc) > ReputationRank(factionEntryCalc->spilloverMaxRankIn))
-                        continue;
-
-                    int32 spilloverRep = int32(spillOverRepOut * factionEntryCalc->spilloverRateIn);
-                    if (spilloverRep != 0 || !incremental)
-                        if (SetOneFactionReputation(factionEntryCalc, spilloverRep, incremental))
+                    if (m_player->GetReputationRank(repTemplate->faction[i]) <= ReputationRank(repTemplate->faction_rank[i]))
+                    {
+                        // bonuses are already given, so just modify standing by rate
+                        int32 spilloverRep = standing * repTemplate->faction_rate[i];
+                        if (SetOneFactionReputation(sFactionStore.LookupEntry(repTemplate->faction[i]), spilloverRep, incremental))
                             anyRankIncreased = true;
+                    }
+                }
+            }
+        }
+        else
+        {
+            float spillOverRepOut = standing;
+            // check for sub-factions that receive spillover
+            SimpleFactionsList const* flist = GetFactionTeamList(factionEntry->ID);
+            // if has no sub-factions, check for factions with same parent
+            if (!flist && factionEntry->team && factionEntry->spilloverRateOut != 0.0f)
+            {
+                spillOverRepOut *= factionEntry->spilloverRateOut;
+                if (FactionEntry const* parent = sFactionStore.LookupEntry(factionEntry->team))
+                {
+                    FactionStateList::iterator parentState = m_factions.find(parent->reputationListID);
+                    // some team factions have own reputation standing, in this case do not spill to other sub-factions
+                    if (parentState != m_factions.end() && (parentState->second.Flags & FACTION_FLAG_TEAM_REPUTATION))
+                    {
+                        if (SetOneFactionReputation(parent, int32(spillOverRepOut), incremental))
+                            anyRankIncreased = true;
+                    }
+                    else    // spill to "sister" factions
+                    {
+                        flist = GetFactionTeamList(factionEntry->team);
+                    }
+                }
+            }
+            if (flist)
+            {
+                // Spillover to affiliated factions
+                for (uint32 itr : *flist)
+                {
+                    if (FactionEntry const* factionEntryCalc = sFactionStore.LookupEntry(itr))
+                    {
+                        if (factionEntryCalc == factionEntry || GetRank(factionEntryCalc) > ReputationRank(factionEntryCalc->spilloverMaxRankIn))
+                            continue;
+
+                        int32 spilloverRep = int32(spillOverRepOut * factionEntryCalc->spilloverRateIn);
+                        if (spilloverRep != 0 || !incremental)
+                            if (SetOneFactionReputation(factionEntryCalc, spilloverRep, incremental))
+                                anyRankIncreased = true;
+                    }
                 }
             }
         }
     }
+
     // spillover done, update faction itself
     FactionStateList::iterator faction = m_factions.find(RepListID(factionEntry->reputationListID));
     if (faction != m_factions.end())
@@ -350,6 +354,8 @@ void ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standi
         // only this faction gets reported to client, even if it has no own visible standing
         SendState(&faction->second, anyRankIncreased);
     }
+
+    return anyRankIncreased;
 }
 
 bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing, bool incremental)

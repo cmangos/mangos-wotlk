@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14088_01_mangos_spawn_group_squad` bit(1) DEFAULT NULL
+  `required_14089_01_mangos_reputation_spillover` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -15854,6 +15854,7 @@ CREATE TABLE `quest_template` (
   `RewMaxRepValue3` mediumint(9) NOT NULL DEFAULT '42999',
   `RewMaxRepValue4` mediumint(9) NOT NULL DEFAULT '42999',
   `RewMaxRepValue5` mediumint(9) NOT NULL DEFAULT '42999',
+  `ReputationSpilloverMask` tinyint unsigned NOT NULL DEFAULT '0',
   `RewHonorAddition` int(10) unsigned NOT NULL DEFAULT '0',
   `RewHonorMultiplier` float NOT NULL DEFAULT '0',
   `RewOrReqMoney` int(11) NOT NULL DEFAULT '0',

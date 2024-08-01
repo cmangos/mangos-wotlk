@@ -2956,13 +2956,13 @@ void Unit::DoExtraAttacks(Unit* victim)
     if (m_extraAttackGuid)
     {
         Unit* target = GetMap()->GetUnit(m_extraAttackGuid);
-        if (target && CanReachWithMeleeAttack(target) && target->IsAlive() && CanAttackInCombat(target, false, false))
+        if (target && CanReachWithMeleeAttack(target) && target->IsAlive() && CanAttackInCombat(target, false, false, false))
             attackTarget = target;
     }
     if (!attackTarget && GetVictim())
     {
         Unit* target = GetVictim();
-        if (CanReachWithMeleeAttack(target) && target->IsAlive() && CanAttackInCombat(target, false, false))
+        if (CanReachWithMeleeAttack(target) && target->IsAlive() && CanAttackInCombat(target, false, false, false))
             attackTarget = target;
     }
     if (!attackTarget)
