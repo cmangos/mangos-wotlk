@@ -514,7 +514,6 @@ scriptdev_sources = [
     'AI/ScriptDevAI/scripts/outland/hellfire_citadel/blood_furnace/blood_furnace.cpp',
     'AI/ScriptDevAI/scripts/outland/hellfire_citadel/blood_furnace/boss_kelidan_the_breaker.cpp',
     'AI/ScriptDevAI/scripts/outland/hellfire_citadel/blood_furnace/boss_broggok.cpp',
-    'AI/ScriptDevAI/scripts/outland/hellfire_citadel/blood_furnace/boss_the_maker.cpp',
     'AI/ScriptDevAI/scripts/outland/hellfire_citadel/shattered_halls/boss_warchief_kargath_bladefist.cpp',
     'AI/ScriptDevAI/scripts/outland/hellfire_citadel/shattered_halls/shattered_halls.cpp',
     'AI/ScriptDevAI/scripts/outland/hellfire_citadel/shattered_halls/shattered_hallsScripts.cpp',
