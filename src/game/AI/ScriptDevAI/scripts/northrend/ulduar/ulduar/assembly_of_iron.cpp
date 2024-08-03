@@ -196,7 +196,7 @@ struct boss_brundirAI : public BossAI
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->AI())
-            summoned->AI()->SetRootSelf(true);
+            summoned->AI()->SetAIImmobilizedState(true);
         m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
         summoned->SetInCombatWithZone(false);
         if (summoned->GetEntry() == NPC_OVERLOAD_VISUAL)
@@ -292,7 +292,7 @@ struct boss_molgeimAI : public BossAI
         if (summoned->AI())
         {
             summoned->AI()->SetReactState(REACT_PASSIVE);
-            summoned->AI()->SetRootSelf(true);
+            summoned->AI()->SetAIImmobilizedState(true);
         }
         m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
         if (summoned->GetEntry() == NPC_RUNE_OF_SUMMONING)
@@ -639,7 +639,7 @@ struct RuneOfPowerCouncil : public SpellScript
         if (summon->AI())
         {
             summon->AI()->SetReactState(REACT_PASSIVE);
-            summon->AI()->SetRootSelf(true);
+            summon->AI()->SetAIImmobilizedState(true);
         }
         summon->SetInCombatWithZone(false);
         summon->CastSpell(summon, SPELL_RUNE_OF_POWER_AURA, TRIGGERED_OLD_TRIGGERED);
