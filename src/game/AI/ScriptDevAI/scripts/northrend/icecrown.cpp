@@ -1179,6 +1179,19 @@ struct AlumethsRemains : public AuraScript
     }
 };
 
+// 60079 - Fire SGM-3
+struct FireSGM3 : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != 32189)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1226,4 +1239,5 @@ void AddSC_icecrown()
     RegisterSpellScript<RodOfSiphoning>("spell_rod_of_siphoning");
     RegisterSpellScript<SummonDarkMessengerBeam>("spell_summon_dark_messenger_beam");
     RegisterSpellScript<AlumethsRemains>("spell_alumeths_remains");
+    RegisterSpellScript<FireSGM3>("spell_fire_sgm3");
 }
