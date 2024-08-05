@@ -877,6 +877,7 @@ void instance_mount_hyjal::OnPlayerDeath(Player* player)
         case CLASS_WARLOCK:
             player->CastSpell(nullptr, SPELL_SOUL_CHARGE_RED_CHARGE, TRIGGERED_OLD_TRIGGERED);
             break;
+        case CLASS_DEATH_KNIGHT:
         case CLASS_MAGE:
         case CLASS_ROGUE:
         case CLASS_WARRIOR:
