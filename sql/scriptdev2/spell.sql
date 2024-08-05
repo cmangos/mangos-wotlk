@@ -926,6 +926,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (59860,'spell_summon_iron_dwarf_aura'),
 (59906,'spell_swift_hand_of_justice'),
 (59915,'spell_discerning_eye_of_the_beast'),
+(60079,'spell_fire_sgm3'),
 (60211,'spell_cauterize'),
 (60528,'spell_rod_of_siphoning'),
 (60539,'spell_sapphiron_achievement_check'),
