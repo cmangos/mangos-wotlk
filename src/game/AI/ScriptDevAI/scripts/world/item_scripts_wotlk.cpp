@@ -190,6 +190,46 @@ struct BlessingOfAncientKings : public AuraScript
     }
 };
 
+// 67799 - Mind Amplification Dish
+struct MindAmplificationDish : public SpellScript
+{
+    enum
+    {
+        MIND_CONTROL  = 13181,
+        FAIL_CONTROL  = 26740,
+        DULLARD       = 67809,
+        MENTAL_BATTLE = 67810,
+    };
+
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->GetAffectiveCaster()->HasAura(DULLARD))
+            return SPELL_FAILED_CASTER_AURASTATE;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+
+        if (!caster || !target)
+            return;
+
+        uint32 roll = urand(0, 99);
+        if (roll < 75)
+            caster->CastSpell(target, MIND_CONTROL, TRIGGERED_NONE, spell->GetCastItem());
+        else if (roll < 90)
+            caster->CastSpell(target, MENTAL_BATTLE, TRIGGERED_NONE, spell->GetCastItem());
+        else if (roll < 97)
+            target->CastSpell(caster, FAIL_CONTROL, TRIGGERED_NONE, spell->GetCastItem());
+        else
+            caster->CastSpell(nullptr, DULLARD, TRIGGERED_NONE, spell->GetCastItem());
+    }
+};
+
 void AddSC_item_scripts_wotlk()
 {
     RegisterSpellScript<SwiftHandOfJustice>("spell_swift_hand_of_justice");
@@ -198,4 +238,5 @@ void AddSC_item_scripts_wotlk()
     RegisterSpellScript<Icecrown25MeleeTrinket>("spell_icecrown_25_melee_trinket");
     RegisterSpellScript<ValanyrEquipEffect>("spell_valanyr_equip_effect");
     RegisterSpellScript<BlessingOfAncientKings>("spell_blessing_of_ancient_kings");
+    RegisterSpellScript<MindAmplificationDish>("spell_mind_amplification_dish");
 }
