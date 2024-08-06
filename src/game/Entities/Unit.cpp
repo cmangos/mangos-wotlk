@@ -2654,7 +2654,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
                 currentAbsorb = maxAbsorb;
 
             int32 manaReduction = int32(currentAbsorb * manaMultiplier);
-            ApplyPowerMod(POWER_MANA, manaReduction, false);
+            ModifyPower(POWER_MANA, -manaReduction);
         }
 
         // Mana Shield (or Fire Ward or Frost Ward or Ice Barrier)
@@ -10488,6 +10488,7 @@ void Unit::SetMaxPower(Powers power, uint32 val)
 
 void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
 {
+    m_unitPower[power] = m_unitPower[power] + (apply ? val : -val);
     ApplyModUInt32Value(UNIT_FIELD_POWER1 + power, val, apply);
 
     // group update
