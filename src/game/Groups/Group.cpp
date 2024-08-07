@@ -70,7 +70,7 @@ GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 Group::Group() : m_Id(0), m_leaderLastOnline(0), m_groupFlags(GROUP_FLAG_NORMAL),
     m_dungeonDifficulty(REGULAR_DIFFICULTY), m_raidDifficulty(REGULAR_DIFFICULTY),
     m_bgGroup(nullptr), m_bfGroup(nullptr), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
-    m_subGroupsCounts(nullptr)
+    m_subGroupsCounts(nullptr), m_scriptRef(this, NoopGroupDeleter())
 {
 }
 
