@@ -35,6 +35,8 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
     SetMeleeEnabled(!m_creature->GetSettings().HasFlag(CreatureStaticFlags::NO_MELEE_FLEE));
+    if (m_creature->GetSettings().HasFlag(CreatureStaticFlags4::NO_MELEE_APPROACH))
+        SetRangedMode(true, 30.f, TYPE_NO_MELEE_MODE);
     if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::SESSILE))
         SetAIImmobilizedState(true);
 
