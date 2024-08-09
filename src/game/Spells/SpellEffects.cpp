@@ -12565,7 +12565,7 @@ void Spell::EffectRedirectThreat(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget)
         return;
 
-    if (unitTarget->GetTypeId() == TYPEID_UNIT && static_cast<Creature*>(unitTarget)->GetSettings().HasFlag(CreatureStaticFlags2::IGNORE_MISDIRECTION))
+    if (unitTarget->IsIgnoringMisdirect())
         return;
 
     m_caster->getHostileRefManager().SetThreatRedirection(unitTarget->GetObjectGuid(), uint32(damage), m_spellInfo->Id);
