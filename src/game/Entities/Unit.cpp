@@ -12262,7 +12262,7 @@ bool Unit::IsAllowedDamageInArea(Unit* attacker, Unit* pVictim)
     if (!area || !(area->flags & AREA_FLAG_SANCTUARY))
         return true;
 
-    if (pVictim->GetTypeId() == TYPEID_UNIT && static_cast<Creature*>(pVictim)->GetSettings().HasFlag(CreatureStaticFlags2::IGNORE_SANCTUARY))
+    if (pVictim->IsIgnoringSanctuary())
         return true;
     else
         return false;

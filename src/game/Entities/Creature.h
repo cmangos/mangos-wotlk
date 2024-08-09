@@ -849,6 +849,8 @@ class Creature : public Unit
         void SetNoReputation(bool state) { m_noReputation = state; }
         bool IsIgnoringFeignDeath() const override;
         void SetIgnoreFeignDeath(bool state);
+        bool IsIgnoringSanctuary() const override;
+        void SetIgnoreSanctuary(bool state);
 
         void SetNoWoundedSlowdown(bool state);
         bool IsNoWoundedSlowdown() const;

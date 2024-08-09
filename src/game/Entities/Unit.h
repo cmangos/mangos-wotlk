@@ -2459,6 +2459,7 @@ class Unit : public WorldObject
         bool IsFeigningDeathSuccessfully() const { return hasUnitState(UNIT_STAT_FEIGN_DEATH); }
         void SetFeignDeath(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, bool dynamic = true, bool success = true);
         virtual bool IsIgnoringFeignDeath() const { return false; }
+        virtual bool IsIgnoringSanctuary() const { return false; }
 
         virtual bool IsSlowedInCombat() const { return false; }
 
