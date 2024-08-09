@@ -2930,6 +2930,19 @@ void Creature::SetIgnoreFeignDeath(bool state)
         m_settings.RemoveFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
 }
 
+bool Creature::IsIgnoringMisdirect() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::IGNORE_MISDIRECTION);
+}
+
+void Creature::SetIgnoreMisdirect(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::IGNORE_MISDIRECTION);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::IGNORE_MISDIRECTION);
+}
+
 void Creature::SetNoWoundedSlowdown(bool state)
 {
     if (state)
