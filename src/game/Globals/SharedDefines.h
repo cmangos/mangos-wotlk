@@ -1318,38 +1318,38 @@ enum CreatureFamily
 
 enum CreatureTypeFlags
 {
-    CREATURE_TYPEFLAGS_TAMEABLE         = 0x00000001,       // Tameable by any hunter
-    CREATURE_TYPEFLAGS_GHOST_VISIBLE    = 0x00000002,       // Creatures which can _also_ be seen when player is a ghost, used in CanInteract function by client, can't be attacked
-    CREATURE_TYPEFLAGS_BOSS_MOB         = 0x00000004,       // "BOSS" flag for tooltips
-    CREATURE_TYPEFLAGS_NO_WOUND_ANIM    = 0x00000008,
-    CREATURE_TYPEFLAGS_NO_FACTION_TOOLTIP=0x00000010,       // controls something in client tooltip related to creature faction
-    CREATURE_TYPEFLAGS_MORE_AUDIBLE     = 0x00000020,       // may be sound related
-    CREATURE_TYPEFLAGS_SPELL_ATTACKABLE = 0x00000040,       // may be related to attackable / not attackable creatures with spells, used together with lua_IsHelpfulSpell/lua_IsHarmfulSpell
-    CREATURE_TYPEFLAGS_INTERACT_DEAD    = 0x00000080,       // Creature can be interacted with even if it's dead
-    CREATURE_TYPEFLAGS_HERBLOOT         = 0x00000100,       // Can be looted by herbalist
-    CREATURE_TYPEFLAGS_MININGLOOT       = 0x00000200,       // Can be looted by miner
-    CREATURE_TYPEFLAGS_NO_DEATH_MSG     = 0x00000400,       // no idea, but it used by client
-    CREATURE_TYPEFLAGS_MOUNTED_COMBAT   = 0x00000800,       // possibility to attack and cast spells while mounted
-    CREATURE_TYPEFLAGS_CAN_ASSIST       = 0x00001000,       // Can aid any player (and group) in combat. Typically seen for escorting NPC's
-    CREATURE_TYPEFLAGS_NO_PET_BAR       = 0x00002000,       // checked from calls in Lua_PetHasActionBar
-    CREATURE_TYPEFLAGS_NO_UID           = 0x00004000,       // Lua_UnitGUID, client does guid_low &= 0xFF000000 if this flag is set
-    CREATURE_TYPEFLAGS_ENGINEERLOOT     = 0x00008000,       // Can be looted by engineer
-    CREATURE_TYPEFLAGS_EXOTIC           = 0x00010000,       // Can be tamed by hunter as exotic pet
-    CREATURE_TYPEFLAGS_MODEL_COLLISION_SIZE=0x00020000,     // related to CreatureDisplayInfo and scaling in some way
-    CREATURE_TYPEFLAGS_SIEGE_WEAPON     = 0x00040000,       // Related to vehicle/siege weapons
-    CREATURE_TYPEFLAGS_COLLIDE_WITH_MISSILES=0x00080000,    // may be has something to do with missiles
-    CREATURE_TYPEFLAGS_NO_NAMEPLATE     = 0x00100000,       // no idea, but it used by client, may be related to rendering
-    CREATURE_TYPEFLAGS_NO_MOUNTED_ANIM  = 0x00200000,       // may be has something to do with animation (disable animation?)
-    CREATURE_TYPEFLAGS_UNK23            = 0x00400000,       // this one probably controls some creature visual
-    CREATURE_TYPEFLAGS_SQUIRE           = 0x00800000,       // First seen in 3.2.2. Related to banner/backpack of creature/companion, used in CanInteract function by client
-    CREATURE_TYPEFLAGS_NO_DEATH_SOUND   = 0x01000000,       // pet sounds related?
-    CREATURE_TYPEFLAGS_NO_SHADOW_BLOB   = 0x02000000,       // this one probably controls some creature visual
-    CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID = 0x04000000,       // creature has no type, or forces creature to be considered as in party, may be related to creature assistance
-    CREATURE_TYPEFLAGS_FORCE_GOSSIP     = 0x08000000,       // used in Lua_ForceGossip
-    CREATURE_TYPEFLAGS_FORCE_UNSHEATHE  = 0x10000000,       // no idea, but it used by client
-    CREATURE_TYPEFLAGS_UNK30            = 0x20000000,
-    CREATURE_TYPEFLAGS_UNK31            = 0x40000000,
-    CREATURE_TYPEFLAGS_QUEST_BOSS       = 0x80000000,       // Lua_UnitIsQuestBoss
+    CREATURE_TYPEFLAGS_TAMEABLE              = 0x00000001,       // Tameable by any hunter
+    CREATURE_TYPEFLAGS_GHOST_VISIBLE         = 0x00000002,       // Creatures which can _also_ be seen when player is a ghost, used in CanInteract function by client, can't be attacked
+    CREATURE_TYPEFLAGS_BOSS_MOB              = 0x00000004,       // "BOSS" flag for tooltips
+    CREATURE_TYPEFLAGS_NO_WOUND_ANIM         = 0x00000008,
+    CREATURE_TYPEFLAGS_NO_FACTION_TOOLTIP    = 0x00000010,       // controls something in client tooltip related to creature faction
+    CREATURE_TYPEFLAGS_MORE_AUDIBLE          = 0x00000020,       // may be sound related
+    CREATURE_TYPEFLAGS_SPELL_ATTACKABLE      = 0x00000040,       // may be related to attackable / not attackable creatures with spells, used together with lua_IsHelpfulSpell/lua_IsHarmfulSpell
+    CREATURE_TYPEFLAGS_INTERACT_DEAD         = 0x00000080,       // Creature can be interacted with even if it's dead
+    CREATURE_TYPEFLAGS_HERBLOOT              = 0x00000100,       // Can be looted by herbalist
+    CREATURE_TYPEFLAGS_MININGLOOT            = 0x00000200,       // Can be looted by miner
+    CREATURE_TYPEFLAGS_NO_DEATH_MSG          = 0x00000400,       // no idea, but it used by client
+    CREATURE_TYPEFLAGS_MOUNTED_COMBAT        = 0x00000800,       // possibility to attack and cast spells while mounted
+    CREATURE_TYPEFLAGS_CAN_ASSIST            = 0x00001000,       // Can aid any player (and group) in combat. Typically seen for escorting NPC's
+    CREATURE_TYPEFLAGS_NO_PET_BAR            = 0x00002000,       // checked from calls in Lua_PetHasActionBar
+    CREATURE_TYPEFLAGS_MASK_UID              = 0x00004000,       // Lua_UnitGUID, client does guid_low &= 0xFF000000 if this flag is set
+    CREATURE_TYPEFLAGS_ENGINEERLOOT          = 0x00008000,       // Can be looted by engineer
+    CREATURE_TYPEFLAGS_EXOTIC                = 0x00010000,       // Can be tamed by hunter as exotic pet
+    CREATURE_TYPEFLAGS_MODEL_COLLISION_SIZE  = 0x00020000,     // related to CreatureDisplayInfo and scaling in some way
+    CREATURE_TYPEFLAGS_SIEGE_WEAPON          = 0x00040000,       // Related to vehicle/siege weapons
+    CREATURE_TYPEFLAGS_COLLIDE_WITH_MISSILES = 0x00080000,    // may be has something to do with missiles
+    CREATURE_TYPEFLAGS_NO_NAMEPLATE          = 0x00100000,       // no idea, but it used by client, may be related to rendering
+    CREATURE_TYPEFLAGS_NO_MOUNTED_ANIM       = 0x00200000,       // may be has something to do with animation (disable animation?)
+    CREATURE_TYPEFLAGS_LINK_ALL              = 0x00400000,       // this one probably controls some creature visual
+    CREATURE_TYPEFLAGS_SQUIRE                = 0x00800000,       // First seen in 3.2.2. Related to banner/backpack of creature/companion, used in CanInteract function by client
+    CREATURE_TYPEFLAGS_NO_DEATH_SOUND        = 0x01000000,       // pet sounds related?
+    CREATURE_TYPEFLAGS_NO_SHADOW_BLOB        = 0x02000000,       // this one probably controls some creature visual
+    CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID      = 0x04000000,       // creature has no type, or forces creature to be considered as in party, may be related to creature assistance
+    CREATURE_TYPEFLAGS_FORCE_GOSSIP          = 0x08000000,       // used in Lua_ForceGossip
+    CREATURE_TYPEFLAGS_DO_NOT_SHEATHE        = 0x10000000,       // no idea, but it used by client
+    CREATURE_TYPEFLAGS_NO_INTERACT_TARGET    = 0x20000000,
+    CREATURE_TYPEFLAGS_DO_NOT_RENDER_NAME    = 0x40000000,
+    CREATURE_TYPEFLAGS_QUEST_BOSS            = 0x80000000,       // Lua_UnitIsQuestBoss
 };
 
 enum CreatureEliteType

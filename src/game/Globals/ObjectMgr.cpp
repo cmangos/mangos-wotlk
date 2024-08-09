@@ -1048,9 +1048,9 @@ uint32 ObjectMgr::GetTypeFlagsFromStaticFlags(uint32 typeFlags, uint32 staticFla
     if (staticFlags1 & uint32(CreatureStaticFlags::NO_FACTION_TOOLTIP))
         typeFlags |= CREATURE_TYPEFLAGS_NO_FACTION_TOOLTIP;
     if (staticFlags1 & uint32(CreatureStaticFlags::DO_NOT_PLAY_WOUND_ANIM))
-        typeFlags |= CREATURE_TYPEFLAGS_NO_WOUND_ANIM; // Not Proven
+        typeFlags |= CREATURE_TYPEFLAGS_NO_WOUND_ANIM;
     if (staticFlags1 & uint32(CreatureStaticFlags::MORE_AUDIBLE))
-        typeFlags |= CREATURE_TYPEFLAGS_MORE_AUDIBLE; // Not Proven
+        typeFlags |= CREATURE_TYPEFLAGS_MORE_AUDIBLE;
     if (staticFlags2 & uint32(CreatureStaticFlags2::SPELL_ATTACKABLE))
         typeFlags |= CREATURE_TYPEFLAGS_SPELL_ATTACKABLE;
     if (staticFlags2 & uint32(CreatureStaticFlags2::INTERACT_WHILE_DEAD))
@@ -1068,7 +1068,7 @@ uint32 ObjectMgr::GetTypeFlagsFromStaticFlags(uint32 typeFlags, uint32 staticFla
     if (staticFlags2 & uint32(CreatureStaticFlags2::NO_PET_BAR))
         typeFlags |= CREATURE_TYPEFLAGS_NO_PET_BAR;
     if (staticFlags3 & uint32(CreatureStaticFlags3::MASK_UID))
-        typeFlags |= CREATURE_TYPEFLAGS_NO_UID;
+        typeFlags |= CREATURE_TYPEFLAGS_MASK_UID;
     if (staticFlags3 & uint32(CreatureStaticFlags3::SKIN_WITH_ENGINEERING))
         typeFlags |= CREATURE_TYPEFLAGS_ENGINEERLOOT;
     if (staticFlags3 & uint32(CreatureStaticFlags3::TAMEABLE_EXOTIC))
@@ -1076,31 +1076,31 @@ uint32 ObjectMgr::GetTypeFlagsFromStaticFlags(uint32 typeFlags, uint32 staticFla
     if (staticFlags3 & uint32(CreatureStaticFlags3::NO_NAME_PLATE))
         typeFlags |= CREATURE_TYPEFLAGS_NO_NAMEPLATE;
     if (staticFlags3 & uint32(CreatureStaticFlags3::USE_MODEL_COLLISION_SIZE))
-        typeFlags |= CREATURE_TYPEFLAGS_MODEL_COLLISION_SIZE; // Not proven
+        typeFlags |= CREATURE_TYPEFLAGS_MODEL_COLLISION_SIZE;
     if (staticFlags3 & uint32(CreatureStaticFlags3::ALLOW_INTERACTION_WHILE_IN_COMBAT))
-        typeFlags |= CREATURE_TYPEFLAGS_SIEGE_WEAPON; // Not proven
+        typeFlags |= CREATURE_TYPEFLAGS_SIEGE_WEAPON;
     if (staticFlags3 & uint32(CreatureStaticFlags3::COLLIDE_WITH_MISSILES))
-        typeFlags |= CREATURE_TYPEFLAGS_COLLIDE_WITH_MISSILES; // Not proven
+        typeFlags |= CREATURE_TYPEFLAGS_COLLIDE_WITH_MISSILES;
     if (staticFlags3 & uint32(CreatureStaticFlags3::DO_NOT_PLAY_MOUNTED_ANIMATIONS))
         typeFlags |= CREATURE_TYPEFLAGS_NO_MOUNTED_ANIM;
     if (staticFlags3 & uint32(CreatureStaticFlags3::LINK_ALL))
-        typeFlags |= CREATURE_TYPEFLAGS_UNK23; // Not proven
+        typeFlags |= CREATURE_TYPEFLAGS_LINK_ALL;
     if (staticFlags4 & uint32(CreatureStaticFlags4::INTERACT_ONLY_WITH_CREATOR))
         typeFlags |= CREATURE_TYPEFLAGS_SQUIRE;
     if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_PLAY_UNIT_EVENT_SOUNDS))
         typeFlags |= CREATURE_TYPEFLAGS_NO_DEATH_SOUND;
     if (staticFlags4 & uint32(CreatureStaticFlags4::HAS_NO_SHADOW_BLOB))
-        typeFlags |= CREATURE_TYPEFLAGS_NO_SHADOW_BLOB; // Not proven
+        typeFlags |= CREATURE_TYPEFLAGS_NO_SHADOW_BLOB;
     if (staticFlags4 & uint32(CreatureStaticFlags4::TREAT_AS_RAID_UNIT_FOR_HELPFUL_SPELLS))
         typeFlags |= CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID;
     if (staticFlags4 & uint32(CreatureStaticFlags4::FORCE_GOSSIP))
         typeFlags |= CREATURE_TYPEFLAGS_FORCE_GOSSIP;
     if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_SHEATHE))
-        typeFlags |= CREATURE_TYPEFLAGS_FORCE_UNSHEATHE;
+        typeFlags |= CREATURE_TYPEFLAGS_DO_NOT_SHEATHE;
     if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_TARGET_ON_INTERACTION))
-        typeFlags |= CREATURE_TYPEFLAGS_UNK30; // Not proven
+        typeFlags |= CREATURE_TYPEFLAGS_NO_INTERACT_TARGET;
     if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_RENDER_OBJECT_NAME))
-        typeFlags |= CREATURE_TYPEFLAGS_UNK31; // Not proven
+        typeFlags |= CREATURE_TYPEFLAGS_DO_NOT_RENDER_NAME;
     if (staticFlags4 & uint32(CreatureStaticFlags4::QUEST_BOSS))
         typeFlags |= CREATURE_TYPEFLAGS_QUEST_BOSS;
     return typeFlags;
