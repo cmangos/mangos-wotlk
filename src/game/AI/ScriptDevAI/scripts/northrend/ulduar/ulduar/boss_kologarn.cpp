@@ -106,7 +106,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
     {
         m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_creature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK15);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CANNOT_TURN);
         Reset();
     }
 

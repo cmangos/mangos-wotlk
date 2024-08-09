@@ -556,7 +556,7 @@ enum UnitFlags2
     UNIT_FLAG2_SPELL_CLICK_IN_GROUP = 0x00001000,
     UNIT_FLAG2_SPELL_CLICK_DISABLED = 0x00002000,
     UNIT_FLAG2_INTERACT_ANY_REACTION = 0x00004000,
-    UNIT_FLAG2_UNK15                = 0x00008000,
+    UNIT_FLAG2_CANNOT_TURN          = 0x00008000,
     UNIT_FLAG2_UNK16                = 0x00010000,
     UNIT_FLAG2_ALLOW_CHEAT_SPELLS   = 0x00040000,
 };
@@ -2633,6 +2633,8 @@ class Unit : public WorldObject
 
         void SetRootVehicle(const ObjectGuid& guid) { m_rootVehicle = guid; }
         const ObjectGuid& GetRootVehicle() const { return m_rootVehicle; }
+
+        virtual bool CannotTurn() const { return false; }
 
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
