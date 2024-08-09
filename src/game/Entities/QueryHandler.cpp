@@ -206,7 +206,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4, always empty
         data << subName;
         data << ci->IconName;                               // "Directions" for guard, string for Icons 2.3.0
-        data << uint32(ci->CreatureTypeFlags);              // flags
+        data << uint32(ci->TypeFlags);                      // flags
         data << uint32(ci->CreatureType);                   // CreatureType.dbc
         data << uint32(ci->Family);                         // CreatureFamily.dbc
         data << uint32(ci->Rank);                           // Creature Rank (elite, boss, etc)
@@ -220,7 +220,7 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << float(ci->PowerMultiplier);                 // power multiplier
         data << uint8(ci->RacialLeader);
         for (unsigned int QuestItem : ci->QuestItems)
-            data << uint32(QuestItem);              // itemId[6], quest drop
+            data << uint32(QuestItem);                      // itemId[6], quest drop
         data << uint32(ci->MovementTemplateId);             // CreatureMovementInfo.dbc
         SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");

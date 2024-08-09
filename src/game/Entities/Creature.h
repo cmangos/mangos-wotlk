@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "Entities/Unit.h"
 #include "Globals/SharedDefines.h"
+#include "Entities/CreatureDefines.h"
 #include "Server/DBCEnums.h"
 #include "Util/Util.h"
 #include "Entities/CreatureSpellList.h"
@@ -107,7 +108,7 @@ struct CreatureInfo
     uint32  UnitFlags2;                                     // enum UnitFlags2
     uint32  DynamicFlags;
     uint32  ExtraFlags;
-    uint32  CreatureTypeFlags;                              // enum CreatureTypeFlags mask values
+    uint32  TypeFlags;                                      // enum TypeFlags mask values
     uint32  StaticFlags;
     uint32  StaticFlags2;
     uint32  StaticFlags3;
@@ -194,11 +195,11 @@ struct CreatureInfo
 
     SkillType GetRequiredLootSkill() const
     {
-        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
+        if (HasFlag(CreatureTypeFlags::SKIN_WITH_HERBALISM))
             return SKILL_HERBALISM;
-        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
+        if (HasFlag(CreatureTypeFlags::SKIN_WITH_MINING))
             return SKILL_MINING;
-        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+        if (HasFlag(CreatureTypeFlags::SKIN_WITH_ENGINEERING))
             return SKILL_ENGINEERING;
         return SKILL_SKINNING;
         // normal case
@@ -206,16 +207,21 @@ struct CreatureInfo
 
     bool IsExotic() const
     {
-        return (CreatureTypeFlags & CREATURE_TYPEFLAGS_EXOTIC) != 0;
+        return bool(CreatureTypeFlags(TypeFlags) & CreatureTypeFlags::TAMEABLE_EXOTIC) != 0;
     }
 
     bool isTameable(bool exotic) const
     {
-        if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
+        if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || !HasFlag(CreatureTypeFlags::TAMEABLE))
             return false;
 
         // if can tame exotic then can tame any tameable
         return exotic || !IsExotic();
+    }
+
+    bool HasFlag(CreatureTypeFlags flags) const
+    {
+        return bool(CreatureTypeFlags(TypeFlags) & flags);
     }
 };
 
@@ -783,7 +789,7 @@ class Creature : public Unit
         uint32 GetInteractionPauseTimer() const { return m_interactionPauseTimer; }
 
         GridReference<Creature>& GetGridRef() { return m_gridRef; }
-        bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0 && !(GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_SIEGE_WEAPON); }
+        bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0 && !(GetCreatureInfo()->HasFlag(CreatureTypeFlags::ALLOW_INTERACTION_WHILE_IN_COMBAT)); }
         bool IsRegeneratingPower() const;
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
