@@ -750,6 +750,8 @@ void ObjectMgr::LoadCreatureTemplates()
             sLog.outErrorDb("Table creature_template entry %u StringID2 %u does not exist. Setting to 0.", cInfo->Entry, cInfo->StringID2);
             const_cast<CreatureInfo*>(cInfo)->StringID2 = 0;
         }
+        if (cInfo->StaticFlags || cInfo->StaticFlags2 || cInfo->StaticFlags3 || cInfo->StaticFlags4)
+            const_cast<CreatureInfo*>(cInfo)->CreatureTypeFlags = GetTypeFlagsFromStaticFlags(cInfo->CreatureTypeFlags, cInfo->StaticFlags, cInfo->StaticFlags2, cInfo->StaticFlags3, cInfo->StaticFlags4);
     }
 
     sLog.outString(">> Loaded %u creature definitions", sCreatureStorage.GetRecordCount());
@@ -1033,6 +1035,75 @@ VehicleSeatParameters const* ObjectMgr::GetVehicleSeatParameters(uint32 seatEntr
         return nullptr;
 
     return &itr->second;
+}
+
+uint32 ObjectMgr::GetTypeFlagsFromStaticFlags(uint32 typeFlags, uint32 staticFlags1, uint32 staticFlags2, uint32 staticFlags3, uint32 staticFlags4) const
+{
+    if (staticFlags1 & uint32(CreatureStaticFlags::TAMEABLE))
+        typeFlags |= CREATURE_TYPEFLAGS_TAMEABLE;
+    if (staticFlags1 & uint32(CreatureStaticFlags::BOSS_MOB))
+        typeFlags |= CREATURE_TYPEFLAGS_BOSS_MOB;
+    if (staticFlags1 & uint32(CreatureStaticFlags::VISIBLE_TO_GHOSTS))
+        typeFlags |= CREATURE_TYPEFLAGS_GHOST_VISIBLE;
+    if (staticFlags1 & uint32(CreatureStaticFlags::NO_FACTION_TOOLTIP))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_FACTION_TOOLTIP;
+    if (staticFlags1 & uint32(CreatureStaticFlags::DO_NOT_PLAY_WOUND_ANIM))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_WOUND_ANIM;
+    if (staticFlags1 & uint32(CreatureStaticFlags::MORE_AUDIBLE))
+        typeFlags |= CREATURE_TYPEFLAGS_MORE_AUDIBLE;
+    if (staticFlags2 & uint32(CreatureStaticFlags2::SPELL_ATTACKABLE))
+        typeFlags |= CREATURE_TYPEFLAGS_SPELL_ATTACKABLE;
+    if (staticFlags2 & uint32(CreatureStaticFlags2::INTERACT_WHILE_DEAD))
+        typeFlags |= CREATURE_TYPEFLAGS_INTERACT_DEAD;
+    if (staticFlags2 & uint32(CreatureStaticFlags2::SKIN_WITH_HERBALISM))
+        typeFlags |= CREATURE_TYPEFLAGS_HERBLOOT;
+    if (staticFlags2 & uint32(CreatureStaticFlags2::SKIN_WITH_MINING))
+        typeFlags |= CREATURE_TYPEFLAGS_MININGLOOT;
+    if (staticFlags2 & uint32(CreatureStaticFlags2::ALLOW_MOUNTED_COMBAT))
+        typeFlags |= CREATURE_TYPEFLAGS_MOUNTED_COMBAT;
+    if (staticFlags2 & uint32(CreatureStaticFlags2::NO_DEATH_MESSAGE))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_DEATH_MSG; // Not proven
+    if (staticFlags2 & uint32(CreatureStaticFlags2::CAN_ASSIST))
+        typeFlags |= CREATURE_TYPEFLAGS_CAN_ASSIST;
+    if (staticFlags2 & uint32(CreatureStaticFlags2::NO_PET_BAR))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_PET_BAR;
+    if (staticFlags3 & uint32(CreatureStaticFlags3::MASK_UID))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_UID;
+    if (staticFlags3 & uint32(CreatureStaticFlags3::SKIN_WITH_ENGINEERING))
+        typeFlags |= CREATURE_TYPEFLAGS_ENGINEERLOOT;
+    if (staticFlags3 & uint32(CreatureStaticFlags3::TAMEABLE_EXOTIC))
+        typeFlags |= CREATURE_TYPEFLAGS_EXOTIC;
+    if (staticFlags3 & uint32(CreatureStaticFlags3::NO_NAME_PLATE))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_NAMEPLATE; // Not proven
+    if (staticFlags3 & uint32(CreatureStaticFlags3::USE_MODEL_COLLISION_SIZE))
+        typeFlags |= CREATURE_TYPEFLAGS_MODEL_COLLISION_SIZE; // Not proven
+    if (staticFlags3 & uint32(CreatureStaticFlags3::ALLOW_INTERACTION_WHILE_IN_COMBAT))
+        typeFlags |= CREATURE_TYPEFLAGS_SIEGE_WEAPON; // Not proven
+    if (staticFlags3 & uint32(CreatureStaticFlags3::COLLIDE_WITH_MISSILES))
+        typeFlags |= CREATURE_TYPEFLAGS_COLLIDE_WITH_MISSILES; // Not proven
+    if (staticFlags3 & uint32(CreatureStaticFlags3::DO_NOT_PLAY_MOUNTED_ANIMATIONS))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_MOUNTED_ANIM; // Not proven
+    if (staticFlags3 & uint32(CreatureStaticFlags3::LINK_ALL))
+        typeFlags |= CREATURE_TYPEFLAGS_UNK23; // Not proven
+    if (staticFlags4 & uint32(CreatureStaticFlags4::INTERACT_ONLY_WITH_CREATOR))
+        typeFlags |= CREATURE_TYPEFLAGS_SQUIRE; // Not proven
+    if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_PLAY_UNIT_EVENT_SOUNDS))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_DEATH_SOUND; // Not proven
+    if (staticFlags4 & uint32(CreatureStaticFlags4::HAS_NO_SHADOW_BLOB))
+        typeFlags |= CREATURE_TYPEFLAGS_NO_SHADOW_BLOB; // Not proven
+    if (staticFlags4 & uint32(CreatureStaticFlags4::TREAT_AS_RAID_UNIT_FOR_HELPFUL_SPELLS))
+        typeFlags |= CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID;
+    if (staticFlags4 & uint32(CreatureStaticFlags4::FORCE_GOSSIP))
+        typeFlags |= CREATURE_TYPEFLAGS_FORCE_GOSSIP;
+    if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_SHEATHE))
+        typeFlags |= CREATURE_TYPEFLAGS_UNK29; // Not proven
+    if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_TARGET_ON_INTERACTION))
+        typeFlags |= CREATURE_TYPEFLAGS_UNK30; // Not proven
+    if (staticFlags4 & uint32(CreatureStaticFlags4::DO_NOT_RENDER_OBJECT_NAME))
+        typeFlags |= CREATURE_TYPEFLAGS_UNK31; // Not proven
+    if (staticFlags4 & uint32(CreatureStaticFlags4::QUEST_BOSS))
+        typeFlags |= CREATURE_TYPEFLAGS_QUEST_BOSS;
+    return typeFlags;
 }
 
 CreatureImmunityVector const* ObjectMgr::GetCreatureImmunitySet(uint32 entry, uint32 setId) const
