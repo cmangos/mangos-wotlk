@@ -187,17 +187,11 @@ struct boss_razorscaleAI : public BossAI
                 m_creature->SetCanFly(true);
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
-                float fX, fY, fZ;
-                //m_creature->GetRespawnCoord(fX, fY, fZ);
                 const Position combatPosition = Position(580.63556, -175.46675, 475.54114);
-                fX=combatPosition.GetPositionX();
-                fY=combatPosition.GetPositionY();
-                fZ=combatPosition.GetPositionZ();
-
                 // use upgraded speed rate for FlyOrLand. This isn't supported by DB but it's confirmed to happen on retail
                 uint32 speedRate = m_creature->GetSpeedRate(MOVE_RUN);
                 m_creature->SetSpeedRate(MOVE_RUN, SPEED_RATE_RAZORSCALE);
-                m_creature->GetMotionMaster()->MovePointTOL(1, fX, fY, fZ, true);
+                m_creature->GetMotionMaster()->MovePointTOL(1, combatPosition.GetPositionX(), combatPosition.GetPositionY(), combatPosition.GetPositionZ(), true);
                 m_creature->SetSpeedRate(MOVE_RUN, speedRate);
 
                 // reset timers
@@ -472,6 +466,7 @@ struct boss_razorscaleAI : public BossAI
             case RAZORSCALE_PLAYER_CHECK: return 1s;
             case RAZORSCALE_REPAIR_HARPOONS: return 20s;
             case RAZORSCALE_SPAWN_ADDS: return 40s;
+            default: return 24h;
         }
     }
 
@@ -586,7 +581,7 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
     npc_expedition_commanderAI(Creature* creature) : ScriptedAI(creature),
         DialogueHelper(aIntroDialogue)
     {
-        m_instance = (instance_ulduar*)creature->GetInstanceData();
+        m_instance = dynamic_cast<instance_ulduar*>(creature->GetInstanceData());
         InitializeDialogueHelper(m_instance);
         m_introDone = false;
         Reset();
@@ -691,7 +686,7 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
 
 bool GossipHello_npc_expedition_commander(Player* player, Creature* creature)
 {
-    if (ScriptedInstance* instance = (ScriptedInstance*)creature->GetInstanceData())
+    if (instance_ulduar* instance = dynamic_cast<instance_ulduar*>(creature->GetInstanceData()))
     {
         if (instance->GetData(TYPE_RAZORSCALE) == NOT_STARTED || instance->GetData(TYPE_RAZORSCALE) == FAIL)
             player->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_START_RAZORSCALE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
@@ -744,7 +739,7 @@ struct npc_razorscale_spawnerAI : public Scripted_NoMovementAI
             }
         });
         SetReactState(REACT_PASSIVE);
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
     }
 
     uint32 m_uiSpawnTimer;
@@ -789,7 +784,7 @@ struct npc_harpoon_fire_stateAI : public Scripted_NoMovementAI
     npc_harpoon_fire_stateAI(Creature* creature) : Scripted_NoMovementAI(creature)
     {
         SetReactState(REACT_PASSIVE);
-        SetRootSelf(true);
+        SetAIImmobilizedState(true);
     }
 
     void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damageType*/, SpellEntry const* spellInfo) override
@@ -845,7 +840,7 @@ struct DevouringFlameRazorscale : public SpellScript
         if (summon->AI())
         {
             summon->AI()->SetReactState(REACT_PASSIVE);
-            summon->AI()->SetRootSelf(true);
+            summon->AI()->SetAIImmobilizedState(true);
             summon->SetImmuneToNPC(true);
         }
         bool isRegularModed = summon->GetMap()->IsRegularDifficulty();
