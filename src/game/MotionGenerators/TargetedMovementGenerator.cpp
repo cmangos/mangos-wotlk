@@ -934,8 +934,10 @@ bool FollowMovementGenerator::_getOrientation(Unit& owner, float& o) const
 {
     if (!i_target.isValid())
         return false;
-
-    o = (i_faceTarget ? owner.GetAngle(i_target.getTarget()) : i_target->GetOrientation());
+    if (owner.CannotTurn())
+        o = owner.GetOrientation();
+    else
+        o = (i_faceTarget ? owner.GetAngle(i_target.getTarget()) : i_target->GetOrientation());
     return true;
 }
 

@@ -52,6 +52,8 @@ void CreatureSettings::ResetStaticFlags(CreatureStaticFlags staticFlags, Creatur
         m_owner->DisableThreatPropagationToOwner();
     if (HasFlag(CreatureStaticFlags2::HIDE_BODY))
         m_owner->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_HIDE_BODY);
+    if (HasFlag(CreatureStaticFlags3::CANNOT_TURN))
+        m_owner->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CANNOT_TURN);
 }
 
 void CreatureSettings::SetFlag(CreatureStaticFlags flag)
