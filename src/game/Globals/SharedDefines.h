@@ -1346,7 +1346,7 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_NO_SHADOW_BLOB   = 0x02000000,       // this one probably controls some creature visual
     CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID = 0x04000000,       // creature has no type, or forces creature to be considered as in party, may be related to creature assistance
     CREATURE_TYPEFLAGS_FORCE_GOSSIP     = 0x08000000,       // used in Lua_ForceGossip
-    CREATURE_TYPEFLAGS_UNK29            = 0x10000000,       // no idea, but it used by client
+    CREATURE_TYPEFLAGS_FORCE_UNSHEATHE  = 0x10000000,       // no idea, but it used by client
     CREATURE_TYPEFLAGS_UNK30            = 0x20000000,
     CREATURE_TYPEFLAGS_UNK31            = 0x40000000,
     CREATURE_TYPEFLAGS_QUEST_BOSS       = 0x80000000,       // Lua_UnitIsQuestBoss
