@@ -394,6 +394,9 @@ void ChaseMovementGenerator::Backpedal(Unit& owner)
     if (!owner.AI() || owner.AI()->GetCombatScriptStatus())
         return;
 
+    if (owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).GetSettings().HasFlag(CreatureStaticFlags4::DONT_REPOSITION_IF_MELEE_TARGET_IS_TOO_CLOSE))
+        return;
+
     m_closenessExpired = false;
     m_closenessAndFanningTimer = CHASE_CLOSENESS_TIMER; // Just in case path doesnt generate
     float targetDist = std::min(this->i_target->GetCombinedCombatReach(&owner, false), 3.75f);
