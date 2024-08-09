@@ -600,6 +600,9 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     if ((GetCreatureInfo()->RegenerateStats & (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER)) == (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER))
         SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
 
+    if (m_settings.HasFlag(CreatureStaticFlags::NO_AUTOMATIC_REGEN))
+        RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
+
     SetCanModifyStats(true);
     UpdateAllStats();
 
