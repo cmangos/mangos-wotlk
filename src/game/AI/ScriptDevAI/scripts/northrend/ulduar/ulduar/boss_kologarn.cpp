@@ -180,8 +180,7 @@ struct boss_kologarnAI : public BossAI
             ResetTimer(KOLOGARN_ORIENTATION_CORRECTION, 1s);
         });
         m_creature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK15);
-        SetRootSelf(true);
-    
+        SetAIImmobilizedState(true);
     }
 
     instance_ulduar* m_instance;
@@ -580,7 +579,7 @@ struct StoneGripAbsorb : AuraScript
             return;
     }
 
-    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/) const override
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
     {
         currentAbsorb = 0;
         if (aura->GetEffIndex() != EFFECT_INDEX_0)
