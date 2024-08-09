@@ -1300,6 +1300,8 @@ class ObjectMgr
 
         // Vehicles
         VehicleSeatParameters const* GetVehicleSeatParameters(uint32 seatEntry) const;
+
+        uint32 GetTypeFlagsFromStaticFlags(uint32 typeFlags, uint32 staticFlags1, uint32 staticFlags2, uint32 staticFlags3, uint32 staticFlags4) const;
     protected:
 
         // current locale settings
