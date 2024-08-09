@@ -52,6 +52,8 @@ void CreatureSettings::ResetStaticFlags(CreatureStaticFlags staticFlags, Creatur
         m_owner->DisableThreatPropagationToOwner();
     if (HasFlag(CreatureStaticFlags2::HIDE_BODY))
         m_owner->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_HIDE_BODY);
+    if (HasFlag(CreatureStaticFlags3::SPELL_CLICK_FOR_PARTY_ONLY))
+        m_owner->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_SPELL_CLICK_IN_GROUP);
 }
 
 void CreatureSettings::SetFlag(CreatureStaticFlags flag)
