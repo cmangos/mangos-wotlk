@@ -1900,7 +1900,10 @@ void Creature::SetDeathState(DeathState s)
         else if (m_respawnOverrideOnce)
             m_respawnOverriden = false;
 
-        m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_corpseDelay * IN_MILLISECONDS); // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
+        if (m_settings.HasFlag(CreatureStaticFlags3::FOREVER_CORPSE_DURATION))
+            m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::hours(24*7);
+        else
+            m_corpseExpirationTime = GetMap()->GetCurrentClockTime() + std::chrono::seconds(m_corpseDelay); // the max/default time for corpse decay (before creature is looted/AllLootRemovedFromCorpse() is called)
         m_respawnTime = time(nullptr) + m_respawnDelay; // respawn delay (spawntimesecs)
 
         // always save boss respawn time at death to prevent crash cheating
