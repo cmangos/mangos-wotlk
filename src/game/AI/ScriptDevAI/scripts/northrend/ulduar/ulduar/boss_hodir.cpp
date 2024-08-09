@@ -378,26 +378,6 @@ bool ProcessEventId_event_boss_hodir(uint32 eventId, Object* source, Object* /*t
     return false;
 }
 
-/*######
-## npc_icicle_target
-######*/
-
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_icicle_targetAI : public Scripted_NoMovementAI
-{
-    npc_icicle_targetAI(Creature* creature) : Scripted_NoMovementAI(creature) { Reset(); }
-
-    void Reset() override
-    {
-        SetAIImmobilizedState(true);
-        DoCastSpellIfCan(m_creature, SPELL_SAFE_AREA);
-    }
-
-    void AttackStart(Unit* /*who*/) override { }
-    void MoveInLineOfSight(Unit* /*who*/) override { }
-    void UpdateAI(const uint32 /*diff*/) override { }
-};
-
 // 61968 Flash Freeze
 struct FlashFreeze : public AuraScript
 {
@@ -407,11 +387,13 @@ struct FlashFreeze : public AuraScript
         if (!target)
             return;
         if (aura->GetAuraTicks() == 1 && !target->HasAura(SPELL_AURA_SAFE_AREA))
+        {
             if (target->IsCreature() && (target->HasAura(SPELL_FLASH_FREEZE_AURA) || target->HasAura(SPELL_FLASH_FREEZE_AURA_NPC)))
                 return;
             else
                 target->CastSpell(nullptr, SPELL_FLASH_FREEZE_SUMMON, TRIGGERED_INSTANT_CAST |
                     TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_CASTER_AURA_STATE | TRIGGERED_IGNORE_GCD, nullptr, aura);
+        }
     }
 };
 
@@ -489,11 +471,6 @@ void AddSC_boss_hodir()
     pNewScript = new Script;
     pNewScript->Name = "event_boss_hodir";
     pNewScript->pProcessEventId = &ProcessEventId_event_boss_hodir;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_icicle_target";
-    pNewScript->GetAI = &GetNewAIInstance<npc_icicle_targetAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<FlashFreeze>("spell_flash_freeze");
