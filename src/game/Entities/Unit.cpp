@@ -9198,7 +9198,10 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
 
         // if player is dead then he can't detect anyone in any cases
         if (!u->IsAlive())
-            detect = false;
+        {
+            if (!IsCreature() || !(static_cast<const Creature*>(this)->GetSettings().HasFlag(CreatureStaticFlags::VISIBLE_TO_GHOSTS)))
+                detect = false;
+        }
     }
     else if (spell)
     {
