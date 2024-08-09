@@ -909,6 +909,8 @@ class Creature : public Unit
 
         virtual uint32 GetDuration() const { return 0; }
 
+        virtual bool CannotTurn() const override { return m_settings.HasFlag(CreatureStaticFlags3::CANNOT_TURN); }
+
     protected:
         bool CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);

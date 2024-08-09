@@ -2640,6 +2640,8 @@ class Unit : public WorldObject
         void SetRootVehicle(const ObjectGuid& guid) { m_rootVehicle = guid; }
         const ObjectGuid& GetRootVehicle() const { return m_rootVehicle; }
 
+        virtual bool CannotTurn() const { return false; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
 
