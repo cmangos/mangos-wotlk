@@ -16,14 +16,14 @@
 
 /* ScriptData
 SDName: boss_kologarn
-SD%Complete: 100%
+SD%Complete: 70%
 SDComment:
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/include/sc_creature.h"
 #include "ulduar.h"
-#include "Entities/TemporarySpawn.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
 {
@@ -74,8 +74,8 @@ enum
     SPELL_EYEBEAM_PERIODIC_H            = 63977,
     SPELL_EYEBEAM_DAMAGE                = 63346,                // triggered by the periodic spell
     SPELL_EYEBEAM_DAMAGE_H              = 63976,
-    SPELL_EYEBEAM_VISUAL_LEFT           = 63676,                // visual link to Kologarn
-    SPELL_EYEBEAM_VISUAL_RIGHT          = 63702,
+    SPELL_EYEBEAM_VISUAL_LEFT           = 63702,                // visual link to Kologarn
+    SPELL_EYEBEAM_VISUAL_RIGHT          = 63676,
 
     // Rubble stalkers
     SPELL_SUMMON_RUBBLE                 = 63633,                // triggers 63634 five times
@@ -91,6 +91,9 @@ enum
     // other
     SEAT_ID_LEFT                        = 1,
     SEAT_ID_RIGHT                       = 2,
+    LEFT_ARM                            = 0,
+    RIGHT_ARM                           = 1,
+
     MAX_ACHIEV_RUBBLE                   = 25,
 };
 
@@ -100,377 +103,346 @@ static const float afKoloArmsLoc[4] = {1797.15f, -24.4027f, 448.741f, 3.1939f};
 ## boss_kologarn
 ######*/
 
-struct boss_kologarnAI : public Scripted_NoMovementAI
+enum KologarnActions
 {
-    boss_kologarnAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    KOLOGARN_BERSERK,
+    KOLOGARN_ARM_SWEEP,
+    KOLOGARN_STONE_GRIP,
+    KOLOGARN_OVERHEAD_SMASH,
+    KOLOGARN_PETRIFYING_BREATH,
+    KOLOGARN_STONE_SHOUT,
+    KOLOGARN_INIT_ARMS,
+    KOLOGARN_RESPAWN_LEFT_ARM,
+    KOLOGARN_RESPAWN_RIGHT_ARM,
+    KOLOGARN_DISARMED_TIMER,
+    KOLOGARN_ACTIONS_MAX,
+    KOLOGARN_ORIENTATION_CORRECTION,
+};
+
+struct boss_kologarnAI : public BossAI
+{
+    boss_kologarnAI(Creature* creature) : BossAI(creature, KOLOGARN_ACTIONS_MAX),
+        m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetDataType(TYPE_KOLOGARN);
+        AddOnAggroText(SAY_AGGRO);
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
+        AddOnDeathText(SAY_DEATH),
+        AddCastOnDeath(QueuedCast{ObjectGuid(), SPELL_INSTAKILL_KOLOGARN_ARM, TRIGGERED_OLD_TRIGGERED},
+                       QueuedCast{ObjectGuid(), SPELL_INSTAKILL_KOLOGARN_ARM, TRIGGERED_OLD_TRIGGERED});
+        AddCombatAction(KOLOGARN_OVERHEAD_SMASH, 5s, 10s);
+        AddCombatAction(KOLOGARN_PETRIFYING_BREATH, 4s);
+        AddCombatAction(KOLOGARN_ARM_SWEEP, 15s, 20s);
+        AddCombatAction(KOLOGARN_STONE_GRIP, 10s);
+        AddCombatAction(KOLOGARN_BERSERK, 10min);
+        AddCombatAction(KOLOGARN_STONE_SHOUT, true);
+        AddCustomAction(KOLOGARN_INIT_ARMS, 5s, [&]()
+        {
+            if (!m_creature->IsAlive() || m_creature->IsInCombat())
+                return;
+            m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_armStatus[RIGHT_ARM] = 1;
+            m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_armStatus[LEFT_ARM] = 1;
+        }, TIMER_COMBAT_OOC);
+        AddCustomAction(KOLOGARN_RESPAWN_LEFT_ARM, true, [&]()
+        {
+            if (!m_creature->IsAlive())
+                return;
+            DoBroadcastText(EMOTE_ARM_LEFT, m_creature);
+            m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_armStatus[LEFT_ARM] = 1;
+        });
+        AddCustomAction(KOLOGARN_RESPAWN_RIGHT_ARM, true, [&]()
+        {
+            if (!m_creature->IsAlive())
+                return;
+            DoBroadcastText(EMOTE_ARM_RIGHT, m_creature);
+            m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_armStatus[RIGHT_ARM] = 1;
+        });
+        AddCustomAction(KOLOGARN_DISARMED_TIMER, true, [&]()
+        {
+            m_disarmedStatus = false;
+        });
+        AddCustomAction(KOLOGARN_ORIENTATION_CORRECTION, 1s, [&]()
+        {
+            if (!m_creature->IsAlive())
+                return;
+            m_creature->SetOrientation(m_creature->GetRespawnPosition().GetPositionO());
+            ResetTimer(KOLOGARN_ORIENTATION_CORRECTION, 1s);
+        });
         m_creature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_UNK15);
-        Reset();
+        SetAIImmobilizedState(true);
     }
 
-    instance_ulduar* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_ulduar* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiMountArmsTimer;
+    uint8 m_armStatus[2];
+    bool m_disarmedStatus;
 
-    uint32 m_uiOverheadSmashTimer;
-    uint32 m_uiStoneShoutTimer;
-    uint32 m_uiEyebeamTimer;
-    uint32 m_uiPetrifyingBreathTimer;
-    uint32 m_uiRespawnRightTimer;
-    uint32 m_uiRespawnLeftTimer;
-
-    uint32 m_uiStoneGripTimer;
-    uint32 m_uiShockwaveTimer;
-
-    uint32 m_uiBerserkTimer;
-
-    uint8 m_uiRubbleCount;
-    uint32 m_uiDisarmedTimer;
+    uint8 m_rubbleCount;
 
     void Reset() override
     {
-        m_uiMountArmsTimer          = 5000;
-        m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
-
-        m_uiOverheadSmashTimer      = urand(5000, 10000);
-        m_uiStoneShoutTimer         = 1000;
-        m_uiEyebeamTimer            = 10000;
-        m_uiPetrifyingBreathTimer   = 4000;
-
-        m_uiShockwaveTimer          = urand(15000, 20000);
-        m_uiStoneGripTimer          = 10000;
-
-        m_uiRespawnRightTimer       = 0;
-        m_uiRespawnLeftTimer        = 0;
-
-        m_uiRubbleCount             = 0;
-        m_uiDisarmedTimer           = 0;
+        BossAI::Reset();
+        m_armStatus[LEFT_ARM]       = 0;
+        m_armStatus[RIGHT_ARM]      = 0;
+        m_disarmedStatus            = false;
+        ResetTimer(KOLOGARN_INIT_ARMS, 5s);
 
         DoCastSpellIfCan(m_creature, SPELL_REDUCE_PARRY_CHANCE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KOLOGARN, DONE);
-
-        DoScriptText(SAY_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
+        BossAI::JustDied();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->GetMap()->ChangeGOPathfinding(194232, 8546, true);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KOLOGARN, IN_PROGRESS);
-
-        DoScriptText(SAY_AGGRO, m_creature);
+        m_creature->SetOrientation(m_creature->GetRespawnPosition().GetPositionO());
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KOLOGARN, FAIL);
-
+        BossAI::JustReachedHome();
         // kill both hands - will be respawned
         m_creature->RemoveAllAuras();
-        DoCastSpellIfCan(m_creature, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_RIGHT_ARM:
             {
-                int32 uiSeat = (int32)SEAT_ID_RIGHT;
-                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                int32 seat = (int32)SEAT_ID_RIGHT;
+                summoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &seat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->GetVictim())
-                    pSummoned->AI()->AttackStart(m_creature->GetVictim());
+                    summoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             }
             case NPC_LEFT_ARM:
             {
-                int32 uiSeat = (int32)SEAT_ID_LEFT;
-                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                int32 seat = (int32)SEAT_ID_LEFT;
+                summoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &seat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->GetVictim())
-                    pSummoned->AI()->AttackStart(m_creature->GetVictim());
+                    summoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             }
             case NPC_FOCUSED_EYEBEAM_RIGHT:
             case NPC_FOCUSED_EYEBEAM_LEFT:
                 // force despawn - if the npc gets in combat it won't despawn automatically
-                pSummoned->ForcedDespawn(10000);
+                summoned->ForcedDespawn(10000);
 
                 // cast visuals and damage spell
-                pSummoned->CastSpell(m_creature, pSummoned->GetEntry() == NPC_FOCUSED_EYEBEAM_LEFT ? SPELL_EYEBEAM_VISUAL_LEFT : SPELL_EYEBEAM_VISUAL_RIGHT, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(m_creature, summoned->GetEntry() == NPC_FOCUSED_EYEBEAM_LEFT ? SPELL_EYEBEAM_VISUAL_LEFT : SPELL_EYEBEAM_VISUAL_RIGHT, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, m_isRegularMode ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, TRIGGERED_OLD_TRIGGERED);
 
                 // follow the summoner
-                if (pSummoned->IsTemporarySummon())
+                if (summoned->IsTemporarySummon())
                 {
-                    if (Unit* pPlayer = m_creature->GetMap()->GetUnit(pSummoned->GetSpawnerGuid()))
-                        pSummoned->GetMotionMaster()->MoveChase(pPlayer);
+                    if (Unit* player = m_creature->GetMap()->GetUnit(summoned->GetSpawnerGuid()))
+                        summoned->GetMotionMaster()->MoveChase(player);
                 }
                 break;
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
         if (!m_creature->IsAlive() || !m_creature->GetVictim())
             return;
 
-        if (pSummoned->GetEntry() == NPC_LEFT_ARM)
+        if (summoned->GetEntry() == NPC_LEFT_ARM)
         {
-            if (m_pInstance)
+            if (m_instance)
             {
-                if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetKoloRubbleStalker(false)))
+                if (Creature* stalker = m_creature->GetMap()->GetCreature(m_instance->GetKoloRubbleStalker(false)))
                 {
-                    pStalker->CastSpell(pStalker, m_bIsRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, TRIGGERED_OLD_TRIGGERED);
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_RUBBLE, TRIGGERED_OLD_TRIGGERED);
-                    pStalker->CastSpell(pStalker, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
+                    stalker->CastSpell(nullptr, m_isRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, TRIGGERED_OLD_TRIGGERED);
+                    stalker->CastSpell(nullptr, SPELL_SUMMON_RUBBLE, TRIGGERED_OLD_TRIGGERED);
+                    stalker->CastSpell(nullptr, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
                 }
 
-                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
+                m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
             }
 
-            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, pSummoned->GetObjectGuid());
-            pSummoned->CastSpell(m_creature, m_bIsRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
-            DoScriptText(SAY_ARM_LOST_LEFT, m_creature);
-            m_uiRespawnLeftTimer = 48000;
+            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, summoned->GetObjectGuid());
+            summoned->CastSpell(m_creature, m_isRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
+            DoBroadcastText(SAY_ARM_LOST_LEFT, m_creature);
+            ResetTimer(KOLOGARN_RESPAWN_LEFT_ARM, 48s);
+            m_armStatus[LEFT_ARM] = 0;
 
             // start disarmed achiev timer or set achiev crit as true if timer already started
-            if (m_uiDisarmedTimer)
+            if (m_disarmedStatus)
             {
-                if (m_pInstance)
-                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
+                if (m_instance)
+                    m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
             }
             else
-                m_uiDisarmedTimer = 12000;
+            {
+                m_disarmedStatus = true;
+                ResetTimer(KOLOGARN_DISARMED_TIMER, 12s);
+            }
         }
-        else if (pSummoned->GetEntry() == NPC_RIGHT_ARM)
+        else if (summoned->GetEntry() == NPC_RIGHT_ARM)
         {
             // spawn Rubble and cancel stone grip
-            if (m_pInstance)
+            if (m_instance)
             {
-                if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetKoloRubbleStalker(true)))
+                if (Creature* stalker = m_creature->GetMap()->GetCreature(m_instance->GetKoloRubbleStalker(true)))
                 {
-                    pStalker->CastSpell(pStalker, m_bIsRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, TRIGGERED_OLD_TRIGGERED);
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_RUBBLE, TRIGGERED_OLD_TRIGGERED);
-                    pStalker->CastSpell(pStalker, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
+                    stalker->CastSpell(nullptr, m_isRegularMode ? SPELL_FALLING_RUBBLE : SPELL_FALLING_RUBBLE_H, TRIGGERED_OLD_TRIGGERED);
+                    stalker->CastSpell(nullptr, SPELL_SUMMON_RUBBLE, TRIGGERED_OLD_TRIGGERED);
+                    stalker->CastSpell(nullptr, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
                 }
 
-                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
+                m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
             }
 
-            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, pSummoned->GetObjectGuid());
-            pSummoned->CastSpell(m_creature, m_bIsRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
-            DoScriptText(SAY_ARM_LOST_RIGHT, m_creature);
-            m_uiRespawnRightTimer = 48000;
+            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, summoned->GetObjectGuid());
+            summoned->CastSpell(m_creature, m_isRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
+            DoBroadcastText(SAY_ARM_LOST_RIGHT, m_creature);
+            ResetTimer(KOLOGARN_RESPAWN_RIGHT_ARM, 48s);
+            m_armStatus[RIGHT_ARM] = 0;
 
             // start disarmed achiev timer or set achiev crit as true if timer already started
-            if (m_uiDisarmedTimer)
+            if (m_disarmedStatus)
             {
-                if (m_pInstance)
-                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
+                if (m_instance)
+                    m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
             }
             else
-                m_uiDisarmedTimer = 12000;
+            {
+                m_disarmedStatus = true;
+                ResetTimer(KOLOGARN_DISARMED_TIMER, 12s);
+            }
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
     {
         // count the summoned Rubble
-        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_RUBBLE_STALKER)
+        if (eventType == AI_EVENT_CUSTOM_A && invoker->GetEntry() == NPC_RUBBLE_STALKER)
         {
-            ++m_uiRubbleCount;
+            ++m_rubbleCount;
 
-            if (m_uiRubbleCount == MAX_ACHIEV_RUBBLE && m_pInstance)
-                m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_RUBBLE, true);
+            if (m_rubbleCount == MAX_ACHIEV_RUBBLE && m_instance)
+                m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_RUBBLE, true);
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    uint8 GetArmStatus()
     {
-        if (m_uiMountArmsTimer)
+        return m_armStatus[LEFT_ARM] + m_armStatus[RIGHT_ARM];
+    }
+
+    std::chrono::milliseconds GetSubsequentActionTimer(uint32 action)
+    {
+        switch (action)
         {
-            if (m_uiMountArmsTimer <= uiDiff)
+            case KOLOGARN_STONE_SHOUT: return RandomTimer(3s, 4s);
+            case KOLOGARN_OVERHEAD_SMASH: return 15s;
+            case KOLOGARN_ARM_SWEEP: return 17s;
+            case KOLOGARN_STONE_GRIP: return RandomTimer(20s, 30s);
+            case KOLOGARN_PETRIFYING_BREATH: return 4s;
+            default: return 24h;
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case KOLOGARN_STONE_SHOUT:
             {
-                m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-                m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-                m_uiMountArmsTimer = 0;
+                if (GetArmStatus() == 0)
+                    DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_STONE_SHOUT : SPELL_STONE_SHOUT_H);
+                break;
             }
-            else
-                m_uiMountArmsTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiRespawnLeftTimer && m_uiRespawnRightTimer)
-        {
-            if (m_uiStoneShoutTimer < uiDiff)
+            case KOLOGARN_OVERHEAD_SMASH:
             {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STONE_SHOUT : SPELL_STONE_SHOUT_H) == CAST_OK)
-                    m_uiStoneShoutTimer = urand(3000, 4000);
-            }
-            else
-                m_uiStoneShoutTimer -= uiDiff;
-        }
-        else
-        {
-            if (m_uiOverheadSmashTimer < uiDiff)
-            {
-                CanCastResult castResult;
-                if (!m_uiRespawnLeftTimer && !m_uiRespawnRightTimer)
-                    castResult = DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_OVERHEAD_SMASH : SPELL_OVERHEAD_SMASH_H);
-                else
-                    castResult = DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_ONE_ARMED_SMASH : SPELL_ONE_ARMED_SMASH_H);
-
-                if (castResult == CAST_OK)
-                    m_uiOverheadSmashTimer = 15000;
-            }
-            else
-                m_uiOverheadSmashTimer -= uiDiff;
-        }
-
-        if (m_uiEyebeamTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FOCUSED_EYEBEAM_SUMMON) == CAST_OK)
-                m_uiEyebeamTimer = 20000;
-        }
-        else
-            m_uiEyebeamTimer -= uiDiff;
-
-        // respawn left arm if killed
-        if (m_uiRespawnLeftTimer)
-        {
-            if (m_uiRespawnLeftTimer <= uiDiff)
-            {
-                DoScriptText(EMOTE_ARM_LEFT, m_creature);
-                m_creature->SummonCreature(NPC_LEFT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-                m_uiRespawnLeftTimer = 0;
-            }
-            else
-                m_uiRespawnLeftTimer -= uiDiff;
-        }
-        // use left arm ability if available - spell always cast by Kologarn
-        else
-        {
-            if (m_uiShockwaveTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARM_SWEEP : SPELL_ARM_SWEEP_H) == CAST_OK)
+                if (GetArmStatus() == 2)
                 {
-                    DoScriptText(SAY_SHOCKWAVE, m_creature);
-                    m_uiShockwaveTimer = 17000;
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_OVERHEAD_SMASH : SPELL_OVERHEAD_SMASH_H) == CAST_OK)
+                        break;
+                    return;
                 }
-            }
-            else
-                m_uiShockwaveTimer -= uiDiff;
-        }
-
-        // respawn right arm if killed
-        if (m_uiRespawnRightTimer)
-        {
-            if (m_uiRespawnRightTimer <= uiDiff)
-            {
-                DoScriptText(EMOTE_ARM_RIGHT, m_creature);
-                m_creature->SummonCreature(NPC_RIGHT_ARM, afKoloArmsLoc[0], afKoloArmsLoc[1], afKoloArmsLoc[2], afKoloArmsLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-                m_uiRespawnRightTimer = 0;
-            }
-            else
-                m_uiRespawnRightTimer -= uiDiff;
-        }
-        // use right arm ability if available - spell always cast by Kologarn
-        else
-        {
-            if (m_uiStoneGripTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H) == CAST_OK)
+                else if (GetArmStatus() == 1)
                 {
-                    DoScriptText(SAY_GRAB, m_creature);
-                    DoScriptText(EMOTE_STONE_GRIP, m_creature);
-                    m_uiStoneGripTimer = urand(20000, 30000);
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_ONE_ARMED_SMASH : SPELL_ONE_ARMED_SMASH_H) == CAST_OK)
+                        break;
+                    return;
                 }
+                break;
             }
-            else
-                m_uiStoneGripTimer -= uiDiff;
-        }
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            case KOLOGARN_ARM_SWEEP:
+            {
+                if (m_armStatus[LEFT_ARM])
+                {
+                    if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_ARM_SWEEP : SPELL_ARM_SWEEP_H) == CAST_OK)
+                    {
+                        DoBroadcastText(SAY_SHOCKWAVE, m_creature);
+                        break;
+                    }
+                    else
+                        return;
+                }
+                break;
+            }
+            case KOLOGARN_STONE_GRIP:
+            {
+                if (m_armStatus[RIGHT_ARM])
+                {
+                    if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H) == CAST_OK)
+                    {
+                        DoBroadcastText(SAY_GRAB, m_creature);
+                        DoBroadcastText(EMOTE_STONE_GRIP, m_creature);
+                        break;
+                    }
+                    else
+                        return;
+                }
+                break;
+            }
+            case KOLOGARN_PETRIFYING_BREATH:
+            {
+                if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
+                {
+                    DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_PETRIFYING_BREATH : SPELL_PETRIFYING_BREATH_H);
+                }
+                break;
+            }
+            case KOLOGARN_BERSERK:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    if (m_pInstance)
+                    if (m_instance)
                     {
-                        if (Creature* pRightArm = m_pInstance->GetSingleCreatureFromStorage(NPC_RIGHT_ARM))
-                            pRightArm->CastSpell(pRightArm, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
-                        if (Creature* pLeftArm = m_pInstance->GetSingleCreatureFromStorage(NPC_LEFT_ARM))
-                            pLeftArm->CastSpell(pLeftArm, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
+                        if (Creature* rightArm = m_instance->GetSingleCreatureFromStorage(NPC_RIGHT_ARM))
+                            rightArm->CastSpell(nullptr, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
+                        if (Creature* leftArm = m_instance->GetSingleCreatureFromStorage(NPC_LEFT_ARM))
+                            leftArm->CastSpell(nullptr, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                     }
 
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
+                    DoBroadcastText(SAY_BERSERK, m_creature);
+                    DisableCombatAction(action);
+                    return;
                 }
+                return;
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
         }
-
-        if (m_uiDisarmedTimer)
-        {
-            if (m_uiDisarmedTimer <= uiDiff)
-            {
-                if (m_pInstance)
-                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, false);
-                m_uiDisarmedTimer = 0;
-            }
-            else
-                m_uiDisarmedTimer -= uiDiff;
-        }
-
-        // melee range check
-        if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
-        {
-            if (m_uiPetrifyingBreathTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PETRIFYING_BREATH : SPELL_PETRIFYING_BREATH_H) == CAST_OK)
-                    m_uiPetrifyingBreathTimer = 4000;
-            }
-            else
-                m_uiPetrifyingBreathTimer -= uiDiff;
-        }
-        else
-            DoMeleeAttackIfReady();
+        ResetCombatAction(action, GetSubsequentActionTimer(action));
     }
 };
-
-UnitAI* GetAI_boss_kologarn(Creature* pCreature)
-{
-    return new boss_kologarnAI(pCreature);
-}
 
 /*######
 ## npc_focused_eyebeam
@@ -478,31 +450,46 @@ UnitAI* GetAI_boss_kologarn(Creature* pCreature)
 
 struct npc_focused_eyebeamAI : public ScriptedAI
 {
-    npc_focused_eyebeamAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_focused_eyebeamAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
-        Reset();
+        m_instance = dynamic_cast<instance_ulduar*>(creature->GetInstanceData());
+        SetReactState(REACT_PASSIVE);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+        SetDeathPrevention(true);
+        AddCustomAction(1, 1s + 500ms, [&]()
+        {
+            SetReactState(REACT_AGGRESSIVE);
+            m_creature->SetInCombatWithZone(false);
+            SetCombatMovement(true);
+            Unit* attackTarget = nullptr;
+            if (Unit* target = m_creature->GetSpawner())
+                attackTarget = target;
+            else
+                attackTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
+            if (attackTarget)
+            {
+                m_creature->AddThreat(attackTarget, 1000000.f);
+                AttackStart(attackTarget);
+            }
+        });
     }
 
-    instance_ulduar* m_pInstance;
+    instance_ulduar* m_instance;
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
+    void JustRespawned() override
     {
-        if (pTarget->GetTypeId() == TYPEID_PLAYER && (pSpellEntry->Id == SPELL_EYEBEAM_DAMAGE || pSpellEntry->Id == SPELL_EYEBEAM_DAMAGE_H) && m_pInstance)
-            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_LOOKS_KILL, false);
+        ScriptedAI::JustRespawned();
+        m_creature->CastSpell(nullptr, m_creature->GetEntry() == NPC_FOCUSED_EYEBEAM_LEFT ? SPELL_EYEBEAM_VISUAL_LEFT : SPELL_EYEBEAM_VISUAL_RIGHT, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, m_creature->GetMap()->IsRegularDifficulty() ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    void SpellHitTarget(Unit* target, SpellEntry const* spellEntry) override
+    {
+        if (target->GetTypeId() == TYPEID_PLAYER && (spellEntry->Id == SPELL_EYEBEAM_DAMAGE || spellEntry->Id == SPELL_EYEBEAM_DAMAGE_H) && m_instance)
+            m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_LOOKS_KILL, false);
+    }
 };
-
-UnitAI* GetAI_npc_focused_eyebeam(Creature* pCreature)
-{
-    return new npc_focused_eyebeamAI(pCreature);
-}
 
 /*######
 ## npc_rubble_stalker
@@ -510,50 +497,83 @@ UnitAI* GetAI_npc_focused_eyebeam(Creature* pCreature)
 
 struct npc_rubble_stalkerAI : public Scripted_NoMovementAI
 {
-    npc_rubble_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    npc_rubble_stalkerAI(Creature* creature) : Scripted_NoMovementAI(creature)
     {
-        m_pInstance = (instance_ulduar*)pCreature->GetInstanceData();
+        m_instance = dynamic_cast<instance_ulduar*>(creature->GetInstanceData());
         Reset();
     }
 
-    instance_ulduar* m_pInstance;
+    instance_ulduar* m_instance;
 
     void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void AttackStart(Unit* /*who*/) override { }
+    void MoveInLineOfSight(Unit* /*who*/) override { }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_RUBBLE && m_pInstance)
+        if (summoned->GetEntry() == NPC_RUBBLE && m_instance)
         {
-            if (Creature* pKologarn = m_pInstance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
+            if (Creature* pKologarn = m_instance->GetSingleCreatureFromStorage(NPC_KOLOGARN))
                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pKologarn);
 
-            pSummoned->SetInCombatWithZone();
+            summoned->SetInCombatWithZone();
         }
     }
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_rubble_stalker(Creature* pCreature)
+struct FocusedEyebeamSummon : SpellScript
 {
-    return new npc_rubble_stalkerAI(pCreature);
-}
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->ForcedDespawn(10000);
+    }
+};
+
+// 64224 - Stone Grip Absorb
+struct StoneGripAbsorb : AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        Unit* player = aura->GetCaster();
+        if (!player->IsAlive())
+            return;
+        uint32 auraToRemove = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
+        player->RemoveAurasDueToSpell(auraToRemove);
+        player->RemoveAurasDueToSpell(64290);
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsAlive())
+            return;
+    }
+
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
+    {
+        currentAbsorb = 0;
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+        aura->GetModifier()->m_amount = std::max(0, aura->GetModifier()->m_amount - remainingDamage);
+    }
+};
 
 void AddSC_boss_kologarn()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_kologarn";
-    pNewScript->GetAI = GetAI_boss_kologarn;
+    pNewScript->GetAI = &GetNewAIInstance<boss_kologarnAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_focused_eyebeam";
-    pNewScript->GetAI = GetAI_npc_focused_eyebeam;
+    pNewScript->GetAI = &GetNewAIInstance<npc_focused_eyebeamAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_rubble_stalker";
-    pNewScript->GetAI = GetAI_npc_rubble_stalker;
+    pNewScript->GetAI = &GetNewAIInstance<npc_rubble_stalkerAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<FocusedEyebeamSummon>("spell_focused_eyebeam_summon");
+    RegisterSpellScript<StoneGripAbsorb>("spell_stone_grip_absorb");
 }
