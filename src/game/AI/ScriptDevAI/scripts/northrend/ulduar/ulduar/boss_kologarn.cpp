@@ -16,19 +16,13 @@
 
 /* ScriptData
 SDName: boss_kologarn
-SD%Complete: 100%
+SD%Complete: 70%
 SDComment:
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/include/sc_creature.h"
-#include "Server/DBCEnums.h"
-#include "Spells/Scripts/SpellScript.h"
-#include "Spells/Spell.h"
-#include "Spells/SpellDefines.h"
 #include "ulduar.h"
-#include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
@@ -128,7 +122,7 @@ enum KologarnActions
 struct boss_kologarnAI : public BossAI
 {
     boss_kologarnAI(Creature* creature) : BossAI(creature, KOLOGARN_ACTIONS_MAX),
-        m_instance(static_cast<instance_ulduar*>(creature->GetInstanceData())),
+        m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_KOLOGARN);
@@ -215,8 +209,8 @@ struct boss_kologarnAI : public BossAI
         BossAI::JustReachedHome();
         // kill both hands - will be respawned
         m_creature->RemoveAllAuras();
-        DoCastSpellIfCan(m_creature, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_INSTAKILL_KOLOGARN_ARM, CAST_TRIGGERED);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -371,28 +365,21 @@ struct boss_kologarnAI : public BossAI
             case KOLOGARN_STONE_SHOUT:
             {
                 if (GetArmStatus() == 0)
-                    DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_STONE_SHOUT : SPELL_STONE_SHOUT_H);
+                    DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_STONE_SHOUT : SPELL_STONE_SHOUT_H);
                 break;
             }
             case KOLOGARN_OVERHEAD_SMASH:
             {
-                //sLog.outError("ArmStatus: %d", GetArmStatus());
                 if (GetArmStatus() == 2)
                 {
                     if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_OVERHEAD_SMASH : SPELL_OVERHEAD_SMASH_H) == CAST_OK)
-                    {
-                        //sLog.outError("Successful Overhead Smash");
                         break;
-                    }
                     return;
                 }
                 else if (GetArmStatus() == 1)
                 {
                     if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_ONE_ARMED_SMASH : SPELL_ONE_ARMED_SMASH_H) == CAST_OK)
-                    {
-                        //sLog.outError("Successful One Armed Smash");
                         break;
-                    }
                     return;
                 }
                 break;
@@ -415,7 +402,7 @@ struct boss_kologarnAI : public BossAI
             {
                 if (m_armStatus[RIGHT_ARM])
                 {
-                    if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H) == CAST_OK)
+                    if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_STONE_GRIP : SPELL_STONE_GRIP_H) == CAST_OK)
                     {
                         DoBroadcastText(SAY_GRAB, m_creature);
                         DoBroadcastText(EMOTE_STONE_GRIP, m_creature);
@@ -441,9 +428,9 @@ struct boss_kologarnAI : public BossAI
                     if (m_instance)
                     {
                         if (Creature* rightArm = m_instance->GetSingleCreatureFromStorage(NPC_RIGHT_ARM))
-                            rightArm->CastSpell(rightArm, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
+                            rightArm->CastSpell(nullptr, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                         if (Creature* leftArm = m_instance->GetSingleCreatureFromStorage(NPC_LEFT_ARM))
-                            leftArm->CastSpell(leftArm, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
+                            leftArm->CastSpell(nullptr, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                     }
 
                     DoBroadcastText(SAY_BERSERK, m_creature);
@@ -465,7 +452,7 @@ struct npc_focused_eyebeamAI : public ScriptedAI
 {
     npc_focused_eyebeamAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_instance = (instance_ulduar*)creature->GetInstanceData();
+        m_instance = dynamic_cast<instance_ulduar*>(creature->GetInstanceData());
         SetReactState(REACT_PASSIVE);
         SetCombatMovement(false);
         SetMeleeEnabled(false);
@@ -473,7 +460,7 @@ struct npc_focused_eyebeamAI : public ScriptedAI
         AddCustomAction(1, 1s + 500ms, [&]()
         {
             SetReactState(REACT_AGGRESSIVE);
-            m_creature->SetInCombatWithZone();
+            m_creature->SetInCombatWithZone(false);
             SetCombatMovement(true);
             Unit* attackTarget = nullptr;
             if (Unit* target = m_creature->GetSpawner())
@@ -512,7 +499,7 @@ struct npc_rubble_stalkerAI : public Scripted_NoMovementAI
 {
     npc_rubble_stalkerAI(Creature* creature) : Scripted_NoMovementAI(creature)
     {
-        m_instance = (instance_ulduar*)creature->GetInstanceData();
+        m_instance = dynamic_cast<instance_ulduar*>(creature->GetInstanceData());
         Reset();
     }
 
@@ -539,25 +526,7 @@ struct FocusedEyebeamSummon : SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
     {
-        //spell->GetAffectiveCaster();
         summon->ForcedDespawn(10000);
-
-        // cast visuals and damage spell
-        //summon->CastSpell(nullptr, summon->GetEntry() == NPC_FOCUSED_EYEBEAM_LEFT ? SPELL_EYEBEAM_VISUAL_LEFT : SPELL_EYEBEAM_VISUAL_RIGHT, TRIGGERED_OLD_TRIGGERED);
-        //summon->CastSpell(nullptr, summon->GetMap()->IsRegularDifficulty() ? SPELL_EYEBEAM_PERIODIC : SPELL_EYEBEAM_PERIODIC_H, TRIGGERED_OLD_TRIGGERED);
-
-        //summon->GetMotionMaster()->MoveFollow(spell->GetAffectiveCaster(), 0.f, 0.f, true);
-        //summon->GetMotionMaster()->MoveChase(spell->GetAffectiveCaster(), 0.f, 0.f, false, false, true, true);
-        if (summon->AI())
-        {
-            
-        }
-        // follow the summoner
-        //if (summon->IsTemporarySummon())
-        //{
-        //    if (Unit* player = summon->GetMap()->GetUnit(summon->GetSpawnerGuid()))
-        //        summon->GetMotionMaster()->MoveChase(player);
-        //}
     }
 };
 
@@ -607,9 +576,4 @@ void AddSC_boss_kologarn()
 
     RegisterSpellScript<FocusedEyebeamSummon>("spell_focused_eyebeam_summon");
     RegisterSpellScript<StoneGripAbsorb>("spell_stone_grip_absorb");
-    /*
-    INSERT INTO `spell_scripts` VALUES
-    (63343,'spell_focused_eyebeam_summon'),
-    (63701,'spell_focused_eyebeam_summon');
-    */
 }
