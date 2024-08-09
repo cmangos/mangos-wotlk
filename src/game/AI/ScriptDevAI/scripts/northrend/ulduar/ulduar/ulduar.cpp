@@ -593,7 +593,10 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                     if (GameObject* pHarpoon = instance->GetGameObject(*itr))
                     {
                         if (!pHarpoon->IsSpawned())
+                        {
+                            pHarpoon->Refresh();
                             pHarpoon->Respawn();
+                        }
                     }
                 }
                 for (GuidList::const_iterator itr = m_lRepairedHarpoonsGuids.begin(); itr != m_lRepairedHarpoonsGuids.end(); ++itr)
@@ -601,7 +604,10 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                     if (GameObject* pHarpoon = instance->GetGameObject(*itr))
                     {
                         if (pHarpoon->IsSpawned())
+                        {
                             pHarpoon->SetLootState(GO_JUST_DEACTIVATED);
+                            pHarpoon->ForcedDespawn();
+                        }
                     }
                 }
             }
