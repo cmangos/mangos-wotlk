@@ -12565,9 +12565,6 @@ void Spell::EffectRedirectThreat(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget)
         return;
 
-    if (unitTarget->IsIgnoringMisdirect())
-        return;
-
     m_caster->getHostileRefManager().SetThreatRedirection(unitTarget->GetObjectGuid(), uint32(damage), m_spellInfo->Id);
 }
 
