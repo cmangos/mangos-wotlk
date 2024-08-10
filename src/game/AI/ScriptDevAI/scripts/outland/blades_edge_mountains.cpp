@@ -1779,16 +1779,6 @@ struct npc_frequency_scanner : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_frequency_scanner(Creature* creature)
-{
-    return new npc_frequency_scanner(creature);
-}
-
-GameObjectAI* GetGOAI_go_aura_generator_000(GameObject* go)
-{
-    return new go_aura_generator_000AI(go);
-}
-
 /*######
 ## npc_fel_cannon
 ######*/
@@ -3403,12 +3393,12 @@ void AddSC_blades_edge_mountains()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_frequency_scanner";
-    pNewScript->GetAI = &GetAI_npc_frequency_scanner;
+    pNewScript->GetAI = &GetNewAIInstance<npc_frequency_scanner>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "go_aura_generator_000";
-    pNewScript->GetGameObjectAI = &GetGOAI_go_aura_generator_000;
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_aura_generator_000AI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
