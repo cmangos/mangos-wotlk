@@ -1133,6 +1133,30 @@ struct go_aura_generator : public GameObjectAI
             ChangeState(bool(miscValue));
     }
 
+    bool CustomCondition(Player const* player)
+    {
+        switch (m_spellInfo->Id)
+        {
+            case 59652: // Cloak Dome (Aura Generator)
+            case 61342: // Cloak Dome (Aura Generator 2)
+            {
+                {
+                    QuestStatus questStatus = player->GetQuestStatus(13379);
+                    if (questStatus == QUEST_STATUS_INCOMPLETE || questStatus == QUEST_STATUS_COMPLETE)
+                        return true;
+                }
+                {
+                    QuestStatus questStatus = player->GetQuestStatus(13383);
+                    if (questStatus == QUEST_STATUS_INCOMPLETE || questStatus == QUEST_STATUS_COMPLETE)
+                        return true;
+                }
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     void ChangeState(bool apply)
     {
         m_started = apply;
@@ -1165,6 +1189,8 @@ struct go_aura_generator : public GameObjectAI
         for (auto& ref : m_go->GetMap()->GetPlayers())
         {
             Player* player = ref.getSource();
+            if (!CustomCondition(player))
+                continue;
             float x, y, z;
             m_go->GetPosition(x, y, z);
             auto bounds = player->GetSpellAuraHolderBounds(m_spellInfo->Id);
@@ -1184,8 +1210,14 @@ struct go_aura_generator : public GameObjectAI
                 if (isCloseEnough)
                 {
                     myHolder = CreateSpellAuraHolder(m_spellInfo, player, m_go);
-                    GameObjectAura* Aur = new GameObjectAura(m_spellInfo, EFFECT_INDEX_0, nullptr, nullptr, myHolder, player, m_go);
-                    myHolder->AddAura(Aur, EFFECT_INDEX_0);
+                    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                    {
+                        if (m_spellInfo->EffectApplyAuraName[i] > 0)
+                        {
+                            GameObjectAura* Aur = new GameObjectAura(m_spellInfo, SpellEffectIndex(i), nullptr, nullptr, myHolder, player, m_go);
+                            myHolder->AddAura(Aur, SpellEffectIndex(i));
+                        }
+                    }
                     if (!player->AddSpellAuraHolder(myHolder))
                         delete myHolder;
                 }
