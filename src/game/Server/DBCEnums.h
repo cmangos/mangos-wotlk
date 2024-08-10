@@ -559,38 +559,38 @@ enum VehicleFlags
 
 enum VehicleSeatFlags
 {
-    SEAT_FLAG_HAS_ENTER_ANIM        = 0x00000001,           // "HasLowerAnimForEnter"
-    SEAT_FLAG_HAS_RIDE_ANIM         = 0x00000002,           // "HasLowerAnimForRide"
-    SEAT_FLAG_UNK3                  = 0x00000004,
-    SEAT_FLAG_UNK4                  = 0x00000008,           // "ShouldUseVehicleSeatExitAnimationOnVoluntaryExit"
-    SEAT_FLAG_UNK5                  = 0x00000010,
-    SEAT_FLAG_UNK6                  = 0x00000020,
-    SEAT_FLAG_UNK7                  = 0x00000040,
-    SEAT_FLAG_UNK8                  = 0x00000080,
-    SEAT_FLAG_UNK9                  = 0x00000100,           // Note: only 5 seats are available with this flag in 3.3.5a; found only on flying dragons and harpoon guns
-    SEAT_FLAG_HIDE_PASSENGER        = 0x00000200,           // Passenger is hidden
-    SEAT_FLAG_ALLOW_TURNING         = 0x00000400,           // "AllowsTurning" | Note: allows the passenger to turn (change orientation) while boarded
-    SEAT_FLAG_CAN_CONTROL           = 0x00000800,           // Lua_UnitInVehicleControlSeat
-    SEAT_FLAG_CAN_CAST_MOUNT_SPELL  = 0x00001000,           // "Can Cast Mount Spell" | Note: there are no seats with this flag in 3.3.5a
-    SEAT_FLAG_UNCONTROLLED          = 0x00002000,           // "Uncontrolled"
-    SEAT_FLAG_CAN_ATTACK            = 0x00004000,           // Can attack, cast spells and use items from vehicle?
-    SEAT_FLAG_SHOULD_USE_VEH_SEAT_EXIT_ANIM_ON_FORCED_EXIT = 0x00008000,           // "ShouldUseVehicleSeatExitAnimationOnForcedExit"
-    SEAT_FLAG_UNK14                 = 0x00010000,
-    SEAT_FLAG_UNK15                 = 0x00020000,
-    SEAT_FLAG_UNK16                 = 0x00040000,           // "HasVehicleExitAnimForVoluntaryExit"
-    SEAT_FLAG_UNK17                 = 0x00080000,           // "HasVehicleExitAnimForForcedExit"
-    SEAT_FLAG_NOT_SELECTABLE        = 0x00100000,
-    SEAT_FLAG_UNK19                 = 0x00200000,           // Note: only 4 seats are available with this flag in 3.3.5a; found only on flying dragons
-    SEAT_FLAG_UNK20                 = 0x00400000,           // "RecHasVehicleEnterAnim"
-    // SEAT_FLAG_UNK21              = 0x00800000,           // Lua_IsUsingVehicleControls | Note: there are no seats with this flag in 3.3.5a
-    SEAT_FLAG_UNK22                 = 0x01000000,           // "EnableVehicleZoom"
-    SEAT_FLAG_CAN_EXIT              = 0x02000000,           // Lua_CanExitVehicle
-    SEAT_FLAG_CAN_SWITCH            = 0x04000000,           // Lua_CanSwitchVehicleSeats
-    SEAT_FLAG_UNK23                 = 0x08000000,           // "HasStartWaitingForVehicleTransitionAnimEnter"
-    SEAT_FLAG_UNK24                 = 0x10000000,           // "HasStartWaitingForVehicleTransitionAnimExit"
-    SEAT_FLAG_CAN_CAST              = 0x20000000,           // Lua_UnitHasVehicleUI
-    SEAT_FLAG_UNK25                 = 0x40000000,
-    SEAT_FLAG_UNK26                 = 0x80000000,           // "AllowsInteraction"
+    SEAT_FLAG_HAS_ENTER_ANIM                                  = 0x00000001,           // "HasLowerAnimForEnter"
+    SEAT_FLAG_HAS_RIDE_ANIM                                   = 0x00000002,           // "HasLowerAnimForRide"
+    SEAT_FLAG_UNK3                                            = 0x00000004,
+    SEAT_FLAG_SHOULD_USE_VEH_SEAT_EXIT_ANIM_ON_VOLUNTARY_EXIT = 0x00000008,           // "ShouldUseVehicleSeatExitAnimationOnVoluntaryExit"
+    SEAT_FLAG_UNK5                                            = 0x00000010,
+    SEAT_FLAG_UNK6                                            = 0x00000020,
+    SEAT_FLAG_UNK7                                            = 0x00000040,
+    SEAT_FLAG_UNK8                                            = 0x00000080,
+    SEAT_FLAG_UNK9                                            = 0x00000100,           // Note: only 5 seats are available with this flag in 3.3.5a; found only on flying dragons and harpoon guns
+    SEAT_FLAG_HIDE_PASSENGER                                  = 0x00000200,           // Passenger is hidden
+    SEAT_FLAG_ALLOW_TURNING                                   = 0x00000400,           // "AllowsTurning" | Note: allows the passenger to turn (change orientation) while boarded
+    SEAT_FLAG_CAN_CONTROL                                     = 0x00000800,           // Lua_UnitInVehicleControlSeat
+    SEAT_FLAG_CAN_CAST_MOUNT_SPELL                            = 0x00001000,           // "Can Cast Mount Spell" | Note: there are no seats with this flag in 3.3.5a
+    SEAT_FLAG_UNCONTROLLED                                    = 0x00002000,           // "Uncontrolled"
+    SEAT_FLAG_CAN_ATTACK                                      = 0x00004000,           // Can attack, cast spells and use items from vehicle?
+    SEAT_FLAG_SHOULD_USE_VEH_SEAT_EXIT_ANIM_ON_FORCED_EXIT    = 0x00008000,           // "ShouldUseVehicleSeatExitAnimationOnForcedExit"
+    SEAT_FLAG_UNK14                                           = 0x00010000,
+    SEAT_FLAG_UNK15                                           = 0x00020000,
+    SEAT_FLAG_HAS_VEH_EXIT_ANIM_VOLUNTARY_EXIT                = 0x00040000,           // "HasVehicleExitAnimForVoluntaryExit"
+    SEAT_FLAG_HAS_VEH_EXIT_ANIM_FORCED_EXIT                   = 0x00080000,           // "HasVehicleExitAnimForForcedExit"
+    SEAT_FLAG_NOT_SELECTABLE                                  = 0x00100000,
+    SEAT_FLAG_UNK19                                           = 0x00200000,           // Note: only 4 seats are available with this flag in 3.3.5a; found only on flying dragons
+    SEAT_FLAG_REC_HAS_VEHICLE_ENTER_ANIM                      = 0x00400000,           // "RecHasVehicleEnterAnim"
+    SEAT_FLAG_IS_USING_VEHICLE_CONTROLS                       = 0x00800000,           // Lua_IsUsingVehicleControls | Note: there are no seats with this flag in 3.3.5a
+    SEAT_FLAG_ENABLE_VEHICLE_ZOOM                             = 0x01000000,           // "EnableVehicleZoom"
+    SEAT_FLAG_CAN_EXIT                                        = 0x02000000,           // Lua_CanExitVehicle
+    SEAT_FLAG_CAN_SWITCH                                      = 0x04000000,           // Lua_CanSwitchVehicleSeats
+    SEAT_FLAG_HAS_START_WAITING_FOR_VEH_TRANSITION_ANIM_ENTER = 0x08000000,           // "HasStartWaitingForVehicleTransitionAnimEnter"
+    SEAT_FLAG_HAS_START_WAITING_FOR_VEH_TRANSITION_ANIM_EXIT  = 0x10000000,           // "HasStartWaitingForVehicleTransitionAnimExit"
+    SEAT_FLAG_CAN_CAST                                        = 0x20000000,           // Lua_UnitHasVehicleUI
+    SEAT_FLAG_UNK25                                           = 0x40000000,
+    VEHICLE_SEAT_FLAG_ALLOWS_INTERACTION                      = 0x80000000,           // "AllowsInteraction"
 };
 
 enum VehicleSeatFlagsB

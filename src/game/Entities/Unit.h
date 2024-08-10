@@ -504,7 +504,7 @@ enum UnitVisibility
 // Value masks for UNIT_FIELD_FLAGS
 enum UnitFlags
 {
-    UNIT_FLAG_UNK_0                 = 0x00000001,           // Movement checks disabled, likely paired with loss of client control packet. We use it to add custom cliffwalking to GM mode until actual usecases will be known.
+    UNIT_FLAG_SERVER_CONTROLLED     = 0x00000001,           // Movement checks disabled, likely paired with loss of client control packet. We use it to add custom cliffwalking to GM mode until actual usecases will be known.
     UNIT_FLAG_SPAWNING              = 0x00000002,           // not attackable
     UNIT_FLAG_CLIENT_CONTROL_LOST   = 0x00000004,           // Generic unspecified loss of control initiated by server script, movement checks disabled, paired with loss of client control packet.
     UNIT_FLAG_PLAYER_CONTROLLED     = 0x00000008,           // players, pets, totems, guardians, companions, charms, any units associated with players
@@ -518,7 +518,7 @@ enum UnitFlags
     UNIT_FLAG_PET_IN_COMBAT         = 0x00000800,           // in combat?, 2.0.8
     UNIT_FLAG_PVP_DEPRECATED        = 0x00001000,           // changed in 3.0.3
     UNIT_FLAG_SILENCED              = 0x00002000,           // silenced, 2.1.1
-    UNIT_FLAG_UNK_14                = 0x00004000,           // 2.0.8
+    UNIT_FLAG_CANNOT_SWIM           = 0x00004000,           // 2.0.8
     UNIT_FLAG_SWIMMING              = 0x00008000,           // related to jerky movement in water?
     UNIT_FLAG_UNTARGETABLE          = 0x00010000,           // is not targetable by attack or spell
     UNIT_FLAG_PACIFIED              = 0x00020000,           // 3.0.3 ok
@@ -541,24 +541,25 @@ enum UnitFlags
 // Value masks for UNIT_FIELD_FLAGS_2
 enum UnitFlags2
 {
-    UNIT_FLAG2_FEIGN_DEATH          = 0x00000001,
-    UNIT_FLAG2_HIDE_BODY            = 0x00000002,           // Hides body and body armor. Weapons and shoulder and head armor still visible
-    UNIT_FLAG2_IGNORE_REPUTATION    = 0x00000004,
-    UNIT_FLAG2_COMPREHEND_LANG      = 0x00000008,
-    UNIT_FLAG2_CLONED               = 0x00000010,           // Used in SPELL_AURA_MIRROR_IMAGE
-    UNIT_FLAG2_DO_NOT_FADE_IN       = 0x00000020,
-    UNIT_FLAG2_FORCE_MOVE           = 0x00000040,
-    UNIT_FLAG2_DISARM_OFFHAND       = 0x00000080,           // also shield case
-    UNIT_FLAG2_UNK8                 = 0x00000100,
-    UNIT_FLAG2_UNK9                 = 0x00000200,
-    UNIT_FLAG2_DISARM_RANGED        = 0x00000400,
-    UNIT_FLAG2_REGENERATE_POWER     = 0x00000800,
-    UNIT_FLAG2_SPELL_CLICK_IN_GROUP = 0x00001000,
-    UNIT_FLAG2_SPELL_CLICK_DISABLED = 0x00002000,
-    UNIT_FLAG2_INTERACT_ANY_REACTION = 0x00004000,
-    UNIT_FLAG2_UNK15                = 0x00008000,
-    UNIT_FLAG2_UNK16                = 0x00010000,
-    UNIT_FLAG2_ALLOW_CHEAT_SPELLS   = 0x00040000,
+    UNIT_FLAG2_FEIGN_DEATH            = 0x00000001,
+    UNIT_FLAG2_HIDE_BODY              = 0x00000002,           // Hides body and body armor. Weapons and shoulder and head armor still visible
+    UNIT_FLAG2_IGNORE_REPUTATION      = 0x00000004,
+    UNIT_FLAG2_COMPREHEND_LANG        = 0x00000008,
+    UNIT_FLAG2_CLONED                 = 0x00000010,           // Used in SPELL_AURA_MIRROR_IMAGE
+    UNIT_FLAG2_DO_NOT_FADE_IN         = 0x00000020,
+    UNIT_FLAG2_FORCE_MOVE             = 0x00000040,
+    UNIT_FLAG2_DISARM_OFFHAND         = 0x00000080,           // also shield case
+    UNIT_FLAG2_DISABLE_PRED_STATS     = 0x00000100,
+    UNIT_FLAG2_ALLOW_CHANGING_TALENTS = 0x00000200,
+    UNIT_FLAG2_DISARM_RANGED          = 0x00000400,
+    UNIT_FLAG2_REGENERATE_POWER       = 0x00000800,
+    UNIT_FLAG2_SPELL_CLICK_IN_GROUP   = 0x00001000,
+    UNIT_FLAG2_SPELL_CLICK_DISABLED   = 0x00002000,
+    UNIT_FLAG2_INTERACT_ANY_REACTION  = 0x00004000,
+    UNIT_FLAG2_CANNOT_TURN            = 0x00008000,
+    UNIT_FLAG2_UNK16                  = 0x00010000,
+    UNIT_FLAG2_PLAY_DEATH_ANIM        = 0x00020000,
+    UNIT_FLAG2_ALLOW_CHEAT_SPELLS     = 0x00040000,
 };
 
 /// Non Player Character flags
