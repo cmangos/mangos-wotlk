@@ -194,11 +194,11 @@ struct CreatureInfo
 
     SkillType GetRequiredLootSkill() const
     {
-        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_HERBLOOT)
+        if (CreatureTypeFlags & CreatureTypeFlags::HERBLOOT)
             return SKILL_HERBALISM;
-        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_MININGLOOT)
+        if (CreatureTypeFlags & CreatureTypeFlags::MININGLOOT)
             return SKILL_MINING;
-        if (CreatureTypeFlags & CREATURE_TYPEFLAGS_ENGINEERLOOT)
+        if (CreatureTypeFlags & CreatureTypeFlags::ENGINEERLOOT)
             return SKILL_ENGINEERING;
         return SKILL_SKINNING;
         // normal case
@@ -206,12 +206,12 @@ struct CreatureInfo
 
     bool IsExotic() const
     {
-        return (CreatureTypeFlags & CREATURE_TYPEFLAGS_EXOTIC) != 0;
+        return (CreatureTypeFlags & CreatureTypeFlags::EXOTIC) != 0;
     }
 
     bool isTameable(bool exotic) const
     {
-        if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || (CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE) == 0)
+        if (CreatureType != CREATURE_TYPE_BEAST || Family == 0 || (CreatureTypeFlags & CreatureTypeFlags::TAMEABLE) == 0)
             return false;
 
         // if can tame exotic then can tame any tameable
@@ -783,7 +783,7 @@ class Creature : public Unit
         uint32 GetInteractionPauseTimer() const { return m_interactionPauseTimer; }
 
         GridReference<Creature>& GetGridRef() { return m_gridRef; }
-        bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0 && !(GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_SIEGE_WEAPON); }
+        bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0 && !(GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::SIEGE_WEAPON); }
         bool IsRegeneratingPower() const;
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
