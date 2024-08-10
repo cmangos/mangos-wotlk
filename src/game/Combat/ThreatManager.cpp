@@ -477,7 +477,7 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
         for (auto& redirection : redirectionData)
         {
             if (getOwner()->IsIgnoringMisdirect())
-                continue;
+                break;
             float redirectedMod = redirection.second.mod;
             Unit* redirectedTarget = iOwner->GetMap()->GetUnit(redirection.second.target);
             if (!redirectedTarget)
