@@ -235,7 +235,7 @@ void VehicleInfo::Initialize()
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
 
     // NOTE: this is the best possible combination to root a vehicle
-    if (vehicleFlags & VEHICLE_FLAG_FIXED_POSITION)
+    if ((vehicleFlags & VEHICLE_FLAG_FIXED_POSITION) || m_owner->GetEntry() == 30236 || m_owner->GetEntry() == 39759)
         pVehicle->SetImmobilizedState(true);
 
     // Initialize power type based on DBC values (creatures only)
@@ -555,15 +555,6 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         // only for flyable vehicles
         if (passenger->IsFlying())
             static_cast<Unit*>(m_owner)->CastSpell(passenger, SPELL_VEHICLE_PARACHUTE, TRIGGERED_OLD_TRIGGERED);
-
-        // TODO: Guesswork, but seems to be fairly near correct
-        // Only if the passenger was on control seat? Also depending on some flags
-        if ((seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL) &&
-                !(m_vehicleEntry->m_flags & (VEHICLE_FLAG_UNK4 | VEHICLE_FLAG_NOT_DISMISSED)))
-        {
-            if (((Creature*)m_owner)->IsTemporarySummon())
-                ((Creature*)m_owner)->ForcedDespawn(1000);
-        }
     }
 
     if (Unit* owner = dynamic_cast<Unit*>(m_owner))
