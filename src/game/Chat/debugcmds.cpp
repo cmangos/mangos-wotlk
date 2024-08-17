@@ -741,13 +741,19 @@ bool ChatHandler::HandleDebugGetItemStateCommand(char* args)
 
 bool ChatHandler::HandleDebugBattlegroundCommand(char* /*args*/)
 {
-    sBattleGroundMgr.ToggleTesting();
+    sBattleGroundMgr.GetMessager().AddMessage([](BattleGroundMgr* mgr)
+    {
+        mgr->ToggleTesting();
+    });
     return true;
 }
 
 bool ChatHandler::HandleDebugArenaCommand(char* /*args*/)
 {
-    sBattleGroundMgr.ToggleArenaTesting();
+    sBattleGroundMgr.GetMessager().AddMessage([](BattleGroundMgr* mgr)
+    {
+        mgr->ToggleArenaTesting();
+    });
     return true;
 }
 

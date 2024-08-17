@@ -2067,36 +2067,6 @@ enum BanReturn
     BAN_NOTFOUND
 };
 
-// indexes of BattlemasterList.dbc
-enum BattleGroundTypeId
-{
-    BATTLEGROUND_TYPE_NONE     = 0,
-    BATTLEGROUND_AV            = 1,
-    BATTLEGROUND_WS            = 2,
-    BATTLEGROUND_AB            = 3,
-    BATTLEGROUND_NA            = 4,
-    BATTLEGROUND_BE            = 5,
-    BATTLEGROUND_AA            = 6,                         // all arenas
-    BATTLEGROUND_EY            = 7,
-    BATTLEGROUND_RL            = 8,
-    BATTLEGROUND_SA            = 9,
-    BATTLEGROUND_DS            = 10,
-    BATTLEGROUND_RV            = 11,
-    BATTLEGROUND_IC            = 30,
-    BATTLEGROUND_RB            = 32                         // random battleground
-};
-#define MAX_BATTLEGROUND_TYPE_ID 33
-
-enum ArenaType
-{
-    ARENA_TYPE_NONE         = 0,                            // used for mark non-arenas or problematic cases
-    ARENA_TYPE_2v2          = 2,
-    ARENA_TYPE_3v3          = 3,
-    ARENA_TYPE_5v5          = 5
-};
-
-inline bool IsArenaTypeValid(ArenaType type) { return type == ARENA_TYPE_2v2 || type == ARENA_TYPE_3v3 || type == ARENA_TYPE_5v5; }
-
 enum MailResponseType
 {
     MAIL_SEND               = 0,

@@ -294,7 +294,12 @@ BattleGround::~BattleGround()
     // skip template bgs as they were never added to visible bg list
     BattleGroundBracketId bracketId = GetBracketId();
     if (bracketId != BG_BRACKET_ID_TEMPLATE)
-        sBattleGroundMgr.DeleteClientVisibleInstanceId(GetTypeId(), bracketId, GetClientInstanceId());
+    {
+        sBattleGroundMgr.GetMessager().AddMessage([typeId = GetTypeId(), bracketId, clientInstanceId = GetClientInstanceId()](BattleGroundMgr* mgr)
+        {
+            mgr->DeleteClientVisibleInstanceId(typeId, bracketId, clientInstanceId);
+        });
+    }
 
     // unload map
     // map can be null at bg destruction
@@ -1368,7 +1373,10 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid playerGuid, bool isOnTransport
         {
             // a player has left the battleground, so there are free slots -> add to queue
             AddToBgFreeSlotQueue();
-            sBattleGroundMgr.ScheduleQueueUpdate(0, ARENA_TYPE_NONE, bgQueueTypeId, bgTypeId, GetBracketId());
+            sBattleGroundMgr.GetMessager().AddMessage([bgQueueTypeId, bgTypeId, bracketId = GetBracketId()](BattleGroundMgr* mgr)
+            {
+                mgr->ScheduleQueueUpdate(0, ARENA_TYPE_NONE, bgQueueTypeId, bgTypeId, bracketId);
+            });
         }
 
         // Let others know
@@ -1845,7 +1853,7 @@ Team BattleGround::GetPrematureWinner()
 */
 void BattleGround::OnObjectDBLoad(Creature* creature)
 {
-    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(creature->GetDbGuid());
+    const BattleGroundEventIdx eventId = GetBgMap()->GetMapDataContainer().GetCreatureEventIndex(creature->GetDbGuid());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
 
@@ -1876,7 +1884,7 @@ uint32 BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
 */
 void BattleGround::OnObjectDBLoad(GameObject* obj)
 {
-    const BattleGroundEventIdx eventId = sBattleGroundMgr.GetGameObjectEventIndex(obj->GetDbGuid());
+    const BattleGroundEventIdx eventId = GetBgMap()->GetMapDataContainer().GetGameObjectEventIndex(obj->GetDbGuid());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
 
