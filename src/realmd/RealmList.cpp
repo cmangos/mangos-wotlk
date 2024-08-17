@@ -175,7 +175,7 @@ void RealmList::UpdateRealms(bool init)
 
             if (Id == 0)
             {
-                sLog.outErrorDb("Realm ID must be > 0", Id, name.c_str());
+                sLog.outErrorDb("Realm ID must be > 0 for %s", name.c_str());
                 continue;
             }
 
