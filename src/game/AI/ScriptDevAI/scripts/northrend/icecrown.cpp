@@ -1160,22 +1160,46 @@ struct RodOfSiphoning : public AuraScript
 };
 
 // 60561 - Summon Dark Messenger Beam
-struct SummonDarkMessengerBeam : public AuraScript
+struct SummonDarkMessengerBeam : public SpellScript, public AuraScript
 {
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->GetCaster()->IsPlayer())
+        {
+            Player* player = static_cast<Player*>(spell->GetCaster());
+            if (!player->HasItemCount(44434, 5))
+            {
+                return SPELL_FAILED_REAGENTS;
+            }
+        }
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_REAGENTS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_55;
+        }
+    }
+
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
         data.caster = aura->GetCaster();
         data.target = nullptr;
+        data.triggerFlags |= TRIGGERED_FORCE_COSTS;
     }
 };
 
 // 60831 - Alumeth's Remains
-struct AlumethsRemains : public AuraScript
+struct AlumethsRemains : public SpellScript, public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
         data.caster = aura->GetCaster();
         data.target = nullptr;
+        data.triggerFlags |= TRIGGERED_FORCE_COSTS;
     }
 };
 
