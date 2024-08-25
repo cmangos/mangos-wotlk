@@ -1397,6 +1397,8 @@ struct FlameStrikeKael : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
+        if (apply)
+            return;
         aura->GetTarget()->CastSpell(nullptr, 36731, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
         if (aura->GetTarget()->IsCreature())
             static_cast<Creature*>(aura->GetTarget())->ForcedDespawn(10000);
