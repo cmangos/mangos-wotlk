@@ -175,30 +175,34 @@ struct boss_hodirAI : public BossAI
 
         m_creature->SetLootRecipient(nullptr);
 
-        if (instance_ulduar* instance = dynamic_cast<instance_ulduar*>(m_creature->GetInstanceData()))
+        const std::vector<Creature*>* tmpHelpers = m_creature->GetMap()->GetCreatures("ULDUAR_HODIR_HELPERS");
+
+        if (!tmpHelpers || tmpHelpers->empty())
+            return;
+
+        const std::vector<Creature*> helpers { *tmpHelpers };
+
+        for (Creature* helper : *tmpHelpers)
         {
-            GuidList helpers;
-            instance->GetHodirHelperGuids(helpers);
-            for (ObjectGuid& helperGuid : helpers)
-                if (Creature* helper = m_creature->GetMap()->GetCreature(helperGuid))
-                    if (!m_eventFinished && helper->IsAlive())
-                        helper->Suicide();
-            instance->ClearHodirHelpers();
+            sLog.outError("%s", helper->GetName());
+            if (!m_eventFinished && helper && helper->IsAlive())
+                helper->Suicide();
         }
     }
 
     void JustPreventedDeath(Unit* attacker) override
     {
         // Inform the faction helpers that the fight is over
-        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-        for (auto itr : threatList)
+        const std::vector<Creature*>* tmpHelpers = m_creature->GetMap()->GetCreatures("ULDUAR_HODIR_HELPERS");
+        if (tmpHelpers && !tmpHelpers->empty())
         {
-            // only check creatures
-            if (!itr->getUnitGuid().IsCreature())
-                continue;
+            const std::vector<Creature*> helpers { *tmpHelpers };
 
-            if (Creature* pTarget = m_creature->GetMap()->GetCreature(itr->getUnitGuid()))
-                pTarget->AI()->EnterEvadeMode();
+            for (Creature* helper : *tmpHelpers)
+            {
+                if (!m_eventFinished && helper && helper->AI() && helper->IsAlive())
+                    helper->AI()->EnterEvadeMode();
+            }
         }
 
         ResetTimer(HODIR_EPILOGUE, 10s);
@@ -262,7 +266,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 {
     npc_flash_freezeAI(Creature* creature) : Scripted_NoMovementAI(creature)
     {
-        m_instance = (instance_ulduar*)creature->GetInstanceData();
+        m_instance = dynamic_cast<instance_ulduar*>(creature->GetInstanceData());
         Reset();
     }
 
@@ -275,7 +279,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
     void Reset() override
     {
         m_freezeInit = false;
-        summoner = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid());
+        summoner = m_creature->GetMap()->GetUnit(m_creature->GetSpawnerGuid());
     }
 
     void AttackStart(Unit* /*who*/) override { }
@@ -308,7 +312,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
             if (!summoner->IsAlive())
             {
                 if (summoner->IsCreature())
-                    ((Creature*)summoner)->ForcedDespawn(5000);
+                    static_cast<Creature*>(summoner)->ForcedDespawn(5000);
                 m_creature->ForcedDespawn();
                 summoner = nullptr;
                 return;

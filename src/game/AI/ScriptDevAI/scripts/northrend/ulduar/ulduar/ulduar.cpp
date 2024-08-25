@@ -314,7 +314,6 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_MAGE_ALLIANCE_H:
         case NPC_PRIEST_ALLIANCE_N:
         case NPC_PRIEST_ALLIANCE_H:
-            m_HodirHelperGuids.push_back(pCreature->GetObjectGuid());
             pCreature->SetImmuneToNPC(false);
             return;
 
