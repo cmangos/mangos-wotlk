@@ -941,6 +941,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61073,'spell_vortex_aura'),
 (61074,'spell_vortex_aura'),
 (61075,'spell_vortex_aura'),
+(61171,'spell_burning'),
 (61187,'spell_twilight_shift_aura'),
 (61190,'spell_twilight_shift_aura'),
 (61210,'spell_align_disk_aggro'),

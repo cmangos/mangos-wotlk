@@ -1216,6 +1216,22 @@ struct FireSGM3 : public SpellScript
     }
 };
 
+// 61171 - Burning
+struct Burning : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->ForcePeriodicity(1 * IN_MILLISECONDS); // tick every second
+    }
+
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        Unit::DealDamage(target, target, 1000, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1264,4 +1280,5 @@ void AddSC_icecrown()
     RegisterSpellScript<SummonDarkMessengerBeam>("spell_summon_dark_messenger_beam");
     RegisterSpellScript<AlumethsRemains>("spell_alumeths_remains");
     RegisterSpellScript<FireSGM3>("spell_fire_sgm3");
+    RegisterSpellScript<Burning>("spell_burning");
 }
