@@ -913,6 +913,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (58420,'spell_portal_to_capital_city'),
 (58984,'spell_shadowmeld'),
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
+(59288,'spell_infragreenshield'),
 (59303,'spell_summon_frost_wyrm'),
 (59317,'spell_teleporting_dalaran'),
 (59331,'spell_poisoned_spear'),
