@@ -1232,6 +1232,16 @@ struct Burning : public AuraScript
     }
 };
 
+// 59288 - Infra-Green Shield
+struct InfraGreenShield : public AuraScript
+{
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        caster->RemoveAuraStack(59288);
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1281,4 +1291,5 @@ void AddSC_icecrown()
     RegisterSpellScript<AlumethsRemains>("spell_alumeths_remains");
     RegisterSpellScript<FireSGM3>("spell_fire_sgm3");
     RegisterSpellScript<Burning>("spell_burning");
+    RegisterSpellScript<InfraGreenShield>("spell_infragreenshield");
 }
