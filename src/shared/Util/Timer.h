@@ -161,4 +161,36 @@ struct ShortTimeTracker
         uint32 i_expiryTime;
 };
 
+struct ChronoTimeTracker
+{
+    public:
+        ChronoTimeTracker() : m_startTime(std::chrono::steady_clock::now()) {}
+        ~ChronoTimeTracker()
+        {
+            sLog.outError("Elapsed: %lds, %ldms, %ldµs, %ldns",
+                elapsedSeconds().count(),
+                elapsedMillis().count(),
+                elapsedMicros().count(),
+                elapsedNanos().count());
+        }
+        std::chrono::seconds elapsedSeconds()
+        {
+            return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::steady_clock::now() - m_startTime);
+        }
+        std::chrono::milliseconds elapsedMillis()
+        {
+            return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_startTime);
+        }
+        std::chrono::microseconds elapsedMicros()
+        {
+            return std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::steady_clock::now() - m_startTime);
+        }
+        std::chrono::nanoseconds elapsedNanos()
+        {
+            return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - m_startTime);
+        }
+    private:
+        std::chrono::time_point<std::chrono::steady_clock, std::chrono::nanoseconds> m_startTime;
+};
+
 #endif
