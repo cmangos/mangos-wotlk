@@ -32,7 +32,7 @@ instance_slave_pens::instance_slave_pens(Map* map) : ScriptedInstance(map), m_na
 
 void instance_slave_pens::Initialize()
 {
-
+    instance->GetVariableManager().SetVariable(WORLD_STATE_NATURALIST_BITE, 0);
 }
 
 void instance_slave_pens::SetData(uint32 type, uint32 data)
@@ -135,6 +135,30 @@ bool GossipHello_npc_naturalist_bite(Player* player, Creature* creature)
     return true;
 }
 
+enum
+{
+    SPELL_LIGHTNING_CLOUD       = 32193,
+    SPELL_LIGHTNING_CLOUD_H     = 37665,
+};
+// 32173 EntanglingRoots
+struct EntanglingRoots : public SpellScript
+{
+    void OnSuccessfulFinish(Spell* spell) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+
+        caster->CastSpell(target, caster->GetMap()->IsRegularDifficulty() ? SPELL_LIGHTNING_CLOUD : SPELL_LIGHTNING_CLOUD_H, TRIGGERED_NONE);
+        return;
+    }
+};
+
+
 void AddSC_instance_slave_pens()
 {
     Script* pNewScript = new Script;
@@ -151,5 +175,7 @@ void AddSC_instance_slave_pens()
     pNewScript->Name = "npc_naturalist_bite";
     pNewScript->pGossipHello = &GossipHello_npc_naturalist_bite;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<EntanglingRoots>("spell_entangling_roots");
 }
 

@@ -368,6 +368,9 @@ enum WorldStateID : int32
     WORLD_STATE_PROTEAN_HORROR     = 5520001,               // Prevents that Protean Horrors respawn
     WORLD_STATE_PROTEAN_NIGHTMARE  = 5520002,               // Prevents that Protean Nightmare respawn
 
+    // The Slave Pens
+    WORLD_STATE_NATURALIST_BITE    = 5470044,              // Spawns Coilfang Group after freeing Naturalist Bite
+
     // Wotlk
     WORLD_STATE_CUSTOM_HEADLESS_HORSEMAN_DUNGEON    = 20000,
     WORLD_STATE_CUSTOM_AHUNE_DUNGEON                = 20001,
