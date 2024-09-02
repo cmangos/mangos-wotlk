@@ -3067,6 +3067,17 @@ bool Creature::CanDaze() const
     return (!IsPlayerControlled() && !GetSettings().HasFlag(CreatureStaticFlags4::CANNOT_DAZE));
 }
 
+Unit::MmapForcingStatus Creature::IsIgnoringMMAP() const
+{
+    if (m_ignoreMMAP)
+        return MmapForcingStatus::IGNORED;
+
+    if (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE)
+        return MmapForcingStatus::FORCED;
+
+    return Unit::IsIgnoringMMAP();
+}
+
 bool Creature::CanRestockPickpocketLoot() const
 {
     return GetMap()->GetCurrentClockTime() >= m_pickpocketRestockTime;

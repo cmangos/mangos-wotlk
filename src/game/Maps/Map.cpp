@@ -161,7 +161,7 @@ bool Map::CanSpawn(TypeID typeId, uint32 dbGuid)
 void Map::SetNavTile(uint32 tileX, uint32 tileY, uint32 tileNumber)
 {
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
-    mmap->ChangeTile(GetId(), GetInstanceId(), tileX, tileY, tileNumber);
+    mmap->ChangeTile(sWorld.GetDataPath(), GetId(), GetInstanceId(), tileX, tileY, tileNumber);
 }
 
 void Map::AwardLFGRewards(uint32 dungeonId)
@@ -195,12 +195,12 @@ void Map::ChangeGOPathfinding(uint32 entry, uint32 displayId, bool apply)
         std::tie(isFlag, tileNumber) = GameObjectModel::GetTileDataForGoDisplayId(GetId(), entry, displayId, tileX, tileY);
         // why are mmtiles saved as Y X in MapBuilder???
         if (!isFlag)
-            mmap->ChangeTile(GetId(), GetInstanceId(), tileY, tileX, apply ? tileNumber : 0);
+            mmap->ChangeTile(sWorld.GetDataPath(), GetId(), GetInstanceId(), tileY, tileX, apply ? tileNumber : 0);
         else
         {
             uint32 currentTileNumber = m_tileNumberPerTile[dataXY];
             tileNumber = apply ? (currentTileNumber | tileNumber) : (currentTileNumber & ~tileNumber);
-            mmap->ChangeTile(GetId(), GetInstanceId(), tileY, tileX, tileNumber);
+            mmap->ChangeTile(sWorld.GetDataPath(), GetId(), GetInstanceId(), tileY, tileX, tileNumber);
         }
         m_tileNumberPerTile[dataXY] = tileNumber;
     }
@@ -215,7 +215,7 @@ void Map::LoadMapAndVMap(int gx, int gy)
         m_bLoadedGrids[gx][gy] = true;
 
     if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(GetId(), GetInstanceId(), gx, gy))
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(GetId(), GetInstanceId(), gx, gy, 0);
+        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), GetId(), GetInstanceId(), gx, gy, 0);
 }
 
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
@@ -267,7 +267,7 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
     m_spawnManager.Initialize();
 
     // load navmesh
-    MMAP::MMapFactory::createOrGetMMapManager()->loadMapData(GetId(), GetInstanceId());
+    MMAP::MMapFactory::createOrGetMMapManager()->loadMapData(sWorld.GetDataPath(), GetId(), GetInstanceId());
 
     sObjectMgr.LoadActiveEntities(this);
 

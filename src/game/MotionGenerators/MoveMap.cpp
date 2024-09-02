@@ -17,13 +17,17 @@
  */
 
 #include "Log/Log.h"
-#include "World/World.h"
-#include "Entities/Creature.h"
+#include "Entities/Unit.h"
 #include "MotionGenerators/MoveMap.h"
 #include "MoveMapSharedDefines.h"
 
 namespace MMAP
 {
+    constexpr char MAP_FILE_NAME_FORMAT[] = "mmaps/%03i.mmap";
+    constexpr char TILE_FILE_NAME_FORMAT[] = "mmaps/%03i%02i%02i.mmtile";
+    constexpr char TILE_ALT_FILE_NAME_FORMAT[] = "mmaps/%03i%02i%02i_%02i.mmtile";
+    constexpr char GO_FILE_NAME_FORMAT[] = "mmaps/go%04i.mmtile";
+
     // ######################## MMapFactory ########################
     // our global singleton copy
     MMapManager* g_MMapManager = nullptr;
@@ -60,25 +64,21 @@ namespace MMAP
 
     bool MMapFactory::IsPathfindingEnabled(uint32 mapId, const Unit* unit = nullptr)
     {
-        if (!sWorld.getConfig(CONFIG_BOOL_MMAP_ENABLED))
+        if (!createOrGetMMapManager()->IsEnabled())
             return false;
 
         if (unit)
         {
-            // always use mmaps for players
-            if (unit->GetTypeId() == TYPEID_PLAYER)
-                return true;
-
-            if (IsPathfindingForceDisabled(unit))
-                return false;
-
-            if (IsPathfindingForceEnabled(unit))
-                return true;
-
-            // always use mmaps for pets of players (can still be disabled by extra-flag for pet creature)
-            if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->IsPet() && unit->GetOwner() &&
-                    unit->GetOwner()->GetTypeId() == TYPEID_PLAYER)
-                return true;
+            Unit::MmapForcingStatus status = unit->IsIgnoringMMAP();
+            switch (status)
+            {
+                case Unit::MmapForcingStatus::DEFAULT:
+                    break;
+                case Unit::MmapForcingStatus::FORCED:
+                    return true;
+                case Unit::MmapForcingStatus::IGNORED:
+                    return false;
+            }
         }
 
         return g_mmapDisabledIds->find(mapId) == g_mmapDisabledIds->end();
@@ -93,28 +93,6 @@ namespace MMAP
         g_MMapManager = nullptr;
     }
 
-    bool MMapFactory::IsPathfindingForceEnabled(const Unit* unit)
-    {
-        if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
-        {
-            if (const CreatureInfo* pInfo = pCreature->GetCreatureInfo())
-            {
-                if (pInfo->ExtraFlags & CREATURE_EXTRA_FLAG_MMAP_FORCE_ENABLE)
-                    return true;
-            }
-        }
-
-        return false;
-    }
-
-    bool MMapFactory::IsPathfindingForceDisabled(const Unit* unit)
-    {
-        if (const Creature* pCreature = dynamic_cast<const Creature*>(unit))
-            return pCreature->IsIgnoringMMAP();
-
-        return false;
-    }
-
     // ######################## MMapManager ########################
     MMapManager::~MMapManager()
     {
@@ -122,22 +100,22 @@ namespace MMAP
         // if we had, tiles in MMapData->mmapLoadedTiles, their actual data is lost!
     }
 
-    void MMapManager::ChangeTile(uint32 mapId, uint32 instanceId, uint32 tileX, uint32 tileY, uint32 tileNumber)
+    void MMapManager::ChangeTile(std::string const& basePath, uint32 mapId, uint32 instanceId, uint32 tileX, uint32 tileY, uint32 tileNumber)
     {
         unloadMap(mapId, instanceId, tileX, tileY);
-        loadMap(mapId, instanceId, tileX, tileY, tileNumber);
+        loadMap(basePath, mapId, instanceId, tileX, tileY, tileNumber);
     }
 
-    bool MMapManager::loadMapData(uint32 mapId, uint32 instanceId)
+    bool MMapManager::loadMapData(std::string const& basePath, uint32 mapId, uint32 instanceId)
     {
         // we already have this map loaded?
         if (m_loadedMMaps.find(packInstanceId(mapId, instanceId)) != m_loadedMMaps.end())
             return true;
 
         // load and init dtNavMesh - read parameters from file
-        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/%03i.mmap") + 1;
+        uint32 pathLen = basePath.length() + strlen(MAP_FILE_NAME_FORMAT) + 1;
         char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/%03i.mmap").c_str(), mapId);
+        snprintf(fileName, pathLen, (basePath + MAP_FILE_NAME_FORMAT).c_str(), mapId);
 
         FILE* file = fopen(fileName, "rb");
         if (!file)
@@ -199,10 +177,10 @@ namespace MMAP
         return false;
     }
 
-    bool MMapManager::loadMap(uint32 mapId, uint32 instanceId, int32 x, int32 y, uint32 number)
+    bool MMapManager::loadMap(std::string const& basePath, uint32 mapId, uint32 instanceId, int32 x, int32 y, uint32 number)
     {
         // make sure the mmap is loaded and ready to load tiles
-        if (!loadMapData(mapId, instanceId))
+        if (!loadMapData(basePath, mapId, instanceId))
             return false;
 
         // get this mmap data
@@ -211,9 +189,9 @@ namespace MMAP
 
         char fileName[100];
         if (number == 0)
-            sprintf(fileName, "%03u%02i%02i.mmtile", mapId, x, y);
+            sprintf(fileName, TILE_FILE_NAME_FORMAT, mapId, x, y);
         else
-            sprintf(fileName, "%03u%02i%02i_%02i.mmtile", mapId, x, y, number);
+            sprintf(fileName, TILE_ALT_FILE_NAME_FORMAT, mapId, x, y, number);
 
         // check if we already have this tile loaded
         uint32 packedGridPos = packTileID(x, y);
@@ -223,7 +201,7 @@ namespace MMAP
             return false;
         }
 
-        std::string filePath = sWorld.GetDataPath() + std::string("mmaps/") + fileName;
+        std::string filePath = basePath + std::string("mmaps/") + fileName;
         // load this tile
         FILE* file = fopen(filePath.c_str(), "rb");
         if (!file)
@@ -282,22 +260,22 @@ namespace MMAP
         return true;
     }
 
-    void MMapManager::loadAllGameObjectModels(std::vector<uint32> const& displayIds)
+    void MMapManager::loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds)
     {
         for (uint32 displayId : displayIds)
-            loadGameObject(displayId);
+            loadGameObject(basePath, displayId);
     }
 
-    bool MMapManager::loadGameObject(uint32 displayId)
+    bool MMapManager::loadGameObject(std::string const& basePath, uint32 displayId)
     {
         // we already have this map loaded?
         if (m_loadedModels.find(displayId) != m_loadedModels.end())
             return true;
 
         // load and init dtNavMesh - read parameters from file
-        uint32 pathLen = sWorld.GetDataPath().length() + strlen("mmaps/go%04i.mmtile") + 1;
+        uint32 pathLen = basePath.length() + strlen(GO_FILE_NAME_FORMAT) + 1;
         char* fileName = new char[pathLen];
-        snprintf(fileName, pathLen, (sWorld.GetDataPath() + "mmaps/go%04i.mmtile").c_str(), displayId);
+        snprintf(fileName, pathLen, (basePath + GO_FILE_NAME_FORMAT).c_str(), displayId);
 
         FILE* file = fopen(fileName, "rb");
         if (!file)

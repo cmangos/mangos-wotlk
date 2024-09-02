@@ -66,6 +66,8 @@
 #include "Globals/CombatCondition.h"
 #include "World/WorldStateExpression.h"
 
+#include "MotionGenerators/MoveMap.h"
+
 #ifdef BUILD_AHBOT
 #include "AuctionHouseBot/AuctionHouseBot.h"
 
