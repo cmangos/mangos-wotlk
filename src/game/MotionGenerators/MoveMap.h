@@ -44,17 +44,15 @@ inline void dtCustomFree(void* ptr)
 namespace MMAP
 {
     typedef std::unordered_map<uint32, dtTileRef> MMapTileSet;
-    typedef std::unordered_map<uint32, dtNavMeshQuery*> NavMeshQuerySet;
     typedef std::unordered_map<std::thread::id, dtNavMeshQuery*> NavMeshGOQuerySet;
 
     // dummy struct to hold map's mmap data
     struct MMapData
     {
-        MMapData(dtNavMesh* mesh) : navMesh(mesh) {}
+        MMapData(dtNavMesh* mesh) : navMesh(mesh), navMeshQuery(nullptr) {}
         ~MMapData()
         {
-            for (auto& navMeshQuerie : navMeshQueries)
-                dtFreeNavMeshQuery(navMeshQuerie.second);
+            dtFreeNavMeshQuery(navMeshQuery);
 
             if (navMesh)
                 dtFreeNavMesh(navMesh);
@@ -63,8 +61,10 @@ namespace MMAP
         dtNavMesh* navMesh;
 
         // we have to use single dtNavMeshQuery for every instance, since those are not thread safe
-        NavMeshQuerySet navMeshQueries;     // instanceId to query
+        dtNavMeshQuery* navMeshQuery;       // mmap data in wotlk is already packed per instance id
         MMapTileSet mmapLoadedTiles;        // maps [map grid coords] to [dtTile]
+
+        std::mutex mutex;
     };
 
     struct MMapGOData
@@ -98,6 +98,7 @@ namespace MMAP
             bool loadMapData(std::string const& basePath, uint32 mapId, uint32 instanceId);
             void loadAllGameObjectModels(std::string const& basePath, std::vector<uint32> const& displayIds);
             bool loadGameObject(std::string const& basePath, uint32 displayId);
+            bool loadMapInstance(std::string const& basePath, uint32 mapId, uint32 instanceId);
             bool unloadMap(uint32 mapId, uint32 instanceId, int32 x, int32 y);
             bool unloadMap(uint32 mapId);
             bool unloadMapInstance(uint32 mapId, uint32 instanceId);

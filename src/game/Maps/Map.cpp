@@ -266,8 +266,7 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
 
     m_spawnManager.Initialize();
 
-    // load navmesh
-    MMAP::MMapFactory::createOrGetMMapManager()->loadMapData(sWorld.GetDataPath(), GetId(), GetInstanceId());
+    MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), GetId(), GetInstanceId());
 
     sObjectMgr.LoadActiveEntities(this);
 
