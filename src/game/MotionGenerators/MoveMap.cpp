@@ -177,21 +177,43 @@ namespace MMAP
         return false;
     }
 
+    void MMapManager::loadAllMapTiles(std::string const& basePath, uint32 mapId, uint32 instanceId)
+    {
+        auto itr = m_loadedMMaps.find(packInstanceId(mapId, instanceId));
+        MANGOS_ASSERT(itr != m_loadedMMaps.end());
+        const auto& mmapData = itr->second;
+
+        if (mmapData->fullLoaded)
+            return;
+
+        for (const auto& entry : boost::filesystem::directory_iterator(basePath + "mmaps"))
+        {
+            if (entry.path().extension() == ".mmtile")
+            {
+                auto filename = entry.path().filename();
+                auto fileNameString = filename.c_str();
+                // trying to avoid string copy
+                uint32 fileMapId = (fileNameString[0] - '0') * 100 + (fileNameString[1] - '0') * 10 + (fileNameString[2] - '0');
+                if (fileMapId != mapId)
+                    continue;
+
+                uint32 x = (fileNameString[3] - '0') * 10 + (fileNameString[4] - '0');
+                uint32 y = (fileNameString[5] - '0') * 10 + (fileNameString[6] - '0');
+                uint32 packedGridPos = packTileID(x, y);
+                loadMapInternal(entry.path().string().c_str(), mmapData, packedGridPos, mapId, x, y); // yes using a temporary - wchar_t on windows
+            }
+        }
+
+        mmapData->fullLoaded = true;
+    }
+
     bool MMapManager::loadMap(std::string const& basePath, uint32 mapId, uint32 instanceId, int32 x, int32 y, uint32 number)
     {
-        // make sure the mmap is loaded and ready to load tiles
-        if (!loadMapData(basePath, mapId, instanceId))
-            return false;
-
         // get this mmap data
-        const auto& mmapData = m_loadedMMaps[packInstanceId(mapId, instanceId)];
-        MANGOS_ASSERT(mmapData->navMesh);
+        auto itr = m_loadedMMaps.find(packInstanceId(mapId, instanceId));
+        MANGOS_ASSERT(itr != m_loadedMMaps.end()); // must not occur here as it would not be thread safe - only in loadMapData through loadMapInstance
 
-        char fileName[100];
-        if (number == 0)
-            sprintf(fileName, TILE_FILE_NAME_FORMAT, mapId, x, y);
-        else
-            sprintf(fileName, TILE_ALT_FILE_NAME_FORMAT, mapId, x, y, number);
+        const auto& mmapData = itr->second;
 
         // check if we already have this tile loaded
         uint32 packedGridPos = packTileID(x, y);
@@ -201,12 +223,20 @@ namespace MMAP
             return false;
         }
 
-        std::string filePath = basePath + std::string("mmaps/") + fileName;
-        // load this tile
-        FILE* file = fopen(filePath.c_str(), "rb");
+        // load this tile :: mmaps/MMMXXYY.mmtile
+        uint32 pathLen = basePath.length() + strlen(number == 0 ? TILE_FILE_NAME_FORMAT : TILE_ALT_FILE_NAME_FORMAT) + 1;
+        std::unique_ptr<char[]> fileName(new char[pathLen]);
+        snprintf(fileName.get(), pathLen, (basePath + (number == 0 ? TILE_FILE_NAME_FORMAT : TILE_ALT_FILE_NAME_FORMAT)).c_str(), mapId, x, y);
+
+        return loadMapInternal(fileName.get(), mmapData, packedGridPos, mapId, x, y);
+    }
+
+    bool MMapManager::loadMapInternal(const char* filePath, const std::unique_ptr<MMapData>& mmapData, uint32 packedGridPos, uint32 mapId, int32 x, int32 y)
+    {
+        FILE* file = fopen(filePath, "rb");
         if (!file)
         {
-            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "ERROR: MMAP:loadMap: Could not open mmtile file '%s'", fileName);
+            DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "ERROR: MMAP:loadMap: Could not open mmtile file '%s'", filePath);
             return false;
         }
 
@@ -216,7 +246,7 @@ namespace MMAP
 
         if (fileHeader.mmapMagic != MMAP_MAGIC)
         {
-            sLog.outError("MMAP:loadMap: Bad header in mmap %s", fileName);
+            sLog.outError("MMAP:loadMap: Bad header in mmap %s", filePath);
             fclose(file);
             return false;
         }
@@ -224,7 +254,7 @@ namespace MMAP
         if (fileHeader.mmapVersion != MMAP_VERSION)
         {
             sLog.outError("MMAP:loadMap: %s was built with generator v%i, expected v%i",
-                          fileName, fileHeader.mmapVersion, MMAP_VERSION);
+                          filePath, fileHeader.mmapVersion, MMAP_VERSION);
             fclose(file);
             return false;
         }
@@ -235,7 +265,7 @@ namespace MMAP
         size_t result = fread(data, fileHeader.size, 1, file);
         if (!result)
         {
-            sLog.outError("MMAP:loadMap: Bad header or data in mmap %s", fileName);
+            sLog.outError("MMAP:loadMap: Bad header or data in mmap %s", filePath);
             fclose(file);
             return false;
         }
@@ -249,14 +279,14 @@ namespace MMAP
         dtStatus dtResult = mmapData->navMesh->addTile(data, fileHeader.size, DT_TILE_FREE_DATA, 0, &tileRef);
         if (dtStatusFailed(dtResult))
         {
-            sLog.outError("MMAP:loadMap: Could not load %s into navmesh", fileName);
+            sLog.outError("MMAP:loadMap: Could not load %s into navmesh", filePath);
             dtFree(data);
             return false;
         }
 
         mmapData->mmapLoadedTiles.insert(std::pair<uint32, dtTileRef>(packedGridPos, tileRef));
         ++m_loadedTiles;
-        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:loadMap:%s: Loaded into %03i[%02i,%02i]", fileName, mapId, header->x, header->y);
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "MMAP:loadMap:%s: Loaded into %03i[%02i,%02i]", filePath, mapId, header->x, header->y);
         return true;
     }
 
