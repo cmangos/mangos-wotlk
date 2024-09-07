@@ -3482,6 +3482,13 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 50665, -- Bleeding Out
 50681, -- Bleeding Out
 50695, -- Bleeding Out
+55162, -- The Ocular: Transform
+59288, -- Infra-Green Shield
+60070, -- Banner, Horde
+60151, -- Banner, Side, Horde
+60161, -- Banner, Alliance
+60189, -- Banner, Side, Alliance
+61366, -- Infra-green Turbine (DND)
 61573, -- Banner of the Alliance
 61574  -- Banner of the Horde
 );
