@@ -367,7 +367,7 @@ namespace MMAP
         if (!loadMapData(basePath, mapId, instanceId))
             return false;
 
-        auto& mmap = m_loadedMMaps[mapId];        
+        auto& mmap = m_loadedMMaps[packInstanceId(mapId, instanceId)];
 
         // allocate mesh query
         dtNavMeshQuery* query = dtAllocNavMeshQuery();

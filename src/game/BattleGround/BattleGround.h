@@ -270,27 +270,6 @@ enum BattleGroundStartingEventsIds
 };
 #define BG_STARTING_EVENT_COUNT 4
 
-enum BattleGroundGroupJoinStatus
-{
-    // positive values are indexes in BattlemasterList.dbc
-    BG_GROUP_JOIN_STATUS_BATTLEGROUND_FAIL          = 0,            // Your group has joined a battleground queue, but you are not eligible (showed for non existing BattlemasterList.dbc indexes)
-    BG_GROUP_JOIN_STATUS_NOT_ELIGIBLE               = -1,           // not show anything
-    BG_GROUP_JOIN_STATUS_DESERTERS                  = -2,           // You cannot join the battleground yet because you or one of your party members is flagged as a Deserter.
-    BG_GROUP_JOIN_STATUS_NOT_IN_TEAM                = -3,           // Incorrect party size for this arena.
-    BG_GROUP_JOIN_STATUS_TOO_MANY_QUEUES            = -4,           // You can only be queued for 2 battles at once
-    BG_GROUP_JOIN_STATUS_CANNOT_QUEUE_FOR_RATED     = -5,           // You cannot queue for a rated match while queued for other battles
-    BG_GROUP_JOIN_STATUS_QUEUED_FOR_RATED           = -6,           // You cannot queue for another battle while queued for a rated arena match
-    BG_GROUP_JOIN_STATUS_TEAM_LEFT_QUEUE            = -7,           // Your team has left the arena queue
-    BG_GROUP_JOIN_STATUS_NOT_IN_BATTLEGROUND        = -8,           // You can't do that in a battleground.
-    BG_GROUP_JOIN_STATUS_XP_GAIN                    = -9,           // wtf, doesn't exist in client...
-    BG_GROUP_JOIN_STATUS_JOIN_RANGE_INDEX           = -10,          // Cannot join the queue unless all members of your party are in the same battleground level range.
-    BG_GROUP_JOIN_STATUS_JOIN_TIMED_OUT             = -11,          // %s was unavailable to join the queue. (uint64 guid exist in client cache)
-    BG_GROUP_JOIN_STATUS_JOIN_FAILED                = -12,          // Join as a group failed (uint64 guid doesn't exist in client cache)
-    BG_GROUP_JOIN_STATUS_LFG_CANT_USE_BATTLEGROUND  = -13,          // You cannot queue for a battleground or arena while using the dungeon system.
-    BG_GROUP_JOIN_STATUS_IN_RANDOM_BG               = -14,          // Can't do that while in a Random Battleground queue.
-    BG_GROUP_JOIN_STATUS_IN_NON_RANDOM_BG           = -15,          // Can't queue for Random Battleground while in another Battleground queue.
-};
-
 /*
  This class is used to keep the battleground score for each individual player
 */
@@ -383,7 +362,7 @@ class BattleGround
         void SetRandomTypeId(BattleGroundTypeId typeId) { m_randomTypeId = typeId; }
         // here we can count minlevel and maxlevel for players
         void SetBracket(PvPDifficultyEntry const* bracketEntry);
-        void SetStatus(BattleGroundStatus status) { m_status = status; }
+        void SetStatus(BattleGroundStatus status);
         void SetClientInstanceId(uint32 instanceId) { m_clientInstanceId = instanceId; }
         void SetStartTime(uint32 time)      { m_startTime = time; }
         void SetEndTime(uint32 time)        { m_endTime = time; }
@@ -402,12 +381,11 @@ class BattleGround
         void SetMaxPlayersPerTeam(uint32 maxPlayers) { m_maxPlayersPerTeam = maxPlayers; }
         void SetMinPlayersPerTeam(uint32 minPlayers) { m_minPlayersPerTeam = minPlayers; }
 
-        void AddToBgFreeSlotQueue();                        // this queue will be useful when more battlegrounds instances will be available
-        void RemoveFromBgFreeSlotQueue();                   // this method could delete whole BG instance, if another free is available
+        bool AddToBgFreeSlotQueue();                           // this queue will be useful when more battlegrounds instances will be available
+        void RemovedFromBgFreeSlotQueue(bool removeFromQueue); // this method could delete whole BG instance, if another free is available
 
         // Functions to decrease or increase player count
-        void DecreaseInvitedCount(Team team)      { (team == ALLIANCE) ? --m_invitedAlliance : --m_invitedHorde; }
-        void IncreaseInvitedCount(Team team)      { (team == ALLIANCE) ? ++m_invitedAlliance : ++m_invitedHorde; }
+        void SetInvitedCount(Team team, uint32 count);
         uint32 GetInvitedCount(Team team) const
         {
             if (team == ALLIANCE)

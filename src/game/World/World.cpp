@@ -162,6 +162,7 @@ World::~World()
     MMAP::MMapFactory::clear();
 
     m_lfgQueueThread.join();
+    m_bgQueueThread.join();
 }
 
 /// Cleanups before world stop
@@ -990,6 +991,8 @@ void World::SetInitialWorldSettings()
     // load SQL dbcs first, other DBCs need them
     sObjectMgr.LoadSQLDBCs();
 
+    m_bgQueue.SetNextRatingDiscardUpdate(std::chrono::milliseconds(sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER)));
+
     // Load before npc_text, gossip_menu_option, script_texts
     sLog.outString("Loading broadcast_text...");
     sObjectMgr.LoadBroadcastText();
@@ -1510,7 +1513,7 @@ void World::SetInitialWorldSettings()
     ///- Initialize Battlegrounds
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
-    sBattleGroundMgr.InitAutomaticArenaPointDistribution();
+    m_bgQueue.InitAutomaticArenaPointDistribution();
     CheckLootTemplates_Reference(ids_set);
 
     sLog.outString("Deleting expired bans...");
@@ -2184,14 +2187,6 @@ bool World::RemoveBanAccount(BanMode mode, const std::string& source, const std:
         WarnAccount(account, source, message, "UNBAN");
     }
     return true;
-}
-
-void World::StartLFGQueueThread()
-{
-    m_lfgQueueThread = std::thread([&]()
-    {
-        m_lfgQueue.Update();
-    });
 }
 
 void World::BroadcastToGroup(ObjectGuid groupGuid, std::vector<WorldPacket> const& packets)
@@ -3054,4 +3049,20 @@ void World::LoadWorldSafeLocs() const
 {
     sWorldSafeLocsStore.Load(true);
     sLog.outString(">> Loaded %u world safe locs", sWorldSafeLocsStore.GetRecordCount());
+}
+
+void World::StartLFGQueueThread()
+{
+    m_lfgQueueThread = std::thread([&]()
+    {
+        m_lfgQueue.Update();
+    });
+}
+
+void World::StartBGQueueThread()
+{
+    m_bgQueueThread = std::thread([&]()
+    {
+        m_bgQueue.Update();
+    });
 }

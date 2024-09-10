@@ -42,6 +42,7 @@
 #include "Loot/LootMgr.h"
 #include "Cinematics/CinematicMgr.h"
 #include "LFG/LFG.h"
+#include "BattleGround/BattleGroundDefines.h"
 
 #include <functional>
 #include <vector>

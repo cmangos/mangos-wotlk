@@ -32,6 +32,7 @@
 #include "Globals/GraveyardManager.h"
 #include "LFG/LFG.h"
 #include "LFG/LFGQueue.h"
+#include "BattleGround/BattleGroundQueue.h"
 
 #include <set>
 #include <list>
@@ -668,9 +669,12 @@ class World
         LfgRaidBrowser& GetRaidBrowser() { return m_raidBrowser; }
         LFGQueue& GetLFGQueue() { return m_lfgQueue; }
 
-        void StartLFGQueueThread();
         void BroadcastToGroup(ObjectGuid groupGuid, std::vector<WorldPacket> const& packets);
         void BroadcastPersonalized(std::map<ObjectGuid, std::vector<WorldPacket>> const& personalizedPackets);
+
+        BattleGroundQueue& GetBGQueue() { return m_bgQueue; }
+        void StartLFGQueueThread();
+        void StartBGQueueThread();
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -805,9 +809,11 @@ class World
 
         // World is owner to differentiate from Dungeon finder where queue is completely disjoint
         LfgRaidBrowser m_raidBrowser;
-        // Housing this here but logically it is completely asynchronous - TODO: Separate this and unify with BG queue
+        // Housing this here but logically it is completely asynchronous
         LFGQueue m_lfgQueue;
         std::thread m_lfgQueueThread;
+        BattleGroundQueue m_bgQueue;
+        std::thread m_bgQueueThread;
 };
 
 extern uint32 realmID;

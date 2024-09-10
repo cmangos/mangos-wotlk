@@ -33,6 +33,7 @@
 #include "Maps/MapManager.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "Spells/SpellAuras.h"
+#include "BattleGround/BattleGroundMgr.h"
 #ifdef BUILD_DEPRECATED_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotMgr.h"
 #include "Config/Config.h"

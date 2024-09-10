@@ -66,7 +66,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         void CreateContinents();
         Map* CreateMap(uint32, const WorldObject* obj);
-        Map* CreateBgMap(uint32 mapid, BattleGround* bg);
+        Map* CreateBgMap(uint32 mapid, uint32 instanceId, BattleGround* bg);
         Map* FindMap(uint32 mapid, uint32 instanceId = 0) const;
 
         void UpdateGridState(grid_state_t state, Map& map, NGridType& ngrid, GridInfo& ginfo, const uint32& x, const uint32& y, const uint32& t_diff);
@@ -188,6 +188,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         MapMapType i_maps;
         IntervalTimer i_timer;
 
+        std::atomic<uint32> i_MaxInstanceId;
         MapUpdater m_updater;
 };
 
