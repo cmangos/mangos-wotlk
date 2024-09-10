@@ -8373,9 +8373,9 @@ void Aura::PeriodicTick()
             uint32 procEx = PROC_EX_INTERNAL_HOT | (isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT);
 
             // add HoTs to amount healed in bgs
-            if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                if (BattleGround* bg = ((Player*)pCaster)->GetBattleGround())
-                    bg->UpdatePlayerScore(((Player*)pCaster), SCORE_HEALING_DONE, gain);
+            if (pCaster->IsPlayer())
+                if (BattleGround* bg = static_cast<Player*>(pCaster)->GetBattleGround())
+                    bg->UpdatePlayerScore(static_cast<Player*>(pCaster), SCORE_HEALING_DONE, gain);
 
             if (pCaster->IsInCombat() && !pCaster->IsCrowdControlled())
                 target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);

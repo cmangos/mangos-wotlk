@@ -1002,7 +1002,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
             duel_hasEnded = true;
         }
 
-        if (dealer->GetTypeId() == TYPEID_PLAYER && dealer != victim)
+        if (dealer->IsPlayer() && dealer != victim)
         {
             Player* killer = static_cast<Player*>(dealer);
 
@@ -7799,22 +7799,22 @@ int32 Unit::DealHeal(Unit* pVictim, uint32 addhealth, SpellEntry const* spellInf
     // overheal = addhealth - gain
     unit->SendHealSpellLog(pVictim, spellInfo->Id, addhealth, addhealth - gain, critical, absorb);
 
-    if (unit->GetTypeId() == TYPEID_PLAYER)
+    if (unit->IsPlayer())
     {
-        if (BattleGround* bg = ((Player*)unit)->GetBattleGround())
-            bg->UpdatePlayerScore((Player*)unit, SCORE_HEALING_DONE, gain);
+        if (BattleGround* bg = static_cast<Player*>(unit)->GetBattleGround())
+            bg->UpdatePlayerScore(static_cast<Player*>(unit), SCORE_HEALING_DONE, gain);
 
         // use the actual gain, as the overheal shall not be counted, skip gain 0 (it ignored anyway in to criteria)
         if (gain)
-            ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, gain, 0, pVictim);
+            static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, gain, 0, pVictim);
 
-        ((Player*)unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, addhealth);
+        static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEAL_CASTED, addhealth);
     }
 
-    if (pVictim->GetTypeId() == TYPEID_PLAYER)
+    if (pVictim->IsPlayer())
     {
-        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
-        ((Player*)pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
+        static_cast<Player*>(pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_TOTAL_HEALING_RECEIVED, gain);
+        static_cast<Player*>(pVictim)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALING_RECEIVED, addhealth);
     }
 
     // Script Event HealedBy

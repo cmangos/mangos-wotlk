@@ -2615,7 +2615,7 @@ void BattleGroundMgr::ScheduleQueueUpdate(uint32 arenaRating, ArenaType arenaTyp
 {
     // std::lock_guard<std::mutex> guard(SchedulerLock);
     // we will use only 1 number created of bgTypeId and bracket_id
-    uint64 schedule_id = ((uint64)arenaRating << 32) | (arenaType << 24) | (bgQueueTypeId << 16) | (bgTypeId << 8) | bracketId;
+    uint64 schedule_id = (uint64(arenaRating) << 32) | (uint64(arenaType) << 24) | (uint64(bgQueueTypeId) << 16) | (uint64(bgTypeId) << 8) | bracketId;
     bool found = false;
     for (unsigned long long i : m_queueUpdateScheduler)
     {

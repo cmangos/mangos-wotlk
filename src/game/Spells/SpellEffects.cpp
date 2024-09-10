@@ -3110,8 +3110,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    if (BattleGround* bg = ((Player*)m_caster)->GetBattleGround())
-                        bg->HandlePlayerDroppedFlag((Player*)m_caster);
+                    if (BattleGround* bg = static_cast<Player*>(m_caster)->GetBattleGround())
+                        bg->HandlePlayerDroppedFlag(static_cast<Player*>(m_caster));
 
                     m_caster->CastSpell(m_caster, 30452, TRIGGERED_OLD_TRIGGERED, nullptr);
                     return;
