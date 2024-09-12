@@ -818,7 +818,7 @@ Unit::SpellProcEventTriggerCheck Unit::IsTriggeredAtSpellProcEvent(ProcExecution
         }
     }
 
-    if (!canProc[EFFECT_INDEX_0] || !canProc[EFFECT_INDEX_1] || !canProc[EFFECT_INDEX_2])
+    if (!canProc[EFFECT_INDEX_0] && !canProc[EFFECT_INDEX_1] && !canProc[EFFECT_INDEX_2])
         return SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_FAILED;
 
     if (roll_chance_f(chance))
