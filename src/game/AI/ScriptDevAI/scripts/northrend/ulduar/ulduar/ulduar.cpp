@@ -180,6 +180,8 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_LEVIATHAN:
         case NPC_EXPLORER_DELLORAH:
         case NPC_BRANN_BRONZEBEARD:
+        case NPC_PROJECTION_UNIT:
+        case NPC_LORE_KEEPER_NORGANNON:
         case NPC_ORBITAL_SUPPORT:
         case NPC_IGNIS:
         case NPC_RAZORSCALE:
@@ -298,7 +300,6 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
             else
                 m_vaporVezaxBunnyGuid = pCreature->GetObjectGuid();
             return;
-
         default:
             return;
     }
@@ -319,6 +320,9 @@ void instance_ulduar::OnCreatureRespawn(Creature* creature)
             hodirHelper->CastSpell(hodirHelper, 64174, TRIGGERED_NONE);
         });
     }
+    //Workaround because Vehicles aren't Creatures, so CreatureAddons aren't applied to them
+    if (creature->GetEntry() == 33059 || creature->GetEntry() == 33061 || creature->GetEntry() == 33063)
+        creature->CastSpell(nullptr, 29266, TRIGGERED_OLD_TRIGGERED);
 }
 
 void instance_ulduar::OnObjectCreate(GameObject* pGo)
@@ -328,6 +332,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         // -----------------    Doors & Other   -----------------
         // The siege
         case GO_SHIELD_WALL:
+        case GO_PROTECTIVE_BUBBLE:
             break;
         case GO_LIGHTNING_DOOR:
             if (m_auiEncounter[TYPE_LEVIATHAN] == SPECIAL || m_auiEncounter[TYPE_LEVIATHAN] == FAIL)
@@ -335,7 +340,7 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
             break;
         case GO_LEVIATHAN_GATE:
             if (m_auiEncounter[TYPE_LEVIATHAN] != NOT_STARTED)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                pGo->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
             break;
         case GO_XT002_GATE:
             pGo->SetGoState(GO_STATE_READY);
@@ -512,26 +517,16 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         // Siege of Ulduar
         case TYPE_LEVIATHAN:
             m_auiEncounter[uiType] = uiData;
-            if (uiData != SPECIAL)
-                DoUseDoorOrButton(GO_SHIELD_WALL);
             if (uiData == IN_PROGRESS)
             {
                 // make sure that the Lightning door is closed when engaged in combat
-                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_LIGHTNING_DOOR))
-                {
-                    if (pDoor->GetGoState() != GO_STATE_READY)
-                        DoUseDoorOrButton(GO_LIGHTNING_DOOR);
-                }
-
+                DoUseOpenableObject(GO_LIGHTNING_DOOR, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHUTOUT, true);
             }
-            else if (uiData == DONE)
-            {
-                DoUseDoorOrButton(GO_XT002_GATE);
-                DoUseDoorOrButton(GO_LIGHTNING_DOOR);
-            }
             else if (uiData == FAIL)
+            {
                 DoCallLeviathanHelp();
+            }
             break;
         case TYPE_IGNIS:
             m_auiEncounter[uiType] = uiData;
@@ -1089,7 +1084,12 @@ bool instance_ulduar::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 u
                 break;
 
             // handle vehicle spell clicks - are available only after the gauntlet was started by gossip or when Leviathan is active
-            return GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL;
+            Creature* keeper = GetSingleCreatureFromStorage(NPC_LORE_KEEPER_NORGANNON);
+            bool isDead = true;
+            if (keeper)
+                if (keeper->IsAlive())
+                    isDead = false;
+            return (isDead || GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL || GetData(TYPE_LEVIATHAN) == IN_PROGRESS) && GetData(TYPE_LEVIATHAN) != DONE;
         }
     }
 
@@ -1606,15 +1606,14 @@ void instance_ulduar::JustDidDialogueStep(int32 iEntry)
                 float fSpeedRate = pLeviathan->GetSpeedRate(MOVE_RUN);
                 pLeviathan->SetWalk(false);
                 pLeviathan->SetSpeedRate(MOVE_RUN, 5);
-                pLeviathan->GetMotionMaster()->MovePoint(1, afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2]);
+                pLeviathan->GetMotionMaster()->MoveCharge(afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2], pLeviathan->GetSpeedRate(MOVE_RUN) * 10, EVENT_CHARGE);
                 pLeviathan->SetSpeedRate(MOVE_RUN, fSpeedRate);
 
                 // modify respawn / home position to the center of arena
                 pLeviathan->SetRespawnCoord(afLeviathanMovePos[0], afLeviathanMovePos[1], afLeviathanMovePos[2], afLeviathanMovePos[3]);
             }
-
             // Note: starting 4.x this gate is a GO 33 and it's destroyed at this point
-            DoUseDoorOrButton(GO_LEVIATHAN_GATE);
+            GetSingleGameObjectFromStorage(GO_LEVIATHAN_GATE)->SetGoState( GO_STATE_ACTIVE_ALTERNATIVE);
             break;
     }
 }
@@ -1712,6 +1711,26 @@ void instance_ulduar::Update(uint32 uiDiff)
     }
 }
 
+bool AreaTrigger_repair_station(Player* player, AreaTriggerEntry const* at)
+{
+    switch (at->id)
+    {
+        case AREATRIGGER_ID_REPAIR_1:
+        case AREATRIGGER_ID_REPAIR_2:
+        {
+            const Creature* vehicle = dynamic_cast<const Creature*>(player->FindRootVehicle());
+            Creature* vehiclePtr = const_cast<Creature*>(vehicle);
+            if (!vehiclePtr)
+                return false;
+            if (!vehiclePtr->HasAura(62705))
+                player->CastSpell(vehiclePtr, 62705, TRIGGERED_NONE);
+            return false;
+        }
+        default:
+            return false;
+    }
+}
+
 InstanceData* GetInstanceData_instance_ulduar(Map* pMap)
 {
     return new instance_ulduar(pMap);
@@ -1766,5 +1785,10 @@ void AddSC_instance_ulduar()
     pNewScript = new Script;
     pNewScript->Name = "event_ulduar";
     pNewScript->pProcessEventId = &ProcessEventId_event_ulduar;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_ulduar";
+    pNewScript->pAreaTrigger = &AreaTrigger_repair_station;
     pNewScript->RegisterSelf();
 }
