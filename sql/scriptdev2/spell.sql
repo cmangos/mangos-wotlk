@@ -973,6 +973,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (62717,'spell_slag_pot'),
 (63474,'spell_ignis_scorch'),
 (63482,'spell_lightning_whirl_heroic'),
+(63499,'spell_hodir_dispel_magic'),
 (63845,'spell_create_lance'),
 (64203,'spell_void_zone_xt'),
 (64209,'spell_consumption_xt'),
