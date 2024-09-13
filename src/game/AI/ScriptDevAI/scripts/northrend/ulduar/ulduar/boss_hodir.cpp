@@ -166,7 +166,6 @@ struct boss_hodirAI : public BossAI
     {
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
-        ResetTimersOnEvade();
 
         if (m_creature->IsAlive() && !m_eventFinished)
             m_creature->GetMotionMaster()->MoveTargetedHome();
@@ -246,8 +245,6 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
     {
         SetAIImmobilizedState(true);
         SetReactState(ReactStates::REACT_PASSIVE);
-
-        Reset();
     }
 
     instance_ulduar* m_instance;
