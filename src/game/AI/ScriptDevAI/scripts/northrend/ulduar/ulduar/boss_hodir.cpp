@@ -393,16 +393,20 @@ struct FlashFreeze : public AuraScript, public SpellScript
 
     void OnSuccessfulFinish(Spell* spell) const override
     {
-        CreatureList toastyFires;
-        GetCreatureListWithEntryInGrid(toastyFires, spell->GetCaster(), NPC_TOASTY_FIRE, 80.f);
-        if (toastyFires.empty())
+        const std::vector<Creature*>* tmpFires = spell->GetCaster()->GetMap()->GetCreatures("ULDUAR_HODIR_FIRES");
+
+        if (!tmpFires || tmpFires->empty())
             return;
-        for (Creature* fire : toastyFires)
+
+        for (Creature* fire : *tmpFires)
         {
-            GameObject* fireGob = GetClosestGameObjectWithEntry(fire, GO_TOASTY_FIRE, 1.f);
-            if (fireGob)
-                fireGob->ForcedDespawn();
-            fire->ForcedDespawn();
+            if (fire && fire->IsAlive())
+            {
+                GameObject* fireGob = GetClosestGameObjectWithEntry(fire, GO_TOASTY_FIRE, 1.f);
+                if (fireGob)
+                    fireGob->ForcedDespawn();
+                fire->ForcedDespawn();
+            }
         }
     }
 
