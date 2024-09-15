@@ -1574,7 +1574,6 @@ UPDATE creature_template SET ScriptName='npc_galen_goodward' WHERE entry=5391;
 UPDATE creature_template SET ScriptName='mob_aquementas' WHERE entry=9453;
 UPDATE creature_template SET ScriptName='npc_custodian_of_time' WHERE entry=20129;
 UPDATE creature_template SET ScriptName='npc_oox17tn' WHERE entry=7784;
-UPDATE creature_template SET ScriptName='npc_stone_watcher_of_norgannon' WHERE entry=7918;
 UPDATE creature_template SET ScriptName='npc_tooga' WHERE entry=5955;
 
 /* TELDRASSIL */
