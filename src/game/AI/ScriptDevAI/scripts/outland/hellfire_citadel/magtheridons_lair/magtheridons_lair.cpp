@@ -117,7 +117,6 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                 case DONE:
                     // Reset door on Fail or Done
                     DoUseOpenableObject(GO_DOODAD_HF_MAG_DOOR01, true);
-
                     SetData(TYPE_CHANNELER_EVENT, DONE);
                     break;
                 case IN_PROGRESS:
@@ -156,7 +155,6 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                         m_uiCageBreakTimer = MINUTE * IN_MILLISECONDS;
                     }
                 }
-
                 // combat door
                 DoUseOpenableObject(GO_DOODAD_HF_MAG_DOOR01, false);
             }
@@ -260,7 +258,6 @@ void instance_magtheridons_lair::Update(uint32 uiDiff)
             if (pMagtheridon->IsAlive())
             {
                 DoBroadcastText(aRandomTaunt[urand(0, 5)], pMagtheridon);
-                m_uiCageBreakTimer = MINUTE * IN_MILLISECONDS;
             }
         }
         m_uiRandYellTimer = 90000;
