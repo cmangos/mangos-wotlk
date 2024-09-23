@@ -337,6 +337,8 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         data << m_owner->GetPackGUID();
         pPlayer->GetSession()->SendPacket(data);
 
+        pPlayer->SetTarget(nullptr);
+
         pPlayer->SetImmobilizedState(true);
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)

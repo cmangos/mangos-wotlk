@@ -1337,7 +1337,7 @@ enum CreatureTypeFlags
     CREATURE_TYPEFLAGS_EXOTIC           = 0x00010000,       // Can be tamed by hunter as exotic pet
     CREATURE_TYPEFLAGS_UNK18            = 0x00020000,       // related to CreatureDisplayInfo and scaling in some way
     CREATURE_TYPEFLAGS_SIEGE_WEAPON     = 0x00040000,       // Related to vehicle/siege weapons
-    CREATURE_TYPEFLAGS_UNK20            = 0x00080000,       // may be has something to do with missiles
+    CREATURE_TYPEFLAGS_COLLIDE_WITH_MISSILES = 0x00080000,  // 
     CREATURE_TYPEFLAGS_UNK21            = 0x00100000,       // no idea, but it used by client, may be related to rendering
     CREATURE_TYPEFLAGS_UNK22            = 0x00200000,       // may be has something to do with animation (disable animation?)
     CREATURE_TYPEFLAGS_UNK23            = 0x00400000,       // this one probably controls some creature visual
