@@ -88,6 +88,8 @@ cmake_install.cmake
 # Special exceptions
 #
 
+src/modules
+
 # recastnavigation directory needs exception
 !dep/recastnavigation/RecastDemo/Build/
 /_build/
