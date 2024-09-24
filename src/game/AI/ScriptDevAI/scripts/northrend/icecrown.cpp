@@ -1242,6 +1242,18 @@ struct InfraGreenShield : public AuraScript
     }
 };
 
+// 56578 - Rapid-Fire Harpoon
+struct RapidFireHarpoon : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        spell->SetDamage(spell->GetUnitTarget()->GetMaxHealth() * spell->GetDamage() / 100); // percentage of effect
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1292,4 +1304,5 @@ void AddSC_icecrown()
     RegisterSpellScript<FireSGM3>("spell_fire_sgm3");
     RegisterSpellScript<Burning>("spell_burning");
     RegisterSpellScript<InfraGreenShield>("spell_infragreenshield");
+    RegisterSpellScript<RapidFireHarpoon>("spell_rapid_fire_harpoon");
 }

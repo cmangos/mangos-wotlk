@@ -888,6 +888,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (56265,'spell_vortex_aura'),
 (56266,'spell_vortex_aura'),
 (56430,'spell_arcane_bomb'),
+(56578,'spell_rapid_fire_harpoon'),
 (56683,'spell_grab_captured_crusader'),
 (56684,'spell_drop_off_captured_crusader'),
 (56839,'spell_to_icecrown_air_ship_a_summon_vehicle'),
