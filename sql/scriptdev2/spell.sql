@@ -636,6 +636,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (16836,'spell_brambles'),
 (16839,'spell_brambles'),
 (16840,'spell_brambles'),
+(25730,'spell_find_the_ancient_hero'),
 (27892,'spell_to_anchor_one'),
 (27893,'spell_to_anchor_two'),
 (27896,'spell_choose_random_skull_pile'),
