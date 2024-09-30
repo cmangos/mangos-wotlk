@@ -1254,6 +1254,15 @@ struct RapidFireHarpoon : public SpellScript
     }
 };
 
+// 25730 - Find the Ancient Hero: The Bone Witch's Amulet Effect
+struct FindtheAncientHero : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->GetMotionMaster()->MoveFollow(spell->GetCaster(), PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1305,4 +1314,5 @@ void AddSC_icecrown()
     RegisterSpellScript<Burning>("spell_burning");
     RegisterSpellScript<InfraGreenShield>("spell_infragreenshield");
     RegisterSpellScript<RapidFireHarpoon>("spell_rapid_fire_harpoon");
+    RegisterSpellScript<FindtheAncientHero>("spell_find_the_ancient_hero");
 }
