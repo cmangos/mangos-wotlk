@@ -239,11 +239,6 @@ enum
     SAY_BLESS_4                         = -1000597,
     SAY_BLESS_5                         = -1000598,
 
-    // quest 12813, by item 40587
-    SPELL_DARKMENDER_TINCTURE           = 52741,
-    SPELL_SUMMON_CORRUPTED_SCARLET      = 54415,
-    NPC_CORPSES_RISE_CREDIT_BUNNY       = 29398,
-
     // quest 12659, item 38731
     SPELL_AHUNAES_KNIFE                 = 52090,
     NPC_SCALPS_KILL_CREDIT_BUNNY        = 28622,
@@ -503,24 +498,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 // possible needs check for quest state, to not have any effect when quest really complete
 
                 pCreatureTarget->UpdateEntry(NPC_DREADTUSK);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_DARKMENDER_TINCTURE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() != TYPEID_PLAYER)
-                    return true;
-
-                // TODO: find/fix visual for effect, no related spells found doing this
-
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUMMON_CORRUPTED_SCARLET, TRIGGERED_OLD_TRIGGERED);
-
-                ((Player*)pCaster)->KilledMonsterCredit(NPC_CORPSES_RISE_CREDIT_BUNNY);
-
-                pCreatureTarget->ForcedDespawn();
                 return true;
             }
             return true;
