@@ -3020,6 +3020,12 @@ void Creature::SetCanDualWield(bool state)
     UpdateDamagePhysical(OFF_ATTACK);
 }
 
+bool Creature::CanDaze() const
+{
+    // Generally, only npcs are able to daze targets in melee
+    return (!IsPlayerControlled() && !GetSettings().HasFlag(CreatureStaticFlags4::CANNOT_DAZE));
+}
+
 bool Creature::CanRestockPickpocketLoot() const
 {
     return GetMap()->GetCurrentClockTime() >= m_pickpocketRestockTime;
