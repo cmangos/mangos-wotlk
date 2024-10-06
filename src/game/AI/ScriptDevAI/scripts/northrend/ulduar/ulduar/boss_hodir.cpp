@@ -21,7 +21,6 @@ SDComment: Achievements NYI.
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
@@ -118,7 +117,6 @@ struct boss_hodirAI : public BossAI
     boss_hodirAI(Creature* creature) : BossAI(creature, HODIR_ACTIONS_MAX),
         m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
-
     {
         SetDataType(TYPE_HODIR);
         AddOnAggroText(SAY_AGGRO);
@@ -236,25 +234,29 @@ struct boss_hodirAI : public BossAI
 ## npc_flash_freeze
 ######*/
 
-struct npc_flash_freezeAI : public Scripted_NoMovementAI
+struct npc_flash_freezeAI : public ScriptedAI
 {
-    npc_flash_freezeAI(Creature* creature) : Scripted_NoMovementAI(creature),
+    npc_flash_freezeAI(Creature* creature) : ScriptedAI(creature),
         m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
-        m_summoner(m_creature->GetSpawnerGuid()),
         m_freezeInit(false)
     {
         SetAIImmobilizedState(true);
         SetReactState(ReactStates::REACT_PASSIVE);
     }
 
+    void Reset() override
+    {
+        ScriptedAI::Reset();
+        SetCombatMovement(false);
+    }
+
     instance_ulduar* m_instance;
 
-    ObjectGuid m_summoner;
     bool m_freezeInit;
 
     inline Unit* GetSummoner() const
     {
-        return m_creature->GetMap()->GetUnit(m_summoner);
+        return m_creature->GetSpawner();
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -324,11 +326,12 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
 ## npc_snowpack_target
 ######*/
 
-struct npc_snowpack_targetAI : public Scripted_NoMovementAI
+struct npc_snowpack_targetAI : public ScriptedAI
 {
-    npc_snowpack_targetAI(Creature* creature) : Scripted_NoMovementAI(creature)
+    npc_snowpack_targetAI(Creature* creature) : ScriptedAI(creature)
     {
         SetAIImmobilizedState(true);
+        SetCombatMovement(false);
     }
 
     void JustRespawned() override
@@ -375,7 +378,7 @@ bool ProcessEventId_event_boss_hodir(uint32 eventId, Object* source, Object* /*t
     return false;
 }
 
-// 61968 Flash Freeze
+// 61968 - Flash Freeze
 struct FlashFreeze : public AuraScript, public SpellScript
 {
     void OnSuccessfulStart(Spell* spell) const override
@@ -423,7 +426,7 @@ struct FlashFreeze : public AuraScript, public SpellScript
     }
 };
 
-// 65272 Shatter Chest
+// 65272 - Shatter Chest
 struct ShatterChest : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -435,7 +438,7 @@ struct ShatterChest : public AuraScript
     }
 };
 
-// 62038 Biting Cold
+// 62038 - Biting Cold
 struct BitingCold : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -451,7 +454,7 @@ struct BitingCold : public AuraScript
     }
 };
 
-// 62039 Biting Cold
+// 62039 - Biting Cold
 struct BitingColdDamage : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -464,7 +467,7 @@ struct BitingColdDamage : public AuraScript
     }
 };
 
-// 62457 Ice Shards
+// 62457 - Ice Shards
 
 struct IceShards : public SpellScript
 {
