@@ -2779,6 +2779,8 @@ void Creature::InspectingLoot()
 {
     // until multiple corpse for creature is not supported
     // this will not have effect after re spawn delay (corpse will be removed anyway)
+    if (m_settings.HasFlag(CreatureStaticFlags3::FOREVER_CORPSE_DURATION))
+        return;
 
     // check if player have enough time to inspect loot
     if (m_corpseExpirationTime < GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_corpseAccelerationDecayDelay))
@@ -2789,6 +2791,9 @@ void Creature::InspectingLoot()
 void Creature::ReduceCorpseDecayTimer()
 {
     if (!IsInWorld())
+        return;
+
+    if (m_settings.HasFlag(CreatureStaticFlags3::FOREVER_CORPSE_DURATION))
         return;
 
     if (m_corpseExpirationTime > GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(m_corpseAccelerationDecayDelay))
