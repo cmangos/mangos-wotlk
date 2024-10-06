@@ -2935,6 +2935,20 @@ void Creature::SetIgnoreFeignDeath(bool state)
         m_settings.RemoveFlag(CreatureStaticFlags2::IGNORE_FEIGN_DEATH);
 }
 
+bool Creature::IsIgnoringSanctuary() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::IGNORE_SANCTUARY);
+}
+
+void Creature::SetIgnoreSanctuary(bool state)
+{
+    if (state)
+        m_settings.SetFlag(CreatureStaticFlags2::IGNORE_SANCTUARY);
+    else
+        m_settings.RemoveFlag(CreatureStaticFlags2::IGNORE_SANCTUARY);
+}
+
+
 void Creature::SetNoWoundedSlowdown(bool state)
 {
     if (state)
