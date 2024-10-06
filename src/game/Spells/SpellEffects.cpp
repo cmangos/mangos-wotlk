@@ -11733,6 +11733,9 @@ void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
             break;
     }
 
+    if (unitTarget->hasUnitState(UNIT_STAT_ROOT))
+        return;
+
     unitTarget->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
 }
 
