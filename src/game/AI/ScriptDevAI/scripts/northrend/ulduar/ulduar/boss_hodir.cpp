@@ -165,11 +165,6 @@ struct boss_hodirAI : public BossAI
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
 
-        if (m_creature->IsAlive() && !m_eventFinished)
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-
-        m_creature->SetLootRecipient(nullptr);
-
         const std::vector<Creature*>* tmpHelpers = m_creature->GetMap()->GetCreatures("ULDUAR_HODIR_HELPERS");
 
         if (!tmpHelpers || tmpHelpers->empty())
@@ -180,6 +175,9 @@ struct boss_hodirAI : public BossAI
             if (!m_eventFinished && helper && helper->IsAlive())
                 helper->Suicide();
         }
+
+        if (m_creature->IsAlive() && !m_eventFinished)
+            m_creature->ForcedDespawn(30s);
     }
 
     void KilledUnit(Unit* victim) override
