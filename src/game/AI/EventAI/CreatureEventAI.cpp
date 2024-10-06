@@ -1425,7 +1425,7 @@ void CreatureEventAI::JustRespawned()                       // NOTE that this is
     if (m_creature->GetSettings().HasFlag(CreatureStaticFlags2::SPAWN_DEFENSIVE))
         SetReactState(REACT_DEFENSIVE);
     else if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::IGNORE_COMBAT))
-        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
     m_EventUpdateTime = EVENT_UPDATE_TIME;
     m_EventDiff = 0;
     m_throwAIEventStep = 0;

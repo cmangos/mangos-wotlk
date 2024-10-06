@@ -44,7 +44,7 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
     if (m_creature->GetSettings().HasFlag(CreatureStaticFlags2::SPAWN_DEFENSIVE))
         SetReactState(REACT_DEFENSIVE);
     else if (m_creature->GetSettings().HasFlag(CreatureStaticFlags::IGNORE_COMBAT))
-        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
     if (m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
         m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
 }
