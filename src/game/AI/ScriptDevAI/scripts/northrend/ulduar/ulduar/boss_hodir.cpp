@@ -177,7 +177,10 @@ struct boss_hodirAI : public BossAI
         }
 
         if (m_creature->IsAlive() && !m_eventFinished)
-            m_creature->ForcedDespawn(30s);
+        {
+            m_creature->SetRespawnDelay(30s, true);
+            m_creature->ForcedDespawn();
+        }
     }
 
     void KilledUnit(Unit* victim) override
