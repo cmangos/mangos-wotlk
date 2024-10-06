@@ -182,6 +182,13 @@ struct boss_hodirAI : public BossAI
         }
     }
 
+    void KilledUnit(Unit* victim) override
+    {
+        BossAI::KilledUnit(victim);
+        if (!m_instance->GetPlayerInMap(true, false))
+            EnterEvadeMode();
+    }
+
     void JustPreventedDeath(Unit* attacker) override
     {
         // Inform the faction helpers that the fight is over
@@ -417,9 +424,9 @@ struct FlashFreeze : public AuraScript, public SpellScript
             return;
         if (aura->GetAuraTicks() == 1 && !target->HasAura(SPELL_AURA_SAFE_AREA))
         {
-            if (target->IsCreature() && (target->HasAura(SPELL_FLASH_FREEZE_AURA) || target->HasAura(SPELL_FLASH_FREEZE_AURA_NPC)))
+            if (target->IsCreature() && target->HasAura(SPELL_FLASH_FREEZE_AURA_NPC))
                 return;
-            else
+            else if (!target->HasAura(SPELL_FLASH_FREEZE_AURA))
                 target->CastSpell(nullptr, SPELL_FLASH_FREEZE_SUMMON, TRIGGERED_INSTANT_CAST |
                     TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_IGNORE_CASTER_AURA_STATE | TRIGGERED_IGNORE_GCD, nullptr, aura);
         }
