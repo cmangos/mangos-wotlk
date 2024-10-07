@@ -88,7 +88,7 @@ jobs:
         mkdir build
         mkdir run
         pushd build
-        cmake ../mangos-wotlk -DCMAKE_INSTALL_PREFIX=../run -DDEBUG=0 -DBUILD_METRICS=ON -DBUILD_GIT_ID=OFF -DBUILD_DOCS=OFF -DBUILD_SCRIPTDEV=ON -DBUILD_AHBOT=ON -DBUILD_DEPRECATED_PLAYERBOT=ON -DBUILD_EXTRACTORS=ON
+        cmake ../ -DCMAKE_INSTALL_PREFIX=../run -DDEBUG=0 -DBUILD_METRICS=ON -DBUILD_GIT_ID=OFF -DBUILD_DOCS=OFF -DBUILD_SCRIPTDEV=ON -DBUILD_AHBOT=ON -DBUILD_DEPRECATED_PLAYERBOT=ON -DBUILD_EXTRACTORS=ON
         make -j $(( $( grep "MHz" /proc/cpuinfo  | wc -l) - 1 ))
         popd
     - name: Perform CodeQL Analysis
