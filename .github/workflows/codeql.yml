@@ -14,11 +14,18 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-  schedule:
-    - cron: '38 13 * * 3'
-
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: Release
+  REPO_DIR : ${{github.workspace}}
+  BUILD_DIR: ${{github.workspace}}/bin/builddir
+  BOOST_VERSION: "1.83.0"
+  BOOST_PLATFORM_VERSION: "22.04"
+  COMPILER_CC: clang
+  COMPILER_PP: clang++
+  USE_PCH: ON
+  EXTRA_BUILD: "-DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_SCRIPTDEV=ON -DBUILD_METRICS=ON -DBUILD_DEPRECATED_PLAYERBOT=ON "
+  
 jobs:
   analyze:
     name: Analyze (${{ matrix.language }})
@@ -47,10 +54,7 @@ jobs:
           build-mode: manual
         - language: go
           build-mode: autobuild
-        - language: javascript-typescript
-          build-mode: none
-        - language: python
-          build-mode: none
+          
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -59,9 +63,36 @@ jobs:
         # see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/customizing-your-advanced-setup-for-code-scanning.
         # If you are analyzing a compiled language, you can modify the 'build-mode' for that language to customize how
         # your codebase is analyzed, see https://docs.github.com/en/code-security/code-scanning/creating-an-advanced-setup-for-code-scanning/codeql-code-scanning-for-compiled-languages
+   
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+      
+    - name: Create Build Environment
+      run: |
+        echo "GITHUB_SHORT_REV=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        echo "ARCHIVE_FILENAME=${{ github.event.repository.name }}-$(git rev-parse --short HEAD).zip" >> $GITHUB_ENV
+        echo "CC=${{matrix.COMPILER_CC}}" >> $GITHUB_ENV
+        echo "CXX=${{matrix.COMPILER_PP}}" >> $GITHUB_ENV
+        cmake -E make_directory ${{ env.BUILD_DIR }}
+  
+    
+    - name: Install Boost
+      uses: MarkusJx/install-boost@v2.4.5
+      id: install-boost
+      with:
+        # REQUIRED: Specify the required boost version
+        # A list of supported versions can be found here:
+        # https://github.com/MarkusJx/prebuilt-boost/blob/main/versions-manifest.json
+        boost_version: ${{env.BOOST_VERSION}}
+        # OPTIONAL: Specify a platform version
+        platform_version: ${{env.BOOST_PLATFORM_VERSION}}
+        # OPTIONAL: Specify a toolset
+        toolset: ${{env.COMPILER_CC}}
+        # OPTIONAL: Specify an architecture
+        arch: x86
+        # NOTE: If a boost version matching all requirements cannot be found,          
+        # this build step will fail
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -75,6 +106,13 @@ jobs:
 
         # For more details on CodeQL's query packs, refer to: https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
+    
+    - name: Configure
+      env:
+        USE_PCH: ${{ matrix.USE_PCH }}
+        EXTRA_BUILD: ${{ matrix.EXTRA_BUILD }}
+        BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
+      
 
     # If the analyze step fails for one of the languages you are analyzing with
     # "We were unable to automatically build your code", modify the matrix above
@@ -84,14 +122,15 @@ jobs:
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - if: matrix.build-mode == 'manual'
       shell: bash
+      run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+    - name: Build
+      env:
+        MAKEFLAGS: "-j8"
       run: |
-        mkdir build
-        mkdir run
-        pushd build
-        find / -iname libboost*.so -o -iname libgoost*.a
-        cmake ../ -DCMAKE_INSTALL_PREFIX=../run -DDEBUG=0 -DBUILD_METRICS=ON -DBUILD_GIT_ID=OFF -DBUILD_DOCS=OFF -DBUILD_SCRIPTDEV=ON -DBUILD_AHBOT=ON -DBUILD_DEPRECATED_PLAYERBOT=ON -DBUILD_EXTRACTORS=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
-        make -j $(( $( grep "MHz" /proc/cpuinfo  | wc -l) - 1 ))
-        popd
+        cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+        cmake --install ${{env.BUILD_DIR}}
+
+        
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
       with:
