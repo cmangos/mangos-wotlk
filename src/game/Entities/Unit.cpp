@@ -3267,12 +3267,6 @@ bool Unit::CanGlance() const
     return false;
 }
 
-bool Unit::CanDaze() const
-{
-    // Generally, only npcs are able to daze targets in melee
-    return (GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
-}
-
 void Unit::SetCanDodge(const bool flag)
 {
     if (m_canDodge == flag)

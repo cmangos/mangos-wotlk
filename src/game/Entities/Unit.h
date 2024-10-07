@@ -1591,7 +1591,7 @@ class Unit : public WorldObject
         // Unit Melee events API: Crush/Glance/Daze
         bool CanCrush() const;
         bool CanGlance() const;
-        bool CanDaze() const;
+        virtual bool CanDaze() const { return false; };
 
         void SetCanDodge(const bool flag);
         void SetCanParry(const bool flag);
