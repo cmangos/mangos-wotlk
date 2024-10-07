@@ -116,7 +116,9 @@ struct boss_hodirAI : public BossAI
 {
     boss_hodirAI(Creature* creature) : BossAI(creature, HODIR_ACTIONS_MAX),
         m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_eventFinished(false),
+        m_epilogueStage(0)
     {
         SetDataType(TYPE_HODIR);
         AddOnAggroText(SAY_AGGRO);
@@ -144,8 +146,13 @@ struct boss_hodirAI : public BossAI
             ++m_epilogueStage;
         });
         SetDeathPrevention(true);
-        m_eventFinished = false;
-        m_epilogueStage = 0;
+        if (m_instance)
+        {
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
+            {
+                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
+            });
+        }
     }
 
     instance_ulduar* m_instance;
@@ -181,13 +188,6 @@ struct boss_hodirAI : public BossAI
             m_creature->SetRespawnDelay(30s, true);
             m_creature->ForcedDespawn();
         }
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        BossAI::KilledUnit(victim);
-        if (!m_instance->GetPlayerInMap(true, false))
-            EnterEvadeMode();
     }
 
     void JustPreventedDeath(Unit* attacker) override
