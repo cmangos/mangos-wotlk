@@ -2464,6 +2464,8 @@ class Unit : public WorldObject
         virtual bool IsIgnoringFeignDeath() const { return false; }
         virtual bool IsIgnoringSanctuary() const { return false; }
 
+        virtual bool IsIgnoringMisdirect() const { return false; }
+
         virtual bool IsSlowedInCombat() const { return false; }
 
         void InterruptSpellsCastedOnMe(bool killDelayed = false);

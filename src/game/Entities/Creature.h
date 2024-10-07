@@ -860,6 +860,9 @@ class Creature : public Unit
         void SetNoWeaponSkillGain(bool state);
         bool IsNoWeaponSkillGain() const override;
 
+        bool IsIgnoringMisdirect() const override;
+        void SetIgnoreMisdirect(bool state);
+
         bool IsPreventingDeath() const override;
 
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0, bool ignoreCat = false) override;
