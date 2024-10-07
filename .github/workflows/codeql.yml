@@ -88,7 +88,8 @@ jobs:
         mkdir build
         mkdir run
         pushd build
-        cmake ../ -DCMAKE_INSTALL_PREFIX=../run -DDEBUG=0 -DBUILD_METRICS=ON -DBUILD_GIT_ID=OFF -DBUILD_DOCS=OFF -DBUILD_SCRIPTDEV=ON -DBUILD_AHBOT=ON -DBUILD_DEPRECATED_PLAYERBOT=ON -DBUILD_EXTRACTORS=ON
+        find / -iname libboost*.so -o -iname libgoost*.a
+        cmake ../ -DCMAKE_INSTALL_PREFIX=../run -DDEBUG=0 -DBUILD_METRICS=ON -DBUILD_GIT_ID=OFF -DBUILD_DOCS=OFF -DBUILD_SCRIPTDEV=ON -DBUILD_AHBOT=ON -DBUILD_DEPRECATED_PLAYERBOT=ON -DBUILD_EXTRACTORS=ON -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
         make -j $(( $( grep "MHz" /proc/cpuinfo  | wc -l) - 1 ))
         popd
     - name: Perform CodeQL Analysis
