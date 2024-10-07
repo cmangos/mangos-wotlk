@@ -52,8 +52,8 @@ jobs:
         include:
         - language: c-cpp
           build-mode: manual
-        - language: go
-          build-mode: autobuild
+        #- language: go
+        #  build-mode: autobuild
           
         # CodeQL supports the following values keywords for 'language': 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
@@ -112,7 +112,7 @@ jobs:
         USE_PCH: ${{ matrix.USE_PCH }}
         EXTRA_BUILD: ${{ matrix.EXTRA_BUILD }}
         BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
-      
+      run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}} 
 
     # If the analyze step fails for one of the languages you are analyzing with
     # "We were unable to automatically build your code", modify the matrix above
@@ -120,12 +120,13 @@ jobs:
     # to build your code.
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-    - if: matrix.build-mode == 'manual'
-      shell: bash
-      run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
+    
+    
+
     - name: Build
       env:
         MAKEFLAGS: "-j8"
+    
       run: |
         cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
         cmake --install ${{env.BUILD_DIR}}
