@@ -21,10 +21,7 @@ env:
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_VERSION: "1.83.0"
   BOOST_PLATFORM_VERSION: "22.04"
-  COMPILER_CC: clang
-  COMPILER_PP: clang++
-  USE_PCH: ON
-  EXTRA_BUILD: "-DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_SCRIPTDEV=ON -DBUILD_METRICS=ON -DBUILD_DEPRECATED_PLAYERBOT=ON "
+
   
 jobs:
   analyze:
@@ -52,6 +49,10 @@ jobs:
         include:
         - language: c-cpp
           build-mode: manual
+          COMPILER_CC: clang
+          COMPILER_PP: clang++
+          USE_PCH: ON
+          EXTRA_BUILD: "-DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_SCRIPTDEV=ON -DBUILD_METRICS=ON -DBUILD_DEPRECATED_PLAYERBOT=ON "
         #- language: go
         #  build-mode: autobuild
           
