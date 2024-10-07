@@ -371,6 +371,7 @@ enum
     EVENT_ID_TOWER_FLAME        = 21033,
     EVENT_ID_TOWER_FROST        = 21032,
     EVENT_ID_TOWER_STORMS       = 21031,
+    EVENT_ID_FLASH_FREEZE       = 20896,
 
     // EVENT_ID_TRAM_MIMIRON    = 21393,                    // tram reached Mimiron
     // EVENT_ID_TRAM_CENTER     = 21394,                    // tram reached Center

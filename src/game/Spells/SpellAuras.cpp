@@ -8926,12 +8926,6 @@ void Aura::PeriodicDummyTick()
                         case 2: target->CastSpell(target, 55739, TRIGGERED_OLD_TRIGGERED); break;
                     }
                     return;
-                case 61968:                                 // Flash Freeze
-                {
-                    if (GetAuraTicks() == 1 && !target->HasAura(62464))
-                        target->CastSpell(target, 61970, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    return;
-                }
                 case 62018:                                 // Collapse
                 {
                     // lose 1% of health every second
@@ -8941,24 +8935,6 @@ void Aura::PeriodicDummyTick()
                 case 62019:                                 // Rune of Summoning
                 {
                     target->CastSpell(target, 62020, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    return;
-                }
-                case 62038:                                 // Biting Cold
-                {
-                    if (target->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // if player is moving remove one aura stack
-                    if (target->IsMoving())
-                        target->RemoveAuraHolderFromStack(62039);
-                    // otherwise add one aura stack each 3 seconds
-                    else if (GetAuraTicks() % 3 && !target->HasAura(62821))
-                        target->CastSpell(target, 62039, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    return;
-                }
-                case 62039:                                 // Biting Cold
-                {
-                    target->CastSpell(target, 62188, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 62566:                                 // Healthy Spore Summon Periodic
@@ -9026,11 +9002,6 @@ void Aura::PeriodicDummyTick()
                             }
                         }
                     }
-                    return;
-                }
-                case 65272:                                 // Shatter Chest
-                {
-                    target->CastSpell(target, 62501, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                     return;
                 }
                 case 66798:                                 // Death's Respite

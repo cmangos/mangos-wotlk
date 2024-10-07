@@ -3469,13 +3469,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 63499:                                 // Dispel Magic
-                {
-                    if (unitTarget)
-                        unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
-
-                    return;
-                }
                 case 63545:                                 // Icicle
                 {
                     if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
