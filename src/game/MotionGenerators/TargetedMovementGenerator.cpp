@@ -141,6 +141,7 @@ void ChaseMovementGenerator::Initialize(Unit& owner)
     _setLocation(owner);
     i_target->GetPosition(i_lastTargetPos.x, i_lastTargetPos.y, i_lastTargetPos.z);
     m_fanningEnabled = !(owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).IsWorldBoss());
+    m_backpedalEnabled = !(owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).GetSettings().HasFlag(CreatureStaticFlags4::DONT_REPOSITION_IF_MELEE_TARGET_IS_TOO_CLOSE));
 }
 
 void ChaseMovementGenerator::Finalize(Unit& owner)
@@ -394,7 +395,7 @@ void ChaseMovementGenerator::Backpedal(Unit& owner)
     if (!owner.AI() || owner.AI()->GetCombatScriptStatus())
         return;
 
-    if (owner.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(owner).GetSettings().HasFlag(CreatureStaticFlags4::DONT_REPOSITION_IF_MELEE_TARGET_IS_TOO_CLOSE))
+    if (!m_backpedalEnabled)
         return;
 
     m_closenessExpired = false;
