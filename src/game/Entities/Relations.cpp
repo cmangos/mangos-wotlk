@@ -338,7 +338,7 @@ bool Unit::IsFriend(const Unit* unit) const
     // WotLK+: Special flag overrides reaction
     if (GetTypeId() == TYPEID_UNIT)
     {
-        if (static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID)
+        if (static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::TREAT_AS_IN_RAID)
             return true;
     }
     return (GetReactionTo(unit) > REP_NEUTRAL);
@@ -367,7 +367,7 @@ bool Unit::CanAttack(const Unit* unit) const
     // Creatures cannot attack player ghosts, unless it is a specially flagged ghost creature
     if (GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(unit)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_GHOST_VISIBLE))
+        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::GHOST_VISIBLE))
             return false;
     }
 
@@ -478,7 +478,7 @@ bool Unit::CanAttackNow(const Unit* unit) const
     if (IsMounted())
     {
         // ... unless we are a creature with a special flag
-        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT))
+        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::MOUNTED_COMBAT))
             return false;
     }
 
@@ -524,7 +524,7 @@ bool Unit::CanAssist(const Unit* unit, bool ignoreFlags) const
     if (GetReactionTo(unit) < REP_FRIENDLY)
     {
         // ... unless we are a creature with a special flag
-        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID))
+        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::TREAT_AS_IN_RAID))
             return false;
     }
 
@@ -568,10 +568,10 @@ bool Unit::CanAssist(const Unit* unit, bool ignoreFlags) const
     {
         if (const uint32 flags = static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags)
         {
-            if (flags & CREATURE_TYPEFLAGS_CAN_ASSIST)
+            if (flags & CreatureTypeFlags::CAN_ASSIST)
                 return true;
 
-            if (flags & CREATURE_TYPEFLAGS_TREAT_AS_IN_RAID)
+            if (flags & CreatureTypeFlags::TREAT_AS_IN_RAID)
                 return true;
         }
     }
@@ -668,14 +668,14 @@ bool Unit::CanInteract(const Unit* unit) const
     // We can't interact with anyone as a ghost except specially flagged NPCs
     if (GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(this)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        if (unit->GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_GHOST_VISIBLE))
+        if (unit->GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::GHOST_VISIBLE))
             return false;
     }
 
     // WotLK+: personal squire support
     if (GetTypeId() == TYPEID_PLAYER && unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP) && unit->GetTypeId() == TYPEID_UNIT)
     {
-        if ((static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_SQUIRE) && unit->GetOwnerGuid() != GetObjectGuid())
+        if ((static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::SQUIRE) && unit->GetOwnerGuid() != GetObjectGuid())
             return false;
     }
 
@@ -724,7 +724,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
     // We can't interact with dead units, unless it's a creature with special flag
     if (!unit->IsAlive())
     {
-        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_INTERACT_DEAD))
+        if (GetTypeId() != TYPEID_UNIT || !(static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::INTERACT_DEAD))
             return false;
     }
 
@@ -739,7 +739,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
         bool interactable = false;
 
         // We can interact with siege weapons in fight
-        if (!interactable && unit->GetTypeId() == TYPEID_UNIT && (static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_SIEGE_WEAPON))
+        if (!interactable && unit->GetTypeId() == TYPEID_UNIT && (static_cast<const Creature*>(unit)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::SIEGE_WEAPON))
             interactable = true;
 
         // We can interact with UNIT_FLAG2_INTERACT_ANY_REACTION flagged units even in fight
@@ -1368,7 +1368,7 @@ bool Unit::CanAttackServerside(const Unit* unit, bool ignoreFlagsSource, bool ig
     // Creatures cannot attack player ghosts, unless it is a specially flagged ghost creature
     if (GetTypeId() == TYPEID_UNIT && unit->GetTypeId() == TYPEID_PLAYER && static_cast<const Player*>(unit)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
     {
-        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_GHOST_VISIBLE))
+        if (!(static_cast<const Creature*>(this)->GetCreatureInfo()->CreatureTypeFlags & CreatureTypeFlags::GHOST_VISIBLE))
             return false;
     }
 
