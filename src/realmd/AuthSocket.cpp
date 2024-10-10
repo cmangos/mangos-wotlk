@@ -487,9 +487,17 @@ bool AuthSocket::_HandleLogonChallenge()
                             pkt->append(s.AsByteArray());// 32 bytes
                             pkt->append(VersionChallenge.data(), VersionChallenge.size());
                             uint8 securityFlags = 0;
+                            
+                            // Determine if there is a forced token requirement
+                            const uint8 secLevel = fields[3].GetUInt8();
+                            const int requireTokensForGMLevel = sConfig.GetIntDefault("RequireTokensFor", -1);
+                            const bool tokenOverride = secLevel >= requireTokensForGMLevel;
+                            if ( tokenOverride )
+                                DEBUG_LOG("[Auth] Overriding token requirements for %s with gmlevel %u",self->_login.c_str(),secLevel);
 
                             self->_token = fields[6].GetCppString();
-                            if (!self->_token.empty() && self->_build >= 8606) // authenticator was added in 2.4.3
+
+                            if (( !self->_token.empty() || tokenOverride) && self->_build >= 8606) // authenticator was added in 2.4.3
                                 securityFlags = SECURITY_FLAG_AUTHENTICATOR;
 
                             *pkt << uint8(securityFlags);                    // security flags (0x0...0x04)
@@ -513,7 +521,6 @@ bool AuthSocket::_HandleLogonChallenge()
                             if (securityFlags & SECURITY_FLAG_AUTHENTICATOR)    // Authenticator input
                                 *pkt << uint8(1);
 
-                            uint8 secLevel = fields[3].GetUInt8();
                             self->_accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
                             ///- All good, await client's proof
