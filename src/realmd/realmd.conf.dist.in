@@ -111,6 +111,17 @@ ConfVersion=2021031501
 #        Default:     0 - (Disabled)
 #                     1 - (Enabled)
 #
+#    RequireTokensFor
+#        Description: Require ToTP (Authenticators) for accounts this level and higher. 
+#           wotlkrealmd.account.token should be set to at least a 20 character, recommend 40 character, long 
+#           randomly generatedkey string containing only uppercase and numbers. 
+#           QR code string: otpauth://totp/{LABEL}?secret={GENERATEDKEY}
+#        Default:    -1 - (Disabled)
+#                     0 - (Players)
+#                     1 - (Moderators)
+#                     2 - (GameMasters)
+#                     3 - (Administrators)
+#
 #    WrongPass.MaxCount
 #        Number of login attemps with wrong password before the account or IP is banned
 #        Default: 0  (Never ban)
@@ -144,6 +155,7 @@ ProcessPriority = 1
 WaitAtStartupError = 0
 RealmsStateUpdateDelay = 20
 StrictVersionCheck = 0
+RequireTokensFor = -1
 WrongPass.MaxCount = 0
 WrongPass.BanTime = 600
 WrongPass.BanType = 0
