@@ -491,7 +491,7 @@ bool AuthSocket::_HandleLogonChallenge()
                             // Determine if there is a forced token requirement
                             const uint8 secLevel = fields[3].GetUInt8();
                             const int requireTokensForGMLevel = sConfig.GetIntDefault("RequireTokensFor", -1);
-                            const bool tokenOverride = secLevel >= requireTokensForGMLevel;
+                            const bool tokenOverride = requireTokensForGMLevel >= 0 && secLevel >= requireTokensForGMLevel;
                             if ( tokenOverride )
                                 DEBUG_LOG("[Auth] Overriding token requirements for %s with gmlevel %u",self->_login.c_str(),secLevel);
 
