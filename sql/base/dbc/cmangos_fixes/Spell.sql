@@ -3604,6 +3604,9 @@ UPDATE spell_template SET Speed=0 WHERE Id IN(44333);
 -- Torch 58121
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 58121;
 
+-- Safirdrang's Chill - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 4020;
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
