@@ -379,6 +379,14 @@ enum WorldStateID : int32
     WORLD_STATE_SETHEKK_GROUP_20    = 5560005,              // 2 Possible group versions
     WORLD_STATE_SETHEKK_GROUP_21    = 5560006,              // 2 Possible group versions
 
+    // Mana Tombs
+    WORLD_STATE_MANA_TOMBS_GROUP_18 = 5570001,              // 2 Possible group versions
+    WORLD_STATE_MANA_TOMBS_GROUP_20 = 5570002,              // 2 Possible group versions
+    WORLD_STATE_MANA_TOMBS_GROUP_27 = 5570003,              // 2 Possible group versions
+    WORLD_STATE_MANA_TOMBS_GROUP_32 = 5570004,              // 2 Possible group versions
+    WORLD_STATE_MANA_TOMBS_GROUP_34 = 5570005,              // 2 Possible group versions
+    WORLD_STATE_MANA_TOMBS_GROUP_35 = 5570006,              // 2 Possible group versions
+
     // Wotlk
     WORLD_STATE_CUSTOM_HEADLESS_HORSEMAN_DUNGEON    = 20000,
     WORLD_STATE_CUSTOM_AHUNE_DUNGEON                = 20001,
