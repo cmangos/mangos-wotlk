@@ -1480,6 +1480,7 @@ UPDATE gameobject_template SET ScriptName='go_quest_still_at_it_credit' WHERE en
 UPDATE creature_template SET ScriptName='npc_solenor' WHERE entry IN (14530,14536);
 
 /* SILVERMOON */
+UPDATE creature_template SET ScriptName='npc_event_generator_001' WHERE entry IN (2334);
 
 /* SILVERPINE FOREST */
 UPDATE creature_template SET ScriptName='npc_deathstalker_erland' WHERE entry=1978;

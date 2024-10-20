@@ -26,6 +26,46 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 
+struct EventGenerator001TurnAI : public ScriptedAI
+{
+    EventGenerator001TurnAI(Creature* creature) : ScriptedAI(creature), m_ori(false)
+    {
+        m_creature->SetCanEnterCombat(false);
+        AddCustomAction(1, 5000u, [&]()
+        {
+            std::vector<Creature*> const* creaturesLeft = m_creature->GetMap()->GetCreatures("SILVERMOON_GUARDIANS_TURN_1");
+            if (creaturesLeft)
+            {
+                for (Creature* creature : *creaturesLeft)
+                    if (!creature->IsInCombat())
+                        creature->SetFacingTo(m_ori ? 5.585053443908691406f : 4.014257431030273437f);
+            }
+            std::vector<Creature*> const* creaturesRight = m_creature->GetMap()->GetCreatures("SILVERMOON_GUARDIANS_TURN_2");
+            if (creaturesRight)
+            {
+                for (Creature* creature : *creaturesRight)
+                    if (!creature->IsInCombat())
+                        creature->SetFacingTo(m_ori ? 2.443460941314697265f : 4.014257431030273437f);
+            }
+            m_ori = !m_ori;
+            ResetTimer(1, 180000);
+        });
+    }
+
+    bool m_ori;
+};
+
+UnitAI* GetNewAIInstance(Creature* creature)
+{
+    if (creature->HasStringId("SILVERMOON_GUARDIANS_TURN_EVENT"))
+        return new EventGenerator001TurnAI(creature);
+    return nullptr;
+}
+
 void AddSC_silvermoon_city()
 {
+    Script* pNewScript = new Script;
+    pNewScript->Name = "npc_event_generator_001";
+    pNewScript->GetAI = &GetNewAIInstance<EventGenerator001TurnAI>;
+    pNewScript->RegisterSelf();
 }
