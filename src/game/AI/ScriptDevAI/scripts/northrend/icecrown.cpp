@@ -1263,6 +1263,16 @@ struct FindtheAncientHero : public SpellScript
     }
 };
 
+// 57853 - Master Summoner's Staff
+struct MasterSummonersStaff : public SpellScript, public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        data.target = nullptr;
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1315,4 +1325,5 @@ void AddSC_icecrown()
     RegisterSpellScript<InfraGreenShield>("spell_infragreenshield");
     RegisterSpellScript<RapidFireHarpoon>("spell_rapid_fire_harpoon");
     RegisterSpellScript<FindtheAncientHero>("spell_find_the_ancient_hero");
+    RegisterSpellScript<MasterSummonersStaff>("spell_master_summoners_staff");
 }
