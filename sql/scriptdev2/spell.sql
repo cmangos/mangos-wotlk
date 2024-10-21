@@ -911,6 +911,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57666,'spell_frozen_siegebolt'),
 (57667,'spell_frozen_siegebolt'),
 (57669,'spell_replenishment'),
+(57853,'spell_master_summoners_staff'),
 (58418,'spell_portal_to_capital_city'),
 (58420,'spell_portal_to_capital_city'),
 (58984,'spell_shadowmeld'),
