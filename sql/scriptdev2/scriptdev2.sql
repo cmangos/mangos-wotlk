@@ -906,6 +906,7 @@ UPDATE creature_template SET ScriptName='npc_kelerun_bloodmourn' WHERE entry=178
 UPDATE gameobject_template SET ScriptName='go_harbinger_second_trial' WHERE entry=182052;
 UPDATE creature_template SET ScriptName='npc_apprentice_mirveda' WHERE entry=15402;
 UPDATE creature_template SET ScriptName='npc_infused_crystal' WHERE entry=16364;
+UPDATE creature_template SET ScriptName='npc_hatchling_movement' WHERE entry IN(21055,21063,21064);
 
 /* FELWOOD */
 UPDATE creature_template SET ScriptName='npc_kitten' WHERE entry=9937;

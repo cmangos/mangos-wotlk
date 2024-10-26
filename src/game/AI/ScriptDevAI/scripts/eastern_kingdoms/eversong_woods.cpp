@@ -481,6 +481,32 @@ UnitAI* GetAI_npc_infused_crystalAI(Creature* pCreature)
     return new npc_infused_crystalAI(pCreature);
 }
 
+struct HatchlingMovementAI : public ScriptedAI
+{
+    HatchlingMovementAI(Creature* creature) : ScriptedAI(creature)
+    {
+        AddCustomAction(1, 1200u, [&]()
+        {
+            PickNewPoint();
+        }, TIMER_COMBAT_OOC);
+    }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType == POINT_MOTION_TYPE && data == 1)
+            ResetTimer(1, 1200u); // exact delay after each movement
+    }
+
+    void PickNewPoint()
+    {
+        Position pos = m_creature->GetRespawnPosition();
+        float angle = rand_norm_f() * 2 * M_PI_F;
+        float range = rand_norm_f() * 2.f;
+        m_creature->MovePositionToFirstCollision(pos, range, angle);
+        m_creature->GetMotionMaster()->MovePoint(1, pos);
+    }
+};
+
 void AddSC_eversong_woods()
 {
     Script* pNewScript = new Script;
@@ -503,5 +529,10 @@ void AddSC_eversong_woods()
     pNewScript = new Script;
     pNewScript->Name = "npc_infused_crystal";
     pNewScript->GetAI = &GetAI_npc_infused_crystalAI;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_hatchling_movement";
+    pNewScript->GetAI = &GetNewAIInstance<HatchlingMovementAI>;
     pNewScript->RegisterSelf();
 }
