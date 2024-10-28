@@ -1273,6 +1273,17 @@ struct MasterSummonersStaff : public SpellScript, public AuraScript
     }
 };
 
+// 58569 - Burning Skeleton
+struct BurningSkeleton : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+        summon->AI()->SetReactState(REACT_PASSIVE);
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1326,4 +1337,5 @@ void AddSC_icecrown()
     RegisterSpellScript<RapidFireHarpoon>("spell_rapid_fire_harpoon");
     RegisterSpellScript<FindtheAncientHero>("spell_find_the_ancient_hero");
     RegisterSpellScript<MasterSummonersStaff>("spell_master_summoners_staff");
+    RegisterSpellScript<BurningSkeleton>("spell_burning_skeleton");
 }

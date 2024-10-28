@@ -914,6 +914,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57853,'spell_master_summoners_staff'),
 (58418,'spell_portal_to_capital_city'),
 (58420,'spell_portal_to_capital_city'),
+(58569,'spell_burning_skeleton'),
 (58984,'spell_shadowmeld'),
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
 (59288,'spell_infragreenshield'),
