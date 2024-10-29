@@ -136,9 +136,9 @@ struct boss_feral_defenderAI : public BossAI
 {
     boss_feral_defenderAI(Creature* creature) : BossAI(creature, FERAL_DEFENDER_ACTIONS_MAX),
         m_instance(dynamic_cast<instance_ulduar*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()),
+        m_feralRushCount(m_isRegularMode ? 6 :10)
     {
-        m_maxFeralRush = m_isRegularMode ? 6 : 10;
         AddCombatAction(FERAL_DEFENDER_FERAL_RUSH, 3s, 5s);
         AddCustomAction(FERAL_DEFENDER_REVIVE, true, [&]()
         {
@@ -156,7 +156,7 @@ struct boss_feral_defenderAI : public BossAI
             if (Creature* seepingFeralStalker = m_creature->GetMap()->GetCreature(m_seepingGuid))
                 seepingFeralStalker->ForcedDespawn();
 
-            m_creature->AI()->SpellListChanged();
+            AddInitialCooldowns();
             ResetTimer(FERAL_DEFENDER_FERAL_RUSH, 1s);
         });
         SetDeathPrevention(true);
@@ -256,8 +256,8 @@ struct TerrifyingScreech : public SpellScript
 {
     void OnSuccessfulFinish(Spell* spell) const override
     {
-        Creature* caster = dynamic_cast<Creature*>(spell->GetCaster());
-        if (!caster || !caster->AI())
+        Unit* caster = spell->GetCaster();
+        if (!caster || !caster->AI() || !caster->IsCreature())
             return;
         caster->AI()->DoCastSpellIfCan(nullptr, caster->GetMap()->IsRegularDifficulty() ? SPELL_SENTINEL_BLAST : SPELL_SENTINEL_BLAST_H);
     }
