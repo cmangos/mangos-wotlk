@@ -986,6 +986,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (64235,'spell_void_zone_xt'),
 (64411,'spell_blessing_of_ancient_kings'),
 (64415,'spell_valanyr_equip_effect'),
+(64456,'spell_feral_essence_removal'),
 (64475,'spell_ignis_remove_strength'),
 (64503,'spell_ignis_water'),
 (64386,'spell_terrifying_screech'),

@@ -62,6 +62,8 @@ enum
     NPC_SEEPING_FERAL_ESSENCE           = 34098,            // summoned by the feral defender on feign death
     // NPC_GUARDIAN_SWARN               = 34034,            // summoned by spell
     NPC_FERAL_DEFENDER_STALKER          = 34096,
+
+    SOUND_DEATH                         = 15476,
 };
 
 /*######
@@ -70,7 +72,6 @@ enum
 
 enum AuriayaActions
 {
-    AURIAYA_ENRAGE,
     AURIAYA_DEFENDER,
     AURIAYA_ACTIONS_MAX,
 };
@@ -84,7 +85,6 @@ struct boss_auriayaAI : public BossAI
         SetDataType(TYPE_AURIAYA);
         AddOnAggroText(SAY_AGGRO);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
-        AddCombatAction(AURIAYA_ENRAGE, 10min);
         AddCombatAction(AURIAYA_DEFENDER, 1min);
     }
 
@@ -94,7 +94,7 @@ struct boss_auriayaAI : public BossAI
     void JustDied(Unit* killer) override
     {
         BossAI::JustDied(killer);
-        m_creature->PlayDirectSound(15476);
+        m_creature->PlayDirectSound(SOUND_DEATH);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -114,15 +114,8 @@ struct boss_auriayaAI : public BossAI
                     DisableCombatAction(action);
                 return;
             }
-            case AURIAYA_ENRAGE:
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    DoBroadcastText(SAY_BERSERK, m_creature);
-                    ResetCombatAction(action, 10min);
-                }
+            default:
                 return;
-            }
         }
     }
 };
@@ -188,7 +181,7 @@ struct boss_feral_defenderAI : public BossAI
 
     void JustPreventedDeath(Unit* attacker) override
     {
-        if (m_deathCount >= 8)
+        if (m_deathCount >= 7)
             SetDeathPrevention(false);
         DoCastSpellIfCan(m_creature, SPELL_FERAL_ESSENCE_REMOVAL, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_SEEPING_FERAL_ESSENCE_SUMMON, CAST_TRIGGERED);
@@ -270,6 +263,20 @@ struct TerrifyingScreech : public SpellScript
     }
 };
 
+// 64456 - Feral Essence Application Removal
+struct FeralEssanceRemoval : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+        unitTarget->RemoveAuraHolderFromStack(spellId);
+    }
+};
+
 void AddSC_boss_auriaya()
 {
     Script* pNewScript = new Script;
@@ -283,4 +290,5 @@ void AddSC_boss_auriaya()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<TerrifyingScreech>("spell_terrifying_screech");
+    RegisterSpellScript<FeralEssanceRemoval>("spell_feral_essence_removal");
 }

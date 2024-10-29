@@ -10207,15 +10207,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 64456:                                 // Feral Essence Application Removal
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
-                    unitTarget->RemoveAuraHolderFromStack(spellId);
-                    return;
-                }
                 case 64466:                                 // Empowering Shadows
                 {
                     if (!unitTarget)
