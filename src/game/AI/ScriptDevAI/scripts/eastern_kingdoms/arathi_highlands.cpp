@@ -46,6 +46,7 @@ enum
     EMOTE_PROGRESS_8        = -1000272,
     SAY_PROGRESS_9          = -1000273,
 
+    FACTION_BOOTY_BAY       = 120,
     QUEST_SUNKEN_TREASURE   = 665,
     ENTRY_VENGEFUL_SURGE    = 2776
 };
@@ -101,7 +102,7 @@ bool QuestAccept_npc_professor_phizzlethorpe(Player* pPlayer, Creature* pCreatur
 {
     if (pQuest->GetQuestId() == QUEST_SUNKEN_TREASURE)
     {
-        pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN);
+        pCreature->SetFactionTemporary(FACTION_BOOTY_BAY, TEMPFACTION_RESTORE_RESPAWN);
         DoScriptText(SAY_PROGRESS_1, pCreature, pPlayer);
 
         if (npc_professor_phizzlethorpeAI* pEscortAI = dynamic_cast<npc_professor_phizzlethorpeAI*>(pCreature->AI()))
