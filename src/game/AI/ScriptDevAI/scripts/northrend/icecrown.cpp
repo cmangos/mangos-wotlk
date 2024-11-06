@@ -1284,6 +1284,16 @@ struct BurningSkeleton : public SpellScript
     }
 };
 
+// 59724 - Refurbished Demolisher
+struct RefurbishedDemolisher : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1338,4 +1348,5 @@ void AddSC_icecrown()
     RegisterSpellScript<FindtheAncientHero>("spell_find_the_ancient_hero");
     RegisterSpellScript<MasterSummonersStaff>("spell_master_summoners_staff");
     RegisterSpellScript<BurningSkeleton>("spell_burning_skeleton");
+    RegisterSpellScript<RefurbishedDemolisher>("spell_refurbished_demolisher");
 }
