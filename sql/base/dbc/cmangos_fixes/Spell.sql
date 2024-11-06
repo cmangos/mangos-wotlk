@@ -2301,9 +2301,11 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 4044,  -- Target Dummy Passive
-5301, -- Defensive State (DND)
-6742, -- Bloodlust
-8852, -- Moss Hide
+4133,  -- Bruise
+5301,  -- Defensive State (DND)
+6742,  -- Bloodlust
+7486, -- Butcher Drain
+8852,  -- Moss Hide
 11816, -- Land Mine Arming
 11966, -- Fire Shield
 12782, -- Shield Spike
