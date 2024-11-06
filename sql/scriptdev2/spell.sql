@@ -922,6 +922,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (59317,'spell_teleporting_dalaran'),
 (59331,'spell_poisoned_spear'),
 (59481,'spell_loatheb_warn'),
+(59724,'spell_refurbished_demolisher'),
 (59743,'spell_void_shift_aura'),
 (59820,'spell_drained_aura'),
 (59827,'spell_impaling_charge'),
