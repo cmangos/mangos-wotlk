@@ -911,6 +911,11 @@ class Creature : public Unit
 
         virtual bool CannotTurn() const override { return m_settings.HasFlag(CreatureStaticFlags3::CANNOT_TURN); }
 
+        CreatureInfo const* GetMountInfo() const override{ return m_mountInfo; }
+        void SetMountInfo(CreatureInfo const* info) override;
+
+        void SetModelRunSpeed(float runSpeed) override { m_modelRunSpeed = runSpeed; }
+
     protected:
         bool CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
@@ -992,6 +997,9 @@ class Creature : public Unit
     private:
         GridReference<Creature> m_gridRef;
         CreatureInfo const* m_creatureInfo;                 // in difficulty mode > 0 can different from ObjMgr::GetCreatureTemplate(GetEntry())
+
+        CreatureInfo const* m_mountInfo;
+        float m_modelRunSpeed;
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent

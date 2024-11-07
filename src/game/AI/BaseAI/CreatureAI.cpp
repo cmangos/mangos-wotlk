@@ -140,6 +140,13 @@ void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType dama
     }
 }
 
+void CreatureAI::JustReachedHome()
+{
+    if (m_dismountOnAggro)
+        if (CreatureInfo const* mountInfo = m_creature->GetMountInfo())
+            m_creature->Mount(Creature::ChooseDisplayId(mountInfo));
+}
+
 void CreatureAI::SetDeathPrevention(bool state)
 {
     if (state)
