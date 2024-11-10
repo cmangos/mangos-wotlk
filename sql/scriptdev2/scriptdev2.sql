@@ -1760,7 +1760,7 @@ UPDATE creature_template SET ScriptName='npc_collapsing_star' WHERE entry=32955;
 UPDATE gameobject_template SET ScriptName='go_celestial_access' WHERE entry IN (194628,194752);
 UPDATE creature_template SET ScriptName='boss_hodir' WHERE entry=32845;
 UPDATE creature_template SET ScriptName='npc_flash_freeze' WHERE entry IN (32926,32938);
-UPDATE creature_template SET ScriptName='npc_icicle_target' WHERE entry=33174;
+UPDATE creature_template SET ScriptName='npc_snowpack_target' WHERE entry=33174;
 UPDATE creature_template SET ScriptName='boss_thorim' WHERE entry=32865;
 UPDATE creature_template SET ScriptName='boss_sif' WHERE entry=33196;
 UPDATE creature_template SET ScriptName='npc_thunder_orb' WHERE entry=33378;
@@ -1799,18 +1799,6 @@ UPDATE creature_template SET ScriptName='npc_constrictor_tentacle' WHERE entry=3
 UPDATE creature_template SET ScriptName='npc_descent_madness' WHERE entry=34072;
 UPDATE creature_template SET ScriptName='npc_keeper_mimiron' WHERE entry=33412;
 UPDATE creature_template SET ScriptName='npc_keeper_thorim' WHERE entry=33413;
--- Hodir
-UPDATE `creature_template` SET `SpellList`=3284500 WHERE `entry`=32845; -- Hodir (10)
-UPDATE `creature_template` SET `SpellList`=3284600 WHERE `entry`=32846; -- Hodir (25)
--- Snowpacked Icicle Target
-UPDATE `creature_template` SET `StaticFlags1`=`StaticFlags1`|0x00000100|0x02000000 WHERE `entry`=33174;
-UPDATE `creature_template` SET `ScriptName`='' WHERE `entry`=33174;
-UPDATE `creature_template` SET `AIName`='', `ScriptName`='npc_snowpack_target' WHERE `Entry`=33174;
-UPDATE `creature_template` SET `AIName`='EventAI', `ScriptName` = '' WHERE `Entry` = 33169; -- Icicle
--- Hodir's Helper NPCs
-UPDATE `creature_template` SET `StringId1`=6030701 WHERE `entry` IN (32941, 33333, 32950, 33332, 32946, 33331, 32948, 33330, 32901, 33325, 32900, 33328, 32893, 33327, 32897, 33326, 33342);
--- Toasty Fire
-UPDATE `creature_template` SET `StringId2`=6030702 WHERE `entry`=33342;
 INSERT INTO scripted_event_id VALUES
 -- Vezax saronite barrier event
 (9735,'event_spell_saronite_barrier'),
