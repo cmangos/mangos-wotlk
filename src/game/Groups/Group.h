@@ -252,6 +252,9 @@ class Group
         }
 
         void SetTargetIcon(uint8 id, ObjectGuid whoGuid, ObjectGuid targetGuid);
+#ifdef ENABLE_PLAYERBOTS
+        ObjectGuid GetTargetIcon(uint8 id) { return m_targetIcons[id]; }
+#endif
 
         Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
         Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }

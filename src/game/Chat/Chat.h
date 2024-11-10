@@ -801,6 +801,13 @@ class ChatHandler
         bool HandlePlayerbotCommand(char* args);
 #endif
 
+#ifdef ENABLE_PLAYERBOTS
+        bool HandlePlayerbotCommand(char* args);
+        bool HandleRandomPlayerbotCommand(char* args);
+        bool HandleAhBotCommand(char* args);
+        bool HandlePerfMonCommand(char* args);
+#endif
+
         bool HandleArenaFlushPointsCommand(char* args);
         bool HandleArenaSeasonRewardsCommand(char* args);
         bool HandleArenaDataReset(char* args);

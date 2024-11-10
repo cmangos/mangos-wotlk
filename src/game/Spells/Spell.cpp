@@ -48,6 +48,10 @@
 #include "MotionGenerators/PathFinder.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Entities/ObjectGuid.h"
+
+#ifdef ENABLE_PLAYERBOTS
+#include "playerbot/PlayerbotAI.h"
+#endif
 #include "Entities/Transports.h"
 
 extern pEffect SpellEffects[MAX_SPELL_EFFECTS];
@@ -5930,6 +5934,16 @@ SpellCastResult Spell::CheckCast(bool strict)
             if (m_spellInfo->MaxTargetLevel && target->GetLevel() > m_spellInfo->MaxTargetLevel)
                 return SPELL_FAILED_HIGHLEVEL;
 
+#ifdef ENABLE_PLAYERBOTS
+            if (target->IsPlayer())
+            {
+                PlayerbotAI* bot = ((Player*)target)->GetPlayerbotAI();
+                if (bot && bot->IsImmuneToSpell(m_spellInfo->Id))
+                {
+                    return SPELL_FAILED_IMMUNE;
+                }
+            }
+#endif
             if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_TRIVIAL) && target->IsTrivialForTarget(m_caster))
                 return SPELL_FAILED_TARGET_IS_TRIVIAL;
         }
@@ -7647,6 +7661,16 @@ bool Spell::IgnoreItemRequirements() const
     if (m_channelOnly || m_ignoreCosts)
         return true;
 
+#ifdef ENABLE_PLAYERBOTS
+    if (m_caster->IsPlayer())
+    {
+        PlayerbotAI* bot = ((Player*)m_caster)->GetPlayerbotAI();
+        if (bot && bot->HasSpellItems(m_spellInfo->Id, m_CastItem))
+        {
+            return true;
+        }
+    }
+#endif
     /// Check if it's an enchant scroll. These have no required reagents even though their spell does.
     if (m_CastItem && (m_CastItem->GetProto()->Flags & ITEM_FLAG_NO_REAGENT_COST))
         return true;
