@@ -51,6 +51,17 @@ if(NOT BUILD_DEPRECATED_PLAYERBOT)
   endforeach()
 endif()
 
+if(NOT BUILD_PLAYERBOTS)
+  # exclude Playerbots folder
+  set (EXCLUDE_DIR "PlayerBots/")
+  foreach (TMP_PATH ${LIBRARY_SRCS})
+      string (FIND ${TMP_PATH} ${EXCLUDE_DIR} EXCLUDE_DIR_FOUND)
+      if (NOT ${EXCLUDE_DIR_FOUND} EQUAL -1)
+          list(REMOVE_ITEM LIBRARY_SRCS ${TMP_PATH})
+      endif ()
+  endforeach()
+endif()
+
 set(PCH_BASE_FILENAME "pchdef")
 # exclude pchdef files
 set (EXCLUDE_FILE "${PCH_BASE_FILENAME}")
@@ -83,8 +94,9 @@ target_link_libraries(${LIBRARY_NAME}
   PRIVATE zlib
 )
 
-# include additionals headers
-set(ADDITIONAL_INCLUDE_DIRS
+# TO DO: Remove this if when old playerbots get removed
+if(NOT BUILD_PLAYERBOTS)
+  set(ADDITIONAL_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/vmap
   ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
@@ -92,13 +104,29 @@ set(ADDITIONAL_INCLUDE_DIRS
   ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
   ${CMAKE_CURRENT_SOURCE_DIR}/PlayerBot
   ${CMAKE_BINARY_DIR}
-)
+  )
+else()
+  set(ADDITIONAL_INCLUDE_DIRS
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/vmap
+    ${CMAKE_CURRENT_SOURCE_DIR}/AuctionHouseBot
+    ${CMAKE_CURRENT_SOURCE_DIR}/BattleGround
+    ${CMAKE_CURRENT_SOURCE_DIR}/OutdoorPvP
+    ${CMAKE_BINARY_DIR}
+  )
+endif()
 
 target_include_directories(${LIBRARY_NAME}
   INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
   PRIVATE ${ADDITIONAL_INCLUDE_DIRS}
   PRIVATE ${Boost_INCLUDE_DIRS}
 )
+
+if(BUILD_PLAYERBOTS)
+  target_link_libraries(${LIBRARY_NAME} PUBLIC playerbots)
+  target_include_directories(${LIBRARY_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src/modules/PlayerBots)
+  add_dependencies(${LIBRARY_NAME} playerbots)
+endif()
 
 if(UNIX)
   # Both systems don't have libdl and don't need them
@@ -125,6 +153,11 @@ endif()
 # Define BUILD_DEPRECATED_PLAYERBOT if need
 if (BUILD_DEPRECATED_PLAYERBOT)
   add_definitions(-DBUILD_DEPRECATED_PLAYERBOT)
+endif()
+
+# Define ENABLE_PLAYERBOTS if need
+if (BUILD_PLAYERBOTS)
+  add_definitions(-DENABLE_PLAYERBOTS)
 endif()
 
 if (MSVC)

@@ -441,6 +441,10 @@ class BattleGround
         GameObject* GetSingleGameObjectFromStorage(uint32 entry) const;
         Creature* GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog = false) const;
 
+#ifdef ENABLE_PLAYERBOTS
+        uint32 GetSingleGameObjectGuid(uint8 event1, uint8 event2);
+#endif
+
         // Function that set and get battleground map id
         void SetMapId(uint32 mapId) { m_mapId = mapId; }
         uint32 GetMapId() const { return m_mapId; }

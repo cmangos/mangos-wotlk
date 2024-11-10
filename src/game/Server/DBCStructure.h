@@ -964,6 +964,21 @@ struct EmotesTextEntry
     //          m_emoteText
 };
 
+#ifdef ENABLE_PLAYERBOTS
+/**
+* \struct EmotesTextSoundEntry
+* \brief Entry resenting the text sound for given emote.
+*/
+struct EmotesTextSoundEntry
+{
+    uint32 Id;                                              // 0
+    uint32 EmotesTextId;                                    // 1
+    uint32 RaceId;                                          // 2
+    uint32 SexId;                                           // 3, 0 male / 1 female
+    uint32 SoundId;                                         // 4
+};
+#endif
+
 struct FactionEntry
 {
     uint32      ID;                                         // 0        m_ID

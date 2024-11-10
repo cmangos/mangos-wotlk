@@ -2382,3 +2382,15 @@ Creature* BattleGround::GetSingleCreatureFromStorage(uint32 entry, bool skipDebu
 
     return nullptr;
 }
+#ifdef ENABLE_PLAYERBOTS
+uint32 BattleGround::GetSingleGameObjectGuid(uint8 event1, uint8 event2)
+{
+    auto itr = m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.begin();
+    if (itr != m_eventObjects[MAKE_PAIR32(event1, event2)].gameobjects.end())
+    {
+        return *itr;
+    }
+
+    return ObjectGuid();
+}
+#endif
