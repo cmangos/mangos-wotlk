@@ -504,9 +504,9 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 //== Player ====================================================
 Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this), m_launched(false)
 {
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    m_playerbotAI = 0;
-    m_playerbotMgr = 0;
+#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
+    m_playerbotAI = nullptr;
+    m_playerbotMgr = nullptr;
 #endif
     m_speakTime = 0;
     m_speakCount = 0;
