@@ -120,7 +120,7 @@ void PlayerbotHolder::HandlePlayerBotLoginCallback(QueryResult* dummy, SqlQueryH
 
     WorldSession* masterSession = masterAccount ? sWorld.FindSession(masterAccount) : NULL;
     uint32 botAccountId = lqh->GetAccountId();
-    WorldSession* botSession = new WorldSession(botAccountId, NULL, SEC_PLAYER, 1, 0, LOCALE_enUS, "", 0, 0, false);
+    WorldSession* botSession = new WorldSession(botAccountId, NULL, SEC_PLAYER, 2, 0, LOCALE_enUS, "", 0, 0, false);
     botSession->SetNoAnticheat();
 
     // has bot already been added?
