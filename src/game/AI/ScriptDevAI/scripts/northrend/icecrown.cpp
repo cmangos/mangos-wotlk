@@ -935,6 +935,19 @@ bool EffectDummyCreature_npc_grand_admiral_westwind(Unit* pCaster, uint32 uiSpel
 }
 
 /*######
+## go_bloodstained_stone
+######*/
+
+struct go_bloodstained_stone : public GameObjectAI
+{
+    go_bloodstained_stone(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(9, true);
+        go->GetVisibilityData().AddInvisibilityValue(9, 100);
+    }
+};
+
+/*######
 ## spell_create_lance - 63845
 ######*/
 
@@ -1323,6 +1336,11 @@ void AddSC_icecrown()
     pNewScript->Name = "npc_grand_admiral_westwind";
     pNewScript->GetAI = &GetAI_npc_grand_admiral_westwind;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_grand_admiral_westwind;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_bloodstained_stone";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_bloodstained_stone>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_create_lance>("spell_create_lance");
