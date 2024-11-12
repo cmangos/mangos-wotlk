@@ -7,6 +7,7 @@ shared_sources = [
     'Util/ProgressBar.cpp',
     'Multithreading/Threading.cpp',
     'Util/ByteBuffer.cpp',
+    'Util/CodeBench.cpp',
     'Database/SqlPreparedStatement.cpp',
     'Database/SqlDelayThread.cpp',
     'Database/Field.cpp',
