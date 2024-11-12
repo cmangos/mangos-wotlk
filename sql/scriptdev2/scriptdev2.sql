@@ -1760,7 +1760,7 @@ UPDATE creature_template SET ScriptName='npc_collapsing_star' WHERE entry=32955;
 UPDATE gameobject_template SET ScriptName='go_celestial_access' WHERE entry IN (194628,194752);
 UPDATE creature_template SET ScriptName='boss_hodir' WHERE entry=32845;
 UPDATE creature_template SET ScriptName='npc_flash_freeze' WHERE entry IN (32926,32938);
-UPDATE creature_template SET ScriptName='npc_icicle_target' WHERE entry=33174;
+UPDATE creature_template SET ScriptName='npc_snowpack_target' WHERE entry=33174;
 UPDATE creature_template SET ScriptName='boss_thorim' WHERE entry=32865;
 UPDATE creature_template SET ScriptName='boss_sif' WHERE entry=33196;
 UPDATE creature_template SET ScriptName='npc_thunder_orb' WHERE entry=33378;
