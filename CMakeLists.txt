@@ -231,9 +231,13 @@ endif()
 
 # Win32 delivered packages
 if(WIN32 AND (BUILD_GAME_SERVER OR BUILD_LOGIN_SERVER OR BUILD_EXTRACTORS))
-  set(MYSQL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/lib/include/mysql")
-  set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmysql.lib")
-  set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmysql.lib")
+  if(SQLITE)
+    find_package(SQLite3 REQUIRED)
+  else()
+    set(MYSQL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/lib/include/mysql")
+    set(MYSQL_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libmysql.lib")
+    set(MYSQL_DEBUG_LIBRARY "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_debug/libmysql.lib")
+  endif()
   set(OPENSSL_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/dep/lib/include")
   set(OPENSSL_LIBRARIES
      "${CMAKE_SOURCE_DIR}/dep/lib/${DEP_ARCH}_release/libcrypto.lib"
