@@ -1,6 +1,7 @@
 option(DEBUG                                "Include additional debug-code in core"     OFF)
 option(WARNINGS                             "Show all warnings during compile"          OFF)
 option(POSTGRESQL                           "Use PostgreSQL"                            OFF)
+option(SQLITE                               "Use SQLite"                                OFF)
 option(PCH                                  "Use precompiled headers"                   ON)
 option(BUILD_GAME_SERVER                    "Build game server"                         ON)
 option(BUILD_LOGIN_SERVER                   "Build login server"                        ON)
@@ -31,6 +32,7 @@ message(STATUS
     DEBUG                   Include additional debug-code in core
     WARNINGS                Show all warnings during compile
     POSTGRESQL              Use PostgreSQL instead of mysql
+    SQLITE                  Use SQLite instead of mysql
     BUILD_GAME_SERVER       Build game server (core server)
     BUILD_LOGIN_SERVER      Build login server (auth server)
     BUILD_EXTRACTORS        Build map/dbc/vmap/mmap extractor
