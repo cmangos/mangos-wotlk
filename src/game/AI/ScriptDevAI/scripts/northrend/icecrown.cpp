@@ -1307,6 +1307,16 @@ struct RefurbishedDemolisher : public SpellScript
     }
 };
 
+// 58524 - Control Eidolon Watcher
+struct ControlEidolonWatcher : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1367,4 +1377,5 @@ void AddSC_icecrown()
     RegisterSpellScript<MasterSummonersStaff>("spell_master_summoners_staff");
     RegisterSpellScript<BurningSkeleton>("spell_burning_skeleton");
     RegisterSpellScript<RefurbishedDemolisher>("spell_refurbished_demolisher");
+    RegisterSpellScript<ControlEidolonWatcher>("spell_control_eidolon_watcher");
 }
