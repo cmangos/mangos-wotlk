@@ -282,6 +282,20 @@ struct HexOfJammalanAura : public AuraScript // s.12479
     }
 };
 
+// 12890 - Deep Slumber
+struct DeepSlumber : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        caster->getThreatManager().modifyThreatPercent(target, -100);
+    }
+};
+
 void AddSC_sunken_temple()
 {
     Script* pNewScript = new Script;
@@ -312,4 +326,5 @@ void AddSC_sunken_temple()
     RegisterSpellScript<SummonHakkar>("spell_summon_hakkar");
     RegisterSpellScript<HakkarSummoned>("spell_hakkar_summoned");
     RegisterSpellScript<HexOfJammalanAura>("spell_hex_of_jammalan");
+    RegisterSpellScript<DeepSlumber>("spell_deep_slumber");
 }
