@@ -16,6 +16,8 @@ endif
 
 realmd_inc = include_directories(realmd_inc_dirs)
 
+local_linker = _linker_args
+
 if build_machine.system() == 'darwin'
   local_linker = [_linker_args, '-Wl,no_fixup_chains -framework Carbon']
 endif
