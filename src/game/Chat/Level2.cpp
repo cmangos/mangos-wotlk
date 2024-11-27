@@ -2068,7 +2068,9 @@ bool ChatHandler::HandleNpcDeleteCommand(char* args)
         case CREATURE_SUBTYPE_GENERIC:
         {
             unit->CombatStop();
-            if (CreatureData const* data = sObjectMgr.GetCreatureData(unit->GetDbGuid()))
+            if (unit->IsUsingNewSpawningSystem()) // might be used in spawn group or scheduled for respawn already
+                unit->AddObjectToRemoveList();
+            else if (CreatureData const* data = sObjectMgr.GetCreatureData(unit->GetDbGuid()))
             {
                 // chat commands execute in world thread so should be thread safe for now
                 sMapMgr.DoForAllMapsWithMapId(data->mapid, [&](Map* map)
