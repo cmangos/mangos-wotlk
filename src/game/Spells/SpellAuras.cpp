@@ -9455,6 +9455,13 @@ void Aura::HandlePhase(bool apply, bool Real)
             newPhase |= (*itr)->GetMiscValue();
 
     target->SetPhaseMask(newPhase ? newPhase : uint32(PHASEMASK_NORMAL), true);
+
+    if (apply)
+    {
+        // drop flag at invisibiliy in bg
+        target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_STEALTH_INVIS_CANCELS);
+    }
+
     // no-phase is also phase state so same code for apply and remove
     if (target->GetTypeId() == TYPEID_PLAYER)
     {

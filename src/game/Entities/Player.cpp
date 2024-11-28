@@ -21268,11 +21268,10 @@ void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
     if (IsGameMaster())
         newPhaseMask = static_cast<uint32>(PHASEMASK_ANYWHERE);
 
-    // phase auras normally not expected at BG but anyway better check
-    if (BattleGround* bg = GetBattleGround())
-        bg->HandlePlayerDroppedFlag(this);
-
     Unit::SetPhaseMask(newPhaseMask, update);
+
+    if (Unit* vehicle = const_cast<Unit*>(FindRootVehicle()))
+        vehicle->SetPhaseMask(newPhaseMask, update);
     GetSession()->SendSetPhaseShift(GetPhaseMask());
 }
 
