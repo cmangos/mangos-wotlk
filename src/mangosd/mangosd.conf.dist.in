@@ -47,6 +47,8 @@ ConfVersion=2024020101
 #                ---PGSQL---
 #                    hostname;port;username;password;database
 #                    .;/path/to/unix_socket/DIRECTORY or . for default path;username;password;database - use Unix sockets at Unix/Linux
+#                ---SQLITE---
+#                    /path/to/sqlite.db
 #
 #    LoginDatabaseConnections
 #    WorldDatabaseConnections
