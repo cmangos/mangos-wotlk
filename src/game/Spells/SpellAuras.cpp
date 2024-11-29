@@ -9454,7 +9454,7 @@ void Aura::HandlePhase(bool apply, bool Real)
         for (auto itr = phases.begin(); itr != phases.end(); ++itr)
             newPhase |= (*itr)->GetMiscValue();
 
-    target->SetPhaseMask(newPhase ? newPhase : uint32(PHASEMASK_NORMAL), true);
+    target->SetPhaseMask(newPhase ? newPhase : uint32(PHASEMASK_NORMAL), false);
 
     if (apply)
     {
@@ -9475,6 +9475,9 @@ void Aura::HandlePhase(bool apply, bool Real)
                 itr->second->ApplyOrRemoveSpellIfCan((Player*)target, zone, area, false);
         }
     }
+
+    if (target->IsInWorld())
+        target->UpdateVisibilityAndView();
 }
 
 void Aura::HandleAuraDetaunt(bool /*Apply*/, bool Real)

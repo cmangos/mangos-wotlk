@@ -6067,7 +6067,8 @@ void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
                     continue;
                 }
                 Unit* itr_target = GetMap()->GetUnit(itr_targetGuid);
-                if (!itr_target || !itr_target->InSamePhase(newPhase))
+                // vehicles follow owner into phase
+                if (!itr_target || (type != TRACK_AURA_TYPE_CONTROL_VEHICLE && !itr_target->InSamePhase(newPhase)))
                 {
                     scTargets.erase(itr);               // remove for caster in any case
 
@@ -11814,10 +11815,10 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
 
     if (IsInWorld())
     {
-        RemoveNotOwnTrackedTargetAuras(newPhaseMask);       // we can lost access to caster or target
-
         // all controlled except not owned charmed units
         CallForAllControlledUnits(SetPhaseMaskHelper(newPhaseMask), CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_MINIPET | CONTROLLED_TOTEMS);
+
+        RemoveNotOwnTrackedTargetAuras(newPhaseMask);       // we can lost access to caster or target
     }
 
     WorldObject::SetPhaseMask(newPhaseMask, update);
