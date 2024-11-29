@@ -77,7 +77,7 @@ if(UNIX)
 endif()
 
 if(APPLE)
-  set(EXECUTABLE_LINK_FLAGS "-Wl,no_fixup_chains -framework Carbon ${EXECUTABLE_LINK_FLAGS}")
+  set(EXECUTABLE_LINK_FLAGS "-Wl,-no_fixup_chains -framework Carbon ${EXECUTABLE_LINK_FLAGS}")
 endif()
 
 set_target_properties(${EXECUTABLE_NAME} PROPERTIES LINK_FLAGS
