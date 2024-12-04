@@ -1317,6 +1317,19 @@ struct ControlEidolonWatcher : public SpellScript
     }
 };
 
+// 58203 - Iron Chain
+struct IronChain : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != 31075)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1378,4 +1391,5 @@ void AddSC_icecrown()
     RegisterSpellScript<BurningSkeleton>("spell_burning_skeleton");
     RegisterSpellScript<RefurbishedDemolisher>("spell_refurbished_demolisher");
     RegisterSpellScript<ControlEidolonWatcher>("spell_control_eidolon_watcher");
+    RegisterSpellScript<IronChain>("spell_iron_chain");
 }
