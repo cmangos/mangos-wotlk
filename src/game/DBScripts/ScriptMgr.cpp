@@ -3078,15 +3078,15 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                         break;
                     }
 
-                    FormationEntrySPtr fEntry = std::make_shared<FormationEntry>();
-                    fEntry->GroupId = targetGroup->GetGroupId();
-                    fEntry->Type = static_cast<SpawnGroupFormationType>(m_script->textId[0]);
-                    fEntry->Spread = m_script->x;
-                    fEntry->Options = m_script->textId[1];
-                    fEntry->MovementType = 0;
-                    fEntry->MovementIdOrWander = 0;
-                    fEntry->Comment = "Dynamically created formation!";
-                    fEntry->IsDynamic = true;
+                    FormationEntry fEntry;
+                    fEntry.GroupId = targetGroup->GetGroupId();
+                    fEntry.Type = static_cast<SpawnGroupFormationType>(m_script->textId[0]);
+                    fEntry.Spread = m_script->x;
+                    fEntry.Options = m_script->textId[1];
+                    fEntry.MovementType = 0;
+                    fEntry.MovementIdOrWander = 0;
+                    fEntry.Comment = "Dynamically created formation!";
+                    fEntry.IsDynamic = true;
 
                     targetGroup->SetFormationData(fEntry);
                     break;
@@ -3142,7 +3142,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                         break;
                     }
 
-                    targetGroup->SetFormationData(nullptr);
+                    targetGroup->ClearFormationData();
                     break;
                 }
 

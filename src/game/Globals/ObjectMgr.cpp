@@ -1413,9 +1413,9 @@ void ObjectMgr::LoadSpawnGroups()
             entry.Active = false;
             entry.Large = false;
             entry.EnabledByDefault = true;
-            entry.formationEntry = nullptr;
+            entry.FormationEntry = nullptr;
             entry.HasChancedSpawns = false;
-            newContainer->spawnGroupMap.emplace(entry.Id, entry);
+            newContainer->spawnGroupMap.emplace(entry.Id, std::move(entry));
         } while (result->NextRow());
     }
 
@@ -1426,31 +1426,31 @@ void ObjectMgr::LoadSpawnGroups()
         {
             Field* fields = result->Fetch();
 
-            FormationEntrySPtr fEntry = std::make_shared<FormationEntry>();
-            fEntry->GroupId = fields[0].GetUInt32();
+            FormationEntry fEntry;
+            fEntry.GroupId = fields[0].GetUInt32();
             uint32 fType = fields[1].GetUInt32();
-            fEntry->Spread = fields[2].GetFloat();
-            fEntry->Options = fields[3].GetUInt32();
-            fEntry->MovementIdOrWander = fields[4].GetUInt32();
-            fEntry->MovementType = fields[5].GetUInt32();
-            fEntry->Comment = fields[6].GetCppString();
+            fEntry.Spread = fields[2].GetFloat();
+            fEntry.Options = fields[3].GetUInt32();
+            fEntry.MovementIdOrWander = fields[4].GetUInt32();
+            fEntry.MovementType = fields[5].GetUInt32();
+            fEntry.Comment = fields[6].GetCppString();
 
-            auto itr = newContainer->spawnGroupMap.find(fEntry->GroupId);
+            auto itr = newContainer->spawnGroupMap.find(fEntry.GroupId);
             if (itr == newContainer->spawnGroupMap.end())
             {
-                sLog.outErrorDb("LoadSpawnGroups: Invalid group Id:%u found in `spawn_group_formation`. Skipping.", fEntry->GroupId);
+                sLog.outErrorDb("LoadSpawnGroups: Invalid group Id:%u found in `spawn_group_formation`. Skipping.", fEntry.GroupId);
                 continue;
             }
 
             if (fType >= static_cast<uint32>(SPAWN_GROUP_FORMATION_TYPE_COUNT))
             {
-                sLog.outErrorDb("LoadSpawnGroups: Invalid formation type in `spawn_group_formation` ID:%u. Skipping.", fEntry->GroupId);
+                sLog.outErrorDb("LoadSpawnGroups: Invalid formation type in `spawn_group_formation` ID:%u. Skipping.", fEntry.GroupId);
                 continue;
             }
 
-            if (fEntry->MovementType >= static_cast<uint32>(MAX_DB_MOTION_TYPE))
+            if (fEntry.MovementType >= static_cast<uint32>(MAX_DB_MOTION_TYPE))
             {
-                sLog.outErrorDb("LoadSpawnGroups: Invalid movement type in `spawn_group_formation` ID:%u. Skipping.", fEntry->GroupId);
+                sLog.outErrorDb("LoadSpawnGroups: Invalid movement type in `spawn_group_formation` ID:%u. Skipping.", fEntry.GroupId);
                 continue;
             }
 
@@ -1465,15 +1465,15 @@ void ObjectMgr::LoadSpawnGroups()
 //                 }
 //             }
 
-            fEntry->Type = static_cast<SpawnGroupFormationType>(fType);
+            fEntry.Type = static_cast<SpawnGroupFormationType>(fType);
 
-            if (fEntry->Spread > 15.0f || fEntry->Spread < -15)
+            if (fEntry.Spread > 15.0f || fEntry.Spread < -15)
             {
-                sLog.outErrorDb("LoadSpawnGroups: Invalid spread value (%5.2f) should be between (-15..15) in formation ID:%u . Skipping.", fEntry->Spread, fEntry->GroupId);
+                sLog.outErrorDb("LoadSpawnGroups: Invalid spread value (%5.2f) should be between (-15..15) in formation ID:%u . Skipping.", fEntry.Spread, fEntry.GroupId);
                 continue;
             }
 
-            itr->second.formationEntry = std::move(fEntry);
+            itr->second.FormationEntry = std::make_unique<FormationEntry>(std::move(fEntry));
         } while (result->NextRow());
     }
 
@@ -1556,7 +1556,7 @@ void ObjectMgr::LoadSpawnGroups()
         // check and fix correctness of slot id indexation
         for (auto& sg : newContainer->spawnGroupMap)
         {
-            if (sg.second.formationEntry == nullptr)
+            if (sg.second.FormationEntry == nullptr)
                 continue;
 
             auto& guidMap = sg.second.DbGuids;
