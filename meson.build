@@ -26,6 +26,30 @@ global_includes = include_directories('src/game', 'dep/libmpq', 'src', 'src/fram
                                       'src/game/MotionGenerators', 'dep/include/bzip2', 'dep/include/gsoap',
                                       'dep/include')
 
+if get_option('BUILD_PLAYERBOTS')
+  playerbot_include_dirs = [
+    'src/modules/PlayerBots',
+    'src/modules/PlayerBots/ahbot',
+    'src/modules/PlayerBots/playerbot',
+    'src/modules/PlayerBots/playerbot/strategy',
+    'src/modules/PlayerBots/playerbot/strategy/generic',
+    'src/modules/PlayerBots/playerbot/strategy/actions',
+    'src/modules/PlayerBots/playerbot/strategy/rogue',
+    'src/modules/PlayerBots/playerbot/strategy/shaman',
+    'src/modules/PlayerBots/playerbot/strategy/paladin',
+    'src/modules/PlayerBots/playerbot/strategy/warlock',
+    'src/modules/PlayerBots/playerbot/strategy/hunter',
+    'src/modules/PlayerBots/playerbot/strategy/deathknight',
+    'src/modules/PlayerBots/playerbot/strategy/warrior',
+    'src/modules/PlayerBots/playerbot/strategy/triggers',
+    'src/modules/PlayerBots/playerbot/strategy/priest',
+    'src/modules/PlayerBots/playerbot/strategy/values',
+    'src/modules/PlayerBots/playerbot/strategy/druid',
+    'src/modules/PlayerBots/playerbot/strategy/mage',
+  ]
+  global_includes = [global_includes, include_directories(playerbot_include_dirs)]
+endif
+
 if not get_option('SQLITE')
   if not dblib_dep.found()
     if build_machine.system() == 'windows'
@@ -99,6 +123,19 @@ if get_option('BUILD_SCRIPTDEV')
 endif
 if get_option('BUILD_PLAYERBOT')
   add_project_arguments('-DBUILD_PLAYERBOT', language: 'cpp')
+endif
+if get_option('BUILD_PLAYERBOTS')
+  add_project_arguments('-DENABLE_PLAYERBOTS', language: 'cpp')
+  add_project_arguments('-DCMANGOS', language: 'cpp')
+  if 'Classic' in meson.project_name()
+    add_project_arguments('-DMANGOSBOT_ZERO', language: 'cpp')
+  endif
+  if 'TBC' in meson.project_name()
+    add_project_arguments('-DMANGOSBOT_ONE', language: 'cpp')
+  endif
+  if 'WotLK' in meson.project_name()
+    add_project_arguments('-DMANGOSBOT_TWO', language: 'cpp')
+  endif
 endif
 if get_option('BUILD_AHBOT')
   add_project_arguments('-DBUILD_AHBOT', language: 'cpp')
