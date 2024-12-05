@@ -8,6 +8,7 @@ option('BUILD_LOGIN_SERVER',  type : 'boolean', value: true,  description: 'Buil
 option('BUILD_EXTRACTORS',    type : 'boolean', value: false, description: 'Build map/dbc/vmap/mmap extractors')
 option('BUILD_SCRIPTDEV',     type : 'boolean', value: true,  description: 'Build ScriptDev. (Off speeds up build)')
 option('BUILD_PLAYERBOT',     type : 'boolean', value: false, description: 'Build Playerbot mod')
+option('BUILD_PLAYERBOTS',    type : 'boolean', value: false, description: 'Build new Playerbots module')
 option('BUILD_AHBOT',         type : 'boolean', value: false, description: 'Build Acution House Bot mod')
 option('BUILD_METRICS',       type : 'boolean', value: false, description: 'Build Metrics, generate data for Grafana')
 option('BUILD_RECASTDEMOMOD', type : 'boolean', value: false, description: 'Build map/vmap/mmap viewer')

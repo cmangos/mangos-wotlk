@@ -19,12 +19,18 @@ if build_machine.system() == 'windows'
   mangosd_inc_dirs = [mangosd_inc_dirs, '../../dep/lib/include', '../../dep/lib/include/mysql']
 endif
 
+link_libs = [sharedlib, gamelib, gsoaplib]
+
+if get_option('BUILD_PLAYERBOTS')
+  link_libs = [link_libs, libplayerbots]
+endif
+
 mangosd_inc = include_directories(mangosd_inc_dirs)
 
 if get_option('BUILD_GAME_SERVER')
   executable('mangosd',
               mangosd_sources,
-              link_with: [sharedlib, gamelib, gsoaplib],
+              link_with: link_libs,
               include_directories: [mangosd_inc, global_includes],
               dependencies: [boost_dep, dblib_dep, zlib_dep, openssl_dep, utfcpp_dep],
               link_args: _linker_args,
