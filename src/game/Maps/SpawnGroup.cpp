@@ -506,8 +506,8 @@ std::string SpawnGroup::to_string() const
 
 CreatureGroup::CreatureGroup(SpawnGroupEntry const& entry, Map& map) : SpawnGroup(entry, map, uint32(TYPEID_UNIT))
 {
-    if (entry.FormationEntry)
-        m_formationData = std::make_shared<FormationData>(this, *(entry.FormationEntry.get()));
+    if (entry.Formation)
+        m_formationData = std::make_shared<FormationData>(this, *(entry.Formation.get()));
     else
         m_formationData = nullptr;
 }
