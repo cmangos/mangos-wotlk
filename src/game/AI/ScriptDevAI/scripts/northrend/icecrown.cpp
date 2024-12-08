@@ -1318,7 +1318,7 @@ struct ControlEidolonWatcher : public SpellScript
 };
 
 // 58203 - Iron Chain
-struct IronChain : public SpellScript
+struct IronChain : public SpellScript, public AuraScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
@@ -1327,6 +1327,16 @@ struct IronChain : public SpellScript
             return SPELL_FAILED_BAD_TARGETS;
 
         return SPELL_CAST_OK;
+    }
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster || !aura->GetTarget()->IsCreature())
+            return;
+        if (!apply)
+            return;
+
+        aura->GetTarget()->GetMotionMaster()->MoveFollow(aura->GetCaster(), 2.0f, M_PI_F, true);
     }
 };
 
