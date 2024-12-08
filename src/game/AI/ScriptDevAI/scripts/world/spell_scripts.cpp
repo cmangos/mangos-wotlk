@@ -1398,6 +1398,18 @@ struct RetaliationCreature : public SpellScript
     }
 };
 
+// 11920 - Net Guard
+struct NetGuard : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        spell->GetCaster()->getThreatManager().modifyThreatPercent(spell->GetUnitTarget(), -50);
+    }
+};
+
 struct HateToHalf : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -1707,6 +1719,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<PreventSpellIfSameAuraOnCaster>("spell_prevent_spell_if_same_aura_on_caster");
     RegisterSpellScript<InstillLordValthalaksSpirit>("spell_instill_lord_valthalaks_spirit");
     RegisterSpellScript<RetaliationCreature>("spell_retaliation_creature");
+    RegisterSpellScript<NetGuard>("spell_net_guard");
     RegisterSpellScript<HateToHalf>("spell_hate_to_half");
     RegisterSpellScript<HateToZero>("spell_hate_to_zero");
     RegisterSpellScript<Stoned>("spell_stoned");
