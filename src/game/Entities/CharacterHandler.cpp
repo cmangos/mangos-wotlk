@@ -1101,6 +1101,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
 void WorldSession::HandlePlayerReconnect()
 {
+    // Detect if reconnecting in combat
+    const bool inCombat = _player->IsInCombat();
+
     // stop logout timer if need
     LogoutRequest(0);
 
@@ -1239,6 +1242,10 @@ void WorldSession::HandlePlayerReconnect()
 
     // Undo flags and states set by logout if present:
     _player->SetStunnedByLogout(false);
+
+    // Mark self for unit flags update to ensure re-application of combat flag at own client
+    if (inCombat)
+        _player->ForceValuesUpdateAtIndex(UNIT_FIELD_FLAGS);
 
     m_playerLoading = false;
 }
