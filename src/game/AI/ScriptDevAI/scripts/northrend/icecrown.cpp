@@ -1340,6 +1340,15 @@ struct IronChain : public SpellScript, public AuraScript
     }
 };
 
+// 60987 - Summon Ominous Cloud
+struct SummonOminousCloud : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 5.f;
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1402,4 +1411,5 @@ void AddSC_icecrown()
     RegisterSpellScript<RefurbishedDemolisher>("spell_refurbished_demolisher");
     RegisterSpellScript<ControlEidolonWatcher>("spell_control_eidolon_watcher");
     RegisterSpellScript<IronChain>("spell_iron_chain");
+    RegisterSpellScript<SummonOminousCloud>("spell_summon_ominous_cloud");
 }
