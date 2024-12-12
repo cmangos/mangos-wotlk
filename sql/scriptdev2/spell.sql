@@ -945,6 +945,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (60779,'spell_increased_healing_done_dummy'),
 (60831,'spell_alumeths_remains'),
 (60929,'spell_loatheb_prewarn'),
+(60987,'spell_summon_ominous_cloud'),
 (61071,'spell_vortex_aura'),
 (61072,'spell_vortex_aura'),
 (61073,'spell_vortex_aura'),
