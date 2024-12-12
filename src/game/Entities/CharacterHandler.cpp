@@ -1551,6 +1551,8 @@ void WorldSession::HandleAlterAppearanceOpcode(WorldPacket& recv_data)
 
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_VISIT_BARBER_SHOP, 1);
 
+    _player->SendForcedObjectUpdate();
+
     _player->SetStandState(0);                              // stand up
 }
 
