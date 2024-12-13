@@ -218,11 +218,19 @@ ArenaTeam* ObjectMgr::GetArenaTeamById(uint32 arenateamid) const
     return nullptr;
 }
 
+bool ichar_equals(char a, char b)
+{
+    return std::tolower(static_cast<unsigned char>(a)) == std::tolower(static_cast<unsigned char>(b));
+}
+
 ArenaTeam* ObjectMgr::GetArenaTeamByName(const std::string& arenateamname) const
 {
     for (const auto& itr : mArenaTeamMap)
-        if (itr.second->GetName() == arenateamname)
+    {
+        std::string const& teamName = itr.second->GetName();
+        if (std::equal(teamName.begin(), teamName.end(), arenateamname.begin(), arenateamname.end(), ichar_equals))
             return itr.second;
+    }            
 
     return nullptr;
 }
