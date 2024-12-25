@@ -189,6 +189,57 @@ void instance_shadow_labyrinth::OnCreatureRespawn(Creature* creature)
     }
 }
 
+// The Screaming Hall 
+// All Worldstates get Activated via database when door opens
+void instance_shadow_labyrinth::OnCreatureGroupDespawn(CreatureGroup* group, Creature* /*pCreature*/)
+{
+
+    switch (group->GetGroupId())
+    {
+        // Blackheart the Inciter room
+        // All groups have a chance to spawn assasins
+        case SL_BLACKHEAT_GROUP_01:
+        case SL_BLACKHEAT_GROUP_02:
+        case SL_BLACKHEAT_GROUP_03:
+        case SL_BLACKHEAT_GROUP_04:
+        case SL_BLACKHEAT_GROUP_05:
+        case SL_BLACKHEAT_GROUP_06:
+        case SL_BLACKHEAT_GROUP_07:
+        case SL_BLACKHEAT_GROUP_08:
+        case SL_BLACKHEAT_GROUP_09:
+        case SL_BLACKHEAT_GROUP_10:
+        case SL_BLACKHEAT_GROUP_11:
+        case SL_BLACKHEAT_GROUP_12:
+        {
+            switch (urand(0, 5))
+            {
+                case 0:
+                instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_ASSASIN_01, 1);
+            }
+            
+            switch (urand(0, 5))
+            {
+                case 0:
+                instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_ASSASIN_02, 1);
+            }
+            break;
+        }
+        // Murmur Room
+        case SL_SPAWN_GROUP_043:
+            instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_49, 0);
+            break;
+        case SL_SPAWN_GROUP_044:
+            instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_50, 0);
+            break;
+        case SL_SPAWN_GROUP_045:
+            instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_51, 0);
+            break;
+        case SL_SPAWN_GROUP_046:
+            instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_52, 0);
+            break;
+    }
+}
+
 void instance_shadow_labyrinth::Load(const char* chrIn)
 {
     if (!chrIn)

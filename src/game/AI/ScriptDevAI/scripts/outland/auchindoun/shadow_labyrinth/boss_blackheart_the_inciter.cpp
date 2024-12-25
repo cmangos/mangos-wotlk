@@ -25,6 +25,7 @@ EndScriptData */
 #include "shadow_labyrinth.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "World/WorldStateDefines.h"
 
 enum
 {
@@ -104,6 +105,9 @@ struct boss_blackheart_the_inciterAI : public CombatAI
             case 0: DoBroadcastText(SAY_AGGRO_1, m_creature); break;
             case 1: DoBroadcastText(SAY_AGGRO_2, m_creature); break;
         }
+
+        m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_ASSASIN_01, 0);
+        m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_ASSASIN_02, 0);
 
         if (m_instance)
             m_instance->SetData(TYPE_INCITER, IN_PROGRESS);

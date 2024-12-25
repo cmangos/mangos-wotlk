@@ -32,7 +32,32 @@ enum
 
     SPELL_BANISH            = 30231,                        // spell is handled in creature_template_addon;
     SPELL_SHAPE_OF_BEAST    = 33949,
+
+    // Blackheart the Inciter
+    SL_BLACKHEAT_GROUP_01   = 5550030,
+    SL_BLACKHEAT_GROUP_02   = 5550031,
+    SL_BLACKHEAT_GROUP_03   = 5550032,
+    SL_BLACKHEAT_GROUP_04   = 5550033,
+    SL_BLACKHEAT_GROUP_05   = 5550034,
+    SL_BLACKHEAT_GROUP_06   = 5550035,
+    SL_BLACKHEAT_GROUP_07   = 5550036,
+    SL_BLACKHEAT_GROUP_08   = 5550037,
+    SL_BLACKHEAT_GROUP_09   = 5550038,
+    SL_BLACKHEAT_GROUP_10   = 5550039,
+    SL_BLACKHEAT_GROUP_11   = 5550040,
+    SL_BLACKHEAT_GROUP_12   = 5550041,
+    SL_BLACKHEAT_GROUP_13   = 5550042,
+
+
+    SL_SPAWN_GROUP_043      = 5550064,                      // SpawnGroup that stops respawning of first runner
+    SL_SPAWN_GROUP_044      = 5550065,                      // SpawnGroup that stops respawning of 2nd runner
+    SL_SPAWN_GROUP_045      = 5550066,                      // SpawnGroup that stops respawning of third runner
+    SL_SPAWN_GROUP_046      = 5550067,                      // SpawnGroup that stops respawning of third runner
 };
+
+const std::string MURMURS_WRATH_TARGETS_01 = "SL_MURMUR_WRATH_TARGET_01";
+const std::string MURMURS_WRATH_TARGETS_02 = "SL_MURMUR_WRATH_TARGET_02";
+const std::string MURMURS_WRATH_TARGETS_03 = "SL_MURMUR_WRATH_TARGET_03";
 
 class instance_shadow_labyrinth : public ScriptedInstance
 {
@@ -46,6 +71,8 @@ class instance_shadow_labyrinth : public ScriptedInstance
 
         void OnCreatureDeath(Creature* pCreature) override;
         void OnCreatureRespawn(Creature* creature) override;
+
+        void OnCreatureGroupDespawn(CreatureGroup* pGroup, Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
