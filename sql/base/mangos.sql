@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14086_01_mangos_displayid_probability` bit(1) DEFAULT NULL
+  `required_14088_01_mangos_spawn_group_squad` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -16223,6 +16223,8 @@ CREATE TABLE `spawn_group`  (
   `WorldStateExpression` int(11) NOT NULL DEFAULT 0 COMMENT 'Worldstate expression Id',
   `Flags` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Flags for various behaviour',
   `StringId` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `RespawnOverrideMin` INT UNSIGNED COMMENT 'Respawn time override' DEFAULT NULL,
+  `RespawnOverrideMax` INT UNSIGNED COMMENT 'Respawn time override' DEFAULT NULL,
   PRIMARY KEY (`Id`)
 );
 
@@ -16274,6 +16276,19 @@ CREATE TABLE `spawn_group_linked_group`  (
   `Id` int(11) NOT NULL COMMENT 'Spawn Group ID',
   `LinkedId` int(11) NOT NULL COMMENT 'Linked Spawn Group ID',
   PRIMARY KEY (`Id`, `LinkedId`)
+);
+
+-- ----------------------------
+-- Table structure for spawn_group_squad
+-- ----------------------------
+
+DROP TABLE IF EXISTS spawn_group_squad;
+CREATE TABLE spawn_group_squad(
+Id INT NOT NULL COMMENT 'Spawn Group ID',
+SquadId INT NOT NULL COMMENT 'Squad Id within Spawn Group',
+Guid INT NOT NULL COMMENT 'Guid of creature or GO',
+Entry INT NOT NULL COMMENT 'Entry of creature or GO',
+PRIMARY KEY(Id, SquadId, Guid)
 );
 
 --
