@@ -2652,6 +2652,7 @@ class Unit : public WorldObject
 
         virtual bool IsNoWeaponSkillGain() const { return false; }
         virtual bool IsPreventingDeath() const { return false; }
+        virtual bool IsIgnoringMisdirection() const { return false; }
 
         void SetRootVehicle(const ObjectGuid& guid) { m_rootVehicle = guid; }
         const ObjectGuid& GetRootVehicle() const { return m_rootVehicle; }

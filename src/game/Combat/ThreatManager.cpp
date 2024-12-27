@@ -468,7 +468,7 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
 
     float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell, assist);
 
-    if (calculatedThreat > 0.0f)
+    if (calculatedThreat > 0.0f && !iOwner->IsIgnoringMisdirection())
     {
         float totalMod = 0.f;
         auto& redirectionData = victim->getHostileRefManager().GetThreatRedirectionData();

@@ -3104,6 +3104,11 @@ bool Creature::IsPreventingDeath() const
     return m_settings.HasFlag(CreatureStaticFlags::UNKILLABLE);
 }
 
+bool Creature::IsIgnoringMisdirection() const
+{
+    return m_settings.HasFlag(CreatureStaticFlags2::IGNORE_MISDIRECTION);
+}
+
 bool Creature::IsCorpseExpired() const
 {
     auto now = GetMap()->GetCurrentClockTime();
