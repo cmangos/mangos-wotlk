@@ -228,7 +228,6 @@ struct EyeOfKilrogg : public SpellScript
     void OnSummon(Spell* spell, Creature* summon) const override
     {
         summon->CastSpell(nullptr, 2585, TRIGGERED_OLD_TRIGGERED);
-        summon->DisableThreatPropagationToOwner();
         if (spell->GetCaster()->HasAura(58081)) // Glyph of Kilrogg
         {
             MapEntry const* mapEntry = spell->GetCaster()->GetMap()->GetEntry();
