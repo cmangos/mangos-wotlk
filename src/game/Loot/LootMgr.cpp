@@ -1789,8 +1789,15 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
     {
         case LOOT_CORPSE:
         {
-            // setting loot right
-            SetGroupLootRight(player);
+            if (creature->GetSettings().HasFlag(CreatureStaticFlags3::CAN_BE_MULTITAPPED))
+            {
+                for (auto& threatEntry : creature->getThreatManager().getThreatList())
+                    if (threatEntry->getTarget()->IsPlayer())
+                        m_ownerSet.insert(threatEntry->getTarget()->GetObjectGuid());
+            }
+            else
+                // setting loot right
+                SetGroupLootRight(player);
             m_clientLootType = CLIENT_LOOT_CORPSE;
 
             if ((creatureInfo->LootId && FillLoot(creatureInfo->LootId, LootTemplates_Creature, player, false)) || creatureInfo->MaxLootGold > 0)
@@ -2214,7 +2221,7 @@ InventoryResult Loot::SendItem(Player* target, LootItem* lootItem, bool sendErro
 
 std::tuple<uint32, uint32, uint32> Loot::GetQualifiedWeapons()
 {
-    uint32 mh, oh, ranged;
+    uint32 mh = 0, oh = 0, ranged = 0;
     uint32 mhType = 0;
     for (auto const& itr : m_lootItems)
     {
