@@ -124,7 +124,7 @@ enum AranActions // order based on priority
 
 struct boss_aranAI : public CombatAI
 {
-    boss_aranAI(Creature* creature) : CombatAI(creature, ARAN_ACTION_MAX), m_instance(static_cast<instance_karazhan*>(creature->GetInstanceData())), m_atiesh(false)
+    boss_aranAI(Creature* creature) : CombatAI(creature, ARAN_ACTION_MAX), m_instance(dynamic_cast<instance_karazhan*>(creature->GetInstanceData())), m_atiesh(false)
     {
         AddTimerlessCombatAction(ARAN_ACTION_DRINK, true);
         AddTimerlessCombatAction(ARAN_ACTION_POTION, true);
@@ -163,16 +163,19 @@ struct boss_aranAI : public CombatAI
 
         SetCombatMovement(true);
 
-        for (ObjectGuid guid : m_instance->GetAranTeleportNPCs())
-            if (Creature* teleport = m_creature->GetMap()->GetCreature(guid))
-            {
-                if (teleport->GetCreatureInfo()->Entry == NPC_SHADOW_OF_ARAN) // avoid case on spawn
+        if (m_instance)
+        {
+            for (ObjectGuid guid : m_instance->GetAranTeleportNPCs())
+                if (Creature* teleport = m_creature->GetMap()->GetCreature(guid))
                 {
-                    teleport->ResetEntry();
-                    teleport->AI()->EnterEvadeMode();
-                    teleport->AIM_Initialize();
+                    if (teleport->GetCreatureInfo()->Entry == NPC_SHADOW_OF_ARAN) // avoid case on spawn
+                    {
+                        teleport->ResetEntry();
+                        teleport->AI()->EnterEvadeMode();
+                        teleport->AIM_Initialize();
+                    }
                 }
-            }
+        }
     }
 
     uint32 GetNormalSpellId(uint32 index) const
