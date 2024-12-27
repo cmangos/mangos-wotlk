@@ -432,10 +432,10 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
                     SetVirtualItem(VIRTUAL_ITEM_SLOT_0, mh);
 
                 if (oh != 0)
-                    SetVirtualItem(VIRTUAL_ITEM_SLOT_0, oh);
+                    SetVirtualItem(VIRTUAL_ITEM_SLOT_1, oh);
 
                 if (ranged != 0)
-                    SetVirtualItem(VIRTUAL_ITEM_SLOT_0, ranged);
+                    SetVirtualItem(VIRTUAL_ITEM_SLOT_2, ranged);
             }            
         }
     }

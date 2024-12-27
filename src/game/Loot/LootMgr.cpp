@@ -1768,16 +1768,16 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
     m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false), m_createTime(World::GetCurrentClockTime())
 {
-    // the player whose group may loot the corpse
-    if (!player)
-    {
-        sLog.outError("LootMgr::CreateLoot> Error cannot get looter info to create loot!");
-        return;
-    }
-
     if (!creature)
     {
         sLog.outError("Loot::CreateLoot> cannot create loot, no creature passed!");
+        return;
+    }
+
+    // the player whose group may loot the corpse
+    if (!player && !creature->GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT))
+    {
+        sLog.outError("LootMgr::CreateLoot> Error cannot get looter info to create loot!");
         return;
     }
 
@@ -1795,7 +1795,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
                     if (threatEntry->getTarget()->IsPlayer())
                         m_ownerSet.insert(threatEntry->getTarget()->GetObjectGuid());
             }
-            else
+            else if (player)
                 // setting loot right
                 SetGroupLootRight(player);
             m_clientLootType = CLIENT_LOOT_CORPSE;
