@@ -4913,6 +4913,11 @@ void Spell::EffectApplyAura(SpellEffectIndex eff_idx)
     // GO auras have caster == nullptr
     Unit* caster = GetAffectiveCaster();
 
+    if (caster && caster->IsPlayerControlled() && unitTarget->IsCreature()
+        && static_cast<Creature*>(unitTarget)->GetSettings().HasFlag(CreatureStaticFlags3::IMMUNE_TO_PLAYER_BUFFS)
+        && IsPositiveAuraEffect(m_spellInfo, eff_idx, caster, unitTarget))
+        return;
+
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[eff_idx]);
 
     Aura* aur = CreateAura(m_spellInfo, eff_idx, &damage, &m_currentBasePoints[eff_idx], m_spellAuraHolder, unitTarget, caster, m_CastItem, GetScriptValue());

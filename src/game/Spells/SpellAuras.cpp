@@ -757,6 +757,9 @@ void AreaAura::Update(uint32 diff)
                 if (!apply)
                     continue;
 
+                if (m_areaAuraType == AREA_AURA_FRIEND && target->IsCreature() && static_cast<Creature*>(target)->GetSettings().HasFlag(CreatureStaticFlags3::NO_FRIENDLY_AREA_AURAS))
+                    continue;
+
                 // Skip some targets (TODO: Might require better checks, also unclear how the actual caster must/can be handled)
                 if (actualSpellInfo->HasAttribute(SPELL_ATTR_EX3_ONLY_ON_PLAYER) && target->GetTypeId() != TYPEID_PLAYER)
                     continue;
