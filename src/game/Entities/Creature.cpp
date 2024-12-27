@@ -416,15 +416,17 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
     }
     else if (!data || (data->spawnTemplate->equipmentId == -1))
     {
-        bool usingLoot = false;
-        if (GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT))
+        if (cinfo->EquipmentTemplateId == 0)
+            LoadEquipment(normalInfo->EquipmentTemplateId, true); // use default from normal template if diff does not have any
+        else
+            LoadEquipment(cinfo->EquipmentTemplateId); // else use from diff template
+
+        if (GetSettings().HasFlag(CreatureStaticFlags::CAN_WIELD_LOOT)) // override from loot if any
         {
             PrepareBodyLootState();
             if (m_loot != nullptr)
             {
                 auto [mh, oh, ranged] = m_loot->GetQualifiedWeapons();
-                if (mh != 0 || oh != 0 || ranged != 0)
-                    usingLoot = true;
 
                 if (mh != 0)
                     SetVirtualItem(VIRTUAL_ITEM_SLOT_0, mh);
@@ -435,13 +437,6 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
                 if (ranged != 0)
                     SetVirtualItem(VIRTUAL_ITEM_SLOT_0, ranged);
             }            
-        }
-        if (!usingLoot)
-        {
-            if (cinfo->EquipmentTemplateId == 0)
-                LoadEquipment(normalInfo->EquipmentTemplateId, true); // use default from normal template if diff does not have any
-            else
-                LoadEquipment(cinfo->EquipmentTemplateId);      // else use from diff template
         }
     }
     else if (data)
