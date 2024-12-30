@@ -8020,13 +8020,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 18945:
                 case 19633:
                 case 20686:
+                case 22920:
                 case 23382:
                 case 25778:
+                case 30013:
                 case 30121:                                 // Forceful Howl - Plagued Deathhound
                 case 31389:                                 // Knock Away
                 case 32077:                                 // Boglord Bash
                 case 32959:                                 // Knock Away
-                case 37102:                                 // Knock Away - Crystalcore Devastator 20040
+                case 37102:
+                case 37317:
                 case 37597:                                 // Meat Slap
                 case 40486:                                 // Eject - Bloodboil
                 {
