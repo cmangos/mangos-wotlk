@@ -8045,6 +8045,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 40486:
                             pct = -25;
                             break;
+                        case 22920:                                 // Arcane Blast - Prince Tortheldrin 11486
                         case 30013:                                 // Disarm - Ethereal Thief 16544
                         case 37317:                                 // Knockback - Tempest Falconer 20037
                         case 10101:
