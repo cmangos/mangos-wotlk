@@ -456,9 +456,8 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     for (int i : pQuest->RewRepValueId)       // columnid in QuestFactionReward.dbc (if negative, from second row)
         data << int32(i);
 
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
-        data << int32(0);
-    // data << int32(pQuest->RewRepValue[i]);            // current field for store of rep value, can be reused to implement "override value"
+    for (int i : pQuest->RewRepValue)         // reward reputation override. No bonus is expected given
+        data << int32(i);
 
     uint32 detailsEmotesCount = pQuest->GetDetailsEmoteCount();
     data << uint32(detailsEmotesCount);
