@@ -1137,6 +1137,7 @@ UPDATE creature_template SET ScriptName='npc_father_kamaros' WHERE entry IN (312
 UPDATE creature_template SET ScriptName='npc_saronite_mine_slave' WHERE entry=31397;
 UPDATE creature_template SET ScriptName='npc_grand_admiral_westwind' WHERE entry=29621;
 UPDATE gameobject_template SET ScriptName='go_bloodstained_stone' WHERE entry IN (194023,194024,193980);
+UPDATE creature_template SET ScriptName='npc_lithe_stalker_1' WHERE entry=30894;
 
 /* IRONFORGE */
 

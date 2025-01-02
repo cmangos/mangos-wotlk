@@ -31,6 +31,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/BaseAI/PetAI.h"
 #include "Entities/Vehicle.h"
 
 /*######
@@ -1349,6 +1350,76 @@ struct SummonOminousCloud : public SpellScript
     }
 };
 
+/*######
+## npc_lithe_stalker
+######*/
+
+enum
+{
+    NPC_LITHE_STALKER = 30894,
+
+    SPELL_SUBDUED_LITHE_STALKER    = 58151,        // Subdued Lithe Stalker
+    SPELL_CSA_DUMMY_EFFECT         = 58178,        // CSA Dummy Effect (25 yards)
+    SPELL_GEIST_RETURN_KILL_CREDIR = 58190,
+
+    SAY_AT50HP                     = 31580,
+};
+
+enum LitheStalkerActions
+{
+    LITHER_STALKER_BELOW_50 = 0,
+    LITHER_STALKER_MAX,
+};
+
+// 58151 - Subdued Lithe Stalker
+struct SubduedLitheStalker : public SpellScript, public AuraScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // Subdued Lithe Stalker can be cast only on less than 50% HP - 30894
+        if (target->GetHealthPercent() > 50.0f || !target || target->GetEntry() != NPC_LITHE_STALKER)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+struct npc_lithe_stalker : public PetAI
+{
+    npc_lithe_stalker(Creature* creature) : PetAI(creature, LITHER_STALKER_MAX)
+    {
+        AddTimerlessCombatAction(LITHER_STALKER_BELOW_50, true);
+        Reset();
+    }
+
+    bool CanHandleCharm() const override { return true; }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case LITHER_STALKER_BELOW_50:
+                if (m_creature->GetHealthPercent() <= 50.0f)
+                {
+                    DoBroadcastText(SAY_AT50HP, m_creature);
+                    DisableCombatAction(action);
+                }
+                break;
+        }
+    }
+
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    {
+        if (pSpell->Id == SPELL_CSA_DUMMY_EFFECT)
+        {
+            SetFollowMovement(false);
+            m_creature->CastSpell(nullptr, 58190, TRIGGERED_OLD_TRIGGERED);
+            // DO STUFF HERE
+        }
+    }
+};
+
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1385,6 +1456,11 @@ void AddSC_icecrown()
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_bloodstained_stone>;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "npc_lithe_stalker_1";
+    pNewScript->GetAI = &GetNewAIInstance<npc_lithe_stalker>;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<spell_create_lance>("spell_create_lance");
     RegisterSpellScript<GrabCapturedCrusader>("spell_grab_captured_crusader");
     RegisterSpellScript<DropOffCapturedCrusader>("spell_drop_off_captured_crusader");
@@ -1412,4 +1488,5 @@ void AddSC_icecrown()
     RegisterSpellScript<ControlEidolonWatcher>("spell_control_eidolon_watcher");
     RegisterSpellScript<IronChain>("spell_iron_chain");
     RegisterSpellScript<SummonOminousCloud>("spell_summon_ominous_cloud");
+    RegisterSpellScript<SubduedLitheStalker>("spell_subdued_lithe_stalker");
 }
