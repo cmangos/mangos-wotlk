@@ -2040,6 +2040,8 @@ bool Player::ResolvePendingMount()
     }
 
     UpdateSpeed(MOVE_RUN, true); // update speed
+    if (m_pendingMountAuraFlying)
+        UpdateSpeed(MOVE_FLIGHT, true);
 
     return true;
 }
