@@ -8809,10 +8809,10 @@ bool Unit::UnmountEntry(const Aura* aura)
     return Unmount(aura);
 }
 
-bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
+bool Unit::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool /*isFlyingAura*/)
 {
     // Custom mount (non-aura such as taxi or command) overwrites aura mounts
-    if (!displayid || (IsMounted() && aura && uint32(aura->GetAmount()) != GetMountID()))
+    if (!displayid || (IsMounted() && auraExists && uint32(auraAmount) != GetMountID()))
         return false;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
@@ -8821,7 +8821,7 @@ bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
     else
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, m_overridenMountId);
 
-    if (aura)
+    if (auraExists)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT);
 
     if (GetMountInfo())
@@ -8832,15 +8832,15 @@ bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
     return true;
 }
 
-bool Unit::Unmount(const Aura* aura/* = nullptr*/)
+bool Unit::Unmount(bool auraExists, int32 auraAmount)
 {
     if (!GetMountID())
         return false;
 
-    if (aura)
+    if (auraExists)
     {
         // Custom mount (non-aura such as taxi or command) overwrites aura mounts, do not dismount on aura removal
-        if (uint32(aura->GetAmount()) != GetMountID() && !m_isMountOverriden)
+        if (uint32(auraAmount) != GetMountID() && !m_isMountOverriden)
             return false;
     }
 
@@ -8848,7 +8848,7 @@ bool Unit::Unmount(const Aura* aura/* = nullptr*/)
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT); // always remove even if aura for safety
 
-    if (aura)
+    if (auraExists)
     {
         WorldPacket data(SMSG_DISMOUNT, 8);
         data << GetPackGUID();
@@ -12570,11 +12570,15 @@ void Unit::SendCollisionHeightUpdate(float height)
     {
         if (Player const* player = GetControllingPlayer())
         {
+            auto const counter = player->GetSession()->GetOrderCounter();
+
             WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
             data << GetPackGUID();
-            data << uint32(sWorld.GetGameTime());
+            data << counter;
             data << height;
             player->GetSession()->SendPacket(data);
+            player->GetSession()->GetAnticheat()->OrderSent(data.GetOpcode(), counter);
+            player->GetSession()->IncrementOrderCounter();
         }
     }
 }
@@ -13383,13 +13387,13 @@ float Unit::OCTRegenMPPerSpirit() const
     return regen;
 }
 
-float Unit::GetCollisionHeight() const
+float Unit::CalculateCollisionHeight(uint32 mountId) const
 {
     float scaleMod = GetObjectScale(); // 99% sure about this
 
-    if (GetMountID())
+    if (mountId)
     {
-        if (CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID)))
+        if (CreatureDisplayInfoEntry const* mountDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(mountId))
         {
             if (CreatureModelDataEntry const* mountModelData = sCreatureModelDataStore.LookupEntry(mountDisplayInfo->ModelId))
             {
@@ -13411,6 +13415,11 @@ float Unit::GetCollisionHeight() const
 
     float const collisionHeight = scaleMod * modelData->CollisionHeight * modelData->Scale * displayInfo->scale;
     return collisionHeight == 0.0f ? DEFAULT_COLLISION_HEIGHT : collisionHeight;
+}
+
+float Unit::GetCollisionHeight() const
+{
+    return CalculateCollisionHeight(GetMountID());
 }
 
 float Unit::GetCollisionWidth() const

@@ -704,6 +704,12 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_lastDbGuid = 0;
     m_lastGameObject = false;
+
+    m_pendingMountId = 0;
+    m_pendingMountAuraAmount = 0;
+    m_pendingMountAura = false;
+    m_pendingMountAuraFlying = false;
+    m_pendingDismount = false;
 }
 
 Player::~Player()
@@ -1972,20 +1978,57 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
     return true;
 }
 
-bool Player::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
+bool Player::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool isFlyingAura)
 {
-    if (!Unit::Mount(displayid, aura))
+    float height = GetCollisionHeight();
+    uint32 newMountId = GetOverridenMountId() ? GetOverridenMountId() : displayid;
+    float newHeight = CalculateCollisionHeight(newMountId);
+
+    m_pendingMountId = newMountId;
+    m_pendingMountAura = auraExists;
+    m_pendingMountAuraAmount = auraAmount;
+    m_pendingMountAuraFlying = isFlyingAura;
+    m_pendingDismount = false;
+
+    if (height != newHeight)
+        SendCollisionHeightUpdate(newHeight);
+    else
+        ResolvePendingMount();
+
+    return true;
+}
+
+bool Player::Unmount(bool auraExists, int32 auraAmount)
+{
+    float height = GetCollisionHeight();
+    float newHeight = CalculateCollisionHeight(0);
+
+    m_pendingMountAura = auraExists;
+    m_pendingMountAuraAmount = auraAmount;
+    m_pendingDismount = true;
+
+    if (height != newHeight)
+        SendCollisionHeightUpdate(newHeight);
+    else
+        ResolvePendingUnmount();
+
+    return true;
+}
+
+bool Player::ResolvePendingMount()
+{
+    if (!Unit::Mount(m_pendingMountId, m_pendingMountAura, m_pendingMountAuraAmount))
         return false;
 
     bool keepPetOnMount = !sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT);
     bool keepPetOnFlyingMount = !keepPetOnMount ? false : sWorld.getConfig(CONFIG_BOOL_KEEP_PET_ON_FLYING_MOUNT);
     // Custom mount (non-aura such as taxi or command) or in flight: unsummon any pet
-    if (!aura || (!keepPetOnFlyingMount && (IsFreeFlying() || IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))))
+    if (!m_pendingMountAura || (!keepPetOnFlyingMount && (IsFreeFlying() || m_pendingMountAuraFlying)))
     {
         UnsummonPetTemporaryIfAny();
     }
     // Land mount aura: unsummon only permanent pet
-    else if (aura)
+    else if (m_pendingMountAura)
     {
         if (Pet* pet = GetPet())
         {
@@ -1996,16 +2039,14 @@ bool Player::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
         }
     }
 
-    float height = GetCollisionHeight();
-    if (height)
-        SendCollisionHeightUpdate(height);
+    UpdateSpeed(MOVE_RUN, true); // update speed
 
     return true;
 }
 
-bool Player::Unmount(const Aura* aura/* = nullptr*/)
+bool Player::ResolvePendingUnmount()
 {
-    if (!Unit::Unmount(aura))
+    if (!Unit::Unmount(m_pendingMountAura, m_pendingMountAuraAmount))
         return false;
 
     // only resummon old pet if the player is already added to a map
@@ -2020,9 +2061,7 @@ bool Player::Unmount(const Aura* aura/* = nullptr*/)
     else
         ResummonPetTemporaryUnSummonedIfAny();
 
-    float height = GetCollisionHeight();
-    if (height)
-        SendCollisionHeightUpdate(height);
+    UpdateSpeed(MOVE_RUN, true); // update speed
 
     return true;
 }

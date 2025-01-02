@@ -1172,6 +1172,7 @@ class Unit : public WorldObject
 
         void CleanupsBeforeDelete() override;               // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
+        float CalculateCollisionHeight(uint32 mountId) const;
         float GetCollisionHeight() const override;
         float GetCollisionWidth() const override;
         float GetObjectBoundingRadius() const override { return m_floatValues[UNIT_FIELD_BOUNDINGRADIUS]; } // overwrite WorldObject version
@@ -1538,8 +1539,8 @@ class Unit : public WorldObject
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
         bool MountEntry(uint32 templateEntry, const Aura* aura = nullptr);
         bool UnmountEntry(const Aura* aura = nullptr);
-        virtual bool Mount(uint32 displayid, const Aura* aura = nullptr);
-        virtual bool Unmount(const Aura* aura = nullptr);
+        virtual bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false);
+        virtual bool Unmount(bool auraExists = false, int32 auraAmount = 0);
 
         VehicleInfo* GetVehicleInfo() const { return m_vehicleInfo.get(); }
         MaNGOS::unique_weak_ptr<VehicleInfo> GetVehicleInfoWeakPtr() const { return m_vehicleInfo; }
@@ -2795,6 +2796,8 @@ class Unit : public WorldObject
         void SetCritterGuid(ObjectGuid critterGuid) { SetGuidValue(UNIT_FIELD_CRITTER, critterGuid); }
 
         FormationSlotDataSPtr m_formationSlot;
+
+        uint32 GetOverridenMountId() const { return m_overridenMountId; }
 
     private:
         void CleanupDeletedAuras();

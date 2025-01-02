@@ -1124,8 +1124,12 @@ class Player : public Unit
         ReputationRank GetReactionTo(Corpse const* corpse) const override;
         bool IsInGroup(Unit const* other, bool party = false, bool ignoreCharms = false) const override;
 
-        bool Mount(uint32 displayid, const Aura* aura = nullptr) override;
-        bool Unmount(const Aura* aura = nullptr) override;
+        bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false) override;
+        bool Unmount(bool auraExists = false, int32 auraAmount = 0) override;
+
+        bool ResolvePendingMount();
+        bool ResolvePendingUnmount();
+        bool IsPendingDismount() const { return m_pendingDismount; }
 
         void ToggleAFK();
         void ToggleDND();
@@ -2984,6 +2988,12 @@ class Player : public Unit
         uint32 m_lastDbGuid; bool m_lastGameObject;
 
         std::set<uint32> m_serversideDailyQuests;
+
+        uint32 m_pendingMountId;
+        bool m_pendingMountAura;
+        int32 m_pendingMountAuraAmount;
+        bool m_pendingMountAuraFlying;
+        bool m_pendingDismount;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

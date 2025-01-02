@@ -449,6 +449,11 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
         data << movementInfo;
         data << newspeed; // new collision height
         mover->SendMessageToSetExcept(data, _player);
+
+        if (_player->IsPendingDismount())
+            _player->ResolvePendingUnmount();
+        else
+            _player->ResolvePendingMount();
         return;
     }
 

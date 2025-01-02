@@ -58,6 +58,8 @@ uint16 GetOrderResponse(uint16 opcode)
         case SMSG_MOVE_WATER_WALK:
         case SMSG_MOVE_LAND_WALK:
             return CMSG_MOVE_WATER_WALK_ACK;
+        case SMSG_MOVE_SET_COLLISION_HGT:
+            return CMSG_MOVE_SET_COLLISION_HGT_ACK;
         default:
             return 0;
     }
