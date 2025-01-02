@@ -2362,7 +2362,7 @@ struct npc_razorthorn_ravager : public CombatAI
 
     }
 
-    bool CanHandleCharm() override { return true; }
+    bool CanHandleCharm() const override { return true; }
 
     void JustGotCharmed(Unit* /*charmer*/) override
     {

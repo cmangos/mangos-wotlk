@@ -1832,7 +1832,7 @@ struct npc_fel_cannon : public Scripted_NoMovementAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
     }
 
-    bool CanHandleCharm() override { return true; }
+    bool CanHandleCharm() const override { return true; }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
