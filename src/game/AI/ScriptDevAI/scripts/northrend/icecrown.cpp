@@ -1415,7 +1415,7 @@ struct npc_lithe_stalker : public PetAI
         {
             SetFollowMovement(false);
             m_creature->CastSpell(nullptr, 58190, TRIGGERED_OLD_TRIGGERED);
-            // DO STUFF HERE
+            m_creature->GetMotionMaster()->MoveWaypoint(1, FORCED_MOVEMENT_RUN);
         }
     }
 };
