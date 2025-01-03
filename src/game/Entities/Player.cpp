@@ -2064,6 +2064,7 @@ bool Player::ResolvePendingUnmount()
         ResummonPetTemporaryUnSummonedIfAny();
 
     UpdateSpeed(MOVE_RUN, true); // update speed
+    UpdateSpeed(MOVE_FLIGHT, true);
 
     return true;
 }
