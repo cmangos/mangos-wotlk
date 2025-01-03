@@ -12391,7 +12391,11 @@ void Unit::SetVehicleId(uint32 entry, uint32 overwriteNpcEntry)
     if (m_vehicleInfo && entry == m_vehicleInfo->GetVehicleEntry()->m_ID)
         return;
 
-    m_vehicleInfo = nullptr;
+    if (m_vehicleInfo)
+    {
+        m_vehicleInfo->Cleanup();
+        m_vehicleInfo = nullptr;
+    }
 
     if (entry)
     {

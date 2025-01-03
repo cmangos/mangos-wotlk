@@ -172,7 +172,8 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
     m_overwriteNpcEntry(overwriteNpcEntry),
     m_isInitialized(false),
     m_disabledAccessoryInit(false),
-    m_originalFaction(owner->GetFaction())
+    m_originalFaction(owner->GetFaction()),
+    m_cleanedUp(false)
 {
     MANGOS_ASSERT(vehicleEntry);
 
@@ -197,9 +198,7 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
 
 VehicleInfo::~VehicleInfo()
 {
-    ((Unit*)m_owner)->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-
-    RemoveAccessoriesFromMap();                             // Remove accessories (for example required with player vehicles)
+    MANGOS_ASSERT(m_cleanedUp);
 }
 
 void VehicleInfo::Initialize()
@@ -246,6 +245,15 @@ void VehicleInfo::Initialize()
     }
 
     m_isInitialized = true;
+}
+
+void VehicleInfo::Cleanup()
+{
+    ((Unit*)m_owner)->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+
+    RemoveAccessoriesFromMap();                             // Remove accessories (for example required with player vehicles)
+
+    m_cleanedUp = true;
 }
 
 void VehicleInfo::SummonPassenger(uint32 entry, Position const& pos, uint8 seatId)

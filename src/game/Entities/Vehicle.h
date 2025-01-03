@@ -80,6 +80,7 @@ class VehicleInfo : public TransportBase
     public:
         explicit VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry);
         void Initialize();                                  ///< Initializes the accessories
+        void Cleanup();
         bool IsInitialized() const { return m_isInitialized; }
         void SummonPassenger(uint32 entry, Position const& pos, uint8 seatId);
 
@@ -139,6 +140,7 @@ class VehicleInfo : public TransportBase
         uint32 m_originalFaction;                           // Internal use to store the original unit faction before taking control of the unit
         GuidSet m_accessoryGuids;                           // Stores the summoned accessories of this vehicle
         std::vector<std::pair<ObjectGuid, uint8>> m_unboardedAccessories; // Stores unboarded accessories for purpose of recall
+        bool m_cleanedUp;
 };
 
 #endif
