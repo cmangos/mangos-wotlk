@@ -1125,7 +1125,7 @@ class Player : public Unit
         bool IsInGroup(Unit const* other, bool party = false, bool ignoreCharms = false) const override;
 
         bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false) override;
-        bool Unmount(bool auraExists = false, int32 auraAmount = 0) override;
+        bool Unmount(bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false) override;
 
         bool ResolvePendingMount();
         bool ResolvePendingUnmount();

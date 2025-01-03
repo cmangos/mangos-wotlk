@@ -1540,7 +1540,7 @@ class Unit : public WorldObject
         bool MountEntry(uint32 templateEntry, const Aura* aura = nullptr);
         bool UnmountEntry(const Aura* aura = nullptr);
         virtual bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false);
-        virtual bool Unmount(bool auraExists = false, int32 auraAmount = 0);
+        virtual bool Unmount(bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false);
 
         VehicleInfo* GetVehicleInfo() const { return m_vehicleInfo.get(); }
         MaNGOS::unique_weak_ptr<VehicleInfo> GetVehicleInfoWeakPtr() const { return m_vehicleInfo; }

@@ -8800,13 +8800,13 @@ bool Unit::MountEntry(uint32 templateEntry, const Aura* aura)
 
     SetMountInfo(ci);
 
-    return Mount(display_id, aura);
+    return Mount(display_id, aura, aura ? aura->GetAmount() : 0);
 }
 
 bool Unit::UnmountEntry(const Aura* aura)
 {
     SetMountInfo(nullptr);
-    return Unmount(aura);
+    return Unmount(aura, aura ? aura->GetAmount() : 0, aura ? IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED) : false);
 }
 
 bool Unit::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool /*isFlyingAura*/)
@@ -8832,7 +8832,7 @@ bool Unit::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool /*isF
     return true;
 }
 
-bool Unit::Unmount(bool auraExists, int32 auraAmount)
+bool Unit::Unmount(bool auraExists, int32 auraAmount, bool /*isFlyingAura*/)
 {
     if (!GetMountID())
         return false;

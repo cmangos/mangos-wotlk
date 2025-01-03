@@ -3846,7 +3846,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
     }
     else
     {
-        target->Unmount(this, this->GetAmount());
+        target->Unmount(this, this->GetAmount(), IsSpellHaveAura(GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED));
 
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
         if (ci && target->IsVehicle() && ci->VehicleTemplateId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)

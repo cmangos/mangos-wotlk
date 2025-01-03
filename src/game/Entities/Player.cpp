@@ -1998,13 +1998,14 @@ bool Player::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool isF
     return true;
 }
 
-bool Player::Unmount(bool auraExists, int32 auraAmount)
+bool Player::Unmount(bool auraExists, int32 auraAmount, bool isFlyingAura)
 {
     float height = GetCollisionHeight();
     float newHeight = CalculateCollisionHeight(0);
 
     m_pendingMountAura = auraExists;
     m_pendingMountAuraAmount = auraAmount;
+    m_pendingMountAuraFlying = isFlyingAura;
     m_pendingDismount = true;
 
     if (height != newHeight)
@@ -2040,6 +2041,8 @@ bool Player::ResolvePendingMount()
     }
 
     UpdateSpeed(MOVE_RUN, true); // update speed
+    if (m_pendingMountAuraFlying)
+        UpdateSpeed(MOVE_FLIGHT, true);
 
     return true;
 }
@@ -2062,6 +2065,8 @@ bool Player::ResolvePendingUnmount()
         ResummonPetTemporaryUnSummonedIfAny();
 
     UpdateSpeed(MOVE_RUN, true); // update speed
+    if (m_pendingMountAuraFlying)
+        UpdateSpeed(MOVE_FLIGHT, true);
 
     return true;
 }
