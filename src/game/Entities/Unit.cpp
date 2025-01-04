@@ -10617,6 +10617,9 @@ void Unit::RemoveFromWorld()
                 transport->RemovePassenger(this);
 
         m_FollowingRefManager.clearReferences();
+
+        if (m_vehicleInfo)
+            m_vehicleInfo->Cleanup();
     }
 
     WorldObject::RemoveFromWorld();
@@ -12570,7 +12573,7 @@ void Unit::EndSpline()
 
 void Unit::SendCollisionHeightUpdate(float height)
 {
-    if (IsClientControlled())
+    if (IsClientControlled() && IsInWorld())
     {
         if (Player const* player = GetControllingPlayer())
         {

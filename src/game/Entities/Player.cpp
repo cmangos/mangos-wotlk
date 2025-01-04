@@ -21464,6 +21464,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     if (IsImmobilizedState()) // TODO: Figure out if this protocol is correct
         SendMoveRoot(true);
 
+    if (m_pendingMountId)
+        SendCollisionHeightUpdate(CalculateCollisionHeight(m_pendingMountId));
+
     SendAurasForTarget(this);
 
     SendEnchantmentDurations();                             // must be after add to map
