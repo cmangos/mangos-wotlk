@@ -10631,8 +10631,11 @@ void Unit::CleanupsBeforeDelete()
         ClearComboPointHolders();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
     }
-    if (IsVehicle())
+    if (m_vehicleInfo)
+    {
         m_vehicleInfo->Cleanup();
+        m_vehicleInfo = nullptr;
+    }
     WorldObject::CleanupsBeforeDelete();
 }
 
