@@ -912,6 +912,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57666,'spell_frozen_siegebolt'),
 (57667,'spell_frozen_siegebolt'),
 (57669,'spell_replenishment'),
+(57557,'spell_pyrobuffet_sartharion'),
 (57853,'spell_master_summoners_staff'),
 (58151,'spell_subdued_lithe_stalker'),
 (58203,'spell_iron_chain'),

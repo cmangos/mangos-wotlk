@@ -63,20 +63,20 @@ enum
 class instance_obsidian_sanctum : public ScriptedInstance
 {
     public:
-        instance_obsidian_sanctum(Map* pMap);
+        instance_obsidian_sanctum(Map* map);
 
         void Initialize() override;
 
-        void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureCreate(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         ObjectGuid SelectRandomFireCycloneGuid();
 
         bool IsActivePortal()
         {
-            for (bool i : m_bPortalActive)
+            for (bool i : m_portalActive)
             {
                 if (i)
                     return true;
@@ -85,21 +85,21 @@ class instance_obsidian_sanctum : public ScriptedInstance
             return false;
         }
 
-        void SetPortalStatus(uint8 uiType, bool bStatus) { m_bPortalActive[uiType] = bStatus; }
-        bool GetPortaStatus(uint8 uiType) { return m_bPortalActive[uiType]; }
+        void SetPortalStatus(uint8 type, bool status) { m_portalActive[type] = status; }
+        bool GetPortaStatus(uint8 type) { return m_portalActive[type]; }
 
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
-        bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target, uint32 miscValue1 /* = 0*/) const override;
+        bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override;
 
     private:
-        uint32 m_auiEncounter[MAX_ENCOUNTER];
-        bool m_bPortalActive[MAX_TWILIGHT_DRAGONS];
+        uint32 m_encounter[MAX_ENCOUNTER];
+        bool m_portalActive[MAX_TWILIGHT_DRAGONS];
 
-        uint8 m_uiAliveDragons;
+        uint8 m_aliveDragons;
 
-        std::set<uint32> m_sVolcanoBlowFailPlayers;
+        std::set<uint32> m_volcanoBlowFailPlayers;
 
-        GuidList m_lFireCycloneGuidList;
+        GuidList m_fireCycloneGuidList;
 };
 
 #endif

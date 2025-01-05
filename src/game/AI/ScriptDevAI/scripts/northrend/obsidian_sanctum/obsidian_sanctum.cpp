@@ -28,127 +28,122 @@ EndScriptData */
 0 - Sartharion
 */
 
-instance_obsidian_sanctum::instance_obsidian_sanctum(Map* pMap) : ScriptedInstance(pMap),
-    m_uiAliveDragons(0)
+instance_obsidian_sanctum::instance_obsidian_sanctum(Map* map) : ScriptedInstance(map),
+    m_aliveDragons(0)
 {
     Initialize();
 }
 
 void instance_obsidian_sanctum::Initialize()
 {
-    memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    memset(&m_encounter, 0, sizeof(m_encounter));
 
-    for (bool& i : m_bPortalActive)
+    for (bool& i : m_portalActive)
         i = false;
 }
 
-void instance_obsidian_sanctum::OnCreatureCreate(Creature* pCreature)
+void instance_obsidian_sanctum::OnCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         // The three dragons below set to active state once created.
         // We must expect bigger raid to encounter main boss, and then three dragons must be active due to grid differences
         case NPC_TENEBRON:
         case NPC_SHADRON:
         case NPC_VESPERON:
-            pCreature->SetActiveObjectState(true);
+            creature->SetActiveObjectState(true);
         case NPC_SARTHARION:
         case NPC_VESPERON_CONTROLLER:
         case NPC_VESPERON_CONTROLLER_DEBUFF_CLEAR:
         case NPC_TENEBRON_EGG_CONTROLLER:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_FIRE_CYCLONE:
-            m_lFireCycloneGuidList.push_back(pCreature->GetObjectGuid());
+            m_fireCycloneGuidList.push_back(creature->GetObjectGuid());
             break;
     }
 }
 
-void instance_obsidian_sanctum::SetData(uint32 uiType, uint32 uiData)
+void instance_obsidian_sanctum::SetData(uint32 type, uint32 data)
 {
-    if (uiType == TYPE_SARTHARION_EVENT)
+    if (type == TYPE_SARTHARION_EVENT)
     {
-        m_auiEncounter[0] = uiData;
-        if (uiData == IN_PROGRESS)
-            m_sVolcanoBlowFailPlayers.clear();
+        m_encounter[0] = data;
+        if (data == IN_PROGRESS)
+            m_volcanoBlowFailPlayers.clear();
     }
-    else if (uiType == TYPE_ALIVE_DRAGONS)
-        m_uiAliveDragons = uiData;
-    else if (uiType == TYPE_VOLCANO_BLOW_FAILED)
+    else if (type == TYPE_ALIVE_DRAGONS)
+        m_aliveDragons = data;
+    else if (type == TYPE_VOLCANO_BLOW_FAILED)
     {
         // Insert the players who fail the achiev and haven't been already inserted in the set
-        if (m_sVolcanoBlowFailPlayers.find(uiData) == m_sVolcanoBlowFailPlayers.end())
-            m_sVolcanoBlowFailPlayers.insert(uiData);
+        if (m_volcanoBlowFailPlayers.find(data) == m_volcanoBlowFailPlayers.end())
+            m_volcanoBlowFailPlayers.insert(data);
     }
 
     // No need to save anything here
 }
 
-uint32 instance_obsidian_sanctum::GetData(uint32 uiType) const
+uint32 instance_obsidian_sanctum::GetData(uint32 type) const
 {
-    if (uiType == TYPE_SARTHARION_EVENT)
-        return m_auiEncounter[0];
+    if (type == TYPE_SARTHARION_EVENT)
+        return m_encounter[0];
 
     return 0;
 }
 
 ObjectGuid instance_obsidian_sanctum::SelectRandomFireCycloneGuid()
 {
-    if (m_lFireCycloneGuidList.empty())
+    if (m_fireCycloneGuidList.empty())
         return ObjectGuid();
 
-    GuidList::iterator iter = m_lFireCycloneGuidList.begin();
-    advance(iter, urand(0, m_lFireCycloneGuidList.size() - 1));
+    GuidList::iterator iter = m_fireCycloneGuidList.begin();
+    advance(iter, urand(0, m_fireCycloneGuidList.size() - 1));
 
     return *iter;
 }
 
-bool instance_obsidian_sanctum::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
+bool instance_obsidian_sanctum::CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* /*target*/, uint32 /*miscValue1 = 0*/) const
 {
-    switch (uiCriteriaId)
+    switch (criteriaId)
     {
         case ACHIEV_DRAGONS_ALIVE_1_N:
         case ACHIEV_DRAGONS_ALIVE_1_H:
-            return m_uiAliveDragons >= 1;
+            return m_aliveDragons >= 1;
         case ACHIEV_DRAGONS_ALIVE_2_N:
         case ACHIEV_DRAGONS_ALIVE_2_H:
-            return m_uiAliveDragons >= 2;
+            return m_aliveDragons >= 2;
         case ACHIEV_DRAGONS_ALIVE_3_N:
         case ACHIEV_DRAGONS_ALIVE_3_H:
-            return m_uiAliveDragons >= 3;
+            return m_aliveDragons >= 3;
         case ACHIEV_CRIT_VOLCANO_BLOW_N:
         case ACHIEV_CRIT_VOLCANO_BLOW_H:
             // Return true if not found in the set
-            return m_sVolcanoBlowFailPlayers.find(pSource->GetGUIDLow()) == m_sVolcanoBlowFailPlayers.end();
+            return m_volcanoBlowFailPlayers.find(source->GetGUIDLow()) == m_volcanoBlowFailPlayers.end();
         default:
             return false;
     }
 }
 
-bool instance_obsidian_sanctum::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const
+bool instance_obsidian_sanctum::CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const
 {
-    switch (uiInstanceConditionId)
+    switch (instanceConditionId)
     {
         case INSTANCE_CONDITION_ID_HARD_MODE:               // Exactly one dragon alive on event start
         case INSTANCE_CONDITION_ID_HARD_MODE_2:             // Exactly two dragons alive on event start
         case INSTANCE_CONDITION_ID_HARD_MODE_3:             // All three dragons alive on event start
-            return m_uiAliveDragons == uiInstanceConditionId;
+            return m_aliveDragons == instanceConditionId;
     }
 
     script_error_log("instance_obsidian_sanctum::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
-                     uiInstanceConditionId, pPlayer ? pPlayer->GetGuidStr().c_str() : "NULL", pConditionSource ? pConditionSource->GetGuidStr().c_str() : "NULL", conditionSourceType);
+                     instanceConditionId, player ? player->GetGuidStr().c_str() : "NULL", conditionSource ? conditionSource->GetGuidStr().c_str() : "NULL", conditionSourceType);
     return false;
-}
-
-InstanceData* GetInstanceData_instance_obsidian_sanctum(Map* pMap)
-{
-    return new instance_obsidian_sanctum(pMap);
 }
 
 void AddSC_instance_obsidian_sanctum()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_obsidian_sanctum";
-    pNewScript->GetInstanceData = GetInstanceData_instance_obsidian_sanctum;
+    pNewScript->GetInstanceData = GetNewInstanceScript<instance_obsidian_sanctum>;
     pNewScript->RegisterSelf();
 }
