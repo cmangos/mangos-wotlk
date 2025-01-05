@@ -3635,6 +3635,11 @@ UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 58121;
 -- Safirdrang's Chill - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 4020;
 
+-- Deathstorm 58912 - 12 target max
+UPDATE spell_template SET MaxAffectedTargets = 12 WHERE id = 58912;
+
+UPDATE spell_template SET AttributesServerSide = AttributesServerSide|0x00000004 WHERE Id IN (58548); -- Ethereal
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
