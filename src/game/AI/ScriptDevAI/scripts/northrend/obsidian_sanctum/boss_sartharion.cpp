@@ -31,26 +31,26 @@ EndScriptData */
 enum
 {
     // Sartharion Yell
-    SAY_SARTHARION_AGGRO                        = -1615018,
-    SAY_SARTHARION_BERSERK                      = -1615019,
-    SAY_SARTHARION_BREATH                       = -1615020,
-    SAY_SARTHARION_CALL_SHADRON                 = -1615021,
-    SAY_SARTHARION_CALL_TENEBRON                = -1615022,
-    SAY_SARTHARION_CALL_VESPERON                = -1615023,
-    SAY_SARTHARION_DEATH                        = -1615024,
-    SAY_SARTHARION_SPECIAL_1                    = -1615025,
-    SAY_SARTHARION_SPECIAL_2                    = -1615026,
-    SAY_SARTHARION_SPECIAL_3                    = -1615027,
-    SAY_SARTHARION_SPECIAL_4                    = -1615028,
-    SAY_SARTHARION_SLAY_1                       = -1615029,
-    SAY_SARTHARION_SLAY_2                       = -1615030,
-    SAY_SARTHARION_SLAY_3                       = -1615031,
+    SAY_SARTHARION_AGGRO                        = 31400,
+    SAY_SARTHARION_BERSERK                      = 31368,
+    SAY_SARTHARION_BREATH                       = 31907,
+    SAY_SARTHARION_CALL_SHADRON                 = 31318,
+    SAY_SARTHARION_CALL_TENEBRON                = 31319,
+    SAY_SARTHARION_CALL_VESPERON                = 31320,
+    SAY_SARTHARION_DEATH                        = 31341,
+    SAY_SARTHARION_SPECIAL_1                    = 31363,
+    SAY_SARTHARION_SPECIAL_2                    = 31904,
+    SAY_SARTHARION_SPECIAL_3                    = 31905,
+    SAY_SARTHARION_SPECIAL_4                    = 31906,
+    SAY_SARTHARION_SLAY_1                       = 31908,
+    SAY_SARTHARION_SLAY_2                       = 31909,
+    SAY_SARTHARION_SLAY_3                       = 31910,
 
-    EMOTE_LAVA_CHURN                            = -1615032,
-    EMOTE_SHADRON_DICIPLE                       = -1615008,
-    EMOTE_VESPERON_DICIPLE                      = -1615041,
-    EMOTE_HATCH_EGGS                            = -1615017,
-    EMOTE_OPEN_PORTAL                           = -1615042, // emote shared by two dragons
+    EMOTE_LAVA_CHURN                            = 31362,
+    EMOTE_SHADRON_DICIPLE                       = 32958,
+    EMOTE_VESPERON_DICIPLE                      = 32960,
+    EMOTE_HATCH_EGGS                            = 32959,
+    EMOTE_OPEN_PORTAL                           = 32554, // emote shared by two dragons
 
     // Sartharion Spells
     SPELL_BERSERK                               = 61632,    // Increases the caster's attack speed by 150% and all damage it deals by 500% for 5 min.
@@ -203,7 +203,7 @@ struct boss_sartharionAI : public CombatAI
         AddCustomAction(SARTHARION_CALL_VESPERON, true, [&]() { CallDragon(NPC_VESPERON); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(SARTHARION_LAVA_STRIKE, 20000, 30000, [&]() { HandleLavaStrike(); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(SARTHARION_FLAME_TSUNAMI, 30000u, [&]() { SendFlameTsunami(); }, TIMER_COMBAT_COMBAT);
-        AddCustomAction(SARTHARION_RESET_WORLDSTATE, true, [&]() { HandleResetWorldstate(); });
+        AddCustomAction(SARTHARION_RESET_WORLDSTATE, true, [&]() { HandleResetWorldstate(); }, TIMER_COMBAT_COMBAT);
         AddOnKillText(SAY_SARTHARION_SLAY_1, SAY_SARTHARION_SLAY_2, SAY_SARTHARION_SLAY_3);
     }
 
@@ -221,7 +221,7 @@ struct boss_sartharionAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_SARTHARION_AGGRO, m_creature);
+        DoBroadcastText(SAY_SARTHARION_AGGRO, m_creature);
 
         if (m_instance)
         {
@@ -232,7 +232,7 @@ struct boss_sartharionAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_SARTHARION_DEATH, m_creature);
+        DoBroadcastText(SAY_SARTHARION_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_SARTHARION_EVENT, DONE);
@@ -267,7 +267,7 @@ struct boss_sartharionAI : public CombatAI
             if (!tenebron->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
                 tenebron->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
-            ResetCombatAction(SARTHARION_CALL_TENEBRON, 30000);
+            ResetTimer(SARTHARION_CALL_TENEBRON, 30000);
         }
 
         if (shadron && shadron->IsAlive() && !shadron->GetVictim())
@@ -278,7 +278,7 @@ struct boss_sartharionAI : public CombatAI
             if (!shadron->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
                 shadron->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
-            ResetCombatAction(SARTHARION_CALL_SHADRON, 75000);
+            ResetTimer(SARTHARION_CALL_SHADRON, 75000);
         }
 
         if (vesperon && vesperon->IsAlive() && !vesperon->GetVictim())
@@ -289,7 +289,7 @@ struct boss_sartharionAI : public CombatAI
             if (!vesperon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
                 vesperon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
-            ResetCombatAction(SARTHARION_CALL_VESPERON, 120000);
+            ResetTimer(SARTHARION_CALL_VESPERON, 120000);
         }
 
         if (uiCountFetchableDragons)
@@ -331,15 +331,15 @@ struct boss_sartharionAI : public CombatAI
                         break;
                 }
 
-                DoScriptText(iTextId, m_creature);
+                DoBroadcastText(iTextId, m_creature);
             }
         }
     }
 
     void SendFlameTsunami()
     {
-        DoScriptText(EMOTE_LAVA_CHURN, m_creature);
-        DoScriptText(SAY_SARTHARION_SPECIAL_4, m_creature);
+        DoBroadcastText(EMOTE_LAVA_CHURN, m_creature);
+        DoBroadcastText(SAY_SARTHARION_SPECIAL_4, m_creature);
         m_creature->GetMap()->GetVariableManager().SetVariable(urand(0, 1) ? WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_LEFT : WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_RIGHT, 1);
         ResetTimer(SARTHARION_RESET_WORLDSTATE, 5000);
         ResetTimer(SARTHARION_FLAME_TSUNAMI, 33000);
@@ -351,6 +351,33 @@ struct boss_sartharionAI : public CombatAI
         m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_SPAWN_FLAME_WALL_RIGHT, 0);
     }
 
+    void EnterEvadeMode() override
+    {
+        Creature* tenebron = m_instance->GetSingleCreatureFromStorage(NPC_TENEBRON);
+        if (tenebron)
+        {
+            tenebron->SetRespawnDelay(30, true);
+            tenebron->ForcedDespawn();
+        }
+
+        Creature* shadron = m_instance->GetSingleCreatureFromStorage(NPC_SHADRON);
+        if (shadron)
+        {
+            shadron->SetRespawnDelay(30, true);
+            shadron->ForcedDespawn();
+        }
+
+        Creature* vesperon = m_instance->GetSingleCreatureFromStorage(NPC_VESPERON);
+        if (vesperon)
+        {
+            vesperon->SetRespawnDelay(30, true);
+            vesperon->ForcedDespawn();
+        }
+
+        m_creature->SetRespawnDelay(30, true);
+        m_creature->ForcedDespawn();
+    }
+
     void HandleLavaStrike()
     {
         if (m_instance)
@@ -360,9 +387,9 @@ struct boss_sartharionAI : public CombatAI
 
             switch (urand(0, 4))
             {
-                case 0: DoScriptText(SAY_SARTHARION_SPECIAL_1, m_creature); break;
-                case 1: DoScriptText(SAY_SARTHARION_SPECIAL_2, m_creature); break;
-                case 2: DoScriptText(SAY_SARTHARION_SPECIAL_3, m_creature); break;
+                case 0: DoBroadcastText(SAY_SARTHARION_SPECIAL_1, m_creature); break;
+                case 1: DoBroadcastText(SAY_SARTHARION_SPECIAL_2, m_creature); break;
+                case 2: DoBroadcastText(SAY_SARTHARION_SPECIAL_3, m_creature); break;
             }
             ResetTimer(SARTHARION_LAVA_STRIKE, m_isSoftEnraged ? 10000 : 30000);
         }
@@ -388,7 +415,7 @@ struct boss_sartharionAI : public CombatAI
                 {
                     DisableCombatAction(action);
                     ResetCombatAction(SARTHARION_ENRAGE_DRAGONS_TIMER, 1000);
-                    DoScriptText(SAY_SARTHARION_BERSERK, m_creature);
+                    DoBroadcastText(SAY_SARTHARION_BERSERK, m_creature);
                 }
                 break;
             case SARTHARION_ENRAGE_DRAGONS_TIMER:
@@ -416,38 +443,38 @@ struct boss_sartharionAI : public CombatAI
 
 enum TeneText
 {
-    SAY_TENEBRON_AGGRO                      = -1615009,
-    SAY_TENEBRON_SLAY_1                     = -1615010,
-    SAY_TENEBRON_SLAY_2                     = -1615011,
-    SAY_TENEBRON_DEATH                      = -1615012,
-    SAY_TENEBRON_BREATH                     = -1615013,
-    SAY_TENEBRON_RESPOND                    = -1615014,
-    SAY_TENEBRON_SPECIAL_1                  = -1615015,
-    SAY_TENEBRON_SPECIAL_2                  = -1615016
+    SAY_TENEBRON_AGGRO                      = 31993,
+    SAY_TENEBRON_SLAY_1                     = 31994,
+    SAY_TENEBRON_SLAY_2                     = 31995,
+    SAY_TENEBRON_DEATH                      = 32000,
+    SAY_TENEBRON_BREATH                     = 31996,
+    SAY_TENEBRON_RESPOND                    = 31999,
+    SAY_TENEBRON_SPECIAL_1                  = 31997,
+    SAY_TENEBRON_SPECIAL_2                  = 31998
 };
 
 enum ShadText
 {
-    SAY_SHADRON_AGGRO                       = -1615000,
-    SAY_SHADRON_SLAY_1                      = -1615001,
-    SAY_SHADRON_SLAY_2                      = -1615002,
-    SAY_SHADRON_DEATH                       = -1615003,
-    SAY_SHADRON_BREATH                      = -1615004,
-    SAY_SHADRON_RESPOND                     = -1615005,
-    SAY_SHADRON_SPECIAL_1                   = -1615006,
-    SAY_SHADRON_SPECIAL_2                   = -1615007
+    SAY_SHADRON_AGGRO                       = 31985,
+    SAY_SHADRON_SLAY_1                      = 31986,
+    SAY_SHADRON_SLAY_2                      = 31987,
+    SAY_SHADRON_DEATH                       = 31984,
+    SAY_SHADRON_BREATH                      = 31988,
+    SAY_SHADRON_RESPOND                     = 31991,
+    SAY_SHADRON_SPECIAL_1                   = 31989,
+    SAY_SHADRON_SPECIAL_2                   = 21749
 };
 
 enum VespText
 {
-    SAY_VESPERON_AGGRO                      = -1615033,
-    SAY_VESPERON_SLAY_1                     = -1615034,
-    SAY_VESPERON_SLAY_2                     = -1615035,
-    SAY_VESPERON_DEATH                      = -1615036,
-    SAY_VESPERON_BREATH                     = -1615037,
-    SAY_VESPERON_RESPOND                    = -1615038,
-    SAY_VESPERON_SPECIAL_1                  = -1615039,
-    SAY_VESPERON_SPECIAL_2                  = -1615040
+    SAY_VESPERON_AGGRO                      = 32002,
+    SAY_VESPERON_SLAY_1                     = 32003,
+    SAY_VESPERON_SLAY_2                     = 32004,
+    SAY_VESPERON_DEATH                      = 32009,
+    SAY_VESPERON_BREATH                     = 32005,
+    SAY_VESPERON_RESPOND                    = 32008,
+    SAY_VESPERON_SPECIAL_1                  = 32006,
+    SAY_VESPERON_SPECIAL_2                  = 32007
 };
 
 enum DummyDragonActions
@@ -558,7 +585,7 @@ struct dummy_dragonAI : public CombatAI
         // using a grid search here seem to be more efficient than caching all four guids
         // in instance script and calculate range to each.
         GameObject* portal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f);
-        DoScriptText(EMOTE_OPEN_PORTAL, m_creature);
+        DoBroadcastText(EMOTE_OPEN_PORTAL, m_creature);
 
         // By using SetRespawnTime() we will actually "spawn" the object with our defined time.
         // Once time is up, portal will disappear again.
@@ -632,18 +659,18 @@ struct mob_tenebronAI : public dummy_dragonAI
     mob_tenebronAI(Creature* creature) : dummy_dragonAI(creature, TYPE_PORTAL_TENEBRON)
     {
         AddOnKillText(SAY_TENEBRON_SLAY_1, SAY_TENEBRON_SLAY_2);
-        AddCustomAction(TENEBRON_SPAWN_EGGS, 20000u, [&]() { HandleEggSpawn(); });
+        AddCustomAction(TENEBRON_SPAWN_EGGS, 20000u, [&]() { HandleEggSpawn(); }, TIMER_COMBAT_COMBAT);
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_TENEBRON_AGGRO, m_creature);
+        DoBroadcastText(SAY_TENEBRON_AGGRO, m_creature);
         DoCastSpellIfCan(nullptr, SPELL_POWER_OF_TENEBRON);
     }
 
     void JustDied(Unit* killer) override
     {
-        DoScriptText(SAY_TENEBRON_DEATH, m_creature);
+        DoBroadcastText(SAY_TENEBRON_DEATH, m_creature);
 
         if (m_instance)
         {
@@ -681,7 +708,7 @@ struct mob_tenebronAI : public dummy_dragonAI
         {
             case SPELL_SHADOW_BREATH: 
             case SPELL_SHADOW_BREATH_H:
-                DoScriptText(SAY_TENEBRON_BREATH, m_creature);
+                DoBroadcastText(SAY_TENEBRON_BREATH, m_creature);
                 break;
         }        
     }
@@ -709,9 +736,9 @@ struct mob_tenebronAI : public dummy_dragonAI
         // used only for visual - the result is handled by the Twilight eggs script
         if (DoCastSpellIfCan(m_creature, SPELL_HATCH_EGGS_MAIN) == CAST_OK)
         {
-            DoScriptText(EMOTE_HATCH_EGGS, m_creature);
+            DoBroadcastText(EMOTE_HATCH_EGGS, m_creature);
             if (urand(0, 1))
-                DoScriptText(urand(0, 1) ? SAY_TENEBRON_SPECIAL_1 : SAY_TENEBRON_SPECIAL_2, m_creature);
+                DoBroadcastText(urand(0, 1) ? SAY_TENEBRON_SPECIAL_1 : SAY_TENEBRON_SPECIAL_2, m_creature);
         }
 
         ResetTimer(TENEBRON_SPAWN_EGGS, 60000);
@@ -732,18 +759,18 @@ struct mob_shadronAI : public dummy_dragonAI
     mob_shadronAI(Creature* creature) : dummy_dragonAI(creature, TYPE_PORTAL_SHADRON)
     {
         AddOnKillText(SAY_SHADRON_SLAY_1, SAY_SHADRON_SLAY_2);
-        AddCustomAction(SHADRON_SPAWN_ACOLYTE, 25000u, [&]() { HandleAcolyteSpawn(); });
+        AddCustomAction(SHADRON_SPAWN_ACOLYTE, 25000u, [&]() { HandleAcolyteSpawn(); }, TIMER_COMBAT_COMBAT);
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_SHADRON_AGGRO, m_creature);
+        DoBroadcastText(SAY_SHADRON_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_POWER_OF_SHADRON);
     }
 
     void JustDied(Unit* killer) override
     {
-        DoScriptText(SAY_SHADRON_DEATH, m_creature);
+        DoBroadcastText(SAY_SHADRON_DEATH, m_creature);
 
         if (m_instance)
         {
@@ -798,16 +825,16 @@ struct mob_shadronAI : public dummy_dragonAI
         {
             case SPELL_SHADOW_BREATH:
             case SPELL_SHADOW_BREATH_H:
-                DoScriptText(SAY_SHADRON_BREATH, m_creature);
+                DoBroadcastText(SAY_SHADRON_BREATH, m_creature);
                 break;
         }
     }
 
     void HandleAcolyteSpawn()
     {
-        DoScriptText(EMOTE_SHADRON_DICIPLE, m_creature);
+        DoBroadcastText(EMOTE_SHADRON_DICIPLE, m_creature);
         if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_SHADRON_SPECIAL_1 : SAY_SHADRON_SPECIAL_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_SHADRON_SPECIAL_1 : SAY_SHADRON_SPECIAL_2, m_creature);
 
         uint32 uiSpawnEntry = NPC_DISCIPLE_OF_SHADRON;
         if (m_instance)
@@ -836,19 +863,19 @@ struct mob_vesperonAI : public dummy_dragonAI
     mob_vesperonAI(Creature* creature) : dummy_dragonAI(creature, TYPE_PORTAL_VESPERON)
     {
         AddOnKillText(SAY_VESPERON_SLAY_1, SAY_VESPERON_SLAY_2);
-        AddCustomAction(VESPERON_SPAWN_ACOLYTE, 25000u, [&]() { HandleAcolyteSpawn(); });
+        AddCustomAction(VESPERON_SPAWN_ACOLYTE, 25000u, [&]() { HandleAcolyteSpawn(); }, TIMER_COMBAT_COMBAT);
         Reset();
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_VESPERON_AGGRO, m_creature);
+        DoBroadcastText(SAY_VESPERON_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_POWER_OF_VESPERON);
     }
 
     void JustDied(Unit* killer) override
     {
-        DoScriptText(SAY_VESPERON_DEATH, m_creature);
+        DoBroadcastText(SAY_VESPERON_DEATH, m_creature);
 
         if (m_instance)
         {
@@ -895,16 +922,16 @@ struct mob_vesperonAI : public dummy_dragonAI
         {
             case SPELL_SHADOW_BREATH:
             case SPELL_SHADOW_BREATH_H:
-                DoScriptText(SAY_VESPERON_BREATH, m_creature);
+                DoBroadcastText(SAY_VESPERON_BREATH, m_creature);
                 break;
         }
     }
 
     void HandleAcolyteSpawn()
     {
-        DoScriptText(EMOTE_VESPERON_DICIPLE, m_creature);
+        DoBroadcastText(EMOTE_VESPERON_DICIPLE, m_creature);
         if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_VESPERON_SPECIAL_1 : SAY_VESPERON_SPECIAL_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_VESPERON_SPECIAL_1 : SAY_VESPERON_SPECIAL_2, m_creature);
 
         uint32 uiSpawnEntry = NPC_DISCIPLE_OF_VESPERON;
         if (m_instance)
@@ -1033,7 +1060,7 @@ struct npc_flame_tsunamiAI : public ScriptedAI
         m_creature->SetCanEnterCombat(false);
         m_creature->SetWalk(false);
         AddCustomAction(0, 2000u, [&]() { HandleTsunamiVisual(); });
-        AddCustomAction(0, 5000u, [&]() { HandleTsunamiDamage(); });
+        AddCustomAction(1, 5000u, [&]() { HandleTsunamiDamage(); });
     }
 
     void Reset() override {}
@@ -1047,12 +1074,12 @@ struct npc_flame_tsunamiAI : public ScriptedAI
     {
         DoCastSpellIfCan(nullptr, SPELL_FLAME_TSUNAMI_DMG_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         uint32 diff = m_creature->GetDbGuid() - (6150000 + 200);
-        m_creature->GetMotionMaster()->MoveWaypoint(6150000 + diff);
+        m_creature->GetMotionMaster()->MoveWaypoint(6150000 + diff, PATH_FROM_WAYPOINT_PATH);
     }
 
     void MovementInform(uint32 type, uint32 pointId) override
     {
-        if (type != POINT_MOTION_TYPE || !pointId)
+        if (type != WAYPOINT_MOTION_TYPE || !pointId)
             return;
 
         m_creature->RemoveAllAurasOnEvade();
@@ -1151,6 +1178,16 @@ struct Pyrobuffet : public SpellScript
     }
 };
 
+// 61254 - Will of Sartharion
+struct WillOfSartharion : public AuraScript
+{
+    void OnAfterApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->SetHealth(aura->GetTarget()->GetMaxHealth());
+    }
+};
+
 void AddSC_boss_sartharion()
 {
     Script* pNewScript = new Script;
@@ -1197,4 +1234,5 @@ void AddSC_boss_sartharion()
     RegisterSpellScript<LavaStrike>("spell_lava_strike");
     RegisterSpellScript<FlameTsunamiDamage>("spell_flame_tsunami_damage");
     RegisterSpellScript<Pyrobuffet>("spell_pyrobuffet_sartharion");
+    RegisterSpellScript<WillOfSartharion>("spell_will_of_sartharion");
 }

@@ -957,6 +957,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61187,'spell_twilight_shift_aura'),
 (61190,'spell_twilight_shift_aura'),
 (61210,'spell_align_disk_aggro'),
+(61254,'spell_will_of_sartharion'),
 (61474,'spell_grip_of_sladran'),
 (61475,'spell_gundrak_snake_wrap'),
 (61546,'spell_shatter'),
