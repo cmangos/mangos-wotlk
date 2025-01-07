@@ -21430,7 +21430,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
         SetMover(this);
 }
 
-void Player::SendInitialPacketsAfterAddToMap()
+void Player::SendInitialPacketsAfterAddToMap(bool reconnect)
 {
     // update zone
     uint32 newzone, newarea;
@@ -21442,23 +21442,27 @@ void Player::SendInitialPacketsAfterAddToMap()
 
     CastSpell(nullptr, 836, TRIGGERED_OLD_TRIGGERED);                          // LOGINEFFECT
 
-    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LOGIN_CANCELS);
+    if (!reconnect)
+        RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LOGIN_CANCELS);
 
-    // set some aura effects that send packet to player client after add player to map
-    // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
-    // same auras state lost at far teleport, send it one more time in this case also
-    static const AuraType auratypes[] =
+    if (!reconnect)
     {
-        SPELL_AURA_GHOST,        SPELL_AURA_TRANSFORM,                 SPELL_AURA_WATER_WALK,
-        SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,                     SPELL_AURA_SAFE_FALL,
-        SPELL_AURA_MOD_STUN,     SPELL_AURA_MOD_ROOT,                  SPELL_AURA_MOD_FEAR,
-        SPELL_AURA_FLY,          SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED,  SPELL_AURA_NONE
-    };
-    for (AuraType const* itr = &auratypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
-    {
-        Unit::AuraList const& auraList = GetAurasByType(*itr);
-        if (!auraList.empty())
-            auraList.front()->ApplyModifier(true, true);
+        // set some aura effects that send packet to player client after add player to map
+        // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
+        // same auras state lost at far teleport, send it one more time in this case also
+        static const AuraType auratypes[] =
+        {
+            SPELL_AURA_GHOST,        SPELL_AURA_TRANSFORM,                 SPELL_AURA_WATER_WALK,
+            SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,                     SPELL_AURA_SAFE_FALL,
+            SPELL_AURA_MOD_STUN,     SPELL_AURA_MOD_ROOT,                  SPELL_AURA_MOD_FEAR,
+            SPELL_AURA_FLY,          SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED,  SPELL_AURA_NONE
+        };
+        for (AuraType const* itr = &auratypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
+        {
+            Unit::AuraList const& auraList = GetAurasByType(*itr);
+            if (!auraList.empty())
+                auraList.front()->ApplyModifier(true, true);
+        }
     }
 
     WorldPacket setCompoundState(SMSG_MULTIPLE_MOVES, 100);

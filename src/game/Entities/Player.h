@@ -1113,7 +1113,7 @@ class Player : public Unit
         static bool BuildEnumData(QueryResult* result,  WorldPacket& p_data);
 
         void SendInitialPacketsBeforeAddToMap();
-        void SendInitialPacketsAfterAddToMap();
+        void SendInitialPacketsAfterAddToMap(bool reconnect);
         void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time) const;
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
