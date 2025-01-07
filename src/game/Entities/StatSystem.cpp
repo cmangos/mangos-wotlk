@@ -239,7 +239,7 @@ void Unit::UpdateMaxHealth()
     value += GetModifierValue(unitMod, TOTAL_VALUE) + GetHealthBonusFromStamina();
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxHealth(uint32(std::ceil(std::max(value, 1.f))));
+    SetMaxHealth(uint32(std::round(std::max(value, 1.f))));
 }
 
 void Unit::UpdateMaxPower(Powers power)
@@ -256,7 +256,7 @@ void Unit::UpdateMaxPower(Powers power)
     value += GetModifierValue(unitMod, TOTAL_VALUE) +  bonusPower;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxPower(power, uint32(std::ceil(value)));
+    SetMaxPower(power, uint32(std::round(value)));
 }
 
 void Player::ApplyFeralAPBonus(int32 amount, bool apply)
@@ -1130,7 +1130,7 @@ void Pet::UpdateMaxPower(Powers power)
     value += GetModifierValue(unitMod, TOTAL_VALUE) + std::max((addValue - 20) * 15 + 20, 0.f);
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxPower(power, uint32(std::ceil(value)));
+    SetMaxPower(power, uint32(std::round(value)));
 }
 
 void Pet::UpdateAttackPowerAndDamage(bool ranged)
