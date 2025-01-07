@@ -13960,6 +13960,7 @@ void Unit::SetLevitate(bool enable)
             data << GetPackGUID();
             data << counter;
             player->GetSession()->SendPacket(data);
+            player->GetSession()->GetAnticheat()->OrderSent(data.GetOpcode(), counter);
             player->GetSession()->IncrementOrderCounter();
             return;
         }
