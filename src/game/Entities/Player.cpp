@@ -21461,11 +21461,71 @@ void Player::SendInitialPacketsAfterAddToMap()
             auraList.front()->ApplyModifier(true, true);
     }
 
-    if (IsImmobilizedState()) // TODO: Figure out if this protocol is correct
-        SendMoveRoot(true);
+    WorldPacket setCompoundState(SMSG_MULTIPLE_MOVES, 100);
+    setCompoundState << uint32(0); // size placeholder
+
+    // manual send package (have code in HandleEffect(this, AURA_EFFECT_HANDLE_SEND_FOR_CLIENT, true); that must not be re-applied.
+    if (IsImmobilizedState())
+    {
+        auto const counter = GetSession()->GetOrderCounter();
+        setCompoundState << uint8(2 + GetPackGUID().size() + 4);
+        setCompoundState << uint16(SMSG_FORCE_MOVE_ROOT);
+        setCompoundState << GetPackGUID();
+        setCompoundState << uint32(counter);
+        GetSession()->GetAnticheat()->OrderSent(SMSG_FORCE_MOVE_ROOT, counter);
+        GetSession()->IncrementOrderCounter();
+    }
+
+    if (HasAuraType(SPELL_AURA_FEATHER_FALL))
+    {
+        auto const counter = GetSession()->GetOrderCounter();
+        setCompoundState << uint8(2 + GetPackGUID().size() + 4);
+        setCompoundState << uint16(SMSG_MOVE_FEATHER_FALL);
+        setCompoundState << GetPackGUID();
+        setCompoundState << uint32(counter);
+        GetSession()->GetAnticheat()->OrderSent(SMSG_MOVE_FEATHER_FALL, counter);
+        GetSession()->IncrementOrderCounter();
+    }
+
+    if (HasAuraType(SPELL_AURA_WATER_WALK))
+    {
+        auto const counter = GetSession()->GetOrderCounter();
+        setCompoundState << uint8(2 + GetPackGUID().size() + 4);
+        setCompoundState << uint16(SMSG_MOVE_WATER_WALK);
+        setCompoundState << GetPackGUID();
+        setCompoundState << uint32(counter);
+        GetSession()->GetAnticheat()->OrderSent(SMSG_MOVE_WATER_WALK, counter);
+        GetSession()->IncrementOrderCounter();
+    }
+
+    if (HasAuraType(SPELL_AURA_HOVER))
+    {
+        auto const counter = GetSession()->GetOrderCounter();
+        setCompoundState << uint8(2 + GetPackGUID().size() + 4);
+        setCompoundState << uint16(SMSG_MOVE_SET_HOVER);
+        setCompoundState << GetPackGUID();
+        setCompoundState << uint32(counter);
+        GetSession()->GetAnticheat()->OrderSent(SMSG_MOVE_SET_HOVER, counter);
+        GetSession()->IncrementOrderCounter();
+    }
 
     if (m_pendingMountId)
-        SendCollisionHeightUpdate(CalculateCollisionHeight(m_pendingMountId));
+    {
+        auto const counter = GetSession()->GetOrderCounter();
+        setCompoundState << uint8(2 + GetPackGUID().size() + 4 + 4);
+        setCompoundState << uint16(SMSG_MOVE_SET_COLLISION_HGT);
+        setCompoundState << GetPackGUID();
+        setCompoundState << uint32(counter);
+        setCompoundState << float(CalculateCollisionHeight(m_pendingMountId));
+        GetSession()->GetAnticheat()->OrderSent(SMSG_MOVE_SET_COLLISION_HGT, counter);
+        GetSession()->IncrementOrderCounter();
+    }
+
+    if (setCompoundState.size() > 4)
+    {
+        setCompoundState.put<uint32>(0, setCompoundState.size() - 4);
+        SendDirectMessage(setCompoundState);
+    }
 
     SendAurasForTarget(this);
 

@@ -1344,7 +1344,7 @@ enum Opcodes
     CMSG_COMMENTATOR_SKIRMISH_QUEUE_COMMAND         = 0x51B,// lua: CommentatorSetSkirmishMatchmakingMode/CommentatorRequestSkirmishQueueData/CommentatorRequestSkirmishMode/CommentatorStartSkirmishMatch
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT1         = 0x51C,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST, CGCommentator::QueueNode
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT2         = 0x51D,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST
-    SMSG_MULTIPLE_MOVES                             = 0x51E,// TODO: Implement from TC
+    SMSG_MULTIPLE_MOVES                             = 0x51E,
     NUM_MSG_TYPES                                   = 0x51F
 };
 
