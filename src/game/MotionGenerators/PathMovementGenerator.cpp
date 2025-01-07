@@ -333,14 +333,20 @@ void TaxiMovementGenerator::Initialize(Unit& unit)
 void TaxiMovementGenerator::Finalize(Unit& unit)
 {
     unit.clearUnitState(UNIT_STAT_TAXI_FLIGHT);
-    unit.RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT));
 
-    if (unit.GetTypeId() == TYPEID_PLAYER)
-        unit.RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
+    if (unit.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT)) // cleanup if still present, otherwise done in Player::OnTaxiFlightEnd
+    {
+        unit.RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT));
 
-    // Client-controlled unit should have control restored
-    if (const Player* controllingClientPlayer = unit.GetClientControlling())
-        controllingClientPlayer->UpdateClientControl(&unit, true);
+        if (unit.GetTypeId() == TYPEID_PLAYER)
+            unit.RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
+
+        // Client-controlled unit should have control restored
+        if (const Player* controllingClientPlayer = unit.GetClientControlling())
+            controllingClientPlayer->UpdateClientControl(&unit, true);
+
+        unit.Unmount();
+    }
 
     AbstractPathMovementGenerator::Finalize(unit);
 }

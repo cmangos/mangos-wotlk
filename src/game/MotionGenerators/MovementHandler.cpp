@@ -852,7 +852,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
 
 bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, Player* plMover, WorldPacket& recv_data)
 {
-    if (plMover && plMover->IsBeingTeleported())
+    if (plMover && plMover->IsBeingTeleported() && recv_data.GetOpcode() != CMSG_MOVE_SET_COLLISION_HGT_ACK)
         return false;
 
     if (!VerifyMovementInfo(movementInfo, mover, recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK))

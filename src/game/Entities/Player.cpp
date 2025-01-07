@@ -20214,12 +20214,22 @@ void Player::OnTaxiFlightStart(const TaxiPathEntry* /*path*/)
 
 void Player::OnTaxiFlightEnd(const TaxiPathEntry* path)
 {
-    // Final destination
-    if (const TaxiNodesEntry* destination = sTaxiNodesStore.LookupEntry(path->to))
-        TeleportTo(GetMap()->GetId(), destination->x, destination->y, destination->z, GetOrientation());
+    RemoveFlag(UNIT_FIELD_FLAGS, (UNIT_FLAG_CLIENT_CONTROL_LOST | UNIT_FLAG_TAXI_FLIGHT));
+
+    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_TAXI_BENCHMARK);
+
+    // Client-controlled unit should have control restored
+    if (const Player* controllingClientPlayer = GetClientControlling())
+        UpdateClientControl(this, true);
+
+    Unmount();
 
     if (pvpInfo.inPvPEnforcedArea)
         CastSpell(this, 2479, TRIGGERED_OLD_TRIGGERED);
+
+    // Final destination
+    if (const TaxiNodesEntry* destination = sTaxiNodesStore.LookupEntry(path->to))
+        TeleportTo(GetMap()->GetId(), destination->x, destination->y, destination->z, GetOrientation());
 
     /*
     NOTE: B clearly has some form of extra scripts on certain fly path ends. Nodes contain extra events, that can be done using dbscript_on_event,
@@ -20315,8 +20325,6 @@ void Player::OnTaxiFlightSplineStart(const TaxiPathNodeEntry* node)
 
 void Player::OnTaxiFlightSplineEnd()
 {
-    Unmount();
-
     getHostileRefManager().updateOnlineOfflineState(true);
 
     // Note: only gets set by itself when container does not end up empty
