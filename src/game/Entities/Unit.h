@@ -1539,7 +1539,7 @@ class Unit : public WorldObject
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
         bool MountEntry(uint32 templateEntry, const Aura* aura = nullptr);
         bool UnmountEntry(const Aura* aura = nullptr);
-        virtual bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false);
+        virtual bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false, bool pendingTaxi = false);
         virtual bool Unmount(bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false);
 
         VehicleInfo* GetVehicleInfo() const { return m_vehicleInfo.get(); }

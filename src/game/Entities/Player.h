@@ -1124,7 +1124,7 @@ class Player : public Unit
         ReputationRank GetReactionTo(Corpse const* corpse) const override;
         bool IsInGroup(Unit const* other, bool party = false, bool ignoreCharms = false) const override;
 
-        bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false) override;
+        bool Mount(uint32 displayid, bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false, bool pendingTaxi = false) override;
         bool Unmount(bool auraExists = false, int32 auraAmount = 0, bool isFlyingAura = false) override;
 
         bool ResolvePendingMount();
@@ -2994,6 +2994,7 @@ class Player : public Unit
         int32 m_pendingMountAuraAmount;
         bool m_pendingMountAuraFlying;
         bool m_pendingDismount;
+        bool m_pendingTaxi;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

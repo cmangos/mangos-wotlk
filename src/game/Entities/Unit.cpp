@@ -8809,7 +8809,7 @@ bool Unit::UnmountEntry(const Aura* aura)
     return Unmount(aura, aura ? aura->GetAmount() : 0, aura ? IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED) : false);
 }
 
-bool Unit::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool /*isFlyingAura*/)
+bool Unit::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool /*isFlyingAura*/, bool /*pendingTaxi*/)
 {
     // Custom mount (non-aura such as taxi or command) overwrites aura mounts
     if (!displayid || (IsMounted() && auraExists && uint32(auraAmount) != GetMountID()))

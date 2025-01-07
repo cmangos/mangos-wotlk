@@ -1216,9 +1216,7 @@ void WorldSession::HandlePlayerReconnect()
         GetAccountId(), IP_str.c_str(), _player->GetName(), _player->GetGUIDLow());
 
     // sync client control (if taxi flying the client is already sync)
-    if (_player->IsTaxiFlying())
-        _player->TaxiFlightResume(true);
-    else if (!_player->IsClientControlled(_player))
+    if (!_player->IsTaxiFlying() && !_player->IsClientControlled(_player))
         _player->UpdateClientControl(_player, false);
 
     // initialize client pet bar if need
@@ -1231,7 +1229,8 @@ void WorldSession::HandlePlayerReconnect()
         _player->SetStandState(UNIT_STAND_STATE_STAND);
 
     // Undo flags and states set by logout if present:
-    _player->SetStunnedByLogout(false);
+    if (!_player->IsTaxiFlying())
+        _player->SetStunnedByLogout(false);
 
     // Mark self for unit flags update to ensure re-application of combat flag at own client
     if (inCombat)

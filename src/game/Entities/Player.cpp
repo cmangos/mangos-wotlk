@@ -710,6 +710,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_pendingMountAura = false;
     m_pendingMountAuraFlying = false;
     m_pendingDismount = false;
+    m_pendingTaxi = false;
 }
 
 Player::~Player()
@@ -1978,8 +1979,11 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
     return true;
 }
 
-bool Player::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool isFlyingAura)
+bool Player::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool isFlyingAura, bool pendingTaxi)
 {
+    if (m_pendingMountId)
+        return false;
+
     float height = GetCollisionHeight();
     uint32 newMountId = GetOverridenMountId() ? GetOverridenMountId() : displayid;
     float newHeight = CalculateCollisionHeight(newMountId);
@@ -1989,11 +1993,9 @@ bool Player::Mount(uint32 displayid, bool auraExists, int32 auraAmount, bool isF
     m_pendingMountAuraAmount = auraAmount;
     m_pendingMountAuraFlying = isFlyingAura;
     m_pendingDismount = false;
+    m_pendingTaxi = pendingTaxi;
 
-    if (height != newHeight)
-        SendCollisionHeightUpdate(newHeight);
-    else
-        ResolvePendingMount();
+    SendCollisionHeightUpdate(newHeight);
 
     return true;
 }
@@ -2040,9 +2042,17 @@ bool Player::ResolvePendingMount()
         }
     }
 
-    UpdateSpeed(MOVE_RUN, true); // update speed
-    if (m_pendingMountAuraFlying)
-        UpdateSpeed(MOVE_FLIGHT, true);
+    if (m_pendingMountAura)
+    {
+        UpdateSpeed(MOVE_RUN, true); // update speed
+        if (m_pendingMountAuraFlying)
+            UpdateSpeed(MOVE_FLIGHT, true);
+    }
+
+    if (m_pendingTaxi)
+        GetMotionMaster()->MoveTaxi();
+
+    m_pendingMountId = 0;
 
     return true;
 }
@@ -2064,9 +2074,12 @@ bool Player::ResolvePendingUnmount()
     else
         ResummonPetTemporaryUnSummonedIfAny();
 
-    UpdateSpeed(MOVE_RUN, true); // update speed
-    if (m_pendingMountAuraFlying)
-        UpdateSpeed(MOVE_FLIGHT, true);
+    if (m_pendingMountAura)
+    {
+        UpdateSpeed(MOVE_RUN, true); // update speed
+        if (m_pendingMountAuraFlying)
+            UpdateSpeed(MOVE_FLIGHT, true);
+    }
 
     return true;
 }
@@ -20137,7 +20150,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
 
     GetSession()->SendActivateTaxiReply(ERR_TAXIOK);
 
-    GetMotionMaster()->MoveTaxi();
+    if (m_taxiTracker.GetMountDisplayId())
+        Mount(m_taxiTracker.GetMountDisplayId(), false, 0, false, true);
 
     return true;
 }
@@ -20159,14 +20173,14 @@ void Player::TaxiFlightResume(bool forceRenewMoveGen /*= false*/)
     DEBUG_LOG("WORLD: Resuming taxi flight for character %u", GetGUIDLow());
 
     // Already in flight: just make sure client control is updated
-    if (hasUnitState(UNIT_STAT_TAXI_FLIGHT))
+    if (hasUnitState(UNIT_STAT_TAXI_FLIGHT) && !forceRenewMoveGen)
     {
         UpdateClientControl(this, IsClientControlled(this));
         if (!forceRenewMoveGen)
             return;
     }
 
-    GetMotionMaster()->MoveTaxi();
+    Mount(m_taxiTracker.GetMountDisplayId(), false, 0, false, true);
 }
 
 bool Player::TaxiFlightInterrupt(bool cancel /*= true*/)
@@ -20292,9 +20306,6 @@ void Player::OnTaxiFlightSplineStart(const TaxiPathNodeEntry* node)
 {
     if (m_taxiTracker.GetState() == Taxi::TRACKER_TRANSFER)
         UpdateClientControl(this, false);
-
-    if (sTaxiPathStore.LookupEntry(node->path))
-        Mount(m_taxiTracker.GetMountDisplayId());
 
     getHostileRefManager().updateOnlineOfflineState(false);
 
