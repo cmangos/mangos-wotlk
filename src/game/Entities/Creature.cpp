@@ -645,10 +645,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
         SetSpellList(Entry * 100 + 0);
     UpdateImmunitiesSet(0);
     if (IsCritter()) // meant to be also settable per creature immunity set
-    {
-        SetAOEImmune(true);
         SetChainImmune(true);
-    }
 
     SetVehicleId(GetCreatureInfo()->VehicleTemplateId, 0);
 
