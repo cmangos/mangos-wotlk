@@ -909,7 +909,7 @@ class Spell
         MaNGOS::unique_weak_ptr<Spell> GetWeakPtr() const;
 
     protected:
-        void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
+        void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType, Player* player);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data
         void UpdateOriginalCasterPointer();
 

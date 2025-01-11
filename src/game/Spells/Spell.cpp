@@ -6469,7 +6469,10 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_EFFECT_OPEN_LOCK:
             {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER) // only players can open locks, gather etc.
+                Player const* affectedCaster = dynamic_cast<Player*>(m_caster);
+                if (!affectedCaster && m_caster->IsUnit())
+                    affectedCaster = static_cast<Unit*>(m_trueCaster)->GetControllingPlayer();
+                if (!affectedCaster) // only players can open locks, gather etc. (can be on vehicle)
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // we need a go target in case of TARGET_GAMEOBJECT (for other targets acceptable GO and items)
@@ -6484,8 +6487,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (GameObject* go = m_targets.getGOTarget())
                 {
                     // In BattleGround players can use only flags and banners
-                    if (((Player*)m_caster)->InBattleGround() &&
-                            !((Player*)m_caster)->CanUseBattleGroundObject())
+                    if (((Player*)affectedCaster)->InBattleGround() &&
+                            !((Player*)affectedCaster)->CanUseBattleGroundObject())
                         return SPELL_FAILED_TRY_AGAIN;
 
                     lockId = go->GetGOInfo()->GetLockId();
@@ -6500,13 +6503,13 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_CHEST_IN_USE;
 
                     // done in client but we need to recheck anyway
-                    if (go->GetGOInfo()->CannotBeUsedUnderImmunity() && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
+                    if (go->GetGOInfo()->CannotBeUsedUnderImmunity() && affectedCaster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
                         return SPELL_FAILED_DAMAGE_IMMUNE;
                 }
                 else if (Item* item = m_targets.getItemTarget())
                 {
                     // not own (trade?)
-                    if (item->GetOwner() != m_caster)
+                    if (item->GetOwner() != affectedCaster)
                         return SPELL_FAILED_ITEM_GONE;
 
                     lockId = item->GetProto()->LockID;
@@ -7466,8 +7469,13 @@ SpellCastResult Spell::CheckRange(bool strict)
     }
 
     if (GameObject* goTarget = m_targets.getGOTarget())
-        if (!goTarget->IsAtInteractDistance(dynamic_cast<Player*>(m_trueCaster), maxRange)) // only player casts these
+    {
+        Player const* player = dynamic_cast<Player*>(m_trueCaster);
+        if (!player && m_trueCaster->IsUnit())
+            player = static_cast<Unit*>(m_trueCaster)->GetControllingPlayer();
+        if (!goTarget->IsAtInteractDistance(player, maxRange)) // only player or vehicle casts these
             return SPELL_FAILED_OUT_OF_RANGE;
+    }
 
     if (m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION)
     {

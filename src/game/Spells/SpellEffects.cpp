@@ -5553,7 +5553,7 @@ void Spell::EffectEnergisePct(SpellEffectIndex eff_idx)
     m_caster->EnergizeBySpell(unitTarget, m_spellInfo, gain, power);
 }
 
-void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
+void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType, Player* player)
 {
     switch (guid.GetHigh())
     {
@@ -5573,7 +5573,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                         return;
 
                     case GAMEOBJECT_TYPE_CHEST:
-                        gameObjTarget->Use(m_caster);
+                        gameObjTarget->Use(player);
                         // Don't return, let loots been taken
                         break;
 
@@ -5631,13 +5631,14 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
 
 void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
 {
-    if (!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+    Player* player = dynamic_cast<Player*>(m_trueCaster);
+    if (!player && m_trueCaster->IsUnit())
+        player = const_cast<Player*>(static_cast<Unit*>(m_trueCaster)->GetControllingPlayer());
+    if (!player)
     {
         DEBUG_LOG("WORLD: Open Lock - No Player Caster!");
         return;
     }
-
-    Player* player = (Player*)m_caster;
 
     uint32 lockId;
 
@@ -5687,13 +5688,13 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
         // only send loot if owner is player, else client sends release anyway
         if (itemTarget->GetOwnerGuid() == m_caster->GetObjectGuid())
         {
-            SendLoot(itemTarget->GetObjectGuid(), LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
+            SendLoot(itemTarget->GetObjectGuid(), LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]), player);
             m_spellLog.AddLog(uint32(SPELL_EFFECT_OPEN_LOCK), itemTarget->GetPackGUID());
         }
     }
     else
     {
-        SendLoot(gameObjTarget->GetObjectGuid(), LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]));
+        SendLoot(gameObjTarget->GetObjectGuid(), LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]), player);
         m_spellLog.AddLog(uint32(SPELL_EFFECT_OPEN_LOCK), gameObjTarget->GetPackGUID());
     }
 }
