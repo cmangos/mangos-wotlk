@@ -147,7 +147,7 @@ bool Map::CanSpawn(TypeID typeId, uint32 dbGuid)
 {
     if (typeId == TYPEID_UNIT)
         return GetCreatureLinkingHolder()->CanSpawn(dbGuid, this, nullptr, 0.f, 0.f);
-    else if (TYPEID_GAMEOBJECT)
+    else if (typeId == TYPEID_GAMEOBJECT)
     {
         GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
         if (data)
