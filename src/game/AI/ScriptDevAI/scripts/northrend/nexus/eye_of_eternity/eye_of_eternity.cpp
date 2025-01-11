@@ -25,8 +25,7 @@ EndScriptData */
 #include "eye_of_eternity.h"
 #include "Maps/TransportSystem.h"
 
-instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance(pMap),
-    m_uiMalygosResetTimer(0),
+instance_eye_of_eternity::instance_eye_of_eternity(Map* map) : ScriptedInstance(map),
     m_uiMalygosCompleteTimer(0)
 {
     Initialize();
@@ -34,99 +33,101 @@ instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance
 
 void instance_eye_of_eternity::Initialize()
 {
-    m_uiEncounter = NOT_STARTED;
+    m_encounter = NOT_STARTED;
 }
 
 bool instance_eye_of_eternity::IsEncounterInProgress() const
 {
-    return m_uiEncounter == IN_PROGRESS;
+    return m_encounter == IN_PROGRESS;
 }
 
-void instance_eye_of_eternity::OnCreatureCreate(Creature* pCreature)
+void instance_eye_of_eternity::OnCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_MALYGOS:
         case NPC_ALEXSTRASZA:
         case NPC_LARGE_TRIGGER:
         case NPC_ALEXSTRASZA_INVIS:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            if (creature->GetEntry() == NPC_ALEXSTRASZA)
+                creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_REAL_FLY_ANIM);
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_NEXUS_LORD:
         case NPC_SCION_OF_ETERNITY:
-            m_lDiskRidersGuids.push_back(pCreature->GetObjectGuid());
+            m_lDiskRidersGuids.push_back(creature->GetObjectGuid());
             break;
         case NPC_HOVER_DISK_LORD:
         case NPC_HOVER_DISK_SCION:
         case NPC_ARCANE_OVERLOAD:
-            m_lSecondPhaseCreaturesGuids.push_back(pCreature->GetObjectGuid());
+            m_lSecondPhaseCreaturesGuids.push_back(creature->GetObjectGuid());
             break;
     }
 }
 
-void instance_eye_of_eternity::OnObjectCreate(GameObject* pGo)
+void instance_eye_of_eternity::OnObjectCreate(GameObject* go)
 {
-    switch (pGo->GetEntry())
+    switch (go->GetEntry())
     {
-        case GO_EXIT_PORTAL:
-        case GO_PLATFORM:
         case GO_FOCUSING_IRIS:
         case GO_FOCUSING_IRIS_H:
+            m_focusingIrisDbGuid = go->GetDbGuid();
+            [[fallthrough]];
+        case GO_EXIT_PORTAL:
+        case GO_PLATFORM:
         case GO_HEART_OF_MAGIC:
         case GO_HEART_OF_MAGIC_H:
         case GO_ALEXSTRASZAS_GIFT:
         case GO_ALEXSTRASZAS_GIFT_H:
-            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
             break;
     }
 }
 
-void instance_eye_of_eternity::OnCreatureRespawn(Creature* pCreature)
+void instance_eye_of_eternity::OnCreatureRespawn(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         // following creatures have a passive behavior
         case NPC_SURGE_OF_POWER:
-            pCreature->AI()->SetReactState(REACT_PASSIVE);
-            pCreature->SetCanEnterCombat(false);
+            creature->AI()->SetReactState(REACT_PASSIVE);
+            creature->SetCanEnterCombat(false);
             break;
     }
 }
 
-void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
+void instance_eye_of_eternity::SetData(uint32 type, uint32 data)
 {
-    if (uiType != TYPE_MALYGOS)
+    if (type != TYPE_MALYGOS)
         return;
 
-    m_uiEncounter = uiData;
+    m_encounter = data;
 
-    if (uiData == IN_PROGRESS)
+    if (data == IN_PROGRESS)
     {
         // Portal and iris despawn handled in DB
         DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MALYGOS_ID);
     }
-    else if (uiData == FAIL)
+    else if (data == FAIL)
     {
         // respawn iris and portal
         DoRespawnGameObject(GO_EXIT_PORTAL, 7 * DAY);
-        DoRespawnGameObject(instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? GO_FOCUSING_IRIS : GO_FOCUSING_IRIS_H, 7 * DAY);
+        instance->GetSpawnManager().RespawnGameObject(m_focusingIrisDbGuid, 60);
 
         // rebuild platform
-        if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
+        if (Creature* malygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
         {
-            if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
+            if (GameObject* platform = GetSingleGameObjectFromStorage(GO_PLATFORM))
             {
-                pPlatform->RebuildGameObject(pMalygos);
-                pPlatform->SetGoState(GO_STATE_READY);
+                platform->RebuildGameObject(malygos);
+                platform->SetGoState(GO_STATE_READY);
                 instance->ChangeGOPathfinding(194232, 8546, true);
             }
 
-            // despawn and respawn boss
-            pMalygos->ForcedDespawn(5000);
-            m_uiMalygosResetTimer = 30000;
+            
         }
     }
-    else if (uiData == DONE)
+    else if (data == DONE)
     {
         // Note: ending event handled by DB
 
@@ -140,62 +141,50 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
     // Currently no reason to save anything
 }
 
-void instance_eye_of_eternity::OnCreatureDeath(Creature* pCreature)
+void instance_eye_of_eternity::OnCreatureDeath(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_NEXUS_LORD:
         case NPC_SCION_OF_ETERNITY:
             // disk vehicles fall down once passenger is killed
-            if (pCreature->GetTransportInfo() && pCreature->GetTransportInfo()->IsOnVehicle())
+            if (creature->GetTransportInfo() && creature->GetTransportInfo()->IsOnVehicle())
             {
-                if (Unit* pVehicle = static_cast<Unit*>(pCreature->GetTransportInfo()->GetTransport()))
+                if (Unit* pVehicle = static_cast<Unit*>(creature->GetTransportInfo()->GetTransport()))
                 {
-                    pVehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, pCreature->GetObjectGuid());
+                    pVehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, creature->GetObjectGuid());
                     pVehicle->GetMotionMaster()->Clear(false, true);
                     pVehicle->SetLevitate(false);
+                    pVehicle->SetHover(false);
+                    pVehicle->GetMotionMaster()->MoveIdle();
                     pVehicle->GetMotionMaster()->MoveFall();
                 }
             }
 
             // remove passenger from riders list
-            m_lDiskRidersGuids.remove(pCreature->GetObjectGuid());
+            m_lDiskRidersGuids.remove(creature->GetObjectGuid());
 
             // start phase 3 if all adds are dead
             if (m_lDiskRidersGuids.empty())
             {
-                if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
-                    pMalygos->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMalygos, pMalygos);
+                if (Creature* malygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
+                    malygos->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, malygos, malygos);
 
                 // despawn all disks and arcane bombs before phase 3
                 for (const auto& guid : m_lSecondPhaseCreaturesGuids)
-                    if (Creature* pCreature = instance->GetCreature(guid))
-                        pCreature->ForcedDespawn();
+                    if (Creature* creature = instance->GetCreature(guid))
+                        creature->ForcedDespawn();
             }
             break;
     }
 }
 
-void instance_eye_of_eternity::Update(uint32 uiDiff)
+void instance_eye_of_eternity::Update(uint32 diff)
 {
-    // Respawn Malygos
-    if (m_uiMalygosResetTimer)
-    {
-        if (m_uiMalygosResetTimer <= uiDiff)
-        {
-            if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
-                pMalygos->Respawn();
-
-            m_uiMalygosResetTimer = 0;
-        }
-        else
-            m_uiMalygosResetTimer -= uiDiff;
-    }
-
     // respawn loot and portal
     if (m_uiMalygosCompleteTimer)
     {
-        if (m_uiMalygosCompleteTimer <= uiDiff)
+        if (m_uiMalygosCompleteTimer <= diff)
         {
             DoRespawnGameObject(GO_EXIT_PORTAL, 24 * HOUR);
             DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_ALEXSTRASZAS_GIFT : GO_ALEXSTRASZAS_GIFT_H, 24 * HOUR);
@@ -203,19 +192,14 @@ void instance_eye_of_eternity::Update(uint32 uiDiff)
             m_uiMalygosCompleteTimer = 0;
         }
         else
-            m_uiMalygosCompleteTimer -= uiDiff;
+            m_uiMalygosCompleteTimer -= diff;
     }
-}
-
-InstanceData* GetInstanceData_instance_eye_of_eternity(Map* pMap)
-{
-    return new instance_eye_of_eternity(pMap);
 }
 
 void AddSC_instance_eye_of_eternity()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_eye_of_eternity";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_eye_of_eternity;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_eye_of_eternity>;
     pNewScript->RegisterSelf();
 }

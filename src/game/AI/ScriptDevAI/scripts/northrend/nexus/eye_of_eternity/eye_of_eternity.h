@@ -39,31 +39,32 @@ enum
 class instance_eye_of_eternity : public ScriptedInstance
 {
     public:
-        instance_eye_of_eternity(Map* pMap);
+        instance_eye_of_eternity(Map* map);
         ~instance_eye_of_eternity() {}
 
         void Initialize() override;
 
         bool IsEncounterInProgress() const override;
 
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureRespawn(Creature* pCreature) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnObjectCreate(GameObject* go) override;
+        void OnCreatureDeath(Creature* creature) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
+        void SetData(uint32 type, uint32 data) override;
 
         void Update(const uint32 diff) override;
 
     protected:
 
-        uint32 m_uiEncounter;
+        uint32 m_encounter;
 
-        uint32 m_uiMalygosResetTimer;
         uint32 m_uiMalygosCompleteTimer;
 
         GuidList m_lDiskRidersGuids;
         GuidList m_lSecondPhaseCreaturesGuids;
+
+        uint32 m_focusingIrisDbGuid;
 };
 
 #endif

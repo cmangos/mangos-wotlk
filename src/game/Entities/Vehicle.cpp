@@ -829,9 +829,12 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->SetCharm(pVehicle);
             pVehicle->SetCharmer(pPlayer);
 
-            pVehicle->GetMotionMaster()->Clear();
-            pVehicle->GetMotionMaster()->MoveIdle();
-            pVehicle->StopMoving(true);
+            if (m_vehicleEntry->m_ID != 220)
+            {
+                pVehicle->GetMotionMaster()->Clear();
+                pVehicle->GetMotionMaster()->MoveIdle();
+                pVehicle->StopMoving(true);
+            }
 
             pVehicle->addUnitState(UNIT_STAT_POSSESSED);
             pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
