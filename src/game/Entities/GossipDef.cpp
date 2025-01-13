@@ -471,7 +471,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     GetMenuSession()->SendPacket(data);
 
     Player* player = GetMenuSession()->GetPlayer();
-    Unit* giver = player->GetMap()->GetUnit(guid);
+    WorldObject* giver = player->GetMap()->GetWorldObject(guid);
     if (giver && pQuest->IsAutoAccept() && player->CanTakeQuest(pQuest, false) && player->CanAddQuest(pQuest, false))
     {
         player->AddQuest(pQuest, giver);
