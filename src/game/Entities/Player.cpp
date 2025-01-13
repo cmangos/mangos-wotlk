@@ -24759,7 +24759,7 @@ Object* Player::GetObjectByTypeMask(ObjectGuid guid, TypeMask typemask)
             if (GetObjectGuid() == guid)
                 return this;
             if ((typemask & TYPEMASK_PLAYER) && IsInWorld())
-                return ObjectAccessor::FindPlayer(guid);
+                return GetMap()->GetPlayer(guid);
             break;
         case HIGHGUID_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:
