@@ -538,7 +538,7 @@ void instance_zulaman::Load(const char* chrIn)
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
 
-    // Skip m_auiEncounter[7], to start the time event properly if needed
+    // Skip m_encounter[7], to start the time event properly if needed
     for (uint8 i = 0; i < MAX_ENCOUNTER - 1; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
