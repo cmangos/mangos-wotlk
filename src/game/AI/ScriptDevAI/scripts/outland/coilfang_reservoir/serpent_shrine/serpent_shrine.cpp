@@ -118,6 +118,9 @@ void instance_serpentshrine_cavern::OnObjectCreate(GameObject* pGo)
             m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
         case GO_CONSOLE_VASHJ:
+#ifdef PRENERF_2_3
+            pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+#endif
             m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             EngageBridgeConsole(pGo);
             break;
@@ -173,7 +176,7 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
         case TYPE_MOROGRIM_EVENT:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
-                EngageBossConsole(uiType, 0);
+                EngageBossConsole(uiType, nullptr);
             if (uiData == SPECIAL)
                 EngageBridgeConsole();
             break;
@@ -322,10 +325,15 @@ void instance_serpentshrine_cavern::SpawnFishCorpses()
 
 void instance_serpentshrine_cavern::EngageBridgeConsole(GameObject* _console)
 {
+#ifdef PRENERF_2_3
     if(m_auiEncounter[TYPE_HYDROSS_EVENT] == SPECIAL && m_auiEncounter[TYPE_THELURKER_EVENT] == SPECIAL && m_auiEncounter[TYPE_LEOTHERAS_EVENT] == SPECIAL
         && m_auiEncounter[TYPE_KARATHRESS_EVENT] == SPECIAL && m_auiEncounter[TYPE_MOROGRIM_EVENT] == SPECIAL)
+#endif
         if(GameObject* console = _console ? _console : instance->GetGameObject(m_goEntryGuidStore[GO_CONSOLE_VASHJ]))
+        {
+            console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+        }
 }
 
 uint32 EncounterTypeFromGOEntry(uint32 goEntry)
@@ -374,10 +382,15 @@ void instance_serpentshrine_cavern::EngageBossConsole(uint32 uiType, GameObject*
         }
         console = instance->GetGameObject(m_goEntryGuidStore[goEntry]);
     }
+#ifdef PRENERF_2_3
     if (m_auiEncounter[uiType] == DONE)
+    {
+        console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
         console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+    }
     else if(m_auiEncounter[uiType] == SPECIAL)
         console->SetGoState(GO_STATE_ACTIVE);
+#endif
 }
 
 bool GOUse_go_ssc_boss_consoles(Player* /*pPlayer*/, GameObject* pGo)
