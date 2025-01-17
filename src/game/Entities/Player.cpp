@@ -14794,6 +14794,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         itr->second->ApplyOrRemoveSpellIfCan(this, zone, area, false);
 
     // resend quests status directly
+    UpdateForQuestWorldObjects();
     SendQuestGiverStatusMultiple();
 }
 
@@ -22031,7 +22032,8 @@ void Player::UpdateForQuestWorldObjects()
         if (m_clientGUID.IsGameObject())
         {
             if (GameObject* obj = GetMap()->GetGameObject(m_clientGUID))
-                obj->BuildValuesUpdateBlockForPlayerWithFlags(updateData, this, UF_FLAG_DYNAMIC);
+                if (sObjectMgr.IsGameObjectForQuests(obj->GetEntry()))
+                    obj->BuildValuesUpdateBlockForPlayerWithFlags(updateData, this, UF_FLAG_DYNAMIC);
         }
         else if (m_clientGUID.IsCreatureOrVehicle())
         {
