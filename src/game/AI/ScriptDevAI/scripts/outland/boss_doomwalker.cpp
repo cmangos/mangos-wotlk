@@ -187,6 +187,7 @@ struct boss_doomwalkerAI : public CombatAI
     void HandleOverrunDamage()
     {
         m_creature->CastSpell(nullptr, SPELL_OVERRUN_DAMAGE, TRIGGERED_NONE);
+        ResetTimer(DOOMWALKER_OVERRUN_SPELL, 250); // meant to be done by spell script effect
     }
 
     void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
