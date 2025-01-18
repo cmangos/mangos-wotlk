@@ -22045,15 +22045,8 @@ void Player::UpdateForQuestWorldObjects()
             if (!obj->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
                 continue;
 
-            SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(obj->GetEntry());
-            for (SpellClickInfoMap::const_iterator _itr = clickPair.first; _itr != clickPair.second; ++_itr)
-            {
-                if (_itr->second.questStart || _itr->second.questEnd)
-                {
-                    obj->BuildCreateUpdateBlockForPlayer(&updateData, this);
-                    break;
-                }
-            }
+            if (canSeeSpellClickOn(obj))
+                obj->BuildCreateUpdateBlockForPlayer(&updateData, this);
         }
     }
     for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
