@@ -11054,7 +11054,7 @@ bool SpellAuraHolder::IsSaveToDbHolder() const
     if (IsPassive() || IsChanneledSpell(GetSpellProto()) || IsItemAura(GetSpellProto()))
         return false;
 
-    if (GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET)
+    if (GetTrackedAuraType() == TRACK_AURA_TYPE_SINGLE_TARGET || GetTrackedAuraType() == TRACK_AURA_TYPE_CONTROL_VEHICLE)
         return false;
 
     if (m_spellProto->AuraInterruptFlags & AURA_INTERRUPT_FLAG_LEAVE_WORLD)
