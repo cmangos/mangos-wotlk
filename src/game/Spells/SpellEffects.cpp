@@ -1637,12 +1637,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 26399:                                 // Despawn Tentacles
-                {
-                    if (unitTarget->GetTypeId() == TYPEID_UNIT)
-                        ((Creature*)unitTarget)->ForcedDespawn();
-                    return;
-                }
                 case 26626:                                 // Mana Burn Area
                 {
                     if (unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->GetPowerType() == POWER_MANA)
