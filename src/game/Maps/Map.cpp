@@ -1579,9 +1579,11 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
 #ifdef ENABLE_PLAYERBOTS
             if (sPlayerbotAIConfig.disableBotOptimizations || player->isRealPlayer())
 #endif
-            UpdateData data;
-            player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj, data);
-            data.SendData(*player->GetSession()); // TODO: This is meant to be done in next broadcast, not immediately
+            {
+                UpdateData data;
+                player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj, data);
+                data.SendData(*player->GetSession()); // TODO: This is meant to be done in next broadcast, not immediately
+            }
         }
     }
 }
