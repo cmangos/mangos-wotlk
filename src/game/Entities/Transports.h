@@ -63,6 +63,7 @@ class GenericTransport : public GameObject
         void SetGoState(GOState state) override;
 
         virtual void SpawnPassengers() {}
+        virtual void SpawnPassengersIfDespawned() {}
         virtual void DespawnPassengers() {}
     protected:
         void UpdatePassengerPositions(PassengerSet& passengers);
@@ -106,6 +107,7 @@ class Transport : public GenericTransport
         KeyFrameVec const& GetKeyFrames() const { return m_transportTemplate.keyFrames; }
 
         void SpawnPassengers() override;
+        void SpawnPassengersIfDespawned() override;
         void DespawnPassengers() override;
     private:
         void TeleportTransport(uint32 newMapid, float x, float y, float z, float o);

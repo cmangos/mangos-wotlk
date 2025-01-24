@@ -261,6 +261,12 @@ void Transport::SpawnPassengers()
     }
 }
 
+void Transport::SpawnPassengersIfDespawned()
+{
+    if (m_staticPassengers.empty())
+        SpawnPassengers();
+}
+
 void Transport::DespawnPassengers()
 {
     auto passengerCopy = m_staticPassengers;
@@ -394,7 +400,7 @@ bool GenericTransport::AddPassenger(WorldObject* passenger, bool adjustCoords)
                 AddPetToTransport(unitPassenger, miniPet);
         }
 
-        if (passenger->GetDbGuid())
+        if (passenger->GetDbGuid() && (passenger->IsCreature() || passenger->IsGameObject()))
             m_staticPassengers.insert(passenger->GetObjectGuid());
     }
     return true;

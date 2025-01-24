@@ -481,12 +481,16 @@ void Map::CreatePlayerOnClient(Player* player)
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     Cell cell(p);
 
-    SendInitSelf(player);
-    SendInitTransports(player);
+    UpdateData updateData;
+    SendInitBeforeGrid(player, updateData);
+    SendInitTransports(player, updateData);
 
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
-    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
+    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), updateData);
     UpdateObjectVisibility(player, cell, p);
+
+    SendInitSelf(player, updateData);
+    updateData.SendData(*player->GetSession());
 }
 
 bool Map::Add(Player* player)
@@ -500,14 +504,16 @@ bool Map::Add(Player* player)
     EnsureGridLoadedAtEnter(cell, player);
     player->AddToWorld();
 
-    // TODO: Aggregate all of these into one packet
-
-    SendInitSelf(player);
-    SendInitTransports(player);
+    UpdateData updateData;
+    SendInitBeforeGrid(player, updateData);
+    SendInitTransports(player, updateData);
 
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
-    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
+    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), updateData);
     UpdateObjectVisibility(player, cell, p);
+
+    SendInitSelf(player, updateData);
+    updateData.SendData(*player->GetSession());
 
     if (IsRaid())
         player->RemoveAllGroupBuffsFromCaster(ObjectGuid());
@@ -549,7 +555,8 @@ void Map::Add(T* obj)
 
     DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "%s enters grid[%u,%u]", obj->GetGuidStr().c_str(), cell.GridX(), cell.GridY());
 
-    obj->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()));
+    UpdateData updateData;
+    obj->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), updateData);
     obj->SetItsNewObject(true);
     UpdateObjectVisibility(obj, cell, p);
     obj->SetItsNewObject(false);
@@ -1572,26 +1579,27 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
 #ifdef ENABLE_PLAYERBOTS
             if (sPlayerbotAIConfig.disableBotOptimizations || player->isRealPlayer())
 #endif
-            player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj);
+            UpdateData data;
+            player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj, data);
+            data.SendData(*player->GetSession()); // TODO: This is meant to be done in next broadcast, not immediately
         }
     }
 }
 
-void Map::SendInitSelf(Player* player) const
+void Map::SendInitBeforeGrid(Player* player, UpdateData& updateData) const
 {
-    DETAIL_LOG("Creating player data for himself %u", player->GetGUIDLow());
-
-    UpdateData updateData;
-
     // attach to player data current transport data
     if (GenericTransport* transport = player->GetTransport())
     {
         player->AddAtClient(transport);
         transport->BuildCreateUpdateBlockForPlayer(&updateData, player);
+        transport->SpawnPassengersIfDespawned();
     }
+}
 
-    // build data for self presence in world at own client (one time for map)
-    player->BuildCreateUpdateBlockForPlayer(&updateData, player);
+void Map::SendInitSelf(Player* player, UpdateData& updateData) const
+{
+    DETAIL_LOG("Creating player data for himself %u", player->GetGUIDLow());
 
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
     if (GenericTransport* transport = player->GetTransport())
@@ -1600,7 +1608,7 @@ void Map::SendInitSelf(Player* player) const
         {
             if (player != passenger)
             {
-                if (player->HasAtClient(passenger) || passenger->isVisibleForInState(player, player, false))
+                if (!player->HasAtClient(passenger) && passenger->isVisibleForInState(player, player, false))
                 {
                     player->AddAtClient(passenger);
                     passenger->BuildCreateUpdateBlockForPlayer(&updateData, player);
@@ -1609,36 +1617,25 @@ void Map::SendInitSelf(Player* player) const
         }
     }
 
-    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
-    {
-        WorldPacket packet = updateData.BuildPacket(i);
-        player->GetSession()->SendPacket(packet);
-    }
+    // build data for self presence in world at own client (one time for map)
+    player->BuildCreateUpdateBlockForPlayer(&updateData, player);
 }
 
-void Map::SendInitTransports(Player* player) const
+void Map::SendInitTransports(Player* player, UpdateData& updateData) const
 {
     // Hack to send out transports
     // no transports at map
     if (m_transports.size() == 0)
         return;
 
-    UpdateData updateData;
-
     for (auto i : m_transports)
     {
-        // send data for current transport in other place
-        if (i != player->GetTransport() && i->GetMapId() == i_id)
+        // send data for current transport in other place - if player is on transport, already sent in init self
+        if (i != player->GetTransport() && i->GetMapId() == i_id && !player->HasAtClient(i))
         {
             player->AddAtClient(i);
             i->BuildCreateUpdateBlockForPlayer(&updateData, player);
         }
-    }
-
-    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
-    {
-        WorldPacket packet = updateData.BuildPacket(i);
-        player->GetSession()->SendPacket(packet);
     }
 }
 
