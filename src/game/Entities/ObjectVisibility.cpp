@@ -50,6 +50,16 @@ void VisibilityData::SetVisibilityDistanceOverride(VisibilityDistanceType type)
     m_visibilityDistanceOverride = VisibilityDistances[AsUnderlyingType(type)];
 }
 
+bool VisibilityData::IsInfiniteVisibility() const
+{
+    return m_visibilityDistanceOverride > VISIBILITY_DISTANCE_GIGANTIC;
+}
+
+bool VisibilityData::IsLargeVisibility() const
+{
+    return m_visibilityDistanceOverride >= VISIBILITY_DISTANCE_LARGE;
+}
+
 float VisibilityData::GetVisibilityDistance() const
 {
     if (IsVisibilityOverridden())

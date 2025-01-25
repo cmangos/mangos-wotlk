@@ -1207,6 +1207,15 @@ void Item::BuildUpdateData(UpdateDataMapType& update_players)
     ClearUpdateMask(false);
 }
 
+void Item::UpdateVisibility(UpdateDataMapType& /*update_players*/)
+{
+    if (Player* pl = GetOwner())
+        pl->GetMap()->AddCreateAtClientObject(pl, this);
+
+    if (ItsNewObject())
+        SetItsNewObject(false);
+}
+
 uint32 Item::GetTotalAP() const
 {
     int32 totalAP = 0;

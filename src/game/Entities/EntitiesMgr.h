@@ -36,6 +36,7 @@ class Player;
 class Pet;
 class DynamicObject;
 class Corpse;
+class UpdateData;
 struct CreatureData;
 struct GameObjectData;
 
@@ -53,5 +54,7 @@ typedef std::map<uint32, Creature*> CreaturesMap;
 typedef std::map<uint32, GameObject*> GameObjectsMap;
 typedef std::map<uint32, DynamicObject*> DynamicObjectsMap;
 typedef std::map<uint32, Corpse*> PlayerCorpsesMap;
+
+typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
 #endif

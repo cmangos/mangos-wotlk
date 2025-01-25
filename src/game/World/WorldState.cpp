@@ -1791,7 +1791,7 @@ bool WorldState::SummonMouth(Map* map, ScourgeInvasionData::InvasionZone& zone, 
         Creature* existingMouth = map->GetCreature(zone.mouthGuid);
 
         if (existingMouth)
-            existingMouth->RemoveFromWorld();
+            existingMouth->AddObjectToRemoveList();
 
         if (Creature* mouth = WorldObject::SummonCreature(TempSpawnSettings(nullptr, NPC_MOUTH_OF_KELTHUZAD, position.x, position.y, position.z, position.o, TEMPSPAWN_DEAD_DESPAWN, 0, true), map, 1))
         {
@@ -1816,7 +1816,7 @@ bool WorldState::SummonPallid(Map* map, ScourgeInvasionData::CityAttack& zone, P
         uint32 pathID = 0;
 
         if (existingPallid)
-            existingPallid->RemoveFromWorld();
+            existingPallid->AddObjectToRemoveList();
 
         if (Creature* pallid = WorldObject::SummonCreature(TempSpawnSettings(nullptr, PickRandomValue(NPC_PALLID_HORROR, NPC_PATCHWORK_TERROR), position.x, position.y, position.z, position.o, TEMPSPAWN_DEAD_DESPAWN, 0, true), map, 1))
         {

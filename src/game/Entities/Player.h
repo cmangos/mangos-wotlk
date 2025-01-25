@@ -1945,7 +1945,7 @@ class Player : public Unit
         WorldSession* GetSession() const { return m_session; }
         void SetSession(WorldSession* s) { m_session = s; }
 
-        void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const override;
+        void BuildCreateUpdateBlockForPlayer(UpdateData& data, Player* target) const override;
         void DestroyForPlayer(Player* target, bool anim = false) const override;
         void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, bool recruitAFriend, float groupRate) const;
 
@@ -2166,6 +2166,7 @@ class Player : public Unit
         void FillBGWeekendWorldStates(WorldPacket& data, uint32& count) const;
 
         void SendAurasForTarget(Unit* target) const;
+        static WorldPacket BuildAurasForTarget(Unit const* target);
 
         PlayerMenu* GetPlayerMenu() const { return m_playerMenu.get(); }
 
@@ -2377,7 +2378,8 @@ class Player : public Unit
         bool HasAtClient(WorldObject const* u) { return u == this || m_clientGUIDs.find(u->GetObjectGuid()) != m_clientGUIDs.end(); }
         bool HasAtClient(const ObjectGuid& guid) const { return guid == GetObjectGuid() || m_clientGUIDs.find(guid) != m_clientGUIDs.end(); }
         void AddAtClient(WorldObject* target);
-        void RemoveAtClient(WorldObject* target);
+        void RemoveAtClient(WorldObject* target, bool skipRemovalOfAt = false);
+        void DestroyAtClient(WorldObject* target, bool skipRemovalOfAt = false);
         GuidSet& GetClientGuids() { return m_clientGUIDs; }
 
         bool IsVisibleInGridForPlayer(Player* pl) const override;
@@ -2941,8 +2943,6 @@ class Player : public Unit
 
         bool m_needsZoneUpdate;
         uint32 m_newZone;
-
-        uint32 m_DetectInvTimer;
 
         // Temporary removed pet cache
         uint32 m_temporaryUnsummonedPetNumber;

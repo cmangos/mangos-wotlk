@@ -121,6 +121,7 @@ struct ZoneDynamicInfo
 #endif
 
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
+#define UPDATE_TICK         400
 
 typedef std::unordered_map<uint32 /*zoneId*/, ZoneDynamicInfo> ZoneDynamicInfoMap;
 
@@ -331,16 +332,24 @@ class Map : public GridRefManager<NGridType>
         MapStoredObjectTypesContainer& GetObjectsStore() { return m_objectsStore; }
         std::map<uint32, uint32>& GetTempCreatures() { return m_tempCreatures; }
         std::map<uint32, uint32>& GetTempPets() { return m_tempPets; }
+        
+        // schedule for update object create change
+        void AddUpdateCreateObject(Object* obj) { m_objectsToClientCreateUpdate.insert(obj); }
+        void RemoveUpdateCreateObject(Object* obj) { m_objectsToClientCreateUpdate.erase(obj); }
+        // schedule for update object values change
+        void AddUpdateObject(Object* obj) { m_objectsToClientUpdate.insert(obj); }
+        void RemoveUpdateObject(Object* obj) { m_objectsToClientUpdate.erase(obj); }
+        // schedule for update object visibility change
+        void AddUpdateMovementObject(Object* obj) { m_objectsToClientMovementUpdate.insert(obj); }
+        void RemoveUpdateMovementObject(Object* obj) { m_objectsToClientMovementUpdate.erase(obj); }
+        // schedule update object destruction of object
+        void AddUpdateRemoveObject(GuidSet& visible, ObjectGuid guid);
+        void AddUpdateRemoveObject(GuidSet&& visible, ObjectGuid guid);
 
-        void AddUpdateObject(Object* obj)
-        {
-            i_objectsToClientUpdate.insert(obj);
-        }
+        void AddCreateAtClientObject(Player* player, Object* obj);
+        void AddCreateAtClientObjects(PlayerSet const& players, Object* obj);
 
-        void RemoveUpdateObject(Object* obj)
-        {
-            i_objectsToClientUpdate.erase(obj);
-        }
+        void AddCameraToWorld(WorldObject* obj);
 
         // DynObjects currently
         uint32 GenerateLocalLowGuid(HighGuid guidhigh);
@@ -452,6 +461,9 @@ class Map : public GridRefManager<NGridType>
 
         void AwardLFGRewards(uint32 dungeonId);
 
+        bool IsUpdateObjectTick() const;
+        bool IsStealthTick() const;
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -460,8 +472,8 @@ class Map : public GridRefManager<NGridType>
         void SendInitBeforeGrid(Player* player, UpdateData& updateData) const;
         void SendInitSelf(Player* player, UpdateData& updateData) const;
 
-        void SendInitTransports(Player* player, UpdateData& updateData) const;
-        void SendRemoveTransports(Player* player) const;
+        void SendInitInfiniteObjects(Player* player, UpdateData& updateData) const;
+        void SendRemoveInfinite(Player* player) const;
         void LoadTransports();
 
         bool CreatureCellRelocation(Creature* c, const Cell& new_cell);
@@ -486,8 +498,16 @@ class Map : public GridRefManager<NGridType>
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
+        void UpdateVisibility(UpdateDataMapType& update_players);
         void SendObjectUpdates();
-        std::set<Object*> i_objectsToClientUpdate;
+        std::set<Object*> m_objectsToClientUpdate;
+        std::set<Object*> m_objectsToClientCreateUpdate;
+        std::set<Object*> m_objectsToClientMovementUpdate;
+        std::vector<std::pair<GuidSet, ObjectGuid>> m_objectsToClientRemove;
+        std::unordered_map<Object*, PlayerSet> m_visibilityAdded;
+
+        std::set<std::pair<WorldObject*, uint32>> m_largeObjects;
+        std::set<WorldObject*> m_infiniteObjects;
 
     protected:
         MapEntry const* i_mapEntry;
@@ -497,6 +517,7 @@ class Map : public GridRefManager<NGridType>
         MaNGOS::unique_weak_ptr<Map> m_weakRef;
         uint32 m_unloadTimer;
         uint32 m_clientUpdateTimer;
+        uint32 m_clientUpdateTick;
         float m_VisibleDistance;
         MapPersistentState* m_persistentState;
 

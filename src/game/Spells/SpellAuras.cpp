@@ -5225,8 +5225,8 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
         for (auto aura : auras)
             target->GetVisibilityData().SetInvisibilityDetectMask(aura->GetModifier()->m_miscvalue, true);
     }
-    if (Real && target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)target)->GetCamera().UpdateVisibilityForOwner();
+    if (Real && target->IsClientControlled())
+        target->GetMap()->AddUpdateCreateObject(const_cast<Player*>(target->GetClientControlling()));
 }
 
 void Aura::HandleDetectAmore(bool apply, bool /*real*/)
@@ -5410,7 +5410,7 @@ void Aura::HandleAuraFakeInebriation(bool apply, bool Real)
         target->SetInt32Value(PLAYER_FAKE_INEBRIATION, point);
     }
 
-    target->UpdateObjectVisibility();
+    target->GetMap()->AddUpdateMovementObject(target);
 }
 
 /*********************************************************/
@@ -10188,7 +10188,7 @@ bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
     return !m_isPassive || totemAura || HasAreaAuraEffect(m_spellProto);
 }
 
-void SpellAuraHolder::BuildUpdatePacket(WorldPacket& data) const
+void SpellAuraHolder::BuildUpdatePacket(ByteBuffer& data) const
 {
     data << uint8(GetAuraSlot());
     data << uint32(GetId());

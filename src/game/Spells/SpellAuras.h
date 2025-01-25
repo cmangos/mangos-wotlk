@@ -102,7 +102,7 @@ class SpellAuraHolder
         void ApplyAuraModifiers(bool apply, bool real = false);
         void _AddSpellAuraHolder();
         void _RemoveSpellAuraHolder();
-        void BuildUpdatePacket(WorldPacket& data) const;
+        void BuildUpdatePacket(ByteBuffer& data) const;
         void SendAuraUpdate(bool remove) const;
         void HandleSpellSpecificBoosts(bool apply);
         void CleanupTriggeredSpells();
