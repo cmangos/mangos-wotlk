@@ -151,9 +151,6 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair& cell, GridRefManager<T>& 
         // if this assert is hit we have a problem somewhere because LoadFromDb should already add to map due to AI
         MANGOS_ASSERT(obj->IsInWorld());
 
-        UpdateData data;
-        obj->GetViewPoint().Event_AddedToWorld(&grid, data);
-
         if (bg)
             bg->OnObjectDBLoad(obj);
 
@@ -295,10 +292,21 @@ ObjectGridUnloader::Visit(GridRefManager<T>& m)
         // if option set then object already saved at this moment
         if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
             obj->SaveRespawnTime();
-        ///- object must be out of world before delete
-        obj->RemoveFromWorld();
-        ///- object will get delinked from the manager when deleted
-        delete obj;
+        // object must be out of world before delete
+        switch (obj->GetTypeId())
+        {
+            case TYPEID_DYNAMICOBJECT:
+                obj->GetMap()->Remove((DynamicObject*)obj, true);
+                break;
+            case TYPEID_GAMEOBJECT:
+                obj->GetMap()->Remove((GameObject*)obj, true);
+                break;
+            case TYPEID_UNIT:
+                obj->GetMap()->Remove((Creature*)obj, true);
+                break;
+            default:
+                MANGOS_ASSERT(false);
+        }
     }
 }
 

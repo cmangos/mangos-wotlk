@@ -149,7 +149,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false),
     m_settings(this),
     m_countSpawns(false),
-    m_creatureGroup(nullptr), m_imposedCooldown(false),
+    m_creatureGroup(nullptr), m_imposedCooldown(false), m_delayedPetSpells(false),
     m_creatureInfo(nullptr), m_mountInfo(nullptr)
 {
     m_valuesCount = UNIT_END;
@@ -159,6 +159,10 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 
 Creature::~Creature()
 {
+    if (m_uint32Values && (GetEntry() == 34925 || GetEntry() == 31243))
+        printf("");
+    if (GetVisibilityData().IsLargeVisibility())
+        printf("");
     CleanupsBeforeDelete();
 }
 
@@ -272,7 +276,6 @@ void Creature::RemoveCorpse(bool inPlace)
 
     m_corpseExpirationTime = TimePoint();
     SetDeathState(DEAD);
-    UpdateObjectVisibility();
 
     delete m_loot;
     m_loot = nullptr;
@@ -304,14 +307,9 @@ void Creature::RemoveCorpse(bool inPlace)
     GetRespawnCoord(x, y, z, &o);
     GetMap()->CreatureRelocation(this, x, y, z, o);
 
-    // forced recreate creature object at clients
-    UnitVisibility currentVis = GetVisibility();
-    SetVisibility(VISIBILITY_REMOVE_CORPSE);
-    UpdateObjectVisibility();
-    SetVisibility(currentVis);                              // restore visibility state
-    UpdateObjectVisibility();
-
-    if (IsUsingNewSpawningSystem())
+    if (!IsUsingNewSpawningSystem()) // schedule out of range
+        GetMap()->AddUpdateRemoveObject(GetClientGuidsIAmAt(), GetObjectGuid());
+    else
         AddObjectToRemoveList();
 }
 
@@ -794,6 +792,9 @@ void Creature::Update(const uint32 diff)
             // Creature can be dead after unit update
             if (IsAlive())
                 RegenerateAll(diff);
+
+            if (m_delayedPetSpells && !ItsNewObject()) // after being added to world
+                TriggerDelayedPetSpells();
 
             break;
         }
@@ -1631,6 +1632,21 @@ void Creature::SetMountInfo(CreatureInfo const* info)
         UpdateModelData();
 
     m_mountInfo = info;
+}
+
+void Creature::TriggerDelayedPetSpells()
+{
+    Player* player = const_cast<Player*>(GetControllingPlayer());
+    if (!player)
+        return;
+
+    player->SetCharm(this);                                    // save guid of charmed creature
+    player->UpdateClientControl(this, true, true);             // transfer client control to the creature after altering flags
+    player->PossessSpellInitialize();                          // TODO: Meant to be after update object with the uf flag
+
+    ForceValuesUpdateForFlag(UF_FLAG_OWNER_ONLY);
+
+    m_delayedPetSpells = false;
 }
 
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)

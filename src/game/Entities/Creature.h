@@ -922,6 +922,9 @@ class Creature : public Unit
 
         void SetModelRunSpeed(float runSpeed) override { m_modelRunSpeed = runSpeed; }
 
+        void SetDelayedPetSpells() { m_delayedPetSpells = true; }
+        void TriggerDelayedPetSpells();
+
     protected:
         bool CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
@@ -999,6 +1002,8 @@ class Creature : public Unit
         ObjectGuid m_killer;
 
         bool m_imposedCooldown;
+
+        bool m_delayedPetSpells;
 
     private:
         GridReference<Creature> m_gridRef;

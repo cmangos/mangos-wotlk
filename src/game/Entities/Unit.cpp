@@ -9247,7 +9247,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     }
 
     // Any units far than max visible distance for viewer or not in our map are not visible too
-    if (!at_same_transport) // distance for show player/pet/creature (no transport case)
+    if (!at_same_transport && !GetVisibilityData().IsInfiniteVisibility()) // distance for show player/pet/creature (no transport case)
     {
         if (!IsWithinDistInMap(viewPoint, u->GetVisibilityData().GetVisibilityDistanceFor((WorldObject *)this), is3dDistance))
             return false;
@@ -9400,10 +9400,8 @@ void Unit::UpdateVisibilityAndView()
         }
     }
 
-    GetViewPoint().Call_UpdateVisibilityForOwner();
-    UpdateObjectVisibility();
+    GetMap()->AddUpdateMovementObject(this);
     ScheduleAINotify(0);
-    GetViewPoint().Event_ViewPointVisibilityChanged();
 }
 
 SpellSchoolMask Unit::GetMainAttackSchoolMask()
@@ -10412,8 +10410,16 @@ void Unit::SetHealth(float val)
     SetUInt32Value(UNIT_FIELD_HEALTH, uint32(val));
     m_unitHealth = val;
 
+    if (!GetMap()->IsUpdateObjectTick())
+    {
+        WorldPacket data(SMSG_HEALTH_UPDATE, 8 + 4);
+        data << GetPackGUID();
+        data << uint32(val);
+        SendMessageToAllWhoSeeMe(data, IsPlayer());
+    }
+
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if (IsPlayer())
     {
         if (((Player*)this)->GetGroup())
             ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_HP);
@@ -10432,7 +10438,7 @@ void Unit::SetMaxHealth(uint32 val)
     SetUInt32Value(UNIT_FIELD_MAXHEALTH, val);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if (IsPlayer())
     {
         if (((Player*)this)->GetGroup())
             ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP);
@@ -10466,13 +10472,13 @@ void Unit::SetPower(Powers power, float val, bool withPowerUpdate /*= true*/)
     SetStatInt32Value(UNIT_FIELD_POWER1 + power, int32(val));
     m_unitPower[power] = val;
 
-    if (withPowerUpdate)
+    if (withPowerUpdate && !GetMap()->IsUpdateObjectTick())
     {
         WorldPacket data(SMSG_POWER_UPDATE, 8 + 1 + 4);
         data << GetPackGUID();
         data << uint8(power);
         data << uint32(val);
-        SendMessageToSet(data, GetTypeId() == TYPEID_PLAYER);
+        SendMessageToAllWhoSeeMe(data, IsPlayer());
     }
 
     // group update
@@ -12378,8 +12384,7 @@ void Unit::OnRelocated()
         m_last_notified_position.z = GetPositionZ();
         if (!IsBoarded() && IsVehicle()) // must update passengers for visibility reasons
             m_vehicleInfo->UpdateGlobalPositions();
-        GetViewPoint().Call_UpdateVisibilityForOwner();
-        UpdateObjectVisibility();
+        GetMap()->AddUpdateMovementObject(this);
     }
     ScheduleAINotify(World::GetRelocationAINotifyDelay());
 }
@@ -12637,9 +12642,6 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     possessed->SelectLevel(GetLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
     possessed->SetLinkedToOwnerAura(TEMPSPAWN_LINKED_AURA_OWNER_CHECK | TEMPSPAWN_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
 
-    // important before adding to the map!
-    SetCharmGuid(possessed->GetObjectGuid());                           // save guid of charmed creature
-
     possessed->SetSummonProperties(TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5000); // set 5s corpse decay
     GetMap()->Add(static_cast<Creature*>(possessed));                   // create the creature in the client
     possessed->AIM_Initialize();                                        // even if this will be replaced it need to be initialized to take care of spawn spells
@@ -12650,10 +12652,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
         player->UnsummonPetTemporaryIfAny();
 
         player->GetCamera().SetView(possessed);                         // modify camera view to the creature view
-        // Force granting client control (required for action bars to function propely, will be taken away on demand after action bars update below)
-        player->UpdateClientControl(possessed, true, true);             // transfer client control to the creature after altering flags
         player->SetMover(possessed);                                    // set mover so now we know that creature is "moved" by this unit
-        player->SendForcedObjectUpdate();                               // we have to update client data here to avoid problem with the "release spirit" windows reappear.
     }
 
     // init CharmInfo class that will hold charm data
@@ -12667,19 +12666,14 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
-    charmInfo->ProcessUnattackableTargets(possessed->m_combatData);
-
     if (player)
     {
         // Initialize pet bar
         if (uint32 charmedSpellList = possessed->GetCreatureInfo()->CharmedSpellList)
             possessed->SetSpellList(charmedSpellList);
         charmInfo->InitPossessCreateSpells();
-        player->PossessSpellInitialize();
 
-        // Take away client control immediately if we are not supposed to have control at the moment
-        if (!possessed->IsClientControlled(player))
-            player->UpdateClientControl(possessed, false);
+        possessed->SetDelayedPetSpells(); // sent after first vis update
     }
 
     // Creature Linking, Initial load is handled like respawn
