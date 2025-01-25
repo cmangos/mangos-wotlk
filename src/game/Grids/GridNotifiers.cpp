@@ -118,21 +118,6 @@ void VisibleNotifier::Notify()
         // send create/outofrange packet to player (except player create updates that already sent using SendUpdateToPlayer)
         if (i_processSend)
             i_data.SendData(*player.GetSession());
-
-        // send out of range to other players if need
-        GuidSet const& oor = i_data.GetOutOfRangeGUIDs();
-        for (auto iter : oor)
-        {
-            if (!iter.IsPlayer())
-                continue;
-
-            if (Player* plr = ObjectAccessor::FindPlayer(iter))
-            {
-                UpdateData data;
-                plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player, data);
-                data.SendData(*plr->GetSession()); // TODO: This has to be aggregated elsewhere
-            }
-        }
     }
 
     // Now do operations that required done at object visibility change to visible
@@ -147,6 +132,10 @@ void VisibleNotifier::Notify()
                 player.SendAurasForTarget((Unit*)vItr);
         }
     }
+    else
+        for (auto vItr : i_visibleNow)
+            if (vItr != &player && vItr->isType(TYPEMASK_UNIT))
+                i_data.AddAfterCreatePacket(Player::BuildAurasForTarget(static_cast<Unit const*>(vItr)));
 }
 
 void MessageDeliverer::Visit(CameraMapType& m)

@@ -748,7 +748,7 @@ void GameObject::Update(const uint32 diff)
 
             // can be not in world at pool despawn
             if (IsInWorld())
-                UpdateObjectVisibility();
+                GetMap()->AddUpdateObject(this);
 
             break;
         }
@@ -1131,10 +1131,6 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
     if (!GetGOInfo()->displayId)
         return false;
 
-    // Transport always visible at this step implementation
-    if (IsMoTransport() && IsInMap(u))
-        return true;
-
     // quick check visibility false cases for non-GM-mode
     if (!u->IsGameMaster())
     {
@@ -1209,6 +1205,9 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
             }
         }
     }
+
+    if (GetVisibilityData().IsInfiniteVisibility())
+        return true;
 
     // check distance
     return IsWithinDistInMap(viewPoint, GetVisibilityData().GetVisibilityDistance(), false);

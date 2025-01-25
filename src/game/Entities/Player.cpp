@@ -590,8 +590,6 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_swingErrorMsg = 0;
 
-    m_DetectInvTimer = 1 * IN_MILLISECONDS;
-
     for (auto& j : m_bgBattleGroundQueueID)
     {
         j.bgQueueTypeId  = BATTLEGROUND_QUEUE_NONE;
@@ -1664,21 +1662,6 @@ void Player::Update(const uint32 diff)
             m_nextSave -= diff;
     }
 
-    // Handle detect stealth players
-    if (m_DetectInvTimer > 0)
-    {
-        if (diff >= m_DetectInvTimer)
-        {
-#ifdef ENABLE_PLAYERBOTS
-            if (isRealPlayer())
-#endif
-            HandleStealthedUnitsDetection();
-            m_DetectInvTimer = GetMap()->IsBattleGroundOrArena() ? 500 : 2000;
-        }
-        else
-            m_DetectInvTimer -= diff;
-    }
-
     // Played time
     if (now > m_Last_tick)
     {
@@ -2282,7 +2265,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             {
                 AddAtClient(currentTransport);
                 UpdateData data;
-                currentTransport->SendCreateUpdateToPlayer(this, data);
+                currentTransport->BuildCreateUpdateBlockForPlayer(data, this);
                 data.SendData(*GetSession());
             }
         }
@@ -2862,7 +2845,7 @@ void Player::SetGameMaster(bool on)
     UpdateData data;
     m_camera.UpdateVisibilityForOwner(true, data);
     data.SendData(*GetSession());
-    UpdateObjectVisibility();
+    GetMap()->AddUpdateMovementObject(this);
     UpdateEverything();
 }
 
@@ -4442,7 +4425,7 @@ void Player::SaveItemToInventory(Item* item)
     item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
 }
 
-void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
+void Player::BuildCreateUpdateBlockForPlayer(UpdateData& data, Player* target) const
 {
     if (target == this)
     {
@@ -4955,13 +4938,14 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     UpdateZone(newzone, newarea, true); // must force zone script updates too to reapply auras
 
     // update visibility of world around viewpoint
-    m_camera.UpdateVisibilityForOwner();
     // update visibility of player for nearby cameras
-    UpdateObjectVisibility();
-
     if (IsInWorld())
+    {
+        GetMap()->AddUpdateCreateObject(this);
+
         if (InstanceData* instanceData = GetMap()->GetInstanceData())
             instanceData->OnPlayerResurrect(this);
+    }
 
     if (!applySickness)
         return;
@@ -5052,9 +5036,6 @@ void Player::KillPlayer()
     UpdateCorpseReclaimDelay();                             // dependent at use SetDeathPvP() call before kill
 
     // don't create corpse at this moment, player might be falling
-
-    // update visibility
-    UpdateObjectVisibility();
 }
 
 Corpse* Player::CreateCorpse()
@@ -11575,9 +11556,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
             if (IsInWorld() && update)
             {
                 pItem->AddToWorld();
-                UpdateData data;
-                pItem->SendCreateUpdateToPlayer(this, data);
-                data.SendData(*GetSession());
+                GetMap()->AddUpdateCreateObject(pItem);
             }
 
             pItem->SetState(ITEM_CHANGED, this);
@@ -11588,9 +11567,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
             if (IsInWorld() && update)
             {
                 pItem->AddToWorld();
-                UpdateData data;
-                pItem->SendCreateUpdateToPlayer(this, data);
-                data.SendData(*GetSession());
+                GetMap()->AddUpdateCreateObject(pItem);
             }
             pItem->SetState(ITEM_CHANGED, this);
             pBag->SetState(ITEM_CHANGED, this);
@@ -11614,9 +11591,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
     pItem2->SetCount(pItem2->GetCount() + count);
     if (IsInWorld() && update)
     {
-        UpdateData data;
-        pItem2->SendCreateUpdateToPlayer(this, data);
-        data.SendData(*GetSession());
+        GetMap()->AddUpdateObject(pItem2);
     }
 
     if (!clone)
@@ -11625,7 +11600,7 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
         if (IsInWorld() && update)
         {
             pItem->RemoveFromWorld();
-            pItem->DestroyForPlayer(this);
+            GetMap()->AddUpdateRemoveObject({ GetObjectGuid() }, pItem->GetObjectGuid());
         }
 
         RemoveEnchantmentDurations(pItem);
@@ -11705,9 +11680,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         if (IsInWorld() && update)
         {
             pItem->AddToWorld();
-            UpdateData data;
-            pItem->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
+            GetMap()->AddUpdateCreateObject(pItem);
         }
 
         ApplyEquipCooldown(pItem);
@@ -11724,17 +11697,13 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
         pItem2->SetCount(pItem2->GetCount() + pItem->GetCount());
         if (IsInWorld() && update)
         {
-            UpdateData data;
-            pItem2->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
+            GetMap()->AddUpdateCreateObject(pItem2);
         }
 
-        // delete item (it not in any slot currently)
-        // pItem->DeleteFromDB();
         if (IsInWorld() && update)
         {
             pItem->RemoveFromWorld();
-            pItem->DestroyForPlayer(this);
+            GetMap()->AddUpdateRemoveObject({ GetObjectGuid() }, pItem->GetObjectGuid());
         }
 
         RemoveEnchantmentDurations(pItem);
@@ -11773,9 +11742,7 @@ void Player::QuickEquipItem(uint16 pos, Item* pItem)
         if (IsInWorld())
         {
             pItem->AddToWorld();
-            UpdateData data;
-            pItem->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
+            GetMap()->AddUpdateCreateObject(pItem);
         }
         // Apply Titan's Grip damage penalty if necessary
         if ((slot == EQUIPMENT_SLOT_MAINHAND || slot == EQUIPMENT_SLOT_OFFHAND) && CanTitanGrip() && HasTwoHandWeaponInOneHand() && !HasAura(49152))
@@ -11910,9 +11877,7 @@ void Player::RemoveItem(uint8 bag, uint8 slot, bool update)
 
         if (IsInWorld() && update)
         {
-            UpdateData data;
-            pItem->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
+            GetMap()->AddUpdateCreateObject(pItem);
         }
     }
 }
@@ -11933,7 +11898,7 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
         if (it->IsInWorld())
         {
             it->RemoveFromWorld();
-            it->DestroyForPlayer(this);
+            GetMap()->AddUpdateRemoveObject({ GetObjectGuid() }, it->GetObjectGuid());
         }
     }
 }
@@ -12037,7 +12002,7 @@ void Player::DestroyItem(uint8 bag, uint8 slot, bool update)
         if (IsInWorld() && update)
         {
             pItem->RemoveFromWorld();
-            pItem->DestroyForPlayer(this);
+            GetMap()->AddUpdateRemoveObject({ GetObjectGuid() }, pItem->GetObjectGuid());
         }
 
         // pItem->SetOwnerGUID(0);
@@ -12073,11 +12038,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
                     ItemRemovedQuestCheck(pItem->GetEntry(), count - remcount);
                     pItem->SetCount(pItem->GetCount() - count + remcount);
                     if (IsInWorld() && update)
-                    {
-                        UpdateData data;
-                        pItem->SendCreateUpdateToPlayer(this, data);
-                        data.SendData(*GetSession());
-                    }
+                        GetMap()->AddUpdateCreateObject(pItem);
                     pItem->SetState(ITEM_CHANGED, this);
                     return;
                 }
@@ -12105,11 +12066,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
                     ItemRemovedQuestCheck(pItem->GetEntry(), count - remcount);
                     pItem->SetCount(pItem->GetCount() - count + remcount);
                     if (IsInWorld() && update)
-                    {
-                        UpdateData data;
-                        pItem->SendCreateUpdateToPlayer(this, data);
-                        data.SendData(*GetSession());
-                    }
+                        GetMap()->AddUpdateCreateObject(pItem);
                     pItem->SetState(ITEM_CHANGED, this);
                     return;
                 }
@@ -12142,11 +12099,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
                             ItemRemovedQuestCheck(pItem->GetEntry(), count - remcount);
                             pItem->SetCount(pItem->GetCount() - count + remcount);
                             if (IsInWorld() && update)
-                            {
-                                UpdateData data;
-                                pItem->SendCreateUpdateToPlayer(this, data);
-                                data.SendData(*GetSession());
-                            }
+                                GetMap()->AddUpdateCreateObject(pItem);
                             pItem->SetState(ITEM_CHANGED, this);
                             return;
                         }
@@ -12179,11 +12132,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
                     ItemRemovedQuestCheck(pItem->GetEntry(), count - remcount);
                     pItem->SetCount(pItem->GetCount() - count + remcount);
                     if (IsInWorld() && update)
-                    {
-                        UpdateData data;
-                        pItem->SendCreateUpdateToPlayer(this, data);
-                        data.SendData(*GetSession());
-                    }
+                        GetMap()->AddUpdateCreateObject(pItem);
                     pItem->SetState(ITEM_CHANGED, this);
                     return;
                 }
@@ -12211,11 +12160,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
                     ItemRemovedQuestCheck(pItem->GetEntry(), count - remcount);
                     pItem->SetCount(pItem->GetCount() - count + remcount);
                     if (IsInWorld() && update)
-                    {
-                        UpdateData data;
-                        pItem->SendCreateUpdateToPlayer(this, data);
-                        data.SendData(*GetSession());
-                    }
+                        GetMap()->AddUpdateCreateObject(pItem);
                     pItem->SetState(ITEM_CHANGED, this);
                     return;
                 }
@@ -12244,11 +12189,7 @@ void Player::DestroyItemCount(uint32 item, uint32 count, bool update, bool unequ
                             ItemRemovedQuestCheck(pItem->GetEntry(), count - remcount);
                             pItem->SetCount(pItem->GetCount() - count + remcount);
                             if (IsInWorld() && update)
-                            {
-                                UpdateData data;
-                                pItem->SendCreateUpdateToPlayer(this, data);
-                                data.SendData(*GetSession());
-                            }
+                                GetMap()->AddUpdateCreateObject(pItem);
                             pItem->SetState(ITEM_CHANGED, this);
                             return;
                         }
@@ -12335,11 +12276,7 @@ void Player::DestroyItemCount(Item* pItem, uint32& count, bool update)
         pItem->SetCount(pItem->GetCount() - count);
         count = 0;
         if (IsInWorld() && update)
-        {
-            UpdateData data;
-            pItem->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
-        }
+            GetMap()->AddUpdateCreateObject(pItem);
         pItem->SetState(ITEM_CHANGED, this);
     }
 }
@@ -12404,11 +12341,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         }
 
         if (IsInWorld())
-        {
-            UpdateData data;
-            pSrcItem->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
-        }
+            GetMap()->AddUpdateObject(pSrcItem);
         pSrcItem->SetState(ITEM_CHANGED, this);
         StoreItem(dest, pNewItem, true);
     }
@@ -12428,11 +12361,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         }
 
         if (IsInWorld())
-        {
-            UpdateData data;
-            pSrcItem->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
-        }
+            GetMap()->AddUpdateObject(pSrcItem);
         pSrcItem->SetState(ITEM_CHANGED, this);
         BankItem(dest, pNewItem, true);
     }
@@ -12452,11 +12381,7 @@ void Player::SplitItem(uint16 src, uint16 dst, uint32 count)
         }
 
         if (IsInWorld())
-        {
-            UpdateData data;
-            pSrcItem->SendCreateUpdateToPlayer(this, data);
-            data.SendData(*GetSession());
-        }
+            GetMap()->AddUpdateObject(pSrcItem);
         pSrcItem->SetState(ITEM_CHANGED, this);
         EquipItem(dest, pNewItem, true);
         AutoUnequipOffhandIfNeed();
@@ -12621,9 +12546,8 @@ void Player::SwapItem(uint16 src, uint16 dst)
                 pDstItem->SetState(ITEM_CHANGED, this);
                 if (IsInWorld())
                 {
-                    UpdateData data;
-                    pSrcItem->SendCreateUpdateToPlayer(this, data);
-                    pDstItem->SendCreateUpdateToPlayer(this, data);
+                    GetMap()->AddUpdateCreateObject(pSrcItem);
+                    GetMap()->AddUpdateCreateObject(pDstItem);
                 }
             }
             return;
@@ -12826,7 +12750,11 @@ void Player::RemoveItemFromBuyBackSlot(uint32 slot, bool del)
         if (pItem)
         {
             pItem->RemoveFromWorld();
-            if (del) pItem->SetState(ITEM_REMOVED, this);
+            if (del)
+            {
+                GetMap()->AddUpdateRemoveObject({ GetObjectGuid() }, pItem->GetObjectGuid());
+                pItem->SetState(ITEM_REMOVED, this);
+            }
         }
 
         m_items[slot] = nullptr;
@@ -20060,6 +19988,7 @@ void Player::HandleStealthedUnitsDetection()
     WorldObject const* viewPoint = GetCamera().GetBody();
 
     UpdateData data;
+    std::vector<Unit*> added;
     for (UnitList::const_iterator i = stealthedUnits.begin(); i != stealthedUnits.end(); ++i)
     {
         Unit* target = *i;
@@ -20073,30 +20002,23 @@ void Player::HandleStealthedUnitsDetection()
         {
             if (!hasAtClient)
             {
-                ObjectGuid i_guid = (*i)->GetObjectGuid();
-                target->SendCreateUpdateToPlayer(this, data);
+                GetMap()->AddCreateAtClientObject(this, target);
                 AddAtClient((*i));
-
+                ObjectGuid i_guid = (*i)->GetObjectGuid();
                 DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is detected in stealth by player %u. Distance = %f", i_guid.GetString().c_str(), GetGUIDLow(), GetDistance(*i));
-
-                // target aura duration for caster show only if target exist at caster client
-                // send data at target visibility change (adding to client)
-                if ((*i) != this && (*i)->isType(TYPEMASK_UNIT))
-                    SendAurasForTarget(*i);
             }
         }
         else
         {
             if (hasAtClient)
             {
-                target->DestroyForPlayer(this);
+                GetMap()->AddUpdateRemoveObject({ GetObjectGuid()}, target->GetObjectGuid());
                 if (target->GetTypeId() == TYPEID_UNIT)
                     BeforeVisibilityDestroy(static_cast<Creature*>(target));
                 RemoveAtClient(target);
             }
         }
     }
-    data.SendData(*GetSession());
 }
 
 bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc /*= nullptr*/, uint32 spellid /*= 0*/)
@@ -21207,9 +21129,9 @@ void Player::AddAtClient(WorldObject* target)
     target->AddClientIAmAt(this);
 }
 
-void Player::RemoveAtClient(WorldObject* target)
+void Player::RemoveAtClient(WorldObject* target, bool skipRemovalOfAt)
 {
-    if (target->GetTypeId() == TYPEID_UNIT)
+    if (target->IsUnit())
     {
         Unit* unitTarget = static_cast<Unit*>(target);
 
@@ -21219,14 +21141,40 @@ void Player::RemoveAtClient(WorldObject* target)
             {
                 if (auto* passenger = info->GetPassenger(i))
                 {
-                    passenger->DestroyForPlayer(this);
                     RemoveAtClient(passenger);
                 }
             }
         }
     }
+
     m_clientGUIDs.erase(target->GetObjectGuid());
-    target->RemoveClientIAmAt(this);
+    if (!skipRemovalOfAt)
+        target->RemoveClientIAmAt(this);
+}
+
+void Player::DestroyAtClient(WorldObject* target, bool skipRemovalOfAt)
+{
+    if (target->IsUnit())
+    {
+        Unit* unitTarget = static_cast<Unit*>(target);
+
+        if (VehicleInfo* info = unitTarget->GetVehicleInfo())
+        {
+            for (uint8 i = 0; i < 8; i++)
+            {
+                if (auto* passenger = info->GetPassenger(i))
+                {
+                    passenger->DestroyForPlayer(this, passenger->IsDead());
+                }
+            }
+        }
+
+        target->DestroyForPlayer(this, unitTarget->IsDead());
+    }
+    else
+        target->DestroyForPlayer(this);
+
+    RemoveAtClient(target, skipRemovalOfAt);
 }
 
 bool Player::IsVisibleInGridForPlayer(Player* pl) const
@@ -21309,15 +21257,10 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
         {
             ObjectGuid t_guid = target->GetObjectGuid();
 
-            if (target->GetTypeId() == TYPEID_UNIT)
-            {
+            if (target->IsCreature())
                 BeforeVisibilityDestroy(static_cast<Creature*>(target));
 
-                // at remove from map (destroy) show kill animation (in different out of range/stealth case)
-                target->DestroyForPlayer(this, !target->IsInWorld() && ((Creature*)target)->IsDead());
-            }
-            else
-                target->DestroyForPlayer(this);
+            GetMap()->AddUpdateRemoveObject({ this->GetObjectGuid() }, target->GetObjectGuid());
 
             RemoveAtClient(target);
 
@@ -21328,8 +21271,8 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
     {
         if (target->isVisibleForInState(this, viewPoint, false))
         {
-            target->SendCreateUpdateToPlayer(this, updateData);
-            if (target->GetTypeId() != TYPEID_GAMEOBJECT || !((GameObject*)target)->IsMoTransport())
+            target->BuildCreateUpdateBlockForPlayer(updateData, this);
+            if (!target->GetVisibilityData().IsInfiniteVisibility())
                 AddAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf: %s is visible now for player %u. Distance = %f", target->GetGuidStr().c_str(), GetGUIDLow(), GetDistance(target));
@@ -21346,7 +21289,7 @@ inline void UpdateVisibilityOf_helper(GuidSet& s64, T* target)
 template<>
 inline void UpdateVisibilityOf_helper(GuidSet& s64, GameObject* target)
 {
-    if (!target->IsMoTransport())
+    if (!target->GetVisibilityData().IsInfiniteVisibility())
         s64.insert(target->GetObjectGuid());
 }
 
@@ -21362,7 +21305,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
             if (target->GetTypeId() == TYPEID_UNIT)
                 BeforeVisibilityDestroy(dynamic_cast<Creature*>(target));
 
-            target->BuildOutOfRangeUpdateBlock(&data);
+            target->BuildOutOfRangeUpdateBlock(data);
             RemoveAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf(TemplateV): %s is out of range for %s. Distance = %f", t_guid.GetString().c_str(), GetGuidStr().c_str(), GetDistance(target));
@@ -21373,7 +21316,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
         if (target->isVisibleForInState(this, viewPoint, false))
         {
             visibleNow.insert(target);
-            target->BuildCreateUpdateBlockForPlayer(&data, this);
+            target->BuildCreateUpdateBlockForPlayer(data, this);
             AddAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf(TemplateV): %s is visible now for %s. Distance = %f", target->GetGuidStr().c_str(), GetGuidStr().c_str(), GetDistance(target));
@@ -21865,6 +21808,21 @@ void Player::SendAurasForTarget(Unit* target) const
     GetSession()->SendPacket(data);
 }
 
+WorldPacket Player::BuildAurasForTarget(Unit const* target)
+{
+    WorldPacket data(SMSG_AURA_UPDATE_ALL);
+    data << target->GetPackGUID();
+
+    Unit::VisibleAuraMap const& visibleAuras = target->GetVisibleAuras();
+    for (const auto& visibleAura : visibleAuras)
+    {
+        SpellAuraHolderConstBounds bounds = target->GetSpellAuraHolderBounds(visibleAura.second);
+        for (SpellAuraHolderMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+            iter->second->BuildUpdatePacket(data);
+    }
+    return data;
+}
+
 ItemSetEffect* Player::GetItemSetEffect(uint32 setId)
 {
     auto itr = m_itemSetEffects.find(setId);
@@ -22117,14 +22075,10 @@ void Player::UpdateForQuestWorldObjects()
                 continue;
 
             if (canSeeSpellClickOn(obj))
-                obj->BuildCreateUpdateBlockForPlayer(&updateData, this);
+                obj->BuildValuesUpdateBlockForPlayerWithFlags(updateData, this, UF_FLAG_DYNAMIC);
         }
     }
-    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
-    {
-        WorldPacket packet = updateData.BuildPacket(i);
-        GetSession()->SendPacket(packet);
-    }
+    updateData.SendData(*GetSession());
 }
 
 void Player::UpdateEverything()
@@ -22135,7 +22089,7 @@ void Player::UpdateEverything()
     UpdateData updateData;
     for (const auto guid : m_clientGUIDs)
         if (WorldObject* obj = GetMap()->GetWorldObject(guid))
-            obj->BuildForcedValuesUpdateBlockForPlayer(&updateData, this);
+            obj->BuildForcedValuesUpdateBlockForPlayer(updateData, this);
 
     updateData.SendData(*GetSession());
 }

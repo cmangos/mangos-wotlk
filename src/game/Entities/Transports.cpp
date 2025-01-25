@@ -233,7 +233,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     SetName(goinfo->name);
 
-    GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Gigantic);
+    GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
 
     return true;
 }
@@ -850,7 +850,7 @@ void Transport::UpdateForMap(Map const* targetMap, bool newMap)
             if (this != player->GetTransport())
             {
                 UpdateData updateData;
-                BuildCreateUpdateBlockForPlayer(&updateData, player);
+                BuildCreateUpdateBlockForPlayer(updateData, player);
                 WorldPacket packet = updateData.BuildPacket(0); // always only one packet
                 player->SendDirectMessage(packet);
                 player->AddAtClient(this);
@@ -860,7 +860,7 @@ void Transport::UpdateForMap(Map const* targetMap, bool newMap)
     else
     {
         UpdateData updateData;
-        BuildOutOfRangeUpdateBlock(&updateData);
+        BuildOutOfRangeUpdateBlock(updateData);
         WorldPacket packet = updateData.BuildPacket(0); // always only one packet
         for (const auto& itr : pl)
         {

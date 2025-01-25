@@ -60,6 +60,11 @@ void UpdateData::AddUpdateBlock(const ByteBuffer& block)
     }
 }
 
+void UpdateData::AddAfterCreatePacket(const WorldPacket& data)
+{
+    m_afterCreatePacket.emplace_back(data);
+}
+
 void UpdateData::Compress(void* dst, uint32* dst_size, void* src, int src_size)
 {
     z_stream c_stream;
@@ -168,9 +173,15 @@ void UpdateData::Clear()
 
 void UpdateData::SendData(WorldSession& session)
 {
+    if (!HasData())
+        return;
+
     for (size_t i = 0; i < GetPacketCount(); ++i)
     {
         WorldPacket packet = BuildPacket(i);
         session.SendPacket(packet);
     }
+
+    for (auto& packet : m_afterCreatePacket)
+        session.SendPacket(packet);
 }

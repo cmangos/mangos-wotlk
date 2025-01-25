@@ -159,6 +159,10 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 
 Creature::~Creature()
 {
+    if (m_uint32Values && (GetEntry() == 34925 || GetEntry() == 31243))
+        printf("");
+    if (GetVisibilityData().IsLargeVisibility())
+        printf("");
     CleanupsBeforeDelete();
 }
 
@@ -272,7 +276,6 @@ void Creature::RemoveCorpse(bool inPlace)
 
     m_corpseExpirationTime = TimePoint();
     SetDeathState(DEAD);
-    UpdateObjectVisibility();
 
     delete m_loot;
     m_loot = nullptr;
@@ -304,14 +307,9 @@ void Creature::RemoveCorpse(bool inPlace)
     GetRespawnCoord(x, y, z, &o);
     GetMap()->CreatureRelocation(this, x, y, z, o);
 
-    // forced recreate creature object at clients
-    UnitVisibility currentVis = GetVisibility();
-    SetVisibility(VISIBILITY_REMOVE_CORPSE);
-    UpdateObjectVisibility();
-    SetVisibility(currentVis);                              // restore visibility state
-    UpdateObjectVisibility();
-
-    if (IsUsingNewSpawningSystem())
+    if (!IsUsingNewSpawningSystem()) // schedule out of range
+        GetMap()->AddUpdateRemoveObject(GetClientGuidsIAmAt(), GetObjectGuid());
+    else
         AddObjectToRemoveList();
 }
 

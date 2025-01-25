@@ -128,6 +128,7 @@ GenericTransport* Map::GetTransport(ObjectGuid guid)
 void Map::AddTransport(Transport* transport)
 {
     m_transports.insert(transport);
+    m_infiniteObjects.insert(transport);
 }
 
 void Map::RemoveTransport(Transport* transport)
@@ -141,6 +142,8 @@ void Map::RemoveTransport(Transport* transport)
     }
     else
         m_transports.erase(transport);
+
+    m_infiniteObjects.erase(transport);
 }
 
 bool Map::CanSpawn(TypeID typeId, uint32 dbGuid)
@@ -181,6 +184,16 @@ void Map::AwardLFGRewards(uint32 dungeonId)
             }
         }
     }
+}
+
+bool Map::IsUpdateObjectTick() const
+{
+    return m_clientUpdateTimer >= UPDATE_TICK;
+}
+
+bool Map::IsStealthTick() const
+{
+    return IsUpdateObjectTick() && m_clientUpdateTick % 5 == 0;
 }
 
 void Map::ChangeGOPathfinding(uint32 entry, uint32 displayId, bool apply)
@@ -483,11 +496,11 @@ void Map::CreatePlayerOnClient(Player* player)
 
     UpdateData updateData;
     SendInitBeforeGrid(player, updateData);
-    SendInitTransports(player, updateData);
+    SendInitInfiniteObjects(player, updateData);
 
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
-    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), updateData);
-    UpdateObjectVisibility(player, cell, p);
+    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), &updateData);
+    AddUpdateCreateObject(player);
 
     SendInitSelf(player, updateData);
     updateData.SendData(*player->GetSession());
@@ -506,11 +519,11 @@ bool Map::Add(Player* player)
 
     UpdateData updateData;
     SendInitBeforeGrid(player, updateData);
-    SendInitTransports(player, updateData);
+    SendInitInfiniteObjects(player, updateData);
 
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
-    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), updateData);
-    UpdateObjectVisibility(player, cell, p);
+    player->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), &updateData);
+    AddUpdateCreateObject(player);
 
     SendInitSelf(player, updateData);
     updateData.SendData(*player->GetSession());
@@ -553,13 +566,15 @@ void Map::Add(T* obj)
     if (obj->isActiveObject())
         AddToActive(obj);
 
+    if (obj->GetVisibilityData().IsInfiniteVisibility())
+        m_infiniteObjects.insert(obj);
+    else if (obj->GetVisibilityData().IsLargeVisibility())
+        m_largeObjects.insert(std::make_pair(obj, obj->GetEntry()));
+
     DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "%s enters grid[%u,%u]", obj->GetGuidStr().c_str(), cell.GridX(), cell.GridY());
 
-    UpdateData updateData;
-    obj->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), updateData);
     obj->SetItsNewObject(true);
-    UpdateObjectVisibility(obj, cell, p);
-    obj->SetItsNewObject(false);
+    AddUpdateCreateObject(obj);    
 }
 
 void Map::MessageBroadcast(Player const* player, WorldPacket const& msg, bool to_self)
@@ -749,7 +764,9 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::Obje
 
 void Map::Update(const uint32& t_diff)
 {
-
+    m_clientUpdateTimer += t_diff;
+    if (IsUpdateObjectTick())
+        ++m_clientUpdateTick;
 #ifdef BUILD_METRICS
     metric::duration<std::chrono::milliseconds> meas("map.update", {
         { "map_id", std::to_string(i_id) },
@@ -1060,12 +1077,20 @@ void Map::Update(const uint32& t_diff)
     meas.add_field("count", std::to_string(static_cast<int32>(count)));
 #endif
 
+    // Process necessary scripts
+    if (!m_scriptSchedule.empty())
+        ScriptsProcess();
+
+    if (i_data)
+        i_data->Update(t_diff);
+
     // Send world objects and item update field changes
-    m_clientUpdateTimer += t_diff;
-    if (m_clientUpdateTimer >= 333)
+    if (IsUpdateObjectTick())
     {
-        m_clientUpdateTimer -= 333;
         SendObjectUpdates();
+        m_clientUpdateTimer -= UPDATE_TICK;
+        if (m_clientUpdateTick > 30)
+            m_clientUpdateTick = 0;
     }
 
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
@@ -1082,13 +1107,6 @@ void Map::Update(const uint32& t_diff)
         }
     }
 
-    ///- Process necessary scripts
-    if (!m_scriptSchedule.empty())
-        ScriptsProcess();
-
-    if (i_data)
-        i_data->Update(t_diff);
-
     m_weatherSystem->UpdateWeathers(t_diff);
 }
 
@@ -1096,6 +1114,11 @@ void Map::Remove(Player* player, bool remove)
 {
     if (i_data)
         i_data->OnPlayerLeave(player);
+
+    m_objectsToClientUpdate.erase(player);
+    m_objectsToClientCreateUpdate.erase(player);
+    m_objectsToClientMovementUpdate.erase(player);
+    m_visibilityAdded.erase(player);
 
     if (IsRaid())
         for (auto& playerRef : GetPlayers())
@@ -1140,8 +1163,8 @@ void Map::Remove(Player* player, bool remove)
 
     RemoveFromGrid(player, grid, cell);
 
-    SendRemoveTransports(player);
-    UpdateObjectVisibility(player, cell, p);
+    SendRemoveInfinite(player); // TODO: Shouldnt send?
+    AddUpdateRemoveObject(player->GetClientGuidsIAmAt(), player->GetObjectGuid());
 
     player->ResetMap();
     if (remove)
@@ -1159,22 +1182,32 @@ void Map::Remove(T* obj, bool remove)
     }
 
     Cell cell(p);
-    if (!loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)))
+    if (!remove && !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)))
         return;
 
     DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "Remove %s from grid[%u,%u]", obj->GetGuidStr().c_str(), cell.data.Part.grid_x, cell.data.Part.grid_y);
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     MANGOS_ASSERT(grid != nullptr);
 
+    m_objectsToClientUpdate.erase(obj);
+    m_objectsToClientCreateUpdate.erase(obj);
+    m_objectsToClientMovementUpdate.erase(obj);
+    m_visibilityAdded.erase(obj);
+
     if (obj->isActiveObject())
         RemoveFromActive(obj);
+
+    if (obj->GetVisibilityData().IsInfiniteVisibility())
+        m_infiniteObjects.erase(obj);
+    else if (obj->GetVisibilityData().IsLargeVisibility())
+        m_largeObjects.erase(std::make_pair(obj, obj->GetEntry()));
 
     if (remove)
         obj->CleanupsBeforeDelete();
     else
         obj->RemoveFromWorld();
 
-    UpdateObjectVisibility(obj, cell, p);                   // i think will be better to call this function while object still in grid, this changes nothing but logically is better(as for me)
+    AddUpdateRemoveObject(obj->GetClientGuidsIAmAt(), obj->GetObjectGuid());
     RemoveFromGrid(obj, grid, cell);
 
     m_objRemoveList.insert(obj->GetObjectGuid());
@@ -1278,7 +1311,7 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
 
     go->Relocate(x, y, z, orientation);
     go->UpdateModelPosition();
-    go->UpdateObjectVisibility();
+    AddUpdateMovementObject(go);
 }
 
 void Map::DynamicObjectRelocation(DynamicObject* dynObj, float x, float y, float z, float orientation)
@@ -1311,7 +1344,7 @@ void Map::DynamicObjectRelocation(DynamicObject* dynObj, float x, float y, float
     else
     {
         dynObj->Relocate(x, y, z, orientation);
-        dynObj->UpdateObjectVisibility();
+        AddUpdateMovementObject(dynObj);
     }
 }
 
@@ -1592,7 +1625,7 @@ void Map::SendInitBeforeGrid(Player* player, UpdateData& updateData) const
     if (GenericTransport* transport = player->GetTransport())
     {
         player->AddAtClient(transport);
-        transport->BuildCreateUpdateBlockForPlayer(&updateData, player);
+        transport->BuildCreateUpdateBlockForPlayer(updateData, player);
         transport->SpawnPassengersIfDespawned();
     }
 }
@@ -1611,58 +1644,52 @@ void Map::SendInitSelf(Player* player, UpdateData& updateData) const
                 if (!player->HasAtClient(passenger) && passenger->isVisibleForInState(player, player, false))
                 {
                     player->AddAtClient(passenger);
-                    passenger->BuildCreateUpdateBlockForPlayer(&updateData, player);
+                    passenger->BuildCreateUpdateBlockForPlayer(updateData, player);
+                    if (passenger->IsUnit())
+                        updateData.AddAfterCreatePacket(Player::BuildAurasForTarget(static_cast<Unit const*>(passenger)));
                 }
             }
         }
     }
 
     // build data for self presence in world at own client (one time for map)
-    player->BuildCreateUpdateBlockForPlayer(&updateData, player);
+    player->BuildCreateUpdateBlockForPlayer(updateData, player);
 }
 
-void Map::SendInitTransports(Player* player, UpdateData& updateData) const
+void Map::SendInitInfiniteObjects(Player* player, UpdateData& updateData) const
 {
-    // Hack to send out transports
-    // no transports at map
-    if (m_transports.size() == 0)
+    if (m_infiniteObjects.size() == 0)
         return;
 
-    for (auto i : m_transports)
+    for (auto i : m_infiniteObjects)
     {
         // send data for current transport in other place - if player is on transport, already sent in init self
-        if (i != player->GetTransport() && i->GetMapId() == i_id && !player->HasAtClient(i))
+        if (i->GetMapId() == i_id && !player->HasAtClient(i))
         {
             player->AddAtClient(i);
-            i->BuildCreateUpdateBlockForPlayer(&updateData, player);
+            i->BuildCreateUpdateBlockForPlayer(updateData, player);
         }
     }
 }
 
-void Map::SendRemoveTransports(Player* player) const
+void Map::SendRemoveInfinite(Player* player) const
 {
-    // Hack to send out transports
-    // no transports at map
-    if (m_transports.size() == 0)
+    if (m_infiniteObjects.size() == 0)
         return;
 
     UpdateData updateData;
 
     // except used transport
-    for (auto i : m_transports)
+    for (auto i : m_infiniteObjects)
     {
-        if (i != player->GetTransport() && i->GetMapId() != i_id)
+        if (i->GetMapId() != i_id && player->HasAtClient(i))
         {
-            i->BuildOutOfRangeUpdateBlock(&updateData);
+            i->BuildOutOfRangeUpdateBlock(updateData);
             player->RemoveAtClient(i);
         }
     }
 
-    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
-    {
-        WorldPacket packet = updateData.BuildPacket(i);
-        player->GetSession()->SendPacket(packet);
-    }
+    updateData.SendData(*player->GetSession());
 }
 
 void Map::LoadTransports()
@@ -2625,24 +2652,112 @@ WorldObject* Map::GetWorldObject(ObjectGuid guid)
     return nullptr;
 }
 
+void Map::UpdateVisibility(UpdateDataMapType update_players)
+{
+    // newly created npcs are done every tick
+    std::unordered_set<Object*> visited;
+    {
+        std::set<Object*> createObjects;
+        std::swap(createObjects, m_objectsToClientCreateUpdate);
+        for (auto& createObj : createObjects)
+        {
+            createObj->UpdateVisibility(update_players);
+            visited.insert(createObj);
+        }
+    }
+
+    if (m_clientUpdateTick % 3 == 0) // every 1200ms update vis on moved objects
+    {
+        std::set<Object*> movementObjects;
+        std::swap(movementObjects, m_objectsToClientMovementUpdate);
+        for (auto& movObj : movementObjects)
+        {
+            if (visited.find(movObj) == visited.end())
+            {
+                movObj->UpdateVisibility(update_players);
+                visited.insert(movObj);
+            }
+        }
+    }
+
+    if (m_clientUpdateTick % 6 == 0) // every 2400ms update vis on large and gigantic objects
+    {
+        for (auto& largeObj : m_largeObjects)
+        {
+            if (visited.find(largeObj.first) == visited.end())
+            {
+                largeObj.first->UpdateVisibility(update_players);
+                visited.insert(largeObj.first);
+            }
+        }
+    }
+
+    // every 400ms vs every 2000ms
+    if (IsBattleGroundOrArena() ? IsUpdateObjectTick() : IsStealthTick())
+    {
+        for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
+        {
+            Player* plr = m_mapRefIter->getSource();
+            if (plr && plr->IsInWorld())
+#ifdef ENABLE_PLAYERBOTS
+                if (isRealPlayer())
+#endif
+                    plr->HandleStealthedUnitsDetection();
+        }
+    }
+}
+
 void Map::SendObjectUpdates()
 {
     UpdateDataMapType update_players;
 
-    while (!i_objectsToClientUpdate.empty())
+    while (!m_objectsToClientUpdate.empty()) // do it first to avoid sending update and create to same obj
     {
-        Object* obj = *i_objectsToClientUpdate.begin();
-        i_objectsToClientUpdate.erase(i_objectsToClientUpdate.begin());
+        Object* obj = *m_objectsToClientUpdate.begin();
+        m_objectsToClientUpdate.erase(m_objectsToClientUpdate.begin());
         obj->BuildUpdateData(update_players);
+        if (obj->ItsNewObject())
+            obj->SetItsNewObject(false);
+    }
+
+    UpdateVisibility(update_players);
+
+    {
+        std::unordered_map<Object*, PlayerSet> visibilityAdded;
+        std::swap(visibilityAdded, m_visibilityAdded);
+        for (auto& visData : visibilityAdded)
+        {               
+            for (Player* player : visData.second)
+                visData.first->BuildCreateDataForPlayer(player, update_players, false);
+
+            if (visData.first->IsUnit())
+            {
+                WorldPacket packet = Player::BuildAurasForTarget(static_cast<Unit const*>(visData.first));
+                for (Player* player : visData.second)
+                {
+                    auto& updateDataData = update_players.find(player); // always exist after previous loop
+                    updateDataData->second.AddAfterCreatePacket(packet);
+                }
+            }
+        }
+    }
+
+    {
+        std::vector<std::pair<GuidSet, ObjectGuid>> removeObjects;
+        std::swap(removeObjects, m_objectsToClientRemove);
+        for (auto& removeObj : removeObjects)
+        {
+            for (ObjectGuid clientImAt : removeObj.first)
+            {
+                if (Player* player = GetPlayer(clientImAt))
+                    Object::BuildOutOfRangeDataForPlayer(player, update_players, removeObj.second);
+            }
+        }
     }
 
     for (auto& update_player : update_players)
     {
-        for (size_t i = 0; i < update_player.second.GetPacketCount(); ++i)
-        {
-            WorldPacket packet = update_player.second.BuildPacket(i);
-            update_player.first->GetSession()->SendPacket(packet);
-        }
+        update_player.second.SendData(*update_player.first->GetSession());
     }
 }
 
@@ -2764,6 +2879,34 @@ void Map::RemoveStringIdObject(uint32 stringId, WorldObject* obj)
         data.creatures.erase(std::remove(data.creatures.begin(), data.creatures.end(), static_cast<Creature*>(obj)), data.creatures.end());
     else if (obj->IsGameObject())
         data.gameobjects.erase(std::remove(data.gameobjects.begin(), data.gameobjects.end(), static_cast<GameObject*>(obj)), data.gameobjects.end());
+}
+
+void Map::AddUpdateRemoveObject(GuidSet& visible, ObjectGuid guid)
+{
+    m_objectsToClientRemove.emplace_back(visible, guid);
+}
+
+void Map::AddUpdateRemoveObject(GuidSet&& visible, ObjectGuid guid)
+{
+    m_objectsToClientRemove.emplace_back(visible, guid);
+}
+
+void Map::AddCreateAtClientObject(Player* player, Object* obj)
+{
+    m_visibilityAdded[obj].insert(player);
+}
+
+void Map::AddCreateAtClientObjects(PlayerSet const& players, Object* obj)
+{
+    m_visibilityAdded[obj].insert(players.begin(), players.end());
+}
+
+void Map::AddCameraToWorld(WorldObject* obj)
+{
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
+    Cell cell(p);
+    NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
+    obj->GetViewPoint().Event_AddedToWorld(&(*grid)(cell.CellX(), cell.CellY()), nullptr);
 }
 
 uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
