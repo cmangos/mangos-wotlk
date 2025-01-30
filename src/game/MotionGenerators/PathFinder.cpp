@@ -25,6 +25,9 @@
 #include "Entities/Transports.h"
 #include <Detour/Include/DetourCommon.h>
 #include <Detour/Include/DetourMath.h>
+#ifdef ENABLE_PLAYERBOTS
+#include "Server/DBCStores.h"
+#endif
 
 #ifdef BUILD_METRICS
  #include "Metric/Metric.h"
