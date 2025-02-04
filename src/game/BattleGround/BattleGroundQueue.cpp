@@ -523,7 +523,7 @@ bool BattleGroundQueueItem::InviteGroupToBg(GroupQueueInfo* groupInfo, BattleGro
         // loop through the players
         for (auto itr = groupInfo->players.begin(); itr != groupInfo->players.end(); ++itr)
         {
-            sWorld.GetMessager().AddMessage([playerGuid = itr->first, bgQueueTypeId, bgTypeId, isInvited = groupInfo->isInvitedToBgInstanceGuid, clientInstanceId = queueInfo.GetClientInstanceId(), isRated = queueInfo.IsRated(), mapId = queueInfo.GetMapId(), arenaType = groupInfo->arenaType, removeInviteTime = groupInfo->removeInviteTime, instanceId = queueInfo.GetInstanceId(), isBg = queueInfo.IsBattleGround(), minLevel = queueInfo.minLevel, maxLevel = queueInfo.maxLevel](World* /*world*/)
+            sWorld.GetMessager().AddMessage([playerGuid = itr->first, bgQueueTypeId, bgTypeId, isInvited = groupInfo->isInvitedToBgInstanceGuid, clientInstanceId = queueInfo.GetClientInstanceId(), isRated = queueInfo.IsRated(), mapId = queueInfo.GetMapId(), arenaType = groupInfo->arenaType, removeInviteTime = groupInfo->removeInviteTime, instanceId = queueInfo.GetInstanceId(), minLevel = queueInfo.minLevel, maxLevel = queueInfo.maxLevel](World* /*world*/)
             {
                 Player* plr = sObjectMgr.GetPlayer(playerGuid);
                 // if offline, skip him, can happen due to asynchronicity now
@@ -547,7 +547,7 @@ bool BattleGroundQueueItem::InviteGroupToBg(GroupQueueInfo* groupInfo, BattleGro
                 DEBUG_LOG("Battleground: invited %s to BG instance %u queueindex %u bgtype %u, I can't help it if they don't press the enter battle button.", plr->GetGuidStr().c_str(), instanceId, queueSlot, bgTypeId);
 
                 // send status packet
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(data, isBg, bgTypeId, clientInstanceId, isRated, mapId, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0, arenaType, TEAM_NONE, minLevel, maxLevel);
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(data, true, bgTypeId, clientInstanceId, isRated, mapId, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0, arenaType, TEAM_NONE, minLevel, maxLevel);
 
                 plr->GetSession()->SendPacket(data);
             });
@@ -953,6 +953,15 @@ void BattleGroundQueueItem::Update(BattleGroundQueue& queue, BattleGroundTypeId 
         }
     }
 
+    auto pickRandomArena = [&](BattleGroundTypeId& bgTypeId, BattleGround*& bgTemplate)
+    {
+        BattleGroundTypeId arenas[] = { BATTLEGROUND_NA, BATTLEGROUND_BE, BATTLEGROUND_RL, BATTLEGROUND_DS, BATTLEGROUND_RV };
+        bgTypeId = arenas[urand(0, countof(arenas) - 1)];
+        bgTemplate = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId);
+        if (!bgTemplate)
+            sLog.outError("BattleGround: CreateNewBattleGround - bg template not found for %u", bgTypeId);
+    };
+
     m_selectionPools[TEAM_INDEX_ALLIANCE].Init();
     m_selectionPools[TEAM_INDEX_HORDE].Init();
 
@@ -1014,6 +1023,13 @@ void BattleGroundQueueItem::Update(BattleGroundQueue& queue, BattleGroundTypeId 
             {
                 sLog.outError("BattleGround: CreateNewBattleGround - bg template not found for %u", bgTypeId);
                 return;
+            }
+
+            if (bgTypeId == BATTLEGROUND_AA)
+            {
+                pickRandomArena(bgTypeId, bgTemplate);
+                if (bgTemplate == nullptr)
+                    return;
             }
 
             BattleGroundInQueueInfo bgInfo;
@@ -1153,6 +1169,13 @@ void BattleGroundQueueItem::Update(BattleGroundQueue& queue, BattleGroundTypeId 
             {
                 sLog.outError("BattleGround: CreateNewBattleGround - bg template not found for %u", bgTypeId);
                 return;
+            }
+
+            if (bgTypeId == BATTLEGROUND_AA)
+            {
+                pickRandomArena(bgTypeId, bgTemplate);
+                if (bgTemplate == nullptr)
+                    return;
             }
 
             BattleGroundInQueueInfo bgInfo;
