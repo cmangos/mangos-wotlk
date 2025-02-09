@@ -84,7 +84,7 @@ metric::metric::~metric()
     if (!m_enabled)
         return;
 
-    m_writeContext.post([&] {
+    boost::asio::post(m_writeContext, [&] {
         m_sendTimer->cancel();
     });
 
