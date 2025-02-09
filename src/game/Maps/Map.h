@@ -497,7 +497,7 @@ class Map : public GridRefManager<NGridType>
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
-        void UpdateVisibility(UpdateDataMapType update_players);
+        void UpdateVisibility(UpdateDataMapType& update_players);
         void SendObjectUpdates();
         std::set<Object*> m_objectsToClientUpdate;
         std::set<Object*> m_objectsToClientCreateUpdate;

@@ -21272,8 +21272,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
         if (target->isVisibleForInState(this, viewPoint, false))
         {
             target->BuildCreateUpdateBlockForPlayer(updateData, this);
-            if (!target->GetVisibilityData().IsInfiniteVisibility())
-                AddAtClient(target);
+            AddAtClient(target);
 
             DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "UpdateVisibilityOf: %s is visible now for player %u. Distance = %f", target->GetGuidStr().c_str(), GetGUIDLow(), GetDistance(target));
         }
@@ -21282,12 +21281,6 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
 
 template<class T>
 inline void UpdateVisibilityOf_helper(GuidSet& s64, T* target)
-{
-    s64.insert(target->GetObjectGuid());
-}
-
-template<>
-inline void UpdateVisibilityOf_helper(GuidSet& s64, GameObject* target)
 {
     if (!target->GetVisibilityData().IsInfiniteVisibility())
         s64.insert(target->GetObjectGuid());

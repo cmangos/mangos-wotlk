@@ -764,6 +764,8 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::Obje
 
 void Map::Update(const uint32& t_diff)
 {
+    auto t1 = std::chrono::high_resolution_clock::now();
+
     m_clientUpdateTimer += t_diff;
     if (IsUpdateObjectTick())
         ++m_clientUpdateTick;
@@ -1066,6 +1068,37 @@ void Map::Update(const uint32& t_diff)
         }
     }
 
+    auto visitHomeCell = [&](WorldObject* largeObj)
+    {
+        CellPair p = MaNGOS::ComputeCellPair(largeObj->GetPositionX(), largeObj->GetPositionY());
+        Cell cell(p);
+        uint32 cell_id = (cell.GridY() * TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell.GridX();
+        if (!isCellMarked(cell_id))
+        {
+            markCell(cell_id);
+            cell.SetNoCreate();
+            Visit(cell, grid_object_update);
+            Visit(cell, world_object_update);
+        }
+    };
+
+    if (!m_infiniteObjects.empty())
+    {
+        for (auto& infiniteObject : m_infiniteObjects)
+        {
+            visitHomeCell(infiniteObject);
+        }
+    }
+
+    if (!m_largeObjects.empty())
+    {
+        for (auto& largeObjData : m_largeObjects)
+        {
+            WorldObject* largeObj = largeObjData.first;
+            visitHomeCell(largeObj);
+        }
+    }
+
     // update all objects
     for (auto wObj : objToUpdate)
     {
@@ -1108,6 +1141,10 @@ void Map::Update(const uint32& t_diff)
     }
 
     m_weatherSystem->UpdateWeathers(t_diff);
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+    sLog.outError("Map Id %u took %u miliseconds", GetId(), ms_int.count());
 }
 
 void Map::Remove(Player* player, bool remove)
@@ -2652,7 +2689,7 @@ WorldObject* Map::GetWorldObject(ObjectGuid guid)
     return nullptr;
 }
 
-void Map::UpdateVisibility(UpdateDataMapType update_players)
+void Map::UpdateVisibility(UpdateDataMapType& update_players)
 {
     // newly created npcs are done every tick
     std::unordered_set<Object*> visited;
