@@ -465,6 +465,9 @@ class Map : public GridRefManager<NGridType>
         bool IsUpdateObjectTick() const;
         bool IsStealthTick() const;
 
+        void AddWaypointingNpc(Unit* npc);
+        void RemoveWaypointingNpc(Unit* npc);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -509,6 +512,7 @@ class Map : public GridRefManager<NGridType>
 
         std::set<std::pair<WorldObject*, uint32>> m_largeObjects;
         std::set<WorldObject*> m_infiniteObjects;
+        std::set<Unit*> m_waypointingNpcs;
 
     protected:
         MapEntry const* i_mapEntry;

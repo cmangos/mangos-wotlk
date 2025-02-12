@@ -196,6 +196,16 @@ bool Map::IsStealthTick() const
     return IsUpdateObjectTick() && m_clientUpdateTick % 5 == 0;
 }
 
+void Map::AddWaypointingNpc(Unit* npc)
+{
+    m_waypointingNpcs.insert(npc);
+}
+
+void Map::RemoveWaypointingNpc(Unit* npc)
+{
+    m_waypointingNpcs.erase(npc);
+}
+
 void Map::ChangeGOPathfinding(uint32 entry, uint32 displayId, bool apply)
 {
     auto tileIds = GameObjectModel::GetTilesForGOEntry(GetId(), entry);
@@ -1094,6 +1104,14 @@ void Map::Update(const uint32& t_diff)
         {
             WorldObject* largeObj = largeObjData.first;
             visitHomeCell(largeObj);
+        }
+    }
+
+    if (!m_waypointingNpcs.empty())
+    {
+        for (auto& waypointNpc : m_waypointingNpcs)
+        {
+            visitHomeCell(waypointNpc);
         }
     }
 

@@ -13656,7 +13656,7 @@ void Unit::UpdateNextUpdateTime()
 
 uint32 Unit::ShouldPerformObjectUpdate(uint32 const diff)
 {
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+    if (IsPlayerControlled() || IsPlayer())
         return diff;
 
     if (IsInCombat())
