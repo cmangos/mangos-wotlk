@@ -1382,7 +1382,7 @@ bool WorldObject::HasStringId(uint32 stringId) const
 
 WorldObject::WorldObject() :
     m_transport(nullptr), m_transportInfo(nullptr), m_isOnEventNotified(false),
-    m_visibilityData(this), m_currMap(nullptr),
+    m_visibilityData(this), m_nextUpdateTime(0), m_accumulatedUpdateDiff(0), m_currMap(nullptr),
     m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
     m_isActiveObject(false), m_debugFlags(0), m_destLocCounter(0), m_castCounter(0)
 {
@@ -3347,6 +3347,21 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
     }
 
     return value;
+}
+
+uint32 WorldObject::ShouldPerformObjectUpdate(uint32 const diff)
+{
+    // For objects that don't have next update time return diff immediately
+    if (!m_nextUpdateTime)
+        return diff;
+
+    m_accumulatedUpdateDiff += diff;
+
+    // Once accumulated time reaches and goes over update time lets use it
+    if (m_accumulatedUpdateDiff >= GetNextUpdateTime())
+        return m_accumulatedUpdateDiff;
+
+    return 0;
 }
 
 float Position::GetAngle(const float x, const float y) const

@@ -610,6 +610,24 @@ struct GameObjectInfo
             default: return HIGHGUID_GAMEOBJECT;
         }
     }
+
+    bool IsSlowUpdateObject() const
+    {
+        switch (type)
+        {
+            case GAMEOBJECT_TYPE_BINDER:
+            case GAMEOBJECT_TYPE_GENERIC:
+            case GAMEOBJECT_TYPE_MAP_OBJECT:
+            case GAMEOBJECT_TYPE_DUEL_ARBITER:
+            case GAMEOBJECT_TYPE_MAILBOX:
+            case GAMEOBJECT_TYPE_MEETINGSTONE:
+            case GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY:
+            case GAMEOBJECT_TYPE_GUILD_BANK:
+            case GAMEOBJECT_TYPE_BARBER_CHAIR:
+                return true;
+            default: return false;
+        }
+    }
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
@@ -973,6 +991,9 @@ class GameObject : public WorldObject
         void SetGameObjectGroup(GameObjectGroup* group);
         void ClearGameObjectGroup();
         GameObjectGroup* GetGameObjectGroup() const { return m_goGroup; }
+
+        void UpdateNextUpdateTime() override;
+        uint32 ShouldPerformObjectUpdate(uint32 const diff) override;
 
     protected:
         uint32      m_spellId;

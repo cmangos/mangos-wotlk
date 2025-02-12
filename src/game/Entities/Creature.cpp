@@ -3146,6 +3146,14 @@ void Creature::ResetSpellHitCounter()
     m_hitBySpells.clear();
 }
 
+uint32 Creature::GetNextUpdateTime()
+{
+    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && m_deathState != ALIVE)
+        return 500;
+
+    return WorldObject::GetNextUpdateTime();
+}
+
 void Creature::Heartbeat()
 {
     Unit::Heartbeat();

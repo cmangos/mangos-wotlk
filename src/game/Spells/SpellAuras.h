@@ -202,6 +202,8 @@ class SpellAuraHolder
         bool HasMechanicMask(uint32 mechanicMask) const;
         bool IsDispellableByMask(uint32 dispelMask, Unit const* caster, SpellEntry const* spellInfo) const;
 
+        bool HasPeriodicAura() const;
+
         void SetCreationDelayFlag();
 
         bool IsProcReady(TimePoint const& now) const;

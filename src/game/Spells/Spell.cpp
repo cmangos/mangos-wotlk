@@ -3318,6 +3318,7 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
     // create and add update event for this spell
     m_spellEvent = new SpellEvent(this);
     m_trueCaster->m_events.AddEvent(m_spellEvent, m_trueCaster->m_events.CalculateTime(1));
+    m_trueCaster->SetNextUpdateTime(1);
 
     if (m_trueCaster->IsUnit()) // gameobjects dont have a sense of already casting a spell
     {
@@ -5024,7 +5025,10 @@ void Spell::SendChannelStart(uint32 duration)
     }
 
     if (target)
+    {
+        target->SetNextUpdateTime(1);
         m_caster->SetChannelObject(target);
+    }
 
     m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_SPELL, m_spellInfo->Id);
     m_caster->addUnitState(UNIT_STAT_CHANNELING);

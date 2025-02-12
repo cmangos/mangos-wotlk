@@ -267,7 +267,8 @@ Unit::Unit() :
     m_ignoreRangedTargets(false),
     m_auraUpdateMask(0),
     m_combatManager(this),
-    m_isMountOverriden(false), m_overridenMountId(0)
+    m_isMountOverriden(false), m_overridenMountId(0),
+    m_hasPeriodicAura(false)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -5483,6 +5484,11 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
     if (!holder->IsDeleted())
     {
         holder->HandleSpellSpecificBoosts(true);
+        m_hasPeriodicAura = m_hasPeriodicAura || holder->HasPeriodicAura();
+        if (m_hasPeriodicAura)
+            SetNextUpdateTime(1);
+        else
+            SetNextUpdateTime(0);
         SpellProcEventEntry const* procEntry = sSpellMgr.GetSpellProcEvent(aurSpellInfo->Id);
         if (aurSpellInfo->procFlags & PROC_FLAG_HEARTBEAT || (procEntry && procEntry->procFlags & PROC_FLAG_HEARTBEAT))
             ++m_hasHeartbeatProcCounter;
@@ -6107,6 +6113,9 @@ void Unit::RemoveSpellAuraHolder(SpellAuraHolder* holder, AuraRemoveMode mode)
         if (itr->second == holder)
         {
             m_spellAuraHolders.erase(itr);
+            m_hasPeriodicAura = HasPeriodicAura();
+            if (!m_hasPeriodicAura)
+                SetNextUpdateTime(0);
             break;
         }
     }
@@ -6415,6 +6424,19 @@ bool Unit::HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const
     for (auto aura : auras)
         if (aura->GetCasterGuid() == caster)
             return true;
+    return false;
+}
+
+bool Unit::HasPeriodicAura() const
+{
+    for (auto holder : m_spellAuraHolders)
+    {
+        for (auto aura : holder.second->m_auras)
+        {
+            if (aura && aura->IsPeriodic())
+                return true;
+        }
+    }
     return false;
 }
 
@@ -13603,6 +13625,33 @@ uint32 Unit::GetModifierXpBasedOnDamageReceived(uint32 xp)
             xp *= (1.f - percentageHp);
     }
     return xp;
+}
+
+void Unit::UpdateNextUpdateTime()
+{
+    // If we already have next update time don't reset it (movement mutation should do it)
+    if (m_nextUpdateTime)
+        return;
+
+    if (!m_events.IsEmpty() || m_hasPeriodicAura)
+        SetNextUpdateTime(1);
+    // If motion type is idle and there is no nextUpdateTime force it
+    else if (GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
+        SetNextUpdateTime(urand(500, 1000));
+    // If motion type is random and there is no nextUpdateTime force it
+    else if (GetMotionMaster()->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
+        SetNextUpdateTime(urand(250, 500));
+}
+
+uint32 Unit::ShouldPerformObjectUpdate(uint32 const diff)
+{
+    if (IsPlayerControlled() || IsPlayer())
+        return diff;
+
+    if (IsInCombat())
+        return diff + m_accumulatedUpdateDiff;
+
+    return WorldObject::ShouldPerformObjectUpdate(diff);
 }
 
 void Unit::OverrideMountDisplayId(uint32 newDisplayId)

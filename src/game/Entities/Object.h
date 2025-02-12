@@ -1223,6 +1223,14 @@ class WorldObject : public Object
         VisibilityData const& GetVisibilityData() const { return m_visibilityData; }
         VisibilityData& GetVisibilityData() { return m_visibilityData; }
 
+        virtual uint32 GetNextUpdateTime() { return m_nextUpdateTime; }
+        virtual void SetNextUpdateTime(uint32 time) { m_nextUpdateTime = time; }
+        virtual void UpdateNextUpdateTime() {}
+        uint32 GetAccumulatedUpdateDiff() { return m_accumulatedUpdateDiff; }
+        void ResetAccumulatedUpdateDiff() { m_accumulatedUpdateDiff = 0; }
+
+        virtual uint32 ShouldPerformObjectUpdate(uint32 const diff);
+
         bool HaveDebugFlag(CMDebugFlags flag) const { return (uint64(m_debugFlags) & flag) != 0; }
         void SetDebugFlag(CMDebugFlags flag) { m_debugFlags |= uint64(flag); }
         void ClearDebugFlag(CMDebugFlags flag) { m_debugFlags &= ~(uint64(flag)); }
@@ -1305,6 +1313,9 @@ class WorldObject : public Object
         bool m_isOnEventNotified;
 
         VisibilityData m_visibilityData;
+
+        uint32 m_nextUpdateTime;
+        uint32 m_accumulatedUpdateDiff;
 
         ShortTimeTracker m_heartBeatTimer;
     private:

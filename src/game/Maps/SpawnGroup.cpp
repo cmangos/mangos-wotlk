@@ -814,14 +814,14 @@ void FormationData::ClearMoveGen()
 
 Unit* FormationData::GetMaster()
 {
-    if (m_slotsMap.begin() != m_slotsMap.end() && m_slotsMap.begin()->first == 0)
+    if (!m_slotsMap.empty() && m_slotsMap.begin()->first == 0)
         return m_slotsMap.begin()->second->GetOwner();
     return nullptr;
 }
 
 void FormationData::SetMasterMovement()
 {
-    auto newMaster = m_slotsMap.at(0)->GetOwner();
+    auto newMaster = GetMaster();
 
     if (!newMaster)
         return;
