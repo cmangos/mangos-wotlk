@@ -158,6 +158,8 @@ class Map : public GridRefManager<NGridType>
         void VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer> &worldVisitor);
         virtual void Update(const uint32&);
 
+        uint64 PerformObjectUpdate(uint32 t_diff, WorldObjectUnSet& objToUpdate);
+
         void MessageBroadcast(Player const*, WorldPacket const&, bool to_self);
         void MessageBroadcast(WorldObject const*, WorldPacket const&);
         void MessageDistBroadcast(Player const*, WorldPacket const&, float dist, bool to_self, bool own_team_only = false);
@@ -464,6 +466,9 @@ class Map : public GridRefManager<NGridType>
         bool IsUpdateObjectTick() const;
         bool IsStealthTick() const;
 
+        void AddWaypointingNpc(Unit* npc);
+        void RemoveWaypointingNpc(Unit* npc);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -508,6 +513,7 @@ class Map : public GridRefManager<NGridType>
 
         std::set<std::pair<WorldObject*, uint32>> m_largeObjects;
         std::set<WorldObject*> m_infiniteObjects;
+        std::set<Unit*> m_waypointingNpcs;
 
     protected:
         MapEntry const* i_mapEntry;

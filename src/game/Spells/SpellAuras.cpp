@@ -51,6 +51,7 @@
 #include "Entities/TemporarySpawn.h"
 #include "Maps/InstanceData.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
+#include "SpellAuras.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -11006,6 +11007,15 @@ bool SpellAuraHolder::IsDispellableByMask(uint32 dispelMask, Unit const* caster,
         }
         return true;
     }
+    return false;
+}
+
+bool SpellAuraHolder::HasPeriodicAura() const
+{
+    for (Aura* aura : m_auras)
+        if (aura && aura->IsPeriodic())
+            return true;
+
     return false;
 }
 

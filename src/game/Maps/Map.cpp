@@ -196,6 +196,16 @@ bool Map::IsStealthTick() const
     return IsUpdateObjectTick() && m_clientUpdateTick % 5 == 0;
 }
 
+void Map::AddWaypointingNpc(Unit* npc)
+{
+    m_waypointingNpcs.insert(npc);
+}
+
+void Map::RemoveWaypointingNpc(Unit* npc)
+{
+    m_waypointingNpcs.erase(npc);
+}
+
 void Map::ChangeGOPathfinding(uint32 entry, uint32 displayId, bool apply)
 {
     auto tileIds = GameObjectModel::GetTilesForGOEntry(GetId(), entry);
@@ -785,8 +795,6 @@ void Map::Update(const uint32& t_diff)
     localtime_r(&m_curTime, &m_curTimeTm);
 #endif
 
-    uint64 count = 0;
-
     m_dyn_tree.update(t_diff);
 
     GetMessager().Execute(this);
@@ -1100,12 +1108,15 @@ void Map::Update(const uint32& t_diff)
         }
     }
 
-    // update all objects
-    for (auto wObj : objToUpdate)
+    if (!m_waypointingNpcs.empty())
     {
-        wObj->Update(t_diff);
-        ++count;
+        for (auto& waypointNpc : m_waypointingNpcs)
+        {
+            visitHomeCell(waypointNpc);
+        }
     }
+
+    uint64 count = PerformObjectUpdate(t_diff, objToUpdate);
 
 #ifdef BUILD_METRICS
     meas.add_field("count", std::to_string(static_cast<int32>(count)));
@@ -1146,6 +1157,24 @@ void Map::Update(const uint32& t_diff)
     auto t2 = std::chrono::high_resolution_clock::now();
     auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
     sLog.outError("Map Id %u took %u miliseconds", GetId(), ms_int.count());
+}
+
+uint64 Map::PerformObjectUpdate(uint32 t_diff, WorldObjectUnSet& objToUpdate)
+{
+    uint64 count = 0;
+    // update all objects
+    for (WorldObject* object : objToUpdate)
+    {
+        if (uint32 accumulatedDiff = object->ShouldPerformObjectUpdate(t_diff))
+        {
+            object->Update(accumulatedDiff);
+            object->ResetAccumulatedUpdateDiff();
+            object->UpdateNextUpdateTime();
+
+            ++count;
+        }
+    }
+    return count;
 }
 
 void Map::Remove(Player* player, bool remove)

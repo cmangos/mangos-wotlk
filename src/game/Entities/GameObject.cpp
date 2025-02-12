@@ -3016,6 +3016,23 @@ void GameObject::ClearGameObjectGroup()
     m_goGroup = nullptr;
 }
 
+void GameObject::UpdateNextUpdateTime()
+{
+    // If we already have next update time don't reset it (movement mutation should do it)
+    if (m_nextUpdateTime)
+        return;
+
+    if (!m_events.IsEmpty() || m_AI)
+        SetNextUpdateTime(1);
+    else if (GetGOInfo()->IsSlowUpdateObject())
+        SetNextUpdateTime(urand(500, 1000));
+}
+
+uint32 GameObject::ShouldPerformObjectUpdate(uint32 const diff)
+{
+    return WorldObject::ShouldPerformObjectUpdate(diff);
+}
+
 QuaternionData GameObject::GetWorldRotation() const
 {
     QuaternionData localRotation = GetLocalRotation();
