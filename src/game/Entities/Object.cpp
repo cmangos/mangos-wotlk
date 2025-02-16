@@ -1328,6 +1328,18 @@ void Object::ForceValuesUpdateAtIndex(uint16 index)
     }
 }
 
+void Object::ForceValuesUpdateForFlag(uint16 flag)
+{
+    uint16 const* flags = UpdateFields::GetUpdateFieldFlagsArray(GetTypeId());
+    MANGOS_ASSERT(flags);
+
+    for (uint16 index = 0; index < m_valuesCount; ++index)
+    {
+        if (GetUInt32Value(index) != 0 && (flags[index] & flag))
+            ForceValuesUpdateAtIndex(index);
+    }
+}
+
 void WorldObject::SetStringId(uint32 stringId, bool apply)
 {
     if (apply)
@@ -2770,6 +2782,9 @@ void WorldObject::UpdateVisibility(UpdateDataMapType& update_players)
     Cell::VisitWorldObjects(this, notifier, GetVisibilityData().GetVisibilityDistance());
     GetMap()->AddCreateAtClientObjects(notifier.i_playerSet, this);
     ClearUpdateMask(false);
+
+    if (ItsNewObject())
+        SetItsNewObject(false);
 }
 
 bool WorldObject::IsControlledByPlayer() const

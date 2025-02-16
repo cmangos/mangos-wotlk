@@ -149,7 +149,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false),
     m_settings(this),
     m_countSpawns(false),
-    m_creatureGroup(nullptr), m_imposedCooldown(false),
+    m_creatureGroup(nullptr), m_imposedCooldown(false), m_delayedPetSpells(false),
     m_creatureInfo(nullptr), m_mountInfo(nullptr)
 {
     m_valuesCount = UNIT_END;
@@ -792,6 +792,9 @@ void Creature::Update(const uint32 diff)
             // Creature can be dead after unit update
             if (IsAlive())
                 RegenerateAll(diff);
+
+            if (m_delayedPetSpells && !ItsNewObject()) // after being added to world
+                TriggerDelayedPetSpells();
 
             break;
         }
@@ -1629,6 +1632,21 @@ void Creature::SetMountInfo(CreatureInfo const* info)
         UpdateModelData();
 
     m_mountInfo = info;
+}
+
+void Creature::TriggerDelayedPetSpells()
+{
+    Player* player = const_cast<Player*>(GetControllingPlayer());
+    if (!player)
+        return;
+
+    player->SetCharm(this);                                    // save guid of charmed creature
+    player->UpdateClientControl(this, true, true);             // transfer client control to the creature after altering flags
+    player->PossessSpellInitialize();
+
+    ForceValuesUpdateForFlag(UF_FLAG_OWNER_ONLY);
+
+    m_delayedPetSpells = false;
 }
 
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)

@@ -1181,11 +1181,6 @@ void Map::Remove(Player* player, bool remove)
     if (i_data)
         i_data->OnPlayerLeave(player);
 
-    m_objectsToClientUpdate.erase(player);
-    m_objectsToClientCreateUpdate.erase(player);
-    m_objectsToClientMovementUpdate.erase(player);
-    m_visibilityAdded.erase(player);
-
     if (IsRaid())
         for (auto& playerRef : GetPlayers())
             playerRef.getSource()->RemoveAllGroupBuffsFromCaster(player->GetObjectGuid());
@@ -1194,6 +1189,11 @@ void Map::Remove(Player* player, bool remove)
         player->CleanupsBeforeDelete();
     else
         player->RemoveFromWorld();
+
+    m_objectsToClientUpdate.erase(player);
+    m_objectsToClientCreateUpdate.erase(player);
+    m_objectsToClientMovementUpdate.erase(player);
+    m_visibilityAdded.erase(player);
 
     // this may be called during Map::Update
     // after decrement+unlink, ++m_mapRefIter will continue correctly
@@ -1255,11 +1255,6 @@ void Map::Remove(T* obj, bool remove)
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
     MANGOS_ASSERT(grid != nullptr);
 
-    m_objectsToClientUpdate.erase(obj);
-    m_objectsToClientCreateUpdate.erase(obj);
-    m_objectsToClientMovementUpdate.erase(obj);
-    m_visibilityAdded.erase(obj);
-
     if (obj->isActiveObject())
         RemoveFromActive(obj);
 
@@ -1272,6 +1267,11 @@ void Map::Remove(T* obj, bool remove)
         obj->CleanupsBeforeDelete();
     else
         obj->RemoveFromWorld();
+
+    m_objectsToClientUpdate.erase(obj);
+    m_objectsToClientCreateUpdate.erase(obj);
+    m_objectsToClientMovementUpdate.erase(obj);
+    m_visibilityAdded.erase(obj);
 
     AddUpdateRemoveObject(obj->GetClientGuidsIAmAt(), obj->GetObjectGuid());
     RemoveFromGrid(obj, grid, cell);

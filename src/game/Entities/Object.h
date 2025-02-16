@@ -494,6 +494,7 @@ class Object
         }
 
         void ForceValuesUpdateAtIndex(uint16 index);
+        void ForceValuesUpdateForFlag(uint16 flag);
         void MarkUpdateFieldsWithFlagForUpdate(UpdateMask& updateMask, uint16 flag) const;
 
         void SetFlag(uint16 index, uint32 newFlag);
