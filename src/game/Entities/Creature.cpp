@@ -1642,7 +1642,7 @@ void Creature::TriggerDelayedPetSpells()
 
     player->SetCharm(this);                                    // save guid of charmed creature
     player->UpdateClientControl(this, true, true);             // transfer client control to the creature after altering flags
-    player->PossessSpellInitialize();
+    player->PossessSpellInitialize();                          // TODO: Meant to be after update object with the uf flag
 
     ForceValuesUpdateForFlag(UF_FLAG_OWNER_ONLY);
 
