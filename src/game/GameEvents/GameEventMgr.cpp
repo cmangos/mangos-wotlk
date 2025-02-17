@@ -947,7 +947,7 @@ void GameEventMgr::GameEventSpawn(int16 event_id)
     if (!dbGuidsToForward.empty())
     {
         // world thread will always have valid pointers to maps
-        sWorld.GetMessager().AddMessage([=](World* world)
+        sWorld.GetMessager().AddMessage([=](World* /*world*/)
         {
             for (auto& data : dbGuidsToForward)
             {
@@ -1055,7 +1055,7 @@ void GameEventMgr::GameEventUnspawn(int16 event_id)
     if (!dbGuidsToForward.empty())
     {
         // world thread will always have valid pointers to maps
-        sWorld.GetMessager().AddMessage([=](World* world)
+        sWorld.GetMessager().AddMessage([=](World* /*world*/)
         {
             for (auto& data : dbGuidsToForward)
             {

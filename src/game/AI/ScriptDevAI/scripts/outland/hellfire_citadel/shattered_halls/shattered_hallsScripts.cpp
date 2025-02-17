@@ -358,7 +358,7 @@ struct npc_shattered_hand_legionnaire : public CombatAI
             ResetTimer(LEGIONNAIRE_CALL_FOR_REINFORCEMENTS, 0u);
     }
 
-    void SummonedCreatureJustDied(Creature* summoned) override
+    void SummonedCreatureJustDied(Creature* /*summoned*/) override
     {
         // There can always be just one reinforcement up, when summoned dies legionnaire can spawn a new one after ~5-15 seconds cooldown
         if (m_reinfCD)
