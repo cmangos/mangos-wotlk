@@ -126,8 +126,6 @@ class instance_blood_furnace : public ScriptedInstance
         bool m_uiBroggokEventDelaySpawn;
         std::vector<uint32> m_broggokEventGuids;
 
-        CreatureGroup* m_cellGroup;
-
         GameObject* m_lLeverGO;
 
         GuidList m_cracks;
