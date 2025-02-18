@@ -26,10 +26,10 @@ EndScriptData */
 
 instance_blood_furnace::instance_blood_furnace(Map* map) : ScriptedInstance(map),
     m_uiBroggokEventTimer(90 * IN_MILLISECONDS),
-    m_uiBroggokEventDelay(0),
     m_uiBroggokEventPhase(0),
     m_uiRandYellTimer(90000),
     m_crackTimer(30000),
+    m_uiBroggokEventDelay(0),
     m_uiBroggokEventDelaySpawn(false)
 {
     Initialize();
