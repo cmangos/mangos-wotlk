@@ -469,8 +469,6 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
             }
             else                                            // guid case
             {
-                CreatureData const* masterData = sObjectMgr.GetCreatureData(pInfo->masterDBGuid);
-                CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(masterData->id);
                 pMaster = pSource->GetMap()->GetCreature(pInfo->masterDBGuid);
             }
 
@@ -774,8 +772,6 @@ bool CreatureLinkingHolder::TryFollowMaster(Creature* pCreature)
     }
     else                                                    // guid case
     {
-        CreatureData const* masterData = sObjectMgr.GetCreatureData(pInfo->masterDBGuid);
-        CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(masterData->id);
         pMaster = pCreature->GetMap()->GetCreature(pInfo->masterDBGuid);
     }
 

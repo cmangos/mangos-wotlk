@@ -1234,7 +1234,6 @@ void UnitAI::UpdateSpellLists()
             if (supportActionRoll > spells.ChanceSupportAction)
                 continue;
 
-        bool oldBehaviour = spell.CombatCondition == -1;
         if (spell.CombatCondition != -1 && spell.CombatCondition)
         {
             SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell.SpellId);

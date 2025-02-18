@@ -179,7 +179,6 @@ struct boss_selin_fireheartAI : public CombatAI
         SetCombatScriptStatus(false);
         SetMeleeEnabled(true);
 
-        bool castSuccessful = false;
         if (DoCastSpellIfCan(nullptr, SPELL_FEL_CRYSTAL_DUMMY) == CAST_OK)
         {
             DoScriptText(EMOTE_CRYSTAL, m_creature);

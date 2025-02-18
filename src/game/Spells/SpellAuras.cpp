@@ -5718,8 +5718,6 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
     if (!Real)
         return;
 
-    Unit* target = GetTarget();
-
     switch (GetId())
     {
         // some spell have charges by functionality not have its in spell data
@@ -5958,9 +5956,6 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
         return;
 
     Unit* target = GetTarget();
-
-    // For prevent double apply bonuses
-    bool loading = (target->GetTypeId() == TYPEID_PLAYER && ((Player*)target)->GetSession()->PlayerLoading());
 
     SpellEntry const* spell = GetSpellProto();
     switch (spell->SpellFamilyName)
