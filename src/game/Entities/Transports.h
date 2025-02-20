@@ -65,6 +65,8 @@ class GenericTransport : public GameObject
         virtual void SpawnPassengers() {}
         virtual void SpawnPassengersIfDespawned() {}
         virtual void DespawnPassengers() {}
+
+        virtual bool IsCrossMapTransport() const = 0;
     protected:
         void UpdatePassengerPositions(PassengerSet& passengers);
 
@@ -85,6 +87,8 @@ class ElevatorTransport : public GenericTransport
         void Update(const uint32 diff) override;
 
         void SetGoState(GOState state) override;
+
+        bool IsCrossMapTransport() const { return false; }
     private:
         TransportAnimation const* m_animationInfo;
         uint32 m_currentSeg;
@@ -98,7 +102,7 @@ class Transport : public GenericTransport
 
         static bool IsSpawnedByDefault(uint32 entry, Team team);
         static void LoadTransport(TransportTemplate const& transportTemplate, Map* map, bool spawnOnDemand = false);
-        bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicHighValue);
+        bool Create(uint32 counter, uint32 entry, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicHighValue);
         void Update(const uint32 diff) override;
 
         uint32 GetPeriod() const { return m_period; }
@@ -109,6 +113,8 @@ class Transport : public GenericTransport
         void SpawnPassengers() override;
         void SpawnPassengersIfDespawned() override;
         void DespawnPassengers() override;
+
+        bool IsCrossMapTransport() const override;
     private:
         void TeleportTransport(uint32 newMapid, float x, float y, float z, float o);
         void UpdateForMap(Map const* targetMap, bool newMap);

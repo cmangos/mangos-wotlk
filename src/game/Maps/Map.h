@@ -178,6 +178,7 @@ class Map : public GridRefManager<NGridType>
         void CreatureRelocation(Creature* creature, float x, float y, float z, float ang);
         void GameObjectRelocation(GameObject* go, float x, float y, float z, float orientation, bool respawnRelocationOnFail = true);
         void DynamicObjectRelocation(DynamicObject* dynObj, float x, float y, float z, float orientation);
+        void CorpseRelocation(Corpse* corpse, float x, float y, float z, float orientation);
 
         template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
 
@@ -540,10 +541,10 @@ class Map : public GridRefManager<NGridType>
         // Map local low guid counters
         ObjectGuidGenerator<HIGHGUID_UNIT> m_CreatureGuids;
         ObjectGuidGenerator<HIGHGUID_GAMEOBJECT> m_GameObjectGuids;
-        ObjectGuidGenerator<HIGHGUID_TRANSPORT> m_transportGuids;
         ObjectGuidGenerator<HIGHGUID_DYNAMICOBJECT> m_DynObjectGuids;
         ObjectGuidGenerator<HIGHGUID_PET> m_PetGuids;
         ObjectGuidGenerator<HIGHGUID_VEHICLE> m_VehicleGuids;
+        ObjectGuidGenerator<HIGHGUID_MO_TRANSPORT> m_transportGuids;
 
         // Type specific code for add/remove to/from grid
         template<class T>

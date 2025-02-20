@@ -93,6 +93,7 @@ struct TransportTemplate
     float accelTime;
     float accelDist;
     uint32 entry;
+    uint32 counter;
 };
 
 class TransportMgr

@@ -231,6 +231,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
       m_variableManager(this)
 {
     m_weatherSystem = new WeatherSystem(this);
+    m_transportGuids.Set(sMapMgr.GetTransportCounter());
 }
 
 void Map::Initialize(bool loadInstanceData /*= true*/)
@@ -1308,11 +1309,40 @@ void Map::DynamicObjectRelocation(DynamicObject* dynObj, float x, float y, float
         AddToGrid(dynObj, newGrid, new_cell);
         dynObj->GetViewPoint().Event_GridChanged(&(*newGrid)(new_cell.CellX(), new_cell.CellY()));
     }
-    else
+
+    dynObj->Relocate(x, y, z, orientation);
+    dynObj->UpdateObjectVisibility();
+}
+
+void Map::CorpseRelocation(Corpse* corpse, float x, float y, float z, float orientation)
+{
+    Cell new_cell(MaNGOS::ComputeCellPair(x, y));
+    Cell old_cell = corpse->GetCurrentCell();
+
+    if (!getNGrid(new_cell.GridX(), new_cell.GridY()))
+        return;
+
+    if (old_cell.DiffGrid(new_cell))
     {
-        dynObj->Relocate(x, y, z, orientation);
-        dynObj->UpdateObjectVisibility();
+        if (!corpse->isActiveObject() && !loaded(new_cell.gridPair()))
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "Creature (GUID: %u Entry: %u) attempt move from grid[%u,%u]cell[%u,%u] to unloaded grid[%u,%u]cell[%u,%u].", corpse->GetGUIDLow(), corpse->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+            return;
+        }
+        EnsureGridLoadedAtEnter(new_cell);
     }
+
+    // delay corpse move for grid/cell to grid/cell moves
+    if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
+    {
+        NGridType* oldGrid = getNGrid(old_cell.GridX(), old_cell.GridY());
+        NGridType* newGrid = getNGrid(new_cell.GridX(), new_cell.GridY());
+        RemoveFromGrid(corpse, oldGrid, old_cell);
+        AddToGrid(corpse, newGrid, new_cell);
+    }
+
+    corpse->Relocate(x, y, z, orientation);
+    corpse->UpdateObjectVisibility();
 }
 
 bool Map::CreatureCellRelocation(Creature* c, const Cell& new_cell)
@@ -2608,7 +2638,7 @@ WorldObject* Map::GetWorldObject(ObjectGuid guid)
     switch (guid.GetHigh())
     {
         case HIGHGUID_PLAYER:       return GetPlayer(guid);
-        case HIGHGUID_TRANSPORT:
+        case HIGHGUID_MO_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:   return GetGameObject(guid);
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:      return GetCreature(guid);
@@ -2620,7 +2650,6 @@ WorldObject* Map::GetWorldObject(ObjectGuid guid)
             Corpse* corpse = GetCorpse(guid);
             return corpse && corpse->IsInWorld() ? corpse : nullptr;
         }
-        case HIGHGUID_MO_TRANSPORT:
         default:                    break;
     }
 
@@ -2775,7 +2804,6 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
     {
         case HIGHGUID_UNIT:
             return m_CreatureGuids.Generate();
-        case HIGHGUID_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:
             return m_GameObjectGuids.Generate();
         case HIGHGUID_DYNAMICOBJECT:
@@ -2784,6 +2812,8 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
             return m_PetGuids.Generate();
         case HIGHGUID_VEHICLE:
             return m_VehicleGuids.Generate();
+        case HIGHGUID_MO_TRANSPORT:
+            return m_transportGuids.Generate();
         default:
             MANGOS_ASSERT(false);
             return 0;

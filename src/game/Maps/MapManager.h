@@ -162,6 +162,8 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         void DoForAllMaps(const std::function<void(Map*)>& worker);
         void DoForAllMapsWithMapId(uint32 mapId, std::function<void(Map*)> worker);
 
+        uint32 GetTransportCounter() const { return m_transportCounter; }
+
     private:
 
         // debugging code, should be deleted some day
@@ -190,6 +192,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         std::atomic<uint32> i_MaxInstanceId;
         MapUpdater m_updater;
+        uint32 m_transportCounter;
 };
 
 template<typename Do>

@@ -31,6 +31,7 @@
 #include "Entities/NPCHandler.h"
 #include "Server/SQLStorages.h"
 #include "Maps/GridDefines.h"
+#include "Entities/Transports.h"
 
 void WorldSession::SendNameQueryResponse(CharacterNameQueryResponse& response) const
 {
@@ -306,9 +307,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
     }
 
     uint32 corpsemapid = corpse->GetMapId();
-    float x = corpse->GetPositionX();
-    float y = corpse->GetPositionY();
-    float z = corpse->GetPositionZ();
+    Position pos = corpse->GetPosition(corpse->GetTransport());
     int32 mapid = corpsemapid;
 
     // if corpse at different map
@@ -323,9 +322,9 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
                 if (TerrainInfo const* entranceMap = sTerrainMgr.LoadTerrain(corpseMapEntry->ghost_entrance_map))
                 {
                     mapid = corpseMapEntry->ghost_entrance_map;
-                    x = corpseMapEntry->ghost_entrance_x;
-                    y = corpseMapEntry->ghost_entrance_y;
-                    z = entranceMap->GetHeightStatic(x, y, MAX_HEIGHT);
+                    pos.x = corpseMapEntry->ghost_entrance_x;
+                    pos.y = corpseMapEntry->ghost_entrance_y;
+                    pos.z = entranceMap->GetHeightStatic(pos.x, pos.y, MAX_HEIGHT);
                 }
             }
         }
@@ -334,11 +333,11 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket& /*recv_data*/)
     WorldPacket data(MSG_CORPSE_QUERY, 1 + (6 * 4));
     data << uint8(1);                                       // corpse found
     data << int32(mapid);
-    data << float(x);
-    data << float(y);
-    data << float(z);
+    data << float(pos.GetPositionX());
+    data << float(pos.GetPositionY());
+    data << float(pos.GetPositionZ());
     data << uint32(corpsemapid);
-    data << uint32(0);                                      // unknown
+    data << uint32(corpse->GetTransport() != nullptr ? corpse->GetTransport()->GetObjectGuid().GetCounter() : 0);
     SendPacket(data);
 }
 
@@ -476,14 +475,29 @@ void WorldSession::HandleCorpseMapPositionQueryOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Recv CMSG_CORPSE_MAP_POSITION_QUERY");
 
-    uint32 unk;
-    recv_data >> unk;
+    uint32 transportCounter;
+    recv_data >> transportCounter;
+
+    Corpse* corpse = GetPlayer()->GetCorpse();
+
+    if (!corpse || !corpse->GetTransport() || corpse->GetTransport()->GetObjectGuid().GetCounter() != transportCounter)
+    {
+        WorldPacket data(SMSG_CORPSE_TRANSPORT_QUERY, 4 + 4 + 4 + 4);
+        data << float(0);
+        data << float(0);
+        data << float(0);
+        data << float(0);
+        SendPacket(data);
+        return;
+    }
+
+    Position pos = corpse->GetTransport()->GetPosition();
 
     WorldPacket data(SMSG_CORPSE_TRANSPORT_QUERY, 4 + 4 + 4 + 4);
-    data << float(0);
-    data << float(0);
-    data << float(0);
-    data << float(0);
+    data << float(pos.GetPositionX());
+    data << float(pos.GetPositionY());
+    data << float(pos.GetPositionZ());
+    data << float(pos.GetPositionO());
     SendPacket(data);
 }
 

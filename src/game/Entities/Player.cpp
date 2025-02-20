@@ -4890,6 +4890,8 @@ void Player::BuildPlayerRepop()
         return;
     }
     GetMap()->Add(corpse);
+    if (GenericTransport* transport = GetTransport())
+        transport->AddPassenger(corpse, true);
 
     // convert player body to ghost
     SetHealth(1);
@@ -5369,7 +5371,7 @@ void Player::RepopAtGraveyard()
     AreaTableEntry const* zone = GetAreaEntryByAreaID(GetAreaId());
 
     // Such zones are considered unreachable as a ghost and the player must be automatically revived
-    if ((!IsAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || GetTransport())
+    if ((!IsAlive() && zone && zone->flags & AREA_FLAG_NEED_FLY) || (GetTransport() && GetTransport()->IsCrossMapTransport()))
     {
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();

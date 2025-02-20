@@ -203,7 +203,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
         return false;
     }
 
-    Object::_Create(dbGuid, guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
+    Object::_Create(dbGuid, guidlow, goinfo->id, goinfo->GetHighGuid());
 
     m_goInfo = goinfo;
 
@@ -944,8 +944,15 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
             dynguid = true;
     }
 
+    GameObjectInfo const* goinfo = ObjectMgr::GetGameObjectInfo(entry);
+    if (!goinfo)
+    {
+        sLog.outErrorDb("Gameobject (GUID: %u) not created: Entry %u does not exist in `gameobject_template`. Map: %u  (X: %f Y: %f Z: %f) ang: %f", dbGuid, entry, map->GetId(), x, y, z, ang);
+        return false;
+    }
+
     if (dynguid || newGuid == 0)
-        newGuid = map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT);
+        newGuid = map->GenerateLocalLowGuid(goinfo->GetHighGuid());
 
     if (!Create(dbGuid, newGuid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, GO_STATE_READY))
         return false;
