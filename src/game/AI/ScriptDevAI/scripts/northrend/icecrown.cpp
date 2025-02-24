@@ -1440,6 +1440,11 @@ struct SummonTournamentAspirant : public SpellScript, public AuraScript
             param1 = SPELL_FAILED_CUSTOM_ERROR_60;
         }
     }
+
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
 };
 
 void AddSC_icecrown()
