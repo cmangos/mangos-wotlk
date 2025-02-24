@@ -366,7 +366,7 @@ void SpawnGroup::Spawn(bool force)
             m_map.GetPersistentState()->AddGameobjectToGrid(dbGuid, data);
         }
         AddObject(dbGuid, entry);
-        if (force || m_entry.Active || m_map.IsLoaded(x, y))
+        if (force || m_entry.Active || m_entry.Large || m_map.IsLoaded(x, y))
         {
             if (GetObjectTypeId() == TYPEID_UNIT)
                 WorldObject::SpawnCreature(dbGuid, &m_map, entry);

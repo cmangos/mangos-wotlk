@@ -93,6 +93,7 @@ struct SpawnGroupEntry
     uint32 Flags;
     uint32 StringId;
     bool Active;
+    bool Large;
     bool EnabledByDefault;
     bool HasChancedSpawns;
     std::vector<SpawnGroupDbGuids> DbGuids;

@@ -223,6 +223,31 @@ struct CreatureInfo
     {
         return bool(CreatureTypeFlags(TypeFlags) & flags);
     }
+
+    bool HasFlag(CreatureStaticFlags flags) const
+    {
+        return bool(CreatureStaticFlags(StaticFlags) & flags);
+    }
+
+    bool HasFlag(CreatureStaticFlags2 flags) const
+    {
+        return bool(CreatureStaticFlags2(StaticFlags2) & flags);
+    }
+
+    bool HasFlag(CreatureStaticFlags3 flags) const
+    {
+        return bool(CreatureStaticFlags3(StaticFlags3) & flags);
+    }
+
+    bool HasFlag(CreatureStaticFlags4 flags) const
+    {
+        return bool(CreatureStaticFlags4(StaticFlags4) & flags);
+    }
+
+    bool IsLargeOrBiggerCreature() const
+    {
+        return HasFlag(CreatureStaticFlags::LARGE_AOI) || HasFlag(CreatureStaticFlags3::GIGANTIC_AOI) || HasFlag(CreatureStaticFlags3::INFINITE_AOI);
+    }
 };
 
 struct CreatureCooldowns

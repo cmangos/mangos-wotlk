@@ -295,6 +295,7 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
         MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), GetId(), GetInstanceId());
 
     sObjectMgr.LoadActiveEntities(this);
+    sObjectMgr.LoadLargeEntities(this);
 
     LoadTransports();
 }
@@ -775,8 +776,6 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::Obje
 
 void Map::Update(const uint32& t_diff)
 {
-    auto t1 = std::chrono::high_resolution_clock::now();
-
     m_clientUpdateTimer += t_diff;
     if (IsUpdateObjectTick())
         ++m_clientUpdateTick;
@@ -1091,28 +1090,31 @@ void Map::Update(const uint32& t_diff)
         }
     };
 
-    if (!m_infiniteObjects.empty())
+    if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE))
     {
-        for (auto& infiniteObject : m_infiniteObjects)
+        if (!m_infiniteObjects.empty())
         {
-            visitHomeCell(infiniteObject);
+            for (auto& infiniteObject : m_infiniteObjects)
+            {
+                visitHomeCell(infiniteObject);
+            }
         }
-    }
 
-    if (!m_largeObjects.empty())
-    {
-        for (auto& largeObjData : m_largeObjects)
+        if (!m_largeObjects.empty())
         {
-            WorldObject* largeObj = largeObjData.first;
-            visitHomeCell(largeObj);
+            for (auto& largeObjData : m_largeObjects)
+            {
+                WorldObject* largeObj = largeObjData.first;
+                visitHomeCell(largeObj);
+            }
         }
-    }
 
-    if (!m_waypointingNpcs.empty())
-    {
-        for (auto& waypointNpc : m_waypointingNpcs)
+        if (!m_waypointingNpcs.empty())
         {
-            visitHomeCell(waypointNpc);
+            for (auto& waypointNpc : m_waypointingNpcs)
+            {
+                visitHomeCell(waypointNpc);
+            }
         }
     }
 
@@ -1153,10 +1155,6 @@ void Map::Update(const uint32& t_diff)
     }
 
     m_weatherSystem->UpdateWeathers(t_diff);
-
-    auto t2 = std::chrono::high_resolution_clock::now();
-    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
-    sLog.outError("Map Id %u took %u miliseconds", GetId(), ms_int.count());
 }
 
 uint64 Map::PerformObjectUpdate(uint32 t_diff, WorldObjectUnSet& objToUpdate)
@@ -2832,7 +2830,7 @@ void Map::SendObjectUpdates()
                 WorldPacket packet = Player::BuildAurasForTarget(static_cast<Unit const*>(visData.first));
                 for (Player* player : visData.second)
                 {
-                    auto& updateDataData = update_players.find(player); // always exist after previous loop
+                    const auto& updateDataData = update_players.find(player); // always exist after previous loop
                     updateDataData->second.AddAfterCreatePacket(packet);
                 }
             }
