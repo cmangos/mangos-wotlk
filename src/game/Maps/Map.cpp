@@ -1091,28 +1091,31 @@ void Map::Update(const uint32& t_diff)
         }
     };
 
-    if (!m_infiniteObjects.empty())
+    if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE))
     {
-        for (auto& infiniteObject : m_infiniteObjects)
+        if (!m_infiniteObjects.empty())
         {
-            visitHomeCell(infiniteObject);
+            for (auto& infiniteObject : m_infiniteObjects)
+            {
+                visitHomeCell(infiniteObject);
+            }
         }
-    }
 
-    if (!m_largeObjects.empty())
-    {
-        for (auto& largeObjData : m_largeObjects)
+        if (!m_largeObjects.empty())
         {
-            WorldObject* largeObj = largeObjData.first;
-            visitHomeCell(largeObj);
+            for (auto& largeObjData : m_largeObjects)
+            {
+                WorldObject* largeObj = largeObjData.first;
+                visitHomeCell(largeObj);
+            }
         }
-    }
 
-    if (!m_waypointingNpcs.empty())
-    {
-        for (auto& waypointNpc : m_waypointingNpcs)
+        if (!m_waypointingNpcs.empty())
         {
-            visitHomeCell(waypointNpc);
+            for (auto& waypointNpc : m_waypointingNpcs)
+            {
+                visitHomeCell(waypointNpc);
+            }
         }
     }
 
