@@ -2132,9 +2132,10 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 {
                     if (LogIfNotUnit(pTarget))
                         break;
+                    uSource->RemoveAurasByCasterSpell(m_script->removeAura.spellId, pTarget->GetObjectGuid());
                 }
                 else
-                    uSource->RemoveAurasByCasterSpell(m_script->removeAura.spellId, pTarget->GetObjectGuid());
+                    uSource->RemoveAurasDueToSpell(m_script->removeAura.spellId);
             }
             else if (m_script->removeAura.defaultOrChargeOrStack == 1)
                 uSource->RemoveAuraCharge(m_script->removeAura.spellId);
