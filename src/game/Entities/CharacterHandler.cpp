@@ -1668,6 +1668,13 @@ void WorldSession::HandleEquipmentSetSaveOpcode(WorldPacket& recv_data)
     recv_data >> name;
     recv_data >> iconName;
 
+    name.erase(std::remove_if(name.begin(), name.end(), [](char c) { return !std::isprint(c); }), name.end());
+    if (name.size() >= 127)
+        name.resize(127);
+    iconName.erase(std::remove_if(iconName.begin(), iconName.end(), [](char c) { return !std::isprint(c); }), iconName.end());
+    if (iconName.size() >= 255)
+        iconName.resize(255);
+
     if (index >= MAX_EQUIPMENT_SET_INDEX)                   // client set slots amount
         return;
 
