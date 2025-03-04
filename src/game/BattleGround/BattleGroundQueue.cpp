@@ -1329,11 +1329,13 @@ bool BgQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         uint32 mapId = bg ? bg->GetMapId() : 0;
         BattleGroundStatus bgStatus = bg ? bg->GetStatus() : STATUS_NONE;
         BattleGroundBracketId bracketId = bg ? bg->GetBracketId() : BG_BRACKET_ID_TEMPLATE;
+        uint32 minLevel = bg ? bg->GetMinLevel() : 0;
+        uint32 maxLevel = bg ? bg->GetMaxLevel() : 0;
 
         uint32 queueSlot = plr->GetBattleGroundQueueIndex(event.m_bgQueueTypeId);
         if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue, or in Battleground
         {
-            sWorld.GetBGQueue().GetMessager().AddMessage([bgQueueTypeId = event.m_bgQueueTypeId, bgTypeId, bgStatus, playerGuid = event.m_playerGuid, instanceGuid = event.m_bgInstanceGuid, removeTime = event.m_removeTime, isBattleGround, queueSlot, bracketId, bgExists, bgInstanceId, isRated, mapId, minLevel = bg->GetMinLevel(), maxLevel = bg->GetMaxLevel()](BattleGroundQueue* queue)
+            sWorld.GetBGQueue().GetMessager().AddMessage([bgQueueTypeId = event.m_bgQueueTypeId, bgTypeId, bgStatus, playerGuid = event.m_playerGuid, instanceGuid = event.m_bgInstanceGuid, removeTime = event.m_removeTime, isBattleGround, queueSlot, bracketId, bgExists, bgInstanceId, isRated, mapId, minLevel, maxLevel](BattleGroundQueue* queue)
             {
                 // check if player is in queue for this BG and if we are removing his invite event
                 BattleGroundQueueItem& bgQueue = queue->m_battleGroundQueues[bgQueueTypeId];
