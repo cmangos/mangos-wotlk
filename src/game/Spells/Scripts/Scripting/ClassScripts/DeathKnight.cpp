@@ -757,6 +757,19 @@ struct GlyphOfDeathsEmbrace : public AuraScript
     }
 };
 
+// 56815 - Rune Strike
+struct RuneStrikeDK : public SpellScript
+{
+    const uint32 RUNE_STRIKE_ENABLEMENT_AURA = 56817;
+    void OnAfterHit(Spell* spell) const
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+        caster->RemoveAurasDueToSpell(RUNE_STRIKE_ENABLEMENT_AURA);
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -791,6 +804,7 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<ObliterateDK>("spell_obliterate_dk");
     RegisterSpellScript<GlyphOfScourgeStrike>("spell_glyph_of_scourge_strike");
     RegisterSpellScript<GlyphOfDeathsEmbrace>("spell_glyph_of_deaths_embrace");
+    RegisterSpellScript<RuneStrikeDK>("spell_rune_strike_dk");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_gargoyle_dk";
