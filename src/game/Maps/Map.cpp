@@ -2795,7 +2795,7 @@ void Map::UpdateVisibility(UpdateDataMapType& update_players)
             Player* plr = m_mapRefIter->getSource();
             if (plr && plr->IsInWorld())
 #ifdef ENABLE_PLAYERBOTS
-                if (isRealPlayer())
+                if (plr->isRealPlayer())
 #endif
                     plr->HandleStealthedUnitsDetection();
         }
