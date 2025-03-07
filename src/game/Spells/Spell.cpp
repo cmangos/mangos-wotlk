@@ -5962,6 +5962,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             case TARGET_UNIT_CASTER_PASSENGER_6:
             case TARGET_UNIT_CASTER_PASSENGER_7:
             case TARGET_UNIT_CASTER_VEHICLE:
+            case TARGET_UNIT_CASTER_DRIVER:
             case TARGET_UNIT_ENEMY_NEAR_CASTER:
             case TARGET_UNIT_FRIEND_NEAR_CASTER:
             case TARGET_UNIT_NEAR_CASTER:
