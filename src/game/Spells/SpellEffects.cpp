@@ -11506,9 +11506,6 @@ void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
     if (!unitTarget || !unitTarget->IsAlive())
         return;
 
-    if (unitTarget->m_extraAttacks)
-        return;
-
     unitTarget->m_extraAttacks += damage;
     if (unitTarget->m_extraAttacks > 5)
         unitTarget->m_extraAttacks = 5;
