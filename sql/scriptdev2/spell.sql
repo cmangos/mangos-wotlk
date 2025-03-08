@@ -1180,7 +1180,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (55090,'spell_scourge_strike'),
 (55265,'spell_scourge_strike'),
 (55270,'spell_scourge_strike'),
-(55271,'spell_scourge_strike');
+(55271,'spell_scourge_strike'),
+(56815,'spell_rune_strike_dk');
 
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
