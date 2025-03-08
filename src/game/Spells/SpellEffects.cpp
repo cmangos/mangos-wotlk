@@ -6638,32 +6638,26 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
 
     // Board the caster right after summoning
     bool executed = false;
+    uint32 spellId = 0;
+    int32 seatNumTemp = -1;
     if (rideSpell)
     {
         SpellEntry const* controlSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(rideSpell);
         if (controlSpellEntry && IsSpellHaveAura(controlSpellEntry, SPELL_AURA_CONTROL_VEHICLE))
         {
-            m_caster->CastSpell(spawnCreature, controlSpellEntry, TRIGGERED_OLD_TRIGGERED);
+            spellId = rideSpell;
             executed = true;
         }
     }
     else
     {
+        spellId = SPELL_RIDE_VEHICLE_HARDCODED;
         if (seatNum > 0 && seatNum < MAX_VEHICLE_SEAT)
-        {
-            int32 points = seatNum;
-            m_caster->CastCustomSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, &points, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-        }
-        else
-            m_caster->CastSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
+            seatNumTemp = seatNum;
     }
 
-    // If the boarding failed...
-    if (!spawnCreature->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
-    {
-        spawnCreature->ForcedDespawn();
-        return false;
-    }
+    if (spellId)
+        spawnCreature->SetDelayedBoarding(spellId, seatNumTemp);
 
     list[0].processed = true;
     return true;

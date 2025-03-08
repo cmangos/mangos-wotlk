@@ -149,7 +149,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false),
     m_settings(this),
     m_countSpawns(false),
-    m_creatureGroup(nullptr), m_imposedCooldown(false), m_delayedPetSpells(false),
+    m_creatureGroup(nullptr), m_imposedCooldown(false), m_delayedPetSpells(false), m_delayedBoardingSpell(0), m_delayedBoardingSeat(-1),
     m_creatureInfo(nullptr), m_mountInfo(nullptr)
 {
     m_valuesCount = UNIT_END;
@@ -795,6 +795,9 @@ void Creature::Update(const uint32 diff)
 
             if (m_delayedPetSpells && !ItsNewObject()) // after being added to world
                 TriggerDelayedPetSpells();
+
+            if (m_delayedBoardingSpell && !ItsNewObject()) // after being added to world
+                TriggerDelayedBoarding();
 
             break;
         }
@@ -1647,6 +1650,31 @@ void Creature::TriggerDelayedPetSpells()
     ForceValuesUpdateForFlag(UF_FLAG_OWNER_ONLY);
 
     m_delayedPetSpells = false;
+}
+
+void Creature::TriggerDelayedBoarding()
+{
+    // Note: Officially what this is meant to do is trigger application of control vehicle aura, and rest of spell being executed in spell effect
+    // We do not currently support this way of delaying aura application and as such remains to be resolved
+
+    Player* player = const_cast<Player*>(GetControllingPlayer());
+    if (!player)
+        return;
+
+    if (m_delayedBoardingSeat != -1)
+    {
+        int32 points = m_delayedBoardingSeat;
+        player->CastCustomSpell(this, m_delayedBoardingSpell, &m_delayedBoardingSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+    }
+    else
+        player->CastSpell(this, m_delayedBoardingSpell, TRIGGERED_OLD_TRIGGERED);
+
+    m_delayedBoardingSpell = 0;
+    m_delayedBoardingSeat = -1;
+
+    // If the boarding failed...
+    if (!HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
+        ForcedDespawn();
 }
 
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
