@@ -6624,6 +6624,7 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
     spawnSettings.spellId = m_spellInfo->Id;
     spawnSettings.ownerGuid = m_caster->GetObjectGuid();
     spawnSettings.level = level;
+    spawnSettings.setRun = !m_caster->IsWalking();
     if (prop->FactionId)
         spawnSettings.faction = prop->FactionId;
     Creature* spawnCreature = WorldObject::SummonCreature(spawnSettings, m_caster->GetMap(), m_caster->GetPhaseMask());
