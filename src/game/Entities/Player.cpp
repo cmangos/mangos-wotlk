@@ -16708,7 +16708,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     if (!sWorld.getConfig(CONFIG_BOOL_DISABLE_INSTANCE_RELOCATE))
     {
         // if the player is in an instance and it has been reset in the meantime teleport him to the entrance
-        if (GetInstanceId() && (!state || time_diff > 15 * MINUTE))
+        if (GetInstanceId() && GetMapId() != 609 && (!state || time_diff > 15 * MINUTE)) // ignore for DK zone which uses instancing for horde/ally
         {
             AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(GetMapId());
             if (at)
