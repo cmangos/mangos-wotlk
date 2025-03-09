@@ -817,6 +817,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
     if (passenger->GetTypeId() == TYPEID_PLAYER)
     {
         Player* pPlayer = (Player*)passenger;
+        CharmInfo* charmInfo = pVehicle->GetCharmInfo();
 
         // group update
         if (pPlayer->GetGroup())
@@ -828,6 +829,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
             pPlayer->SetCharm(pVehicle);
             pVehicle->SetCharmer(pPlayer);
+            
+            charmInfo = pVehicle->InitCharmInfo(pVehicle);
+            charmInfo->SetCharmState((pVehicle->IsCreature() && static_cast<Creature*>(pVehicle)->GetSettings().HasFlag(CreatureStaticFlags2::ACTION_TRIGGERS_WHILE_CHARMED)) ? "" : "PossessedAI", false);
 
             if (m_vehicleEntry->m_ID != 220)
             {
@@ -876,7 +880,8 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
         {
-            CharmInfo* charmInfo = pVehicle->InitCharmInfo(pVehicle);
+            if (!charmInfo)
+                charmInfo = pVehicle->InitCharmInfo(pVehicle);
             charmInfo->InitVehicleCreateSpells();
 
             pPlayer->VehicleSpellInitialize();
@@ -922,6 +927,9 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
+            CharmInfo* charmInfo = pVehicle->GetCharmInfo();
+            MANGOS_ASSERT(charmInfo);
+
             pPlayer->SetCharm(nullptr);
             pVehicle->SetCharmer(nullptr);
 
@@ -932,15 +940,8 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pVehicle->GetMotionMaster()->Clear();
 
             pVehicle->clearUnitState(UNIT_STAT_POSSESSED);
-            pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
-            pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
-            if (pPlayer->IsPvP())
-                pVehicle->SetPvP(false);
-
-            if (pPlayer->IsPvPFreeForAll())
-                pVehicle->SetPvPFreeForAll(false);
+            charmInfo->ResetCharmState();
 
             // must be called after movement control unapplying
             pPlayer->GetCamera().ResetView();
@@ -948,7 +949,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             if (pVehicle->GetTypeId() == TYPEID_UNIT)
             {
                 // reset vehicle faction
-                ((Creature*)pVehicle)->SetFactionTemporary(m_originalFaction, TEMPFACTION_NONE);
+                static_cast<Creature*>(pVehicle)->SetFactionTemporary(m_originalFaction, TEMPFACTION_NONE);
 
                 pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
             }
