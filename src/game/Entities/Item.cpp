@@ -241,6 +241,15 @@ bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     return true;
 }
 
+void Item::RemoveFromWorld()
+{
+    if (Player* owner = GetOwner())
+        if (owner->IsInWorld())
+            owner->GetMap()->RemoveUpdateCreateObject(this); // in case we are in the pipeline
+
+    Object::RemoveFromWorld();
+}
+
 void Item::UpdateDuration(Player* owner, uint32 diff)
 {
     if (!GetUInt32Value(ITEM_FIELD_DURATION))

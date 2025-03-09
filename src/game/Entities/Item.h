@@ -278,6 +278,8 @@ class Item : public Object
 
         virtual bool Create(uint32 guidlow, uint32 itemid, Player const* owner);
 
+        void RemoveFromWorld() override;
+
         ItemPrototype const* GetProto() const;
 
         ObjectGuid const& GetOwnerGuid() const { return GetGuidValue(ITEM_FIELD_OWNER); }
