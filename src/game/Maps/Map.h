@@ -469,6 +469,8 @@ class Map : public GridRefManager<NGridType>
         void AddWaypointingNpc(Unit* npc);
         void RemoveWaypointingNpc(Unit* npc);
 
+        void UpdateInfinite(Player& player, UpdateData& updateData, GuidSet& clientGUIDs, WorldObjectSet& visibleNow) const;
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 

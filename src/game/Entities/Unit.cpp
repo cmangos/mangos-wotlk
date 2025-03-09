@@ -9271,9 +9271,11 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // Any units far than max visible distance for viewer or not in our map are not visible too
     if (!at_same_transport && !GetVisibilityData().IsInfiniteVisibility()) // distance for show player/pet/creature (no transport case)
     {
-        if (!IsWithinDistInMap(viewPoint, u->GetVisibilityData().GetVisibilityDistanceFor((WorldObject *)this), is3dDistance))
+        if (!IsWithinDistInMap(viewPoint, u->GetVisibilityData().GetVisibilityDistanceFor((WorldObject*)this), is3dDistance))
             return false;
     }
+    else if (GetVisibilityData().IsInfiniteVisibility() && !InSamePhase(viewPoint))
+        return false;
 
     // when restriction not set, visible to all
     if (!IsOnlyVisibleTo(u->GetObjectGuid()))

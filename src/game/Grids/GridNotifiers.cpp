@@ -95,6 +95,12 @@ void VisibleNotifier::Notify()
         ++itr;
     }
 
+    if (player.IsPendingPhaseChange())
+    {
+        player.GetMap()->UpdateInfinite(player, i_data, i_clientGUIDs, i_visibleNow);
+        player.RemovePendingPhaseChange();
+    }
+
     // generate outOfRange for not iterate objects
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)

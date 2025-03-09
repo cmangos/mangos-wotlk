@@ -1760,7 +1760,7 @@ void Map::SendInitInfiniteObjects(Player* player, UpdateData& updateData) const
     for (auto i : m_infiniteObjects)
     {
         // send data for current transport in other place - if player is on transport, already sent in init self
-        if (i->GetMapId() == i_id && !player->HasAtClient(i))
+        if (i->GetMapId() == i_id && !player->HasAtClient(i) && i->InSamePhase(player))
         {
             player->AddAtClient(i);
             i->BuildCreateUpdateBlockForPlayer(updateData, player);
@@ -1786,6 +1786,30 @@ void Map::SendRemoveInfinite(Player* player) const
     }
 
     updateData.SendData(*player->GetSession());
+}
+
+void Map::UpdateInfinite(Player& player, UpdateData& updateData, GuidSet& clientGUIDs, WorldObjectSet& visibleNow) const
+{
+    for (auto i : m_infiniteObjects)
+    {
+        if (i->GetMapId() == i_id)
+        {
+            if (player.HasAtClient(i))
+            {
+                if (!player.InSamePhase(i))
+                {
+                    i->BuildOutOfRangeUpdateBlock(updateData);
+                    player.RemoveAtClient(i);
+                }
+            }
+            else if (player.InSamePhase(i))
+            {
+                player.AddAtClient(i);
+                i->BuildCreateUpdateBlockForPlayer(updateData, &player);
+                visibleNow.insert(i);
+            }
+        }
+    }
 }
 
 void Map::LoadTransports()

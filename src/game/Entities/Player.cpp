@@ -21337,6 +21337,8 @@ void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
     if (Unit* vehicle = const_cast<Unit*>(FindRootVehicle()))
         vehicle->SetPhaseMask(newPhaseMask, update);
     GetSession()->SendSetPhaseShift(GetPhaseMask());
+
+    m_pendingPhaseChange = true;
 }
 
 void Player::InitPrimaryProfessions()

@@ -2617,6 +2617,8 @@ class Player : public Unit
         void SetLastData(uint32 dbGuid, bool gameobject) { m_lastDbGuid = dbGuid; m_lastGameObject = gameobject; }
 
         bool IsMirrorTimerActive(MirrorTimer::Type timer) const;
+        bool IsPendingPhaseChange() const { return m_pendingPhaseChange; }
+        void RemovePendingPhaseChange() { m_pendingPhaseChange = false; }
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2995,6 +2997,7 @@ class Player : public Unit
         bool m_pendingMountAuraFlying;
         bool m_pendingDismount;
         bool m_pendingTaxi;
+        bool m_pendingPhaseChange;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

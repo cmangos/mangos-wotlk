@@ -1216,7 +1216,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         }
     }
 
-    if (GetVisibilityData().IsInfiniteVisibility())
+    if (GetVisibilityData().IsInfiniteVisibility() && InSamePhase(viewPoint))
         return true;
 
     // check distance
