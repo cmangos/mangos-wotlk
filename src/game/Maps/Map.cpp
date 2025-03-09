@@ -1190,7 +1190,7 @@ void Map::Remove(Player* player, bool remove)
         player->RemoveFromWorld();
 
     m_objectsToClientUpdate.erase(player);
-    m_objectsToClientCreateUpdate.erase(player);
+    m_objectsToClientCreateUpdate.erase({ player , player->GetObjectGuid() });
     m_objectsToClientMovementUpdate.erase(player);
     m_visibilityAdded.erase(player);
 
@@ -1268,7 +1268,7 @@ void Map::Remove(T* obj, bool remove)
         obj->RemoveFromWorld();
 
     m_objectsToClientUpdate.erase(obj);
-    m_objectsToClientCreateUpdate.erase(obj);
+    m_objectsToClientCreateUpdate.erase({ obj, obj->GetObjectGuid() });
     m_objectsToClientMovementUpdate.erase(obj);
     m_visibilityAdded.erase(obj);
 
@@ -2752,12 +2752,12 @@ void Map::UpdateVisibility(UpdateDataMapType& update_players)
     // newly created npcs are done every tick
     std::unordered_set<Object*> visited;
     {
-        std::set<Object*> createObjects;
+        std::set<std::pair<Object*, ObjectGuid>> createObjects;
         std::swap(createObjects, m_objectsToClientCreateUpdate);
         for (auto& createObj : createObjects)
         {
-            createObj->UpdateVisibility(update_players);
-            visited.insert(createObj);
+            createObj.first->UpdateVisibility(update_players);
+            visited.insert(createObj.first);
         }
     }
 

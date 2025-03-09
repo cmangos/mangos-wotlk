@@ -336,8 +336,8 @@ class Map : public GridRefManager<NGridType>
         std::map<uint32, uint32>& GetTempPets() { return m_tempPets; }
         
         // schedule for update object create change
-        void AddUpdateCreateObject(Object* obj) { m_objectsToClientCreateUpdate.insert(obj); }
-        void RemoveUpdateCreateObject(Object* obj) { m_objectsToClientCreateUpdate.erase(obj); }
+        void AddUpdateCreateObject(Object* obj) { m_objectsToClientCreateUpdate.insert({ obj, obj->GetObjectGuid() }); }
+        void RemoveUpdateCreateObject(Object* obj) { m_objectsToClientCreateUpdate.erase({ obj, obj->GetObjectGuid() }); }
         // schedule for update object values change
         void AddUpdateObject(Object* obj) { m_objectsToClientUpdate.insert(obj); }
         void RemoveUpdateObject(Object* obj) { m_objectsToClientUpdate.erase(obj); }
@@ -506,7 +506,7 @@ class Map : public GridRefManager<NGridType>
         void UpdateVisibility(UpdateDataMapType& update_players);
         void SendObjectUpdates();
         std::set<Object*> m_objectsToClientUpdate;
-        std::set<Object*> m_objectsToClientCreateUpdate;
+        std::set<std::pair<Object*, ObjectGuid>> m_objectsToClientCreateUpdate;
         std::set<Object*> m_objectsToClientMovementUpdate;
         std::vector<std::pair<GuidSet, ObjectGuid>> m_objectsToClientRemove;
         std::unordered_map<Object*, PlayerSet> m_visibilityAdded;
