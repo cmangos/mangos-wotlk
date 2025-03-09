@@ -1731,7 +1731,7 @@ void ObjectMgr::LoadSpawnGroups()
                                 entry.Active = true;
                                 break;
                             }
-                            else if (specials && goInfo->IsLargeGameObject())
+                            else if (specials && goInfo->IsLargeOrBiggerGameObject())
                             {
                                 entry.Large = true;
                                 break;
@@ -2674,7 +2674,7 @@ void ObjectMgr::LoadGameObjects()
 
             if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && gInfo && gInfo->ExtraFlags & GAMEOBJECT_EXTRA_FLAG_ACTIVE)
                 m_activeGameObjects.emplace(data.mapid, guid);
-            else if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE) && gInfo && gInfo->IsLargeGameObject())
+            else if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE) && gInfo && gInfo->IsLargeOrBiggerGameObject())
                 m_largeGameObjects.emplace(data.mapid, guid);
         }
 

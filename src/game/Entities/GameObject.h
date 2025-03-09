@@ -587,6 +587,21 @@ struct GameObjectInfo
         }
     }
 
+    bool IsInfiniteGameObject() const
+    {
+        switch (type)
+        {
+            case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING: return true;
+            case GAMEOBJECT_TYPE_TRAPDOOR:              return true;
+            default: return false;
+        }
+    }
+
+    bool IsLargeOrBiggerGameObject() const
+    {
+        return IsLargeGameObject() || IsInfiniteGameObject();
+    }
+
     bool IsServerOnly() const
     {
         switch (type)
