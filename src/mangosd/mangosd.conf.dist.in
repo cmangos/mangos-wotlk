@@ -258,6 +258,7 @@ MaxOverspeedPings = 2
 GridUnload = 1
 LoadAllGridsOnMaps = ""
 Autoload.Active = 1
+Specials.Active = 0
 GridCleanUpDelay = 300000
 MapUpdateInterval = 100
 ChangeWeatherInterval = 600000
