@@ -280,6 +280,8 @@ ObjectGridUnloader::Unload(GridType& grid)
 {
     TypeContainerVisitor<ObjectGridUnloader, GridTypeMapContainer > unloader(*this);
     grid.Visit(unloader);
+    TypeContainerVisitor<ObjectGridUnloader, WorldTypeMapContainer > unloaderWorld(*this);
+    grid.Visit(unloaderWorld);
 }
 
 template<class T>
@@ -289,23 +291,17 @@ ObjectGridUnloader::Visit(GridRefManager<T>& m)
     while (!m.isEmpty())
     {
         T* obj = m.getFirst()->getSource();
-        // if option set then object already saved at this moment
-        if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
-            obj->SaveRespawnTime();
-        // object must be out of world before delete
-        switch (obj->GetTypeId())
+        if constexpr (std::is_same_v<T, Camera>)
         {
-            case TYPEID_DYNAMICOBJECT:
-                obj->GetMap()->Remove((DynamicObject*)obj, true);
-                break;
-            case TYPEID_GAMEOBJECT:
-                obj->GetMap()->Remove((GameObject*)obj, true);
-                break;
-            case TYPEID_UNIT:
-                obj->GetMap()->Remove((Creature*)obj, true);
-                break;
-            default:
-                MANGOS_ASSERT(false);
+
+        }
+        else
+        {
+            // if option set then object already saved at this moment
+            if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
+                obj->SaveRespawnTime();
+            // object must be out of world before delete
+            obj->GetMap()->Remove(obj, true);
         }
     }
 }
