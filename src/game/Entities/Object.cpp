@@ -1384,7 +1384,7 @@ WorldObject::WorldObject() :
     m_transport(nullptr), m_transportInfo(nullptr), m_isOnEventNotified(false),
     m_visibilityData(this), m_nextUpdateTime(0), m_accumulatedUpdateDiff(0), m_currMap(nullptr),
     m_mapId(0), m_InstanceId(0), m_phaseMask(PHASEMASK_NORMAL),
-    m_isActiveObject(false), m_debugFlags(0), m_destLocCounter(0), m_castCounter(0)
+    m_isActiveObject(false), m_debugFlags(0), m_destLocCounter(0), m_castCounter(0), m_inRemoveList(false)
 {
 }
 
@@ -1392,6 +1392,11 @@ void WorldObject::CleanupsBeforeDelete()
 {
     m_events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
     RemoveFromWorld();
+}
+
+WorldObject::~WorldObject()
+{
+    MANGOS_ASSERT(!m_inRemoveList);
 }
 
 void WorldObject::Update(const uint32 diff)

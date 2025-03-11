@@ -261,6 +261,8 @@ class Map : public GridRefManager<NGridType>
         MapPersistentState* GetPersistentState() const { return m_persistentState; }
 
         void AddObjectToRemoveList(WorldObject* obj);
+        void RemoveObjectFromRemoveList(WorldObject* obj);
+        bool IsInRemoveList(WorldObject* obj) const;
 
         void UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& cellpair);
 

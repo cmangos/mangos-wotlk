@@ -1841,7 +1841,19 @@ void Map::AddObjectToRemoveList(WorldObject* obj)
     obj->CleanupsBeforeDelete();                            // remove or simplify at least cross referenced links
 
     i_objectsToRemove.insert(obj);
+    obj->m_inRemoveList = true;
     // DEBUG_LOG("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
+}
+
+void Map::RemoveObjectFromRemoveList(WorldObject* obj)
+{
+    i_objectsToRemove.erase(obj);
+    obj->m_inRemoveList = false;
+}
+
+bool Map::IsInRemoveList(WorldObject* obj) const
+{
+    return i_objectsToRemove.find(obj) != i_objectsToRemove.end();
 }
 
 void Map::RemoveAllObjectsInRemoveList()
@@ -1854,6 +1866,7 @@ void Map::RemoveAllObjectsInRemoveList()
     {
         WorldObject* obj = *i_objectsToRemove.begin();
         i_objectsToRemove.erase(i_objectsToRemove.begin());
+        obj->m_inRemoveList = false;
 
         switch (obj->GetTypeId())
         {

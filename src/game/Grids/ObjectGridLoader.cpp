@@ -297,6 +297,7 @@ ObjectGridUnloader::Visit(GridRefManager<T>& m)
         }
         else
         {
+            obj->GetMap()->RemoveObjectFromRemoveList(obj);
             // if option set then object already saved at this moment
             if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
                 obj->SaveRespawnTime();

@@ -944,7 +944,7 @@ class WorldObject : public Object
         friend struct WorldObjectCreateAccumulator;
 
     public:
-        virtual ~WorldObject() {}
+        virtual ~WorldObject();
 
         virtual void Update(const uint32 /*diff*/);
         virtual void Heartbeat() {}
@@ -1152,6 +1152,7 @@ class WorldObject : public Object
 
         virtual void SaveRespawnTime() {}
         void AddObjectToRemoveList();
+        bool m_inRemoveList;
 
         virtual void UpdateVisibilityAndView();             // update visibility for object and object for all around
 
