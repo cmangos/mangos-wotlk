@@ -164,6 +164,9 @@ bool Map::CanSpawn(TypeID typeId, uint32 dbGuid)
 void Map::SetNavTile(uint32 tileX, uint32 tileY, uint32 tileNumber)
 {
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
+    if (!mmap->IsEnabled())
+        return;
+
     mmap->ChangeTile(sWorld.GetDataPath(), GetId(), GetInstanceId(), tileX, tileY, tileNumber);
 }
 
@@ -210,6 +213,8 @@ void Map::ChangeGOPathfinding(uint32 entry, uint32 displayId, bool apply)
 {
     auto tileIds = GameObjectModel::GetTilesForGOEntry(GetId(), entry);
     MMAP::MMapManager* mmap = MMAP::MMapFactory::createOrGetMMapManager();
+    if (!mmap->IsEnabled())
+        return;
     for (auto dataXY : tileIds)
     {
         uint32 tileX = dataXY.first;
@@ -237,8 +242,9 @@ void Map::LoadMapAndVMap(int gx, int gy)
     if (m_TerrainData->Load(gx, gy)) // fails also on maps which have no tiles for everything except mmaps
         m_bLoadedGrids[gx][gy] = true;
 
-    if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(GetId(), GetInstanceId(), gx, gy))
-        MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), GetId(), GetInstanceId(), gx, gy, 0);
+    if (MMAP::MMapFactory::createOrGetMMapManager()->IsEnabled())
+        if (!MMAP::MMapFactory::createOrGetMMapManager()->IsMMapTileLoaded(GetId(), GetInstanceId(), gx, gy))
+            MMAP::MMapFactory::createOrGetMMapManager()->loadMap(sWorld.GetDataPath(), GetId(), GetInstanceId(), gx, gy, 0);
 }
 
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
@@ -290,9 +296,13 @@ void Map::Initialize(bool loadInstanceData /*= true*/)
 
     m_spawnManager.Initialize();
 
-    MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), GetId(), GetInstanceId());
-    if (sWorld.getConfig(CONFIG_BOOL_PRELOAD_MMAP_TILES))
-        MMAP::MMapFactory::createOrGetMMapManager()->loadAllMapTiles(sWorld.GetDataPath(), GetId(), GetInstanceId());
+    auto mmap = MMAP::MMapFactory::createOrGetMMapManager();
+    if (mmap->IsEnabled())
+    {
+        mmap->loadMapInstance(sWorld.GetDataPath(), GetId(), GetInstanceId());
+        if (sWorld.getConfig(CONFIG_BOOL_PRELOAD_MMAP_TILES))
+            mmap->loadAllMapTiles(sWorld.GetDataPath(), GetId(), GetInstanceId());
+    }
 
     sObjectMgr.LoadActiveEntities(this);
     sObjectMgr.LoadLargeEntities(this);
