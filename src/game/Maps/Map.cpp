@@ -2447,13 +2447,18 @@ DungeonPersistentState* DungeonMap::GetPersistanceState() const
 
 /* ******* Battleground Instance Maps ******* */
 
-BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 spawnMode)
-    : Map(id, expiry, InstanceId, spawnMode)
+BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 spawnMode, BattleGround* bg)
+    : Map(id, expiry, InstanceId, spawnMode), m_bg(bg), m_scheduledForDeletion(false)
 {
 }
 
 BattleGroundMap::~BattleGroundMap()
 {
+    sBattleGroundMgr.GetMessager().AddMessage([instanceId = GetInstanceId(), typeId = m_bg->GetTypeId()](BattleGroundMgr* mgr)
+    {
+        mgr->RemoveBattleGround(instanceId, typeId);
+    });
+    m_bg = nullptr;
 }
 
 void BattleGroundMap::Initialize(bool)
@@ -2465,7 +2470,7 @@ void BattleGroundMap::Update(const uint32& diff)
 {
     Map::Update(diff);
 
-    if (!m_bg)
+    if (m_scheduledForDeletion)
         return;
 
     if (!m_bg->GetPlayersSize())
@@ -2482,11 +2487,8 @@ void BattleGroundMap::Update(const uint32& diff)
         // BattleGround Template instance cannot be updated, because it would be deleted
         if (!m_bg->GetInvitedCount(HORDE) && !m_bg->GetInvitedCount(ALLIANCE))
         {
-            sBattleGroundMgr.GetMessager().AddMessage([instanceId = GetInstanceId(), typeId = m_bg->GetTypeId()](BattleGroundMgr* mgr)
-            {
-                mgr->RemoveBattleGround(instanceId, typeId);
-            });
-            m_bg = nullptr;
+            m_scheduledForDeletion = true;
+            m_bg->EndNow();
         }
     }
     else

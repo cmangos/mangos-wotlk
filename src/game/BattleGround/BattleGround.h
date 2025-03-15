@@ -660,9 +660,10 @@ class BattleGround
         MaNGOS::unique_weak_ptr<BattleGround> GetWeakPtr() const { return m_weakRef; }
         void SetWeakPtr(MaNGOS::unique_weak_ptr<BattleGround> weakRef) { m_weakRef = std::move(weakRef); }
 
-    protected:
         // this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
         void EndNow();
+
+    protected:
         void PlayerAddedToBgCheckIfBgIsRunning(Player* /*player*/);
 
         /* Scorekeeping */

@@ -676,7 +676,7 @@ class BattleGroundMap : public Map
     private:
         using Map::GetPersistentState;                      // hide in subclass for overwrite
     public:
-        BattleGroundMap(uint32 id, time_t, uint32 InstanceId, uint8 spawnMode);
+        BattleGroundMap(uint32 id, time_t, uint32 InstanceId, uint8 spawnMode, BattleGround* bg);
         ~BattleGroundMap();
 
         virtual void Initialize(bool) override;
@@ -689,13 +689,15 @@ class BattleGroundMap : public Map
 
         virtual void InitVisibilityDistance() override;
         BattleGround* GetBG() const override { return m_bg; }
-        void SetBG(BattleGround* bg) { m_bg = bg; }
+
+        bool IsScheduledForDeletion() const { return m_scheduledForDeletion; }
 
         // can't be nullptr for loaded map
         BattleGroundPersistentState* GetPersistanceState() const;
 
     private:
         BattleGround* m_bg;
+        bool m_scheduledForDeletion;
 };
 
 template<class T, class CONTAINER>
