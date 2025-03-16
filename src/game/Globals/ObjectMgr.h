@@ -766,6 +766,8 @@ class ObjectMgr
         void LoadConditions();
         void LoadMailLevelRewards();
 
+        void GenerateZoneAndAreaIds();
+
         void LoadGossipText();
 
         void LoadAreaTriggerTeleports();

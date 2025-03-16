@@ -936,6 +936,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_UINT32_SUNSREACH_COUNTER, "Sunsreach.CounterMax", 10000);
 
+    setConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP, "Spawns.ZoneArea", false);
+
     sLog.outString();
 }
 
@@ -1179,6 +1181,12 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Gameobject Data...");
     sObjectMgr.LoadGameObjects();
+
+    if (getConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP))
+    {
+        sLog.outString("Generating zone and area ids for creatures and gameobjects...");
+        sObjectMgr.GenerateZoneAndAreaIds();
+    }
 
     sLog.outString("Loading SpellsScriptTarget...");
     sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates, LoadCreatures and LoadGameobjectInfo
