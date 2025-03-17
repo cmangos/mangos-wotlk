@@ -557,6 +557,61 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                     }
                     break;
                 }
+                case EVENT_T_BOARD_VEHICLE:
+                {
+                    if (temp.boardVehicle.board > 2)
+                    {
+                        sLog.outErrorEventAI("Creature %d has invalid board setting %u in event %u.", keyField, temp.boardVehicle.board, eventId);
+                        continue;
+                    }
+                    if (temp.boardVehicle.seat >= MAX_VEHICLE_SEAT || temp.boardVehicle.seat < -1)
+                    {
+                        sLog.outErrorEventAI("Creature %d has invalid seat setting %u in event %u.", keyField, temp.boardVehicle.seat, eventId);
+                        continue;
+                    }
+                    break;
+                }
+                case EVENT_T_PASSENGER_BOARDED:
+                {
+                    if (temp.passengerBoard.board > 2)
+                    {
+                        sLog.outErrorEventAI("Creature %d has invalid board setting %u in event %u.", keyField, temp.passengerBoard.board, eventId);
+                        continue;
+                    }
+                    if (temp.passengerBoard.seat >= MAX_VEHICLE_SEAT || temp.passengerBoard.seat < -1)
+                    {
+                        sLog.outErrorEventAI("Creature %d has invalid seat setting %u in event %u.", keyField, temp.passengerBoard.seat, eventId);
+                        continue;
+                    }
+                    break;
+                }
+                case EVENT_T_VEHICLE_RETURN:
+                {
+                    if (temp.vehicleReturn.seat >= MAX_VEHICLE_SEAT || temp.vehicleReturn.seat < -1)
+                    {
+                        sLog.outErrorEventAI("Creature %d has invalid seat setting %u in event %u.", keyField, temp.vehicleReturn.seat, eventId);
+                        continue;
+                    }
+                    break;
+                }
+                case EVENT_T_PASSENGER_SPAWN:
+                {
+                    if (temp.passengerSpawn.seat >= MAX_VEHICLE_SEAT || temp.passengerSpawn.seat < -1)
+                    {
+                        sLog.outErrorEventAI("Creature %d has invalid seat setting %u in event %u.", keyField, temp.passengerSpawn.seat, eventId);
+                        continue;
+                    }
+                    break;
+                }
+                case EVENT_T_PASSENGER_CONTROL_END:
+                {
+                    if (temp.passengerControlEnd.seat >= MAX_VEHICLE_SEAT || temp.passengerControlEnd.seat < -1)
+                    {
+                        sLog.outErrorEventAI("Creature %d has invalid seat setting %u in event %u.", keyField, temp.passengerControlEnd.seat, eventId);
+                        continue;
+                    }
+                    break;
+                }
                 default:
                     sLog.outErrorEventAI("Creature %d using not checked at load event (%u) in event %u. Need check code update?", keyField, temp.event_id, eventId);
                     break;
