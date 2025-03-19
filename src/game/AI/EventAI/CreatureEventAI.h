@@ -803,28 +803,28 @@ struct CreatureEventAI_Event
         struct
         {
             uint32 board;
-            uint32 seat;
+            int32 seat;
         } boardVehicle;
         // EVENT_T_PASSENGER_BOARDED                        = 39
         struct
         {
             uint32 board;
-            uint32 seat;
+            int32 seat;
         } passengerBoard;
         // EVENT_T_VEHICLE_RETURN                           = 40
         struct
         {
-            uint32 seat;
+            int32 seat;
         } vehicleReturn;
         // EVENT_T_PASSENGER_SPAWN                          = 41
         struct
         {
-            uint32 seat;
+            int32 seat;
         } passengerSpawn;
         // EVENT_T_PASSENGER_CONTROL_END                    = 42
         struct
         {
-            uint32 seat;
+            int32 seat;
         } passengerControlEnd;
         // RAW
         struct
