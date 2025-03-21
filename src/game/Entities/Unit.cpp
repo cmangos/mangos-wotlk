@@ -5523,6 +5523,12 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
         SpellProcEventEntry const* procEntry = sSpellMgr.GetSpellProcEvent(aurSpellInfo->Id);
         if (aurSpellInfo->procFlags & PROC_FLAG_HEARTBEAT || (procEntry && procEntry->procFlags & PROC_FLAG_HEARTBEAT))
             ++m_hasHeartbeatProcCounter;
+
+        ObjectGuid casterGuid = holder->GetCasterGuid();
+        if (casterGuid.IsPlayer())
+            if (Unit* caster = holder->GetCaster())
+                if (caster->GetMap()->GetMapDataContainer().IsSpellUsedInCondition(holder->GetId()))
+                    static_cast<Player*>(caster)->UpdateForQuestWorldObjects();
     }
 
     return true;

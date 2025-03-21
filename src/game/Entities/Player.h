@@ -2517,6 +2517,7 @@ class Player : public Unit
         virtual CombatData const* GetCombatData() const override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
 
         bool canSeeSpellClickOn(Creature const* c) const;
+        bool HasConditionalSpellClick(Creature const* c) const;
 
         void SendMessageToPlayer(std::string const& message) const; // debugging purposes
 

@@ -161,6 +161,7 @@ class ConditionEntry
 
         // Checks correctness of values
         bool IsValid() const;
+        uint32 UsesSpell() const;
         static bool CanBeUsedWithoutPlayer(uint32 entry);
 
         // Checks if the condition is met

@@ -79,6 +79,7 @@ struct SpellClickInfo
 
     // helpers
     bool IsFitToRequirements(Player const* player, Creature const* clickedCreature) const;
+    bool HasConditionalSpellClick() const;
 };
 
 typedef std::multimap<uint32 /*npcEntry*/, SpellClickInfo> SpellClickInfoMap;
@@ -1304,6 +1305,8 @@ class ObjectMgr
         VehicleSeatParameters const* GetVehicleSeatParameters(uint32 seatEntry) const;
 
         uint32 GetTypeFlagsFromStaticFlags(CreatureTypeFlags typeFlags, uint32 staticFlags1, uint32 staticFlags2, uint32 staticFlags3, uint32 staticFlags4) const;
+
+        bool IsSpellUsedInCondition(uint32 spellId) const;
     protected:
 
         // current locale settings
@@ -1491,6 +1494,8 @@ class ObjectMgr
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm
 
         std::map<uint32, VehicleSeatParameters> m_seatParameters;
+
+        std::unordered_set<uint32> m_spellsUsedInSpellClickConditions;
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

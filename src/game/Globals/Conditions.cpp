@@ -1036,6 +1036,16 @@ bool ConditionEntry::IsValid() const
     return true;
 }
 
+uint32 ConditionEntry::UsesSpell() const
+{
+    switch (m_condition)
+    {
+        case CONDITION_AURA:
+            return m_value1;
+    }
+    return 0;
+}
+
 // Check if a condition can be used without providing a player param
 bool ConditionEntry::CanBeUsedWithoutPlayer(uint32 entry)
 {

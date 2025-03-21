@@ -89,6 +89,8 @@ class MapDataContainer
 
         BattleGroundTypeId GetBattleMasterBG(uint32 entry) const;
         void SetBattleMastersMap(std::shared_ptr<BattleMastersMap> battleMasters);
+
+        bool IsSpellUsedInCondition(uint32 spellId) const;
     private:
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;

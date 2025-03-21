@@ -188,6 +188,11 @@ void MapDataContainer::SetBattleMastersMap(std::shared_ptr<BattleMastersMap> bat
     m_battleMastersMap = battleMasters;
 }
 
+bool MapDataContainer::IsSpellUsedInCondition(uint32 spellId) const
+{
+    return sObjectMgr.IsSpellUsedInCondition(spellId);
+}
+
 void MapDataContainer::SetStringIdMaps(std::shared_ptr<StringIdMap> stringIds, std::shared_ptr<StringIdMapByString> stringIdsByString)
 {
     m_stringIds = stringIds;

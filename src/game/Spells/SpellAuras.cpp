@@ -10018,6 +10018,10 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
             caster->AddCooldown(*GetSpellProto());
         }
     }
+
+    if (caster && caster->IsPlayer())
+        if (caster->GetMap()->GetMapDataContainer().IsSpellUsedInCondition(GetId()))
+            static_cast<Player*>(caster)->UpdateForQuestWorldObjects();
 }
 
 void SpellAuraHolder::CleanupTriggeredSpells()

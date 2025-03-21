@@ -22070,7 +22070,7 @@ void Player::UpdateForQuestWorldObjects()
             if (!obj->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
                 continue;
 
-            if (canSeeSpellClickOn(obj))
+            if (HasConditionalSpellClick(obj))
                 obj->BuildValuesUpdateBlockForPlayerWithFlags(updateData, this, UF_FLAG_DYNAMIC);
         }
     }
@@ -24158,6 +24158,19 @@ bool Player::canSeeSpellClickOn(Creature const* c) const
     SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(c->GetEntry());
     for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
         if (itr->second.IsFitToRequirements(this, c))
+            return true;
+
+    return false;
+}
+
+bool Player::HasConditionalSpellClick(Creature const* c) const
+{
+    if (!c->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPELLCLICK))
+        return false;
+
+    SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(c->GetEntry());
+    for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+        if (itr->second.HasConditionalSpellClick())
             return true;
 
     return false;

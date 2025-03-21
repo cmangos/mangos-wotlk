@@ -138,6 +138,11 @@ bool SpellClickInfo::IsFitToRequirements(Player const* player, Creature const* c
     return true;
 }
 
+bool SpellClickInfo::HasConditionalSpellClick() const
+{
+    return conditionId || questStart || questEnd;
+}
+
 template<typename T>
 T IdGenerator<T>::Generate()
 {
@@ -1112,6 +1117,11 @@ uint32 ObjectMgr::GetTypeFlagsFromStaticFlags(CreatureTypeFlags typeFlags, uint3
     if (staticFlags4 & uint32(CreatureStaticFlags4::QUEST_BOSS))
         typeFlags |= CreatureTypeFlags::QUEST_BOSS;
     return uint32(typeFlags);
+}
+
+bool ObjectMgr::IsSpellUsedInCondition(uint32 spellId) const
+{
+    return m_spellsUsedInSpellClickConditions.find(spellId) != m_spellsUsedInSpellClickConditions.end();
 }
 
 CreatureImmunityVector const* ObjectMgr::GetCreatureImmunitySet(uint32 entry, uint32 setId) const
@@ -8420,6 +8430,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
     uint32 count = 0;
 
     mSpellClickInfoMap.clear();
+    m_spellsUsedInSpellClickConditions.clear();
     //                                             0          1         2            3                   4          5           6
     auto queryResult = WorldDatabase.Query("SELECT npc_entry, spell_id, quest_start, quest_start_active, quest_end, cast_flags, condition_id FROM npc_spellclick_spells");
 
@@ -8466,10 +8477,17 @@ void ObjectMgr::LoadNPCSpellClickSpells()
             }
         }
 
-        if (info.conditionId && !sConditionStorage.LookupEntry<ConditionEntry const*>(info.conditionId))
+        if (info.conditionId)
         {
-            sLog.outErrorDb("Table npc_spellclick_spells references unknown condition %u. Skipping entry.", info.conditionId);
-            continue;
+            ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(info.conditionId);
+            if (!condition)
+            {
+                sLog.outErrorDb("Table npc_spellclick_spells references unknown condition %u. Skipping entry.", info.conditionId);
+                continue;
+            }
+
+            if (uint32 spellId = condition->UsesSpell())
+                m_spellsUsedInSpellClickConditions.insert(spellId);
         }
         if (!info.conditionId)                         // TODO Drop block after finished converting
         {
