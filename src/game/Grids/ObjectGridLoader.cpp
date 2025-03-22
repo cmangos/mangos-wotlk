@@ -295,6 +295,10 @@ ObjectGridUnloader::Visit(GridRefManager<T>& m)
         {
 
         }
+        else if constexpr (std::is_same_v<T, Corpse>)
+        {
+            sObjectAccessor.ConvertCorpseForPlayer(obj->GetOwnerGuid());
+        }
         else
         {
             obj->GetMap()->RemoveObjectFromRemoveList(obj);
