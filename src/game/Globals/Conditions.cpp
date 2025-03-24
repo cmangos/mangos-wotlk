@@ -1040,6 +1040,37 @@ uint32 ConditionEntry::UsesSpell() const
 {
     switch (m_condition)
     {
+        case CONDITION_NOT:
+        {
+            ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value1);
+            MANGOS_ASSERT(condition);
+            return condition->UsesSpell();
+        }
+        case CONDITION_AND:
+        case CONDITION_OR:
+        {
+            {
+                ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value1);
+                if (condition && condition->UsesSpell())
+                    return true;
+            }
+            {
+                ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value2);
+                if (condition && condition->UsesSpell())
+                    return true;
+            }
+            {
+                ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value3);
+                if (condition && condition->UsesSpell())
+                    return true;
+            }
+            {
+                ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value4);
+                if (condition && condition->UsesSpell())
+                    return true;
+            }
+            return false;
+        }
         case CONDITION_AURA:
             return m_value1;
     }
