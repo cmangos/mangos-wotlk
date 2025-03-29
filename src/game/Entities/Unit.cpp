@@ -8070,7 +8070,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellSchoolMask schoolMask, Spel
     // Add flat bonus from spell damage creature
     DoneTotal += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE, creatureTypeMask);
 
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_CASTER_DAMAGE_MODIFIERS))
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_CASTER_DAMAGE_MODIFIERS))
     {
         // Creature damage
         if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->IsPet())
