@@ -1690,7 +1690,7 @@ void Creature::TriggerDelayedBoarding()
     // Note: Officially what this is meant to do is trigger application of control vehicle aura, and rest of spell being executed in spell effect
     // We do not currently support this way of delaying aura application and as such remains to be resolved
 
-    Player* player = const_cast<Player*>(GetControllingPlayer());
+    Player* player = dynamic_cast<Player*>(GetSpawner());
     if (!player)
         return;
 

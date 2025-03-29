@@ -2743,6 +2743,9 @@ struct WorldObjectCreateAccumulator
 
 void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
 {
+    if (ItsNewObject())
+        GetMap()->AddCameraToWorld(this);
+
     if (IsPlayer())
         BuildUpdateDataForPlayer((Player*)this, update_players);
 
@@ -2754,6 +2757,9 @@ void WorldObject::BuildUpdateData(UpdateDataMapType& update_players)
     }
 
     ClearUpdateMask(false);
+
+    if (ItsNewObject())
+        SetItsNewObject(false);
 }
 
 void WorldObject::UpdateVisibility(UpdateDataMapType& update_players)

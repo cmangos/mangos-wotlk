@@ -2860,8 +2860,6 @@ void Map::SendObjectUpdates()
         Object* obj = *m_objectsToClientUpdate.begin();
         m_objectsToClientUpdate.erase(m_objectsToClientUpdate.begin());
         obj->BuildUpdateData(update_players);
-        if (obj->ItsNewObject())
-            obj->SetItsNewObject(false);
     }
 
     UpdateVisibility(update_players);
