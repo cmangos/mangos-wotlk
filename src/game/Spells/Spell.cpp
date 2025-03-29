@@ -4693,7 +4693,7 @@ void Spell::SendSpellGo()
         if (m_cast_count > 0)
             destLocData << uint32(m_cast_count);
 
-        MaNGOS::SpellMessageDestLocDeliverer notifier(*m_trueCaster, data); // broadcast around caster normal packet to those who see caster
+        MaNGOS::SpellMessageDestLocDeliverer notifier(*m_trueCaster, data, destLocData); // broadcast around caster normal packet to those who see caster
         Cell::VisitAllObjects(m_trueCaster->GetPositionX(), m_trueCaster->GetPositionY(), m_trueCaster->GetMap(), notifier, m_trueCaster->GetVisibilityData().GetVisibilityDistance());
         notifier.StopAccumulating(); // broadcast around destination to those who dont see caster
         float destX = m_targets.m_destPos.x, destY = m_targets.m_destPos.y;

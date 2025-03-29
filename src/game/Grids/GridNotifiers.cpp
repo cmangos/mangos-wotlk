@@ -234,7 +234,7 @@ void SpellMessageDestLocDeliverer::Visit(CameraMapType& m)
 
         if (WorldSession* session = player->GetSession())
         {
-            session->SendPacket(i_message);
+            session->SendPacket(i_accumulate ? i_spellMessage : i_destLoc);
             if (i_accumulate)
                 i_guids.insert(player->GetObjectGuid());
         }
