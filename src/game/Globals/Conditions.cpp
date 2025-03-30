@@ -1051,23 +1051,27 @@ uint32 ConditionEntry::UsesSpell() const
         {
             {
                 ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value1);
-                if (condition && condition->UsesSpell())
-                    return true;
+                if (condition)
+                    if (uint32 spellId = condition->UsesSpell())
+                        return spellId;
             }
             {
                 ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value2);
-                if (condition && condition->UsesSpell())
-                    return true;
+                if (condition)
+                    if (uint32 spellId = condition->UsesSpell())
+                        return spellId;
             }
             {
                 ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value3);
-                if (condition && condition->UsesSpell())
-                    return true;
+                if (condition)
+                    if (uint32 spellId = condition->UsesSpell())
+                        return spellId;
             }
             {
                 ConditionEntry const* condition = sConditionStorage.LookupEntry<ConditionEntry>(m_value4);
-                if (condition && condition->UsesSpell())
-                    return true;
+                if (condition)
+                    if (uint32 spellId = condition->UsesSpell())
+                        return spellId;
             }
             return false;
         }
