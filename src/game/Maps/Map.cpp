@@ -1240,6 +1240,10 @@ void Map::Remove(Player* player, bool remove)
 
     SendRemoveInfinite(player); // TODO: Shouldnt send?
     AddUpdateRemoveObject(player->GetClientGuidsIAmAt(), player->GetObjectGuid());
+    for (auto& clientGuid : player->GetClientGuidsIAmAt())
+        if (Player* client = GetPlayer(clientGuid))
+            client->RemoveAtClient(player, true);
+    player->GetClientGuidsIAmAt().clear();
 
     player->ResetMap();
     if (remove)
@@ -1282,8 +1286,13 @@ void Map::Remove(T* obj, bool remove)
     m_objectsToClientMovementUpdate.erase(obj);
     m_visibilityAdded.erase(obj);
 
-    AddUpdateRemoveObject(obj->GetClientGuidsIAmAt(), obj->GetObjectGuid());
     RemoveFromGrid(obj, grid, cell);
+
+    AddUpdateRemoveObject(obj->GetClientGuidsIAmAt(), obj->GetObjectGuid());
+    for (auto& clientGuid : obj->GetClientGuidsIAmAt())
+        if (Player* client = GetPlayer(clientGuid))
+            client->RemoveAtClient(obj, true);
+    obj->GetClientGuidsIAmAt().clear();
 
     m_objRemoveList.insert(obj->GetObjectGuid());
 

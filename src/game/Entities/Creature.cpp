@@ -315,6 +315,7 @@ void Creature::RemoveCorpse(bool inPlace)
                 client->RemoveAtClient(this, true);
         GetMap()->AddUpdateRemoveObject(GetClientGuidsIAmAt(), GetObjectGuid());
         clientGuids.clear();
+        GetClientGuidsIAmAt().clear();
     }
     else
         AddObjectToRemoveList();
