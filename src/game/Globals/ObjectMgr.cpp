@@ -7449,11 +7449,17 @@ void ObjectMgr::SetHighestGuids()
         m_ItemGuids.Set((*result)[0].GetUInt32() + 1);
     }
 
+    uint32 newInstanceId = 0;
     result = CharacterDatabase.Query("SELECT MAX(id) FROM instance");
     if (result)
     {
-        m_InstanceGuids.Set((*result)[0].GetUInt32() + 1);
+        newInstanceId = (*result)[0].GetUInt32() + 1;
     }
+
+    if (newInstanceId < 2) //Instance id 0 and 1 are taken by ebon hold.
+        newInstanceId = 2;
+
+    m_InstanceGuids.Set(newInstanceId);
 
     // Cleanup other tables from nonexistent guids (>=m_hiItemGuid)
     CharacterDatabase.BeginTransaction();
