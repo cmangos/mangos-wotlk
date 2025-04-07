@@ -355,7 +355,7 @@ template<>
 void Map::AddToGrid(Creature* obj, NGridType* grid, Cell const& cell)
 {
     // add to world object registry in grid
-    if (obj->IsPet())
+    if (obj->IsPet() && obj->IsPlayerControlled())
     {
         (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Creature>(obj);
         obj->SetCurrentCell(cell);
@@ -399,7 +399,7 @@ template<>
 void Map::RemoveFromGrid(Creature* obj, NGridType* grid, Cell const& cell)
 {
     // remove from world object registry in grid
-    if (obj->IsPet())
+    if (obj->IsPet() && obj->IsPlayerControlled())
     {
         (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Creature>(obj);
     }
@@ -1990,9 +1990,9 @@ void Map::AddToActive(WorldObject* obj)
     EnsureGridLoaded(cell);
 
     // also not allow unloading spawn grid to prevent creating creature clone at load
-    if (obj->GetTypeId() == TYPEID_UNIT)
+    if (obj->IsCreature())
     {
-        Creature* c = (Creature*)obj;
+        Creature* c = static_cast<Creature*>(obj);
 
         if (!c->IsPet() && c->HasStaticDBSpawnData())
         {
@@ -2025,9 +2025,9 @@ void Map::RemoveFromActive(WorldObject* obj)
         m_activeNonPlayers.erase(obj);
 
     // also allow unloading spawn grid
-    if (obj->GetTypeId() == TYPEID_UNIT)
+    if (obj->IsCreature())
     {
-        Creature* c = (Creature*)obj;
+        Creature* c = static_cast<Creature*>(obj);
 
         if (!c->IsPet() && c->HasStaticDBSpawnData())
         {

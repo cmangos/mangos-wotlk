@@ -57,7 +57,7 @@ ObjectGridRespawnMover::Visit(CreatureMapType& m)
 
         Creature* c = iter->getSource();
 
-        MANGOS_ASSERT(!c->IsPet() && "ObjectGridRespawnMover don't must be called for pets");
+        MANGOS_ASSERT((!c->IsPet() || !c->IsPlayerControlled()) && "ObjectGridRespawnMover don't must be called for player pets");
 
         Cell const& cur_cell  = c->GetCurrentCell();
 
@@ -280,8 +280,6 @@ ObjectGridUnloader::Unload(GridType& grid)
 {
     TypeContainerVisitor<ObjectGridUnloader, GridTypeMapContainer > unloader(*this);
     grid.Visit(unloader);
-    TypeContainerVisitor<ObjectGridUnloader, WorldTypeMapContainer > unloaderWorld(*this);
-    grid.Visit(unloaderWorld);
 }
 
 template<class T>
@@ -291,31 +289,12 @@ ObjectGridUnloader::Visit(GridRefManager<T>& m)
     while (!m.isEmpty())
     {
         T* obj = m.getFirst()->getSource();
-        if constexpr (std::is_same_v<T, Camera>)
-        {
-
-        }
-        else if constexpr (std::is_same_v<T, Corpse>)
-        {
-            if (obj->GetType() == CORPSE_BONES)
-            {
-                obj->GetMap()->RemoveObjectFromRemoveList(obj);
-                obj->GetMap()->Remove(obj, true);
-            }
-            else
-            {
-                sObjectAccessor.RemoveCorpse(obj);
-            }
-        }
-        else
-        {
-            obj->GetMap()->RemoveObjectFromRemoveList(obj);
-            // if option set then object already saved at this moment
-            if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
-                obj->SaveRespawnTime();
-            // object must be out of world before delete
-            obj->GetMap()->Remove(obj, true);
-        }
+        obj->GetMap()->RemoveObjectFromRemoveList(obj);
+        // if option set then object already saved at this moment
+        if (!sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
+            obj->SaveRespawnTime();
+        // object must be out of world before delete
+        obj->GetMap()->Remove(obj, true);
     }
 }
 
