@@ -1285,7 +1285,9 @@ void Map::Remove(T* obj, bool remove)
     m_objectsToClientCreateUpdate.erase({ obj, obj->GetObjectGuid() });
     m_objectsToClientMovementUpdate.erase(obj);
     m_visibilityAdded.erase(obj);
-    m_waypointingNpcs.erase(obj);
+
+    if constexpr (std::is_same_v<T, Unit>)
+        m_waypointingNpcs.erase(obj);
 
     RemoveFromGrid(obj, grid, cell);
 
