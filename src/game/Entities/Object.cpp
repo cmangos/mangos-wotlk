@@ -1280,6 +1280,14 @@ void Object::BuildCreateDataForPlayer(Player* pl, UpdateDataMapType& update_play
         iter->second.AddAfterCreatePacket(Player::BuildAurasForTarget(static_cast<Unit const*>(this)));
 }
 
+void Object::SetUpdateFlag(ObjectUpdateFlags flag, bool add)
+{
+    if (add)
+        m_updateFlag |= flag;
+    else
+        m_updateFlag &= ~flag;
+}
+
 void Object::BuildOutOfRangeDataForPlayer(Player* pl, UpdateDataMapType& update_players, ObjectGuid oorObject)
 {
     UpdateDataMapType::iterator iter = update_players.find(pl);

@@ -633,6 +633,8 @@ class Object
         static void BuildOutOfRangeDataForPlayer(Player* pl, UpdateDataMapType& update_players, ObjectGuid oorObject);
         void BuildCreateDataForPlayer(Player* pl, UpdateDataMapType& update_players, bool auras = true) const;
 
+        void SetUpdateFlag(ObjectUpdateFlags flag, bool add);
+
     protected:
         Object();
 
