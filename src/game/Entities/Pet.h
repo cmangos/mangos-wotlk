@@ -159,7 +159,7 @@ class Pet : public Creature
         static Position GetPetSpawnPosition(Unit* owner);
         bool isLoading() const { return m_loading; }
         void SetLoading(bool state) { m_loading = state; }
-        void Unsummon(PetSaveMode mode, Unit* owner = nullptr);
+        void Unsummon(PetSaveMode mode, Unit* owner = nullptr, bool removeList = true);
         static void DeleteFromDB(uint32 guidlow, bool separate_transaction = true);
         static void DeleteFromDB(Unit* owner, PetSaveMode slot);
         static SpellCastResult TryLoadFromDB(Unit* owner, uint32 petentry = 0, uint32 petnumber = 0, bool current = false, PetType mandatoryPetType = MAX_PET_TYPE);
