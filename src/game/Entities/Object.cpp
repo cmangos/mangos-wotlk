@@ -2344,6 +2344,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map, uint
                 creature->SetWalk(false);
             if (templateData->IsHovering())
                 creature->SetHover(true);
+            if (templateData->IsGravityDisabled())
+                creature->SetLevitate(true);
             relayId = templateData->relayId;
             if (templateData->stringId)
                 creature->SetStringId(templateData->stringId, true);
