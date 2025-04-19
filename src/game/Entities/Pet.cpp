@@ -776,6 +776,8 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/, bool removeList 
 {
     MANGOS_ASSERT(!m_removed);
 
+    m_removed = true;
+
     if (!owner)
         owner = GetOwner();
 
@@ -877,8 +879,6 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/, bool removeList 
 
     if (removeList)
         AddObjectToRemoveList();
-
-    m_removed = true;
 }
 
 void Pet::GivePetXP(uint32 xp)
