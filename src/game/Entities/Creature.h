@@ -954,6 +954,9 @@ class Creature : public Unit
 
         void SetModelRunSpeed(float runSpeed) override { m_modelRunSpeed = runSpeed; }
 
+        bool IsCombatOnlyStealth() const { return m_combatOnlyStealth; }
+        void SetCombatOnlyStealth(bool state) { m_combatOnlyStealth = state; }
+
         void SetDelayedPetSpells() { m_delayedPetSpells = true; }
         void TriggerDelayedPetSpells();
 
@@ -1050,6 +1053,8 @@ class Creature : public Unit
 
         CreatureInfo const* m_mountInfo;
         float m_modelRunSpeed;
+
+        bool m_combatOnlyStealth;
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent

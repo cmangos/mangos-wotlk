@@ -151,7 +151,8 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_countSpawns(false),
     m_creatureGroup(nullptr), m_imposedCooldown(false), m_delayedPetSpells(false), m_delayedBoardingSpell(0), m_delayedBoardingSeat(-1),
     m_healthMultiplier(1.f),
-    m_creatureInfo(nullptr), m_mountInfo(nullptr)
+    m_creatureInfo(nullptr), m_mountInfo(nullptr),
+    m_combatOnlyStealth(false)
 {
     m_valuesCount = UNIT_END;
 
