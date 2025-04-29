@@ -94,6 +94,7 @@ struct EarthShield : public AuraScript
         procData.basepoints[0] = aura->GetAmount();
         procData.triggerTarget = aura->GetTarget();
         procData.triggeredSpellId = 379;
+        procData.triggerOriginalCaster = aura->GetCasterGuid();
         // Glyph of Earth Shield
         if (Unit* caster = aura->GetCaster())
         {
