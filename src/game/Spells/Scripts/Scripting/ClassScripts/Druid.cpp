@@ -349,7 +349,20 @@ struct ThornsDruid : public AuraScript
     }
 };
 
-// TODO: Glyph of Entangling Roots
+// 33600, 33601, 33602 - Improved Faerie Fire
+struct ImprovedFaerieFire : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->RegisterScriptedLocationAura(aura, SCRIPT_LOCATION_CRIT_CHANCE, apply);
+    }
+
+    void OnCritChanceCalculate(Aura* aura, Unit const* target, float& chance, SpellEntry const* /*spellInfo*/) const override
+    {
+        if (target->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DRUID, uint64(0x00000400), 0, aura->GetTarget()->GetObjectGuid())) chance += aura->GetModifier()->m_amount; // Faerie Fire
+    }
+};
 
 void LoadDruidScripts()
 {
@@ -371,4 +384,5 @@ void LoadDruidScripts()
     RegisterSpellScript<GlyphOfTyphoon>("spell_typhoon");
     RegisterSpellScript<GlyphOfStarfire>("spell_glyph_of_starfire");
     RegisterSpellScript<ThornsDruid>("spell_thorns_druid");
+    RegisterSpellScript<ImprovedFaerieFire>("spell_improved_faerie_fire");
 }

@@ -1710,7 +1710,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (9756,'spell_thorns_druid'),
 (9910,'spell_thorns_druid'),
 (26992,'spell_thorns_druid'),
-(53307,'spell_thorns_druid');
+(53307,'spell_thorns_druid'),
+(33600,'spell_improved_faerie_fire'),
+(33601,'spell_improved_faerie_fire'),
+(33602,'spell_improved_faerie_fire');
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
