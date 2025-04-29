@@ -19,8 +19,6 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
-// TODO: Implement WOLTK only scaling auras
-
 enum
 {
     SPELL_PET_RESISTANCE = 37386,

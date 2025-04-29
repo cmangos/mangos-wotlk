@@ -561,7 +561,6 @@ struct SummonGargoyle : public SpellScript, public AuraScript
         summon->CastSpell(nullptr, SPELL_DEATH_KNIGHT_PET_SCALING_02, TRIGGERED_NONE);
         summon->CastSpell(nullptr, SPELL_DEATH_KNIGHT_PET_SCALING_03, TRIGGERED_NONE);
         summon->CastSpell(nullptr, SPELL_AVOIDANCE_PASSIVE, TRIGGERED_NONE);
-        // TODO: Figure out cast speed scaling
 
         Unit* target = spell->m_targets.getUnitTarget();
         Position pos = target ? target->GetPosition() : spell->GetCaster()->GetPosition();
