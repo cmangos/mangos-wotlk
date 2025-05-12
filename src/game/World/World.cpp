@@ -73,6 +73,7 @@
 #include "Anticheat/Anticheat.hpp"
 #include "LFG/LFGMgr.h"
 #include "Vmap/GameObjectModel.h"
+#include "Spells/SpellStacking.h"
 
 #ifdef BUILD_AHBOT
  #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -997,6 +998,9 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadSQLDBCs();
 
     m_bgQueue.SetNextRatingDiscardUpdate(std::chrono::milliseconds(sWorld.getConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER)));
+
+    sLog.outString("Loading spell groups...");
+    sSpellStacker.LoadSpellGroups();
 
     // Load before npc_text, gossip_menu_option, script_texts
     sLog.outString("Loading broadcast_text...");

@@ -313,6 +313,7 @@ struct DeathKnightDisease : public AuraScript
     }
 };
 
+// 65142 - Crypt Fever
 struct CryptFeverServerside : public AuraScript
 {
     int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override

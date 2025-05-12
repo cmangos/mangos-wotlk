@@ -51,6 +51,7 @@
 #include "Tools/Formulas.h"
 #include "Entities/Transports.h"
 #include "Anticheat/Anticheat.hpp"
+#include "Spells/SpellStacking.h"
 
 #ifdef BUILD_METRICS
  #include "Metric/Metric.h"
@@ -5390,13 +5391,14 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
             }
             else
             {
-                //any stackable case with amount should mod existing stack amount
-                if (aurSpellInfo->StackAmount && !IsChanneledSpell(aurSpellInfo) && !aurSpellInfo->HasAttribute(SPELL_ATTR_EX3_DOT_STACKING_RULE))
+                // any stackable case with amount should mod existing stack amount
+                bool isStackable = sSpellStacker.IsSpellStackableWithSpellForDifferentCasters(aurSpellInfo, foundHolder->GetSpellProto(), true, this);
+                if (aurSpellInfo->StackAmount && !IsChanneledSpell(aurSpellInfo) && !isStackable)
                 {
                     foundHolder->ModStackAmount(holder->GetStackAmount(), holder->GetCaster());
                     return false;
                 }
-                else if (!IsStackableSpell(aurSpellInfo, foundHolder->GetSpellProto(), holder->GetTarget()))
+                else if (!isStackable)
                 {
                     RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
                     break;
@@ -5598,7 +5600,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         return true;
 
     const uint32 spellId = holder->GetId();
-    const SpellSpecific specific = GetSpellSpecific(spellId);
+    SpellGroupSpellData const* data = sSpellStacker.GetSpellGroupDataForSpell(spellId);
     auto drGroup = holder->getDiminishGroup();
     SpellEntry const* triggeredBy = holder->GetTriggeredBy();
 
@@ -5616,7 +5618,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             continue;
 
         const uint32 existingSpellId = existingSpellProto->Id;
-        const SpellSpecific existingSpecific = GetSpellSpecific(existingSpellId);
+        SpellGroupSpellData const* existingData = sSpellStacker.GetSpellGroupDataForSpell(existingSpellId);
         auto existingDrGroup = existing->getDiminishGroup();
         const bool own = (holder->GetCasterGuid() == existing->GetCasterGuid());
 
@@ -5640,10 +5642,15 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
         bool unique = false;
         bool personal = false;
-        if (specific && existingSpecific && IsSpellSpecificIdentical(specific, existingSpecific))
+        if (spellId == existingSpellId)
         {
-            personal = IsSpellSpecificUniquePerCaster(specific);
-            unique = (personal || IsSpellSpecificUniquePerTarget(specific));
+            personal = spellProto->HasAttribute(SpellAttributesEx5::SPELL_ATTR_EX5_AURA_UNIQUE_PER_CASTER);
+            unique = (personal || spellProto->HasAttribute(SpellAttributesEx::SPELL_ATTR_EX_AURA_UNIQUE));
+        }
+        if (data && existingData && (data->mask & existingData->mask) != 0)
+        {
+            personal = data->rule == SpellGroupRule::UNIQUE_PER_CASTER;
+            unique = (personal || data->rule == SpellGroupRule::UNIQUE);
         }
 
         bool diminished = false;
@@ -5654,7 +5661,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             unique = diminished;
         }
 
-        bool stackable = (own ? sSpellMgr.IsSpellStackableWithSpell(spellProto, existingSpellProto) : sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(spellProto, existingSpellProto));
+        bool stackable = (own ? sSpellStacker.IsSpellStackableWithSpell(spellProto, existingSpellProto, this) : sSpellStacker.IsSpellStackableWithSpellForDifferentCasters(spellProto, existingSpellProto, sSpellMgr.IsSpellAnotherRankOfSpell(spellProto->Id, existingSpellProto->Id), this));
 
         // Remove only own auras when multiranking
         if (!unique && own && stackable && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId))
@@ -5682,8 +5689,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             if (!IsSpellWithCasterSourceTargetsOnly(spellProto) && !IsSpellWithCasterSourceTargetsOnly(existingSpellProto))
             {
                 // holder cannot remove higher/stronger rank if it isn't from the same caster
-                // judgement excluded due to invalid comparison of dummy auras
-                if (!IsSpellSpecificInterchangeable(specific) && IsSimilarExistingAuraStronger(holder, existing)) // TROLOLO
+                if (IsSimilarExistingAuraStronger(holder, existing)) // TROLOLO
                     return false;
 
                 if (!diminished && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId))

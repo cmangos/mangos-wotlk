@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "SpellAuras.h"
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "Server/WorldPacket.h"
@@ -51,7 +52,7 @@
 #include "Entities/TemporarySpawn.h"
 #include "Maps/InstanceData.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
-#include "SpellAuras.h"
+#include "Spells/SpellStacking.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -738,7 +739,7 @@ void AreaAura::Update(uint32 diff)
                             // non caster self-casted auras (stacked from diff. casters)
                             if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE && i->second->GetCasterGuid() != GetCasterGuid())
                             {
-                                apply = IsStackableSpell(actualSpellInfo, i->second->GetSpellProto(), target);
+                                apply = sSpellStacker.IsStackableSpell(actualSpellInfo, i->second->GetSpellProto(), target);
                                 break;
                             }
                             if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE || i->second->GetCasterGuid() == GetCasterGuid())
@@ -10612,7 +10613,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             if (GetCasterGuid() != m_target->GetObjectGuid() || !GetCasterGuid().IsPlayer())
                 return;
 
-            if (GetSpellSpecific(m_spellProto->Id) != SPELL_AURA)
+            SpellGroupSpellData const* data = sSpellStacker.GetSpellGroupDataForSpell(m_spellProto->Id);
+
+            if (data && !data->HasFlag(SpellGroupId::AURA))
                 return;
 
             // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
