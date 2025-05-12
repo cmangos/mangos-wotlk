@@ -806,6 +806,6 @@ void Battlefield::SendZoneWarning(WorldObject* source, int32 textEntry, uint32 s
 
         // play sound id, if provided
         if (soundId)
-            source->PlayDirectSound(soundId, PlayPacketParameters(PLAY_TARGET, (Player const*)player));
+            source->PlayDirectSound(soundId, PlayPacketParameters(PlayPacketSettings::TARGET, (Player const*)player));
     }
 }

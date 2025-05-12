@@ -3507,7 +3507,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         // Play part 1
                         if (apply)
-                            target->PlayDirectSound(14970, PlayPacketParameters(PLAY_TARGET, (Player*)target));
+                            target->PlayDirectSound(14970, PlayPacketParameters(PlayPacketSettings::TARGET, (Player*)target));
                         // continue in 58205
                         else
                             target->CastSpell(target, 58205, TRIGGERED_OLD_TRIGGERED);
@@ -3518,10 +3518,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         // Play part 2
                         if (apply)
-                            target->PlayDirectSound(14971, PlayPacketParameters(PLAY_TARGET, (Player*)target));
+                            target->PlayDirectSound(14971, PlayPacketParameters(PlayPacketSettings::TARGET, (Player*)target));
                         // Play part 3
                         else
-                            target->PlayDirectSound(14972, PlayPacketParameters(PLAY_TARGET, (Player*)target));
+                            target->PlayDirectSound(14972, PlayPacketParameters(PlayPacketSettings::TARGET, (Player*)target));
                     }
                     return;
                 case 40131:

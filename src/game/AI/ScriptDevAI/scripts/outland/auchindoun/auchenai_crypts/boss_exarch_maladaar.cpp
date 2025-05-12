@@ -130,7 +130,7 @@ struct boss_exarch_maladaarAI : public CombatAI
     {
         if (!m_bHasTaunted && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 150.0f) && m_creature->IsWithinLOSInMap(who))
         {
-            m_creature->PlayDistanceSound(10509, PLAY_ZONE);
+            m_creature->PlayDistanceSound(10509, PlayPacketSettings::ZONE);
             m_bHasTaunted = true;
         }
 
