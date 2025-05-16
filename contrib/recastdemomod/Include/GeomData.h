@@ -7,7 +7,7 @@
 #include "DetourNavMeshQuery.h"
 #include "SampleInterfaces.h"
 #include "ChunkyTriMesh.h"
-#include "..\..\..\..\contrib\mmap\src\TerrainBuilder.h"
+#include "../../../../contrib/mmap/src/TerrainBuilder.h"
 #include "Vmap/GameObjectModelVmaps.h"
 
 class MeshDetails
