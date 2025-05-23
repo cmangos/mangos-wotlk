@@ -5673,6 +5673,9 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
     }
     else
     {
+        if (Unit* owner = gameObjTarget->GetOwner())
+            player->SetOutOfCombatWithVictim(owner);
+
         SendLoot(gameObjTarget->GetObjectGuid(), LOOT_SKINNING, LockType(m_spellInfo->EffectMiscValue[eff_idx]), player);
         m_spellLog.AddLog(uint32(SPELL_EFFECT_OPEN_LOCK), gameObjTarget->GetPackGUID());
     }
