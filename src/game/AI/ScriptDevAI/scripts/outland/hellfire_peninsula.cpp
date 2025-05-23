@@ -49,69 +49,44 @@ EndContentData */
 
 enum
 {
-    SAY_FREE                        = -1000139,
-
-    FACTION_HOSTILE                 = 16,
     FACTION_FRIENDLY                = 35,
-
-    SPELL_ENVELOPING_WINDS          = 15535,
-    SPELL_SHOCK                     = 12553,
+    AERANAS_RELAY_SCRIPT            = 17086,
 };
 
-struct npc_aeranasAI : public ScriptedAI
+enum AeranasActions
 {
-    npc_aeranasAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    uint32 m_uiEnvelopingWindsTimer;
-    uint32 m_uiShockTimer;
-
-    void Reset() override
-    {
-        m_uiEnvelopingWindsTimer = 9000;
-        m_uiShockTimer           = 5000;
-
-        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_creature->GetHealthPercent() < 30.0f)
-        {
-            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-            m_creature->RemoveAllAuras();
-            m_creature->CombatStop(true);
-            DoScriptText(SAY_FREE, m_creature);
-            return;
-        }
-
-        if (m_uiShockTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOCK);
-            m_uiShockTimer = 10000;
-        }
-        else
-            m_uiShockTimer -= uiDiff;
-
-        if (m_uiEnvelopingWindsTimer < uiDiff)
-        {
-            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ENVELOPING_WINDS);
-            m_uiEnvelopingWindsTimer = 25000;
-        }
-        else
-            m_uiEnvelopingWindsTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
+    AERANAS_PHASE_1,
+    AERANAS_ACTION_MAX,
 };
 
-UnitAI* GetAI_npc_aeranas(Creature* pCreature)
+struct npc_aeranasAI : public CombatAI
 {
-    return new npc_aeranasAI(pCreature);
-}
+    npc_aeranasAI(Creature* creature) : CombatAI(creature, AERANAS_ACTION_MAX)
+    {
+        AddTimerlessCombatAction(AERANAS_PHASE_1, true);
+        Reset(); 
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case AERANAS_PHASE_1:
+            {
+                if (m_creature->GetHealthPercent() < 30.0f) 
+                {
+                    m_creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, AERANAS_RELAY_SCRIPT, m_creature, m_creature);
+                    m_creature->setFaction(FACTION_FRIENDLY);
+                    m_creature->RemoveAllAuras();
+                    m_creature->CombatStop(true);
+                    DisableCombatAction(action);
+                }
+                break;
+            }
+        }
+    }    
+};
+
 
 /*######
 ## npc_ancestral_wolf
@@ -2400,7 +2375,7 @@ void AddSC_hellfire_peninsula()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_aeranas";
-    pNewScript->GetAI = &GetAI_npc_aeranas;
+    pNewScript->GetAI = &GetNewAIInstance<npc_aeranasAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

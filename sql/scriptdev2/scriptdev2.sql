@@ -2076,7 +2076,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000137','See to it, Ardonis!','0','0','0','0','19190','dawnforge COMMANDER_DAWNFORGE_5'),
 
 ('-1000138','Prepare to enter oblivion, meddlers. You have unleashed a god!','0','1','0','15','18443','Salhadaar SAY'),
-('-1000139','Avruu''s magic is broken! I''m free once again!','0','0','0','0','13447','aeranas SAY_FREE'),
 
 ('-1000156','Bloodmaul Brew? Me favorite!','0','0','0','0','18171','bladespire ogre SAY_BREW_1'),
 
