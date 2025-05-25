@@ -2883,7 +2883,7 @@ void Map::SendObjectUpdates()
             for (Player* player : visData.second)
                 visData.first->BuildCreateDataForPlayer(player, update_players, false);
 
-            if (visData.first->IsUnit())
+            if (!visData.second.empty() && visData.first->IsUnit())
             {
                 WorldPacket packet = Player::BuildAurasForTarget(static_cast<Unit const*>(visData.first));
                 for (Player* player : visData.second)
@@ -2892,6 +2892,8 @@ void Map::SendObjectUpdates()
                     updateDataData->second.AddAfterCreatePacket(packet);
                 }
             }
+
+            visData.first->SetItsNewObject(false);
         }
     }
 

@@ -2803,9 +2803,6 @@ void WorldObject::UpdateVisibility(UpdateDataMapType& update_players)
     Cell::VisitWorldObjects(this, notifier, GetVisibilityData().GetVisibilityDistance());
     GetMap()->AddCreateAtClientObjects(notifier.i_playerSet, this);
     ClearUpdateMask(false);
-
-    if (ItsNewObject())
-        SetItsNewObject(false);
 }
 
 bool WorldObject::IsControlledByPlayer() const
