@@ -80,7 +80,7 @@ struct InhibitMagic : public AuraScript
     void OnHolderInit(SpellAuraHolder* holder, WorldObject* caster) const override
     {
         uint32 stacks = 1;
-        if (caster)
+        if (caster) // Incorrect impl, meant to be chain cast 4 times with different radius and stacks reset on each first cast
         {
             float dist = holder->GetTarget()->GetDistance(caster, true, DIST_CALC_COMBAT_REACH);
             if (dist > 45.f)
