@@ -3245,7 +3245,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
 
     if (unitCaster && basePointsPerLevel != 0.0f)
     {
-        int32 level = int32(unitCaster->GetLevel());
+        int32 level = int32(unitCaster->GetSpellRank(spellProto) / 5);
         if (level > int32(spellProto->maxLevel) && spellProto->maxLevel > 0)
             level = int32(spellProto->maxLevel);
         else if (level < int32(spellProto->baseLevel))
