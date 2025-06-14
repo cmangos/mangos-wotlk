@@ -145,10 +145,6 @@ enum
     SPELL_HEALING_SALVE_DUMMY           = 29319,
     NPC_MAGHAR_GRUNT                    = 16846,
 
-    // quest 10190
-    SPELL_RECHARGING_BATTERY            = 34219,
-    NPC_DRAINED_PHASE_HUNTER            = 19595,
-
     // target hulking helboar
     SPELL_ADMINISTER_ANTIDOTE           = 34665,
     NPC_HELBOAR                         = 16880,
@@ -333,20 +329,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
             }
 
             return true;
-        }
-        case SPELL_RECHARGING_BATTERY:
-        {
-            if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-                return true;
-
-            if (!bApply)
-            {
-                if (pAura->GetTarget()->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                    ((Creature*)pAura->GetTarget())->UpdateEntry(NPC_DRAINED_PHASE_HUNTER);
-            }
-
-            return true;
-        }
+        }        
         case SPELL_TAG_MURLOC:
         {
             Creature* pCreature = (Creature*)pAura->GetTarget();
