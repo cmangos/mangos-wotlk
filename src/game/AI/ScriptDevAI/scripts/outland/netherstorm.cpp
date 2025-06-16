@@ -1303,147 +1303,49 @@ enum
     QUEST_MARK_V_IS_ALIVE       = 10191,
     NPC_BOT_SPECIALIST_ALLEY    = 19578,
     GO_DRAENEI_MACHINE          = 183771,
+    MAXX_A_MILLION_PATH         = 19589
 
-    SAY_START                   = -1000621,
-    SAY_ALLEY_FAREWELL          = -1000622,
-    SAY_CONTINUE                = -1000623,
-    SAY_ALLEY_FINISH            = -1000624
 };
 
-struct npc_maxx_a_million_escortAI : public npc_escortAI
+struct npc_maxx_a_millionAI : public npc_escortAI
 {
-    npc_maxx_a_million_escortAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
-
-    uint8 m_uiSubEvent;
-    uint32 m_uiSubEventTimer;
-    ObjectGuid m_alleyGuid;
-    ObjectGuid m_lastDraeneiMachineGuid;
+    npc_maxx_a_millionAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     void Reset() override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
-            m_uiSubEvent = 0;
-            m_uiSubEventTimer = 0;
-            m_alleyGuid.Clear();
-            m_lastDraeneiMachineGuid.Clear();
-
             // Reset fields, that were changed on escort-start
             m_creature->HandleEmote(EMOTE_STATE_STUN);
         }
     }
 
-    void WaypointReached(uint32 uiPoint) override
+    void WaypointReached(uint32 uiPointId) override
     {
-        switch (uiPoint)
+        switch (uiPointId)
         {
-            case 1:
-                // turn 90 degrees , towards doorway.
-                m_creature->SetFacingTo(m_creature->GetOrientation() + (M_PI_F / 2));
-                DoScriptText(SAY_START, m_creature);
-                m_uiSubEventTimer = 3000;
-                m_uiSubEvent = 1;
-                break;
-            case 7:
-            case 17:
-            case 29:
-                if (GameObject* pMachine = GetClosestGameObjectWithEntry(m_creature, GO_DRAENEI_MACHINE, INTERACTION_DISTANCE))
-                {
-                    m_creature->SetFacingToObject(pMachine);
-                    m_lastDraeneiMachineGuid = pMachine->GetObjectGuid();
-                    m_uiSubEvent = 2;
-                    m_uiSubEventTimer = 1000;
-                }
-                else
-                    m_lastDraeneiMachineGuid.Clear();
-
-                break;
-            case 36:
-                if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MARK_V_IS_ALIVE, m_creature);
-
-                if (Creature* pAlley = m_creature->GetMap()->GetCreature(m_alleyGuid))
-                    DoScriptText(SAY_ALLEY_FINISH, pAlley);
-
+            case 58:
+                if (Player* player = GetPlayerForEscort())
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_MARK_V_IS_ALIVE, m_creature);
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+                End();
                 break;
         }
-    }
-
-    void WaypointStart(uint32 uiPoint) override
-    {
-        switch (uiPoint)
-        {
-            case 8:
-            case 18:
-            case 30:
-                DoScriptText(SAY_CONTINUE, m_creature);
-                break;
-        }
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() ||  !m_creature->GetVictim())
-        {
-            if (m_uiSubEventTimer)
-            {
-                if (m_uiSubEventTimer <= uiDiff)
-                {
-                    switch (m_uiSubEvent)
-                    {
-                        case 1:                             // Wait time before Say
-                            if (Creature* pAlley = GetClosestCreatureWithEntry(m_creature, NPC_BOT_SPECIALIST_ALLEY, INTERACTION_DISTANCE * 2))
-                            {
-                                m_alleyGuid = pAlley->GetObjectGuid();
-                                DoScriptText(SAY_ALLEY_FAREWELL, pAlley);
-                            }
-                            m_uiSubEventTimer = 0;
-                            m_uiSubEvent = 0;
-                            break;
-                        case 2:                             // Short wait time after reached WP at machine
-                            m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
-                            m_uiSubEventTimer = 2000;
-                            m_uiSubEvent = 3;
-                            break;
-                        case 3:                             // Despawn machine after 2s
-                            if (GameObject* pMachine = m_creature->GetMap()->GetGameObject(m_lastDraeneiMachineGuid))
-                                pMachine->Use(m_creature);
-
-                            m_lastDraeneiMachineGuid.Clear();
-                            m_uiSubEventTimer = 0;
-                            m_uiSubEvent = 0;
-                            break;
-                        default:
-                            m_uiSubEventTimer = 0;
-                            break;
-                    }
-                }
-                else
-                    m_uiSubEventTimer -= uiDiff;
-            }
-        }
-        else
-            DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_npc_maxx_a_million(Creature* pCreature)
+bool QuestAccept_npc_maxx_a_million(Player* player, Creature* creature, const Quest* quest)
 {
-    return new npc_maxx_a_million_escortAI(pCreature);
-}
-
-bool QuestAccept_npc_maxx_a_million(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_MARK_V_IS_ALIVE)
+    if (quest->GetQuestId() == QUEST_MARK_V_IS_ALIVE)
     {
-        if (npc_maxx_a_million_escortAI* pEscortAI = dynamic_cast<npc_maxx_a_million_escortAI*>(pCreature->AI()))
-        {
-            // Set Faction to Escort Faction
-            pCreature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
-            // Set emote-state to 0 (is EMOTE_STATE_STUN by default)
-            pCreature->HandleEmote(EMOTE_ONESHOT_NONE);
 
-            pEscortAI->Start(false, pPlayer, pQuest, true);
+        if (npc_maxx_a_millionAI* pEscortAI = dynamic_cast<npc_maxx_a_millionAI*>(creature->AI()))
+        {
+            creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_PASSIVE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
+            pEscortAI->Start(false, player, quest, false, false, MAXX_A_MILLION_PATH);
+            // Set emote-state to 0 (is EMOTE_STATE_STUN by default)
+            creature->HandleEmote(EMOTE_ONESHOT_NONE);
         }
     }
     return true;
@@ -4115,7 +4017,7 @@ void AddSC_netherstorm()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_maxx_a_million";
-    pNewScript->GetAI = &GetAI_npc_maxx_a_million;
+    pNewScript->GetAI = &GetNewAIInstance<npc_maxx_a_millionAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_maxx_a_million;
     pNewScript->RegisterSelf();
 
