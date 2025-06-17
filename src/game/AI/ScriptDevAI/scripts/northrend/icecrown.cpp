@@ -949,9 +949,36 @@ struct go_bloodstained_stone : public GameObjectAI
 };
 
 /*######
-## spell_create_lance - 63845
+## go_mysterious_snow_mound_a
 ######*/
 
+struct go_mysterious_snow_mound_a : public GameObjectAI
+{
+    go_mysterious_snow_mound_a(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(7, true);
+        go->GetVisibilityData().AddInvisibilityValue(7, 5000);
+    }
+};
+
+/*######
+## go_mysterious_snow_mound_h
+######*/
+
+struct go_mysterious_snow_mound_h : public GameObjectAI
+{
+    go_mysterious_snow_mound_h(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(8, true);
+        go->GetVisibilityData().AddInvisibilityValue(8, 5000);
+    }
+};
+
+/*######
+// Spells
+######*/
+
+// spell_create_lance - 63845
 struct SpellCreateLanceData
 {
     Races playerRace;
@@ -1067,7 +1094,6 @@ struct ToIcecrownAirshipHSummonVehicle : public SpellScript
 // 57650 - Frozen Siegebolt
 // 57666 - Frozen Siegebolt
 // 57667 - Frozen Siegebolt
-
 struct FrozenSiegebolt : public SpellScript
 {
     void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex effIdx, bool /*targetB*/, float& radius) const override
@@ -1420,8 +1446,215 @@ struct npc_lithe_stalker : public PetAI
     }
 };
 
+// 62722 - Tournament - Mounted Melee - GOSSIP - Initiate Combat
+struct TournamentMMGossip : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        Unit* target = aura->GetTarget();
+
+        if (!caster || !apply)
+            return;
+
+        Creature* m_creature = (Creature*)caster;
+        Player* player = (Player*)target;
+
+        if (player->HasAura(63151))
+        {
+            if (player->GetTransportInfo() && player->GetTransportInfo()->IsOnVehicle())
+            {
+                m_creature->CastSpell(static_cast<Unit*>(player->GetTransportInfo()->GetTransport()), 63462, TRIGGERED_OLD_TRIGGERED);
+                m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+                m_creature->AI()->AttackStart(static_cast<Unit*>(player->GetTransportInfo()->GetTransport()));
+            }
+        }
+        else if (!player->HasAura(63151))
+        {
+            player->RemoveAurasDueToSpell(63005);
+            m_creature->ForcedDespawn(2000);
+            {
+                if (player->GetTeam() == ALLIANCE)
+
+                    switch (urand(0, 3))
+                    {
+                        case 0: DoBroadcastText(33763, m_creature); break;
+                        case 1: DoBroadcastText(33771, m_creature); break;
+                        case 2: DoBroadcastText(33772, m_creature); break;
+                        case 3: DoBroadcastText(33773, m_creature); break;
+                    }
+                else if (player->GetTeam() == HORDE)
+
+                    switch (urand(0, 3))
+                    {
+                        case 0: DoBroadcastText(33764, m_creature); break;
+                        case 1: DoBroadcastText(33777, m_creature); break;
+                        case 2: DoBroadcastText(33778, m_creature); break;
+                        case 3: DoBroadcastText(33779, m_creature); break;
+                    }
+            }
+        }
+    }
+};
+
+// 62726 - Tournament - Mounted Melee - MOUNT IS DEAD - End Combat
+struct TournamentMMDead : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+
+        float x, y, z;
+        caster->GetNearPoint(caster, x, y, z, 0, 10.0f, caster->GetOrientation());
+        caster->GetMotionMaster()->MovePoint(1, x, y, z);
+    }
+};
+
+// 63000 - Trample Scourge
+struct TrampleScourge : public AuraScript
+{
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* caster = aura->GetCaster();
+        caster->CastSpell(nullptr, 63001, TRIGGERED_OLD_TRIGGERED);     // 63001 Trample Scourge
+    }
+};
+
+// 63034 - Player On Tournament Mount
+struct PlayerOnTournamentMount : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (!target)
+                return;
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                return;
+            // Valiant & champion - done via EAI
+            // Aspirant
+            Player* pPlayer = (Player*)target;
+            if (pPlayer->GetQuestRewardStatus(13680) || pPlayer->GetQuestRewardStatus(13679))
+                return;
+            
+            uint8 race = target->getRace();
+            uint32 spellId = 0;
+
+            switch (race)
+            {
+            case RACE_HUMAN:            spellId = 62595; break;
+            case RACE_DWARF:            spellId = 63425; break;
+            case RACE_NIGHTELF:         spellId = 63404; break;
+            case RACE_GNOME:            spellId = 63394; break;
+            case RACE_DRAENEI:          spellId = 63421; break;
+            case RACE_ORC:              spellId = 63431; break;
+            case RACE_UNDEAD:           spellId = 63428; break;
+            case RACE_TAUREN:           spellId = 63434; break;
+            case RACE_TROLL:            spellId = 63397; break;
+            case RACE_BLOODELF:         spellId = 63401; break;
+            }
+            if (spellId)
+                target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+
+            return;
+        }
+    }
+};
+
+// 63035 - Remove Mounted Aura
+struct RemoveMountedAura : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+        if (target->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        // Valiant & champion
+        target->RemoveAurasDueToSpell(62596);       // Stormwind Valiant
+        target->RemoveAurasDueToSpell(62594);       // Stormwind Champion
+        target->RemoveAurasDueToSpell(63426);       // Ironforge Valiant
+        target->RemoveAurasDueToSpell(63427);       // Ironforge Champion
+        target->RemoveAurasDueToSpell(63395);       // Gnomeregan Valiant
+        target->RemoveAurasDueToSpell(63396);       // Gnomeregan Champion
+        target->RemoveAurasDueToSpell(63422);       // Exodar Valiant
+        target->RemoveAurasDueToSpell(63423);       // Exodar Champion
+        target->RemoveAurasDueToSpell(63405);       // Darnassian Valiant
+        target->RemoveAurasDueToSpell(63406);       // Darnassian Champion
+        target->RemoveAurasDueToSpell(63432);       // Orgrimmar Valiant
+        target->RemoveAurasDueToSpell(63433);       // Orgrimmar Champion
+        target->RemoveAurasDueToSpell(63398);       // Darkspear Valiant
+        target->RemoveAurasDueToSpell(63399);       // Darkspear Champion
+        target->RemoveAurasDueToSpell(63435);       // Thunder Bluff Valiant
+        target->RemoveAurasDueToSpell(63436);       // Thunder Bluff Champion
+        target->RemoveAurasDueToSpell(63402);       // Silvermoon Valiant
+        target->RemoveAurasDueToSpell(63403);       // Silvermoon Champion
+        target->RemoveAurasDueToSpell(63429);       // Forsaken Valiant
+        target->RemoveAurasDueToSpell(63430);       // Forsaken Champion
+        // Campaign Warhorse 33531
+        target->RemoveAurasDueToSpell(63606);       // Campaign Warhorse
+        // Argent Warhorse 33782
+        target->RemoveAurasDueToSpell(63500);       // Argent Warhorse
+        // Aspirant
+        Player* pPlayer = (Player*)target;
+        if (pPlayer->GetQuestRewardStatus(13680) || pPlayer->GetQuestRewardStatus(13679))
+            return;
+
+        uint8 race = target->getRace();
+        uint32 spellId = 0;
+
+        switch (race)
+        {
+        case RACE_HUMAN:            spellId = 62595; break;
+        case RACE_DWARF:            spellId = 63425; break;
+        case RACE_NIGHTELF:         spellId = 63404; break;
+        case RACE_GNOME:            spellId = 63394; break;
+        case RACE_DRAENEI:          spellId = 63421; break;
+        case RACE_ORC:              spellId = 63431; break;
+        case RACE_UNDEAD:           spellId = 63428; break;
+        case RACE_TAUREN:           spellId = 63434; break;
+        case RACE_TROLL:            spellId = 63397; break;
+        case RACE_BLOODELF:         spellId = 63401; break;
+        }
+        if (spellId)
+            target->RemoveAurasDueToSpell(spellId);
+
+        return;
+    }
+};
+
+// 63103 - Validate Player
+struct ValidatePlayer : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+
+        float x, y, z;
+        caster->GetNearPoint(caster, x, y, z, 0, 15.0f, caster->GetOrientation());
+        caster->GetMotionMaster()->MovePoint(1, x, y, z);
+    }
+};
+
 // 63791 - Summon Tournament Hawkstrider (Aspirant)
 // 63792 - Summon Tournament Steed (Aspirant)
+// 62774 - Summon Tournament Charger
+// 62779 - Summon Tournament Ram
+// 62780 - Summon Tournament Mechanostrider
+// 62781 - Summon Tournament Elekk
+// 62782 - Summon Tournament Nightsaber
+// 62783 - Summon Tournament Wolf
+// 62784 - Summon Tournament Raptor
+// 62785 - Summon Tournament Kodo
+// 62786 - Summon Tournament Hawkstrider
+// 62787 - Summon Tournament Warhorse
+// 63215 - Summon Campaign Charger
 struct SummonTournamentAspirant : public SpellScript, public AuraScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -1444,6 +1677,197 @@ struct SummonTournamentAspirant : public SpellScript, public AuraScript
     void OnSummon(Spell* spell, Creature* summon) const override
     {
         summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
+// 64192 - Block!                                                               // Npc Only
+struct BlockNpc : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+
+        SpellAuraHolder* auraHolder = target->GetSpellAuraHolder(62719);
+        if (auraHolder && auraHolder->GetStackAmount() == 1)
+        {
+            target->RemoveAurasDueToSpell(63131);
+            target->RemoveAurasDueToSpell(63132);
+            target->CastSpell(nullptr, 63130, TRIGGERED_OLD_TRIGGERED);         // Shield Level 1
+        }
+        else if (auraHolder && auraHolder->GetStackAmount() == 2)
+        {
+            target->RemoveAurasDueToSpell(63130);
+            target->RemoveAurasDueToSpell(63132);
+            target->CastSpell(nullptr, 63131, TRIGGERED_OLD_TRIGGERED);         // Shield Level 2
+        }
+        else if (auraHolder && auraHolder->GetStackAmount() == 3)
+        {
+            target->RemoveAurasDueToSpell(63130);
+            target->RemoveAurasDueToSpell(63131);
+            target->CastSpell(nullptr, 63132, TRIGGERED_OLD_TRIGGERED);         // Shield Level 3
+        }
+        else if (target && !target->HasAura(62719))
+        {
+            target->RemoveAurasDueToSpell(63130);
+            target->RemoveAurasDueToSpell(63131);
+            target->RemoveAurasDueToSpell(63132);
+        }
+        return;
+    }
+};
+
+// 63119 - Block!                                                               // Player Only
+struct BlockPlayer : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+         if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+
+        SpellAuraHolder* auraHolder = target->GetSpellAuraHolder(62552);
+        if (auraHolder && auraHolder->GetStackAmount() == 1)
+        {
+            target->RemoveAurasDueToSpell(63131);
+            target->RemoveAurasDueToSpell(63132);
+            target->CastSpell(target, 63130, TRIGGERED_OLD_TRIGGERED);         // Shield Level 1
+        }
+        else if (auraHolder && auraHolder->GetStackAmount() == 2)
+        {
+            target->RemoveAurasDueToSpell(63130);
+            target->RemoveAurasDueToSpell(63132);
+            target->CastSpell(target, 63131, TRIGGERED_OLD_TRIGGERED);         // Shield Level 2
+        }
+        else if (auraHolder && auraHolder->GetStackAmount() == 3)
+        {
+            target->RemoveAurasDueToSpell(63130);
+            target->RemoveAurasDueToSpell(63131);
+            target->CastSpell(target, 63132, TRIGGERED_OLD_TRIGGERED);         // Shield Level 3
+        }
+        else if (target && !target->HasAura(62552))
+        {
+            target->RemoveAurasDueToSpell(63130);
+            target->RemoveAurasDueToSpell(63131);
+            target->RemoveAurasDueToSpell(63132);
+        }
+        return;
+    }
+};
+
+// 64101 - Defend
+// 64076 - [DND] Defend Aura(04 seconds)
+// 64220 - [DND] Defend Aura(08 seconds)
+// 64221 - [DND] Defend Aura(06 seconds)
+// 64222 - [DND] Defend Aura(07 seconds)
+// 64223 - [DND] Defend Aura(10 seconds)
+// 64553 - [DND] Defend Aura(05 seconds)
+// 65190 - [DND] Defend Aura(09 seconds)
+struct DndDefend : public AuraScript
+{
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+
+        target->CastSpell(target, 62719, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 64192, TRIGGERED_OLD_TRIGGERED);
+        return;
+    }
+};
+
+// Charge 62563
+struct Charge62563 : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+
+        caster->CastSpell(nullptr, 63662, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(target, 64591, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// Pound Drum 66512
+struct PoundDrum : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, GameObject* target, SpellEffectIndex /*eff*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster->IsPlayer())
+            return true;
+
+        Player* player = static_cast<Player*>(caster);
+        if (player->GetTeam() == ALLIANCE && target->GetEntry() != 195308)
+            return false;
+
+        if (player->GetTeam() == HORDE && target->GetEntry() != 195309)
+            return false;
+
+        return true;
+    }
+
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetOverridenSpeed(0.f);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        GameObject* target = spell->GetGOTarget();
+
+        target->ForcedDespawn();
+
+        switch (urand(0, 1))
+        {
+        case 0: caster->CastSpell(caster, 66510, TRIGGERED_OLD_TRIGGERED); break;  // Summon Deep Jormungar
+        case 1: caster->CastSpell(caster, 66492, TRIGGERED_OLD_TRIGGERED); break;  // Stormforged Mole Machine
+        }
+    }
+};
+
+// Incapacitate Maloric 63124
+struct IncapacitateMaloric : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->m_targets.getUnitTarget();
+        
+        if (!caster->IsFacingTargetsBack(target))
+            return SPELL_FAILED_NOT_BEHIND;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+// Stormforged Mole Machine 66492
+struct StormforgedMoleMachine : public SpellScript
+{
+    void OnSummon(Spell* spell, GameObject* summon) const override
+    {
+        summon->Use(spell->GetCaster());
+        summon->ForcedDespawn(7000);
+    }
+};
+
+// Argent Gruntling 62746
+// Argent Squire 62609
+struct ArgentGruntling : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SetDefaultGossipMenuId(summon->GetCreatureInfo()->GossipMenuId);
     }
 };
 
@@ -1484,6 +1908,16 @@ void AddSC_icecrown()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
+    pNewScript->Name = "go_mysterious_snow_mound_a";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_mysterious_snow_mound_a>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_mysterious_snow_mound_h";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_mysterious_snow_mound_h>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
     pNewScript->Name = "npc_lithe_stalker_1";
     pNewScript->GetAI = &GetNewAIInstance<npc_lithe_stalker>;
     pNewScript->RegisterSelf();
@@ -1517,4 +1951,18 @@ void AddSC_icecrown()
     RegisterSpellScript<SummonOminousCloud>("spell_summon_ominous_cloud");
     RegisterSpellScript<SubduedLitheStalker>("spell_subdued_lithe_stalker");
     RegisterSpellScript<SummonTournamentAspirant>("spell_summon_tournament_aspirant");
+    RegisterSpellScript<BlockNpc>("spell_blocknpc");
+    RegisterSpellScript<BlockPlayer>("spell_blockplayer");
+    RegisterSpellScript<PlayerOnTournamentMount>("spell_player_on_tournament_mount");
+    RegisterSpellScript<RemoveMountedAura>("spell_remove_mounted_aura");
+    RegisterSpellScript<TournamentMMGossip>("spell_tournament_mm_gossip");
+    RegisterSpellScript<TournamentMMDead>("spell_tournament_mm_dead");
+    RegisterSpellScript<DndDefend>("spell_dnddefend");
+    RegisterSpellScript<ValidatePlayer>("spell_validateplayer");
+    RegisterSpellScript<TrampleScourge>("spell_trample_scourge");
+    RegisterSpellScript<Charge62563>("spell_charge_62563");
+    RegisterSpellScript<PoundDrum>("spell_pound_drum");
+    RegisterSpellScript<IncapacitateMaloric>("spell_incapacitate_maloric");
+    RegisterSpellScript<StormforgedMoleMachine>("spell_stormforged_mole_machine");
+    RegisterSpellScript<ArgentGruntling>("spell_argent_gruntling");
 }

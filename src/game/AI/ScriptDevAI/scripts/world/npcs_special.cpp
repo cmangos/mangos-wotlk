@@ -1451,6 +1451,8 @@ enum npc_burster_worm
     SPELL_ENRAGE                        = 32714,
     SPELL_WORM_SWEEP                    = 30732,
     SPELL_WORM_BLAST                    = 31378,
+    SPELL_ACID_SPIT                     = 61597,
+    SPELL_SWEEP                         = 61598,
 
     // npcs that get enrage
     NPC_TUNNELER                        = 16968,
@@ -1469,6 +1471,9 @@ enum npc_burster_worm
     NPC_BONE_SIFTER                     = 22466,
     NPC_MATURE_BONE_SIFTER              = 22482,
 
+    // WotLk npcs
+    NPC_DEEP_JORMUNGAR                  = 34920,
+
     // combat phases
     PHASE_COMBAT                        = 1,
     PHASE_CHASE                         = 2,
@@ -1482,6 +1487,7 @@ enum BursterActions
     BURSTER_ENRAGE,
     BURSTER_BORE,
     BURSTER_SWEEP,
+    BURSTER_SWEEP_2,
     BURSTER_ACTION_MAX,
     BURSTER_BIRTH_DELAY,
     BURSTER_CHASE_SEQUENCE,
@@ -1505,6 +1511,8 @@ struct npc_burster_wormAI : public CombatAI
             AddCombatAction(BURSTER_BORE, 5000u);
         if (m_creature->GetEntry() == NPC_SAND_WORM)
             AddCombatAction(BURSTER_SWEEP, 5000, 15000);
+        if (m_creature->GetEntry() == NPC_DEEP_JORMUNGAR)
+            AddCombatAction(BURSTER_SWEEP_2, 5000, 15000);
         // sequences
         AddCustomAction(BURSTER_BIRTH_DELAY, true, [&]()
         {
@@ -1565,6 +1573,8 @@ struct npc_burster_wormAI : public CombatAI
                 return SPELL_POISON_SPIT;
             case NPC_SAND_WORM:
                 return SPELL_WORM_BLAST;
+            case NPC_DEEP_JORMUNGAR:
+                return SPELL_ACID_SPIT;
             default:
                 return SPELL_POISON;
         }
@@ -1710,6 +1720,11 @@ struct npc_burster_wormAI : public CombatAI
             case BURSTER_SWEEP:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_WORM_SWEEP) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 25000));
+            }
+            case BURSTER_SWEEP_2:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SWEEP) == CAST_OK)
                     ResetCombatAction(action, urand(15000, 25000));
                 break;
             }
@@ -3254,7 +3269,6 @@ void AddSC_npcs_special()
     RegisterSpellScript<GossipNPCAppearanceAllBrewfest>("spell_gossip_npc_appearance_all_brewfest");
     RegisterSpellScript<GossipNPCAppearanceAllSpiritOfCompetition>("spell_gossip_npc_appearance_all_spirit_of_competition");
     RegisterSpellScript<GossipNPCAppearanceAllPirateDay>("spell_gossip_npc_appearance_all_pirate_day");
-
     RegisterSpellScript<MirrorImageFrostbolt>("spell_mirror_image_frostbolt");
     RegisterSpellScript<InheritMastersThreatList>("spell_inherit_masters_threat_list");
 }

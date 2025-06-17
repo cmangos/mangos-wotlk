@@ -229,16 +229,6 @@ enum
     NPC_DARKSPINE_MYRMIDON              = 25060,
     NPC_DARKSPINE_SIREN                 = 25073,
 
-    // quest 14107
-    SPELL_BLESSING_OF_PEACE             = 66719,
-    NPC_FALLEN_HERO_SPIRIT              = 32149,
-    NPC_FALLEN_HERO_SPIRIT_PROXY        = 35055,
-    SAY_BLESS_1                         = -1000594,
-    SAY_BLESS_2                         = -1000595,
-    SAY_BLESS_3                         = -1000596,
-    SAY_BLESS_4                         = -1000597,
-    SAY_BLESS_5                         = -1000598,
-
     // quest 12659, item 38731
     SPELL_AHUNAES_KNIFE                 = 52090,
     NPC_SCALPS_KILL_CREDIT_BUNNY        = 28622,
@@ -312,38 +302,6 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
 {
     switch (pAura->GetId())
     {
-        case SPELL_BLESSING_OF_PEACE:
-        {
-            Creature* pCreature = (Creature*)pAura->GetTarget();
-
-            if (!pCreature || pCreature->GetEntry() != NPC_FALLEN_HERO_SPIRIT)
-                return true;
-
-            if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-                return true;
-
-            if (bApply)
-            {
-                switch (urand(0, 4))
-                {
-                    case 0: DoScriptText(SAY_BLESS_1, pCreature); break;
-                    case 1: DoScriptText(SAY_BLESS_2, pCreature); break;
-                    case 2: DoScriptText(SAY_BLESS_3, pCreature); break;
-                    case 3: DoScriptText(SAY_BLESS_4, pCreature); break;
-                    case 4: DoScriptText(SAY_BLESS_5, pCreature); break;
-                }
-            }
-            else
-            {
-                if (Player* pPlayer = (Player*)pAura->GetCaster())
-                {
-                    pPlayer->KilledMonsterCredit(NPC_FALLEN_HERO_SPIRIT_PROXY, pCreature->GetObjectGuid());
-                    pCreature->ForcedDespawn();
-                }
-            }
-
-            return true;
-        }
         case SPELL_HEALING_SALVE:
         {
             if (pAura->GetEffIndex() != EFFECT_INDEX_0)
