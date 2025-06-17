@@ -636,7 +636,7 @@ enum
     QUEST_THE_BLACK_KNIGHTS_CURSE = 14016,
 };
 
-bool AreaTrigger_at_black_knight_grave(Player* player, AreaTriggerEntry const* /*pAt*/)
+bool AreaTrigger_at_black_knight_grave(Player* player, AreaTriggerEntry const* /*at*/)
 {
     if (player->IsAlive() && !player->IsGameMaster() && player->GetQuestStatus(QUEST_THE_BLACK_KNIGHTS_CURSE) == QUEST_STATUS_INCOMPLETE)
     {
