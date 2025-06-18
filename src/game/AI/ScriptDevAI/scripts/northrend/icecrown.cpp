@@ -949,9 +949,10 @@ struct go_bloodstained_stone : public GameObjectAI
 };
 
 /*######
-## spell_create_lance - 63845
+// Spells
 ######*/
 
+// spell_create_lance - 63845
 struct SpellCreateLanceData
 {
     Races playerRace;
@@ -1067,7 +1068,6 @@ struct ToIcecrownAirshipHSummonVehicle : public SpellScript
 // 57650 - Frozen Siegebolt
 // 57666 - Frozen Siegebolt
 // 57667 - Frozen Siegebolt
-
 struct FrozenSiegebolt : public SpellScript
 {
     void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex effIdx, bool /*targetB*/, float& radius) const override
@@ -1420,33 +1420,6 @@ struct npc_lithe_stalker : public PetAI
     }
 };
 
-// 63791 - Summon Tournament Hawkstrider (Aspirant)
-// 63792 - Summon Tournament Steed (Aspirant)
-struct SummonTournamentAspirant : public SpellScript, public AuraScript
-{
-    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
-    {
-        if (!spell->GetCaster()->HasAura(62853)) // Player must have aura from equiped item
-            return SPELL_FAILED_EQUIPPED_ITEM;
-
-        return SPELL_CAST_OK;
-    }
-
-    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
-    {
-        if (result == SPELL_FAILED_EQUIPPED_ITEM)
-        {
-            result = SPELL_FAILED_CUSTOM_ERROR;
-            param1 = SPELL_FAILED_CUSTOM_ERROR_60;
-        }
-    }
-
-    void OnSummon(Spell* spell, Creature* summon) const override
-    {
-        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
-    }
-};
-
 void AddSC_icecrown()
 {
     Script* pNewScript = new Script;
@@ -1516,5 +1489,4 @@ void AddSC_icecrown()
     RegisterSpellScript<IronChain>("spell_iron_chain");
     RegisterSpellScript<SummonOminousCloud>("spell_summon_ominous_cloud");
     RegisterSpellScript<SubduedLitheStalker>("spell_subdued_lithe_stalker");
-    RegisterSpellScript<SummonTournamentAspirant>("spell_summon_tournament_aspirant");
 }

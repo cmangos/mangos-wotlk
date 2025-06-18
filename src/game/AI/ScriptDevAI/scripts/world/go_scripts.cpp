@@ -24,7 +24,6 @@ EndScriptData */
 /* ContentData
 go_ethereum_prison
 go_ethereum_stasis
-go_mysterious_snow_mound
 go_tele_to_dalaran_crystal
 go_tele_to_violet_stand
 go_andorhal_tower
@@ -276,36 +275,6 @@ bool GOUse_go_jump_a_tron(Player* pPlayer, GameObject* pGo)
         pCreature->CastSpell(pPlayer, SPELL_JUMP_A_TRON, TRIGGERED_NONE);
 
     return false;
-}
-
-/*######
-## go_mysterious_snow_mound
-######*/
-
-enum
-{
-    SPELL_SUMMON_DEEP_JORMUNGAR     = 66510,
-    SPELL_SUMMON_MOLE_MACHINE       = 66492,
-    SPELL_SUMMON_MARAUDER           = 66491,
-};
-
-bool GOUse_go_mysterious_snow_mound(Player* pPlayer, GameObject* pGo)
-{
-    if (urand(0, 1))
-    {
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_DEEP_JORMUNGAR, TRIGGERED_OLD_TRIGGERED);
-    }
-    else
-    {
-        // This is basically wrong, but added for support.
-        // Mole machine would summon, along with unkonwn GO (a GO trap?) and then
-        // the npc would summon with base of that location.
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_MOLE_MACHINE, TRIGGERED_OLD_TRIGGERED);
-        pPlayer->CastSpell(pPlayer, SPELL_SUMMON_MARAUDER, TRIGGERED_OLD_TRIGGERED);
-    }
-
-    pGo->SetLootState(GO_JUST_DEACTIVATED);
-    return true;
 }
 
 /*######
@@ -1284,11 +1253,6 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_jump_a_tron";
     pNewScript->pGOUse =          &GOUse_go_jump_a_tron;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_mysterious_snow_mound";
-    pNewScript->pGOUse =          &GOUse_go_mysterious_snow_mound;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

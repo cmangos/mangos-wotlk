@@ -3571,26 +3571,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                     return;
                 }
-                case 66390:                                 // Read Last Rites
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Summon Tualiq Proxy
-                    // Not known what purpose this has
-                    unitTarget->CastSpell(unitTarget, 66411, TRIGGERED_OLD_TRIGGERED);
-
-                    // Summon Tualiq Spirit
-                    // Offtopic note: the summoned has aura from spell 37119 and 66419. One of them should
-                    // most likely make summoned "rise", hover up/sideways in the air (MOVEFLAG_LEVITATING + MOVEFLAG_HOVER)
-                    unitTarget->CastSpell(unitTarget, 66412, TRIGGERED_OLD_TRIGGERED);
-
-                    ((Player*)m_caster)->KilledMonsterCredit(unitTarget->GetEntry(), unitTarget->GetObjectGuid());
-
-                    // Must have a delay for proper spell animation
-                    ((Creature*)unitTarget)->ForcedDespawn(1000);
-                    return;
-                }
                 case 67019:                                 // Flask of the North
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -10019,60 +9999,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAuraHolderFromStack(spellId, numStacks);
                     return;
                 }
-                case 62552:                                 // Defend
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 63119, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 62575:                                 // Shield-Breaker (player)
-                case 68282:                                 // Charge (player)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAuraHolderFromStack(62719);
-                    unitTarget->RemoveAuraHolderFromStack(64100);
-                    unitTarget->RemoveAuraHolderFromStack(64192);
-                    return;
-                }
                 case 62688:                                 // Summon Wave - 10 Mob
                 {
                     uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
 
                     for (uint32 i = 0; i < 10; ++i)
                         m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
-                case 63010:                                 // Charge
-                case 68307:                                 // Charge
-                case 68504:                                 // Shield-Breaker
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    Unit* owner = unitTarget->GetBeneficiaryPlayer();
-                    if (!owner)
-                        return;
-
-                    owner->RemoveAuraHolderFromStack(62552);
-                    owner->RemoveAuraHolderFromStack(63119);
-
-                    if (owner->HasAura(63132))
-                    {
-                        owner->RemoveAurasDueToSpell(63132);
-                        owner->CastSpell(unitTarget, 63131, TRIGGERED_OLD_TRIGGERED);
-                    }
-                    else if (owner->HasAura(63131))
-                    {
-                        owner->RemoveAurasDueToSpell(63131);
-                        owner->CastSpell(unitTarget, 63130, TRIGGERED_OLD_TRIGGERED);
-                    }
-                    else if (owner->HasAura(63130))
-                        owner->RemoveAurasDueToSpell(63130);
 
                     return;
                 }
@@ -10083,29 +10015,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     for (uint8 i = 0; i < 15; ++i)
                         unitTarget->CastSpell(unitTarget, 65347, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 63119:                                 // Block!
-                case 64192:                                 // Block!
-                {
-                    if (!unitTarget)
-                        return;
-
-                    if (unitTarget->HasAura(63132))
-                        return;
-                    if (unitTarget->HasAura(63131))
-                    {
-                        unitTarget->RemoveAurasDueToSpell(63131);
-                        unitTarget->CastSpell(unitTarget, 63132, TRIGGERED_OLD_TRIGGERED);         // Shield Level 3
-                    }
-                    else if (unitTarget->HasAura(63130))
-                    {
-                        unitTarget->RemoveAurasDueToSpell(63130);
-                        unitTarget->CastSpell(unitTarget, 63131, TRIGGERED_OLD_TRIGGERED);         // Shield Level 2
-                    }
-                    else
-                        unitTarget->CastSpell(unitTarget, 63130, TRIGGERED_OLD_TRIGGERED);
-                    // Shield Level 1
                     return;
                 }
                 case 63122:                                 // Clear Insane

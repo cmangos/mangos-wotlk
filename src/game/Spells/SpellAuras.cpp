@@ -8960,12 +8960,6 @@ void Aura::PeriodicDummyTick()
                         target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 63387 : 64531, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 64101:                                 // Defend
-                {
-                    target->CastSpell(target, 62719, TRIGGERED_OLD_TRIGGERED);
-                    target->CastSpell(target, 64192, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 64217:                                 // Overcharged
                 {
                     if (GetHolder()->GetStackAmount() >= 10)

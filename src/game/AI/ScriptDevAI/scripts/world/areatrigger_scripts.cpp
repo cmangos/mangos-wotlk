@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Areatrigger_Scripts
 SD%Complete: 100
-SDComment: Quest support: 1126, 4291, 6681, 7632, 273, 10280, 10589/10604, 11686, 12548, 12575, 12741, 13315/13351, 24849/24851, 8735
+SDComment: Quest support: 1126, 4291, 6681, 7632, 273, 10280, 10589/10604, 11686, 12548, 12575, 12741, 13315/13351, 24849/24851, 8735, 14016
 SDCategory: Areatrigger
 EndScriptData */
 
@@ -40,6 +40,7 @@ at_area_52                      4422, 4466, 4471, 4472
 at_twilight_grove               4017
 at_hive_tower                   3146
 at_at_underbelly                5693, 5691
+at_black_knight_grave           5500
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"

@@ -114,7 +114,6 @@ UPDATE gameobject_template SET ScriptName='go_ethereum_stasis' WHERE entry=18459
 UPDATE gameobject_template SET ScriptName='go_ethereum_stasis' WHERE entry BETWEEN 185461 AND 185464;
 UPDATE gameobject_template SET ScriptName='go_stasis_chamber_alpha' WHERE entry IN(185512);
 UPDATE gameobject_template SET ScriptName='go_jump_a_tron' WHERE entry=183146;
-UPDATE gameobject_template SET ScriptName='go_mysterious_snow_mound' WHERE entry=195308;
 UPDATE gameobject_template SET ScriptName='go_tele_to_dalaran_crystal' WHERE entry=191230;
 UPDATE gameobject_template SET ScriptName='go_tele_to_violet_stand' WHERE entry=191229;
 UPDATE gameobject_template SET ScriptName='go_andorhal_tower' WHERE entry IN (176094,176095,176096,176097);
@@ -218,7 +217,7 @@ UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
 -- outland
 16880,16518,16847,17157,17326,17654,18879,21729,24918,24922,25084,25085,
 -- northrend
-23678,25752,25753,25758,25792,25793,26268,26270,26421,26616,26643,26841,27122,27808,28053,28054,28068,28093,28465,28600,29319,29327,30146,30169,32149);
+23678,25752,25753,25758,25792,25793,26268,26270,26421,26616,26643,26841,27122,27808,28053,28054,28068,28093,28465,28600,29319,29327,30146,30169);
 
 UPDATE gameobject_template SET ScriptName='spell_dummy_go' WHERE entry IN (181616,186949);
 
@@ -1136,8 +1135,11 @@ UPDATE creature_template SET ScriptName='npc_infantry' WHERE entry IN (31701,318
 UPDATE creature_template SET ScriptName='npc_father_kamaros' WHERE entry IN (31279,32800);
 UPDATE creature_template SET ScriptName='npc_saronite_mine_slave' WHERE entry=31397;
 UPDATE creature_template SET ScriptName='npc_grand_admiral_westwind' WHERE entry=29621;
-UPDATE gameobject_template SET ScriptName='go_bloodstained_stone' WHERE entry IN (194023,194024,193980);
 UPDATE creature_template SET ScriptName='npc_lithe_stalker_1' WHERE entry=30894;
+UPDATE creature_template SET ScriptName='npc_burster_worm' WHERE entry=34920;
+UPDATE gameobject_template SET ScriptName='go_bloodstained_stone' WHERE entry IN (194023,194024,193980);
+UPDATE gameobject_template SET ScriptName='go_mysterious_snow_mound_a' WHERE entry IN (195308);
+UPDATE gameobject_template SET ScriptName='go_mysterious_snow_mound_h' WHERE entry IN (195309);
 
 /* IRONFORGE */
 
@@ -2565,12 +2567,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000591','Hear me brothers and sisters-in-arms! The time of our enemies is at an end! We must strike at the fel orcs that remain! Exterminate them like the vermin that they are! Carry with you the favor of the Sons of Lothar!','0','6','0','22','20755','Yell Magtheridon Death2 A'),
 ('-1000592','Hellfire Citadel is ours! The source of Illidan''s fel orc army is no more! Magtheridon has fallen to the might of $n and $g his:her; allies!','0','6','0','15','20765','Yell Magtheridon Death1 H'),
 ('-1000593','The time for us to rise and strike at the fel orcs that remain is now! Do this for your Warchief! Do this for the Horde!','0','6','0','22','20766','Yell Magtheridon Death2 H'),
-
-('-1000594','At last... now I can rest.','0','0','0','0','35291','hero spirit SAY_BLESS_1'),
-('-1000595','I''m so tired. Just let me rest for a moment.','0','0','0','0','35295','hero spirit SAY_BLESS_2'),
-('-1000596','I can''t hear the screams anymore. Is this the end?','0','0','0','0','35294','hero spirit SAY_BLESS_3'),
-('-1000597','My nightmare, is it finally over?','0','0','0','0','35292','hero spirit SAY_BLESS_4'),
-('-1000598','It was awful... I dreamt I was fighting against my friends.','0','0','0','0','35293','hero spirit SAY_BLESS_5'),
 
 ('-1000599','It''s a miracle! The beast skinned itself!','0','0','0','5','25029','nesingwary trapper SAY_PHRASE_1'),
 ('-1000600','Jackpot!','0','0','0','5','25034','nesingwary trapper SAY_PHRASE_2'),
