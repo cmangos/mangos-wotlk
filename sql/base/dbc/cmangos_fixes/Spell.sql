@@ -3559,13 +3559,34 @@ UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00
 50695, -- Bleeding Out
 55162, -- The Ocular: Transform
 59288, -- Infra-Green Shield
+59942, -- Scourge Banner-Bearer
 60070, -- Banner, Horde
 60151, -- Banner, Side, Horde
 60161, -- Banner, Alliance
 60189, -- Banner, Side, Alliance
 61366, -- Infra-green Turbine (DND)
 61573, -- Banner of the Alliance
-61574  -- Banner of the Horde
+61574, -- Banner of the Horde
+62594, -- Stormwind Champion's Pennant
+62596, -- Stormwind Valiant's Pennant
+63395, -- Gnomeregan Valiant's Pennant
+63396, -- Gnomeregan Champion's Pennant
+63398, -- Sen'jin Valiant's Pennant
+63399, -- Sen'jin Champion's Pennant
+63402, -- Silvermoon Valiant's Pennant
+63403, -- Silvermoon Champion's Pennant
+63405, -- Darnassus Valiant's Pennant
+63406, -- Darnassus Champion's Pennant
+63422, -- Exodar Valiant's Pennant
+63423, -- Exodar Champion's Pennant
+63426, -- Ironforge Valiant's Pennant
+63427, -- Ironforge Champion's Pennant
+63429, -- Undercity Valiant's Pennant
+63430, -- Undercity Champion's Pennant
+63432, -- Orgrimmar Valiant's Pennant
+63433, -- Orgrimmar Champion's Pennant
+63435, -- Thunder Bluff Valiant's Pennant
+63436  -- Thunder Bluff Champion's Pennant
 );
 
 -- missing spell
