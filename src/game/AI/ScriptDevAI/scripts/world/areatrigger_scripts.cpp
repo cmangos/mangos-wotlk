@@ -626,27 +626,6 @@ bool AreaTrigger_at_quetzlun(Player* player, AreaTriggerEntry const* /*at*/)
     return true;
 }
 
-/*######
-## Quest 14016
-######*/
-
-enum
-{
-    NPC_CULT_ASSASSIN             = 35127,
-    QUEST_THE_BLACK_KNIGHTS_CURSE = 14016,
-};
-
-bool AreaTrigger_at_black_knight_grave(Player* player, AreaTriggerEntry const* /*at*/)
-{
-    if (player->IsAlive() && !player->IsGameMaster() && player->GetQuestStatus(QUEST_THE_BLACK_KNIGHTS_CURSE) == QUEST_STATUS_INCOMPLETE)
-    {
-        if (!GetClosestCreatureWithEntry(player, NPC_CULT_ASSASSIN, 75.0f, false, false))
-            player->SummonCreature(NPC_CULT_ASSASSIN, 8455.797f, 459.0955f, 596.1551f, 1.57079f, TEMPSPAWN_TIMED_OOC_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
-    }
-
-    return false;
-}
-
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript = new Script;
@@ -742,10 +721,5 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_quetzlun";
     pNewScript->pAreaTrigger = &AreaTrigger_at_quetzlun;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "at_black_knight_grave";
-    pNewScript->pAreaTrigger = &AreaTrigger_at_black_knight_grave;
     pNewScript->RegisterSelf();
 }
