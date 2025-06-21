@@ -2280,6 +2280,7 @@ class Unit : public WorldObject
 
         // misc have plain value but we check it fit to provided values mask (mask & (1 << (misc-1)))
         float GetTotalAuraMultiplierByMiscValueForMask(AuraType auratype, uint32 mask) const;
+        int32 GetMaxPositiveAuraModifierByItemClass(AuraType auratype, Item* weapon) const;
 
         Aura* GetDummyAura(uint32 spell_id) const;
 

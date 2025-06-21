@@ -818,7 +818,8 @@ void Player::UpdateWeaponDependantStats(WeaponAttackType attType)
             break;
         case RANGED_ATTACK:
             UpdateWeaponHitChances(attType);
-            UpdateArmorPenetration();
+            UpdateRangedWeaponDependantAmmoHasteAura();
+			UpdateArmorPenetration();
             break;
     }
 }
