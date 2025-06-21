@@ -1259,13 +1259,15 @@ void Map::Remove(T* obj, bool remove)
         return;
     }
 
+    // Note for grid unload: Entities can teleport around at the time of unload hence currently creatures can happen to call map remove on an unloaded grid
+    // pre-visibility code didnt need to do much cleanup, but now we need to clean up lists we keep as part of internal map cycle
+    // possibly solved in future by despawning creature in place instead of teleporting around
     Cell cell(p);
-    if (!remove && !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)))
-        return;
+    bool gridLoaded = loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y));
 
     DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "Remove %s from grid[%u,%u]", obj->GetGuidStr().c_str(), cell.data.Part.grid_x, cell.data.Part.grid_y);
     NGridType* grid = getNGrid(cell.GridX(), cell.GridY());
-    MANGOS_ASSERT(grid != nullptr);
+    MANGOS_ASSERT(!gridLoaded || grid != nullptr);
 
     if (obj->isActiveObject())
         RemoveFromActive(obj);
@@ -1288,7 +1290,8 @@ void Map::Remove(T* obj, bool remove)
     if constexpr (std::is_same_v<T, Unit>)
         m_waypointingNpcs.erase(obj);
 
-    RemoveFromGrid(obj, grid, cell);
+    if (gridLoaded)
+        RemoveFromGrid(obj, grid, cell);
 
     AddUpdateRemoveObject(obj->GetClientGuidsIAmAt(), obj->GetObjectGuid());
     for (auto& clientGuid : obj->GetClientGuidsIAmAt())
