@@ -905,6 +905,7 @@ class Spell
         void SetDamageDoneModifier(float mod, SpellEffectIndex effIdx);
         void SetIgnoreOwnerLevel(bool state) { m_ignoreOwnerLevel = state; }
         void SetUsableWhileStunned(bool state) { m_usableWhileStunned = state; }
+        void SetHelpfulThreatCoefficient(float coeff) { m_helpfulThreatCoeff = coeff; }
 
         MaNGOS::unique_weak_ptr<Spell> GetWeakPtr() const;
 
@@ -1110,6 +1111,9 @@ class Spell
 
         // GO casting preparations
         WorldObject* m_trueCaster;
+
+        // Applies coefficient to spell_threat to helpful target
+        float m_helpfulThreatCoeff;
 };
 
 enum ReplenishType

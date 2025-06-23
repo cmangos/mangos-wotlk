@@ -40,7 +40,7 @@ enum SocialFlag
 {
     SOCIAL_FLAG_FRIEND      = 0x01,
     SOCIAL_FLAG_IGNORED     = 0x02,
-    SOCIAL_FLAG_MUTED       = 0x04,                         // guessed
+    SOCIAL_FLAG_MUTED       = 0x04,
     SOCIAL_FLAG_RAF         = 0x08                          // Recruit-A-Friend
 };
 
@@ -108,6 +108,15 @@ enum FriendsResult
 
 #define SOCIALMGR_FRIEND_LIMIT  100
 #define SOCIALMGR_IGNORE_LIMIT  50
+
+enum class SocialListFlags
+{
+    FRIEND_LIST = 0x1,
+    IGNORE_LIST = 0x2,
+    MUTE_LIST   = 0x4,
+};
+
+DEFINE_ENUM_FLAG(SocialListFlags);
 
 class PlayerSocial
 {
