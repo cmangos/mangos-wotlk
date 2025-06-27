@@ -1831,6 +1831,8 @@ class Player : public Unit
         void UpdatePvPFlagTimer(uint32 diff);
         void UpdatePvPContestedFlagTimer(uint32 diff);
 
+        void ForceSanctuary(bool state); // abstraction on top of SetPvPSanctuary for zone change
+
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
         DuelInfo* duel;
         bool IsInDuelWith(Player const* player) const { return duel && duel->opponent == player && duel->startTime != 0; }
