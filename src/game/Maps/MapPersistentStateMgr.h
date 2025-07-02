@@ -293,7 +293,7 @@ struct DungeonResetEvent
     DungeonResetEvent() : type(RESET_EVENT_NORMAL_DUNGEON), difficulty(DUNGEON_DIFFICULTY_NORMAL), mapid(0), instanceId(0) {}
     DungeonResetEvent(ResetEventType t, uint32 _mapid, Difficulty d, uint32 _instanceid)
         : type(t), difficulty(d), mapid(_mapid), instanceId(_instanceid) {}
-    bool operator == (const DungeonResetEvent& e) { return e.mapid == mapid && e.difficulty == difficulty && e.instanceId == instanceId; }
+    bool operator == (const DungeonResetEvent& e) const { return e.mapid == mapid && e.difficulty == difficulty && e.instanceId == instanceId; }
 };
 
 class DungeonResetScheduler
