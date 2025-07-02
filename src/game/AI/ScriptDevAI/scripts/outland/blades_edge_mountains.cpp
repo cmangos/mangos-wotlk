@@ -889,7 +889,7 @@ struct npc_light_orb_collectorAI : public ScriptedAI
         // Select an nearby orb to collect
         if (!m_uiStartTimer && !m_bOrbPulled)
         {
-            if (m_creature->GetDistance(pWho) <= MAX_PULL_DISTANCE)
+            if (m_creature->GetDistance(pWho) <= float(MAX_PULL_DISTANCE))
             {
                 m_selectedOrbGuid = pWho->GetObjectGuid();
                 m_uiStartTimer = 2000;

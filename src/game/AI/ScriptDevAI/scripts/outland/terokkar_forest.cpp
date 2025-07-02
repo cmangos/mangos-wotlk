@@ -432,7 +432,7 @@ struct npc_letollAI : public npc_escortAI
 
         for (auto& itr : m_lResearchersList)
         {
-            float fAngle = uiCount < MAX_RESEARCHER ? M_PI / MAX_RESEARCHER - (uiCount * 2 * M_PI / MAX_RESEARCHER) : 0.0f;
+            float fAngle = uiCount < MAX_RESEARCHER ? M_PI / float(MAX_RESEARCHER) - (uiCount * 2 * M_PI / float(MAX_RESEARCHER)) : 0.0f;
 
             if (itr->IsAlive() && !itr->IsInCombat())
                 itr->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle);
