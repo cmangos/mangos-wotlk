@@ -322,12 +322,13 @@ struct PlayerInfo
 
 struct PvPInfo
 {
-    PvPInfo() : inPvPCombat(false), inPvPEnforcedArea(false), inPvPCapturePoint(false), isPvPFlagCarrier(false), timerPvPRemaining(0), timerPvPContestedRemaining(0) {}
+    PvPInfo() : inPvPCombat(false), inPvPEnforcedArea(false), inPvPCapturePoint(false), isPvPFlagCarrier(false), isSanctuaryOverriden(false), timerPvPRemaining(0), timerPvPContestedRemaining(0) {}
 
     bool inPvPCombat;
     bool inPvPEnforcedArea;
     bool inPvPCapturePoint;
     bool isPvPFlagCarrier;
+    bool isSanctuaryOverriden;
     uint32 timerPvPRemaining;
     uint32 timerPvPContestedRemaining;
 };

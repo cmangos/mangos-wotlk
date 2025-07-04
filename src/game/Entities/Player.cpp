@@ -7686,10 +7686,13 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
     if (pvpInfo.inPvPEnforcedArea)                              // in hostile area
         UpdatePvP(true);
 
-    if (zone->flags & AREA_FLAG_SANCTUARY) // in sanctuary
-        ForceSanctuary(true);
-    else
-        ForceSanctuary(false);
+    if (!pvpInfo.isSanctuaryOverriden)
+    {
+        if (zone->flags & AREA_FLAG_SANCTUARY) // in sanctuary
+            ForceSanctuary(true);
+        else
+            ForceSanctuary(false);
+    }
 
     if (zone->flags & AREA_FLAG_CAPITAL)                    // in capital city
         SetRestType(REST_TYPE_IN_CITY);

@@ -577,6 +577,20 @@ struct ArgentGruntling : public SpellScript
     }
 };
 
+// 64373 - Armistice
+struct Armistice : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(caster);
+        player->pvpInfo.isSanctuaryOverriden = apply;
+        player->ForceSanctuary(apply);
+    }
+};
 
 void AddSC_argent_tournament()
 {
@@ -610,4 +624,5 @@ void AddSC_argent_tournament()
     RegisterSpellScript<IncapacitateMaloric>("spell_incapacitate_maloric");
     RegisterSpellScript<StormforgedMoleMachine>("spell_stormforged_mole_machine");
     RegisterSpellScript<ArgentGruntling>("spell_argent_gruntling");
+    RegisterSpellScript<Armistice>("spell_armistice");
 }

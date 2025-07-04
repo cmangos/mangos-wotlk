@@ -1030,6 +1030,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (64223,'spell_dnddefend'),
 (64234,'spell_gravity_bomb'),
 (64235,'spell_void_zone_xt'),
+(64373,'spell_armistice'),
 (64386,'spell_terrifying_screech'),
 (64411,'spell_blessing_of_ancient_kings'),
 (64415,'spell_valanyr_equip_effect'),
