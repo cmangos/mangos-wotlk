@@ -3629,6 +3629,7 @@ float Unit::CalculateEffectiveDodgeChance(const Unit* attacker, WeaponAttackType
     chance += (difference * factor);
     // Attacker's SPELL_AURA_MOD_COMBAT_RESULT_CHANCE contribution (or reduction)
     chance += attacker->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE);
+    chance += attacker->GetTotalAuraModifier(SPELL_AURA_MOD_ENEMY_DODGE);
     // Attacker's expertise reduction
     chance -= attacker->GetExpertisePercent(attType);
     return std::max(0.0f, std::min(chance, 100.0f));
