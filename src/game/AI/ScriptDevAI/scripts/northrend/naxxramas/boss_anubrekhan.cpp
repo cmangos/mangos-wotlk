@@ -84,6 +84,8 @@ struct boss_anubrekhanAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
+
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
         DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
