@@ -55,16 +55,20 @@ enum
     SPELLSET_25N                = 2926801,
 };
 
+static const float resetZ = 266.0f;                         // Above this altitude, Faerlina is outside her room and should reset (leashing)
+
 struct boss_faerlinaAI : public BossAI
 {
-    boss_faerlinaAI(Creature* creature) : BossAI(creature, 0),
-        m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())),
-        m_hasTaunted(false)
+    boss_faerlinaAI(Creature* creature) : BossAI(creature, 0), m_instance(static_cast<instance_naxxramas *>(creature->GetInstanceData())), m_hasTaunted(false)
     {
         SetDataType(TYPE_FAERLINA);
         AddOnAggroText(SAY_AGGRO_1, SAY_AGGRO_2, SAY_AGGRO_3, SAY_AGGRO_4);
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         AddOnDeathText(SAY_DEATH);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float, float, float z)
+        {
+            return z > resetZ;
+        });
     }
 
     instance_naxxramas* m_instance;
@@ -93,6 +97,7 @@ struct boss_faerlinaAI : public BossAI
     }
 };
 
+// 28732 - Widow's Embrace
 struct WidowsEmbrace : public AuraScript, public SpellScript
 {
     void OnCast(Spell* spell) const override
