@@ -64,9 +64,7 @@ enum GluthActions
 
 struct boss_gluthAI : public BossAI
 {
-    boss_gluthAI(Creature* creature) : BossAI(creature, GLUTH_ACTIONS_MAX), 
-        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_gluthAI(Creature* creature) : BossAI(creature, GLUTH_ACTIONS_MAX), m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_GLUTH);
         AddCustomAction(GLUTH_SUMMON_DELAY, true, [&]()
@@ -137,6 +135,7 @@ struct ZombieChowSearch : AuraScript
     }
 };
 
+// 28374 - Decimate
 struct GluthDecimate : SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
@@ -170,6 +169,7 @@ struct GluthDecimate : SpellScript
     }
 };
 
+// 28235 - Zombie Chow Search
 struct SummonZombieChow : AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
@@ -201,7 +201,8 @@ struct SummonZombieChow : AuraScript
     }
 };
 
-struct EatZombieChowAOE : SpellScript
+// 28404 - Zombie Chow Search
+struct ZombieChowSearchInstakillAoe : SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
@@ -221,5 +222,5 @@ void AddSC_boss_gluth()
     RegisterSpellScript<GluthDecimate>("spell_decimate");
     RegisterSpellScript<SummonZombieChow>("spell_summon_zombie_chow");
     RegisterSpellScript<ZombieChowSearch>("spell_zombie_chow_search");
-    RegisterSpellScript<EatZombieChowAOE>("spell_zombie_chow_search_instakill_aoe");
+    RegisterSpellScript<ZombieChowSearchInstakillAoe>("spell_zombie_chow_search_instakill_aoe");
 }
