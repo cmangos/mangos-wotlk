@@ -656,6 +656,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27938,'spell_choose_random_skull_pile'),
 (28136,'spell_thaddius_lightning_visual'),
 (28159,'spell_shock_thaddius'),
+(28169,'spell_grobbulus_mutating_injection'),
 (28059,'spell_thaddius_charge_buff'),
 (28084,'spell_thaddius_charge_buff'),
 (28062,'spell_thaddius_charge_damage'),

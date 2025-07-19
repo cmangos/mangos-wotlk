@@ -27,8 +27,8 @@ Fallout slime 28218
 Mutating Injection 28169
 Enrages 26527*/
 
-#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
@@ -61,10 +61,7 @@ enum GrobbulusActions
 
 struct boss_grobbulusAI : public BossAI
 {
-    boss_grobbulusAI(Creature* creature) : BossAI(creature, GROBBULUS_ACTION_MAX),
-        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
-        m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty()),
-        m_berserkTimer(m_bIsRegularMode ? 12min : 9min)
+    boss_grobbulusAI(Creature* creature) : BossAI(creature, GROBBULUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_bIsRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_GROBBULUS);
         AddCombatAction(GROBBULUS_SLIME_STREAM, true);
@@ -73,7 +70,6 @@ struct boss_grobbulusAI : public BossAI
 
     ScriptedInstance* m_instance;
     bool m_bIsRegularMode;
-    std::chrono::milliseconds m_berserkTimer;
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
     {
@@ -125,6 +121,7 @@ struct boss_grobbulusAI : public BossAI
     }
 };
 
+// 28169 - Mutating Injection
 struct MutatingInjection : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override

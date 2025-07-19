@@ -68,9 +68,7 @@ enum HeiganActions
 
 struct boss_heiganAI : public BossAI
 {
-    boss_heiganAI(Creature* creature) : BossAI(creature, HEIGAN_ACTIONS_MAX),
-        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()), m_phase(PHASE_GROUND)
+    boss_heiganAI(Creature* creature) : BossAI(creature, HEIGAN_ACTIONS_MAX), m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()), m_phase(PHASE_GROUND)
     {
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float /*y*/, float /*z*/)
         {
@@ -208,6 +206,8 @@ struct boss_heiganAI : public BossAI
     }
 };
 
+// 29351 - Plague Wave Controller (Slow)
+// 30114 - Plague Wave Controller (Fast)
 struct PlagueWaveController : public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /* data */) const override
