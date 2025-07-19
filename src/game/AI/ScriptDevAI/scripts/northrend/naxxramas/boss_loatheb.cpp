@@ -59,9 +59,7 @@ enum LoathebActions
 
 struct boss_loathebAI : public BossAI
 {
-    boss_loathebAI(Creature* creature) : BossAI(creature, LOATHEB_ACTIONS_MAX),
-        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_loathebAI(Creature* creature) : BossAI(creature, LOATHEB_ACTIONS_MAX), m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_LOATHEB);
         AddCombatAction(LOATHEB_SOFT_ENRAGE, 5min);
@@ -75,6 +73,7 @@ struct boss_loathebAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
         m_creature->SetSpellList(m_isRegularMode ? SPELLSET_10N : SPELLSET_25N);
     }
 
@@ -112,6 +111,7 @@ struct boss_loathebAI : public BossAI
     }
 };
 
+// 55593 - Necrotic Aura
 struct NecroticAura : public SpellScript
 {
     void OnCast(Spell* spell) const override
@@ -125,6 +125,7 @@ struct NecroticAura : public SpellScript
     }
 };
 
+// 60929 - Necrotic Aura Pre Warning
 struct AuraPreWarning : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -135,6 +136,7 @@ struct AuraPreWarning : public AuraScript
     }
 };
 
+// 59481 - Necrotic Aura Warning
 struct AuraWarning : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override

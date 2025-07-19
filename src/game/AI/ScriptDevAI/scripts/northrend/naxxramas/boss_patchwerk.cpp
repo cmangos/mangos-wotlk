@@ -56,8 +56,7 @@ enum PatchwerkActions
 
 struct boss_patchwerkAI : public BossAI
 {
-    boss_patchwerkAI(Creature* creature) : BossAI(creature, PATCHWERK_ACTION_MAX),
-        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_patchwerkAI(Creature* creature) : BossAI(creature, PATCHWERK_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         SetDataType(TYPE_PATCHWERK);
         AddOnKillText(SAY_SLAY);
@@ -71,7 +70,7 @@ struct boss_patchwerkAI : public BossAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        BossAI::Reset();
         m_creature->SetSpellList(SPELLSET_NORMAL);
     }
 
