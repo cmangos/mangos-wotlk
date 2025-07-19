@@ -673,6 +673,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28673,'spell_web_wrap_maexxna'),
 (28728,'spell_feigh_death_pos_aura'),
 (28732,'spell_widows_embrace'),
+(29252,'spell_summon_skeletons_noth'),
 (29280,'spell_web_wrap_message'),
 (29281,'spell_web_wrap_message'),
 (29282,'spell_web_wrap_message'),

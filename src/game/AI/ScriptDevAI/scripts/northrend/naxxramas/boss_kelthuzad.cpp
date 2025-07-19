@@ -517,7 +517,10 @@ struct boss_kelthuzadAI : public BossAI
     }
 };
 
-// Summon one add (which type depends on spell)
+// 28415 - Summon Type A Trigger
+// 28416 - Summon Type B Trigger
+// 28417 - Summon Type C Trigger
+// 28455 - Summon Type D Trigger
 struct TriggerKTAdd : public SpellScript
 {
     bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -529,6 +532,7 @@ struct TriggerKTAdd : public SpellScript
 
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
+        // Summon one add (which type depends on spell)
         if (Unit* unitTarget = spell->GetUnitTarget())
         {
             uint32 summonId = 0;
@@ -564,11 +568,12 @@ struct TriggerKTAdd : public SpellScript
     }
 };
 
-// Select four random players plus the main tank and mind control them all. Evil.
+// 28408 - Chains of Kel'Thuzad
 struct ChainsKelThuzad : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
     {
+        // Select four random players plus the main tank and mind control them all. Evil.
         Unit* caster = spell->GetCaster();
 
         SelectAttackingTargetParams chainsParams;
@@ -597,11 +602,12 @@ struct ChainsKelThuzad : public SpellScript
     }
 };
 
-// Do damage onto the player equal to 26% of his/her full hit points on every tick
+// 27808 - Frost Blast
 struct FrostBlast : public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /* data */) const override
     {
+        // Do damage onto the player equal to 26% of his/her full hit points on every tick
         Unit* caster = aura->GetCaster();
         if (!caster)
             return;

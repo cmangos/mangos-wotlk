@@ -243,6 +243,7 @@ bool GOUse_go_sapphiron_birth(Player* /*player*/, GameObject* go)
     return false;
 }
 
+// 28526 - Icebolt
 struct IceBolt : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
@@ -270,6 +271,7 @@ struct IceBolt : public SpellScript
     }
 };
 
+// 30101 - Frost Breath
 struct FrostBreath : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -285,6 +287,7 @@ struct FrostBreath : public SpellScript
     }
 };
 
+// 28522 - Icebolt
 struct PeriodicIceBolt : public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
@@ -301,6 +304,7 @@ struct PeriodicIceBolt : public AuraScript
     }
 };
 
+// 30132 - Despawn Ice Block
 struct DespawnIceBlock : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /* effIdx */) const override
@@ -318,6 +322,7 @@ struct DespawnIceBlock : public SpellScript
     }
 };
 
+// 28560 - Summon Blizzard
 struct SapphironBlizzardInit : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -335,6 +340,7 @@ struct SapphironBlizzardInit : public SpellScript
     }
 };
 
+// 60539 - Sapphiron Achievement Check
 struct SapphironAchievementCheck : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex) const override

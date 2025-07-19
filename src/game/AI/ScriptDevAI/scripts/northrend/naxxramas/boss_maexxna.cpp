@@ -226,6 +226,7 @@ struct boss_maexxnaAI : public BossAI
     }
 };
 
+// 28673, 54127 - Web Wrap
 struct WebWrapMaexxna : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -245,6 +246,7 @@ struct WebWrapMaexxna : public SpellScript
     }
 };
 
+// 29280, 29281, 29282, 29283, 29285, 29287 - Web Wrap
 struct WebWrapMessage : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -265,6 +267,7 @@ struct WebWrapMessage : public SpellScript
     }
 };
 
+// 28622 - Web Wrap
 struct WebWrapDamage : public AuraScript
 {
     void OnPeriodicTickEnd(Aura* aura) const override

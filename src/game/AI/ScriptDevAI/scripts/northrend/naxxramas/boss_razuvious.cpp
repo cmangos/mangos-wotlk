@@ -136,6 +136,7 @@ bool NpcSpellClick_npc_obedienceCrystal(Player* player, Creature* clickedCreatur
     return true;
 }
 
+// 55479 - Force Obedience
 struct ForcedObedience : public AuraScript, public SpellScript
 {
     void OnInit(Spell* spell) const override
