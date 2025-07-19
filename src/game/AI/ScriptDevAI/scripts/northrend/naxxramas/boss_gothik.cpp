@@ -96,9 +96,7 @@ enum GothikActions
 
 struct boss_gothikAI : public BossAI
 {
-    boss_gothikAI(Creature* creature) : BossAI(creature, GOTHIK_ACTIONS_MAX),
-        m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_gothikAI(Creature* creature) : BossAI(creature, GOTHIK_ACTIONS_MAX), m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_GOTHIK);
         AddOnKillText(SAY_KILL);
@@ -120,7 +118,7 @@ struct boss_gothikAI : public BossAI
                 case 3:
                 {
                     DoBroadcastText(SAY_SPEECH_4, m_creature);
-                    m_uiPhase = PHASE_BALCONY;
+                    m_phase = PHASE_BALCONY;
                     break;
                 }
             }
@@ -133,8 +131,7 @@ struct boss_gothikAI : public BossAI
 
     GuidVector m_summonedAddGuids;
 
-    uint8 m_uiPhase;
-    uint8 m_uiSpeech;
+    uint8 m_phase;
     uint8 m_speechStep;
 
     void Reset() override
@@ -147,7 +144,7 @@ struct boss_gothikAI : public BossAI
         SetReactState(REACT_PASSIVE);
         SetCombatScriptStatus(false);
 
-        m_uiPhase = PHASE_SPEECH;
+        m_phase = PHASE_SPEECH;
         m_speechStep = 0;
 
         // Despawn Adds
@@ -157,7 +154,7 @@ struct boss_gothikAI : public BossAI
     void HandleGroundPhase()
     {
         m_creature->CastSpell(nullptr, SPELL_TELEPORT_RIGHT, TRIGGERED_OLD_TRIGGERED);
-        m_uiPhase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
+        m_phase = m_instance ? PHASE_TELEPORTING : PHASE_STOP_TELEPORTING;
 
         DoBroadcastText(SAY_TELEPORT, m_creature);
         DoBroadcastText(EMOTE_TO_FRAY, m_creature);
@@ -221,7 +218,7 @@ struct boss_gothikAI : public BossAI
 
         for (const auto& playerRef : players)
             if (Player* player = playerRef.getSource())
-                if (!m_instance->IsInRightSideGothArea(player) && player->IsAlive())
+                if (!m_instance->IsInRightSideGothikArea(player) && player->IsAlive())
                     return true;
 
         return false;
@@ -282,7 +279,7 @@ struct boss_gothikAI : public BossAI
                     if (Creature* add = m_creature->GetMap()->GetCreature(guid))
                     {
                         // attack other side
-                        if (add->IsAlive() && m_instance->IsInRightSideGothArea(player) != m_instance->IsInRightSideGothArea(add))
+                        if (add->IsAlive() && m_instance->IsInRightSideGothikArea(player) != m_instance->IsInRightSideGothikArea(add))
                         {
                             add->AddThreat(player);
                         }
@@ -318,14 +315,14 @@ struct boss_gothikAI : public BossAI
             {
                 if (m_creature->GetHealthPercent() <= 30.0f)
                 {
-                    m_uiPhase = PHASE_STOP_TELEPORTING;
+                    m_phase = PHASE_STOP_TELEPORTING;
                     DisableCombatAction(action);
                 }
                 return;
             }
             case GOTHIK_TELEPORT:
             {
-                uint32 teleportSpell = m_instance->IsInRightSideGothArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
+                uint32 teleportSpell = m_instance->IsInRightSideGothikArea(m_creature) ? SPELL_TELEPORT_LEFT : SPELL_TELEPORT_RIGHT;
                 if (DoCastSpellIfCan(nullptr, teleportSpell) == CAST_OK)
                     break;
                 return;
@@ -335,6 +332,7 @@ struct boss_gothikAI : public BossAI
     }
 };
 
+// 27892, 27928, 27935 - To Anchor 1
 struct ToAnchorOne : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -359,6 +357,7 @@ struct ToAnchorOne : public SpellScript
     }
 };
 
+// 27893, 27929, 27936 - To Anchor 2
 struct ToAnchorTwo : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -383,6 +382,7 @@ struct ToAnchorTwo : public SpellScript
     }
 };
 
+// 27896, 27930, 27938 - Choose Random Skull Pile
 struct ChooseRandomSkullPile : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -403,6 +403,7 @@ struct ChooseRandomSkullPile : public SpellScript
     }
 };
 
+// 27915, 27931, 27937 - Anchor to Skulls
 struct AnchorToSkull : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override

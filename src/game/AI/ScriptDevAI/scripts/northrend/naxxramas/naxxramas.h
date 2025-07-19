@@ -288,7 +288,7 @@ class instance_naxxramas : public ScriptedInstance
         void DoTriggerHeiganTraps(Creature* pHeigan, uint32 uiAreaIndex);
 
         // goth
-        bool IsInRightSideGothArea(Unit* pUnit);
+        bool IsInRightSideGothikArea(Unit* pUnit);
 
         // Gluth
         const GuidVector& GetGluthTriggers() const { return m_gluthTriggers; }

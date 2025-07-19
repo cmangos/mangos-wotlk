@@ -739,7 +739,7 @@ void instance_naxxramas::Update(uint32 uiDiff)
 }
 
 // Right is right side from gothik (eastern)
-bool instance_naxxramas::IsInRightSideGothArea(Unit* unit)
+bool instance_naxxramas::IsInRightSideGothikArea(Unit* unit)
 {
     if (GameObject* combatGate = GetSingleGameObjectFromStorage(GO_MILI_GOTH_COMBAT_GATE))
         return (combatGate->GetPositionY() >= unit->GetPositionY());
