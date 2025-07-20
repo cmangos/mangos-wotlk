@@ -23,8 +23,8 @@ SDComment: Web Wrap works incorrectly: The way it's supposed to work is Maexxna 
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/base/BossAI.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "naxxramas.h"
 
 enum
@@ -166,12 +166,10 @@ static const float aWebWrapLoc[MAX_WEB_WRAP_POSITIONS][3] =
 
 struct boss_maexxnaAI : public BossAI
 {
-    boss_maexxnaAI(Creature* creature) : BossAI(creature, MAEXXNA_ACTION_MAX),
-        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_maexxnaAI(Creature* creature) : BossAI(creature, MAEXXNA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_MAEXXNA);
-        AddTimerlessCombatAction(MAEXXNA_ENRAGE_HP_CHECK, true);         // Soft enrage à 30%
+        AddTimerlessCombatAction(MAEXXNA_ENRAGE_HP_CHECK, true); // Soft enrage at 30%
     }
 
     ScriptedInstance* m_instance;
@@ -180,7 +178,6 @@ struct boss_maexxnaAI : public BossAI
     void Reset() override
     {
         CombatAI::Reset();
-
         DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
@@ -232,7 +229,7 @@ struct WebWrapMaexxna : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         uint32 targetCount = spell->m_spellInfo->Id == SPELL_WEBWRAP ? MAX_PLAYERS_WEB_WRAP : MAX_PLAYERS_WEB_WRAP_H;
-        std::vector<uint32> targetSpells{ 28617, 29280, 29281, 29282, 29283, 29285, 29287 };
+        std::vector<uint32> targetSpells{ 29280, 29281, 29282, 29283, 29285, 29287 };
         std::vector<Unit*> unitList;
         spell->GetCaster()->SelectAttackingTargets(unitList, ATTACKING_TARGET_ALL_SUITABLE, 1, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK);
         std::shuffle(unitList.begin(), unitList.end(), *GetRandomGenerator());

@@ -123,10 +123,10 @@ struct boss_thaddiusAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
         SetCombatScriptStatus(true);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
-        DoCastSpellIfCan(m_creature, SPELL_THADIUS_SPAWN);
-        BossAI::Reset();
+        DoCastSpellIfCan(nullptr, SPELL_THADIUS_SPAWN);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -222,8 +222,7 @@ enum TeslaCoilActions
 
 struct npc_tesla_coilAI : public ScriptedAI
 {
-    npc_tesla_coilAI(Creature* creature) : ScriptedAI(creature),
-        m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
+    npc_tesla_coilAI(Creature* creature) : ScriptedAI(creature), m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData()))
     {
         SetAIImmobilizedState(true);
         SetCombatMovement(false);
@@ -278,9 +277,7 @@ enum ThaddiusAddActions
 
 struct boss_thaddiusAddsAI : public BossAI
 {
-    boss_thaddiusAddsAI(Creature* creature) : BossAI(creature, THADDIUS_ADD_ACTIONS_MAX),
-        m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_thaddiusAddsAI(Creature* creature) : BossAI(creature, THADDIUS_ADD_ACTIONS_MAX), m_instance(dynamic_cast<instance_naxxramas*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_THADDIUS);
         AddCustomAction(THADDIUS_ADD_REVIVE, true, [&]()
@@ -315,6 +312,7 @@ struct boss_thaddiusAddsAI : public BossAI
 
     void Reset() override
     {
+        BossAI::Reset();
         m_isFakingDeath = false;
         m_areBothDead = false;
 
@@ -325,7 +323,6 @@ struct boss_thaddiusAddsAI : public BossAI
         SetDeathPrevention(true);
         SetCombatScriptStatus(false);
         SetCombatMovement(true);
-        BossAI::Reset();
     }
 
     Creature* GetOtherAdd() const
@@ -335,8 +332,7 @@ struct boss_thaddiusAddsAI : public BossAI
         {
             case NPC_FEUGEN:  return m_instance->GetSingleCreatureFromStorage(NPC_STALAGG);
             case NPC_STALAGG: return m_instance->GetSingleCreatureFromStorage(NPC_FEUGEN);
-            default:
-                return nullptr;
+            default: return nullptr;
         }
     }
 
@@ -351,12 +347,6 @@ struct boss_thaddiusAddsAI : public BossAI
         }
     }
 
-    void JustRespawned() override
-    {
-        Reset();                                            // Needed to reset the flags properly
-        JustReachedHome();
-    }
-
     void JustReachedHome() override
     {
         if (!m_instance)
@@ -368,16 +358,16 @@ struct boss_thaddiusAddsAI : public BossAI
             {
                 if (pOtherAI->IsCountingDead())
                 {
+                    other->SetRespawnDelay(1s, true);
                     other->ForcedDespawn();
-                    other->Respawn();
                 }
             }
         }
 
         if (Creature* tesla = GetClosestCreatureWithEntry(m_creature, NPC_TESLA_COIL, 50.f))
         {
+            tesla->SetRespawnDelay(1s, true);
             tesla->ForcedDespawn();
-            tesla->Respawn();
         }
 
         m_instance->SetData(TYPE_THADDIUS, FAIL);
@@ -399,7 +389,8 @@ struct boss_thaddiusAddsAI : public BossAI
     void PauseCombatMovement()
     {
         SetAIImmobilizedState(true);
-        AddCustomAction(THADDIUS_ADD_HOLD, 1s + 500ms, [&](){
+        AddCustomAction(THADDIUS_ADD_HOLD, 1s + 500ms, [&]()
+        {
             SetAIImmobilizedState(false);
             m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
             DisableTimer(THADDIUS_ADD_HOLD);
@@ -442,17 +433,7 @@ struct boss_stalaggAI : public boss_thaddiusAddsAI
     {
         AddOnKillText(SAY_STAL_SLAY);
         AddOnAggroText(SAY_STAL_AGGRO);
-        Reset();
-    }
-
-    void Reset() override
-    {
-        boss_thaddiusAddsAI::Reset();
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoBroadcastText(SAY_STAL_DEATH, m_creature);
+        AddOnDeathText(SAY_STAL_DEATH);
     }
 };
 
@@ -466,17 +447,7 @@ struct boss_feugenAI : public boss_thaddiusAddsAI
     {
         AddOnKillText(SAY_FEUG_SLAY);
         AddOnAggroText(SAY_FEUG_AGGRO);
-        Reset();
-    }
-
-    void Reset() override
-    {
-        boss_thaddiusAddsAI::Reset();
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoBroadcastText(SAY_FEUG_DEATH, m_creature);
+        AddOnDeathText(SAY_FEUG_DEATH);
     }
 };
 
