@@ -97,9 +97,7 @@ enum NothAction
 
 struct boss_nothAI : public BossAI
 {
-    boss_nothAI(Creature* creature) : BossAI(creature, NOTH_ACTIONS_MAX),
-        m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_nothAI(Creature* creature) : BossAI(creature, NOTH_ACTIONS_MAX), m_instance(static_cast<instance_naxxramas*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         SetDataType(TYPE_NOTH);
         AddOnKillText(SAY_SLAY1, SAY_SLAY2);
@@ -107,7 +105,6 @@ struct boss_nothAI : public BossAI
         AddOnAggroText(SAY_AGGRO1, SAY_AGGRO2, SAY_AGGRO3);
         AddCombatAction(NOTH_PHASE_BALCONY, 90s);
         AddCombatAction(NOTH_PHASE_GROUND, true);
-        Reset();
     }
 
     instance_naxxramas* m_instance;
