@@ -1213,14 +1213,13 @@ enum
 
 struct npc_totem_of_spiritsAI : public ScriptedAI
 {
-    npc_totem_of_spiritsAI(Creature* creature) : ScriptedAI(creature)
+    npc_totem_of_spiritsAI(Creature* creature) : ScriptedAI(creature), m_uiElementalSieveTimer(2500)
     {
         SetReactState(REACT_PASSIVE);
         Reset();
-        m_uiElementalSieveTimer = 2500; // needs to be cast non-stop without interference from evade and some such
     }
 
-    uint32 m_uiElementalSieveTimer;
+    uint32 m_uiElementalSieveTimer; // needs to be cast non-stop without interference from evade and some such
 
     void Reset() override {}
 
@@ -1264,37 +1263,40 @@ struct npc_totem_of_spiritsAI : public ScriptedAI
     }
 };
 
-bool EffectDummyCreature_npc_totem_of_spirits(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 36025 - Earth Soul Captured
+// 36115 - Fiery Soul Captured
+// 36170 - Water Soul Captured
+// 36181 - Air Soul Captured
+struct ElementalCapturedCredit : public SpellScript
 {
-    if (uiEffIndex != EFFECT_INDEX_0)
-        return false;
-
-    switch (uiSpellId)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        case SPELL_EARTH_CAPTURED:
+        Unit* target = spell->GetUnitTarget();
+        switch (spell->m_spellInfo->Id)
         {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EARTH_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
-            return true;
-        }
-        case SPELL_FIERY_CAPTURED:
-        {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_FIERY_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
-            return true;
-        }
-        case SPELL_WATER_CAPTURED:
-        {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_WATER_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
-            return true;
-        }
-        case SPELL_AIR_CAPTURED:
-        {
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_AIR_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
-            return true;
+            case SPELL_EARTH_CAPTURED:
+            {
+                target->CastSpell(nullptr, SPELL_EARTH_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
+            case SPELL_FIERY_CAPTURED:
+            {
+                target->CastSpell(nullptr, SPELL_FIERY_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
+            case SPELL_WATER_CAPTURED:
+            {
+                target->CastSpell(nullptr, SPELL_WATER_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
+            case SPELL_AIR_CAPTURED:
+            {
+                target->CastSpell(nullptr, SPELL_AIR_CAPTURED_CREDIT, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
         }
     }
-
-    return false;
-}
+};
 
 bool ProcessEventId_event_spell_soul_captured_credit(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool bIsStart)
 {
@@ -1324,6 +1326,38 @@ bool ProcessEventId_event_spell_soul_captured_credit(uint32 uiEventId, Object* p
 
     return false;
 }
+
+// 36035 - Elemental Sieve
+struct ElementalSieve : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply || aura->GetRemoveMode() != AURA_REMOVE_BY_DEATH)
+            return;
+
+        Pet* pCaster = dynamic_cast<Pet*>(aura->GetCaster());
+        Unit* target = aura->GetTarget();
+
+        // aura only affect the spirit totem, since this is the one that need to be in range.
+        // It is possible though, that player is the one who should actually have the aura
+        // and check for presense of spirit totem, but then we can't script the dummy.
+        if (!pCaster)
+            return;
+
+        // Summon the soul of the spirit and cast the visual
+        uint32 soulEntry = 0;
+        switch (target->GetEntry())
+        {
+            case 21050: soulEntry = 21073; break; // Earthen Soul
+            case 21061: soulEntry = 21097; break; // Fiery Soul
+            case 21059: soulEntry = 21109; break; // Watery Soul
+            case 21060: soulEntry = 21116; break; // Airy Soul
+        }
+
+        target->CastSpell(nullptr, 36206, TRIGGERED_OLD_TRIGGERED);
+        pCaster->SummonCreature(soulEntry, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 0, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 10000);
+    }
+};
 
 /*#####
 #npc_shadowlord_deathwail
@@ -5391,7 +5425,6 @@ void AddSC_shadowmoon_valley()
     pNewScript = new Script;
     pNewScript->Name = "npc_totem_of_spirits";
     pNewScript->GetAI = &GetNewAIInstance<npc_totem_of_spiritsAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_totem_of_spirits;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -5504,4 +5537,6 @@ void AddSC_shadowmoon_valley()
     RegisterSpellScript<DragonmawIllusionBase>("spell_dragonmaw_illusion_base");
     RegisterSpellScript<DragonmawIllusionTransform>("spell_dragonmaw_illusion_transform");
     RegisterSpellScript<CallingRider>("spell_calling_rider");
+    RegisterSpellScript<ElementalCapturedCredit>("spell_elemental_captured_credit");
+    RegisterSpellScript<ElementalSieve>("spell_elemental_sieve");
 }
