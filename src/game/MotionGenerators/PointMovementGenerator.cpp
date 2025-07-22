@@ -116,7 +116,7 @@ void PointMovementGenerator::MovementInform(Unit& unit)
     if (unit.GetTypeId() == TYPEID_UNIT && static_cast<Creature&>(unit).IsTemporarySummon())
     {
         if (unit.GetSpawnerGuid().IsAnyTypeCreature())
-            if (Creature* pSummoner = unit.GetMap()->GetCreature(unit.GetSpawnerGuid()))
+            if (Creature* pSummoner = unit.GetMap()->GetAnyTypeCreature(unit.GetSpawnerGuid()))
             {
                 if (UnitAI* ai = pSummoner->AI())
                     ai->SummonedMovementInform(static_cast<Creature*>(&unit), type, m_id);
