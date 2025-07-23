@@ -679,6 +679,7 @@ scriptdev_sources = [
     'AI/ScriptDevAI/scripts/northrend/crusaders_coliseum/trial_of_the_champion/instance_trial_of_the_champion.cpp',
     'AI/ScriptDevAI/scripts/northrend/crusaders_coliseum/trial_of_the_champion/trial_of_the_champion.cpp',
     'AI/ScriptDevAI/scripts/northrend/crusaders_coliseum/trial_of_the_champion/boss_argent_challenge.cpp',
+    'AI/ScriptDevAI/scripts/northrend/argent_tournament.cpp',
     'AI/ScriptDevAI/scripts/northrend/obsidian_sanctum/boss_sartharion.cpp',
     'AI/ScriptDevAI/scripts/northrend/obsidian_sanctum/obsidian_sanctum.cpp',
     'AI/ScriptDevAI/scripts/northrend/sholazar_basin.cpp',
