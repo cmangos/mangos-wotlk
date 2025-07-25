@@ -715,6 +715,44 @@ struct MoltenFuryFlamebringer : public SpellScript
     }
 };
 
+// 61544 - Summon Budd PET
+struct SummonBuddPet : public SpellScript
+{
+    enum
+    {
+        SPELL_BUDDS_ATTENTION_SPAN          = 47014,    // Budd's Attention Span
+        SPELL_BUDD_PET_PERIODIC_TRIGGER     = 47019,    // Budd Pet Periodic Trigger (Budd Pet Periodic Trigger)
+        SPELL_ATTENTION_SPAN                = 47025,    // Attention Span
+    };
+
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Unit* caster = spell->GetCaster();
+
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+        summon->AI()->SetReactState(REACT_PASSIVE);
+        summon->CastSpell(caster, SPELL_BUDDS_ATTENTION_SPAN, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(summon, SPELL_BUDD_PET_PERIODIC_TRIGGER, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(nullptr, SPELL_ATTENTION_SPAN, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 47025 - Attention Span
+struct AttentionSpan : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        Creature* budd = (Creature*)caster;
+
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+        {
+            budd->ForcedDespawn();
+        }
+    }
+};
+
 void AddSC_grizzly_hills()
 {
     Script* pNewScript = new Script;
@@ -741,4 +779,6 @@ void AddSC_grizzly_hills()
     RegisterSpellScript<spell_out_cold>("spell_out_cold");
     RegisterSpellScript<spell_assemble_cage>("spell_assemble_cage");
     RegisterSpellScript<MoltenFuryFlamebringer>("spell_molten_fury_flamebringer");
+    RegisterSpellScript<SummonBuddPet>("spell_summon_budd_pet");
+    RegisterSpellScript<AttentionSpan>("spell_attention_span");
 }
