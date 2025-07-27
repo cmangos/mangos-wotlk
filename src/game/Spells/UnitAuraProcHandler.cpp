@@ -560,7 +560,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             if (procTriggeredData.spellProcEvent && procTriggeredData.spellProcEvent->cooldown)
                 cooldown = procTriggeredData.spellProcEvent->cooldown;
             if (cooldown)
-                holder->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
+                holder->SetProcCooldown(std::chrono::milliseconds(cooldown), GetMap()->GetCurrentClockTime());
         }
 
         if (result != SpellProcEventTriggerCheck::SPELL_PROC_TRIGGER_OK)
@@ -627,7 +627,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
         }
 
         if ((procSuccess || triggeredByHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX2_PROC_COOLDOWN_ON_FAILURE)) && anyAuraProc && execData.cooldown)
-            triggeredByHolder->SetProcCooldown(std::chrono::seconds(execData.cooldown), GetMap()->GetCurrentClockTime());
+            triggeredByHolder->SetProcCooldown(std::chrono::milliseconds(execData.cooldown), GetMap()->GetCurrentClockTime());
 
         // Remove charge (aura can be removed by triggers)
         // Attribute example - drain soul vanilla - third effect fails when not have talent but charge should drop
@@ -862,7 +862,7 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MA
         CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST | TRIGGERED_DO_NOT_RESET_LEASH, castItem, triggeredByAura, originalCaster);
 
     if (cooldown)
-        triggeredByAura->GetHolder()->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
+        triggeredByAura->GetHolder()->SetProcCooldown(std::chrono::milliseconds(cooldown), GetMap()->GetCurrentClockTime());
 
     return SPELL_AURA_PROC_OK;
 }
@@ -3861,7 +3861,7 @@ SpellAuraProcResult Unit::HandleProcTriggerDamageAuraProc(ProcExecutionData& dat
     }
 
     if (cooldown)
-        triggeredByAura->GetHolder()->SetProcCooldown(std::chrono::seconds(cooldown), GetMap()->GetCurrentClockTime());
+        triggeredByAura->GetHolder()->SetProcCooldown(std::chrono::milliseconds(cooldown), GetMap()->GetCurrentClockTime());
 
     SpellNonMeleeDamage spellDamageInfo(this, victim, spellInfo->Id, SpellSchoolMask(spellInfo->SchoolMask));
     CalculateSpellDamage(&spellDamageInfo, triggeredByAura->GetModifier()->m_amount, spellInfo, triggeredByAura->GetEffIndex());

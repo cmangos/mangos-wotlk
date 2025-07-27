@@ -3,5 +3,5 @@
  #define REVISION_DB_REALMD "required_14083_01_realmd_joindate_datetime"
  #define REVISION_DB_LOGS "required_14039_01_logs_anticheat"
  #define REVISION_DB_CHARACTERS "required_14087_01_characters_equip_size"
- #define REVISION_DB_MANGOS "required_14091_01_mangos_spell_groups"
+ #define REVISION_DB_MANGOS "required_14092_01_mangos_proc_cooldown"
 #endif // __REVISION_SQL_H__
