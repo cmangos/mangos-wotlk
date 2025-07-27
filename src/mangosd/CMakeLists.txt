@@ -57,6 +57,7 @@ target_link_libraries(${EXECUTABLE_NAME}
   game
   gsoap
   g3dlite
+  cmangos-compile-option-interface
 )
 
 if(WIN32)
