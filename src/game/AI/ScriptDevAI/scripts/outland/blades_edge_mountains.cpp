@@ -825,34 +825,32 @@ UnitAI* GetAI_npc_simon_game_bunny(Creature* pCreature)
     return new npc_simon_game_bunnyAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 40041 - Simon Game Pre-game timer
+struct SimonGamePreGameTimer : public AuraScript
 {
-    if (pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY && pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY_LARGE)
-        return false;
-
-    if (uiSpellId == SPELL_PRE_EVENT_TIMER && uiEffIndex == EFFECT_INDEX_0)
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
     {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);
-        return true;
+        Unit* target = aura->GetTarget();
+        Unit* caster = aura->GetCaster();
+        if (caster && target->AI())
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, caster, target);
     }
+};
 
-    return false;
-}
-
-bool EffectScriptEffectCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid originalCasterGuid)
+// 40055, 40165, 40166, 40167 - Introspection
+struct IntrospectionSimonGame : public SpellScript
 {
-    if ((uiSpellId == SPELL_INTROSPECTION_BLUE || uiSpellId == SPELL_INTROSPECTION_GREEN || uiSpellId == SPELL_INTROSPECTION_RED ||
-            uiSpellId == SPELL_INTROSPECTION_YELLOW) && uiEffIndex == EFFECT_INDEX_1)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if ((pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY || pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY_LARGE)
-                && pCaster->GetTypeId() == TYPEID_PLAYER && originalCasterGuid.IsGameObject())
-            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget, uiSpellId);
+        if (effIdx != EFFECT_INDEX_1)
+            return;
 
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        if (caster->IsPlayer() && target->AI())
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, caster, target, spell->m_spellInfo->Id);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_light_orb_collector
@@ -1576,29 +1574,40 @@ UnitAI* GetAI_npc_bloodmaul_dire_wolf(Creature* pCreature)
     return new npc_bloodmaul_dire_wolfAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_spell_diminution_powder(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 36310 - Rina's Diminution Powder
+struct RinasDiminutionPowder : public SpellScript
 {
-    if (uiSpellId == SPELL_RINAS_DIMINUTION_POWDER && uiEffIndex == EFFECT_INDEX_1 && pCreatureTarget->GetEntry() == NPC_BLOODMAUL_DIRE_WOLF)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        // Check if creature already has aura. ToDo: check for Hibernating creatures
-        if (pCreatureTarget->HasAura(SPELL_RINAS_DIMINUTION_POWDER))
-            return true;
-
-        // give kill credit, change to friendly and inform the creautre about the reset timer
-        ((Player*)pCaster)->KilledMonsterCredit(NPC_DIRE_WOLF_TRIGGER);
-        pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME);
-
-        // Note: we can't remove all auras because it will also remove the current aura; so currently we only remove periodic damage auras
-        // This might be wrong and we might need to change this to something like "RemoveAllAurasExceptId(...)"
-        pCreatureTarget->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE);
-        pCreatureTarget->CombatStop(true);
-
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target->IsCreature() || target->GetEntry() != NPC_BLOODMAUL_DIRE_WOLF)
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
     }
 
-    return false;
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Creature* target = dynamic_cast<Creature*>(spell->GetUnitTarget());
+        if (target->HasAura(SPELL_RINAS_DIMINUTION_POWDER))
+            return;
+
+        Unit* caster = spell->GetCaster();
+        // give kill credit, change to friendly and inform the creautre about the reset timer
+        if (caster->IsPlayer())
+            static_cast<Player*>(caster)->KilledMonsterCredit(NPC_DIRE_WOLF_TRIGGER);
+        
+        target->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME);
+        // Note: we can't remove all auras because it will also remove the current aura; so currently we only remove periodic damage auras
+        // This might be wrong and we might need to change this to something like "RemoveAllAurasExceptId(...)"
+        target->RemoveSpellsCausingAura(SPELL_AURA_PERIODIC_DAMAGE);
+        target->CombatStop(true);
+
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target);
+    }
+};
 
 /*######
 ## mobs_grishna_arrakoa
@@ -3346,8 +3355,6 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_simon_game_bunny";
     pNewScript->GetAI = &GetAI_npc_simon_game_bunny;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_simon_game_bunny;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_npc_simon_game_bunny;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -3383,7 +3390,6 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_bloodmaul_dire_wolf";
     pNewScript->GetAI = &GetAI_npc_bloodmaul_dire_wolf;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_diminution_powder;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -3457,6 +3463,8 @@ void AddSC_blades_edge_mountains()
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_nether_drake_egg_trapAI>;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<SimonGamePreGameTimer>("spell_simon_game_pre_game_timer");
+    RegisterSpellScript<IntrospectionSimonGame>("spell_introspection_simon_game");
     RegisterSpellScript<ExorcismFeather>("spell_exorcism_feather");
     RegisterSpellScript<KoiKoiDeath>("spell_koi_koi_death");
     RegisterSpellScript<Soaring>("spell_soaring");
