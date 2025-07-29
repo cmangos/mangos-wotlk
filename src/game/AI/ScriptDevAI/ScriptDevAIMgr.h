@@ -91,7 +91,7 @@ struct Script
         pQuestAcceptNPC(nullptr), pQuestAcceptGO(nullptr), pQuestAcceptItem(nullptr),
         pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
         pGOUse(nullptr), pItemUse(nullptr), pItemLoot(nullptr), pAreaTrigger(nullptr), pNpcSpellClick(nullptr), pProcessEventId(nullptr),
-        pEffectDummyNPC(nullptr), pEffectDummyItem(nullptr), pEffectScriptEffectNPC(nullptr),
+        pEffectDummyNPC(nullptr), pEffectDummyItem(nullptr),
         pEffectAuraDummy(nullptr), pTrapSearching(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
     {}
 
@@ -118,7 +118,6 @@ struct Script
     bool (*pProcessEventId)(uint32, Object*, Object*, bool);
     bool (*pEffectDummyNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
     bool (*pEffectDummyItem)(Unit*, uint32, SpellEffectIndex, Item*, ObjectGuid);
-    bool (*pEffectScriptEffectNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
     bool (*pEffectAuraDummy)(const Aura*, bool);
     std::function<bool(Unit*)>* pTrapSearching;
 
@@ -160,7 +159,6 @@ class ScriptDevAIMgr
         bool OnProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Item* pTarget, ObjectGuid originalCasterGuid);
-        bool OnEffectScriptEffect(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
         bool OnAuraDummy(Aura const* pAura, bool bApply);
         bool OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId);
 
