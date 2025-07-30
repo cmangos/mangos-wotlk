@@ -446,15 +446,15 @@ UnitAI* GetAI_npc_twilight_volunteer(Creature* pCreature)
     return new npc_twilight_volunteerAI(pCreature);
 }
 
-bool EffectAuraDummy_spell_aura_dummy_sacrifice_beam(const Aura* pAura, bool bApply)
+// 56150 - Sacrifice Beam
+struct SacrificeBeam : public AuraScript
 {
-    if (pAura->GetId() == SPELL_SACRIFICE_BEAM && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
+    void OnApply(Aura* aura, bool apply) const override
     {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
-            pTarget->Suicide();
+        if (!apply && aura->GetEffIndex() == EFFECT_INDEX_0)
+            aura->GetTarget()->Suicide();
     }
-    return true;
-}
+};
 
 void AddSC_boss_jedoga()
 {
@@ -466,6 +466,7 @@ void AddSC_boss_jedoga()
     pNewScript = new Script;
     pNewScript->Name = "npc_twilight_volunteer";
     pNewScript->GetAI = &GetAI_npc_twilight_volunteer;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_sacrifice_beam;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SacrificeBeam>("spell_sacrifice_beam");
 }

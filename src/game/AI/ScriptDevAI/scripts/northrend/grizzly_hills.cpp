@@ -75,35 +75,34 @@ UnitAI* GetAI_npc_depleted_war_golem(Creature* pCreature)
     return new npc_depleted_war_golemAI(pCreature);
 }
 
-bool EffectAuraDummy_npc_depleted_war_golem(const Aura* pAura, bool bApply)
+// 47799 - Charge War Golem
+struct ChargeWarGolem : public AuraScript
 {
-    if (pAura->GetId() != SPELL_CHARGE_GOLEM)
-        return true;
-
-    Creature* pCreature = (Creature*)pAura->GetTarget();
-
-    if (!pCreature)
-        return true;
-
-    if (pAura->GetEffIndex() == EFFECT_INDEX_0)
+    void OnApply(Aura* aura, bool apply) const override
     {
-        if (bApply)
-        {
-            DoScriptText(SAY_GOLEM_CHARGE, pCreature);
-            pCreature->addUnitState(UNIT_STAT_STUNNED);
-        }
-        else
-        {
-            DoScriptText(SAY_GOLEM_COMPLETE, pCreature);
-            pCreature->clearUnitState(UNIT_STAT_STUNNED);
+        if (!aura->GetTarget()->IsCreature())
+            return;
 
-            // targets master
-            pCreature->CastSpell(pCreature, SPELL_GOLEM_CHARGE_CREDIT, TRIGGERED_OLD_TRIGGERED);
+        Creature* golem = static_cast<Creature*>(aura->GetTarget());
+
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            if (apply)
+            {
+                DoScriptText(SAY_GOLEM_CHARGE, golem);
+                golem->addUnitState(UNIT_STAT_STUNNED);
+            }
+            else
+            {
+                DoScriptText(SAY_GOLEM_COMPLETE, golem);
+                golem->clearUnitState(UNIT_STAT_STUNNED);
+
+                // targets master
+                golem->CastSpell(nullptr, SPELL_GOLEM_CHARGE_CREDIT, TRIGGERED_OLD_TRIGGERED);
+            }
         }
     }
-
-    return true;
-}
+};
 
 /*######
 ## npc_harrison_jones
@@ -783,7 +782,6 @@ void AddSC_grizzly_hills()
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_depleted_war_golem";
     pNewScript->GetAI = &GetAI_npc_depleted_war_golem;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_depleted_war_golem;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -798,6 +796,7 @@ void AddSC_grizzly_hills()
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_emily;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<ChargeWarGolem>("spell_charge_war_golem");
     RegisterSpellScript<spell_eagle_eyes>("spell_eagle_eyes");
     RegisterSpellScript<spell_escape_from_silverbrook_credit_master>("spell_escape_from_silverbrook_credit_master");
     RegisterSpellScript<spell_tag_troll>("spell_tag_troll");

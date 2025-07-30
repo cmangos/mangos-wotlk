@@ -86,25 +86,22 @@ enum
 ## spell_aura_dummy_frostmourne_equip
 ######*/
 
-bool EffectAuraDummy_spell_aura_dummy_frostmourne_equip(const Aura* pAura, bool bApply)
+// 72729 - Frostmourne Equip
+struct FrostmourneEquip : public AuraScript
 {
-    // ### Workaround alert! ###
-    // This is required in order to forced despawn the Frostmourne Gameobject
-    // To be removed and replaced with DBscripts once proper despawning of Door type GOs is supported
-    if (pAura->GetId() == SPELL_FROSTMOURNE_EQUIP && pAura->GetEffIndex() == EFFECT_INDEX_0 && bApply)
+    void OnApply(Aura* aura, bool apply) const override
     {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
-        {
-            ScriptedInstance* pInstance = (ScriptedInstance*)pTarget->GetInstanceData();
-            if (!pInstance)
-                return true;
+        if (!apply)
+            return;
 
-            if (GameObject* pGo = pInstance->GetSingleGameObjectFromStorage(GO_FROSTMOURNE))
-                pGo->Delete();
-        }
+        ScriptedInstance* instance = dynamic_cast<ScriptedInstance*>(aura->GetTarget()->GetInstanceData());
+        if (!instance)
+            return;
+
+        if (GameObject* go = instance->GetSingleGameObjectFromStorage(GO_FROSTMOURNE))
+            go->ForcedDespawn();
     }
-    return true;
-}
+};
 
 /*######
 ## at_frostworn_general
@@ -344,11 +341,6 @@ void AddSC_halls_of_reflection()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_spell_aura_dummy_frostmourne_equip";
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_frostmourne_equip;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "at_frostworn_general";
     pNewScript->pAreaTrigger = &AreaTrigger_at_frostworn_general;
     pNewScript->RegisterSelf();
@@ -363,6 +355,7 @@ void AddSC_halls_of_reflection()
     pNewScript->pAreaTrigger = &AreaTrigger_at_queldelar_start;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<FrostmourneEquip>("spell_frostmourne_equip");
     RegisterSpellScript<spell_gunship_cannon_fire_aura>("spell_gunship_cannon_fire_aura");
     RegisterSpellScript<spell_halls_of_reflection_clone>("spell_halls_of_reflection_clone");
     RegisterSpellScript<spell_start_halls_of_reflection_quest>("spell_start_halls_of_reflection_quest");

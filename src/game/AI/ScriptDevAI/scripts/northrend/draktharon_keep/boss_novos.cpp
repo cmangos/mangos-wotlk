@@ -373,38 +373,38 @@ UnitAI* GetAI_npc_crystal_channel_target(Creature* pCreature)
     return new npc_crystal_channel_targetAI(pCreature);
 }
 
-// Handling of the dummy auras of Crystal Handler Death spells, on remove the Crystal needs to be opened
-bool EffectAuraDummy_npc_crystal_channel_target(const Aura* pAura, bool bApply)
+// 47336, 55801, 55803, 55805 - Crystal Handler Death
+struct CrystalHandlerDeath: public AuraScript
 {
-    for (uint8 i = 0; i < MAX_CRYSTALS; ++i)
+    void OnApply(Aura* aura, bool apply) const override
     {
-        if (pAura->GetId() == aCrystalHandlerDeathSpells[i])
+        if (aura->GetEffIndex() == EFFECT_INDEX_0 && !apply)
         {
-            if (pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
+            if (Creature* pCreature = (Creature*)aura->GetTarget())
             {
-                if (Creature* pCreature = (Creature*)pAura->GetTarget())
+                if (instance_draktharon_keep* pInstance = (instance_draktharon_keep*)pCreature->GetInstanceData())
                 {
-                    if (instance_draktharon_keep* pInstance = (instance_draktharon_keep*)pCreature->GetInstanceData())
+                    if (pInstance->GetData(TYPE_NOVOS) == NOT_STARTED || pInstance->GetData(TYPE_NOVOS) == FAIL)
+                        return;
+
+                    uint32 i;
+                    for (i = 0; i < sizeof(aCrystalHandlerDeathSpells); ++i)
                     {
-                        if (pInstance->GetData(TYPE_NOVOS) == NOT_STARTED || pInstance->GetData(TYPE_NOVOS) == FAIL)
-                            return true;
-
-                        pInstance->DoHandleCrystal(i);
-
-                        // Inform Novos about removed
-                        if (Creature* pNovos = pInstance->GetSingleCreatureFromStorage(NPC_NOVOS))
-                            if (boss_novosAI* pNovosAI = dynamic_cast<boss_novosAI*>(pNovos->AI()))
-                                pNovosAI->LostOneCrystal();
+                        if (aCrystalHandlerDeathSpells[i] == aura->GetId())
+                            break;
                     }
+
+                    pInstance->DoHandleCrystal(i);
+
+                    // Inform Novos about removed
+                    if (Creature* pNovos = pInstance->GetSingleCreatureFromStorage(NPC_NOVOS))
+                        if (boss_novosAI* pNovosAI = dynamic_cast<boss_novosAI*>(pNovos->AI()))
+                            pNovosAI->LostOneCrystal();
                 }
             }
-
-            return true;
         }
     }
-
-    return false;
-}
+};
 
 void AddSC_boss_novos()
 {
@@ -416,6 +416,7 @@ void AddSC_boss_novos()
     pNewScript = new Script;
     pNewScript->Name = "npc_crystal_channel_target";
     pNewScript->GetAI = &GetAI_npc_crystal_channel_target;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_crystal_channel_target;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CrystalHandlerDeath>("spell_crystal_handler_death");
 }

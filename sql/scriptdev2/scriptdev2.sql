@@ -624,8 +624,6 @@ UPDATE creature_template SET ScriptName='npc_nesingwary_trapper' WHERE entry=258
 UPDATE creature_template SET ScriptName='npc_oil_stained_wolf' WHERE entry=25791;
 UPDATE creature_template SET ScriptName='npc_sinkhole_kill_credit' WHERE entry IN (26248,26249);
 UPDATE creature_template SET ScriptName='npc_lurgglbr' WHERE entry=25208;
-UPDATE creature_template SET ScriptName='npc_beryl_sorcerer' WHERE entry=25316;
-UPDATE creature_template SET ScriptName='npc_captured_beryl_sorcerer' WHERE entry=25474;
 UPDATE creature_template SET ScriptName='npc_nexus_drake_hatchling' WHERE entry=26127;
 UPDATE creature_template SET ScriptName='npc_scourged_flamespitter' WHERE entry=25582;
 UPDATE creature_template SET ScriptName='npc_bonker_togglevolt' WHERE entry=25589;
@@ -676,7 +674,6 @@ INSERT INTO scripted_areatrigger VALUES
 /* THE CULLING OF STRATHOLME */
 UPDATE instance_template SET ScriptName='instance_culling_of_stratholme' WHERE map=595;
 UPDATE creature_template SET ScriptName='npc_chromie' WHERE entry IN (26527, 27915);
-UPDATE creature_template SET ScriptName='spell_dummy_npc_crates_bunny' WHERE entry=27827;
 UPDATE creature_template SET ScriptName='npc_spell_dummy_crusader_strike' WHERE entry IN (28167,28169);
 UPDATE creature_template SET ScriptName='npc_arthas' WHERE entry=26499;
 INSERT INTO scripted_areatrigger VALUES
@@ -1109,7 +1106,6 @@ UPDATE instance_template SET ScriptName='instance_forge_of_souls' WHERE map=632;
 
 /* HALLS OF REFLECTION */
 UPDATE instance_template SET ScriptName='instance_halls_of_reflection' WHERE map=668;
-UPDATE creature_template SET ScriptName='npc_spell_aura_dummy_frostmourne_equip' WHERE entry=37226;
 UPDATE creature_template SET ScriptName='npc_spell_summon_reflections' WHERE entry=36723;
 UPDATE creature_template SET ScriptName='boss_lich_king_hor' WHERE entry=36954;
 UPDATE creature_template SET ScriptName='npc_jaina_sylvanas_hor' WHERE entry IN (36955,37554);

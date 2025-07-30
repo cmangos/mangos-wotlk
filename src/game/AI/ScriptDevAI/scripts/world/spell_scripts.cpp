@@ -211,10 +211,6 @@ enum
     EMOTE_AGGRO                         = -1000551,
     EMOTE_CREATE                        = -1000552,
 
-    SAY_SPECIMEN                        = -1000581,
-    NPC_NEXUS_DRAKE_HATCHLING           = 26127,
-    SPELL_RAELORASZ_FIREBALL            = 46704,
-
     // Quest "Disrupt the Greengill Coast" (11541)
     SPELL_ORB_OF_MURLOC_CONTROL         = 45109,
     SPELL_GREENGILL_SLAVE_FREED         = 45110,
@@ -269,12 +265,6 @@ enum
     SAY_FREE_2                          = -1000782,
     SAY_FREE_3                          = -1000783,
 
-    // npcs that are only interactable while dead
-    SPELL_SHROUD_OF_DEATH               = 10848,
-    SPELL_SPIRIT_PARTICLES              = 17327,
-    NPC_FRANCLORN_FORGEWRIGHT           = 8888,
-    NPC_GAERIYAN                        = 9299,
-
     // quest 6661
     SPELL_MELODIOUS_RAPTURE             = 21050,
     SPELL_MELODIOUS_RAPTURE_VISUAL      = 21051,
@@ -287,57 +277,6 @@ enum
     NPC_SMOLDERING_SCRAP_BUNNY          = 30169,
     GO_SMOLDERING_SCRAP                 = 192124,
 };
-
-bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
-{
-    switch (pAura->GetId())
-    {
-        case SPELL_RAELORASZ_FIREBALL:
-        {
-            if (pAura->GetEffIndex() != EFFECT_INDEX_0)
-                return true;
-
-            if (Unit* pCaster = pAura->GetCaster())
-                DoScriptText(SAY_SPECIMEN, pCaster);
-
-            Unit* pTarget = pAura->GetTarget();
-            if (pTarget->GetTypeId() == TYPEID_UNIT)
-            {
-                Creature* pCreature = (Creature*)pTarget;
-
-                if (pCreature->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
-                {
-                    pCreature->SetStandState(UNIT_STAND_STATE_SLEEP);
-                    pCreature->ForcedDespawn(3000);
-                }
-            }
-            return true;
-        }
-        case SPELL_ENRAGE:
-        {
-            if (!bApply || pAura->GetTarget()->GetTypeId() != TYPEID_UNIT)
-                return false;
-
-            Creature* pTarget = (Creature*)pAura->GetTarget();
-
-            if (Creature* pCreature = GetClosestCreatureWithEntry(pTarget, NPC_DARKSPINE_MYRMIDON, 50.0f))
-            {
-                pTarget->AI()->AttackStart(pCreature);
-                return true;
-            }
-
-            if (Creature* pCreature = GetClosestCreatureWithEntry(pTarget, NPC_DARKSPINE_SIREN, 50.0f))
-            {
-                pTarget->AI()->AttackStart(pCreature);
-                return true;
-            }
-
-            return false;
-        }
-    }
-
-    return false;
-}
 
 bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
@@ -1518,7 +1457,6 @@ void AddSC_spell_scripts()
     Script* pNewScript = new Script;
     pNewScript->Name = "spell_dummy_npc";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_npc;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_npc;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<CastFishingNet>("spell_cast_fishing_net");

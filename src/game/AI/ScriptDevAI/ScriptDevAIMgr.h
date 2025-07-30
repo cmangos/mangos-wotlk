@@ -92,7 +92,7 @@ struct Script
         pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
         pGOUse(nullptr), pItemUse(nullptr), pItemLoot(nullptr), pAreaTrigger(nullptr), pNpcSpellClick(nullptr), pProcessEventId(nullptr),
         pEffectDummyNPC(nullptr),
-        pEffectAuraDummy(nullptr), pTrapSearching(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
+        pTrapSearching(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
     {}
 
     std::string Name;
@@ -117,7 +117,6 @@ struct Script
     bool (*pNpcSpellClick)(Player*, Creature*, uint32);
     bool (*pProcessEventId)(uint32, Object*, Object*, bool);
     bool (*pEffectDummyNPC)(Unit*, uint32, SpellEffectIndex, Creature*, ObjectGuid);
-    bool (*pEffectAuraDummy)(const Aura*, bool);
     std::function<bool(Unit*)>* pTrapSearching;
 
     GameObjectAI* (*GetGameObjectAI)(GameObject*);
@@ -157,7 +156,6 @@ class ScriptDevAIMgr
         bool OnAreaTrigger(Player* pPlayer, AreaTriggerEntry const* atEntry);
         bool OnProcessEvent(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart);
         bool OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid);
-        bool OnAuraDummy(Aura const* pAura, bool bApply);
         bool OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId);
 
         void AddScript(uint32 id, Script* script);
