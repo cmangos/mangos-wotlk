@@ -3335,6 +3335,24 @@ struct CoaxMarmot : public AuraScript
     }
 };
 
+enum
+{
+    //  for quest 10584
+    SPELL_PROTOVOLTAIC_MAGNETO_COLLECTOR = 37136,
+    NPC_ENCASED_ELECTROMENTAL           = 21731,
+};
+
+// 37136 - Protovoltaic Magneto Collector
+struct ProtovoltaicMagnetoCollector : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (apply && target->IsCreature())
+            static_cast<Creature*>(target)->UpdateEntry(NPC_ENCASED_ELECTROMENTAL);
+    }
+};
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript = new Script;
@@ -3469,4 +3487,5 @@ void AddSC_blades_edge_mountains()
     RegisterSpellScript<KoiKoiDeath>("spell_koi_koi_death");
     RegisterSpellScript<Soaring>("spell_soaring");
     RegisterSpellScript<CoaxMarmot>("spell_coax_marmot");
+    RegisterSpellScript<ProtovoltaicMagnetoCollector>("spell_protovoltaic_magneto_collector");
 }

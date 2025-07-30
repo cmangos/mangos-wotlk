@@ -415,6 +415,60 @@ struct SparAuras : public AuraScript
     }
 };
 
+enum
+{
+    // Quest "Disrupt the Greengill Coast" (11541)
+    SPELL_ORB_OF_MURLOC_CONTROL         = 45109,
+    SPELL_GREENGILL_SLAVE_FREED         = 45110,
+    SPELL_ENRAGE                        = 45111,
+    NPC_FREED_GREENGILL_SLAVE           = 25085,
+    NPC_DARKSPINE_MYRMIDON              = 25060,
+    NPC_DARKSPINE_SIREN                 = 25073,
+};
+
+// 45111 - Enrage
+struct EnrageDisruptTheGreenCoast : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply || !aura->GetTarget()->IsCreature())
+            return;
+
+        Unit* target = aura->GetTarget();
+
+        if (Creature* creature = GetClosestCreatureWithEntry(target, NPC_DARKSPINE_MYRMIDON, 50.0f))
+        {
+            target->AI()->AttackStart(creature);
+            return;
+        }
+
+        if (Creature* creature = GetClosestCreatureWithEntry(target, NPC_DARKSPINE_SIREN, 50.0f))
+        {
+            target->AI()->AttackStart(creature);
+            return;
+        }
+    }
+};
+
+// 45109 - Orb of Murloc Control
+struct OrbOfMurlocControl : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target->IsCreature())
+            return;
+
+        target->CastSpell(caster, SPELL_GREENGILL_SLAVE_FREED, TRIGGERED_OLD_TRIGGERED);
+
+        // Freed Greengill Slave
+        static_cast<Creature*>(target)->UpdateEntry(NPC_FREED_GREENGILL_SLAVE);
+
+        target->CastSpell(target, SPELL_ENRAGE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_isle_of_queldanas()
 {
     Script* pNewScript = new Script;
@@ -439,4 +493,6 @@ void AddSC_isle_of_queldanas()
 
     RegisterSpellScript<ShatteredSunMarksmanShoot>("spell_shattered_sun_marksman_shoot");
     RegisterSpellScript<SparAuras>("spell_spar_auras");
+    RegisterSpellScript<EnrageDisruptTheGreenCoast>("spell_enrage_disrupt_the_green_coast");
+    RegisterSpellScript<OrbOfMurlocControl>("spell_orb_of_murloc_control");
 }

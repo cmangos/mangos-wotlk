@@ -418,6 +418,49 @@ bool QuestAccept_npc_demolitionist_legoso(Player* pPlayer, Creature* pCreature, 
     return true;
 }
 
+enum
+{
+    // quest 9629
+    SPELL_TAG_MURLOC                    = 30877,
+    SPELL_TAG_MURLOC_PROC               = 30875,
+    NPC_BLACKSILT_MURLOC                = 17326,
+    NPC_TAGGED_MURLOC                   = 17654,
+};
+
+// 30877 - Tag Murloc
+struct TagMurloc : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (apply)
+        {
+            if (target->GetEntry() == NPC_BLACKSILT_MURLOC)
+            {
+                if (Unit* caster = aura->GetCaster())
+                    caster->CastSpell(target, SPELL_TAG_MURLOC_PROC, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+        {
+            if (target->GetEntry() == NPC_TAGGED_MURLOC)
+                static_cast<Creature*>(target)->ForcedDespawn();
+        }
+    }
+};
+
+// 30875 - Tag Murloc
+struct TagMurlocDummy : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (target->IsCreature())
+            if (static_cast<Creature*>(target)->GetEntry() == NPC_BLACKSILT_MURLOC)
+                static_cast<Creature*>(target)->UpdateEntry(NPC_TAGGED_MURLOC);
+    }
+};
+
 void AddSC_bloodmyst_isle()
 {
     Script* pNewScript = new Script;
@@ -430,4 +473,7 @@ void AddSC_bloodmyst_isle()
     pNewScript->GetAI = &GetNewAIInstance<npc_demolitionist_legosoAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_demolitionist_legoso;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TagMurloc>("spell_tag_murloc");
+    RegisterSpellScript<TagMurlocDummy>("spell_tag_murloc_dummy");
 }

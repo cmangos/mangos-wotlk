@@ -2371,6 +2371,55 @@ struct CharmRavager : public AuraScript
     }
 };
 
+enum
+{
+    // quest 9447
+    SPELL_HEALING_SALVE                 = 29314,
+    SPELL_HEALING_SALVE_DUMMY           = 29319,
+    NPC_MAGHAR_GRUNT                    = 16846,
+    NPC_DEBILITATED_MAGHAR_GRUNT        = 16847,
+};
+
+// 29314 - Quest - Healing Salve
+struct QuestHealingSalve : public SpellScript, public AuraScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_DEBILITATED_MAGHAR_GRUNT)
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            return;
+
+        if (Unit* caster = aura->GetCaster())
+            caster->CastSpell(aura->GetTarget(), SPELL_HEALING_SALVE_DUMMY, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 29319 - Quest - Healing Salve Dummy
+struct QuestHealingSalveDummy : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply || !aura->GetTarget()->IsCreature())
+            return;
+
+        Creature* creature = static_cast<Creature*>(aura->GetTarget());
+
+        creature->UpdateEntry(NPC_MAGHAR_GRUNT);
+
+        if (creature->getStandState() == UNIT_STAND_STATE_KNEEL)
+            creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+        creature->ForcedDespawn(60 * IN_MILLISECONDS);
+    }
+};
+
 void AddSC_hellfire_peninsula()
 {
     Script* pNewScript = new Script;
@@ -2487,4 +2536,6 @@ void AddSC_hellfire_peninsula()
     RegisterSpellScript<LivingFlareMaster>("spell_living_flare_master");
     RegisterSpellScript<LivingFlareUnstable>("spell_living_flare_unstable");
     RegisterSpellScript<DemoniacVisitation>("spell_demoniac_visitation");
+    RegisterSpellScript<QuestHealingSalve>("spell_quest_healing_salve");
+    RegisterSpellScript<QuestHealingSalveDummy>("spell_quest_healing_salve_dummy");
 }
