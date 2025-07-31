@@ -763,16 +763,13 @@ struct SparksocketAAAggroCheck : public SpellScript
 
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (effIdx != EFFECT_INDEX_0)
-            return;
-
         Unit* caster = spell->GetCaster();
         Unit* target = spell->GetUnitTarget();
 
-        Player* player = (Player*)target;
-
         if (!target->IsPlayer())
             return;
+
+        Player* player = static_cast<Player*>(target);
 
         if (player->IsMounted())
         {
