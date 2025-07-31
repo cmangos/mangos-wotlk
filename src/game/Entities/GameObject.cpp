@@ -755,7 +755,18 @@ void GameObject::Update(const uint32 diff)
 
             // can be not in world at pool despawn
             if (IsInWorld())
-                GetMap()->AddUpdateObject(this);
+            {
+                if (!IsUsingNewSpawningSystem()) // schedule out of range
+                {
+                    auto& clientGuids = GetClientGuidsIAmAt();
+                    for (auto& clientGuid : clientGuids)
+                        if (Player* client = GetMap()->GetPlayer(clientGuid))
+                            client->RemoveAtClient(this, true);
+                    GetMap()->AddUpdateRemoveObject(GetClientGuidsIAmAt(), GetObjectGuid());
+                    clientGuids.clear();
+                    GetClientGuidsIAmAt().clear();
+                }
+            }
 
             break;
         }
