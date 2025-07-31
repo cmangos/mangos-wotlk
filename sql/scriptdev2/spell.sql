@@ -875,6 +875,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54306,'spell_protective_bubble_aura'),
 (54361,'spell_void_shift_aura'),
 (54426,'spell_decimate'),
+(54432,'spell_sparksocket_aa_aggrocheck'),
 (54496,'spell_summon_plague_spray'),
 (54517,'spell_magnetic_pull_thaddius'),
 (54956,'spell_impaling_charge'),

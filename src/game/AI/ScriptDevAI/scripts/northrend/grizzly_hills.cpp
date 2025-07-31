@@ -753,6 +753,31 @@ struct AttentionSpan : public AuraScript
     }
 };
 
+// 54432 - Sparksocket AA: Aggro Check
+struct SparksocketAAAggroCheck : public SpellScript
+{
+    enum
+    {
+        SPELL_SPARKSOCKETPRESP =   56320,  // Sparksocket AA: Positive Response
+    };
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+
+        if (!target->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(target);
+
+        if (player->IsMounted())
+        {
+            player->CastSpell(caster, SPELL_SPARKSOCKETPRESP, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_grizzly_hills()
 {
     Script* pNewScript = new Script;
@@ -781,4 +806,5 @@ void AddSC_grizzly_hills()
     RegisterSpellScript<MoltenFuryFlamebringer>("spell_molten_fury_flamebringer");
     RegisterSpellScript<SummonBuddPet>("spell_summon_budd_pet");
     RegisterSpellScript<AttentionSpan>("spell_attention_span");
+    RegisterSpellScript<SparksocketAAAggroCheck>("spell_sparksocket_aa_aggrocheck");
 }
