@@ -229,7 +229,7 @@ INSERT INTO spell_group_spell(Id, SpellId) VALUES
 (3,8553),
 (3,20875),
 (3,22789),
-(3,22790), stacks until wotlk
+(3,22790), -- stacks until wotlk
 (3,25037),
 (3,25722),
 (3,25804),
