@@ -7609,6 +7609,14 @@ void Player::UpdateArea(uint32 newArea)
         SetRestType(REST_TYPE_FACTION_AREA);
     else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() != REST_TYPE_IN_TAVERN && GetRestType() != REST_TYPE_IN_CITY)
         SetRestType(REST_TYPE_NO);
+
+    if (!pvpInfo.isSanctuaryOverriden)
+    {
+        if (area && area->flags & AREA_FLAG_SANCTUARY) // in sanctuary
+            ForceSanctuary(true);
+        else
+            ForceSanctuary(false);
+    }
 }
 
 bool Player::CanUseCapturePoint() const
@@ -7686,14 +7694,6 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
 
     if (pvpInfo.inPvPEnforcedArea)                              // in hostile area
         UpdatePvP(true);
-
-    if (!pvpInfo.isSanctuaryOverriden)
-    {
-        if (zone->flags & AREA_FLAG_SANCTUARY) // in sanctuary
-            ForceSanctuary(true);
-        else
-            ForceSanctuary(false);
-    }
 
     if (zone->flags & AREA_FLAG_CAPITAL)                    // in capital city
         SetRestType(REST_TYPE_IN_CITY);

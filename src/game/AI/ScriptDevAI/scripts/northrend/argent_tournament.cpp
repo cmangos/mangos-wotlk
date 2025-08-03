@@ -587,8 +587,8 @@ struct Armistice : public AuraScript
             return;
 
         Player* player = static_cast<Player*>(caster);
-        player->pvpInfo.isSanctuaryOverriden = apply;
-        player->ForceSanctuary(apply);
+        // player->pvpInfo.isSanctuaryOverriden = apply;
+        // player->ForceSanctuary(apply);
     }
 };
 
