@@ -306,36 +306,38 @@ UnitAI* GetAI_boss_festergut(Creature* pCreature)
     return new boss_festergutAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_spell_inhale_blight(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 69165 - Inhale Blight
+struct InhaleBlight : public SpellScript
 {
-    if (uiSpellId == SPELL_INHALE_BLIGHT && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_FESTERGUT)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pCreatureTarget->GetInstanceData();
-        if (!pInstance)
-            return false;
+        if (effIdx != EFFECT_INDEX_0)
+            return;
 
-        Creature* pGasStalker = pInstance->GetSingleCreatureFromStorage(NPC_GAS_STALKER);
-        if (!pGasStalker)
-            return false;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(target->GetInstanceData());
+        if (!instance)
+            return;
 
-        if (pCreatureTarget->HasAura(SPELL_GASEOUS_BLIGHT_1))
+        Creature* gasStalker = instance->GetSingleCreatureFromStorage(NPC_GAS_STALKER);
+        if (!gasStalker)
+            return;
+
+        if (target->HasAura(SPELL_GASEOUS_BLIGHT_1))
         {
-            pGasStalker->RemoveAllAurasOnEvade();
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_GASEOUS_BLIGHT_2, TRIGGERED_OLD_TRIGGERED);
+            gasStalker->RemoveAllAurasOnEvade();
+            target->CastSpell(nullptr, SPELL_GASEOUS_BLIGHT_2, TRIGGERED_OLD_TRIGGERED);
         }
-        else if (pCreatureTarget->HasAura(SPELL_GASEOUS_BLIGHT_2))
+        else if (target->HasAura(SPELL_GASEOUS_BLIGHT_2))
         {
-            pGasStalker->RemoveAllAurasOnEvade();
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_GASEOUS_BLIGHT_3, TRIGGERED_OLD_TRIGGERED);
+            gasStalker->RemoveAllAurasOnEvade();
+            target->CastSpell(nullptr, SPELL_GASEOUS_BLIGHT_3, TRIGGERED_OLD_TRIGGERED);
         }
-        else if (pCreatureTarget->HasAura(SPELL_GASEOUS_BLIGHT_3))
-            pGasStalker->RemoveAllAurasOnEvade();
-
-        return true;
+        else if (target->HasAura(SPELL_GASEOUS_BLIGHT_3))
+            gasStalker->RemoveAllAurasOnEvade();
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_orange_gas_stalker
@@ -362,11 +364,12 @@ void AddSC_boss_festergut()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_festergut";
     pNewScript->GetAI = &GetAI_boss_festergut;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_inhale_blight;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_orange_gas_stalker";
     pNewScript->GetAI = GetAI_npc_orange_gas_stalker;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<InhaleBlight>("spell_inhale_blight");
 }

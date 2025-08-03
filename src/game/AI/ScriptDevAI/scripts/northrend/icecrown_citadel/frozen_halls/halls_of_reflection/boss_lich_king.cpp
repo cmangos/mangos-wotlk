@@ -250,19 +250,19 @@ struct boss_lich_king_horAI : public ScriptedAI
     }
 };
 
-bool EffectScriptEffectCreature_spell_stun_break(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 69763 - Stun Break
+struct StunBreakLk : public SpellScript
 {
-    if (uiSpellId == SPELL_STUN_BREAK && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        pCreatureTarget->AI()->EnterEvadeMode();
-        pCreatureTarget->SetImmuneToPlayer(true);
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        if (!target->IsCreature())
+            return;
+        target->AI()->EnterEvadeMode();
+        target->SetImmuneToPlayer(true);
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetCaster(), target);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_jaina_sylvanas_hor
@@ -356,7 +356,6 @@ void AddSC_boss_lich_king()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_lich_king_hor";
     pNewScript->GetAI = &GetNewAIInstance<boss_lich_king_horAI>;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_stun_break;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -368,4 +367,6 @@ void AddSC_boss_lich_king()
     pNewScript->Name = "at_wrath_lich_king";
     pNewScript->pAreaTrigger = &AreaTrigger_at_wrath_lich_king;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<StunBreakLk>("spell_stun_break_lk");
 }

@@ -482,17 +482,16 @@ UnitAI* GetAI_boss_professor_putricide(Creature* pCreature)
     return new boss_professor_putricideAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 69795 - Ooze Flood Trigger
+struct OozeFloodTrigger : public SpellScript
 {
-    if (pCreatureTarget->GetEntry() != NPC_PROFESSOR_PUTRICIDE)
-        return false;
-
-    // Ooze flood trigger - used in Rotface encounter
-    if (uiSpellId == SPELL_OOZE_FLOOD_TRIGGER && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pCreatureTarget->GetInstanceData();
+        uint32 spellId = spell->m_spellInfo->Id;
+        Unit* target = spell->GetUnitTarget();
+        instance_icecrown_citadel* pInstance = dynamic_cast<instance_icecrown_citadel*>(target->GetInstanceData());
         if (!pInstance)
-            return false;
+            return;
 
         // Defind the target as one of the stalkers from the top of the taps
         GuidList lStalkersGuidList;
@@ -503,20 +502,20 @@ bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, S
 
         for (GuidList::const_iterator itr = lStalkersGuidList.begin(); itr != lStalkersGuidList.end(); ++itr)
         {
-            if (Creature* pStalker = pCreatureTarget->GetMap()->GetCreature(*itr))
+            if (Creature* pStalker = target->GetMap()->GetCreature(*itr))
                 vTapStalkers.push_back(pStalker);
         }
 
         if (vTapStalkers.empty())
         {
             script_error_log("Instance Icecrown Citadel: ERROR Failed to properly find creature %u for Ooze Flood event.", NPC_PUDDLE_STALKER);
-            return false;
+            return;
         }
 
         // pick random target of the tap stalkers
         Creature* pTarget = vTapStalkers[urand(0, vTapStalkers.size() - 1)];
         if (!pTarget)
-            return false;
+            return;
 
         // get the nearest twin tap stalker
         Creature* pNearTarget = nullptr;
@@ -524,7 +523,7 @@ bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, S
         GetCreatureListWithEntryInGrid(lTargetsInRange, pTarget, pTarget->GetEntry(), 30.0f);
 
         if (lTargetsInRange.empty())
-            return false;
+            return;
 
         // find only the nearest tap trigger
         for (CreatureList::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
@@ -534,37 +533,34 @@ bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, S
         }
 
         if (!pNearTarget)
-            return false;
+            return;
 
         // cast the triggered spell on each target
-        pCreatureTarget->CastSpell(pTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-        pCreatureTarget->CastSpell(pNearTarget, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-        DoScriptText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, pCreatureTarget);
-
-        return true;
+        target->CastSpell(pTarget, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(pNearTarget, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
+        DoScriptText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, target);
     }
-    if (uiSpellId == SPELL_UNSTABLE_EXPERIMENT && uiEffIndex == EFFECT_INDEX_0)
-    {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
-    }
+};
 
-    return false;
-}
-
-bool EffectDummyCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 70351 - Unstable Experiment
+struct UnstableExperiment : public SpellScript
 {
-    if (pCreatureTarget->GetEntry() != NPC_PROFESSOR_PUTRICIDE)
-        return false;
-
-    if (uiSpellId == SPELL_VOLATILE_EXPERIMENT && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetCaster(), target);
     }
+};
 
-    return false;
-}
+// 72840 - Volatile Experiment
+struct VolatileExperiment : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, spell->GetCaster(), target);
+    }
+};
 
 /*######
 ## npc_volatile_ooze_icc
@@ -702,34 +698,34 @@ UnitAI* GetAI_npc_growing_ooze_puddle(Creature* pCreature)
     return new npc_growing_ooze_puddleAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_spell_eat_ooze(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 70360 - Eat Ooze
+struct EatOoze : public SpellScript
 {
-    if (pCreatureTarget->GetEntry() != NPC_GROWING_OOZE_PUDDLE)
-        return false;
-
-    // Ooze flood trigger - used in Rotface encounter
-    if (uiSpellId == SPELL_EAT_OOZE && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pCreatureTarget->GetInstanceData();
-        if (!pInstance)
-            return false;
+        if (effIdx != EFFECT_INDEX_0)
+            return;
 
+        Unit* target = spell->GetUnitTarget();
+        instance_icecrown_citadel* pInstance = dynamic_cast<instance_icecrown_citadel*>(target->GetInstanceData());
+        if (!pInstance)
+            return;
+
+        uint32 triggerSpellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
         // ToDo: research if the amount of stacks removal is correct
-        pCreatureTarget->RemoveAuraHolderFromStack(GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), 3);
+        target->RemoveAuraHolderFromStack(triggerSpellId, 3);
 
         // despawn if we don't have the grow aura anymore
-        if (!pCreatureTarget->HasAura(GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex)))
+        if (!target->HasAura(spell->m_spellInfo->CalculateSimpleValue(effIdx)))
         {
-            pCreatureTarget->RemoveAllAurasOnEvade();
-            pCreatureTarget->ForcedDespawn(5000);
+            target->RemoveAllAurasOnEvade();
+            if (target->IsCreature())
+                static_cast<Creature*>(target)->ForcedDespawn(5000);
         }
 
         pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_NAUSEA, false);
-        return true;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_choking_gas_bomb
@@ -771,27 +767,23 @@ UnitAI* GetAI_npc_puddle_stalker(Creature* pCreature)
     return new npc_puddle_stalkerAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_spell_ooze_flood(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 69782 - Ooze Flood
+struct OozeFlood : public SpellScript
 {
-    if (uiSpellId == SPELL_OOZE_FLOOD && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_PUDDLE_STALKER)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        Unit* target = spell->GetUnitTarget();
         // Set target manually to hit exactly the stalker below the tap
-        if (Creature* pStalker = GetClosestCreatureWithEntry(pCreatureTarget, pCreatureTarget->GetEntry(), 20.0f))
-            pCreatureTarget->CastSpell(pStalker, GetSpellStore()->LookupEntry<SpellEntry>(uiSpellId)->CalculateSimpleValue(uiEffIndex), TRIGGERED_OLD_TRIGGERED);
-
-        return true;
+        if (Creature* pStalker = GetClosestCreatureWithEntry(target, target->GetEntry(), 20.0f))
+            target->CastSpell(pStalker, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
     }
-
-    return false;
-}
+};
 
 void AddSC_boss_professor_putricide()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_professor_putricide";
     pNewScript->GetAI = &GetAI_boss_professor_putricide;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_putricide;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_npc_putricide;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -807,7 +799,6 @@ void AddSC_boss_professor_putricide()
     pNewScript = new Script;
     pNewScript->Name = "npc_growing_ooze_puddle";
     pNewScript->GetAI = GetAI_npc_growing_ooze_puddle;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_eat_ooze;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -818,6 +809,11 @@ void AddSC_boss_professor_putricide()
     pNewScript = new Script;
     pNewScript->Name = "npc_puddle_stalker";
     pNewScript->GetAI = GetAI_npc_puddle_stalker;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_ooze_flood;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<OozeFloodTrigger>("spell_ooze_flood_trigger");
+    RegisterSpellScript<UnstableExperiment>("spell_unstable_experiment");
+    RegisterSpellScript<VolatileExperiment>("spell_volatile_experiment");
+    RegisterSpellScript<EatOoze>("spell_eat_ooze");
+    RegisterSpellScript<OozeFlood>("spell_ooze_flood");
 }

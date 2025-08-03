@@ -771,18 +771,16 @@ UnitAI* GetAI_boss_freya(Creature* pCreature)
     return new boss_freyaAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_boss_freya(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 62678, 62873 - Summon Allies of Nature
+struct SummonAlliesOfNature : public SpellScript
 {
-    if ((uiSpellId == SPELL_SUMMON_ALLIES_OF_NATURE || uiSpellId == SPELL_SUMMON_ALLIES_OF_NATURE_H) && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCreatureTarget->GetEntry() == NPC_FREYA)
-            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        if (target->GetEntry() == NPC_FREYA)
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetCaster(), target);
     }
-
-    return false;
-}
+};
 
 /*######
 ## three_nature_allies
@@ -1134,7 +1132,6 @@ void AddSC_boss_freya()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_freya";
     pNewScript->GetAI = GetAI_boss_freya;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_boss_freya;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1171,4 +1168,6 @@ void AddSC_boss_freya()
     pNewScript->Name = "npc_healthy_spore";
     pNewScript->GetAI = GetAI_npc_healthy_spore;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonAlliesOfNature>("spell_summon_allies_of_nature");
 }

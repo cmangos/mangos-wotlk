@@ -417,37 +417,31 @@ UnitAI* GetAI_mob_big_ooze(Creature* pCreature)
     return new mob_big_oozeAI(pCreature);
 }
 
-bool EffectScriptEffectCreature_spell_unstable_ooze(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 69558 - Unstable Ooze
+struct UnstableOozeRotface : public SpellScript
 {
-    if (uiSpellId == SPELL_UNSTABLE_OOZE && uiEffIndex == EFFECT_INDEX_2 && pCreatureTarget->GetEntry() == NPC_BIG_OOZE)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        Unit* target = spell->GetUnitTarget();
+        if (effIdx != EFFECT_INDEX_2 || !target->AI())
+            return;
+
         // send AI event on 5 stacks of unstable Ooze
-        SpellAuraHolder* pOozeHolder = pCreatureTarget->GetSpellAuraHolder(uiSpellId);
+        SpellAuraHolder* pOozeHolder = target->GetSpellAuraHolder(spell->m_spellInfo->Id);
         if (pOozeHolder)
         {
             // Note: stacks are increased after the effect is processed, so we need to use (stacks - 1)
             switch (pOozeHolder->GetStackAmount())
             {
-                case 1:
-                    DoScriptText(EMOTE_OOZE_GROW_1, pCreatureTarget);
-                    break;
-                case 2:
-                    DoScriptText(EMOTE_OOZE_GROW_2, pCreatureTarget);
-                    break;
-                case 4:
-                    pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+                case 1: DoScriptText(EMOTE_OOZE_GROW_1, target); break;
+                case 2: DoScriptText(EMOTE_OOZE_GROW_2, target); break;
+                case 4: target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetCaster(), target);
                 // no break;
-                case 3:
-                    DoScriptText(EMOTE_OOZE_GROW_3, pCreatureTarget);
-                    break;
+                case 3: DoScriptText(EMOTE_OOZE_GROW_3, target); break;
             }
         }
-
-        return true;
     }
-
-    return false;
-}
+};
 
 void AddSC_boss_rotface()
 {
@@ -464,6 +458,7 @@ void AddSC_boss_rotface()
     pNewScript = new Script;
     pNewScript->Name = "mob_big_ooze";
     pNewScript->GetAI = &GetAI_mob_big_ooze;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_unstable_ooze;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<UnstableOozeRotface>("spell_unstable_ooze_rotface");
 }
