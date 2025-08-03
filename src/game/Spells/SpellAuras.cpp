@@ -10646,8 +10646,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
             SpellGroupSpellData const* data = sSpellStacker.GetSpellGroupDataForSpell(m_spellProto->Id);
 
-            if (data && !data->HasFlag(SpellGroupId::AURA))
-                return;
+            if (!data || !data->HasFlag(SpellGroupId::AURA))
+                break;
 
             // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
             if ((GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000008)) == 0)
