@@ -237,12 +237,9 @@ INSERT INTO spell_group_spell(Id, SpellId) VALUES
 
 
 -- attribute query cleaned
-(3,128), -- Spellstone
 (3,15851), -- Dragonbreath Chili
 (3,15852), -- Dragonbreath Chili
 (3,17624), -- Petrification
-(3,17729), -- Greater Spellstone
-(3,17730), -- Major Spellstone
 (3,19705), -- Well Fed
 (3,19706), -- Well Fed
 (3,19708), -- Well Fed
@@ -255,7 +252,6 @@ INSERT INTO spell_group_spell(Id, SpellId) VALUES
 (3,25694), -- Well Fed
 (3,25851), -- Lightheaded
 (3,25941), -- Well Fed
-(3,28170), -- Master Spellstone
 (3,29040), -- Fizzy Energy Drink
 (3,29220), -- Fiery Festival Brew
 (3,29221), -- Fiery Festival Brew
@@ -436,7 +432,6 @@ INSERT INTO spell_group_spell(Id, SpellId) VALUES
 (8,19900),
 (8,27153),
 (8,48947),
-(8,20218), -- Sanctity Aura
 (8,32223), -- Crusader Aura
 
 -- Sting
