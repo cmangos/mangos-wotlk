@@ -964,6 +964,11 @@ class Creature : public Unit
         void SetDelayedBoarding(uint32 spellId, int32 seat) { m_delayedBoardingSpell = spellId; m_delayedBoardingSeat = seat; }
         void TriggerDelayedBoarding();
 
+        bool IsThreatUpdateSent() const override;
+        bool IgnoreLosWhenCastingOnMe() const override;
+        bool IsDealTripleDamageToPets() const override;
+        bool IsEnemyCheckIgnoresLos() const override;
+
     protected:
         bool CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);

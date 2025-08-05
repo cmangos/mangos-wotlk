@@ -2666,6 +2666,11 @@ class Unit : public WorldObject
         virtual void SetMountInfo(CreatureInfo const* /*info*/) {} // does nothing for base unit
         virtual void SetModelRunSpeed(float /*runSpeed*/) {} // does nothing for base unit
 
+        virtual bool IsThreatUpdateSent() const { return true; }
+        virtual bool IgnoreLosWhenCastingOnMe() const { return false; }
+        virtual bool IsDealTripleDamageToPets() const { return false; }
+        virtual bool IsEnemyCheckIgnoresLos() const { return false; }
+
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;
 

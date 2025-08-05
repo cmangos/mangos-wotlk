@@ -5770,7 +5770,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
                 if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALWAYS_LINE_OF_SIGHT) ||
                     (!IsIgnoreLosSpellCast(m_spellInfo) && !m_IsTriggeredSpell))
-                    if (!m_trueCaster->IsWithinLOSInMap(target, true))
+                    if (!target->IgnoreLosWhenCastingOnMe() && !m_trueCaster->IsWithinLOSInMap(target, true))
                         return SPELL_FAILED_LINE_OF_SIGHT;
 
                 if (m_trueCaster->IsPlayer())
@@ -8429,12 +8429,12 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                                 if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_LOCATION_CHANNEL_TARGET_DEST)
                                 {
                                     if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
-                                        if (!target->IsWithinLOSInMap(dynObj, true))
+                                        if (!target->IgnoreLosWhenCastingOnMe() && !target->IsWithinLOSInMap(dynObj, true))
                                             return false;
                                 }
                                 else if (WorldObject* caster = GetCastingObject())
                                 {
-                                    if (!target->IsWithinLOSInMap(caster, true))
+                                    if (!target->IgnoreLosWhenCastingOnMe() && !target->IsWithinLOSInMap(caster, true))
                                         return false;
                                 }
                             }
@@ -9283,7 +9283,7 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme sc
                 if (prev->GetDistance(*next, true, DIST_CALC_NONE) > m_jumpRadius * m_jumpRadius)
                     break;
 
-                if (!prev->IsWithinLOSInMap(*next, true))
+                if (!(*next)->IgnoreLosWhenCastingOnMe() && !prev->IsWithinLOSInMap(*next, true))
                 {
                     ++next;
                     continue;
@@ -9322,7 +9322,7 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme sc
                     continue;
                 }
 
-                if (!prev->IsWithinLOSInMap(*next, true))
+                if (!(*next)->IgnoreLosWhenCastingOnMe() && !prev->IsWithinLOSInMap(*next, true))
                 {
                     ++next;
                     continue;

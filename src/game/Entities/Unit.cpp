@@ -449,7 +449,7 @@ void Unit::Update(const uint32 diff)
             m_lastManaUseTimer -= diff;
     }
 
-    if (CanHaveThreatList())
+    if (CanHaveThreatList() && IsThreatUpdateSent())
         getThreatManager().UpdateForClient(diff);
 
     if (!IsDelayCombatTimerSpellCasted())
@@ -843,6 +843,9 @@ void Unit::DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* ab
 
     if (dealer) // dealer is optional
     {
+        if (dealer->IsDealTripleDamageToPets() && !victim->IsPlayer() && victim->IsPlayerControlled())
+            damage *= 3;
+
         // You don't lose health from damage taken from another player while in a sanctuary
         // You still see it in the combat log though
         if (!IsAllowedDamageInArea(dealer, victim))

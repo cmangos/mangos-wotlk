@@ -1720,6 +1720,26 @@ void Creature::TriggerDelayedBoarding()
         ForcedDespawn();
 }
 
+bool Creature::IsThreatUpdateSent() const
+{
+    return !GetSettings().HasFlag(CreatureStaticFlags3::NO_THREAT_FEEDBACK);
+}
+
+bool Creature::IgnoreLosWhenCastingOnMe() const
+{
+    return GetSettings().HasFlag(CreatureStaticFlags4::IGNORE_LOS_WHEN_CASTING_ON_ME);
+}
+
+bool Creature::IsDealTripleDamageToPets() const
+{
+    return GetSettings().HasFlag(CreatureStaticFlags4::DEALS_TRIPLE_DAMAGE_TO_PC_CONTROLLED_PETS);
+}
+
+bool Creature::IsEnemyCheckIgnoresLos() const
+{
+    return GetSettings().HasFlag(CreatureStaticFlags3::ENEMY_CHECK_IGNORES_LOS);
+}
+
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     m_originalEntry = cinfo->Entry;
