@@ -1578,7 +1578,6 @@ UPDATE creature_template SET ScriptName='npc_galen_goodward' WHERE entry=5391;
 
 /* TANARIS */
 UPDATE creature_template SET ScriptName='mob_aquementas' WHERE entry=9453;
-UPDATE creature_template SET ScriptName='npc_custodian_of_time' WHERE entry=20129;
 UPDATE creature_template SET ScriptName='npc_oox17tn' WHERE entry=7784;
 UPDATE creature_template SET ScriptName='npc_tooga' WHERE entry=5955;
 
@@ -2139,21 +2138,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000214','Emergency shutdown will complete in ten seconds.','0','2','0','0','17885','manaforge_control EMOTE_10'),
 ('-1000215','Emergency shutdown complete.','0','2','0','0','17900','manaforge_control EMOTE_COMPLETE'),
 ('-1000216','Emergency shutdown aborted.','0','2','0','0','17886','manaforge_control EMOTE_ABORT'),
-
-('-1000217','Greetings, $N. I will guide you through the cavern. Please try and keep up.','0','4','0','0','17656','WHISPER_CUSTODIAN_1'),
-('-1000218','We do not know if the Caverns of Time have always been accessible to mortals. Truly, it is impossible to tell as the Timeless One is in perpetual motion, changing our timeways as he sees fit. What you see now may very well not exist tomorrow. You may wake up and have no memory of this place.','0','4','0','0','17657','WHISPER_CUSTODIAN_2'),
-('-1000219','It is strange, I know... Most mortals cannot actually comprehend what they see here, as often, what they see is not anchored within their own perception of reality.','0','4','0','0','17658','WHISPER_CUSTODIAN_3'),
-('-1000220','Follow me, please.','0','4','0','0','17668','WHISPER_CUSTODIAN_4'),
-('-1000221','There are only two truths to be found here: First, that time is chaotic, always in flux, and completely malleable and second, perception does not dictate reality.','0','4','0','0','17667','WHISPER_CUSTODIAN_5'),
-('-1000222','As custodians of time, we watch over and care for Nozdormu''s realm. The master is away at the moment, which means that attempts are being made to dramatically alter time. The master never meddles in the affairs of mortals but instead corrects the alterations made to time by others. He is reactionary in this regard.','0','4','0','0','17659','WHISPER_CUSTODIAN_6'),
-('-1000223','For normal maintenance of time, the Keepers of Time are sufficient caretakers. We are able to deal with most ordinary disturbances. I speak of little things, such as rogue mages changing something in the past to elevate their status or wealth in the present.','0','4','0','0','17660','WHISPER_CUSTODIAN_7'),
-('-1000224','These tunnels that you see are called timeways. They are infinite in number. The ones that currently exist in your reality are what the master has deemed as ''trouble spots.'' These trouble spots may differ completely in theme but they always share a cause. That is, their existence is a result of the same temporal disturbance. Remember that should you venture inside one...','0','4','0','0','17661','WHISPER_CUSTODIAN_8'),
-('-1000225','This timeway is in great disarray! We have agents inside right now attempting to restore order. What information I have indicates that Thrall''s freedom is in jeopardy. A malevolent organization known as the Infinite Dragonflight is trying to prevent his escape. I fear without outside assistance, all will be lost.','0','4','0','0','17663','WHISPER_CUSTODIAN_9'),
-('-1000226','We have very little information on this timeway. Sa''at has been dispatched and is currently inside. The data we have gathered from his correspondence is that the Infinite Dragonflight are once again attempting to alter time. Could it be that the opening of the Dark Portal is being targeted for sabotage? Let us hope not...','0','4','0','0','17664','WHISPER_CUSTODIAN_10'),
-('-1000227','This timeway is currently collapsing. What that may hold for the past, present and future is currently unknown...','0','4','0','0','0','WHISPER_CUSTODIAN_11'),
-('-1000228','The timeways are currently ranked in order from least catastrophic to most catastrophic. Note that they are all classified as catastrophic, meaning that any single one of these timeways collapsing would mean that your world would end. We only classify them in such a way so that the heroes and adventurers that are sent here know which timeway best suits their abilities.','0','4','0','0','17662','WHISPER_CUSTODIAN_12'),
-('-1000229','All we know of this timeway is that it leads to Mount Hyjal. The Infinite Dragonflight have gone to great lengths to prevent our involvement. We know next to nothing, mortal. Soridormi is currently attempting to break through the timeway''s defenses but has thus far been unsuccessful. You might be our only hope of breaking through and resolving the conflict.','0','4','0','0','17665','WHISPER_CUSTODIAN_13'),
-('-1000230','Our time is at an end $N. I would wish you luck, if such a thing existed.','0','4','0','0','17666','WHISPER_CUSTODIAN_14'),
 
 ('-1000231','Ah, $GPriest:Priestess; you came along just in time. I appreciate it.','0','0','0','20','7668','garments SAY_COMMON_HEALED'),
 ('-1000232','Thank you! Thank you, $GPriest:Priestess;. Now I can take on those gnolls with your power to back me!','0','0','1','4','7792','garments SAY_DG_KEL_THANKS'),
@@ -9152,32 +9136,6 @@ INSERT INTO script_waypoint (Entry, PathId, Point, PositionX, PositionY, Positio
 (19685,0,75,-1837.93,5521.12,0.844,0,0,0,''),
 (19685,0,76,-1832.781,5523.799,1.035073,100,2500,0,'pause'),
 (19685,0,77,-1847.987,5477.499,0.8568287,100,40000,0,'end'),
-(20129,0,1,-8374.93,-4250.21,-204.38,0,5000,0,''),
-(20129,0,2,-8374.93,-4250.21,-204.38,0,16000,0,''),
-(20129,0,3,-8374.93,-4250.21,-204.38,0,10000,0,''),
-(20129,0,4,-8374.93,-4250.21,-204.38,0,2000,0,''),
-(20129,0,5,-8439.4,-4180.05,-209.25,0,0,0,''),
-(20129,0,6,-8437.82,-4120.84,-208.59,0,10000,0,''),
-(20129,0,7,-8437.82,-4120.84,-208.59,0,16000,0,''),
-(20129,0,8,-8437.82,-4120.84,-208.59,0,13000,0,''),
-(20129,0,9,-8437.82,-4120.84,-208.59,0,18000,0,''),
-(20129,0,10,-8437.82,-4120.84,-208.59,0,15000,0,''),
-(20129,0,11,-8437.82,-4120.84,-208.59,0,2000,0,''),
-(20129,0,12,-8467.26,-4198.63,-214.21,0,0,0,''),
-(20129,0,13,-8667.76,-4252.13,-209.56,0,0,0,''),
-(20129,0,14,-8703.71,-4234.58,-209.5,0,14000,0,''),
-(20129,0,15,-8703.71,-4234.58,-209.5,0,2000,0,''),
-(20129,0,16,-8642.81,-4304.37,-209.57,0,0,0,''),
-(20129,0,17,-8649.06,-4394.36,-208.46,0,6000,0,''),
-(20129,0,18,-8649.06,-4394.36,-208.46,0,18000,0,''),
-(20129,0,19,-8649.06,-4394.36,-208.46,0,2000,0,''),
-(20129,0,20,-8468.72,-4437.67,-215.45,0,0,0,''),
-(20129,0,21,-8427.54,-4426,-211.13,0,0,0,''),
-(20129,0,22,-8364.83,-4393.32,-205.91,0,0,0,''),
-(20129,0,23,-8304.54,-4357.2,-208.2,0,18000,0,''),
-(20129,0,24,-8304.54,-4357.2,-208.2,0,2000,0,''),
-(20129,0,25,-8375.42,-4250.41,-205.14,0,5000,0,''),
-(20129,0,26,-8375.42,-4250.41,-205.14,0,5000,0,''),
 (20281,0,1,3096.42,2801.41,118.149,0,7000,0,'SAY_DRIJYA_START'),
 (20281,0,2,3096.52,2801.06,118.128,0,0,0,'SAY_DRIJYA_1'),
 (20281,0,3,3100,2796.67,118.118,0,0,0,''),
