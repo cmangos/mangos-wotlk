@@ -10082,7 +10082,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
         if (!i.hitTime)
             return DIMINISHING_LEVEL_1;
 
-        const bool pvp = (GetTypeId() == TYPEID_PLAYER);
+        const bool pvp = (IsPlayerControlled());
         const bool diminished = IsDiminishingReturnsGroupDurationDiminished(group, pvp);
 
         // If enough time has passed sinc the last spell from this group was casted - reset the count
@@ -10131,16 +10131,32 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, U
         // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
         int32 limitduration = GetDiminishingReturnsLimitDuration(group, spellInfo);
         if (limitduration > 0 && duration > limitduration)
-            if (pvp)
+            if (pvp || IsTreatAsPlayerForDebuffDuration())
                 duration = limitduration;
     }
 
     float mod = 1.0f;
 
     // Some diminishings applies to mobs too (for example, Stun)
-    if (IsSubjectToDiminishingLevels(group, pvp))
+    if (IsSubjectToDiminishingLevels(group, pvp || IsTreatAsPlayerForDiminishingReturns()))
     {
-        if (IsDiminishingReturnsGroupDurationDiminished(group, pvp))
+        if (group == DIMINISHING_TAUNT)
+        {
+            if (IsSubjectToTauntDr())
+            {
+                DiminishingLevels diminish = Level;
+                switch (diminish)
+                {
+                    case DIMINISHING_LEVEL_1: break;
+                    case DIMINISHING_LEVEL_2: mod = 0.65f; break;
+                    case DIMINISHING_LEVEL_3: mod = 0.4225f; break;
+                    case DIMINISHING_LEVEL_4: mod = 0.274625f; break;
+                    case DIMINISHING_LEVEL_IMMUNE: mod = 0.0f; break;
+                    default: break;
+                }
+            }
+        }
+        else
         {
             DiminishingLevels diminish = Level;
 
@@ -10149,6 +10165,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, U
                 case DIMINISHING_LEVEL_1: break;
                 case DIMINISHING_LEVEL_2: mod = 0.5f; break;
                 case DIMINISHING_LEVEL_3: mod = 0.25f; break;
+                case DIMINISHING_LEVEL_4:
                 case DIMINISHING_LEVEL_IMMUNE: mod = 0.0f; break;
                 default: break;
             }

@@ -608,7 +608,8 @@ enum DiminishingLevels
     DIMINISHING_LEVEL_1             = 0,         //< Won't make a difference to stun duration
     DIMINISHING_LEVEL_2             = 1,         //< Reduces stun time by 50%
     DIMINISHING_LEVEL_3             = 2,         //< Reduces stun time by 75%
-    DIMINISHING_LEVEL_IMMUNE        = 3          //< The target is immune to the DiminishingGrouop
+    DIMINISHING_LEVEL_4             = 3,         //< Taunt only
+    DIMINISHING_LEVEL_IMMUNE        = 4          //< The target is immune to the DiminishingGrouop
 };
 
 /**
@@ -2670,6 +2671,9 @@ class Unit : public WorldObject
         virtual bool IgnoreLosWhenCastingOnMe() const { return false; }
         virtual bool IsDealTripleDamageToPets() const { return false; }
         virtual bool IsEnemyCheckIgnoresLos() const { return false; }
+        virtual bool IsSubjectToTauntDr() const { return false; }
+        virtual bool IsTreatAsPlayerForDebuffDuration() const { return false; }
+        virtual bool IsTreatAsPlayerForDiminishingReturns() const { return false; }
 
     protected:
         bool MeetsSelectAttackingRequirement(Unit* target, SpellEntry const* spellInfo, uint32 selectFlags, SelectAttackingTargetParams params, int32 unitConditionId) const;

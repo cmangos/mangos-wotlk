@@ -968,6 +968,9 @@ class Creature : public Unit
         bool IgnoreLosWhenCastingOnMe() const override;
         bool IsDealTripleDamageToPets() const override;
         bool IsEnemyCheckIgnoresLos() const override;
+        bool IsSubjectToTauntDr() const override;
+        bool IsTreatAsPlayerForDebuffDuration() const override;
+        bool IsTreatAsPlayerForDiminishingReturns() const override;
 
     protected:
         bool CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);

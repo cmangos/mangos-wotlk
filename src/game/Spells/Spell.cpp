@@ -1155,7 +1155,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
                 int32 duration = targetInfo.effectDuration;
                 targetForDiminish->ApplyDiminishingToDuration(targetInfo.diminishGroup, duration, realCaster, targetInfo.diminishLevel, isReflected, m_spellInfo, m_auraScript);
                 targetInfo.diminishDuration = duration;
-                if (targetInfo.diminishDuration == 0 && targetInfo.diminishLevel == DIMINISHING_LEVEL_IMMUNE)
+                if (targetInfo.diminishDuration == 0 && targetInfo.effectDuration != targetInfo.diminishDuration)
                     targetInfo.effectHitMask &= ~GetAuraEffectMask(m_spellInfo);
             }
         }

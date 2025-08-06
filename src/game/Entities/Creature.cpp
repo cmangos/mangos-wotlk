@@ -1740,6 +1740,21 @@ bool Creature::IsEnemyCheckIgnoresLos() const
     return GetSettings().HasFlag(CreatureStaticFlags3::ENEMY_CHECK_IGNORES_LOS);
 }
 
+bool Creature::IsSubjectToTauntDr() const
+{
+    return GetSettings().HasFlag(CreatureStaticFlags4::OBEYS_TAUNT_DIMINISHING_RETURNS);
+}
+
+bool Creature::IsTreatAsPlayerForDebuffDuration() const
+{
+    return GetSettings().HasFlag(CreatureStaticFlags4::TREAT_AS_PLAYER_FOR_PVP_DEBUFF_DURATION);
+}
+
+bool Creature::IsTreatAsPlayerForDiminishingReturns() const
+{
+    return GetSettings().HasFlag(CreatureStaticFlags4::TREAT_AS_PLAYER_FOR_DIMINISHING_RETURNS);
+}
+
 bool Creature::CreateFromProto(uint32 dbGuid, uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data /*=nullptr*/, GameEventCreatureData const* eventData /*=nullptr*/)
 {
     m_originalEntry = cinfo->Entry;

@@ -2991,6 +2991,9 @@ void SpellMgr::CheckUsedSpells(char const* table) const
 
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered)
 {
+    if (IsSpellHaveAura(spellproto, SPELL_AURA_MOD_TAUNT))
+        return DIMINISHING_TAUNT;
+
     // Explicit Diminishing Groups
     switch (spellproto->SpellFamilyName)
     {
@@ -3162,7 +3165,7 @@ bool IsDiminishingReturnsGroupDurationDiminished(DiminishingGroup group, bool pv
 //         default:
 //             return true;
 //     }
-    return false;
+    return true;
 }
 
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
@@ -3172,6 +3175,7 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
         case DIMINISHING_CYCLONE:
         case DIMINISHING_TRIGGER_STUN:
         case DIMINISHING_CONTROL_STUN:
+        case DIMINISHING_TAUNT:
             return DRTYPE_ALL;
         case DIMINISHING_CONTROL_ROOT:
         case DIMINISHING_TRIGGER_ROOT:

@@ -1816,7 +1816,8 @@ enum DiminishingGroup
     DIMINISHING_BANISH,
     // Other
     // Don't Diminish, but limit duration to 10s
-    DIMINISHING_LIMITONLY
+    DIMINISHING_LIMITONLY,
+    DIMINISHING_TAUNT,
 };
 
 enum InstanceResetMethod
