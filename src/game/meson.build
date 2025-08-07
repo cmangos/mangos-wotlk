@@ -210,6 +210,7 @@ game_sources = [
     'Spells/SpellTargets.cpp',
     'Spells/SpellDefines.cpp',
     'Spells/SpellEffects.cpp',
+    'Spells/SpellStacking.cpp',
     'Groups/GroupHandler.cpp',
     'Groups/GroupReference.cpp',
     'Groups/Group.cpp',
