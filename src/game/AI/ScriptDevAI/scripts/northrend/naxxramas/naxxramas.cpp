@@ -852,15 +852,6 @@ bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigge
     return false;
 }
 
-// 25680 - Random Aggro
-struct RandomAggro : public SpellScript
-{
-    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
-    {
-        spell->GetCaster()->AddThreat(spell->GetUnitTarget());
-    }
-};
-
 void AddSC_instance_naxxramas()
 {
     Script* pNewScript = new Script;
@@ -872,6 +863,4 @@ void AddSC_instance_naxxramas()
     pNewScript->Name = "at_naxxramas";
     pNewScript->pAreaTrigger = &AreaTrigger_at_naxxramas;
     pNewScript->RegisterSelf();
-
-    RegisterSpellScript<RandomAggro>("spell_random_aggro");
 }

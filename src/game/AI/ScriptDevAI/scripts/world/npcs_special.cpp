@@ -1958,7 +1958,7 @@ enum
     SPELL_GLYPH_OF_SNAKE_TRAP   = 56849,
     SPELL_GLYPH_OF_SNAKE_TRAP_AVOIDANCE_CUSTOM = 80001, // no spell in sniff
 
-    // SPELL_RANDOM_AGGRO = 34701 // unk purpose
+    SPELL_RANDOM_AGGRO = 34701,
 };
 
 struct npc_snakesAI : public ScriptedAI
@@ -1977,6 +1977,7 @@ struct npc_snakesAI : public ScriptedAI
         if (Unit* spawner = m_creature->GetSpawner())
             if (spawner->HasAura(SPELL_GLYPH_OF_SNAKE_TRAP)) // Glyph of Snake Trap
                 DoCastSpellIfCan(nullptr, SPELL_GLYPH_OF_SNAKE_TRAP_AVOIDANCE_CUSTOM, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_RANDOM_AGGRO, CAST_TRIGGERED);
     }
 
     void UpdateAI(const uint32 diff) override
