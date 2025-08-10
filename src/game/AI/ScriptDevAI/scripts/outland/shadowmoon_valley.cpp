@@ -446,24 +446,27 @@ struct npc_dragonmaw_peonAI : public ScriptedAI
     }
 };
 
-bool EffectDummyCreature_npc_dragonmaw_peon(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 40468 - Serving Poisoned Mutton
+struct ServingPoisonedMutton : public SpellScript
 {
-    if (uiEffIndex != EFFECT_INDEX_1 || uiSpellId != SPELL_SERVING_MUTTON || pCaster->GetTypeId() != TYPEID_PLAYER)
-        return false;
-
-    npc_dragonmaw_peonAI* pPeonAI = dynamic_cast<npc_dragonmaw_peonAI*>(pCreatureTarget->AI());
-
-    if (!pPeonAI)
-        return false;
-
-    if (pPeonAI->SetPlayerTarget(pCaster->GetObjectGuid()))
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        pCreatureTarget->HandleEmote(EMOTE_ONESHOT_NONE);
-        return true;
-    }
+        if (effIdx != EFFECT_INDEX_1)
+            return;
 
-    return false;
-}
+        Unit* caster = spell->GetCaster();
+        npc_dragonmaw_peonAI* peonAI = dynamic_cast<npc_dragonmaw_peonAI*>(spell->GetUnitTarget()->AI());
+
+        if (!peonAI)
+            return;
+
+        if (peonAI->SetPlayerTarget(caster->GetObjectGuid()))
+        {
+            spell->GetUnitTarget()->HandleEmote(EMOTE_ONESHOT_NONE);
+            return;
+        }
+    }
+};
 
 /*######
 # npc_wilda
@@ -2502,29 +2505,25 @@ UnitAI* GetAI_npc_domesticated_felboar(Creature* pCreature)
     return new npc_domesticated_felboarAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_shadowmoon_tuber_node(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 36652 - Tuber Whistle
+struct TuberWhistle : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_TUBER_WHISTLE && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCreatureTarget->GetEntry() == NPC_SHADOWMOON_TUBER_NODE)
-        {
-            // Check if tuber mound exists or it's spawned
-            GameObject* pTuber = GetClosestGameObjectWithEntry(pCreatureTarget, GO_SHADOWMOON_TUBER_MOUND, 1.0f);
-            if (!pTuber || !pTuber->IsSpawned())
-                return true;
+        Unit* target = spell->GetUnitTarget();
+        if (!target->AI())
+            return;
 
-            // Call nearby felboar
-            if (Creature* pBoar = GetClosestCreatureWithEntry(pCreatureTarget, NPC_DOMESTICATED_FELBOAR, 40.0f))
-                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_START_EVENT, pCaster, pBoar);
-        }
+        // Check if tuber mound exists or it's spawned
+        GameObject* tuber = GetClosestGameObjectWithEntry(target, GO_SHADOWMOON_TUBER_MOUND, 1.0f);
+        if (!tuber || !tuber->IsSpawned())
+            return;
 
-        // always return true when we are handling this spell and effect
-        return true;
+        // Call nearby felboar
+        if (Creature* boar = GetClosestCreatureWithEntry(target, NPC_DOMESTICATED_FELBOAR, 40.0f))
+            target->AI()->SendAIEvent(AI_EVENT_START_EVENT, spell->GetCaster(), boar);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_veneratus_spawn_node
@@ -5403,7 +5402,6 @@ void AddSC_shadowmoon_valley()
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_peon";
     pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_peonAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_dragonmaw_peon;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -5457,11 +5455,6 @@ void AddSC_shadowmoon_valley()
     pNewScript = new Script;
     pNewScript->Name = "npc_domesticated_felboar";
     pNewScript->GetAI = &GetAI_npc_domesticated_felboar;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_shadowmoon_tuber_node";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_shadowmoon_tuber_node;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -5532,6 +5525,8 @@ void AddSC_shadowmoon_valley()
     pNewScript->GetAI = &GetAI_npc_bt_battle_sensor;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<ServingPoisonedMutton>("spell_serving_poisoned_mutton");
+    RegisterSpellScript<TuberWhistle>("spell_tuber_whistle");
     RegisterSpellScript<DragonmawKnockdownTheAggroCheck>("spell_dragonmaw_knockdown_the_aggro_check");
     RegisterSpellScript<TagGreaterFelfireDiemetradon>("spell_tag_for_single_use");
     RegisterSpellScript<DragonmawIllusionBase>("spell_dragonmaw_illusion_base");

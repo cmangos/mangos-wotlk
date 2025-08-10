@@ -143,21 +143,6 @@ struct CastFishingNet : public SpellScript
 
 enum
 {
-    // target hulking helboar
-    SPELL_ADMINISTER_ANTIDOTE           = 34665,
-    NPC_HELBOAR                         = 16880,
-    NPC_DREADTUSK                       = 16992,
-
-    // quest 11515
-    SPELL_FEL_SIPHON_DUMMY              = 44936,
-    NPC_FELBLOOD_INITIATE               = 24918,
-    NPC_EMACIATED_FELBLOOD              = 24955,
-
-    // target nestlewood owlkin
-    SPELL_INOCULATE_OWLKIN              = 29528,
-    NPC_OWLKIN                          = 16518,
-    NPC_OWLKIN_INOC                     = 16534,
-
     // for quest 12516
     SPELL_MODIFIED_MOJO                 = 50706,
 
@@ -202,14 +187,6 @@ enum
     EMOTE_AGGRO                         = -1000551,
     EMOTE_CREATE                        = -1000552,
 
-    // Quest "Disrupt the Greengill Coast" (11541)
-    SPELL_ORB_OF_MURLOC_CONTROL         = 45109,
-    SPELL_GREENGILL_SLAVE_FREED         = 45110,
-    SPELL_ENRAGE                        = 45111,
-    NPC_FREED_GREENGILL_SLAVE           = 25085,
-    NPC_DARKSPINE_MYRMIDON              = 25060,
-    NPC_DARKSPINE_SIREN                 = 25073,
-
     // quest 12659, item 38731
     SPELL_AHUNAES_KNIFE                 = 52090,
     NPC_SCALPS_KILL_CREDIT_BUNNY        = 28622,
@@ -225,10 +202,6 @@ enum
     NPC_BEAR_KILL_CREDIT                = 33006,
     SAY_ITS_FEMALE                      = -1000642,
     SAY_ITS_MALE                        = -1000643,
-
-    // quest 9849, item 24501
-    SPELL_THROW_GORDAWG_BOULDER         = 32001,
-    NPC_MINION_OF_GUROK                 = 18181,
 
     // quest 12589
     SPELL_HIT_APPLE                     = 51331,
@@ -273,38 +246,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
 {
     switch (uiSpellId)
     {
-        case SPELL_ADMINISTER_ANTIDOTE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_HELBOAR)
-                    return true;
-
-                // possible needs check for quest state, to not have any effect when quest really complete
-
-                pCreatureTarget->UpdateEntry(NPC_DREADTUSK);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_INOCULATE_OWLKIN:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_OWLKIN)
-                    return true;
-
-                pCreatureTarget->UpdateEntry(NPC_OWLKIN_INOC);
-                pCreatureTarget->AIM_Initialize();
-                ((Player*)pCaster)->KilledMonsterCredit(NPC_OWLKIN_INOC);
-
-                // set despawn timer, since we want to remove creature after a short time
-                pCreatureTarget->ForcedDespawn(15000);
-
-                return true;
-            }
-            return true;
-        }
         case SPELL_MODIFIED_MOJO:
         {
             if (uiEffIndex == EFFECT_INDEX_0)
@@ -318,18 +259,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 // "NOOOOOOOOOOOOooooooo...............!"
 
                 pCreatureTarget->UpdateEntry(NPC_WEAK_PROPHET_OF_SSERATUS);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_FEL_SIPHON_DUMMY:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_FELBLOOD_INITIATE)
-                    return true;
-
-                pCreatureTarget->UpdateEntry(NPC_EMACIATED_FELBLOOD);
                 return true;
             }
             return true;
@@ -470,21 +399,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                         break;
                     }
                 }
-                return true;
-            }
-            return true;
-        }
-        case SPELL_THROW_GORDAWG_BOULDER:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    if (irand(i, 2))                        // 2-3 summons
-                        pCreatureTarget->SummonCreature(NPC_MINION_OF_GUROK, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
-                }
-
-                pCreatureTarget->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED); // suicide spell
                 return true;
             }
             return true;

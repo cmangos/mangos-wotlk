@@ -273,6 +273,40 @@ bool QuestAccept_npc_magwin(Player* pPlayer, Creature* pCreature, const Quest* p
     return true;
 }
 
+enum
+{
+    NPC_OWLKIN                          = 16518,
+    NPC_OWLKIN_INOC                     = 16534,
+};
+
+// 29528 - Inoculate Nestlewood Owlkin
+struct InoculateNestlewoodOwlkin : public SpellScript, public AuraScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    { 
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_OWLKIN)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const
+    {
+        Creature* target = static_cast<Creature*>(aura->GetTarget());
+
+        target->UpdateEntry(NPC_OWLKIN_INOC);
+        target->AIM_Initialize();
+
+        if (aura->GetCasterGuid().IsPlayer())
+            if (Player* caster = static_cast<Player*>(aura->GetCaster()))
+                caster->KilledMonsterCredit(NPC_OWLKIN_INOC);
+
+        // set despawn timer, since we want to remove creature after a short time
+        target->ForcedDespawn(15000);
+    }
+};
+
 void AddSC_azuremyst_isle()
 {
     Script* pNewScript = new Script;
@@ -285,4 +319,6 @@ void AddSC_azuremyst_isle()
     pNewScript->GetAI = &GetNewAIInstance<npc_magwinAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_magwin;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<InoculateNestlewoodOwlkin>("spell_inoculate_nestlewood_owlkin");
 }

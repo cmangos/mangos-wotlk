@@ -637,6 +637,7 @@ enum
     SPELL_CAPTURED_SPARROWHAWK = 39812,
 };
 
+// 39810 - Sparrowhawk Net
 struct SparrowhawkNet : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -652,6 +653,32 @@ struct SparrowhawkNet : public SpellScript
             return;
 
         spell->GetUnitTarget()->CastSpell(spell->GetCaster(), SPELL_CAPTURED_SPARROWHAWK, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+enum
+{
+    NPC_SHATTERED_RUMBLER = 17157,
+};
+
+// 32001 - Throw Gordawg's Boulder
+struct ThrowGordawgsBoulder : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_SHATTERED_RUMBLER)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+
+        target->CastSpell(nullptr, 31995, TRIGGERED_OLD_TRIGGERED); // summons 2-4
+        target->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED); // suicide spell
     }
 };
 
@@ -685,4 +712,5 @@ void AddSC_nagrand()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SparrowhawkNet>("spell_sparrowhawk_net");
+    RegisterSpellScript<ThrowGordawgsBoulder>("spell_throw_gordawgs_boulder");
 }
