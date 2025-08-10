@@ -305,6 +305,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (36290,'spell_pure_nether_beam_parent'),
 (36291,'spell_pure_nether_beam_parent'),
 (40468,'spell_serving_poisoned_mutton'),
+(40131,'spell_shroud_of_death'),
 (36652,'spell_tuber_whistle'),
 (37027,'spell_remote_toy_trigger'),
 (39228,'spell_argussian_compass'),
