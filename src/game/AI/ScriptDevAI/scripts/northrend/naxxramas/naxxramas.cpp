@@ -795,11 +795,6 @@ void instance_naxxramas::DoTaunt()
     }
 }
 
-InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
-{
-    return new instance_naxxramas(pMap);
-}
-
 bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigger)
 {
     if (areaTrigger->id == AREATRIGGER_KELTHUZAD)
@@ -857,15 +852,26 @@ bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigge
     return false;
 }
 
+// 25680 - Random Aggro
+struct RandomAggro : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->GetCaster()->AddThreat(spell->GetUnitTarget());
+    }
+};
+
 void AddSC_instance_naxxramas()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_naxxramas";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_naxxramas>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "at_naxxramas";
     pNewScript->pAreaTrigger = &AreaTrigger_at_naxxramas;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<RandomAggro>("spell_random_aggro");
 }
