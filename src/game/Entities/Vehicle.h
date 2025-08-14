@@ -113,6 +113,8 @@ class VehicleInfo : public TransportBase
     private:
         // Internal use to calculate the boarding position
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;
+        // Internal use to calculate the coordinates of the seat
+        void GetSeatCoordinates(const VehicleSeatEntry* seatEntry, float& lx, float& ly, float& lz) const;
 
         // Seat information
         bool GetUsableSeatFor(Unit* passenger, uint8& seat, bool reset, bool next) const;
@@ -120,7 +122,8 @@ class VehicleInfo : public TransportBase
 
         uint8 GetTakenSeatsMask() const;
         uint8 GetEmptySeatsMask() const { return ~GetTakenSeatsMask(); }
-        uint8 GetEmptySeats() const { return m_vehicleSeats.size() - m_passengers.size(); }
+        //uint8 GetEmptySeats() const { return m_vehicleSeats.size() - m_passengers.size(); }
+        uint8 GetEmptySeats() const;
 
         bool IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const;
         bool IsUsableSeatForCreature(uint32 /*seatFlags*/) const { return true; } // special flag?, !IsUsableSeatForPlayer(seatFlags)?

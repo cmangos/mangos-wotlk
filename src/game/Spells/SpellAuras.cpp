@@ -6928,6 +6928,10 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
         case 60430:                                         // Molten Fury
         case 64193:                                         // Heartbreak
         case 65737:                                         // Heartbreak
+        case 65077:                                         // Tower of Frost
+        case 64482:                                         // Tower of Life
+        case 65076:                                         // Tower of Storms
+        case 65075:                                         // Tower of Flames
             target->SetHealth(target->GetMaxHealth());
             break;
         default:

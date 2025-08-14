@@ -4077,7 +4077,8 @@ void Spell::update(uint32 difftime)
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if ((m_trueCaster->IsUnit() && m_timer != 0) &&
             (m_castPositionX != m_trueCaster->GetPositionX() || m_castPositionY != m_trueCaster->GetPositionY() || m_castPositionZ != m_trueCaster->GetPositionZ()) &&
-            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
+            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)) &&
+            (!m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT)))
     {
         // always cancel for channeled spells
         if (m_spellState == SPELL_STATE_CHANNELING)
@@ -5618,7 +5619,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Caster aura req check if need
         if (m_spellInfo->casterAuraSpell && !m_caster->HasAura(m_spellInfo->casterAuraSpell))
-            return SPELL_FAILED_CASTER_AURASTATE;
+            if (!m_triggeredBySpellInfo || m_triggeredBySpellInfo->Id != m_spellInfo->casterAuraSpell)
+                return SPELL_FAILED_CASTER_AURASTATE;
         if (m_spellInfo->excludeCasterAuraSpell)
         {
             // Special cases of non existing auras handling
@@ -7020,19 +7022,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (!expectedTarget->IsVehicle())
                         return SPELL_FAILED_BAD_TARGETS;
-
-                    // It is possible to change between vehicles that are boarded on each other
-                    if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
-                    {
-                        // Check if trying to board a vehicle that is boarded on current transport
-                        bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(expectedTarget);
-                        // Check if trying to board a vehicle that has the current transport on board
-                        if (!boardedOnEachOther)
-                            boardedOnEachOther = expectedTarget->GetVehicleInfo()->HasOnBoard(m_caster);
-
-                        if (!boardedOnEachOther)
-                            return SPELL_FAILED_NOT_ON_TRANSPORT;
-                    }
 
                     if (!expectedTarget->GetVehicleInfo()->CanBoard(m_caster))
                         return SPELL_FAILED_BAD_TARGETS;

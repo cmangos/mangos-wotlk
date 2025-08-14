@@ -76,6 +76,9 @@ enum MovementGeneratorType
     EXTERNAL_WAYPOINT_FINISHED_LAST = 20,                   // Only used in UnitAI::MovementInform when the waittime of the last wp is finished The pathId >= 0 is added as additional value
 
     FORMATION_MOTION_TYPE           = 21,                   // TargetedMovementGenerator.h
+
+    BOARD_VEHICLE_MOTION_TYPE       = 22,
+    UNBOARD_VEHICLE_MOTION_TYPE     = 23,
 };
 
 enum MMCleanFlag
