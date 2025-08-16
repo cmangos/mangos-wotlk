@@ -6417,14 +6417,14 @@ bool Spell::DoSummonTotem(CreatureSummonPositions& list, SpellEffectIndex eff_id
         pTotem->SetPvPSanctuary(true);
 
     // sending SMSG_TOTEM_CREATED before add to map (done in Summon)
-    if (slot < MAX_TOTEM_SLOT && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (slot < MAX_TOTEM_SLOT && m_caster->IsPlayer())
     {
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
         data << uint8(slot);
         data << pTotem->GetObjectGuid();
         data << uint32(m_duration);
         data << uint32(m_spellInfo->Id);
-        ((Player*)m_caster)->SendDirectMessage(data);
+        static_cast<Player*>(m_caster)->SendDirectMessage(data);
     }
 
     pTotem->Summon(m_caster);
@@ -11315,6 +11315,16 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     pGameObj->SetSpellId(m_spellInfo->Id);
     pGameObj->SetSpawnerGuid(m_trueCaster->GetObjectGuid());
     m_caster->AddGameObject(pGameObj);
+
+    if (slot < MAX_TOTEM_SLOT && m_caster->IsPlayer())
+    {
+        WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
+        data << uint8(slot);
+        data << pGameObj->GetObjectGuid();
+        data << 0; // gos send no extra info
+        data << 0;
+        static_cast<Player*>(m_caster)->SendDirectMessage(data);
+    }
 
     map->Add(pGameObj);
     pGameObj->AIM_Initialize();
