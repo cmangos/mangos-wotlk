@@ -3312,8 +3312,11 @@ struct Soaring : public AuraScript
     }
 };
 
-struct CoaxMarmot : public AuraScript
+// 38544 - Coax Marmot
+struct CoaxMarmot : public SpellScript, public AuraScript
 {
+    void OnSummon(Spell* spell, Creature* summon) const override { spell->GetCaster()->CastSpell(summon, 38586, TRIGGERED_OLD_TRIGGERED); }
+
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)

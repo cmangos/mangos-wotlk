@@ -5905,23 +5905,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
             {
                 case UNITNAME_SUMMON_TITLE_NONE:
                 {
-                    // those are classical totems - effectbasepoints is their hp and not summon ammount!
-                    // 121: 23035, battlestands
-                    // 647: 52893, Anti-Magic Zone (npc used)
-                    if (prop_id == 121 || prop_id == 647)
-                        summonResult = DoSummonTotem(summonPositions, eff_idx);
-                    else
-                    {
-                        switch (m_spellInfo->Id) // unable to distinguish based on prop_id, therefore spell by spell override
-                        {
-                            case 38544: // summon marmot, gives control of marmot pet
-                                summonResult = DoSummonPossessed(summonPositions, summon_prop, eff_idx, creatureLevel);
-                                break;
-                            default:
-                                summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, creatureLevel);
-                                break;
-                        }
-                    }
+                    summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, creatureLevel);
                     break;
                 }
                 case UNITNAME_SUMMON_TITLE_PET:
