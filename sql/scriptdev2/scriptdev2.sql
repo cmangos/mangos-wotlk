@@ -211,15 +211,6 @@ UPDATE creature_template SET ScriptName='npc_gossip_npc' WHERE entry IN (18927,1
 UPDATE creature_template SET ScriptName='npc_quest_attunement' WHERE entry IN(22421,18528,19935);
 
 /* SPELL */
-UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
--- eastern kingdoms
-8888,13016,
--- kalimdor
-9299,
--- outland
-16880,16518,16847,17157,17326,17654,18879,21729,24918,24922,25084,25085,
--- northrend
-23678,25752,25753,25758,25792,25793,26268,26270,26421,26616,26643,26841,27122,27808,28053,28054,28068,28093,28465,28600,29319,29327,30169);
 
 /* WORLD MAP SCRIPTS */
 DELETE FROM world_template WHERE map IN (0, 1, 530, 571, 609);
@@ -496,7 +487,6 @@ UPDATE creature_template SET ScriptName='boss_general_angerforge' WHERE entry=90
 UPDATE creature_template SET ScriptName='boss_high_interrogator_gerstahn' WHERE entry=9018;
 UPDATE creature_template SET ScriptName='boss_coren_direbrew' WHERE entry=23872;
 UPDATE creature_template SET ScriptName='npc_grimstone' WHERE entry=10096;
-UPDATE creature_template SET ScriptName='npc_theldren_trigger' WHERE entry=16079;
 UPDATE creature_template SET ScriptName='npc_phalanx' WHERE entry=9502;
 UPDATE creature_template SET ScriptName='npc_mistress_nagmara' WHERE entry=9500;
 UPDATE creature_template SET ScriptName='npc_rocknot' WHERE entry=9503;
@@ -836,7 +826,6 @@ UPDATE creature_template SET ScriptName='npc_magrami_spectre' WHERE entry=11560;
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
 UPDATE gameobject_template SET ScriptName='go_fixed_trap' WHERE entry=179512;
-UPDATE creature_template SET ScriptName='npc_mizzle_crafty' WHERE entry=14353;
 UPDATE creature_template SET ScriptName='npc_warlock_mount_ritual' WHERE entry=14501;
 UPDATE gameobject_template SET ScriptName='go_dreadsteed_quest_objects' WHERE entry IN(179672,179673,179674);
 INSERT INTO scripted_event_id VALUES
@@ -1692,7 +1681,6 @@ INSERT INTO scripted_event_id VALUES
 (2228,'event_spell_altar_boss_aggro'),
 (2268,'event_spell_altar_boss_aggro');
 UPDATE creature_template SET ScriptName='boss_archaedas' WHERE entry=2748;
-UPDATE creature_template SET ScriptName='mob_archaeras_add' WHERE entry IN (7309,7076,7077,10120);
 UPDATE instance_template SET ScriptName='instance_uldaman' WHERE map=70;
 
 /*  */

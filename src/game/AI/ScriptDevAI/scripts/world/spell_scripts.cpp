@@ -150,29 +150,32 @@ enum
     NPC_ENTHRALLED_DEEPRUN_RAT          = 13017,
 };
 
-bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 21050 - Melodious Rapture
+struct MelodiousRapture : public SpellScript
 {
-    switch (uiSpellId)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        case SPELL_MELODIOUS_RAPTURE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() != TYPEID_PLAYER && pCreatureTarget->GetEntry() != NPC_DEEPRUN_RAT)
-                    return true;
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_DEEPRUN_RAT)
+            return SPELL_FAILED_BAD_TARGETS;
 
-                pCreatureTarget->UpdateEntry(NPC_ENTHRALLED_DEEPRUN_RAT);
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_MELODIOUS_RAPTURE_VISUAL, TRIGGERED_NONE);
-                pCreatureTarget->GetMotionMaster()->MoveFollow(pCaster, frand(0.5f, 3.0f), frand(M_PI_F * 0.8f, M_PI_F * 1.2f));
-
-                ((Player*)pCaster)->KilledMonsterCredit(NPC_ENTHRALLED_DEEPRUN_RAT);
-            }
-            return true;
-        }
+        return SPELL_CAST_OK;
     }
 
-    return false;
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->IsPlayer())
+            return;
+
+        static_cast<Creature*>(target)->UpdateEntry(NPC_ENTHRALLED_DEEPRUN_RAT);
+        target->CastSpell(nullptr, SPELL_MELODIOUS_RAPTURE_VISUAL, TRIGGERED_NONE);
+        target->GetMotionMaster()->MoveFollow(caster, frand(0.5f, 3.0f), frand(M_PI_F * 0.8f, M_PI_F * 1.2f));
+
+        static_cast<Player*>(caster)->KilledMonsterCredit(NPC_ENTHRALLED_DEEPRUN_RAT);
+    }
+};
 
 struct GreaterInvisibilityMob : public AuraScript
 {
@@ -1032,13 +1035,9 @@ struct InvisibleForAlive : public AuraScript
 
 void AddSC_spell_scripts()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "spell_dummy_npc";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_npc;
-    pNewScript->RegisterSelf();
-
     RegisterSpellScript<CastFishingNet>("spell_cast_fishing_net");
     RegisterSpellScript<AnuniaqsNet>("spell_anuniaqs_net");
+    RegisterSpellScript<MelodiousRapture>("spell_melodious_rapture");
     RegisterSpellScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
     RegisterSpellScript<InebriateRemoval>("spell_inebriate_removal");
     RegisterSpellScript<AstralBite>("spell_astral_bite");
