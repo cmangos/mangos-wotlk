@@ -2051,10 +2051,16 @@ void Map::RemoveFromActive(WorldObject* obj)
     }
 }
 
-void Map::RemoveFromLargeObjects(WorldObject* obj)
+void Map::RemoveEntryFromLargeObjects(WorldObject* obj, uint32 newEntry)
 {
     if (obj->GetVisibilityData().IsLargeVisibility())
+    {
         m_largeObjects.erase(std::make_pair(obj, obj->GetEntry()));
+        if (newEntry)
+        {
+            m_largeObjects.insert(std::make_pair(obj, newEntry));
+        }
+    }
 }
 
 void Map::AddToOnEventNotified(WorldObject* obj)
