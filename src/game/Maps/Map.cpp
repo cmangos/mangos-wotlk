@@ -2056,10 +2056,9 @@ void Map::RemoveEntryFromLargeObjects(WorldObject* obj, uint32 newEntry)
     if (obj->GetVisibilityData().IsLargeVisibility())
     {
         m_largeObjects.erase(std::make_pair(obj, obj->GetEntry()));
-        if (newEntry)
-        {
-            m_largeObjects.insert(std::make_pair(obj, newEntry));
-        }
+        if (!newEntry)
+            return;
+        m_largeObjects.insert(std::make_pair(obj, newEntry));
     }
 }
 
