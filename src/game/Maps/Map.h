@@ -298,6 +298,9 @@ class Map : public GridRefManager<NGridType>
         // must called with RemoveFromWorld
         void RemoveFromActive(WorldObject* obj);
 
+        // remove object from large objects list
+        void RemoveFromLargeObjects(WorldObject* obj);
+
         // Game Event notification system
         void AddToOnEventNotified(WorldObject* obj);
         void RemoveFromOnEventNotified(WorldObject* obj);
