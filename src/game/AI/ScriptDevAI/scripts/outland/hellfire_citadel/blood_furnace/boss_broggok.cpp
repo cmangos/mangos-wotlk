@@ -61,16 +61,12 @@ struct boss_broggokAI : public CombatAI
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
 
-    void Aggro(Unit* /*who*/) override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
-    }
-
     void EnterEvadeMode() override
     {
         if (m_instance)
             m_instance->SetData(TYPE_BROGGOK_EVENT, FAIL);
+
+        CombatAI::EnterEvadeMode();
     }
 
     void JustSummoned(Creature* summoned) override
@@ -81,6 +77,7 @@ struct boss_broggokAI : public CombatAI
             summoned->AI()->SetReactState(REACT_DEFENSIVE);
             summoned->AI()->SetCombatMovement(false);
             summoned->AI()->SetMeleeEnabled(false);
+            summoned->SetCanCallForAssistance(false);
             summoned->SetInCombatWithZone();
         }
         else
