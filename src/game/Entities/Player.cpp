@@ -12272,7 +12272,7 @@ void Player::DestroyItemCount(Item* pItem, uint32& count, bool update)
         pItem->SetCount(pItem->GetCount() - count);
         count = 0;
         if (IsInWorld() && update)
-            GetMap()->AddUpdateCreateObject(pItem);
+            GetMap()->AddUpdateObject(pItem);
         pItem->SetState(ITEM_CHANGED, this);
     }
 }
