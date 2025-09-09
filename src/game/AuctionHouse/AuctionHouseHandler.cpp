@@ -353,7 +353,7 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
 
         Item* newItem = it->CloneItem(stackSize);
 
-        pl->DestroyItemCount(it, stackSize, true);
+        pl->DestroyItemCount(*it, stackSize, true);
 
         pl->ModifyMoney(-int32(deposit));
 

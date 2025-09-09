@@ -11234,10 +11234,10 @@ void Spell::EffectInebriate(SpellEffectIndex /*eff_idx*/)
 
 void Spell::EffectFeedPet(SpellEffectIndex eff_idx)
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (!m_caster->IsPlayer())
         return;
 
-    Player* _player = (Player*)m_caster;
+    Player* _player = static_cast<Player*>(m_caster);
 
     Item* foodItem = m_targets.getItemTarget();
     if (!foodItem)
@@ -11259,7 +11259,7 @@ void Spell::EffectFeedPet(SpellEffectIndex eff_idx)
     m_spellLog.SendToSet();
 
     uint32 count = 1;
-    _player->DestroyItemCount(foodItem, count, true);
+    _player->DestroyItemCount(*foodItem, count, true);
     // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
     m_caster->CastCustomSpell(nullptr, m_spellInfo->EffectTriggerSpell[eff_idx], &benefit, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
