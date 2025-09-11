@@ -12451,8 +12451,8 @@ void Player::SwapItem(uint16 src, uint16 dst)
                 pDstItem->SetState(ITEM_CHANGED, this);
                 if (IsInWorld())
                 {
-                    GetMap()->AddUpdateCreateObject(pSrcItem);
-                    GetMap()->AddUpdateCreateObject(pDstItem);
+                    GetMap()->AddUpdateObject(pSrcItem);
+                    GetMap()->AddUpdateObject(pDstItem);
                 }
             }
             return;
