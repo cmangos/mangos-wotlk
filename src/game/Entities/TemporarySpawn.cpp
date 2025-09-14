@@ -96,7 +96,7 @@ void TemporarySpawn::Update(const uint32 diff)
 
         case TEMPSPAWN_DEAD_DESPAWN:
         {
-            if (IsDespawned())
+            if (IsDead() || IsDespawned())
             {
                 UnSummon();
                 return;
@@ -174,7 +174,7 @@ void TemporarySpawn::Update(const uint32 diff)
             }
             if (!GetCharmerGuid())
             {
-                if (IsExpired())
+                if (IsExpired() && !IsInCombat())
                 {
                     UnSummon();
                     return;
