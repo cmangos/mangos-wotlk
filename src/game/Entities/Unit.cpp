@@ -7439,9 +7439,9 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
 {
     if (apply)
     {
-        if (!HasFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1)))
+        if (!HasFlag(UNIT_FIELD_AURASTATE, convertEnumToFlag(flag)))
         {
-            SetFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1));
+            SetFlag(UNIT_FIELD_AURASTATE, convertEnumToFlag(flag));
             if (GetTypeId() == TYPEID_PLAYER)
             {
                 const PlayerSpellMap& sp_list = ((Player*)this)->GetSpellMap();
@@ -7458,9 +7458,9 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
     }
     else
     {
-        if (HasFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1)))
+        if (HasFlag(UNIT_FIELD_AURASTATE, convertEnumToFlag(flag)))
         {
-            RemoveFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1));
+            RemoveFlag(UNIT_FIELD_AURASTATE, convertEnumToFlag(flag));
 
             if (flag != AURA_STATE_ENRAGE)                  // enrage aura state triggering continues auras
             {
@@ -8507,7 +8507,7 @@ bool Unit::IsImmuneToSpell(SpellEntry const* spellInfo, bool /*castOnSelf*/, uin
 
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY_MASK);
         for (auto iter : immuneAuraApply)
-            if (iter->GetModifier()->m_miscvalue & (1 << (mechanic - 1)))
+            if (iter->GetModifier()->m_miscvalue & (convertEnumToFlag(mechanic)))
                 return true;
     }
 
@@ -8535,7 +8535,7 @@ bool Unit::IsImmuneToSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex i
 
         AuraList const& immuneAuraApply = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY_MASK);
         for (auto iter : immuneAuraApply)
-            if (iter->GetModifier()->m_miscvalue & (1 << (mechanic - 1)))
+            if (iter->GetModifier()->m_miscvalue & convertEnumToFlag(mechanic))
                 return true;
     }
 
@@ -10069,7 +10069,7 @@ int32 Unit::CalculateAuraDuration(SpellEntry const* spellInfo, uint32 effectMask
 
     for (int32 mechanic = FIRST_MECHANIC; mechanic < MAX_MECHANIC; ++mechanic)
     {
-        if (!(mechanicMask & (1 << (mechanic - 1))))
+        if (!(mechanicMask & convertEnumToFlag(mechanic)))
             continue;
 
         int32 stackingMod = GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic);

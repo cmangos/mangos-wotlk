@@ -583,7 +583,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                         if (((Unit*)this)->HasAuraStateForCaster(AURA_STATE_CONFLAGRATE, target->GetObjectGuid()))
                             *data << m_uint32Values[index];
                         else
-                            *data << (m_uint32Values[index] & ~(1 << (AURA_STATE_CONFLAGRATE - 1)));
+                            *data << (m_uint32Values[index] & ~(convertEnumToFlag(AURA_STATE_CONFLAGRATE)));
                     }
                     else
                         *data << m_uint32Values[index];
