@@ -253,7 +253,7 @@ void CreatureAI::OnCallForHelp(Unit* enemy)
                 SetAIOrder(ORDER_FLEE_FROM_CALL_FOR_HELP);
             return;
         }
-        if (factionTemplate->IsRespondToCallForHelp())
+        if (!factionTemplate->IsRespondToCallForHelp())
             return;
     }
     AttackStart(enemy);
