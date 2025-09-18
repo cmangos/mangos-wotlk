@@ -321,6 +321,16 @@ struct SummonWaterGlobules : public SpellScript
     }
 };
 
+// 37852 - Watery Grave Explosion
+struct WateryGraveExplosion : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (spell->GetTriggeredByAuraSpellInfo())
+            spell->GetCaster()->RemoveAurasDueToSpell(spell->GetTriggeredByAuraSpellInfo()->Id); // Remove Watery Grave to prevent root affecting knockback
+    }
+};
+
 void AddSC_boss_morogrim_tidewalker()
 {
     Script* pNewScript = new Script;
@@ -335,4 +345,5 @@ void AddSC_boss_morogrim_tidewalker()
 
     RegisterSpellScript<WateryGrave>("spell_watery_grave");
     RegisterSpellScript<SummonWaterGlobules>("spell_summon_water_globules");
+    RegisterSpellScript<WateryGraveExplosion>("spell_watery_grave_explosion");
 }

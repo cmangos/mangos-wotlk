@@ -1995,6 +1995,12 @@ struct SpellEntry
             return mask;
         }
 
+        bool CanBeUsedInForm(ShapeshiftForm form) const
+        {
+            uint32 mask = (1 << (form - 1));
+            return (Stances[0] & mask) && (StancesNot[0] & mask) == 0;
+        }
+
     private:
         // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation

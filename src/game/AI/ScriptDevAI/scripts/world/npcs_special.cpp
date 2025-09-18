@@ -2626,6 +2626,7 @@ struct npc_imp_in_a_ball : public ScriptedAI
     }
 };
 
+// 5166 - Harvest Silithid Egg
 struct HarvestSilithidEgg : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -2635,6 +2636,7 @@ struct HarvestSilithidEgg : public SpellScript
     }
 };
 
+// 40526 - Imp in a Bottle (say)
 struct ImpInABottleSay : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -2839,6 +2841,7 @@ struct GossipNPCAI : public ScriptedAI
     }
 };
 
+// 33228 - Gossip NPC Periodic Trigger - Fidget (Gossip NPC Periodic Trigger - Fidget)
 struct GossipNPCPeriodicTriggerFidget : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -2847,6 +2850,7 @@ struct GossipNPCPeriodicTriggerFidget : public SpellScript
     }
 };
 
+// 33208 - Gossip NPC Periodic - Talk
 struct GossipNPCPeriodicTalk : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
@@ -2879,6 +2883,7 @@ uint32 GetRandomText(const std::vector<uint32> texts)
     return texts[urand(0, texts.size() - 1)];
 }
 
+// 33227 - Gossip NPC Periodic Trigger - Talk
 struct GossipNPCPeriodicTriggerTalk : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -3020,6 +3025,7 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
     }
 };
 
+// 44186 - Gossip NPC Appearance - All, Brewfest
 struct GossipNPCAppearanceAllBrewfest : public AuraScript
 {
     void OnApply(Aura* aura, bool /*apply*/) const override
@@ -3044,6 +3050,7 @@ struct GossipNPCAppearanceAllBrewfest : public AuraScript
     }
 };
 
+// 48305 - Gossip NPC Appearance - All, Competition
 struct GossipNPCAppearanceAllSpiritOfCompetition : public AuraScript
 {
     uint32 GetAuraScriptCustomizationValue(Aura* aura) const override
@@ -3068,6 +3075,7 @@ struct GossipNPCAppearanceAllSpiritOfCompetition : public AuraScript
     }
 };
 
+// 50531 - Gossip NPC Appearance - All, Pirate Day
 struct GossipNPCAppearanceAllPirateDay : public AuraScript
 {
     uint32 GetAuraScriptCustomizationValue(Aura* aura) const override

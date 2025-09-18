@@ -280,6 +280,8 @@ struct RandomAggroSnakeTrap : public SpellScript
     }
 };
 
+// TODO: some evidence tbc pet growl scales with hunter AP
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<Entrapment>("spell_entrapment");

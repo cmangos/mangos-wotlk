@@ -3356,6 +3356,16 @@ struct ProtovoltaicMagnetoCollector : public AuraScript
     }
 };
 
+// 36812, 37910, 37962, 37968 - Soaring
+struct SoaringBem : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (spell->m_targets.getUnitTarget())
+            spell->m_targets.getUnitTarget()->RemoveAurasDueToSpell(36801); // Remove Cannon Channel to prevent root affecting knockback
+    }
+};
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript = new Script;
@@ -3491,4 +3501,5 @@ void AddSC_blades_edge_mountains()
     RegisterSpellScript<Soaring>("spell_soaring");
     RegisterSpellScript<CoaxMarmot>("spell_coax_marmot");
     RegisterSpellScript<ProtovoltaicMagnetoCollector>("spell_protovoltaic_magneto_collector");
+    RegisterSpellScript<SoaringBem>("spell_soaring_bem");
 }
