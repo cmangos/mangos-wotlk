@@ -9,10 +9,10 @@ endif
 
 _linker_args = ''
 
-boost_dep = dependency('boost', version: '>=1.66.0', static: true, modules: ['thread', 'program_options', 'system', 'filesystem'], required: false)
+boost_dep = dependency('boost', version: '>=1.71.0', static: true, modules: ['thread', 'program_options', 'filesystem'], required: false)
 if not boost_dep.found()
   message('Static Boost libraries could not be found. Trying dynamic libraries')
-  boost_dep = dependency('boost', version: '>=1.66.0', static:false, modules: ['thread', 'program_options', 'system', 'filesystem'], required: true)
+  boost_dep = dependency('boost', version: '>=1.71.0', static:false, modules: ['thread', 'program_options', 'filesystem'], required: true)
 endif
 dblib_dep = dependency('mariadb', 'libmariadb', 'mysql', 'libmysql', 'postgresql', required: false)
 zlib_dep = dependency('zlib', version: '>=1.2.13', static: true, fallback: ['zlib', 'zlib_dep'], required: true)
