@@ -3303,12 +3303,19 @@ enum
     SPELL_ZEPHYRIUM_CHARGED = 37108,
 };
 
-struct Soaring : public AuraScript
+// 36812, 37910, 37962, 37968 - Soaring
+struct Soaring : public SpellScript, public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)
             aura->GetTarget()->CastSpell(nullptr, SPELL_ZEPHYRIUM_CHARGED, TRIGGERED_NONE);
+    }
+
+    void OnCast(Spell* spell) const override
+    {
+        if (spell->m_targets.getUnitTarget())
+            spell->m_targets.getUnitTarget()->RemoveAurasDueToSpell(36801); // Remove Cannon Channel to prevent root affecting knockback
     }
 };
 
@@ -3353,16 +3360,6 @@ struct ProtovoltaicMagnetoCollector : public AuraScript
         Unit* target = aura->GetTarget();
         if (apply && target->IsCreature())
             static_cast<Creature*>(target)->UpdateEntry(NPC_ENCASED_ELECTROMENTAL);
-    }
-};
-
-// 36812, 37910, 37962, 37968 - Soaring
-struct SoaringBem : public SpellScript
-{
-    void OnCast(Spell* spell) const override
-    {
-        if (spell->m_targets.getUnitTarget())
-            spell->m_targets.getUnitTarget()->RemoveAurasDueToSpell(36801); // Remove Cannon Channel to prevent root affecting knockback
     }
 };
 
@@ -3501,5 +3498,4 @@ void AddSC_blades_edge_mountains()
     RegisterSpellScript<Soaring>("spell_soaring");
     RegisterSpellScript<CoaxMarmot>("spell_coax_marmot");
     RegisterSpellScript<ProtovoltaicMagnetoCollector>("spell_protovoltaic_magneto_collector");
-    RegisterSpellScript<SoaringBem>("spell_soaring_bem");
 }
