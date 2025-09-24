@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14092_01_mangos_proc_cooldown` bit(1) DEFAULT NULL
+  `required_14093_01_mangos_vehicle_ridespell` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -20027,6 +20027,7 @@ CREATE TABLE `vehicle_accessory` (
   `vehicle_entry` int(10) unsigned NOT NULL COMMENT 'entry of the npc who has some accessory as vehicle',
   `seat` mediumint(8) unsigned NOT NULL COMMENT 'onto which seat shall the passenger be boarded',
   `accessory_entry` int(10) unsigned NOT NULL COMMENT 'entry of the passenger that is to be boarded',
+  `RideSpellId` int(10) unsigned NOT NULL COMMENT 'spell id to be used for riding',
   `comment` varchar(255) NOT NULL,
   PRIMARY KEY (`vehicle_entry`,`seat`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Vehicle Accessory (passengers that are auto-boarded onto a vehicle)';

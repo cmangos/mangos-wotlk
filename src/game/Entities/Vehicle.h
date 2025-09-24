@@ -49,6 +49,7 @@ struct VehicleAccessory
     uint32 vehicleEntry;
     uint32 seatId;
     uint32 passengerEntry;
+    uint32 rideSpellId;
 };
 
 enum ExitParamType
@@ -82,7 +83,7 @@ class VehicleInfo : public TransportBase
         void Initialize();                                  ///< Initializes the accessories
         void Cleanup();
         bool IsInitialized() const { return m_isInitialized; }
-        void SummonPassenger(uint32 entry, Position const& pos, uint8 seatId);
+        void SummonPassenger(uint32 entry, Position const& pos, uint8 seatId, uint32 spellId);
 
         ~VehicleInfo();
 

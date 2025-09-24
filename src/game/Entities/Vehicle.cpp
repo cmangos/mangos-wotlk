@@ -103,6 +103,11 @@ void ObjectMgr::LoadVehicleAccessory()
             sLog.outErrorDb("Table `vehicle_accessory` has entry (vehicle entry: %u, seat %u, passenger %u) where seat is invalid (must be between 0 and %u), skip vehicle.", itr->vehicleEntry, itr->seatId, itr->passengerEntry, MAX_VEHICLE_SEAT - 1);
             sVehicleAccessoryStorage.EraseEntry(itr->vehicleEntry);
         }
+        if (itr->rideSpellId && !sSpellTemplate.LookupEntry<SpellEntry>(itr->rideSpellId))
+        {
+            sLog.outErrorDb("Table `vehicle_accessory` has entry (vehicle entry: %u, seat %u, passenger %u) where ride spell %u is invalid, skip vehicle.", itr->vehicleEntry, itr->seatId, itr->passengerEntry, itr->rideSpellId);
+            sVehicleAccessoryStorage.EraseEntry(itr->vehicleEntry);
+        }
     }
 
     sLog.outString(">> Loaded %u vehicle accessories", sVehicleAccessoryStorage.GetRecordCount());
@@ -214,7 +219,7 @@ void VehicleInfo::Initialize()
         {
             Position pos = m_owner->GetPosition();
             pos.o *= 2;
-            SummonPassenger(itr->passengerEntry, pos, itr->seatId);
+            SummonPassenger(itr->passengerEntry, pos, itr->seatId, itr->rideSpellId);
         }
     }
 
@@ -256,14 +261,14 @@ void VehicleInfo::Cleanup()
     m_cleanedUp = true;
 }
 
-void VehicleInfo::SummonPassenger(uint32 entry, Position const& pos, uint8 seatId)
+void VehicleInfo::SummonPassenger(uint32 entry, Position const& pos, uint8 seatId, uint32 spellId)
 {
     if (Creature* summoned = m_owner->SummonCreature(entry, pos.x, pos.y, pos.z, pos.o, TEMPSPAWN_DEAD_DESPAWN, 0))
     {
         DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), seatId);
         m_accessoryGuids.insert(summoned->GetObjectGuid());
         int32 basepoint0 = seatId + 1;
-        summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        summoned->CastCustomSpell((Unit*)m_owner, spellId != 0 ? spellId : SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 }
 
@@ -676,7 +681,7 @@ void VehicleInfo::RespawnAccessories(int32 seatIndex)
             continue;
         Position pos = m_owner->GetPosition();
         pos.o *= 2;
-        SummonPassenger(itr->passengerEntry, pos, itr->seatId);
+        SummonPassenger(itr->passengerEntry, pos, itr->seatId, itr->rideSpellId);
         if (UnitAI* ownerAI = static_cast<Unit*>(m_owner)->AI())
             ownerAI->OnPassengerSpawn(itr->seatId);
     }
