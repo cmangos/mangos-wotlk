@@ -3017,6 +3017,7 @@ void Player::GiveLevel(uint32 level)
     if (level == GetLevel())
         return;
 
+    uint32 oldLevel = GetLevel();
     uint32 plClass = getClass();
 
     PlayerLevelInfo info;
@@ -3081,8 +3082,11 @@ void Player::GiveLevel(uint32 level)
     if (Pet* pet = GetPet())
         pet->SynchronizeLevelWithOwner();
 
-    if (MailLevelReward const* mailReward = sObjectMgr.GetMailLevelReward(level, getRaceMask()))
-        MailDraft(mailReward->mailTemplateId).SendMailTo(this, MailSender(MAIL_CREATURE, mailReward->senderEntry));
+    for (uint32 curLevel = oldLevel + 1; curLevel <= level; ++curLevel)
+    {
+        if (MailLevelReward const* mailReward = sObjectMgr.GetMailLevelReward(curLevel, getRaceMask()))
+            MailDraft(mailReward->mailTemplateId).SendMailTo(this, MailSender(MAIL_CREATURE, mailReward->senderEntry));
+    }
 
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL);
 #ifdef BUILD_DEPRECATED_PLAYERBOT
