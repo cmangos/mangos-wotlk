@@ -843,6 +843,7 @@ class MovementInfo
         // Read/Write methods
         void Read(ByteBuffer& data);
         void Write(ByteBuffer& data) const;
+        uint32 GetSerializedSize() const;
 
         // Movement flags manipulations
         void AddMovementFlag(MovementFlags f) { moveFlags |= f; }

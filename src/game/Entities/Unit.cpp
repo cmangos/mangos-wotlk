@@ -236,6 +236,24 @@ void MovementInfo::Write(ByteBuffer& data) const
     }
 }
 
+uint32 MovementInfo::GetSerializedSize() const
+{
+    uint32 size = 30;
+    if (HasMovementFlag(MOVEFLAG_ONTRANSPORT))
+    {
+        size += t_guid.WriteAsPacked().size() + 21;
+        if (moveFlags2 & MOVEFLAG2_INTERP_MOVEMENT)
+            size += 4;
+    }
+    if ((HasMovementFlag(MovementFlags(MOVEFLAG_SWIMMING | MOVEFLAG_FLYING))) || (moveFlags2 & MOVEFLAG2_ALLOW_PITCHING))
+        size += 4;
+    if (HasMovementFlag(MOVEFLAG_FALLING))
+        size += 16;
+    if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
+        size += 4;
+    return size;
+}
+
 float MovementInfo::GetOrientationInMotion(MovementFlags flags, float orientation)
 {
     float mod = ((flags & MOVEFLAG_BACKWARD) ? M_PI_F : 0);

@@ -646,6 +646,8 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("%s", recv_data.GetOpcodeName());
 
+    Opcodes opcode = recv_data.GetOpcode();
+
     ObjectGuid guid;
     uint32 counter;
     MovementInfo movementInfo;
@@ -654,7 +656,8 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
     recv_data >> guid.ReadAsPacked();
     recv_data >> counter;
     recv_data >> movementInfo;
-    recv_data >> isApplied;
+    if (opcode != CMSG_MOVE_GRAVITY_DISABLE_ACK && opcode != CMSG_MOVE_GRAVITY_ENABLE_ACK)
+        recv_data >> isApplied;
 
     m_anticheat->OrderAck(recv_data.GetOpcode(), counter);
 
@@ -665,17 +668,20 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
 
     Opcodes response = MSG_NULL_ACTION;
 
-    switch (recv_data.GetOpcode())
+    switch (opcode)
     {
         case CMSG_MOVE_HOVER_ACK: response = MSG_MOVE_HOVER; break;
         case CMSG_MOVE_FEATHER_FALL_ACK: response = MSG_MOVE_FEATHER_FALL; break;
         case CMSG_MOVE_WATER_WALK_ACK: response = MSG_MOVE_WATER_WALK; break;
         case CMSG_MOVE_SET_CAN_FLY_ACK: response = MSG_MOVE_UPDATE_CAN_FLY; break;
+        case CMSG_MOVE_GRAVITY_DISABLE_ACK: response = MSG_MOVE_GRAVITY_CHNG; break;
+        case CMSG_MOVE_GRAVITY_ENABLE_ACK: response = MSG_MOVE_GRAVITY_CHNG; break;
         default: break;
     }
 
-    WorldPacket data(response, 8);
-    data << guid.WriteAsPacked();
+    const PackedGuid packed = guid.WriteAsPacked();
+    WorldPacket data(response, packed.size() + movementInfo.GetSerializedSize());
+    data << packed;
     data << movementInfo;
     mover->SendMessageToSetExcept(data, _player);
 }
