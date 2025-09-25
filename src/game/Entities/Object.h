@@ -853,6 +853,7 @@ class MovementInfo
         void SetMovementFlags(MovementFlags f) { moveFlags = f; }
         MovementFlags2 GetMovementFlags2() const { return MovementFlags2(moveFlags2); }
         void AddMovementFlags2(MovementFlags2 f) { moveFlags2 |= f; }
+        bool HasMovementFlag(MovementFlags2 f) const { return (moveFlags2 & f) != 0; }
 
         // Deduce speed type by current movement flags:
         inline UnitMoveType GetSpeedType() const { return GetSpeedType(MovementFlags(moveFlags)); }
