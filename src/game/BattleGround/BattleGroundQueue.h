@@ -145,7 +145,7 @@ class BattleGroundQueueItem
         void RemovePlayer(BattleGroundQueue& queue, ObjectGuid guid, bool decreaseInvitedCount);
         bool IsPlayerInvited(ObjectGuid /*playerGuid*/, const uint32 /*bgInstanceGuid*/, const uint32 /*removeTime*/);
         bool GetPlayerGroupInfoData(ObjectGuid /*guid*/, GroupQueueInfo* /*groupInfo*/);
-        void PlayerInvitedToBgUpdateAverageWaitTime(GroupQueueInfo* /*groupInfo*/, BattleGroundBracketId /*bracketId*/);
+        void PlayerInvitedToBgUpdateAverageWaitTime(GroupQueueInfo& /*groupInfo*/, BattleGroundBracketId /*bracketId*/);
         uint32 GetAverageQueueWaitTime(GroupQueueInfo* /*groupInfo*/, BattleGroundBracketId /*bracketId*/);
 
     private:
@@ -183,7 +183,7 @@ class BattleGroundQueueItem
         // one selection pool for horde, other one for alliance
         SelectionPool m_selectionPools[PVP_TEAM_COUNT];
 
-        bool InviteGroupToBg(GroupQueueInfo* groupInfo, BattleGroundInQueueInfo& queueInfo, Team side);
+        bool InviteGroupToBg(GroupQueueInfo& groupInfo, BattleGroundInQueueInfo& queueInfo, Team side);
 
         uint32 m_waitTimes[PVP_TEAM_COUNT][MAX_BATTLEGROUND_BRACKETS][COUNT_OF_PLAYERS_TO_AVERAGE_WAIT_TIME];
         uint32 m_waitTimeLastPlayer[PVP_TEAM_COUNT][MAX_BATTLEGROUND_BRACKETS];
