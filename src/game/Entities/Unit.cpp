@@ -6971,8 +6971,8 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
                 target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HOSTILE_ACTION);
 
                 // caster can be detected but have stealth aura
-                if (!spellInfo->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED) || bypassStealthAndEndIt)
-                    realCaster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                if (bypassStealthAndEndIt) // all other cases are handled through AURA_INTERRUPT_FLAG_ACTION
+                    realCaster->RemoveAurasWithDispelType(DISPEL_STEALTH);
             }
 
             target->AttackedBy(realCaster);
