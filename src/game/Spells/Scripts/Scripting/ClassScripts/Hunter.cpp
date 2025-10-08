@@ -271,11 +271,15 @@ struct RandomAggroSnakeTrap : public SpellScript
             return;
 
         Unit* target = spell->GetUnitTarget();
-        Unit* caster = spell->GetCaster();
-        if (caster->CanAttack(target))
+        Unit* snake = spell->GetCaster();
+
+        if (!target || !snake)
+            return;
+
+        if (snake->CanAttack(target) && snake->IsVisibleForOrDetect(target, target, true))
         {
-            if (caster->IsVisibleForOrDetect(target, target, true))
-                caster->AI()->AttackStart(caster);
+            if (snake->AI())
+                snake->AI()->AttackStart(target);
         }
     }
 };
