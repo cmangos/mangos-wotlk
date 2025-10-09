@@ -361,6 +361,19 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
     }
 };
 
+/*######
+## go_falling_rocks
+######*/
+
+struct go_falling_rocks : public GameObjectAI
+{
+    go_falling_rocks(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(7, true);
+        go->GetVisibilityData().AddInvisibilityValue(7, 1000);
+    }
+};
+
 void AddSC_storm_peaks()
 {
     Script* pNewScript = new Script;
@@ -384,6 +397,11 @@ void AddSC_storm_peaks()
     pNewScript = new Script;
     pNewScript->Name = "npc_ethereal_frostworg";
     pNewScript->GetAI = &GetNewAIInstance<npc_ethereal_frostworgAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_falling_rocks";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_falling_rocks>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
