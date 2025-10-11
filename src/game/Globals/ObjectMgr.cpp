@@ -9917,7 +9917,7 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
         trainerSpell.isProvidedReqLevel = trainerSpell.reqLevel > 0;
 
         // By default, lets assume the specified spell is the one we want to teach the player...
-        trainerSpell.learnedSpell = spell;
+        trainerSpell.learnedSpell.push_back(spell);
         // ...but first, lets inspect this spell...
         for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
         {
@@ -9930,39 +9930,43 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
                         // ...looks like the specified spell is actually a trainer's spell casted on a player to teach another spell
                         // Trainer's spells can teach more than one spell (up to number of effects), but we will stick to the first one
                         // Self-casts listed in trainer's lists usually come from recipes which were made trainable in a later patch
-                        trainerSpell.learnedSpell = spellinfo->EffectTriggerSpell[i];
+                        trainerSpell.learnedSpell.push_back(spellinfo->EffectTriggerSpell[i]);
                         break;
                 }
             }
         }
 
-        // already checked as valid spell so exist.
-        SpellEntry const* learnSpellinfo = sSpellTemplate.LookupEntry<SpellEntry>(trainerSpell.learnedSpell);
-        if (SpellMgr::IsProfessionSpell(trainerSpell.learnedSpell))
+        for (auto& learnedSpell : trainerSpell.learnedSpell)
         {
-            data.trainerType = 2;
+            // already checked as valid spell so exist.
+            SpellEntry const* learnSpellinfo = sSpellTemplate.LookupEntry<SpellEntry>(learnedSpell);
+            if (SpellMgr::IsProfessionSpell(learnedSpell))
+            {
+                data.trainerType = 2;
 
-            uint32 minLevel = sSpellMgr.GetProfessionSpellMinLevel(trainerSpell.learnedSpell);
-            if (trainerSpell.reqLevel)
-            {
-                if (minLevel == trainerSpell.reqLevel)
-                    ERROR_DB_STRICT_LOG("Table `%s` (Entry: %u) has redundant reqlevel %u (=prof reqlevel) for spell %u", tableName, entry, trainerSpell.reqLevel, spell);
+                uint32 minLevel = sSpellMgr.GetProfessionSpellMinLevel(learnedSpell);
+                if (trainerSpell.reqLevel)
+                {
+                    if (minLevel == trainerSpell.reqLevel)
+                        ERROR_DB_STRICT_LOG("Table `%s` (Entry: %u) has redundant reqlevel %u (=prof reqlevel) for spell %u", tableName, entry, trainerSpell.reqLevel, spell);
+                    else
+                        sLog.outErrorDb("Table `%s` (Entry: %u) has wrong redundant reqlevel %u (<>prof reqlevel %u) for spell %u", tableName, entry, trainerSpell.reqLevel,
+                                        minLevel, spell);
+                }
                 else
-                    sLog.outErrorDb("Table `%s` (Entry: %u) has wrong redundant reqlevel %u (<>prof reqlevel %u) for spell %u", tableName, entry, trainerSpell.reqLevel, minLevel, spell);
+                    trainerSpell.reqLevel = minLevel;
             }
+            // for non-prof. spell use spellLevel if not provided any
             else
-                trainerSpell.reqLevel = minLevel;
-        }
-        // for non-prof. spell use spellLevel if not provided any
-        else
-        {
-            if (trainerSpell.reqLevel)
             {
-                if (trainerSpell.reqLevel == learnSpellinfo->spellLevel)
-                    ERROR_DB_STRICT_LOG("Table `%s` (Entry: %u) has redundant reqlevel %u (=spell level) for spell %u", tableName, entry, trainerSpell.reqLevel, spell);
+                if (trainerSpell.reqLevel)
+                {
+                    if (trainerSpell.reqLevel == learnSpellinfo->spellLevel)
+                        ERROR_DB_STRICT_LOG("Table `%s` (Entry: %u) has redundant reqlevel %u (=spell level) for spell %u", tableName, entry, trainerSpell.reqLevel, spell);
+                }
+                else
+                    trainerSpell.reqLevel = learnSpellinfo->spellLevel;
             }
-            else
-                trainerSpell.reqLevel = learnSpellinfo->spellLevel;
         }
 
         if (trainerSpell.conditionId)

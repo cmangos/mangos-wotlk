@@ -106,9 +106,9 @@ void WorldSession::HandleTrainerListOpcode(WorldPacket& recv_data)
 
 static void SendTrainerSpellHelper(WorldPacket& data, TrainerSpell const* tSpell, TrainerSpellState state, float fDiscountMod, bool /*can_learn_primary_prof*/, uint32 reqLevel)
 {
-    bool primary_prof_first_rank = sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell);
+    bool primary_prof_first_rank = sSpellMgr.IsPrimaryProfessionFirstRankSpell(tSpell->learnedSpell.size() > 1 ? tSpell->learnedSpell[1] : tSpell->learnedSpell[0]);
 
-    SpellChainNode const* chain_node = sSpellMgr.GetSpellChainNode(tSpell->learnedSpell);
+    SpellChainNode const* chain_node = sSpellMgr.GetSpellChainNode(tSpell->learnedSpell.size() > 1 ? tSpell->learnedSpell[1] : tSpell->learnedSpell[0]);
 
     data << uint32(tSpell->spell);                      // learned spell (or cast-spell in profession case)
     data << uint8(state == TRAINER_SPELL_GREEN_DISABLED ? TRAINER_SPELL_GREEN : state);
@@ -194,7 +194,7 @@ void WorldSession::SendTrainerList(ObjectGuid guid) const
             TrainerSpell const* tSpell = &itr.second;
 
             uint32 reqLevel = 0;
-            if (!_player->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+            if (!_player->IsSpellFitByClassAndRace(tSpell->spell, &reqLevel))
                 continue;
 
             if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
@@ -217,7 +217,7 @@ void WorldSession::SendTrainerList(ObjectGuid guid) const
             TrainerSpell const* tSpell = &itr.second;
 
             uint32 reqLevel = 0;
-            if (!_player->IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
+            if (!_player->IsSpellFitByClassAndRace(tSpell->spell, &reqLevel))
                 continue;
 
             if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, GetPlayer(), unit->GetMap(), unit, CONDITION_FROM_TRAINER))
@@ -277,7 +277,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recv_data)
 
     // can't be learn, cheat? Or double learn with lags...
     uint32 reqLevel = 0;
-    if (!_player->IsSpellFitByClassAndRace(trainer_spell->learnedSpell, &reqLevel))
+    if (!_player->IsSpellFitByClassAndRace(trainer_spell->spell, &reqLevel))
         return;
 
     reqLevel = trainer_spell->isProvidedReqLevel ? trainer_spell->reqLevel : std::max(reqLevel, trainer_spell->reqLevel);

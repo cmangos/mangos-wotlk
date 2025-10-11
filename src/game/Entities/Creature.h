@@ -501,13 +501,13 @@ struct TrainerSpell
     uint32 reqSkill;
     uint32 reqSkillValue;
     uint32 reqLevel;
-    uint32 learnedSpell;
+    std::vector<uint32> learnedSpell;
     std::array<std::optional<uint32>, 3> reqAbility;
     uint32 conditionId;
     bool isProvidedReqLevel;
 
     // helpers
-    bool IsCastable() const { return learnedSpell != spell; }
+    bool IsCastable() const { return learnedSpell.size() > 1; }
 };
 
 typedef std::unordered_map < uint32 /*spellid*/, TrainerSpell > TrainerSpellMap;

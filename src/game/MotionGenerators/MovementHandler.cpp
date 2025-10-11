@@ -689,7 +689,7 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
 void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode %s", recv_data.GetOpcodeName());
-    // Pre-Wrath: broadcast root
+
     ObjectGuid guid;
     uint32 counter;
     MovementInfo movementInfo;
