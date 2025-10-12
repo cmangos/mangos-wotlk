@@ -4552,7 +4552,8 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
                 return TRAINER_SPELL_RED;
 
             // check additional spell requirement
-            if (spell_chain->req && !HasSpell(spell_chain->req))
+            if (spell_chain->req && !HasSpell(spell_chain->req) &&
+                std::find(trainer_spell->learnedSpell.begin(), trainer_spell->learnedSpell.end(), spell_chain->req) == trainer_spell->learnedSpell.end())
                 return TRAINER_SPELL_RED;
         }
 
