@@ -23365,92 +23365,99 @@ void Player::learnClassLevelSpells(bool includeHighLevelQuestRewards)
 
             uint32 reqLevel = 0;
 
-            // skip wrong class/race skills
-            if (!IsSpellFitByClassAndRace(tSpell->learnedSpell, &reqLevel))
-                continue;
-
-            if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, this, GetMap(), this, CONDITION_FROM_TRAINER))
-                continue;
-
-            // skip spells with first rank learned as talent (and all talents then also)
-            uint32 first_rank = sSpellMgr.GetFirstSpellInChain(tSpell->learnedSpell);
-            reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
-            bool isValidTalent = GetTalentSpellCost(first_rank) && HasSpell(first_rank) && reqLevel <= GetLevel();
-
-            TrainerSpellState state = GetTrainerSpellState(tSpell, reqLevel);
-            if (state != TRAINER_SPELL_GREEN && !isValidTalent)
-                continue;
-
-            SpellEntry const* proto = sSpellTemplate.LookupEntry<SpellEntry>(tSpell->learnedSpell);
-            if (!proto)
-                continue;
-
-            // fix activate state for non-stackable low rank (and find next spell for !active case)
-            if (uint32 nextId = sSpellMgr.GetSpellBookSuccessorSpellId(proto->Id))
+            if (!tSpell->learnedSpell.empty())
             {
-                if (HasSpell(nextId))
+
+                for (auto learnedSpell : tSpell->learnedSpell)
                 {
-                    // high rank already known so this must !active
-                    continue;
-                }
-            }
 
-            // skip other spell families (minus a few exceptions)
-            if (proto->SpellFamilyName != family)
-            {
-                SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(tSpell->learnedSpell);
-                if (bounds.first == bounds.second)
-                    continue;
+                    // skip wrong class/race skills
+                    if (!IsSpellFitByClassAndRace(learnedSpell, &reqLevel))
+                        continue;
 
-                SkillLineAbilityEntry const* skillInfo = bounds.first->second;
-                if (!skillInfo)
-                    continue;
+                    if (tSpell->conditionId && !sObjectMgr.IsConditionSatisfied(tSpell->conditionId, this, GetMap(), this, CONDITION_FROM_TRAINER))
+                        continue;
 
-                switch (skillInfo->skillId)
-                {
-                case SKILL_SUBTLETY:
-                case SKILL_BEAST_MASTERY:
-                case SKILL_SURVIVAL:
-                case SKILL_DEFENSE:
-                case SKILL_DUAL_WIELD:
-                case SKILL_FERAL_COMBAT:
-                case SKILL_PROTECTION:
-                case SKILL_PLATE_MAIL:
-                case SKILL_DEMONOLOGY:
-                case SKILL_ENHANCEMENT:
-                case SKILL_MAIL:
-                case SKILL_HOLY2:
-                case SKILL_LOCKPICKING:
-                    break;
+                    // skip spells with first rank learned as talent (and all talents then also)
+                    uint32 first_rank = sSpellMgr.GetFirstSpellInChain(learnedSpell);
+                    reqLevel = tSpell->isProvidedReqLevel ? tSpell->reqLevel : std::max(reqLevel, tSpell->reqLevel);
+                    bool isValidTalent = GetTalentSpellCost(first_rank) && HasSpell(first_rank) && reqLevel <= GetLevel();
 
-                default: continue;
-                }
-            }
+                    TrainerSpellState state = GetTrainerSpellState(tSpell, reqLevel);
+                    if (state != TRAINER_SPELL_GREEN && !isValidTalent)
+                        continue;
 
-            // skip wrong class/race skills
-            if (!IsSpellFitByClassAndRace(tSpell->learnedSpell))
-                continue;
+                    SpellEntry const* proto = sSpellTemplate.LookupEntry<SpellEntry>(learnedSpell);
+                    if (!proto)
+                        continue;
 
-            // skip broken spells
-            if (!SpellMgr::IsSpellValid(proto, this, false))
-                continue;
-
-            if (tSpell->learnedSpell)
-            {
-                bool learned = false;
-                for (int j = 0; j < 3; ++j)
-                {
-                    if (proto->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                    // fix activate state for non-stackable low rank (and find next spell for !active case)
+                    if (uint32 nextId = sSpellMgr.GetSpellBookSuccessorSpellId(proto->Id))
                     {
-                        uint32 learnedSpell = proto->EffectTriggerSpell[j];
-                        learnSpell(learnedSpell, false);
-                        learned = true;
+                        if (HasSpell(nextId))
+                        {
+                            // high rank already known so this must !active
+                            continue;
+                        }
                     }
-                }
 
-                if (!learned)
-                {
-                    learnSpell(tSpell->learnedSpell, false);
+                    // skip other spell families (minus a few exceptions)
+                    if (proto->SpellFamilyName != family)
+                    {
+                        SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(learnedSpell);
+                        if (bounds.first == bounds.second)
+                            continue;
+
+                        SkillLineAbilityEntry const* skillInfo = bounds.first->second;
+                        if (!skillInfo)
+                            continue;
+
+                        switch (skillInfo->skillId)
+                        {
+                            case SKILL_SUBTLETY:
+                            case SKILL_BEAST_MASTERY:
+                            case SKILL_SURVIVAL:
+                            case SKILL_DEFENSE:
+                            case SKILL_DUAL_WIELD:
+                            case SKILL_FERAL_COMBAT:
+                            case SKILL_PROTECTION:
+                            case SKILL_PLATE_MAIL:
+                            case SKILL_DEMONOLOGY:
+                            case SKILL_ENHANCEMENT:
+                            case SKILL_MAIL:
+                            case SKILL_HOLY2:
+                            case SKILL_LOCKPICKING: break;
+
+                            default: continue;
+                        }
+                    }
+
+                    // skip wrong class/race skills
+                    if (!IsSpellFitByClassAndRace(learnedSpell))
+                        continue;
+
+                    // skip broken spells
+                    if (!SpellMgr::IsSpellValid(proto, this, false))
+                        continue;
+
+                    if (learnedSpell)
+                    {
+                        bool learned = false;
+                        for (int j = 0; j < 3; ++j)
+                        {
+                            if (proto->Effect[j] == SPELL_EFFECT_LEARN_SPELL)
+                            {
+                                uint32 learnedSpell2 = proto->EffectTriggerSpell[j];
+                                learnSpell(learnedSpell2, false);
+                                learned = true;
+                            }
+                        }
+
+                        if (!learned)
+                        {
+                            learnSpell(learnedSpell, false);
+                        }
+                    }
                 }
             }
             else
