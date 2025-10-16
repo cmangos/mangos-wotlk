@@ -294,7 +294,7 @@ struct ScriptInfo
         {
             uint32 movementType;                            // datalong
             uint32 wanderORpathIdORRelayId;                 // datalong2
-            uint32 timerOrPassTarget;                       // datalong3
+            uint32 timerOrPassTargetOrCyclic;               // datalong3
         } movement;
 
         struct                                              // SCRIPT_COMMAND_SET_ACTIVEOBJECT (21)
