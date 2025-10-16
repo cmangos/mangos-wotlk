@@ -4654,8 +4654,8 @@ void Spell::SendSpellGo()
 
     if (castFlags & CAST_FLAG_VISUAL_CHAIN)                 // spell visual chain effect
     {
-        data << uint32(0);                                  // SpellVisual.dbc id?
-        data << uint32(0);                                  // overrides previous field if > 0 and violencelevel client cvar < 2
+        data << uint32(0);                                  // useViolence
+        data << uint32(0);                                  // SpellVisualID - overrides previous field if > 0 and violencelevel client cvar < 2
     }
 
     bool sendDestLoc = false;
