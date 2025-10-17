@@ -311,7 +311,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (36815,'spell_shock_barrier'),
 (46165,'spell_shock_barrier'),
 (36797,'spell_mind_control_kaelthas'),
-(35869,'spell_nether_beam'),
+(35869,'spell_nether_beam_kaelthas'),
 (36819,'spell_pyroblast_kael'),
 (36730,'spell_flame_strike_kael'),
 (36035,'spell_elemental_sieve'),

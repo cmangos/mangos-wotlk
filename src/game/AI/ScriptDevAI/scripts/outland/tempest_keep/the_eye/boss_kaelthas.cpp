@@ -1358,7 +1358,7 @@ struct MindControlKaelthas : public SpellScript, public AuraScript
 };
 
 // 35869 - Nether Beam
-struct NetherBeam : public SpellScript
+struct NetherBeamKaelthas : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
@@ -1552,7 +1552,7 @@ void AddSC_boss_kaelthas()
     RegisterSpellScript<GravityLapseKnockup>("spell_gravity_lapse_knockup");
     RegisterSpellScript<ShockBarrier>("spell_shock_barrier");
     RegisterSpellScript<MindControlKaelthas>("spell_mind_control_kaelthas");
-    RegisterSpellScript<NetherBeam>("spell_nether_beam");
+    RegisterSpellScript<NetherBeamKaelthas>("spell_nether_beam_kaelthas");
     RegisterSpellScript<PyroblastKael>("spell_pyroblast_kael");
     RegisterSpellScript<FlameStrikeKael>("spell_flame_strike_kael");
     RegisterSpellScript<NetherbeamSpeedKael>("spell_netherbeam_speed_kael");
