@@ -1272,7 +1272,7 @@ struct npc_totem_of_spiritsAI : public ScriptedAI
 // 36181 - Air Soul Captured
 struct ElementalCapturedCredit : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         switch (spell->m_spellInfo->Id)
