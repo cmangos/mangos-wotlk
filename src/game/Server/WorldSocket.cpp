@@ -123,7 +123,7 @@ WorldSocket::WorldSocket(boost::asio::io_context& context) : AsyncSocket(context
 {
 }
 
-void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
+void WorldSocket::SendPacket(const WorldPacket& pct)
 {
     if (IsClosed())
         return;
@@ -695,7 +695,7 @@ bool WorldSocket::HandlePing(WorldPacket& recvPacket)
 
     WorldPacket packet(SMSG_PONG, 4);
     packet << ping;
-    SendPacket(packet, true);
+    SendPacket(packet);
 
     return true;
 }
