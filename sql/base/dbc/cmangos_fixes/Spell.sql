@@ -2967,6 +2967,7 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
 33711,38794, -- Murmur's Touch (Shadow Labyrinth, Murmur)
 33716, -- laugh should only hit one target per tick
 34094, -- Power of Arrazius - should only hit one player
+34186, -- Haste Other - should only hit one Dreghood Geomancer 16937 / Dreghood Brute 16938
 34290, -- Ghazan Acid Spit should only hit one target
 34441, -- make spell target only one enemy, likely mismatch in dbc during tbc nerfs
 36146, -- Naberius Mind control should only hit one target
