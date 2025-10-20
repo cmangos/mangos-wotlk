@@ -2439,6 +2439,10 @@ enum
 {
     NPC_FELBLOOD_INITIATE   = 24918,
     NPC_EMACIATED_FELBLOOD  = 24955,
+
+    SAY_SIPHON_1            = 23994,
+    SAY_SIPHON_2            = 23995,
+    SAY_SIPHON_3            = 23996,
 };
 
 // 44936 - Quest - Fel Siphon Dummy
@@ -2456,6 +2460,12 @@ struct QuestFelSiphonDummy : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         static_cast<Creature*>(spell->GetUnitTarget())->UpdateEntry(NPC_EMACIATED_FELBLOOD);
+        switch (urand(0, 2))
+        {
+            case 0: DoBroadcastText(SAY_SIPHON_1, spell->GetUnitTarget()); break;
+            case 1: DoBroadcastText(SAY_SIPHON_2, spell->GetUnitTarget()); break;
+            case 2: DoBroadcastText(SAY_SIPHON_3, spell->GetUnitTarget()); break;
+        }
     }
 };
 
