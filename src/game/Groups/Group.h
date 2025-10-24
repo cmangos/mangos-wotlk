@@ -398,6 +398,7 @@ class Group
         uint8*              m_subGroupsCounts;
 
         LFGData             m_lfgData;
+        uint32              m_counter;
 
         struct NoopGroupDeleter { void operator()(Group*) const { /*noop - not managed*/ } };
         MaNGOS::unique_trackable_ptr<Group> m_scriptRef;

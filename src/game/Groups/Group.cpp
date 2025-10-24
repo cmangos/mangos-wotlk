@@ -71,7 +71,7 @@ GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 Group::Group() : m_Id(0), m_leaderLastOnline(0), m_groupFlags(GROUP_FLAG_NORMAL),
     m_dungeonDifficulty(REGULAR_DIFFICULTY), m_raidDifficulty(REGULAR_DIFFICULTY),
     m_bgGroup(nullptr), m_bfGroup(nullptr), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
-    m_subGroupsCounts(nullptr), m_scriptRef(this, NoopGroupDeleter())
+    m_subGroupsCounts(nullptr), m_counter(0), m_scriptRef(this, NoopGroupDeleter())
 {
 }
 
@@ -667,28 +667,29 @@ void Group::SendUpdateTo(Player* player)
 
         // guess size
         WorldPacket data(SMSG_GROUP_LIST, (1 + 1 + 1 + 1 + 8 + 4 + GetMembersCount() * 20));
-        data << uint8(m_groupFlags);                         // group type (flags in 3.3)
-        data << uint8(citr->group);                         // groupid
-        data << uint8(GetFlags(*citr));                     // group flags
-        data << uint8(IsBattleGroup() ? 1 : 0);             // 2.0.x, isBattleGroundGroup?
+        data << uint8(m_groupFlags);                          // group type (flags in 3.3)
+        data << uint8(citr->group);                           // groupid
+        data << uint8(GetFlags(*citr));                       // group flags
+        data << uint8(player->GetLfgData().GetPlayerRoles()); // lfg roles
         if (m_groupFlags & GROUP_FLAG_LFG)
         {
-            data << uint8(0);
-            data << uint32(0);
+            data << uint8(player->GetLfgData().GetState() == LFG_STATE_FINISHED_DUNGEON ? 2 : 0);
+            data << uint32(player->GetLfgData().GetDungeon());
         }
         data << GetObjectGuid();                            // group guid
-        data << uint32(0);                                  // 3.3, this value increments every time SMSG_GROUP_LIST is sent
+        data << uint32(m_counter++);                        // 3.3, value increases every time this packet gets sent
         data << uint32(GetMembersCount() - 1);
         for (member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
         {
             if (citr->guid == citr2->guid)
                 continue;
+            Player* player = sObjectMgr.GetPlayer(citr2->guid); // can be nullptr
             data << citr2->name;
             data << citr2->guid;
-            data << uint8(GetGroupMemberStatus(sObjectMgr.GetPlayer(citr2->guid)));
+            data << uint8(GetGroupMemberStatus());
             data << uint8(citr2->group);                    // groupid
             data << uint8(GetFlags(*citr2));                // group flags
-            data << uint8(0);                               // 3.3, role?
+            data << uint8(player != nullptr ? player->GetLfgData().GetPlayerRoles() : 0); // lfg roles
         }
 
         ObjectGuid masterLootGuid = (m_lootMethod == MASTER_LOOT) ? m_masterLooterGuid : ObjectGuid();
