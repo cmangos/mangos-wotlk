@@ -685,7 +685,7 @@ struct ItemPrototype
         return false;
     }
 
-    constexpr bool HasCreator() const
+    inline bool HasCreator() const
     {
         static constexpr uint32 ITEM_HEARTHSTONE_ID = 6948;
         return Stackable <= 1 &&
