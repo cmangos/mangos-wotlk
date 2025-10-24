@@ -7594,8 +7594,11 @@ void ObjectMgr::LoadGameObjectLocales()
 
     auto queryResult = WorldDatabase.Query("SELECT entry,"
                           "name_loc1,name_loc2,name_loc3,name_loc4,name_loc5,name_loc6,name_loc7,name_loc8,"
-                          "castbarcaption_loc1,castbarcaption_loc2,castbarcaption_loc3,castbarcaption_loc4,"
-                          "castbarcaption_loc5,castbarcaption_loc6,castbarcaption_loc7,castbarcaption_loc8 FROM locales_gameobject");
+                          "opening_text_loc1,opening_text_loc2,opening_text_loc3,opening_text_loc4,"
+                          "opening_text_loc5,opening_text_loc6,opening_text_loc7,opening_text_loc8,"
+                          "closing_text_loc1,closing_text_loc2,closing_text_loc3,closing_text_loc4,"
+                          "closing_text_loc5,closing_text_loc6,closing_text_loc7,closing_text_loc8 "
+                          "FROM locales_gameobject");
 
     if (!queryResult)
     {
@@ -7624,32 +7627,60 @@ void ObjectMgr::LoadGameObjectLocales()
 
         for (int i = 1; i < MAX_LOCALE; ++i)
         {
-            std::string str = fields[i].GetCppString();
-            if (!str.empty())
+            auto& field = fields[i];
+            if (!field.IsNULL())
             {
-                int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
-                if (idx >= 0)
+                std::string str = field.GetCppString();
+                if (!str.empty())
                 {
-                    if ((int32)data.Name.size() <= idx)
-                        data.Name.resize(idx + 1);
+                    int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
+                    if (idx >= 0)
+                    {
+                        if ((int32)data.Name.size() <= idx)
+                            data.Name.resize(idx + 1);
 
-                    data.Name[idx] = str;
+                        data.Name[idx] = str;
+                    }
                 }
             }
         }
 
         for (int i = 1; i < MAX_LOCALE; ++i)
         {
-            std::string str = fields[i + (MAX_LOCALE - 1)].GetCppString();
-            if (!str.empty())
+            auto& field = fields[i + (MAX_LOCALE - 1)];
+            if (!field.IsNULL())
             {
-                int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
-                if (idx >= 0)
+                std::string str = field.GetCppString();
+                if (!str.empty())
                 {
-                    if ((int32)data.CastBarCaption.size() <= idx)
-                        data.CastBarCaption.resize(idx + 1);
+                    int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
+                    if (idx >= 0)
+                    {
+                        if ((int32)data.OpeningText.size() <= idx)
+                            data.OpeningText.resize(idx + 1);
 
-                    data.CastBarCaption[idx] = str;
+                        data.OpeningText[idx] = str;
+                    }
+                }
+            }
+        }
+
+        for (int i = 1; i < MAX_LOCALE; ++i)
+        {
+            auto& field = fields[i + (MAX_LOCALE - 1) * 2];
+            if (!field.IsNULL())
+            {
+                std::string str = field.GetCppString();
+                if (!str.empty())
+                {
+                    int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
+                    if (idx >= 0)
+                    {
+                        if ((int32)data.ClosingText.size() <= idx)
+                            data.ClosingText.resize(idx + 1);
+
+                        data.ClosingText[idx] = str;
+                    }
                 }
             }
         }
