@@ -5288,7 +5288,7 @@ bool Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype, bool reportE
         }
 
         // set the "Crafted by ..." property of the item
-        if (pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetProto()->Class != ITEM_CLASS_QUEST && !pItem->GetProto()->Stackable)
+        if (pItem->GetProto()->HasCreator())
             pItem->SetGuidValue(ITEM_FIELD_CREATOR, player->GetObjectGuid());
 
         // send info to the client
