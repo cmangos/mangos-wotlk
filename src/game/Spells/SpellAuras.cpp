@@ -3403,6 +3403,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     else
                         target->RemoveAurasDueToSpell(37284);
+                    return;
                 }
                 case 40133:                                 // Summon Fire Elemental
                 {
