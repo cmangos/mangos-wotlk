@@ -172,6 +172,21 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
                 instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_STV_GRP_02, urand(0, 1));
                 break;
         }
+
+        // Quest: Stranglethorn Fever Wave Died
+        switch (creatureGroup->GetGroupId())
+        {
+            case STV_FEVER_GROUP_01: 
+                HandleSTVFeverEvent(AI_EVENT_CUSTOM_EVENTAI_A);
+                break;
+            case STV_FEVER_GROUP_02: 
+                HandleSTVFeverEvent(AI_EVENT_CUSTOM_EVENTAI_B); 
+                break;
+            case STV_FEVER_GROUP_03: 
+                HandleSTVFeverEvent(AI_EVENT_CUSTOM_EVENTAI_C); 
+                break;             
+        }
+        
     }
 
     bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override
@@ -380,6 +395,19 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             m_brewfestEvent.StartDarkIronAttackEvent();
         else if (event_id == GAME_EVENT_BREWFEST_KEG_TAPPING && activate)
             m_brewfestEvent.StartKegTappingEvent();
+    }
+
+    // Quest: Stranglethorn Fever Wave Died
+    // Inform Quest Handler to spawn next group if still alive
+    void HandleSTVFeverEvent(AIEventType eventType)
+    {
+        std::vector<Creature*> const* witchDoctor = instance->GetCreatures(WITCH_DOCTOR_UNBAGWA);
+        if (witchDoctor)
+        {
+            for (Creature* creature : *witchDoctor)
+                if (creature->IsAlive())
+                    creature->AI()->SendAIEvent(eventType, creature, creature);
+        }
     }
 
     void Update(uint32 diff) override
