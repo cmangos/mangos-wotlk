@@ -685,6 +685,16 @@ struct ItemPrototype
         return false;
     }
 
+    constexpr bool HasCreator() const
+    {
+        static constexpr uint32 ITEM_HEARTHSTONE_ID = 6948;
+        return Stackable <= 1 &&
+            Class != ITEM_CLASS_CONSUMABLE &&
+            Class != ITEM_CLASS_QUEST &&
+            !(Flags & ITEM_FLAG_NO_CREATOR) &&
+            ItemId != ITEM_HEARTHSTONE_ID;
+    }
+
     uint32 GetMaxStackSize() const { return Stackable > 0 ? uint32(Stackable) : uint32(0x7FFFFFFF - 1); }
 
     float getDPS() const
