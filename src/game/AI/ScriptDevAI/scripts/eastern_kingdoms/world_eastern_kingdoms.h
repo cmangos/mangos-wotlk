@@ -95,6 +95,4 @@ enum BFTDP_Events
     EVENT_REINFORCEMENTS_LEADER_SPEAK = 7,
 };
 
-const std::string WITCH_DOCTOR_UNBAGWA = "STV_WITCH_DOCTOR_UNBAGWA";
-
 #endif

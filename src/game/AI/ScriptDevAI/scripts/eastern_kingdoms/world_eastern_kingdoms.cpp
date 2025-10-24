@@ -401,7 +401,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
     // Inform Quest Handler to spawn next group if still alive
     void HandleSTVFeverEvent(AIEventType eventType)
     {
-        std::vector<Creature*> const* witchDoctor = instance->GetCreatures(WITCH_DOCTOR_UNBAGWA);
+        std::vector<Creature*> const* witchDoctor = instance->GetCreatures("STV_WITCH_DOCTOR_UNBAGWA");
         if (witchDoctor)
         {
             for (Creature* creature : *witchDoctor)
