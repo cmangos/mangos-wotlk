@@ -436,6 +436,15 @@ struct spell_teleport_sota : public SpellScript
     }
 };
 
+// Criterion 6800 - Sickly Gazelle
+struct SicklyGazelleAchiev : public AchievementCriteriaScript
+{
+    bool OnCriteriaCheck(Player const* source, Unit const* target) const override
+    {
+        return target->GetTypeId() == TYPEID_PLAYER && target->IsMounted();
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -462,4 +471,6 @@ void AddSC_battleground()
     RegisterSpellScript<spell_repair_cannon>("spell_repair_cannon");
     RegisterSpellScript<spell_end_of_round>("spell_end_of_round");
     RegisterSpellScript<spell_teleport_sota>("spell_teleport_sota");
+
+    sAchievementMgr.RegisterAchievementCriteriaScript<SicklyGazelleAchiev>("criterion_sickly_gazelle");
 }

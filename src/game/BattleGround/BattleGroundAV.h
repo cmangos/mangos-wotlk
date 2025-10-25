@@ -113,8 +113,6 @@ enum AVAchievs
     BG_AV_ACHIEV_CRIT_ALL_COUNTS_H1     = 3388,             // achiev id 1164
     BG_AV_ACHIEV_CRIT_ALL_COUNTS_H2     = 3389,
 
-    BG_AV_ACHIEV_CRIT_SICKLY_GAZELLE    = 6800,             // achiev id 223
-
     BG_AV_ACHIEV_CRIT_STORMPIKE_PERF1   = 1242,             // achiev id 220
     BG_AV_ACHIEV_CRIT_STORMPIKE_PERF2   = 1825,
     BG_AV_ACHIEV_CRIT_STORMPIKE_PERF3   = 1803,

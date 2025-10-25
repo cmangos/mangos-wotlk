@@ -1000,8 +1000,6 @@ bool BattleGroundAV::CheckAchievementCriteriaMeet(uint32 criteriaId, Player cons
         case BG_AV_ACHIEV_CRIT_ALL_COUNTS_H1:
         case BG_AV_ACHIEV_CRIT_ALL_COUNTS_H2:
             return m_mineOwner[BG_AV_IRONDEEP_MINE_ID] == TEAM_INDEX_HORDE && m_mineOwner[BG_AV_COLDTOOTH_MINE_ID] == TEAM_INDEX_HORDE;
-        case BG_AV_ACHIEV_CRIT_SICKLY_GAZELLE:
-            return target->GetAreaId() == BG_AV_AREA_ID_FIELD_OF_STRIFE && target->GetTypeId() == TYPEID_PLAYER && target->IsMounted();
         case BG_AV_ACHIEV_CRIT_STORMPIKE_PERF1:
         case BG_AV_ACHIEV_CRIT_STORMPIKE_PERF2:
         case BG_AV_ACHIEV_CRIT_STORMPIKE_PERF3:
