@@ -720,7 +720,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
     if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
         return;
 
-    if (_player->IsExpectingChangeTransport() && opcode == CMSG_FORCE_MOVE_ROOT_ACK)
+    if (_player->IsExpectingChangeTransport())
         return;
 
     WorldPacket data(opcode == CMSG_FORCE_MOVE_UNROOT_ACK ? MSG_MOVE_UNROOT : MSG_MOVE_ROOT);
@@ -750,9 +750,9 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
         return;
 
     _player->SetExpectingChangeTransport(false);
-    WorldPacket data(MSG_MOVE_ROOT, recv_data.size());
+    WorldPacket data(_player->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT) ? MSG_MOVE_ROOT : MSG_MOVE_UNROOT, recv_data.size());
     data << mover->GetPackGUID(); // write guid
-    movementInfo.Write(data);     // write data
+    data << movementInfo;
     mover->SendMessageToSetExcept(data, _player);
 }
 
