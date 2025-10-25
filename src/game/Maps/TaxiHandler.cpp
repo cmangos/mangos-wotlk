@@ -178,21 +178,6 @@ void WorldSession::HandleActivateTaxiExpressOpcode(WorldPacket& recv_data)
     GetPlayer()->ActivateTaxiPathTo(nodes, npc);
 }
 
-void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
-{
-    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_SPLINE_DONE");
-
-    ObjectGuid guid;                                        // used only for proper packet read
-    MovementInfo movementInfo;                              // used only for proper packet read
-    uint32 movementCounter;                                 // spline counter
-
-    recv_data >> guid.ReadAsPacked();
-    recv_data >> movementInfo;
-    recv_data >> movementCounter;
-
-    // TODO: Add checking for correct point end for correct spline
-}
-
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_ACTIVATETAXI");

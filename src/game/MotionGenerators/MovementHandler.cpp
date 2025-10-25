@@ -410,12 +410,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     // CMSG opcode has no handler in client, should not be sent to others.
     // It is sent by client when you jump and hit something on the way up,
     // thus stopping upward movement and causing you to descend sooner.
-    if (opcode == CMSG_MOVE_FALL_RESET)
+    if (opcode == CMSG_MOVE_FALL_RESET || opcode == CMSG_MOVE_CHNG_TRANSPORT)
         return;
 
     WorldPacket data(opcode, recv_data.size());
     data << mover->GetPackGUID();             // write guid
-    movementInfo.Write(data);                               // write data
+    movementInfo.Write(data);                 // write data
     mover->SendMessageToSetExcept(data, _player);
 }
 
@@ -697,14 +697,16 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
     recv_data >> counter;
     recv_data >> movementInfo;
 
-    m_anticheat->OrderAck(recv_data.GetOpcode(), counter);
+    Opcodes opcode = recv_data.GetOpcode();
+
+    m_anticheat->OrderAck(opcode, counter);
 
     Unit* mover = _player->GetMover();
 
     if (mover->GetObjectGuid() != guid)
         return;
 
-    if (recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK) // unroot case
+    if (opcode == CMSG_FORCE_MOVE_UNROOT_ACK) // unroot case
     {
         if (!mover->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT))
             return;
@@ -718,9 +720,39 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
     if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
         return;
 
-    WorldPacket data(recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK ? MSG_MOVE_UNROOT : MSG_MOVE_ROOT);
+    if (_player->IsExpectingChangeTransport() && opcode == CMSG_FORCE_MOVE_ROOT_ACK)
+        return;
+
+    WorldPacket data(opcode == CMSG_FORCE_MOVE_UNROOT_ACK ? MSG_MOVE_UNROOT : MSG_MOVE_ROOT);
     data << guid.WriteAsPacked();
     data << movementInfo;
+    mover->SendMessageToSetExcept(data, _player);
+}
+
+void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_SPLINE_DONE");
+
+    ObjectGuid guid;           // used only for proper packet read
+    MovementInfo movementInfo; // used only for proper packet read
+    uint32 movementCounter;    // spline counter
+
+    Unit* mover = _player->GetMover();
+
+    recv_data >> guid.ReadAsPacked();
+    recv_data >> movementInfo;
+    recv_data >> movementCounter;
+
+    if (mover->GetObjectGuid() != guid)
+        return;
+
+    if (!_player->IsExpectingChangeTransport() || !mover->movespline || mover->movespline->GetId() != movementCounter)
+        return;
+
+    _player->SetExpectingChangeTransport(false);
+    WorldPacket data(MSG_MOVE_ROOT, recv_data.size());
+    data << mover->GetPackGUID(); // write guid
+    movementInfo.Write(data);     // write data
     mover->SendMessageToSetExcept(data, _player);
 }
 

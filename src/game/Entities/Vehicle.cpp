@@ -358,6 +358,8 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         pPlayer->SetTarget(nullptr);
 
         pPlayer->SetImmobilizedState(true);
+
+        pPlayer->SetExpectingChangeTransport(true);
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
     {
@@ -532,6 +534,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             pPlayer->ResummonPetTemporaryUnSummonedIfAny();
             pPlayer->SetFallInformation(0, pPlayer->GetPositionZ());
 
+            pPlayer->SetExpectingChangeTransport(true);
             // SMSG_PET_DISMISS_SOUND (?)
         }
 
@@ -541,7 +544,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         Movement::MoveSplineInit init(*passenger);
 
         Position exitPos = m_owner->GetPosition(m_owner->GetTransport());
-        exitPos.o = passenger->GetOrientation();
+        exitPos.o = exitPos.o + passenger->GetTransOffsetO();
 
         if (VehicleSeatParameters const* params = sObjectMgr.GetVehicleSeatParameters(seatEntry->m_ID))
         {

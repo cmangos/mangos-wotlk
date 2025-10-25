@@ -2628,6 +2628,9 @@ class Player : public Unit
         bool IsMirrorTimerActive(MirrorTimer::Type timer) const;
         bool IsPendingPhaseChange() const { return m_pendingPhaseChange; }
         void RemovePendingPhaseChange() { m_pendingPhaseChange = false; }
+
+        bool IsExpectingChangeTransport() const { return m_expectingChangeTransport; }
+        void SetExpectingChangeTransport(bool state) { m_expectingChangeTransport = state; }
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2868,6 +2871,8 @@ class Player : public Unit
         EquipmentSets m_EquipmentSets;
 
         bool m_isDebuggingAreaTriggers;
+
+        bool m_expectingChangeTransport;
     private:
         void _HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEntry const* spellInfo);
         // internal common parts for CanStore/StoreItem functions
