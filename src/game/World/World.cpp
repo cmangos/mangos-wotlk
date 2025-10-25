@@ -1475,6 +1475,9 @@ void World::SetInitialWorldSettings()
     // after spellscripts
     sScriptDevAIMgr.CheckScriptNames();
 
+    // after SD2
+    sAchievementMgr.AssignAchievementCriteriaScripts();
+
     ///- Initialize game time and timers
     sLog.outString("Initialize game time and timers");
     m_gameTime = time(nullptr);

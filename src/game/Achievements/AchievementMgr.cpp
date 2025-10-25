@@ -201,6 +201,8 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
                 return false;
             }
             return true;
+        case ACHIEVEMENT_CRITERIA_REQUIRE_SCRIPT:
+            return true;
         case ACHIEVEMENT_CRITERIA_REQUIRE_MAP_DIFFICULTY:
             if (difficulty.difficulty >= MAX_DIFFICULTY)
             {
@@ -344,6 +346,8 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
             if (!target)
                 return false;
             return target->getGender() == gender.gender;
+        case ACHIEVEMENT_CRITERIA_REQUIRE_SCRIPT:
+            return sAchievementMgr.OnCriteriaCheck(criteria_id, source, target);
         case ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED:
             return false;                                   // always fail
         case ACHIEVEMENT_CRITERIA_REQUIRE_MAP_DIFFICULTY:
@@ -2451,6 +2455,12 @@ void AchievementMgr::BuildAllDataPacket(WorldPacket& data)
     data << int32(-1);
 }
 
+AchievementGlobalMgr::~AchievementGlobalMgr()
+{
+    for (auto& script : m_criteriaScriptByString)
+        delete script.second;
+}
+
 //==========================================================
 AchievementCriteriaEntryList const& AchievementGlobalMgr::GetAchievementCriteriaByType(AchievementCriteriaTypes type) const
 {
@@ -2590,7 +2600,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
 {
     m_criteriaRequirementMap.clear();                       // need for reload case
 
-    auto queryResult = WorldDatabase.Query("SELECT criteria_id, type, value1, value2 FROM achievement_criteria_requirement");
+    auto queryResult = WorldDatabase.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM achievement_criteria_requirement");
 
     if (!queryResult)
     {
@@ -2620,6 +2630,12 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
         }
 
         AchievementCriteriaRequirement data(fields[1].GetUInt32(), fields[2].GetUInt32(), fields[3].GetUInt32());
+
+        if (!fields[4].IsNULL())
+        {
+            std::string scriptName = fields[4].GetCppString();
+            m_criteriaStringById[scriptName].push_back(criteria_id); // checks done on loading scripts
+        }
 
         if (!data.IsValid(criteria))
         {
@@ -2971,4 +2987,38 @@ void AchievementGlobalMgr::LoadRewardLocales()
 
     sLog.outString();
     sLog.outString(">> Loaded " SIZEFMTD " achievement reward locale strings", m_achievementRewardLocales.size());
+}
+
+void AchievementGlobalMgr::AssignAchievementCriteriaScripts()
+{
+    std::vector<std::string> missingScripts;
+
+    for (auto& stringToId : m_criteriaStringById)
+    {
+        for (uint32 criteriaId : stringToId.second)
+        {
+            auto scriptItr = m_criteriaScriptByString.find(stringToId.first);
+            if (scriptItr == m_criteriaScriptByString.end())
+            {
+                missingScripts.push_back(stringToId.first);
+                continue;
+            }
+
+            m_criteriaScriptById[criteriaId] = m_criteriaScriptByString[stringToId.first];
+        }
+    }
+
+    for (auto& missingScript : missingScripts)
+    {
+        sLog.outError("Table `achievement_criteria_requirement` contains missing ScriptName %s", missingScript.c_str());
+    }
+}
+
+bool AchievementGlobalMgr::OnCriteriaCheck(uint32 criteriaId, Player const* source, Unit const* target)
+{
+    auto itr = m_criteriaScriptById.find(criteriaId);
+    if (itr == m_criteriaScriptById.end())
+        return false;
+
+    return itr->second->OnCriteriaCheck(source, target);
 }

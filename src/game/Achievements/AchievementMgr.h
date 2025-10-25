@@ -26,6 +26,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 
 struct AchievementEntry;
 struct AchievementCriteriaEntry;
@@ -59,7 +60,7 @@ enum AchievementCriteriaRequirementType
     ACHIEVEMENT_CRITERIA_REQUIRE_VALUE               = 8,   // minvalue                     value provided with achievement update must be not less that limit
     ACHIEVEMENT_CRITERIA_REQUIRE_T_LEVEL             = 9,   // minlevel                     minlevel of target
     ACHIEVEMENT_CRITERIA_REQUIRE_T_GENDER            = 10,  // gender                       0=male; 1=female
-    ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED            = 11,  //                              used to prevent achievement creteria complete if not all requirement implemented and listed in table
+    ACHIEVEMENT_CRITERIA_REQUIRE_SCRIPT              = 11,  //                              custom script
     ACHIEVEMENT_CRITERIA_REQUIRE_MAP_DIFFICULTY      = 12,  // difficulty                   normal/heroic difficulty for current event map
     ACHIEVEMENT_CRITERIA_REQUIRE_MAP_PLAYER_COUNT    = 13,  // count                        "with less than %u people in the zone"
     ACHIEVEMENT_CRITERIA_REQUIRE_T_TEAM              = 14,  // team                         HORDE(67), ALLIANCE(469)
@@ -74,10 +75,16 @@ enum AchievementCriteriaRequirementType
     ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE  = 23,  // creatureType
     ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID              = 24,  // mapId                        player must be in map
     ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION= 25,  // condition_entry              player must be in map
+    ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED            = 27,  //                              used to prevent achievement creteria complete if not all requirement implemented and listed in table
 };
 
 class Player;
 class Unit;
+
+struct AchievementCriteriaScript
+{
+    virtual bool OnCriteriaCheck(Player const* source, Unit const* target) const = 0;
+};
 
 struct AchievementCriteriaRequirement
 {
@@ -133,7 +140,7 @@ struct AchievementCriteriaRequirement
         {
             uint32 gender;
         } gender;
-        // ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED          = 11 (no data)
+        // ACHIEVEMENT_CRITERIA_REQUIRE_SCRIPT            = 11 (no data)
         // ACHIEVEMENT_CRITERIA_REQUIRE_MAP_DIFFICULTY    = 12
         struct
         {
@@ -198,6 +205,7 @@ struct AchievementCriteriaRequirement
         {
             uint32 conditionEntry;
         } worldStateCondition;
+        // ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED             = 26 (no data)
         // ...
         struct
         {
@@ -329,6 +337,8 @@ class AchievementMgr
 class AchievementGlobalMgr
 {
     public:
+        ~AchievementGlobalMgr();
+
         AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type) const;
         AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id);
         AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const;
@@ -346,6 +356,16 @@ class AchievementGlobalMgr
         void LoadRewards();
         void LoadRewardLocales();
 
+        template <typename T>
+        void RegisterAchievementCriteriaScript(std::string scriptName)
+        {
+            m_criteriaScriptByString.emplace(scriptName, new T());
+        }
+
+        void AssignAchievementCriteriaScripts();
+
+        bool OnCriteriaCheck(uint32 criteriaId, Player const* source, Unit const* target);
+
     private:
         AchievementCriteriaRequirementMap m_criteriaRequirementMap;
 
@@ -361,6 +381,10 @@ class AchievementGlobalMgr
 
         AchievementRewardsMap       m_achievementRewards;
         AchievementRewardLocalesMap m_achievementRewardLocales;
+
+        std::map<std::string, AchievementCriteriaScript*> m_criteriaScriptByString;
+        std::map<uint32, AchievementCriteriaScript*> m_criteriaScriptById;
+        std::map<std::string, std::vector<uint32>> m_criteriaStringById;
 };
 
 #define sAchievementMgr MaNGOS::Singleton<AchievementGlobalMgr>::Instance()

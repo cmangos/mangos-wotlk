@@ -3,5 +3,5 @@
  #define REVISION_DB_REALMD "required_14083_01_realmd_joindate_datetime"
  #define REVISION_DB_LOGS "required_14039_01_logs_anticheat"
  #define REVISION_DB_CHARACTERS "required_14087_01_characters_equip_size"
- #define REVISION_DB_MANGOS "required_14093_01_mangos_vehicle_ridespell"
+ #define REVISION_DB_MANGOS "required_14094_01_mangos_achievement_scripting"
 #endif // __REVISION_SQL_H__
