@@ -314,7 +314,12 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Calculate passengers local position
     float lx = 0.f, ly = 0.f, lz = 0.f, lo = 0.f;
-    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
+    uint32 displayId = 0;
+    if (m_owner->IsCreature())
+        displayId = static_cast<Creature*>(m_owner)->GetNativeDisplayId();
+    else if (m_owner->IsPlayer())
+        displayId = static_cast<Player*>(m_owner)->GetMountID();
+    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(displayId);
     float scale = creatureDisplayInfo->scale;
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
     auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
@@ -428,7 +433,12 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     RemoveSeatMods(passenger, seatEntry->m_flags);
 
     float lx = 0.f, ly = 0.f, lz = 0.f, lo = 0.f;
-    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(static_cast<Creature*>(m_owner)->GetNativeDisplayId());
+    uint32 displayId = 0;
+    if (m_owner->IsCreature())
+        displayId = static_cast<Creature*>(m_owner)->GetNativeDisplayId();
+    else if (m_owner->IsPlayer())
+        displayId = static_cast<Player*>(m_owner)->GetMountID();
+    auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(displayId);
     float scale = creatureDisplayInfo->scale;
     scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
     auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
