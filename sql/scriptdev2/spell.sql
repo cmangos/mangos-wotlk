@@ -1424,7 +1424,22 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (49045,'spell_arcane_shot_hunter'),
 (781,'spell_disengage'),
 (19572,'spell_improved_mend_pet'),
-(19573,'spell_improved_mend_pet');
+(19573,'spell_improved_mend_pet'),
+(19597, 'spell_taming_pet_rod'),
+(19676, 'spell_taming_pet_rod'),
+(19677, 'spell_taming_pet_rod'),
+(19678, 'spell_taming_pet_rod'),
+(19679, 'spell_taming_pet_rod'),
+(19680, 'spell_taming_pet_rod'),
+(19681, 'spell_taming_pet_rod'),
+(19682, 'spell_taming_pet_rod'),
+(19683, 'spell_taming_pet_rod'),
+(19684, 'spell_taming_pet_rod'),
+(19685, 'spell_taming_pet_rod'),
+(19686, 'spell_taming_pet_rod'),
+(30100, 'spell_taming_pet_rod'),
+(30103, 'spell_taming_pet_rod'),
+(30104, 'spell_taming_pet_rod');
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
