@@ -219,7 +219,7 @@ UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
 -- outland
 16880,16518,16847,17157,17326,17654,18879,21729,24918,24922,25084,25085,
 -- northrend
-23678,25752,25753,25758,25792,25793,26268,26270,26421,26616,26643,26841,27122,27808,28053,28054,28068,28093,28465,28600,29319,29327,30146,30169);
+23678,25752,25753,25758,25792,25793,26268,26270,26421,26616,26643,26841,27122,27808,28053,28054,28068,28093,28465,28600,29319,29327,30169);
 
 UPDATE gameobject_template SET ScriptName='spell_dummy_go' WHERE entry IN (181616,186949);
 
@@ -2499,13 +2499,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1000553','Be ready, $N. I hear the council returning. Prepare to ambush!','0','0','0','0','542','deathstalker_faerleia SAY_START'),
 ('-1000554','Well done. A blow to Arugal no doubt!','0','0','0','0','545','deathstalker_faerleia SAY_END'),
-
-('-1000555','Back... to work...','0','0','0','0','30796','exhausted vrykul SAY_RAND_WORK1'),
-('-1000556','You treat us worse than animals!','0','0','0','0','30797','exhausted vrykul SAY_RAND_WORK2'),
-('-1000557','We will have revenge...some day.','0','0','0','0','30798','exhausted vrykul SAY_RAND_WORK3'),
-('-1000558','Curse you! You will not treat me like a beast!','0','0','0','0','30793','exhausted vrykul SAY_RAND_ATTACK1'),
-('-1000559','I''d rather die fighting than live like a slave.','0','0','0','0','30795','exhausted vrykul SAY_RAND_ATTACK2'),
-('-1000560','Enough! I will teach you some manners, wench!','0','0','0','0','30794','exhausted vrykul SAY_RAND_ATTACK3'),
 
 ('-1000566','Stand back! Stand clear! The infernal will need to be given a wide berth!','0','0','0','0','9634','SAY_NIBY_1'),
 ('-1000567','BOW DOWN TO THE ALMIGHTY! BOW DOWN BEFORE MY INFERNAL DESTRO... chicken?','0','0','0','0','9635','SAY_NIBY_2'),
