@@ -148,15 +148,6 @@ enum
     NPC_HELBOAR                         = 16880,
     NPC_DREADTUSK                       = 16992,
 
-    // quest 12906/13422
-    SPELL_DISCIPLINING_ROD              = 56033,
-    SAY_RAND_WORK1                      = -1000555,
-    SAY_RAND_WORK2                      = -1000556,
-    SAY_RAND_WORK3                      = -1000557,
-    SAY_RAND_ATTACK1                    = -1000558,
-    SAY_RAND_ATTACK2                    = -1000559,
-    SAY_RAND_ATTACK3                    = -1000560,
-
     // quest 11515
     SPELL_FEL_SIPHON_DUMMY              = 44936,
     NPC_FELBLOOD_INITIATE               = 24918,
@@ -292,47 +283,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 // possible needs check for quest state, to not have any effect when quest really complete
 
                 pCreatureTarget->UpdateEntry(NPC_DREADTUSK);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_DISCIPLINING_ROD:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->getStandState() == UNIT_STAND_STATE_STAND)
-                    return true;
-
-                switch (urand(1, 2))
-                {
-                    case 1:
-                    {
-                        switch (urand(1, 3))
-                        {
-                            case 1: DoScriptText(SAY_RAND_ATTACK1, pCreatureTarget); break;
-                            case 2: DoScriptText(SAY_RAND_ATTACK2, pCreatureTarget); break;
-                            case 3: DoScriptText(SAY_RAND_ATTACK3, pCreatureTarget); break;
-                        }
-
-                        pCreatureTarget->SetStandState(UNIT_STAND_STATE_STAND);
-                        pCreatureTarget->AI()->AttackStart(pCaster);
-                        break;
-                    }
-                    case 2:
-                    {
-                        switch (urand(1, 3))
-                        {
-                            case 1: DoScriptText(SAY_RAND_WORK1, pCreatureTarget); break;
-                            case 2: DoScriptText(SAY_RAND_WORK2, pCreatureTarget); break;
-                            case 3: DoScriptText(SAY_RAND_WORK3, pCreatureTarget); break;
-                        }
-
-                        pCreatureTarget->SetStandState(UNIT_STAND_STATE_STAND);
-                        pCreatureTarget->HandleEmote(EMOTE_STATE_WORK);
-                        break;
-                    }
-                }
-
                 return true;
             }
             return true;
