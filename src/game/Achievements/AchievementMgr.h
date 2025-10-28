@@ -205,7 +205,7 @@ struct AchievementCriteriaRequirement
         {
             uint32 conditionEntry;
         } worldStateCondition;
-        // ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED             = 26 (no data)
+        // ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED             = 27 (no data)
         // ...
         struct
         {
