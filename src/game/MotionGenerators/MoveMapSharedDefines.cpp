@@ -48,7 +48,7 @@ namespace MMAP
 
         G3D::Vector3 pos(building->x, building->y, building->z);
         G3D::Quat rot(building->qx, building->qy, building->qz, building->qw);
-        G3D::Matrix3 matrix = (rot * G3D::Quat(0, 0, 1, 0)).toRotationMatrix();
+        G3D::Matrix3 matrix = (G3D::Quat(0, 0, 1, 0) * rot).toRotationMatrix();
         for (std::vector<VMAP::GroupModel>::iterator it = groupModels.begin(); it != groupModels.end(); ++it)
         {
             // transform data
