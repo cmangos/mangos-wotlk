@@ -85,7 +85,7 @@ typedef std::map<uint32, std::vector<TileBuilding>> TileBuildings;
 static TileBuildings BuildingMap =
 {
     {649u, {TileBuilding(std::string("Coliseum_Intact_Floor.wmo.vmo"), 563.53472900390625, 177.3090362548828125, 398.5718994140625, 3.14159265358979323846 / 2, 0, 0, 0.707106590270996093, 0.707106947898864746, 9059, false, false, 01, 195527)}},
-    {603u, {TileBuilding(std::string("Ul_Ulduar_Trapdoor_02.m2.vmo"), 1805.630126953125, -23.5202598571777343, 451.225433349609375, 0, 0, 0, 0, 0, 8546, false, false, 01, 194232)}},
+    {603u, {TileBuilding(std::string("Ul_Ulduar_Trapdoor_02.m2.vmo"), 1805.630126953125, -23.5202598571777343, 451.225433349609375, 0, 0, 0, 0, 1, 8546, false, false, 01, 194232)}},
     {616u, {TileBuilding(std::string("Nexus_Raid_Floating_Platform.wmo.vmo"), 754.34552001953125, 1300.8697509765625, 256.24853515625, 3.141592741012573242, 0, 0, -1, 0, 8387, false, false, 01, 193070)}},
     {631u,
     {TileBuilding(std::string("Icecrownraid_Arthas_Precipice.wmo.vmo"), 503.619781494140625, -2124.654541015625, 836.60699462890625, 3.141592741012573242, 0, 0, -1, 0, 9256, true, true, 0, 202078),
@@ -93,9 +93,9 @@ static TileBuildings BuildingMap =
     TileBuilding(std::string("Icecrownraid_Arthas_Precipice_Phase1.wmo.vmo"), 503.619781494140625, -2124.654541015625, 836.60699462890625, 3.141592741012573242, 0, 0, -1, 0, 9276, false, true, 0, 202161),
     TileBuilding(std::string("Icecrownraid_Arthas_Precipice_Phase2.wmo.vmo"), 503.619781494140625, -2124.654541015625, 836.60699462890625, 3.141592741012573242, 0, 0, -1, 0, 9276, false, true, 0, 202161),
     TileBuilding(std::string("Iceshard_Standing.m2.vmo"), 473.7476806640625, -2096.47705078125, 840.85699462890625, 3.141592741012573242, 0, 0, -1, 0, 9227, false, true, 0x1, 202141),
-    TileBuilding(std::string("Iceshard_Standing.m2.vmo"), 473.748291015625, -2152.832275390625, 840.85699462890625, -1.57079577445983886, 0, 0, -1, 0, 9227, false, true, 0x1, 202142),
-    TileBuilding(std::string("Iceshard_Standing.m2.vmo"), 533.56048583984375, -2152.831298828125, 840.85699462890625, 0, 0, 0, -1, 0, 9227, false, true, 0x1, 202143),
-    TileBuilding(std::string("Iceshard_Standing.m2.vmo"), 533.55987548828125, -2096.47607421875, 840.85699462890625, 1.570795774459838867, 0, 0, -1, 0, 9227, false, true, 0x1, 202144)}}
+    TileBuilding(std::string("Iceshard_Standing.m2.vmo"), 473.748291015625, -2152.832275390625, 840.85699462890625, -1.57079577445983886, 0, 0, -0.70710659027099609, 0.707106947898864746, 9227, false, true, 0x1, 202142),
+    TileBuilding(std::string("Iceshard_Standing.m2.vmo"), 533.56048583984375, -2152.831298828125, 840.85699462890625, 0, 0, 0, 0, 1, 9227, false, true, 0x1, 202143),
+    TileBuilding(std::string("Iceshard_Standing.m2.vmo"), 533.55987548828125, -2096.47607421875, 840.85699462890625, 1.570795774459838867, 0, 0, 0.707106590270996093, 0.707106947898864746, 9227, false, true, 0x1, 202144)}}
 };
 
 #ifdef MMAP_GENERATOR
