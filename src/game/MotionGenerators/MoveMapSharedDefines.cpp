@@ -47,8 +47,8 @@ namespace MMAP
         bool isM2 = building->modelName.find(".m2") != building->modelName.npos || building->modelName.find(".M2") != building->modelName.npos;
 
         G3D::Vector3 pos(building->x, building->y, building->z);
-        G3D::Quat rot(0, 0, sin(building->ori / 2), cos(building->ori / 2));
-        G3D::Matrix3 matrix = rot.toRotationMatrix();
+        G3D::Quat rot(building->qx, building->qy, building->qz, building->qw);
+        G3D::Matrix3 matrix = (rot * G3D::Quat(0, 0, 1, 0)).toRotationMatrix();
         for (std::vector<VMAP::GroupModel>::iterator it = groupModels.begin(); it != groupModels.end(); ++it)
         {
             // transform data
