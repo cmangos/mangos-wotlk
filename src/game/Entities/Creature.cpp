@@ -354,6 +354,12 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         }
     }
 
+    // Remove from large objects list if the new entry is not also a large object
+    if (!cinfo->IsLargeOrBiggerCreature())
+        GetMap()->RemoveEntryFromLargeObjects(this);
+    else
+        GetMap()->RemoveEntryFromLargeObjects(this, Entry);
+
     SetEntry(Entry);                                        // normal entry always
     m_creatureInfo = cinfo;                                 // map mode related always
 
