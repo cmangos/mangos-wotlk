@@ -49,33 +49,34 @@ struct CriteriaProgress
 enum AchievementCriteriaRequirementType
 {
     // value1         value2        comment
-    ACHIEVEMENT_CRITERIA_REQUIRE_NONE                = 0,   // 0              0
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_CREATURE          = 1,   // creature_id    0
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_CLASS_RACE = 2,   // class_id       race_id
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_LESS_HEALTH = 3,  // health_percent 0
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_DEAD       = 4,   // own_team       0             not corpse (not released body), own_team==false if enemy team expected
-    ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA              = 5,   // spell_id       effect_idx
-    ACHIEVEMENT_CRITERIA_REQUIRE_S_AREA              = 6,   // area id        0
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA              = 7,   // spell_id       effect_idx
-    ACHIEVEMENT_CRITERIA_REQUIRE_VALUE               = 8,   // minvalue                     value provided with achievement update must be not less that limit
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_LEVEL             = 9,   // minlevel                     minlevel of target
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_GENDER            = 10,  // gender                       0=male; 1=female
-    ACHIEVEMENT_CRITERIA_REQUIRE_SCRIPT              = 11,  //                              custom script
-    ACHIEVEMENT_CRITERIA_REQUIRE_MAP_DIFFICULTY      = 12,  // difficulty                   normal/heroic difficulty for current event map
-    ACHIEVEMENT_CRITERIA_REQUIRE_MAP_PLAYER_COUNT    = 13,  // count                        "with less than %u people in the zone"
-    ACHIEVEMENT_CRITERIA_REQUIRE_T_TEAM              = 14,  // team                         HORDE(67), ALLIANCE(469)
-    ACHIEVEMENT_CRITERIA_REQUIRE_S_DRUNK             = 15,  // drunken_state  0             (enum DrunkenState) of player
-    ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY             = 16,  // holiday_id     0             event in holiday time
-    ACHIEVEMENT_CRITERIA_REQUIRE_UNUSED              = 17,  //
-    ACHIEVEMENT_CRITERIA_REQUIRE_INSTANCE_SCRIPT     = 18,  // 0              0             maker instance script call for check current criteria requirements fit
-    ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPPED_ITEM_LVL = 19,  // item_level     item_quality  fir equipped item in slot `misc1` to item level and quality
-    ACHIEVEMENT_CRITERIA_REQUIRE_NTH_BIRTHDAY        = 20,  // N                            login on day of N-th Birthday
-    ACHIEVEMENT_CRITERIA_REQUIRE_KNOWN_TITLE         = 21,  // title_id                     known (pvp) title, values from dbc
-    ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT          = 22,  // 0              0             maker battleground or outdoor pvp script call for check current criteria requirements fit
-    ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE  = 23,  // creatureType
-    ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID              = 24,  // mapId                        player must be in map
-    ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION= 25,  // condition_entry              player must be in map
-    ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED            = 27,  //                              used to prevent achievement creteria complete if not all requirement implemented and listed in table
+    ACHIEVEMENT_CRITERIA_REQUIRE_NONE                   = 0,   // 0              0
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_CREATURE             = 1,   // creature_id    0
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_CLASS_RACE    = 2,   // class_id       race_id
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_LESS_HEALTH   = 3,   // health_percent 0
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_DEAD          = 4,   // own_team       0             not corpse (not released body), own_team==false if enemy team expected
+    ACHIEVEMENT_CRITERIA_REQUIRE_S_AURA                 = 5,   // spell_id       effect_idx
+    ACHIEVEMENT_CRITERIA_REQUIRE_S_AREA                 = 6,   // area id        0
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_AURA                 = 7,   // spell_id       effect_idx
+    ACHIEVEMENT_CRITERIA_REQUIRE_VALUE                  = 8,   // minvalue                     value provided with achievement update must be not less that limit
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_LEVEL                = 9,   // minlevel                     minlevel of target
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_GENDER               = 10,  // gender                       0=male; 1=female
+    ACHIEVEMENT_CRITERIA_REQUIRE_SCRIPT                 = 11,  //                              custom script
+    ACHIEVEMENT_CRITERIA_REQUIRE_MAP_DIFFICULTY         = 12,  // difficulty                   normal/heroic difficulty for current event map
+    ACHIEVEMENT_CRITERIA_REQUIRE_MAP_PLAYER_COUNT       = 13,  // count                        "with less than %u people in the zone"
+    ACHIEVEMENT_CRITERIA_REQUIRE_T_TEAM                 = 14,  // team                         HORDE(67), ALLIANCE(469)
+    ACHIEVEMENT_CRITERIA_REQUIRE_S_DRUNK                = 15,  // drunken_state  0             (enum DrunkenState) of player
+    ACHIEVEMENT_CRITERIA_REQUIRE_HOLIDAY                = 16,  // holiday_id     0             event in holiday time
+    ACHIEVEMENT_CRITERIA_REQUIRE_UNUSED                 = 17,  //
+    ACHIEVEMENT_CRITERIA_REQUIRE_INSTANCE_SCRIPT        = 18,  // 0              0             maker instance script call for check current criteria requirements fit
+    ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPPED_ITEM_LVL    = 19,  // item_level     item_quality  fir equipped item in slot `misc1` to item level and quality
+    ACHIEVEMENT_CRITERIA_REQUIRE_NTH_BIRTHDAY           = 20,  // N                            login on day of N-th Birthday
+    ACHIEVEMENT_CRITERIA_REQUIRE_KNOWN_TITLE            = 21,  // title_id                     known (pvp) title, values from dbc
+    ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT             = 22,  // 0              0             maker battleground or outdoor pvp script call for check current criteria requirements fit
+    ACHIEVEMENT_CRITERIA_REQUIRE_KILL_CREATURE_TYPE     = 23,  // creatureType
+    ACHIEVEMENT_CRITERIA_REQUIRE_MAP_ID                 = 24,  // mapId                        player must be in map
+    ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION   = 25,  // condition_entry              player must be in map
+    ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_EXPRESSION  = 26,  // worldstate_expression
+    ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED               = 27,  //                              used to prevent achievement creteria complete if not all requirement implemented and listed in table
 };
 
 class Player;
@@ -205,6 +206,11 @@ struct AchievementCriteriaRequirement
         {
             uint32 conditionEntry;
         } worldStateCondition;
+        // ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_EXPRESSION = 26
+        struct
+        {
+            uint32 expressionEntry;
+        } worldStateExpression;
         // ACHIEVEMENT_CRITERIA_REQUIRE_DISABLED             = 27 (no data)
         // ...
         struct

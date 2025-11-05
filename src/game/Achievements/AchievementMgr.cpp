@@ -44,6 +44,7 @@
 #include "Chat/Chat.h"
 
 #include "Policies/Singleton.h"
+#include "World/WorldStateExpression.h"
 
 INSTANTIATE_SINGLETON_1(AchievementGlobalMgr);
 
@@ -293,6 +294,16 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
             }
             return true;
         }
+        case ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_EXPRESSION:
+        {
+            if (!sObjectMgr.ExistsWorldstateExpression(worldStateExpression.expressionEntry))
+            {
+                sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) for requirement ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_EXPRESSION (%u) have unknown Id in value1 (%u), ignore.",
+                    criteria->ID, criteria->requiredType, requirementType, worldStateExpression.expressionEntry);
+                return false;
+            }
+            return true;
+        }
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` (Entry: %u Type: %u) have data for not supported data type (%u), ignore.", criteria->ID, criteria->requiredType, requirementType);
             return false;
@@ -432,6 +443,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
             return source->GetMapId() == mapId.mapId;
         case ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_CONDITION:
             return IsConditionSatisfied(worldStateCondition.conditionEntry, nullptr, source->GetMap(), nullptr, CONDITION_FROM_WORLDSTATE);
+        case ACHIEVEMENT_CRITERIA_REQUIRE_WORLDSTATE_EXPRESSION: return sObjectMgr.GetWorldStateExpressionMgr().Meets(source->GetMap(), worldStateExpression.expressionEntry);
         case ACHIEVEMENT_CRITERIA_REQUIRE_UNUSED: break;
     }
     return false;

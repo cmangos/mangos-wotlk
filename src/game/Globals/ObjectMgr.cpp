@@ -8820,6 +8820,16 @@ std::shared_ptr<std::map<int32, CombatConditionEntry>> ObjectMgr::GetCombatCondi
     return m_combatConditionMgr->Get();
 }
 
+bool ObjectMgr::ExistsWorldstateExpression(int32 Id)
+{
+    return m_worldStateExpressionMgr->Exists(Id);
+}
+
+WorldStateExpressionMgr const& ObjectMgr::GetWorldStateExpressionMgr()
+{
+    return *(m_worldStateExpressionMgr.get());
+}
+
 void ObjectMgr::DeleteCreatureData(uint32 guid)
 {
     // remove mapid*cellid -> guid_set map

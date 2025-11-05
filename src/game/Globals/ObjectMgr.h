@@ -827,6 +827,9 @@ class ObjectMgr
         std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> GetWorldStateExpressions();
         std::shared_ptr<std::map<int32, CombatConditionEntry>> GetCombatConditions();
 
+        bool ExistsWorldstateExpression(int32 Id);
+        WorldStateExpressionMgr const& GetWorldStateExpressionMgr(); // must operate statelessly
+
         /// @param _map Map* of the map for which to load active entities. If nullptr active entities on continents are loaded
         void LoadActiveEntities(Map* _map);
         void LoadLargeEntities(Map* _map);
