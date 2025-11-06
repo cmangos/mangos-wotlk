@@ -36,7 +36,7 @@ namespace Movement
     {
         MoveSplineFlag splineflags = move_spline.splineflags;
 
-        data << uint8(0);
+        data << uint8(0); // toggles MOVEFLAG2_UNK7 in client
         data << move_spline.spline.getPoint(move_spline.spline.first());
         data << move_spline.GetId();
 
@@ -64,7 +64,7 @@ namespace Movement
         if (splineflags.animation)
         {
             data << splineflags.getAnimationId();
-            data << move_spline.parabolic_start_time;
+            data << move_spline.animation_start_time;
         }
 
         data << move_spline.Duration();
@@ -72,7 +72,7 @@ namespace Movement
         if (splineflags.parabolic)
         {
             data << move_spline.vertical_acceleration;
-            data << move_spline.animation_start_time;
+            data << move_spline.parabolic_start_time;
         }
     }
 
