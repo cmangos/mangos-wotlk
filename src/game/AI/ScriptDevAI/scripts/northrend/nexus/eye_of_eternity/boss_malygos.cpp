@@ -296,7 +296,7 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
 
         // reset flags
         m_creature->SetImmuneToPlayer(true);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_REAL_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Fly);
 
         SetCombatMovement(false);
         SetMeleeEnabled(false);
@@ -367,7 +367,7 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
                 case POINT_ID_COMBAT_INTERMEDIATE:
                     m_creature->SetLevitate(false);
                     m_creature->SetHover(false);
-                    m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_REAL_FLY_ANIM);
+                    m_creature->SetAnimTier(AnimTier::Ground);
                     m_creature->GetMotionMaster()->MoveFall();
                     break;
                 case POINT_ID_COMBAT:
@@ -549,7 +549,7 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
                 SetCombatMovement(false);
                 m_creature->SetLevitate(true);
                 m_creature->SetHover(true);
-                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_REAL_FLY_ANIM);
+                m_creature->SetAnimTier(AnimTier::Fly);
 
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveIdle();
@@ -588,7 +588,7 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
                 SetMeleeEnabled(false);
                 m_creature->SetLevitate(true);
                 m_creature->SetHover(true);
-                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_REAL_FLY_ANIM);
+                m_creature->SetAnimTier(AnimTier::Fly);
 
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveIdle();

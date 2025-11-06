@@ -364,7 +364,7 @@ struct boss_felmystAI : public CombatAI
         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
         m_creature->SetLevitate(false);
         m_creature->SetHover(false);
-        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Ground);
         ResetTimer(FELMYST_TRANSITION_DELAY, 2500);
     }
 
@@ -481,7 +481,7 @@ struct boss_felmystAI : public CombatAI
                 DoScriptText(SAY_TAKEOFF, m_creature);
                 SetMeleeEnabled(false);
                 m_creature->SetTarget(nullptr);
-                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_FLY_ANIM);
+                m_creature->SetAnimTier(AnimTier::Hover);
                 m_creature->SendForcedObjectUpdate();
                 ResetTimer(FELMYST_LIFTOFF_DELAY, 5000);
                 SetDeathPrevention(true);

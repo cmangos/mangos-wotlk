@@ -29,14 +29,6 @@ class WorldObject;
 
 namespace Movement
 {
-    enum AnimType
-    {
-        ToGround    = 0, // 460 = ToGround, index of AnimationData.dbc
-        FlyToFly    = 1, // 461 = FlyToFly?
-        ToFly       = 2, // 458 = ToFly
-        FlyToGround = 3, // 463 = FlyToGround
-    };
-
     /*  Initializes and launches spline movement
      */
     class MoveSplineInit
@@ -62,7 +54,7 @@ namespace Movement
             /* Plays animation after movement done
              * can't be combined with parabolic movement
              */
-            void SetAnimation(AnimType anim);
+            void SetAnimation(AnimTier anim);
 
             /* Adds final facing animation
              * sets unit's facing to specified point/angle after all path done
@@ -182,7 +174,7 @@ namespace Movement
         args.flags.EnableParabolic();
     }
 
-    inline void MoveSplineInit::SetAnimation(AnimType anim)
+    inline void MoveSplineInit::SetAnimation(AnimTier anim)
     {
         args.animation_start_Idx = 0.f;
         args.flags.EnableAnimation((uint8)anim);

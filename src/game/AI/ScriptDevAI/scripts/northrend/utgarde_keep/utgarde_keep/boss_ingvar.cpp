@@ -344,7 +344,7 @@ struct npc_annhyldeAI : public ScriptedAI
         m_uiResurrectTimer = 0;
         m_uiResurrectPhase = 0;
 
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Hover);
     }
 
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override

@@ -110,7 +110,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
         m_uiPactDarkfallenTimer  = 15000;
         m_uiSwarmingShadowsTimer = 30000;
 
-        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Ground);
     }
 
     void JustReachedHome() override
@@ -160,7 +160,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                     m_uiPhase = PHASE_FLYING;
 
                     m_creature->SetLevitate(true);
-                    m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                    m_creature->SetAnimTier(AnimTier::Hover);
 
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MovePoint(POINT_CENTER_AIR, aQueenPosition[1][0], aQueenPosition[1][1], aQueenPosition[1][2]);
@@ -173,7 +173,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                 SetCombatMovement(true);
 
                 m_creature->SetLevitate(false);
-                m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                m_creature->SetAnimTier(AnimTier::Ground);
 
                 m_creature->GetMotionMaster()->Clear();
                 if (m_creature->GetVictim())

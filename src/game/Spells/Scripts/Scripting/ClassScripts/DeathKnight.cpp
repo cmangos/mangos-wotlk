@@ -602,7 +602,7 @@ struct GargoyleDeathKnightAI : public CombatAI
         {
             SetCombatScriptStatus(false);
             m_creature->SetHover(true);
-            m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetAnimTier(AnimTier::Hover);
         }
     }
 };

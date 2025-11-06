@@ -50,7 +50,7 @@ void instance_eye_of_eternity::OnCreatureCreate(Creature* creature)
         case NPC_LARGE_TRIGGER:
         case NPC_ALEXSTRASZA_INVIS:
             if (creature->GetEntry() == NPC_ALEXSTRASZA)
-                creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_REAL_FLY_ANIM);
+                creature->SetAnimTier(AnimTier::Fly);
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_NEXUS_LORD:

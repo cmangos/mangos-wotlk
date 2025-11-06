@@ -225,7 +225,7 @@ void PointTOLMovementGenerator::Move(Unit& unit)
         init.SetFacing(m_o);
     init.SetVelocity(m_speed);
     init.SetFly();
-    init.SetAnimation((m_takeOff ? Movement::FlyToGround : Movement::ToGround));
+    init.SetAnimation((m_takeOff ? AnimTier::Fly : AnimTier::Ground));
     init.SetWalk(!unit.hasUnitState(UNIT_STAT_RUNNING));
     init.Launch();
 }

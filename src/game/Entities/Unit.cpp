@@ -8898,6 +8898,16 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
     return WeaponSpeed * PPM / 600.0f;                      // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
 }
 
+void Unit::SetAnimTier(AnimTier tier)
+{
+    SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER, (uint8)tier);
+}
+
+AnimTier Unit::GetAnimTier() const
+{
+    return AnimTier(GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER));
+}
+
 bool Unit::MountEntry(uint32 templateEntry, const Aura* aura)
 {
     CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(templateEntry);

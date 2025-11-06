@@ -96,7 +96,7 @@ struct boss_svalaAI : public CombatAI
         if (m_instance)
             m_instance->SetData(TYPE_SVALA, FAIL);
 
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Hover);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -104,7 +104,7 @@ struct boss_svalaAI : public CombatAI
         m_creature->SetLevitate(false);
         DoScriptText(SAY_AGGRO, m_creature);
 
-        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Ground);
     }
 
     void JustSummoned(Creature* pSummoned) override
