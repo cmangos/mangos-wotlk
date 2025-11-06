@@ -291,8 +291,8 @@ bool FixedPathMovementGenerator::Move(Unit& unit) const
         if (!init.CheckBounds())
             ERROR_DB_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Path movement non-catmullrom pathId %u point %u for %s has invalid out of bounds spline. Likely meant to be split into several. (by script action or waittime)", unit.GetMotionMaster()->GetPathId(), m_pathIndex, unit.GetName());
     }
-    if (m_orientation != 0.f)
-        init.SetFacing(m_orientation);
+    if (m_orientation)
+        init.SetFacing(*m_orientation);
     if (m_speed != 0.f)
         init.SetVelocity(m_speed);
     if (m_cyclic)
@@ -414,7 +414,7 @@ bool TaxiMovementGenerator::Resume(Unit& unit)
         uint32 i = 0;
         for (auto itr = nodes.begin(); itr != nodes.end(); ++itr, ++i)
         {
-            m_path.emplace(i, WaypointNode((*itr)->x, (*itr)->y, (*itr)->z , 0, 0, 0));
+            m_path.emplace(i, WaypointNode((*itr)->x, (*itr)->y, (*itr)->z , std::nullopt, 0, 0));
             m_spline.push_back({ (*itr)->x, (*itr)->y, (*itr)->z });
         }
 

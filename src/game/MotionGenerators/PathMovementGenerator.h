@@ -47,7 +47,7 @@ class AbstractPathMovementGenerator : public MovementGenerator
         WaypointPath m_path;
         int32 m_pathIndex;
         Movement::PointsArray m_spline;
-        float m_orientation;
+        std::optional<float> m_orientation;
         ShortTimeTracker m_timer;
         bool m_cyclic;
         bool m_firstCycle;
