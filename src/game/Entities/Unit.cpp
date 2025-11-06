@@ -12684,6 +12684,9 @@ void Unit::UpdateSplinePosition(bool relocateOnly)
 
     m_lastMoveTime = GetMap()->GetCurrentClockTime();
 
+    if (movespline->hasAnim())
+        SetAnimTier(static_cast<AnimTier>(movespline->getAnim()));
+
     if (relocateOnly)
     {
         Relocate(pos.x, pos.y, pos.z, pos.o);

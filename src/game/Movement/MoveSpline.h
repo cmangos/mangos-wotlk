@@ -135,6 +135,8 @@ namespace Movement
             bool isFacingPoint() const { return splineflags.final_point; }
             bool isFacingTarget() const { return splineflags.final_target; }
             bool isFacingAngle() const { return splineflags.final_angle; }
+            bool hasAnim() const { return splineflags.animation; }
+            uint8 getAnim() const { return splineflags.getAnimationId(); }
             bool IsBoarding() const;
             const Vector3 FinalDestination() const;
             const Vector3 CurrentDestination() const { return Initialized() ? spline.getPoint(point_Idx + 1) : Vector3();}
