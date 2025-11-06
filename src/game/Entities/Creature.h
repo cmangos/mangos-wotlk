@@ -51,7 +51,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_NO_PARRY               = 0x00000004,       // 4 creature can't parry
     CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN        = 0x00000008,       // 8 creature can't counter-attack at parry
     CREATURE_EXTRA_FLAG_NO_BLOCK               = 0x00000010,       // 16 creature can't block
-    CREATURE_EXTRA_FLAG_UNUSED                 = 0x00000020,       // 32
+    CREATURE_EXTRA_FLAG_RUN_DURING_WANDER      = 0x00000020,       // 32 15% chance during wander (random movement)
     CREATURE_EXTRA_FLAG_UNUSED2                = 0x00000040,       // 64
     CREATURE_EXTRA_FLAG_INVISIBLE              = 0x00000080,       // 128 creature is always invisible for player (mostly trigger creatures)
     CREATURE_EXTRA_FLAG_UNUSED3                = 0x00000100,       // 256
@@ -247,6 +247,11 @@ struct CreatureInfo
     bool IsLargeOrBiggerCreature() const
     {
         return HasFlag(CreatureStaticFlags::LARGE_AOI) || HasFlag(CreatureStaticFlags3::GIGANTIC_AOI) || HasFlag(CreatureStaticFlags3::INFINITE_AOI);
+    }
+
+    bool HasFlag(CreatureFlagsExtra flags) const
+    {
+        return bool(ExtraFlags & flags);
     }
 };
 
