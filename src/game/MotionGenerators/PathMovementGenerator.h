@@ -29,7 +29,7 @@
 class AbstractPathMovementGenerator : public MovementGenerator
 {
     public:
-        explicit AbstractPathMovementGenerator(const Movement::PointsArray& path, float orientation = 0, int32 offset = 0);
+        explicit AbstractPathMovementGenerator(const Movement::PointsArray& path, std::optional<float> orientation, int32 offset = 0);
         explicit AbstractPathMovementGenerator(const WaypointPath* path, int32 offset = 0, bool cyclic = false, ObjectGuid guid = ObjectGuid());
 
         void Initialize(Unit& owner) override;
@@ -61,7 +61,7 @@ class AbstractPathMovementGenerator : public MovementGenerator
 class FixedPathMovementGenerator : public AbstractPathMovementGenerator
 {
     public:
-        FixedPathMovementGenerator(const Movement::PointsArray &path, float orientation, uint32 forcedMovement, bool flying = false, float speed = 0, int32 offset = 0) :
+        FixedPathMovementGenerator(const Movement::PointsArray &path, std::optional<float> orientation, uint32 forcedMovement, bool flying = false, float speed = 0, int32 offset = 0) :
             AbstractPathMovementGenerator(path, orientation, offset), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement) {}
         FixedPathMovementGenerator(const Movement::PointsArray& path, uint32 forcedMovement, bool flying = false, float speed = 0, int32 offset = 0) :
             FixedPathMovementGenerator(path, 0, forcedMovement, flying, speed, offset) {}
@@ -91,7 +91,7 @@ class TaxiMovementGenerator : public AbstractPathMovementGenerator
 {
     public:
         explicit TaxiMovementGenerator() :
-            AbstractPathMovementGenerator(Movement::PointsArray()) {}
+            AbstractPathMovementGenerator(Movement::PointsArray(), std::nullopt) {}
 
         void Initialize(Unit& unit) override;
         void Finalize(Unit& unit) override;
