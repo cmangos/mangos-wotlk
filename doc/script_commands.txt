@@ -459,3 +459,6 @@ Defining a buddy could be done in several way:
                                             * datalong2 = max distance for recall, of 0 any distance
                                             * dataint = seat index for recall or respawn, if -1, all seats per vehicle accessory template
 
+57 SCRIPT_COMMAND_SET_ANIM_TIER             Sets anim tier (UNIT_FIELD_BYTES_1, offset 3) - either set on spawn or through movement with animtier
+                                            * datalong = enum AnimTier
+

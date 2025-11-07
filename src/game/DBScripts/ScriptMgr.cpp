@@ -966,6 +966,13 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     continue;
                 }
                 break;
+            case SCRIPT_COMMAND_SET_ANIM_TIER: // 57
+                if (AnimTier(tmp.animTier.animTier) >= AnimTier::Max)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid recall respawn flags assigned %u", tablename, tmp.recallOrRespawnPassenger.recallRespawnFlag);
+                    continue;
+                }
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping", tablename, tmp.command);
@@ -3332,6 +3339,14 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 static_cast<Unit*>(pSource)->GetVehicleInfo()->RespawnAccessories(seatIndex);
             else if (flags == 3)
                 static_cast<Unit*>(pSource)->GetVehicleInfo()->RecallAndRespawnAccessories(m_script->recallOrRespawnPassenger.searchRadius, seatIndex);
+            break;
+        }
+        case SCRIPT_COMMAND_SET_ANIM_TIER:
+        {
+            if (LogIfNotUnit(pSource))
+                break;
+
+            static_cast<Unit*>(pSource)->SetAnimTier(AnimTier(m_script->animTier.animTier));
             break;
         }
         default:
