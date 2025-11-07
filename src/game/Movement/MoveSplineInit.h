@@ -23,6 +23,7 @@
 #include "Entities/Object.h"
 #include "Movement/MoveSplineInitArgs.h"
 #include "MotionGenerators/PathFinder.h"
+#include "MotionGenerators/MotionMaster.h"
 
 class Unit;
 class WorldObject;

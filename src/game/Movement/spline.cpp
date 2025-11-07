@@ -224,7 +224,7 @@ namespace Movement
 
         points.resize(real_size);
 
-        memcpy(&points[0], controls, sizeof(Vector3) * count);
+        memcpy(static_cast<void*>(&points[0]), controls, sizeof(Vector3) * count);
 
         // first and last two indexes are space for special 'virtual points'
         // these points are required for proper C_Evaluate and C_Evaluate_Derivative methtod work
@@ -246,7 +246,7 @@ namespace Movement
         int lo_index = 1;
         int high_index = lo_index + count - 1;
 
-        memcpy(&points[lo_index], controls, sizeof(Vector3) * count);
+        memcpy(static_cast<void*>(&points[lo_index]), controls, sizeof(Vector3) * count);
 
         // first and last two indexes are space for special 'virtual points'
         // these points are required for proper C_Evaluate and C_Evaluate_Derivative methtod work
@@ -276,7 +276,7 @@ namespace Movement
         index_type t = c / 3u;
 
         points.resize(c);
-        memcpy(&points[0], controls, sizeof(Vector3) * c);
+        memcpy(static_cast<void*>(&points[0]), controls, sizeof(Vector3) * c);
 
         index_lo = 0;
         index_hi = t - 1;
