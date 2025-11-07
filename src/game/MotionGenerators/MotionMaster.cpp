@@ -405,9 +405,9 @@ void MotionMaster::MoveStay(float x, float y, float z, float o, bool asMain)
     Mutate(new StayMovementGenerator(x, y, z, o));
 }
 
-void MotionMaster::MovePoint(uint32 id, Position const& position, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/, float speed/* = 0.f*/, bool generatePath/* = true*/, ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/* = 0*/)
+void MotionMaster::MovePoint(uint32 id, Position const& position, ForcedMovement forcedMovement /* = FORCED_MOVEMENT_NONE*/, float speed /* = 0.f*/, bool generatePath /* = true*/, ObjectGuid guid /* = ObjectGuid()*/, uint32 relayId /* = 0*/, std::optional<AnimTier> animTier/* = std::nullopt*/)
 {
-    Mutate(new PointMovementGenerator(id, position.x, position.y, position.z, position.o, generatePath, forcedMovement, speed, guid, relayId));
+    Mutate(new PointMovementGenerator(id, position.x, position.y, position.z, position.o, generatePath, forcedMovement, speed, guid, relayId, animTier));
 }
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/, bool generatePath/* = true*/)
@@ -442,10 +442,10 @@ void MotionMaster::MovePath(std::vector<G3D::Vector3>& path, float o, ForcedMove
     Mutate(new FixedPathMovementGenerator(path, o, forcedMovement, flying));
 }
 
-void MotionMaster::MovePath(int32 pathId, WaypointPathOrigin wpOrigin /*= PATH_NO_PATH*/, ForcedMovement forcedMovement, bool flying, float speed, bool cyclic, ObjectGuid guid/* = ObjectGuid()*/)
+void MotionMaster::MovePath(int32 pathId, WaypointPathOrigin wpOrigin /*= PATH_NO_PATH*/, ForcedMovement forcedMovement, bool flying, float speed, bool cyclic, ObjectGuid guid/* = ObjectGuid()*/, std::optional<AnimTier> animTier)
 {
     m_currentPathId = pathId;
-    Mutate(new FixedPathMovementGenerator(*m_owner, pathId, wpOrigin, forcedMovement, flying, speed, 0, cyclic, guid));
+    Mutate(new FixedPathMovementGenerator(*m_owner, pathId, wpOrigin, forcedMovement, flying, speed, 0, cyclic, guid, animTier));
 }
 
 void MotionMaster::MoveRetreat(float x, float y, float z, float o, uint32 delay)

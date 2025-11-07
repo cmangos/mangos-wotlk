@@ -225,9 +225,9 @@ void AbstractPathMovementGenerator::MovementInform(Unit& unit)
     }
 }
 
-FixedPathMovementGenerator::FixedPathMovementGenerator(Unit& creature, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying, float speed, int32 offset, bool cyclic, ObjectGuid guid) :
+FixedPathMovementGenerator::FixedPathMovementGenerator(Unit& creature, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying, float speed, int32 offset, bool cyclic, ObjectGuid guid, std::optional<AnimTier> animTier) :
     AbstractPathMovementGenerator((pathId || wpOrigin != PATH_NO_PATH ? sWaypointMgr.GetPathFromOrigin(creature.GetEntry(), creature.GetDbGuid(), pathId, (wpOrigin == PATH_NO_PATH && pathId ? PATH_FROM_ENTRY : wpOrigin))
-        : sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetDbGuid())), offset, cyclic, guid), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement)
+        : sWaypointMgr.GetDefaultPath(creature.GetEntry(), creature.GetDbGuid())), offset, cyclic, guid), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement), m_animTier(animTier)
 {
 }
 
@@ -297,6 +297,8 @@ bool FixedPathMovementGenerator::Move(Unit& unit) const
         init.SetVelocity(m_speed);
     if (m_cyclic)
         init.SetCyclic();
+    if (m_animTier)
+        init.SetAnimation(*m_animTier, init.Path().size() - 2);
     init.SetFirstPointId(m_pathIndex);
     return bool(init.Launch());
 }

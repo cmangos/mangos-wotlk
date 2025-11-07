@@ -183,12 +183,13 @@ Defining a buddy could be done in several way:
                                             If position is very near to current position, or x=y=z=0, then only orientation is changed
 											If x=y=0 and z !=0, then only Z position is changed (new value will be added to current 'z' position)
                                             * datalong = dbscripts_on_relay id - executed for source and target same as this script
-                                            * datalong2 = travel_speed*100 (use 0 for creature default movement)
+                                            * datalong2 = flags - 0x1 - use dataint2 as enum AnimTier
                                             * datalong3 = enum ForcedMovement
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: teleport unit to position
                                             * x/y/z/o
                                             * dataint = 1 to init move to respawn position, 2 to init creature group member each in their respawn position.
                                                         no other data is needed. So ex: command 3 ... dataint=1 and creature should head to its respawn pos
+                                            * dataint2 = if flag 0x1 set - enum AnimTier - default ignored
 
  4 SCRIPT_COMMAND_FLAG_SET                  source = any
                                             * datalong = field_id
@@ -273,9 +274,11 @@ Defining a buddy could be done in several way:
                                             *             0x2 - for waypoint, path and linear path - uses pathId from waypoint_path table
                                             *             0x4 - for path - flying specifier
                                             *             0x8 - for path - cyclic specifier
+                                            *             0x10 - for path - dataint3 contains enum AnimTier (default ignored)
                                             * data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL: RandomMovement around current position
                                             * dataint = enum ForcedMovement for non random, for random 0 walk, 1 run
                                             * dataint2 - flags - for random: 0x1 make main movegen (will stay on evade)
+                                            * dataint3 - if flag 0x10 - enum AnimTier - default ignored
                                             * dataFloat = vertical Speed - used by Jump and special case of Path
                                             * speed = override of speed for Jump and Path
                                             * Path when Vertical Speed is set - Uses exclusively waypoint_path, supports forcedMovement, pathId, speed, verticalSpeed

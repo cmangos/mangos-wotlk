@@ -54,7 +54,7 @@ namespace Movement
             /* Plays animation after movement done
              * can't be combined with parabolic movement
              */
-            void SetAnimation(AnimTier anim);
+            void SetAnimation(AnimTier anim, uint32 animationStartIdx);
 
             /* Adds final facing animation
              * sets unit's facing to specified point/angle after all path done
@@ -174,9 +174,9 @@ namespace Movement
         args.flags.EnableParabolic();
     }
 
-    inline void MoveSplineInit::SetAnimation(AnimTier anim)
+    inline void MoveSplineInit::SetAnimation(AnimTier anim, uint32 animationStartIdx)
     {
-        args.animation_start_Idx = 0.f;
+        args.animation_start_Idx = animationStartIdx;
         args.flags.EnableAnimation((uint8)anim);
     }
 

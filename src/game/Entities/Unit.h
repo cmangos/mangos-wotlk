@@ -129,16 +129,6 @@ enum UnitVisFlags
     UNIT_VIS_FLAGS_ALL          = 0xFF
 };
 
-enum class AnimTier : uint8
-{
-    Ground = 0,
-    Swim = 1,
-    Hover = 2,
-    Fly = 3,
-    Submerged = 4,
-    Max
-};
-
 // byte value (UNIT_FIELD_BYTES_2,UNIT_BYTES_2_OFFSET_SHEATH_STATE) // TODO - solve conflicting with SharedDefines.h enum SheathTypes
 enum SheathState
 {
