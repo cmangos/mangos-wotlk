@@ -130,31 +130,31 @@ struct boss_ormorokAI : public CombatAI
             DoScriptText(SAY_KILL, m_creature);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_CRYSTALLINE_TANGLER:
-                pSummoned->CastSpell(pSummoned, SPELL_CRYSTALLINE_TANGLER, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_CRYSTALLINE_TANGLER, TRIGGERED_OLD_TRIGGERED);
 
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-                    pSummoned->AI()->AttackStart(pTarget);
+                    summoned->AI()->AttackStart(pTarget);
                 break;
             case NPC_CRYSTAL_SPIKE_TRIGGER:
-                pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_PRE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(summoned, SPELL_CRYSTAL_SPIKE_PRE, TRIGGERED_OLD_TRIGGERED);
                 ++m_uiSpikeCount;
             // no break;
             case NPC_CRYSTAL_SPIKE_INITIAL:
                 // make creature passive
-                pSummoned->AI()->SetReactState(REACT_PASSIVE);
-                pSummoned->SetCanEnterCombat(false);
+                summoned->AI()->SetReactState(REACT_PASSIVE);
+                summoned->SetCanEnterCombat(false);
 
                 // Update orientation so we can always face the boss
-                pSummoned->SetFacingToObject(m_creature);
+                summoned->SetFacingToObject(m_creature);
 
                 // allow continuous summoning only until we reach the limit
                 if (m_uiSpikeCount < MAX_ALLOWED_SPIKES)
-                    pSummoned->CastSpell(pSummoned, SPELL_CRYSTAL_SPIKE_AURA, TRIGGERED_OLD_TRIGGERED);
+                    summoned->CastSpell(summoned, SPELL_CRYSTAL_SPIKE_AURA, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -203,11 +203,8 @@ struct boss_ormorokAI : public CombatAI
     }
 };
 
-/*######
-## spell_crystal_spikes - 47958, 57082, 57083
-######*/
-
-struct spell_crystal_spikes : public SpellScript
+// 47958, 57082, 57083 - Crystal Spikes
+struct CrystalSpikes : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -221,26 +218,23 @@ struct spell_crystal_spikes : public SpellScript
         // trigger spells that will summon creature 27101 around the caster
         if (spell->m_spellInfo->Id == 47958)
         {
-            target->CastSpell(target, 47954, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 47955, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 47956, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 47957, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 47954, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 47955, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 47956, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 47957, TRIGGERED_OLD_TRIGGERED);
         }
         else
         {
-            target->CastSpell(target, 57077, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 57078, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 57080, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 57081, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 57077, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 57078, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 57080, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(nullptr, 57081, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };
 
-/*######
-## spell_crystal_spike_aura - 47941
-######*/
-
-struct spell_crystal_spike_aura : public AuraScript
+// 47941 - Crystal Spike
+struct CrystalSpikeAura : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
@@ -248,12 +242,12 @@ struct spell_crystal_spike_aura : public AuraScript
         if (!target)
             return;
 
-        instance_nexus* pInstance = static_cast<instance_nexus*>(target->GetInstanceData());
-        if (!pInstance)
+        instance_nexus* instance = static_cast<instance_nexus*>(target->GetInstanceData());
+        if (!instance)
             return;
 
-        Creature* pOrmorok = pInstance->GetSingleCreatureFromStorage(NPC_ORMOROK);
-        if (!pOrmorok)
+        Creature* ormorok = instance->GetSingleCreatureFromStorage(NPC_ORMOROK);
+        if (!ormorok)
             return;
 
         // The following spells define the direction of the spike line
@@ -265,15 +259,12 @@ struct spell_crystal_spike_aura : public AuraScript
         else
             castSpellId = urand(0, 1) ? SPELL_CRYSTAL_SPIKE_LEFT : SPELL_CRYSTAL_SPIKE_RIGHT;
 
-        target->CastSpell(target, castSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pOrmorok->GetObjectGuid());
+        target->CastSpell(target, castSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ormorok->GetObjectGuid());
     }
 };
 
-/*######
-## spell_crystal_spike_visual_aura - 50442
-######*/
-
-struct spell_crystal_spike_visual_aura : public AuraScript
+// 50442 - Crystal Spike Pre-visual
+struct CrystalSpikePreVisual : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
@@ -301,7 +292,7 @@ void AddSC_boss_ormorok()
     pNewScript->GetAI = &GetNewAIInstance<boss_ormorokAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_crystal_spikes>("spell_crystal_spikes");
-    RegisterSpellScript<spell_crystal_spike_aura>("spell_crystal_spike_aura");
-    RegisterSpellScript<spell_crystal_spike_visual_aura>("spell_crystal_spike_visual_aura");
+    RegisterSpellScript<CrystalSpikes>("spell_crystal_spikes");
+    RegisterSpellScript<CrystalSpikeAura>("spell_crystal_spike_aura");
+    RegisterSpellScript<CrystalSpikePreVisual>("spell_crystal_spike_visual_aura");
 }

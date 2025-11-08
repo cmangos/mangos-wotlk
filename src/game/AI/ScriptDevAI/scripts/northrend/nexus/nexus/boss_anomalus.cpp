@@ -108,9 +108,9 @@ struct boss_anomalusAI : public CombatAI
             DoScriptText(SAY_KILL, m_creature);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_CHAOTIC_RIFT)
+        if (summoned->GetEntry() == NPC_CHAOTIC_RIFT)
         {
             ++m_uiChaoticRiftCount;
 
@@ -118,9 +118,9 @@ struct boss_anomalusAI : public CombatAI
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_CHAOTIC_RIFT)
+        if (summoned->GetEntry() == NPC_CHAOTIC_RIFT)
         {
             --m_uiChaoticRiftCount;
 
@@ -198,11 +198,8 @@ struct boss_anomalusAI : public CombatAI
     }
 };
 
-/*######
-## spell_charge_rifts - 47747
-######*/
-
-struct spell_charge_rifts : public SpellScript
+// 47747 - Charge Rifts
+struct ChargeRifts : public SpellScript
 {
     void OnRadiusCalculate(Spell* spell, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& radius) const override
     {
@@ -223,8 +220,8 @@ struct spell_charge_rifts : public SpellScript
         target->RemoveAurasDueToSpell(47732);
 
         // cast charged damage and summon auras
-        target->CastSpell(target, 47733, TRIGGERED_OLD_TRIGGERED);
-        target->CastSpell(target, 47742, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(nullptr, 47733, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(nullptr, 47742, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -235,5 +232,5 @@ void AddSC_boss_anomalus()
     pNewScript->GetAI = &GetNewAIInstance<boss_anomalusAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_charge_rifts>("spell_charge_rifts");
+    RegisterSpellScript<ChargeRifts>("spell_charge_rifts");
 }

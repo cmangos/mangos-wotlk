@@ -205,17 +205,17 @@ struct boss_telestraAI : public CombatAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
-            case NPC_TELEST_FIRE:   pSummoned->CastSpell(pSummoned, SPELL_FIRE_VISUAL, TRIGGERED_OLD_TRIGGERED);   break;
-            case NPC_TELEST_ARCANE: pSummoned->CastSpell(pSummoned, SPELL_ARCANE_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
-            case NPC_TELEST_FROST:  pSummoned->CastSpell(pSummoned, SPELL_FROST_VISUAL, TRIGGERED_OLD_TRIGGERED);  break;
+            case NPC_TELEST_FIRE:   summoned->CastSpell(summoned, SPELL_FIRE_VISUAL, TRIGGERED_OLD_TRIGGERED);   break;
+            case NPC_TELEST_ARCANE: summoned->CastSpell(summoned, SPELL_ARCANE_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_TELEST_FROST:  summoned->CastSpell(summoned, SPELL_FROST_VISUAL, TRIGGERED_OLD_TRIGGERED);  break;
         }
 
         if (m_creature->GetVictim())
-            pSummoned->AI()->AttackStart(m_creature->GetVictim());
+            summoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     // Method to handle ther merge of the clones
@@ -307,11 +307,8 @@ struct boss_telestraAI : public CombatAI
     }
 };
 
-/*######
-## spell_summon_telestra_clones - 47710
-######*/
-
-struct spell_summon_telestra_clones : public SpellScript
+// 47710 - Summon Telestra Clones
+struct SummonTelestraClones : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -327,11 +324,10 @@ struct spell_summon_telestra_clones : public SpellScript
     }
 };
 
-/*######
-## spell_telestra_clone_dies_aura - 47711, 47712, 47713
-######*/
-
-struct spell_telestra_clone_dies_aura : public AuraScript
+// 47711 - Telestra Clone Dies (Fire)
+// 47712 - Telestra Clone Dies (Frost)
+// 47713 - Telestra Clone Dies (Arcane)
+struct TelestraCloneDiesAura : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
@@ -345,11 +341,8 @@ struct spell_telestra_clone_dies_aura : public AuraScript
     }
 };
 
-/*######
-## spell_gravity_well_effect - 47764
-######*/
-
-struct spell_gravity_well_effect : public SpellScript
+// 47764 - Gravity Well Effect
+struct GravityWellEffect : public SpellScript
 {
     void OnDestTarget(Spell* spell) const override
     {
@@ -364,7 +357,7 @@ void AddSC_boss_telestra()
     pNewScript->GetAI = &GetNewAIInstance<boss_telestraAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_summon_telestra_clones>("spell_summon_telestra_clones");
-    RegisterSpellScript<spell_telestra_clone_dies_aura>("spell_telestra_clone_dies_aura");
-    RegisterSpellScript<spell_gravity_well_effect>("spell_gravity_well_effect");
+    RegisterSpellScript<SummonTelestraClones>("spell_summon_telestra_clones");
+    RegisterSpellScript<TelestraCloneDiesAura>("spell_telestra_clone_dies_aura");
+    RegisterSpellScript<GravityWellEffect>("spell_gravity_well_effect");
 }

@@ -65,14 +65,12 @@ enum KeristraszaActions
 
 struct boss_keristraszaAI : public CombatAI
 {
-    boss_keristraszaAI(Creature* creature) : CombatAI(creature, KERISTRASZA_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData()))
+    boss_keristraszaAI(Creature* creature) : CombatAI(creature, KERISTRASZA_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddCombatAction(KERISTRASZA_ACTION_TAIL_SWEEP, 10000u);
         AddCombatAction(KERISTRASZA_ACTION_CRYSTALFIRE_BREATH, 15000u);
         AddCombatAction(KERISTRASZA_ACTION_CRYSTALLIZE, 18000u);
         AddTimerlessCombatAction(KERISTRASZA_ACTION_ENRAGE, true);
-
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
     }
 
     instance_nexus* m_instance;
@@ -164,11 +162,8 @@ struct boss_keristraszaAI : public CombatAI
     }
 };
 
-/*######
-## spell_intense_cold_aura - 48095
-######*/
-
-struct spell_intense_cold_aura : public AuraScript
+// 48095 - Intense Cold
+struct IntenseColdAura : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
@@ -196,5 +191,5 @@ void AddSC_boss_keristrasza()
     pNewScript->GetAI = &GetNewAIInstance<boss_keristraszaAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_intense_cold_aura>("spell_intense_cold_aura");
+    RegisterSpellScript<IntenseColdAura>("spell_intense_cold_aura");
 }

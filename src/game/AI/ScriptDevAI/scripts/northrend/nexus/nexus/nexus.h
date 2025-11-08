@@ -50,15 +50,15 @@ class instance_nexus : public ScriptedInstance
 
         void Initialize() override;
 
-        void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureCreate(Creature* pCreature) override;
+        void OnObjectCreate(GameObject* go) override;
+        void OnCreatureCreate(Creature* creature) override;
         void OnCreatureRespawn(Creature* creature) override;
 
-        uint32 GetData(uint32 uiType) const override;
-        void SetData(uint32 uiType, uint32 uiData) override;
+        uint32 GetData(uint32 type) const override;
+        void SetData(uint32 type, uint32 data) override;
 
-        void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
+        void SetSpecialAchievementCriteria(uint32 type, bool isMet);
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target, uint32 miscValue1 /* = 0*/) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
 
