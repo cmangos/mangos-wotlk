@@ -119,6 +119,8 @@ namespace Movement
              */
             void SetExitVehicle();
 
+            void SetExitVoluntary() { args.toggleMoveflagUnk4 = true; }
+
             PointsArray& Path() { return args.path; }
 
             void SetCombatSlowed(float slowed) { args.slowed = slowed; }

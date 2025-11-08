@@ -70,6 +70,7 @@ namespace Movement
             MoveSplineFlag  splineflags;
 
             float           speed;
+            bool            toggleMoveflagUnk4;
 
             uint32          time_passed;
             // currently duration mods are unused, but its _currently_
@@ -136,6 +137,7 @@ namespace Movement
             bool isFacingTarget() const { return splineflags.final_target; }
             bool isFacingAngle() const { return splineflags.final_angle; }
             bool hasAnim() const { return splineflags.animation; }
+            bool hasExitVoluntary() const { return toggleMoveflagUnk4; }
             uint8 getAnim() const { return splineflags.getAnimationId(); }
             bool IsBoarding() const;
             const Vector3 FinalDestination() const;

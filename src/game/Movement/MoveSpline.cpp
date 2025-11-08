@@ -159,6 +159,7 @@ namespace Movement
         }
         point_Idx = spline.first();
         speed = args.velocity;
+        toggleMoveflagUnk4 = args.toggleMoveflagUnk4;
     }
 
     void MoveSpline::Initialize(const MoveSplineInitArgs& args)

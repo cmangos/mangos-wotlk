@@ -12687,6 +12687,9 @@ void Unit::UpdateSplinePosition(bool relocateOnly)
     if (movespline->hasAnim())
         SetAnimTier(static_cast<AnimTier>(movespline->getAnim()));
 
+    if (movespline->hasExitVoluntary())
+        m_movementInfo.AddMovementFlags2(MOVEFLAG2_UNK4);
+
     if (relocateOnly)
     {
         Relocate(pos.x, pos.y, pos.z, pos.o);

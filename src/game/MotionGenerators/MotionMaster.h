@@ -174,6 +174,14 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MovePathAndJumpVerticalSpeed(uint32 pathId, float horizontalSpeed, float verticalSpeed, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, ObjectGuid guid = ObjectGuid());
         void MovePathAndJump(uint32 pathId, float horizontalSpeed, float maxHeight, ForcedMovement forcedMovement = FORCED_MOVEMENT_NONE, ObjectGuid guid = ObjectGuid());
 
+        enum class MoveVehicleType
+        {
+            Enter,
+            Exit,
+            Switch,
+        };
+        void MoveVehicle(MoveVehicleType type, Position pos, bool voluntary);
+
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
 
         void propagateSpeedChange();

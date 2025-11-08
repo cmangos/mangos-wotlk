@@ -367,11 +367,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
             ((Creature*)passenger)->SetImmobilizedState(true);
     }
 
-    Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
-    init.SetFacing(lo);                                   // local orientation ? ToDo: Set proper orientation!
-    init.SetBoardVehicle();
-    init.Launch();
+    passenger->GetMotionMaster()->MoveVehicle(MotionMaster::MoveVehicleType::Enter, Position(lx, ly, lz, lo), false);
 
     // Apply passenger modifications
     ApplySeatMods(passenger, seatEntry->m_flags);
@@ -460,12 +456,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     itr->second->SetTransportSeat(seat);
     itr->second->SetLocalPosition(lx, ly, lz, lo);
 
-    Movement::MoveSplineInit init(*passenger);
-    init.MoveTo(lx, ly, lz);                          // ToDo: Set correct local coords
-    //if (oldorientation != neworientation) (?)
-    init.SetFacing(lo);                                 // local orientation ? ToDo: Set proper orientation!
-    // It seems that Seat switching is sent without SplineFlag BoardVehicle
-    init.Launch();
+    passenger->GetMotionMaster()->MoveVehicle(MotionMaster::MoveVehicleType::Switch, Position(lx, ly, lz, lo), false);
 
     bool hadControl = seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL;
 
@@ -541,8 +532,6 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         if (passenger->hasUnitState(UNIT_STAT_ROOT) && !passenger->HasAuraType(SPELL_AURA_MOD_ROOT))
             passenger->SetImmobilizedState(false);
 
-        Movement::MoveSplineInit init(*passenger);
-
         Position exitPos = m_owner->GetPosition(m_owner->GetTransport());
         exitPos.o = exitPos.o + passenger->GetTransOffsetO();
 
@@ -562,10 +551,8 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
             }
         }
 
-        init.MoveTo(exitPos.x, exitPos.y, exitPos.z, false, true);
-        init.SetFacing(exitPos.o);
-        init.SetExitVehicle();
-        init.Launch();
+        // confirmed for kvaldir raider rn
+        passenger->GetMotionMaster()->MoveVehicle(MotionMaster::MoveVehicleType::Exit, exitPos, passenger->GetEntry() == 25760);
 
         // Remove from list if passenger was accessory
         if (passenger->IsCreature() && m_accessoryGuids.find(passenger->GetObjectGuid()) != m_accessoryGuids.end())

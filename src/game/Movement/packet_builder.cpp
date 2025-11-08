@@ -36,7 +36,7 @@ namespace Movement
     {
         MoveSplineFlag splineflags = move_spline.splineflags;
 
-        data << uint8(0); // toggles MOVEFLAG2_UNK4 in client
+        data << uint8(move_spline.toggleMoveflagUnk4); // toggles MOVEFLAG2_UNK4 in client
         data << move_spline.spline.getPoint(move_spline.spline.first());
         data << move_spline.GetId();
 

@@ -648,6 +648,21 @@ void MotionMaster::MovePathAndJump(uint32 pathId, float horizontalSpeed, float m
     Mutate(new PathJumpGenerator(pathId, forcedMovement, horizontalSpeed, maxHeight, guid));
 }
 
+void MotionMaster::MoveVehicle(MoveVehicleType type, Position pos, bool voluntary)
+{
+    Movement::MoveSplineInit init(*m_owner);
+    init.MoveTo(pos.x, pos.y, pos.z, false, true);
+    init.SetFacing(pos.o);
+    if (type == MoveVehicleType::Exit)
+        init.SetExitVehicle();
+    else if (type == MoveVehicleType::Enter)
+        init.SetBoardVehicle();
+    if (voluntary)
+        init.SetExitVoluntary();
+    init.Launch();
+    Mutate(new EffectMovementGenerator(init, 0));
+}
+
 void MotionMaster::Mutate(MovementGenerator* m)
 {
     if (!empty())
