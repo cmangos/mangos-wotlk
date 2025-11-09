@@ -143,12 +143,15 @@ enum
     // move point ids
     POINT_ID_COMBAT                 = 1,
     POINT_ID_VORTEX                 = 2,
-    POINT_ID_TRANSITION_1           = 3,
+    POINT_ID_TRANSITION_1_1         = 3,
     POINT_ID_FLIGHT                 = 4,
     POINT_ID_SURGE                  = 5,
     POINT_ID_TRANSITION_2           = 6,
     POINT_ID_PHASE_3                = 7,
     POINT_ID_COMBAT_INTERMEDIATE    = 8,
+    POINT_ID_COMBAT_FALL            = 9,
+    POINT_ID_VORTEX_INTERMEDIATE    = 10,
+    POINT_ID_TRANSITION_1_2         = 11,
 
     // light overrid id
     LIGHT_ID_DEFAULT                = 1773,
@@ -204,7 +207,8 @@ static const DialogueEntry aIntroDialogue[] =
 };
 
 static const float aCenterMovePos[3] = {754.395f, 1301.270f, 266.253f};                 // platform center location
-static const float aVortexMovePos[3] = { 756.70105f, 1303.9907f, 286.1703f };           // phase 1 vortex center location
+static const float aVortexMovePos[3] = {754.f, 1302.f, 286.f};                          // phase 1 vortex center location
+static const float aIntermediaryPhase2Point[3] = {754.f, 1302.f, 300.f};                // phase 2 center location
 static const float aHoverMovePos[3] = { 828.996f, 1298.84f, 300.0f };                   // phase 2 transition location
 static const float aSurgeMovePos[3] = { 746.10187f, 1305.9847f, 316.653f };             // phase 2 surge of power location
 static const float aTransitionPos[3] = { 754.544f, 1301.71f, 320.0f };                  // phase 3 transition location
@@ -254,6 +258,7 @@ enum MalygosActions
     MALYGOS_VORTEX_DELAY,
     MALYGOS_VORTEX_END,
     MALYGOS_ARCANE_PULSE_END,
+    MALYGOS_DELAYED_PHASE_2_POINT,
 };
 
 struct boss_malygosAI : public CombatAI, private DialogueHelper
@@ -273,6 +278,7 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
         AddCustomAction(MALYGOS_VORTEX_DELAY, true, [&]() { HandleVortexDelay(); });
         AddCustomAction(MALYGOS_VORTEX_END, true, [&]() { HandleVortexEnd(); });
         AddCustomAction(MALYGOS_ARCANE_PULSE_END, true, [&]() { HandleArcanePulseEnd(); });
+        AddCustomAction(MALYGOS_DELAYED_PHASE_2_POINT, true, [&]() { HandleDelayedPhase2Point(); });
     }
 
     instance_eye_of_eternity* m_instance;
@@ -350,25 +356,26 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
 
     void MovementInform(uint32 moveType, uint32 pointId) override
     {
-        if (moveType == FALL_MOTION_TYPE && pointId == EVENT_FALL)
-        {
-            SetCombatMovement(true);
-            SetMeleeEnabled(true);
-            DoStartMovement(m_creature->GetVictim());
-            m_creature->SetInCombatWithZone();
-            AttackClosestEnemy();
-        }
-
         // remove flight anim and start moving
         if (moveType == POINT_MOTION_TYPE)
         {
             switch (pointId)
             {
                 case POINT_ID_COMBAT_INTERMEDIATE:
+                {
                     m_creature->SetLevitate(false);
                     m_creature->SetHover(false);
-                    m_creature->SetAnimTier(AnimTier::Ground);
-                    m_creature->GetMotionMaster()->MoveFall();
+                    Position pos = m_creature->GetPosition();
+                    pos.z = m_creature->GetMap()->GetHeight(m_creature->GetPhaseMask(), pos.x, pos.y, pos.z);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_COMBAT_FALL, pos, FORCED_MOVEMENT_NONE, 0.f, true, ObjectGuid(), 0, AnimTier::Ground);
+                    break;
+                }
+                case POINT_ID_COMBAT_FALL:
+                    SetCombatMovement(true);
+                    SetMeleeEnabled(true);
+                    DoStartMovement(m_creature->GetVictim());
+                    m_creature->SetInCombatWithZone();
+                    AttackClosestEnemy();
                     break;
                 case POINT_ID_COMBAT:
                     // after vortex phase inform the Power sparks and set phase
@@ -380,9 +387,20 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
                 case POINT_ID_VORTEX:
                     SetPhase(PHASE_VORTEX);
                     break;
-                case POINT_ID_TRANSITION_1:
+                case POINT_ID_VORTEX_INTERMEDIATE:
+                    m_creature->SetLevitate(true);
+                    m_creature->SetHover(true);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_VORTEX, aVortexMovePos[0], aVortexMovePos[1], aVortexMovePos[2]);
+                    break;
                 case POINT_ID_TRANSITION_2:
                     // no action here
+                    break;
+                case POINT_ID_TRANSITION_1_1:
+                    m_creature->SetLevitate(true);
+                    m_creature->SetHover(true);
+                    ResetTimer(MALYGOS_DELAYED_PHASE_2_POINT, 400);
+                    break;
+                case POINT_ID_TRANSITION_1_2:
                     break;
                 case POINT_ID_FLIGHT:
                     // start wp movement during phase 2; use path id 1
@@ -524,6 +542,11 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
         SetPhase(PHASE_TRANSITION_FLOOR);
     }
 
+    void HandleDelayedPhase2Point()
+    {
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_TRANSITION_1_2, Position(aIntermediaryPhase2Point[0], aIntermediaryPhase2Point[1], aIntermediaryPhase2Point[2]));
+    }
+
     void HandleArcanePulseEnd()
     {
         m_creature->GetMotionMaster()->UnpauseWaypoints();
@@ -547,16 +570,12 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
             case PHASE_TRANSITION_VORTEX:
             {
                 SetCombatMovement(false);
-                m_creature->SetLevitate(true);
-                m_creature->SetHover(true);
-                m_creature->SetAnimTier(AnimTier::Fly);
-
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveIdle();
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_VORTEX, aVortexMovePos[0], aVortexMovePos[1], aVortexMovePos[2]);
-
+                Position pos = m_creature->GetPosition();
+                pos.z += 20.f;
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_VORTEX, pos, FORCED_MOVEMENT_NONE, 0.f, true, ObjectGuid(), 0, AnimTier::Fly);
                 SendAIEventAround(AI_EVENT_CUSTOM_C, m_creature, 0, 50.0f);
-
                 DoBroadcastText(SAY_VORTEX, m_creature);
                 break;
             }
@@ -565,7 +584,7 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
                 if (m_instance)
                 {
                     if (Creature* trigger = m_instance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
-                        trigger->CastSpell(trigger, SPELL_VORTEX_VISUAL, TRIGGERED_NONE);
+                        trigger->CastSpell(nullptr, SPELL_VORTEX_VISUAL, TRIGGERED_NONE);
                 }
                 DoCastSpellIfCan(nullptr, SPELL_VORTEX_STUN, CAST_TRIGGERED);
                 m_creature->GetMotionMaster()->MoveIdle();
@@ -586,13 +605,12 @@ struct boss_malygosAI : public CombatAI, private DialogueHelper
                 m_creature->SetSpellList(0);
                 SetCombatMovement(false);
                 SetMeleeEnabled(false);
-                m_creature->SetLevitate(true);
-                m_creature->SetHover(true);
-                m_creature->SetAnimTier(AnimTier::Fly);
 
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveIdle();
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_TRANSITION_1, m_creature->GetPositionX(), m_creature->GetPositionY(), 300.f);
+                Position pos = m_creature->GetPosition();
+                pos.z += 20.f;
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_TRANSITION_1_1, pos, FORCED_MOVEMENT_NONE, 0.f, true, ObjectGuid(), 0, AnimTier::Fly);
 
                 StartNextDialogueText(SAY_END_PHASE_1);
                 break;
