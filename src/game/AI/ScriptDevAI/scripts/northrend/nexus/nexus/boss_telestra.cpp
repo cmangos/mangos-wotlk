@@ -23,18 +23,18 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "nexus.h"
-#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
 enum
 {
-    SAY_AGGRO               = -1576000,
-    SAY_SPLIT_1             = -1576001,
-    SAY_SPLIT_2             = -1576002,
-    SAY_MERGE               = -1576003,
-    SAY_KILL                = -1576004,
-    SAY_DEATH               = -1576005,
+    SAY_AGGRO               = 29593,
+    SAY_SPLIT_1             = 29594,
+    SAY_SPLIT_2             = 29595,
+    SAY_MERGE               = 29596,
+    SAY_KILL                = 29597,
+    SAY_DEATH               = 29598,
 
     SPELL_FIREBOMB          = 47773,
     SPELL_FIREBOMB_H        = 56934,
@@ -73,9 +73,6 @@ static const float aRoomCenterCoords[3] = { 504.956f, 89.032f, -16.124f };
 
 enum TelestraActions
 {
-    TELESTRA_ACTION_FIRE_BOMB,
-    TELESTRA_ACTION_ICE_NOVA,
-    TELESTRA_ACTION_GRAVITY_WELL,
     TELESTRA_ACTION_CLONES,
     TELESTRA_ACTION_CLONES_H,
     TELESTRA_ACTION_TELEPORT,
@@ -83,15 +80,10 @@ enum TelestraActions
     TELESTRA_SPAWN_BACK_IN
 };
 
-struct boss_telestraAI : public CombatAI
+struct boss_telestraAI : public BossAI
 {
-    boss_telestraAI(Creature* creature) : CombatAI(creature, TELESTRA_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData()))
+    boss_telestraAI(Creature* creature) : BossAI(creature, TELESTRA_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-
-        AddCombatAction(TELESTRA_ACTION_FIRE_BOMB, 0u, 1000u);
-        AddCombatAction(TELESTRA_ACTION_ICE_NOVA, 15000u);
-        AddCombatAction(TELESTRA_ACTION_GRAVITY_WELL, 10000u);
         AddCombatAction(TELESTRA_ACTION_TELEPORT, true);
 
         AddTimerlessCombatAction(TELESTRA_ACTION_CLONES, true);
@@ -103,6 +95,11 @@ struct boss_telestraAI : public CombatAI
         AddMainSpell(m_isRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H);
         AddDistanceSpell(m_isRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H);
         SetRangedMode(true, 20.0f, TYPE_PROXIMITY);
+
+        SetDataType(TYPE_TELESTRA);
+        AddOnAggroText(SAY_AGGRO);
+        AddOnDeathText(SAY_DEATH);
+        AddOnKillText(SAY_KILL);
     }
 
     instance_nexus* m_instance;
@@ -115,45 +112,20 @@ struct boss_telestraAI : public CombatAI
 
     void Reset() override
     {
+        BossAI::Reset();
+
         m_uiCloneDeadCount = 0;
         m_uiPersonalityTimer = 0;
         m_bCanCheckAchiev = false;
         SetCombatMovement(true);
-
-        CombatAI::Reset();
     }
 
     void JustReachedHome() override
     {
+        BossAI::JustReachedHome();
+
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_TELESTRA, FAIL);
-    }
-
-    void Aggro(Unit* who) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_TELESTRA, IN_PROGRESS);
-    }
-
-    void JustDied(Unit* killer) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_TELESTRA, DONE);
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        CombatAI::KilledUnit(victim);
-
-        if (urand(0, 1))
-            DoScriptText(SAY_KILL, m_creature);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
@@ -221,7 +193,7 @@ struct boss_telestraAI : public CombatAI
     // Method to handle ther merge of the clones
     void HandlePersonalityMerge()
     {
-        if (DoCastSpellIfCan(m_creature, SPELL_SPAWN_BACK_IN, CAST_TRIGGERED) == CAST_OK)
+        if (DoCastSpellIfCan(nullptr, SPELL_SPAWN_BACK_IN, CAST_TRIGGERED) == CAST_OK)
         {
             m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_CLONES);
             m_creature->RemoveAurasDueToSpell(SPELL_FIRE_DIES);
@@ -231,63 +203,48 @@ struct boss_telestraAI : public CombatAI
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
             m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
 
-            DoScriptText(SAY_MERGE, m_creature);
+            DoBroadcastText(SAY_MERGE, m_creature);
 
-            ResetCombatAction(TELESTRA_ACTION_GRAVITY_WELL, 10000);
-            ResetCombatAction(TELESTRA_ACTION_ICE_NOVA, 15000);
-            ResetCombatAction(TELESTRA_ACTION_FIRE_BOMB, urand(1000, 2000));
+            AddInitialCooldowns();
 
             SetCombatMovement(true);
+            SetCombatScriptStatus(false);
         }
+    }
+
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
+    {
+        if (spellInfo->Id == SPELL_SUMMON_CLONES)
+            DoBroadcastText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
     }
 
     void ExecuteAction(uint32 action) override
     {
         switch (action)
         {
-            case TELESTRA_ACTION_FIRE_BOMB:
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
-                    ResetCombatAction(action, 2000);
-                break;
-            case TELESTRA_ACTION_ICE_NOVA:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H) == CAST_OK)
-                    ResetCombatAction(action, urand(10000, 15000));
-                break;
-            case TELESTRA_ACTION_GRAVITY_WELL:
-                if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_WELL) == CAST_OK)
-                    ResetCombatAction(action, urand(10000, 15000));
-                break;
             case TELESTRA_ACTION_CLONES:
                 if (m_creature->GetHealthPercent() < 50.0f)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
-                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
-
-                        SetActionReadyStatus(action, false);
+                        DisableCombatAction(action);
                         ResetCombatAction(TELESTRA_ACTION_TELEPORT, 10000);
-                        DisableCombatAction(TELESTRA_ACTION_GRAVITY_WELL);
-                        DisableCombatAction(TELESTRA_ACTION_ICE_NOVA);
-                        DisableCombatAction(TELESTRA_ACTION_FIRE_BOMB);
 
                         SetCombatMovement(false);
+                        SetCombatScriptStatus(true);
                     }
                 }
                 break;
             case TELESTRA_ACTION_CLONES_H:
                 if (m_creature->GetHealthPercent() < 15.0f)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
-                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
-
-                        SetActionReadyStatus(action, false);
+                        DisableCombatAction(action);
                         ResetCombatAction(TELESTRA_ACTION_TELEPORT, 10000);
-                        DisableCombatAction(TELESTRA_ACTION_GRAVITY_WELL);
-                        DisableCombatAction(TELESTRA_ACTION_ICE_NOVA);
-                        DisableCombatAction(TELESTRA_ACTION_FIRE_BOMB);
 
                         SetCombatMovement(false);
+                        SetCombatScriptStatus(true);
                     }
                 }
                 break;
@@ -300,7 +257,7 @@ struct boss_telestraAI : public CombatAI
 
     void UpdateAI(const uint32 diff) override
     {
-        CombatAI::UpdateAI(diff);
+        BossAI::UpdateAI(diff);
 
         if (m_bCanCheckAchiev)
             m_uiPersonalityTimer += diff;

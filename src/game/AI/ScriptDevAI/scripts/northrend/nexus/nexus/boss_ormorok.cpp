@@ -25,16 +25,16 @@ EndScriptData */
 #include "nexus.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
-#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
 {
-    SAY_AGGRO                   = -1576011,
-    SAY_KILL                    = -1576012,
-    SAY_REFLECT                 = -1576013,
-    SAY_ICESPIKE                = -1576014,
-    SAY_DEATH                   = -1576015,
-    EMOTE_BOSS_GENERIC_FRENZY   = -1000005,
+    SAY_AGGRO                   = 29605,
+    SAY_KILL                    = 29607,
+    SAY_REFLECT                 = 29609,
+    SAY_ICESPIKE                = 29610,
+    SAY_DEATH                   = 29608,
+    EMOTE_BOSS_GENERIC_FRENZY   = 10677,
 
     SPELL_REFLECTION            = 47981,
     SPELL_CRYSTAL_SPIKES        = 47958,        // spawn 4x creature 27101
@@ -69,11 +69,6 @@ enum
 
 enum OrmorokActions
 {
-    ORMOROK_ACTION_TRAMPLE,
-    ORMOROK_ACTION_REFLECTION,
-    ORMOROK_ACTION_CRYSTAL_SPIKE,
-    ORMOROK_ACTION_TANGLER,
-    ORMOROK_ACTION_ENRAGE,
     ORMOROK_ACTION_MAX,
 };
 
@@ -81,20 +76,14 @@ enum OrmorokActions
 ## boss_ormorok
 ######*/
 
-struct boss_ormorokAI : public CombatAI
+struct boss_ormorokAI : public BossAI
 {
-    boss_ormorokAI(Creature* creature) : CombatAI(creature, ORMOROK_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData()))
+    boss_ormorokAI(Creature* creature) : BossAI(creature, ORMOROK_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-
-        AddCombatAction(ORMOROK_ACTION_TRAMPLE, 10000u);
-        AddCombatAction(ORMOROK_ACTION_REFLECTION, 25000u);
-        AddCombatAction(ORMOROK_ACTION_CRYSTAL_SPIKE, 10000u, 15000u);
-
-        if (!m_isRegularMode)
-            AddCombatAction(ORMOROK_ACTION_TANGLER, 12000u);
-
-        AddTimerlessCombatAction(ORMOROK_ACTION_ENRAGE, true);
+        AddOnAggroText(SAY_AGGRO);
+        AddOnDeathText(SAY_DEATH);
+        SetDataType(TYPE_ORMOROK);
+        AddOnKillText(SAY_KILL);
     }
 
     instance_nexus* m_instance;
@@ -104,30 +93,9 @@ struct boss_ormorokAI : public CombatAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        BossAI::Reset();
 
         m_uiSpikeCount = 0;
-    }
-
-    void Aggro(Unit* /*who*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void JustDied(Unit* /*killer*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_instance)
-            m_instance->SetData(TYPE_ORMOROK, DONE);
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        CombatAI::KilledUnit(victim);
-
-        if (urand(0, 1))
-            DoScriptText(SAY_KILL, m_creature);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -135,15 +103,15 @@ struct boss_ormorokAI : public CombatAI
         switch (summoned->GetEntry())
         {
             case NPC_CRYSTALLINE_TANGLER:
-                summoned->CastSpell(summoned, SPELL_CRYSTALLINE_TANGLER, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(nullptr, SPELL_CRYSTALLINE_TANGLER, TRIGGERED_OLD_TRIGGERED);
 
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
                     summoned->AI()->AttackStart(pTarget);
                 break;
             case NPC_CRYSTAL_SPIKE_TRIGGER:
-                summoned->CastSpell(summoned, SPELL_CRYSTAL_SPIKE_PRE, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(nullptr, SPELL_CRYSTAL_SPIKE_PRE, TRIGGERED_OLD_TRIGGERED);
                 ++m_uiSpikeCount;
-            // no break;
+                [[fallthrough]];
             case NPC_CRYSTAL_SPIKE_INITIAL:
                 // make creature passive
                 summoned->AI()->SetReactState(REACT_PASSIVE);
@@ -154,52 +122,20 @@ struct boss_ormorokAI : public CombatAI
 
                 // allow continuous summoning only until we reach the limit
                 if (m_uiSpikeCount < MAX_ALLOWED_SPIKES)
-                    summoned->CastSpell(summoned, SPELL_CRYSTAL_SPIKE_AURA, TRIGGERED_OLD_TRIGGERED);
+                    summoned->CastSpell(nullptr, SPELL_CRYSTAL_SPIKE_AURA, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
 
-    void ExecuteAction(uint32 action) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
-        switch (action)
+        if (spellInfo->Id == SPELL_CRYSTAL_SPIKES_H1 || spellInfo->Id == SPELL_CRYSTAL_SPIKES_H2)
         {
-            case ORMOROK_ACTION_TRAMPLE:
-                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_TRAMPLE : SPELL_TRAMPLE_H) == CAST_OK)
-                    ResetCombatAction(action, 10000);
-                break;
-            case ORMOROK_ACTION_REFLECTION:
-                if (DoCastSpellIfCan(m_creature, SPELL_REFLECTION) == CAST_OK)
-                    ResetCombatAction(action, 30000);
-                break;
-            case ORMOROK_ACTION_CRYSTAL_SPIKE:
-            {
-                uint32 uiSpikeSpell = SPELL_CRYSTAL_SPIKES;
-                if (!m_isRegularMode)
-                    uiSpikeSpell = urand(0, 1) ? SPELL_CRYSTAL_SPIKES_H1 : SPELL_CRYSTAL_SPIKES_H2;
-
-                if (DoCastSpellIfCan(m_creature, uiSpikeSpell) == CAST_OK)
-                {
-                    DoScriptText(SAY_ICESPIKE, m_creature);
-                    m_uiSpikeCount = 0;
-                    ResetCombatAction(action, 30000);
-                }
-                break;
-            }
-            case ORMOROK_ACTION_TANGLER:
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_TANGLER_H) == CAST_OK)
-                    ResetCombatAction(action, urand(15000, 20000));
-                break;
-            case ORMOROK_ACTION_ENRAGE:
-                if (m_creature->GetHealthPercent() < 25.0f)
-                {
-                    if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H) == CAST_OK)
-                    {
-                        DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
-                        SetActionReadyStatus(action, false);
-                    }
-                }
-                break;
+            DoBroadcastText(SAY_ICESPIKE, m_creature);
+            m_uiSpikeCount = 0;
         }
+        else if (spellInfo->Id == SPELL_FRENZY || spellInfo->Id == SPELL_FRENZY_H)
+            DoBroadcastText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
     }
 };
 
