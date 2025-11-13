@@ -606,6 +606,7 @@ struct dummy_dragonAI : public CombatAI
                 m_creature->GetMotionMaster()->MovePath(0, PATH_FROM_ENTRY, FORCED_MOVEMENT_NONE, true, 0.f, true);
                 break;
             case POINT_ID_DESCEND:
+            {
                 Position pos;
                 switch (m_creature->GetEntry())
                 {
@@ -616,6 +617,7 @@ struct dummy_dragonAI : public CombatAI
                 }
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, pos, FORCED_MOVEMENT_NONE, 0.f, true, ObjectGuid(), 0, AnimTier::Ground);
                 break;
+            }
             case POINT_ID_LAND:
                 m_creature->SetLevitate(false);
                 m_creature->SetHover(false);
