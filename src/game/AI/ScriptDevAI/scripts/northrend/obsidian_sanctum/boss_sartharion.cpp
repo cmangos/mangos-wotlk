@@ -131,7 +131,8 @@ enum
 
     // using these custom points for dragons start and end
     POINT_ID_INIT                               = 100,
-    POINT_ID_LAND                               = 200
+    POINT_ID_DESCEND                            = 101,
+    POINT_ID_LAND                               = 102
 };
 
 struct Waypoint
@@ -139,23 +140,26 @@ struct Waypoint
     float m_fX, m_fY, m_fZ, m_fO;
 };
 
-// each dragons special points. First where fly to before connect to connon, second where land point is.
+// each dragons special points. First where fly to before connect to connon, second where to descend and third to land
 Waypoint m_aTene[] =
 {
-    {3212.854f, 575.597f, 109.856f},                        // init
-    {3246.425f, 565.367f, 61.249f}                          // end
+    {3239.067f, 657.2349f, 88.877464f}, // init
+    {3249.57f, 567.826f, 59.289764f},   // descend
+    {3249.57f, 567.826f, 58.289764f}
 };
 
 Waypoint m_aShad[] =
 {
-    {3293.238f, 472.223f, 106.968f},
-    {3271.669f, 526.907f, 61.931f}
+    {3363.0605f, 525.27985f, 100.36195f},
+    {3229.69f, 533.195f, 59.595776f},
+    {3229.69f, 533.195f, 58.595776f},
 };
 
 Waypoint m_aVesp[] =
 {
-    {3193.310f, 472.861f, 102.697f},
-    {3227.268f, 533.238f, 59.995f}
+    {3145.6814f, 520.70984f, 91.69995f},
+    {3269.7056f, 532.8048f, 59.562943f},
+    {3269.7056f, 532.8048f, 58.562943f},
 };
 
 // points around raid "isle", counter clockwise. should probably be adjusted to be more alike
@@ -184,6 +188,9 @@ enum SartharionActions
     SARTHARION_CALL_TENEBRON,
     SARTHARION_CALL_SHADRON,
     SARTHARION_CALL_VESPERON,
+    SARTHARION_DESCEND_TENEBRON,
+    SARTHARION_DESCEND_VESPERON,
+    SARTHARION_DESCEND_SHADRON,
     SARTHARION_LAVA_STRIKE,
     SARTHARION_FLAME_TSUNAMI,
     SARTHARION_RESET_WORLDSTATE
@@ -201,6 +208,9 @@ struct boss_sartharionAI : public CombatAI
         AddCustomAction(SARTHARION_CALL_TENEBRON, true, [&]() { CallDragon(NPC_TENEBRON); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(SARTHARION_CALL_SHADRON, true, [&]() { CallDragon(NPC_SHADRON); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(SARTHARION_CALL_VESPERON, true, [&]() { CallDragon(NPC_VESPERON); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(SARTHARION_DESCEND_TENEBRON, true, [&]() { DescendDragon(NPC_TENEBRON); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(SARTHARION_DESCEND_VESPERON, true, [&]() { DescendDragon(NPC_VESPERON); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(SARTHARION_DESCEND_SHADRON, true, [&]() { DescendDragon(NPC_SHADRON); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(SARTHARION_LAVA_STRIKE, 20000, 30000, [&]() { HandleLavaStrike(); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(SARTHARION_FLAME_TSUNAMI, 30000u, [&]() { SendFlameTsunami(); }, TIMER_COMBAT_COMBAT);
         AddCustomAction(SARTHARION_RESET_WORLDSTATE, true, [&]() { HandleResetWorldstate(); }, TIMER_COMBAT_COMBAT);
@@ -262,10 +272,9 @@ struct boss_sartharionAI : public CombatAI
         if (tenebron && tenebron->IsAlive() && !tenebron->GetVictim())
         {
             ++uiCountFetchableDragons;
-            tenebron->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
+            tenebron->GetMotionMaster()->MovePoint(POINT_ID_INIT, Position(m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ), FORCED_MOVEMENT_FLIGHT, 0.f, true, ObjectGuid(), 0, AnimTier::Fly);
 
-            if (!tenebron->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
-                tenebron->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
+            tenebron->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
 
             ResetTimer(SARTHARION_CALL_TENEBRON, 30000);
         }
@@ -273,7 +282,7 @@ struct boss_sartharionAI : public CombatAI
         if (shadron && shadron->IsAlive() && !shadron->GetVictim())
         {
             ++uiCountFetchableDragons;
-            shadron->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
+            shadron->GetMotionMaster()->MovePoint(POINT_ID_INIT, Position(m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ), FORCED_MOVEMENT_FLIGHT, 0.f, true, ObjectGuid(), 0, AnimTier::Fly);
 
             if (!shadron->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
                 shadron->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
@@ -284,7 +293,7 @@ struct boss_sartharionAI : public CombatAI
         if (vesperon && vesperon->IsAlive() && !vesperon->GetVictim())
         {
             ++uiCountFetchableDragons;
-            vesperon->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
+            vesperon->GetMotionMaster()->MovePoint(POINT_ID_INIT, Position(m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ), FORCED_MOVEMENT_FLIGHT, 0.f, true, ObjectGuid(), 0, AnimTier::Fly);
 
             if (!vesperon->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
                 vesperon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
@@ -319,19 +328,57 @@ struct boss_sartharionAI : public CombatAI
                 {
                     case NPC_TENEBRON:
                         iTextId = SAY_SARTHARION_CALL_TENEBRON;
-                        dragon->GetMotionMaster()->MovePoint(POINT_ID_LAND, m_aTene[1].m_fX, m_aTene[1].m_fY, m_aTene[1].m_fZ);
+                        dragon->StopMoving();
+                        dragon->GetMotionMaster()->Clear(false, true);
+                        dragon->GetMotionMaster()->MoveIdle();
+                        ResetTimer(SARTHARION_DESCEND_TENEBRON, 4000);
                         break;
                     case NPC_SHADRON:
                         iTextId = SAY_SARTHARION_CALL_SHADRON;
-                        dragon->GetMotionMaster()->MovePoint(POINT_ID_LAND, m_aShad[1].m_fX, m_aShad[1].m_fY, m_aShad[1].m_fZ);
+                        dragon->StopMoving();
+                        dragon->GetMotionMaster()->Clear(false, true);
+                        dragon->GetMotionMaster()->MoveIdle();
+                        ResetTimer(SARTHARION_DESCEND_SHADRON, 4000);
                         break;
                     case NPC_VESPERON:
                         iTextId = SAY_SARTHARION_CALL_VESPERON;
-                        dragon->GetMotionMaster()->MovePoint(POINT_ID_LAND, m_aVesp[1].m_fX, m_aVesp[1].m_fY, m_aVesp[1].m_fZ);
+                        dragon->StopMoving();
+                        dragon->GetMotionMaster()->Clear(false, true);
+                        dragon->GetMotionMaster()->MoveIdle();
+                        ResetTimer(SARTHARION_DESCEND_VESPERON, 4000);
                         break;
                 }
 
                 DoBroadcastText(iTextId, m_creature);
+            }
+        }
+    }
+
+    void DescendDragon(uint32 entry)
+    {
+        if (m_instance)
+        {
+            Creature* dragon = m_instance->GetSingleCreatureFromStorage(entry);
+            if (dragon && dragon->IsAlive())
+            {
+                switch (entry)
+                {
+                    case NPC_TENEBRON:
+                    {
+                        dragon->GetMotionMaster()->MovePoint(POINT_ID_DESCEND, Position(m_aTene[1].m_fX, m_aTene[1].m_fY, m_aTene[1].m_fZ), FORCED_MOVEMENT_FLIGHT);
+                        break;
+                    }
+                    case NPC_SHADRON:
+                    {
+                        dragon->GetMotionMaster()->MovePoint(POINT_ID_DESCEND, Position(m_aShad[1].m_fX, m_aShad[1].m_fY, m_aShad[1].m_fZ), FORCED_MOVEMENT_FLIGHT);
+                        break;
+                    }
+                    case NPC_VESPERON:
+                    {
+                        dragon->GetMotionMaster()->MovePoint(POINT_ID_DESCEND, Position(m_aVesp[1].m_fX, m_aVesp[1].m_fY, m_aVesp[1].m_fZ), FORCED_MOVEMENT_FLIGHT);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -551,22 +598,32 @@ struct dummy_dragonAI : public CombatAI
             return;
         }
 
-        // this is the end (!)
-        if (pointId == POINT_ID_LAND)
+        switch (pointId)
         {
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->SetInCombatWithZone();
-            return;
+            case POINT_ID_INIT:
+                m_creature->SetLevitate(true);
+                m_creature->SetHover(true);
+                m_creature->GetMotionMaster()->MovePath(0, PATH_FROM_ENTRY, FORCED_MOVEMENT_NONE, true, 0.f, true);
+                break;
+            case POINT_ID_DESCEND:
+                Position pos;
+                switch (m_creature->GetEntry())
+                {
+                    default:
+                    case NPC_TENEBRON: pos = Position(m_aTene[2].m_fX, m_aTene[2].m_fY, m_aTene[2].m_fZ); break;
+                    case NPC_SHADRON: pos = Position(m_aShad[2].m_fX, m_aShad[2].m_fY, m_aShad[2].m_fZ); break;
+                    case NPC_VESPERON: pos = Position(m_aVesp[2].m_fX, m_aVesp[2].m_fY, m_aVesp[2].m_fZ); break;
+                }
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, pos, FORCED_MOVEMENT_NONE, 0.f, true, ObjectGuid(), 0, AnimTier::Ground);
+                break;
+            case POINT_ID_LAND:
+                m_creature->SetLevitate(false);
+                m_creature->SetHover(false);
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+                m_creature->SetInCombatWithZone();
+                break;
         }
-
-        // increase
-        m_uiWaypointId = pointId + 1;
-
-        // if we have reached a point bigger or equal to count, it mean we must reset to point 0
-        if (m_uiWaypointId >= countof(m_aDragonCommon))
-            m_uiWaypointId = 0;
-
-        ResetTimer(DUMMY_DRAGON_MOVE, 500);
     }
 
     virtual void OnPortalOpen() {}
