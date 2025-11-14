@@ -716,7 +716,7 @@ struct ObliterateDK : public SpellScript
         // in official data, supposedly removed eff 1 is not removed, effect 0 that worked differently isnt removed, and actual functionality is stored in eff2
         if (effIdx == EFFECT_INDEX_1)
             if (Aura* glyphOfObliterate = spell->GetCaster()->GetAura(58671, EFFECT_INDEX_1))
-                spell->SetDamageDoneModifier(glyphOfObliterate->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2), EFFECT_INDEX_1);
+                spell->SetDamageDoneModifier(float(glyphOfObliterate->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2)) / 100, EFFECT_INDEX_1);
     }
 };
 
