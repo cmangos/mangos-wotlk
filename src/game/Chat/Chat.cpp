@@ -985,6 +985,7 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand commandTable[] =
     {
+        { "tp",             SEC_PLAYER,         true,  &ChatHandler::HandleTpCommand,                     "", nullptr              },
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  true,  nullptr,                                           "", achievementCommandTable },
         { "anticheat",      SEC_GAMEMASTER,     true,  nullptr,                                           "", anticheatCommandTable},
@@ -1002,7 +1003,7 @@ ChatCommand* ChatHandler::getCommandTable()
 #endif
         { "cast",           SEC_ADMINISTRATOR,  false, nullptr,                                           "", castCommandTable     },
         { "character",      SEC_GAMEMASTER,     true,  nullptr,                                           "", characterCommandTable},
-        { "channel",        SEC_MODERATOR,      false, nullptr,                                        "", channelCommandTable  },
+        { "channel",        SEC_MODERATOR,      false, nullptr,                                           "", channelCommandTable  },
         { "debug",          SEC_MODERATOR,      true,  nullptr,                                           "", debugCommandTable    },
         { "event",          SEC_GAMEMASTER,     false, nullptr,                                           "", eventCommandTable    },
         { "gm",             SEC_PLAYER,         true,  nullptr,                                           "", gmCommandTable       },

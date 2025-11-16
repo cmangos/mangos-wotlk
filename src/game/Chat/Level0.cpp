@@ -30,6 +30,41 @@
 #include "revision.h"
 #include "Util/Util.h"
 
+bool ChatHandler::HandleTpCommand(char* args)
+{
+    Player* player = m_session->GetPlayer();
+
+    if (!player) {
+        return true;
+    }
+
+    MapEntry const* mapEntry = sMapStore.LookupEntry(player->GetMapId());
+
+    if (!mapEntry || !mapEntry->IsDungeon())
+    {
+        SendSysMessage("Cannot teleport to the entrance: you are not in a dungeon!");
+        return true;
+    }
+
+    if (player->IsInCombat())
+    {
+        SendSysMessage("Cannot teleport to the entrance: you are in combat!");
+        return true;
+    }
+
+    AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(mapEntry->MapID);
+
+    if (!at)
+    {
+        SendSysMessage("Cannot teleport to the entrance: Internal error, dungeon entrance does not exist!");
+        return true;
+    }
+
+    player->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, at->target_Orientation + M_PI);
+
+    return true;
+}
+
 bool ChatHandler::HandleHelpCommand(char* args)
 {
     if (!*args)
