@@ -251,26 +251,31 @@ UnitAI* GetAI_npc_oil_stained_wolf(Creature* pCreature)
     return new npc_oil_stained_wolfAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_oil_stained_wolf(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 53326 - Throw Wolf Bait
+struct ThrowWolfBait : public SpellScript
 {
-    if (uiSpellId == SPELL_THROW_WOLF_BAIT)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        if (uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetFaction() != FACTION_MONSTER && !pCreatureTarget->HasAura(SPELL_HAS_EATEN))
-        {
-            pCreatureTarget->SetFactionTemporary(FACTION_MONSTER);
-            pCreatureTarget->SetWalk(false);
-
-            pCreatureTarget->GetMotionMaster()->MoveIdle();
-
-            float fX, fY, fZ;
-            pCaster->GetContactPoint(pCreatureTarget, fX, fY, fZ, CONTACT_DISTANCE);
-            pCreatureTarget->GetMotionMaster()->MovePoint(POINT_DEST, fX, fY, fZ);
-            return true;
-        }
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetFaction() != FACTION_MONSTER && !target->HasAura(SPELL_HAS_EATEN))
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
     }
 
-    return false;
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        static_cast<Creature*>(target)->SetFactionTemporary(FACTION_MONSTER);
+        static_cast<Creature*>(target)->SetWalk(false);
+
+        target->GetMotionMaster()->MoveIdle();
+
+        float fX, fY, fZ;
+        caster->GetContactPoint(target, fX, fY, fZ, CONTACT_DISTANCE);
+        target->GetMotionMaster()->MovePoint(POINT_DEST, fX, fY, fZ);
+    }
+};
 
 // 46073 - Has Eaten Recently
 struct HasEatenRecently : public AuraScript
@@ -830,61 +835,74 @@ struct SubduedBorean : public AuraScript
     }
 };
 
-bool EffectDummyCreature_npc_nexus_drake_hatchling(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 46673 - Capture Trigger
+struct CaptureTriggerNexusDrake : public SpellScript
 {
-    if (uiSpellId == SPELL_CAPTURE_TRIGGER && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        if (pCaster->GetTypeId() != TYPEID_PLAYER)
-            return true;
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_NEXUS_DRAKE_HATCHLING)
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
 
-        if (pCaster->HasAura(SPELL_DRAKE_HATCHLING_SUBDUED) || pCreatureTarget->HasAura(SPELL_SUBDUED))
-            return true;
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->GetTypeId() != TYPEID_PLAYER)
+            return;
 
-        Player* pPlayer = (Player*)pCaster;
-        if (!pPlayer)
-            return true;
+        if (caster->HasAura(SPELL_DRAKE_HATCHLING_SUBDUED) || target->HasAura(SPELL_SUBDUED))
+            return;
+
+        Player* player = static_cast<Player*>(caster);
+        if (!player)
+            return;
 
         // check the quest
-        if (pPlayer->GetQuestStatus(QUEST_DRAKE_HUNT) != QUEST_STATUS_INCOMPLETE && pPlayer->GetQuestStatus(QUEST_DRAKE_HUNT_DAILY) != QUEST_STATUS_INCOMPLETE)
-            return true;
+        if (player->GetQuestStatus(QUEST_DRAKE_HUNT) != QUEST_STATUS_INCOMPLETE && player->GetQuestStatus(QUEST_DRAKE_HUNT_DAILY) != QUEST_STATUS_INCOMPLETE)
+            return;
 
         // evade and set friendly and start following
-        pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-        pCreatureTarget->CombatStop(true);
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_START_EVENT, pCaster, pCreatureTarget);
+        static_cast<Creature*>(target)->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+        target->CombatStop(true);
+        target->AI()->SendAIEvent(AI_EVENT_START_EVENT, caster, target);
 
         // cast visual spells
-        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_DRAKE_VOMIT_PERIODIC, TRIGGERED_OLD_TRIGGERED);
-        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUBDUED, TRIGGERED_OLD_TRIGGERED);
-        pCreatureTarget->CastSpell(pCaster, SPELL_DRAKE_HATCHLING_SUBDUED, TRIGGERED_OLD_TRIGGERED);
-
-        return true;
+        target->CastSpell(nullptr, SPELL_DRAKE_VOMIT_PERIODIC, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(nullptr, SPELL_SUBDUED, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(caster, SPELL_DRAKE_HATCHLING_SUBDUED, TRIGGERED_OLD_TRIGGERED);
     }
-    if (uiSpellId == SPELL_DRAKE_TURN_IN && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
+};
+
+// 46696 - Drake Turn-in
+struct DrakeTurnInNexusDrake : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        if (Creature* pRaelorasz = GetClosestCreatureWithEntry(pCreatureTarget, NPC_RAELORASZ, 30.0f))
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_NEXUS_DRAKE_HATCHLING)
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (Creature* raelorasz = GetClosestCreatureWithEntry(target, NPC_RAELORASZ, 30.0f))
         {
             // Inform Raelorasz and move in front of him
-            pCreatureTarget->CastSpell(pRaelorasz, SPELL_DRAKE_COMPLETION_PING, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(raelorasz, SPELL_DRAKE_COMPLETION_PING, TRIGGERED_OLD_TRIGGERED);
 
             float fX, fY, fZ;
-            pRaelorasz->GetContactPoint(pCreatureTarget, fX, fY, fZ, CONTACT_DISTANCE);
-            pCreatureTarget->GetMotionMaster()->Clear(true, true);
-            pCreatureTarget->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-            return true;
+            raelorasz->GetContactPoint(target, fX, fY, fZ, CONTACT_DISTANCE);
+            target->GetMotionMaster()->Clear(true, true);
+            target->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
         }
     }
-    else if (uiSpellId == SPELL_RAELORASZ_FIREBALL && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
-    {
-        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_COMPLETE_IMMOLATION, TRIGGERED_OLD_TRIGGERED);
-        pCreatureTarget->SetStandState(UNIT_STAND_STATE_DEAD);
-        pCreatureTarget->ForcedDespawn(10000);
-
-        return true;
-    }
-
-    return false;
-}
+};
 
 /*#####
 # npc_scourged_flamespitter
@@ -1611,24 +1629,17 @@ enum
 };
 
 // 46704 - Raelorasz Fireball
-struct RaeloraszFireball : public AuraScript
+struct RaeloraszFireball : public SpellScript
 {
-    void OnApply(Aura* aura, bool apply) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (Unit* caster = aura->GetCaster())
+        if (Unit* caster = spell->GetCaster())
             DoScriptText(SAY_SPECIMEN, caster);
 
-        Unit* target = aura->GetTarget();
-        if (target->IsCreature())
-        {
-            Creature* creature = static_cast<Creature*>(target);
-
-            if (creature->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
-            {
-                creature->SetStandState(UNIT_STAND_STATE_SLEEP);
-                creature->ForcedDespawn(3000);
-            }
-        }
+        Unit* target = spell->GetUnitTarget();
+        target->CastSpell(nullptr, SPELL_COMPLETE_IMMOLATION, TRIGGERED_OLD_TRIGGERED);
+        target->SetStandState(UNIT_STAND_STATE_DEAD);
+        static_cast<Creature*>(target)->ForcedDespawn(10000);
     }
 };
 
@@ -1706,7 +1717,6 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_oil_stained_wolf";
     pNewScript->GetAI = &GetAI_npc_oil_stained_wolf;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_oil_stained_wolf;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1723,7 +1733,6 @@ void AddSC_borean_tundra()
     pNewScript = new Script;
     pNewScript->Name = "npc_nexus_drake_hatchling";
     pNewScript->GetAI = &GetAI_npc_nexus_drake_hatchling;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_nexus_drake_hatchling;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1774,6 +1783,9 @@ void AddSC_borean_tundra()
     pNewScript->GetGameObjectAI = &GetNewAIInstance<MammothTrapBoreanAI>;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<ThrowWolfBait>("spell_throw_wolf_bait");
+    RegisterSpellScript<CaptureTriggerNexusDrake>("spell_capture_trigger_nexus_drake");
+    RegisterSpellScript<DrakeTurnInNexusDrake>("spell_drake_turn_in_nexus_drake");
     RegisterSpellScript<PlantWarsongBanner>("spell_plant_warsong_banner");
     RegisterSpellScript<HasEatenRecently>("spell_has_eaten_recently");
     RegisterSpellScript<ArcaneChainsBorean>("spell_arcane_chains_borean");

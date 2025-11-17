@@ -72,13 +72,24 @@ UnitAI* GetAI_npc_floating_spirit(Creature* pCreature)
 ## npc_restless_frostborn
 ######*/
 
-bool EffectDummyCreature_npc_restless_frostborn(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 55983 - Blow Hodir's Horn
+struct BlowHodirsHorn : public SpellScript
 {
-    if (uiSpellId == SPELL_BLOW_HODIRS_HORN && uiEffIndex == EFFECT_INDEX_0 && !pCreatureTarget->IsAlive() && pCaster->GetTypeId() == TYPEID_PLAYER)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || (target->GetEntry() != NPC_NIFFELEM_FOREFATHER && target->GetEntry() != NPC_FROSTBORN_WARRIOR && target->GetEntry() != NPC_FROSTBORN_GHOST))
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
         uint32 uiCredit = 0;
         uint32 uiSpawnSpell = 0;
-        switch (pCreatureTarget->GetEntry())
+        switch (target->GetEntry())
         {
             case NPC_NIFFELEM_FOREFATHER:
                 uiCredit = NPC_FROST_GIANT_GHOST_KC;
@@ -95,13 +106,10 @@ bool EffectDummyCreature_npc_restless_frostborn(Unit* pCaster, uint32 uiSpellId,
         }
 
         // spawn the spirit and give the credit; spirit animation is handled by the script above
-        pCaster->CastSpell(pCaster, uiSpawnSpell, TRIGGERED_OLD_TRIGGERED);
-        ((Player*)pCaster)->KilledMonsterCredit(uiCredit);
-        return true;
+        caster->CastSpell(nullptr, uiSpawnSpell, TRIGGERED_OLD_TRIGGERED);
+        static_cast<Player*>(caster)->KilledMonsterCredit(uiCredit);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_injured_miner
@@ -417,11 +425,6 @@ void AddSC_storm_peaks()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_restless_frostborn";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_restless_frostborn;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_injured_miner";
     pNewScript->GetAI = &GetAI_npc_injured_miner;
     pNewScript->pGossipHello = &GossipHello_npc_injured_miner;
@@ -439,6 +442,7 @@ void AddSC_storm_peaks()
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_falling_rocks>;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<BlowHodirsHorn>("spell_blow_hodirs_horn");
     RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
     RegisterSpellScript<ThrowIce>("spell_throw_ice");
 }

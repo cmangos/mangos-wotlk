@@ -1473,7 +1473,6 @@ UPDATE creature_template SET ScriptName='npc_adal' WHERE entry IN(18481);
 /* SHOLAZAR BASIN */
 UPDATE creature_template SET ScriptName='npc_helice' WHERE entry=28787;
 UPDATE creature_template SET ScriptName='npc_tipsy_mcmanus' WHERE entry=28566;
-UPDATE creature_template SET ScriptName='npc_wants_fruit_credit' WHERE entry IN (28535,28536,28537);
 UPDATE gameobject_template SET ScriptName='go_quest_still_at_it_credit' WHERE entry IN (190635,190636);
 
 /* SILITHUS */
@@ -1494,7 +1493,6 @@ UPDATE gameobject_template SET ScriptName = 'go_covert_ops' WHERE entry=19590;
 
 /* STORM PEAKS */
 UPDATE creature_template SET ScriptName='npc_floating_spirit' WHERE entry IN (30141,30143,30145);
-UPDATE creature_template SET ScriptName='npc_restless_frostborn' WHERE entry IN (29974,30135,30144);
 UPDATE creature_template SET ScriptName='npc_injured_miner' WHERE entry=29434;
 UPDATE creature_template SET ScriptName='npc_ethereal_frostworg' WHERE entry=30219;
 UPDATE gameobject_template SET ScriptName = 'go_falling_rocks' WHERE entry=191794;

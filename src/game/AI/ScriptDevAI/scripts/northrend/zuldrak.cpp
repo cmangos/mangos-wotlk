@@ -190,19 +190,15 @@ UnitAI* GetAI_npc_decaying_ghoul(Creature* pCreature)
     return new npc_decaying_ghoulAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_decaying_ghoul(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 52037 - Attract Ghoul
+struct AttractGhoul : public SpellScript
 {
-    if (uiSpellId == SPELL_ATTRACT_GHOUL && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_DECAYING_GHOUL)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (pCaster->GetEntry() != NPC_GHOUL_FEEDING_BUNNY)
-            return true;
-
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spell->GetCaster(), target);
     }
-
-    return false;
-}
+};
 
 // 55430 - Gymer's Buddy
 struct GymersBuddy : public SpellScript
@@ -984,7 +980,6 @@ void AddSC_zuldrak()
     pNewScript = new Script;
     pNewScript->Name = "npc_decaying_ghoul";
     pNewScript->GetAI = &GetAI_npc_decaying_ghoul;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_decaying_ghoul;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -997,6 +992,7 @@ void AddSC_zuldrak()
     pNewScript->GetAI = &GetNewAIInstance<ArgentStandUnit>;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<AttractGhoul>("spell_attract_ghoul");
     RegisterSpellScript<GymersBuddy>("spell_gymers_buddy");
     RegisterSpellScript<GymersThrow>("spell_gymers_throw");
     RegisterSpellScript<SummonStefan>("spell_summon_stefan");

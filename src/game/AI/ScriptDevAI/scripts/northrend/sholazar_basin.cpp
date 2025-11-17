@@ -437,21 +437,24 @@ bool GossipSelect_npc_tipsy_mcmanus(Player* pPlayer, Creature* pCreature, uint32
 ## npc_wants_fruit_credit
 ######*/
 
-bool EffectDummyCreature_npc_wants_fruit_credit(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 51931 - Toss Orange
+// 51932 - Toss Banana
+// 51933 - Toss Papaya
+struct TossFruit : public SpellScript
 {
-    if ((uiSpellId == SPELL_TOSS_ORANGE || uiSpellId == SPELL_TOSS_BANANA || uiSpellId == SPELL_TOSS_PAPAYA) && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && ((Player*)pCaster)->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->IsPlayer() && static_cast<Player*>(caster)->GetQuestStatus(QUEST_ID_STILL_AT_IT) == QUEST_STATUS_INCOMPLETE)
         {
-            if (Creature* pTipsyMcmanus = GetClosestCreatureWithEntry(pCaster, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
+            if (Creature* tipsyMcmanus = GetClosestCreatureWithEntry(caster, NPC_TIPSY_MCMANUS, 2 * INTERACTION_DISTANCE))
             {
-                pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pTipsyMcmanus, pCreatureTarget->GetEntry());
-                return true;
+                target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, tipsyMcmanus, target->GetEntry());
             }
         }
     }
-    return false;
-}
+};
 
 /*######
 ## go_quest_still_at_it_credit
@@ -866,15 +869,11 @@ void AddSC_sholazar_basin()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_wants_fruit_credit";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_wants_fruit_credit;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "go_quest_still_at_it_credit";
     pNewScript->pGOUse = &GOUse_go_quest_still_at_it_credit;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<TossFruit>("spell_toss_fruit");
     RegisterSpellScript<ShootRJR>("spell_shoot_rjr");
     RegisterSpellScript<ParachutePeriodicDummy>("spell_parachute_periodic_dummy");
     RegisterSpellScript<InitiateKillCheck>("spell_initiate_kill_check");
