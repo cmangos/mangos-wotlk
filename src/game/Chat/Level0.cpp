@@ -35,21 +35,28 @@ bool ChatHandler::HandleTpCommand(char* args)
     Player* player = m_session->GetPlayer();
 
     if (!player) {
+        SendSysMessage("Cannot teleport to the entrance: Internal error, player does not exist!");
         return true;
     }
 
+    Map const* map = player->GetMap();
     MapEntry const* mapEntry = sMapStore.LookupEntry(player->GetMapId());
 
-    if (!mapEntry || !mapEntry->IsDungeon())
+    if (!map || !mapEntry || !mapEntry->IsDungeon())
     {
         SendSysMessage("Cannot teleport to the entrance: you are not in a dungeon!");
         return true;
     }
 
-    if (player->IsInCombat())
+    for (const auto& itr : map->GetPlayers())
     {
-        SendSysMessage("Cannot teleport to the entrance: you are in combat!");
-        return true;
+        Player const* playerFromMap = itr.getSource();
+        
+        if (playerFromMap && playerFromMap->IsInCombat())
+        {
+            SendSysMessage("Cannot teleport to the entrance: your group is in combat!");
+            return true;
+        }
     }
 
     AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(mapEntry->MapID);
