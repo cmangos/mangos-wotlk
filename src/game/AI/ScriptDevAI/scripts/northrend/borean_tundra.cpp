@@ -1632,6 +1632,70 @@ struct RaeloraszFireball : public AuraScript
     }
 };
 
+enum
+{
+    // for quest 11730
+    SPELL_ULTRASONIC_SCREWDRIVER        = 46023,
+    SPELL_REPROGRAM_KILL_CREDIT         = 46027,
+
+    NPC_COLLECT_A_TRON                  = 25793,
+    SPELL_SUMMON_COLLECT_A_TRON         = 46034,
+
+    NPC_DEFENDO_TANK                    = 25758,
+    SPELL_SUMMON_DEFENDO_TANK           = 46058,
+
+    NPC_SCAVENGE_A8                     = 25752,
+    SPELL_SUMMON_SCAVENGE_A8            = 46063,
+
+    NPC_SCAVENGE_B6                     = 25792,
+    SPELL_SUMMON_SCAVENGE_B6            = 46066,
+
+    NPC_SENTRY_BOT                      = 25753,
+    SPELL_SUMMON_SENTRY_BOT             = 46068,
+};
+
+// 46023 - The Ultrasonic Screwdriver
+struct TheUltrasonicScrewdriver : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        std::vector<uint32> targets = {NPC_COLLECT_A_TRON, NPC_DEFENDO_TANK, NPC_SCAVENGE_A8, NPC_SCAVENGE_B6, NPC_SENTRY_BOT};
+        if (!target || std::find(targets.begin(), targets.end(), target->GetEntry()) == targets.end())
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (target->IsCorpse())
+        {
+            uint32 newSpellId = 0;
+
+            switch (target->GetEntry())
+            {
+                case NPC_COLLECT_A_TRON: newSpellId = SPELL_SUMMON_COLLECT_A_TRON; break;
+                case NPC_DEFENDO_TANK: newSpellId = SPELL_SUMMON_DEFENDO_TANK; break;
+                case NPC_SCAVENGE_A8: newSpellId = SPELL_SUMMON_SCAVENGE_A8; break;
+                case NPC_SCAVENGE_B6: newSpellId = SPELL_SUMMON_SCAVENGE_B6; break;
+                case NPC_SENTRY_BOT: newSpellId = SPELL_SUMMON_SENTRY_BOT; break;
+            }
+
+            if (const SpellEntry* spellInfo = GetSpellStore()->LookupEntry<SpellEntry>(newSpellId))
+            {
+                caster->CastSpell(target, spellInfo->Id, TRIGGERED_OLD_TRIGGERED);
+
+                if (Pet* pet = caster->FindGuardianWithEntry(spellInfo->EffectMiscValue[effIdx]))
+                    pet->CastSpell(caster, SPELL_REPROGRAM_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
+
+                static_cast<Creature*>(target)->ForcedDespawn();
+            }
+        }
+    }
+};
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript = new Script;
@@ -1720,4 +1784,5 @@ void AddSC_borean_tundra()
     RegisterSpellScript<RaeloraszFireball>("spell_raelorasz_fireball");
     RegisterSpellScript<ReinforcedNetBorean>("spell_reinforced_net_borean");
     RegisterSpellScript<CratesCarried>("spell_crates_carried");
+    RegisterSpellScript<TheUltrasonicScrewdriver>("spell_ultrasonic_screwdriver");
 }

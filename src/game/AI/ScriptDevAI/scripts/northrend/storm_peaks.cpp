@@ -374,6 +374,41 @@ struct go_falling_rocks : public GameObjectAI
     }
 };
 
+enum
+{
+    // quest 12981
+    SPELL_THROW_ICE                     = 56099,
+    SPELL_FROZEN_IRON_SCRAP             = 56101,
+    NPC_SMOLDERING_SCRAP_BUNNY          = 30169,
+    GO_SMOLDERING_SCRAP                 = 192124,
+};
+
+// 56099 - Throw Ice
+struct ThrowIce : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        return target->GetEntry() == NPC_SMOLDERING_SCRAP_BUNNY;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (target == nullptr)
+            return;
+
+        if (GameObject* scrap = GetClosestGameObjectWithEntry(target, GO_SMOLDERING_SCRAP, 5.0f))
+        {
+            if (scrap->GetRespawnTime() != 0)
+                return;
+
+            target->CastSpell(nullptr, SPELL_FROZEN_IRON_SCRAP, TRIGGERED_OLD_TRIGGERED);
+            scrap->SetLootState(GO_JUST_DEACTIVATED);
+            static_cast<Creature*>(target)->ForcedDespawn(1000);
+        }
+    }
+};
+
 void AddSC_storm_peaks()
 {
     Script* pNewScript = new Script;
@@ -405,4 +440,5 @@ void AddSC_storm_peaks()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
+    RegisterSpellScript<ThrowIce>("spell_throw_ice");
 }

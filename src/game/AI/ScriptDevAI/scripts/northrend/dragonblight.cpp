@@ -476,6 +476,83 @@ struct LapsingDream : public AuraScript
     }
 };
 
+enum
+{
+    // for quest 12459
+    SPELL_SEEDS_OF_NATURES_WRATH        = 49587,
+
+    NPC_REANIMATED_FROSTWYRM            = 26841,
+    NPC_TURGID                          = 27808,
+    NPC_DEATHGAZE                       = 27122,
+
+    NPC_WEAK_REANIMATED_FROSTWYRM       = 27821,
+    NPC_WEAK_TURGID                     = 27809,
+    NPC_WEAK_DEATHGAZE                  = 27807,
+};
+
+// 49587 - Seeds of Nature's Wrath
+struct SeedsOfNaturesWrath : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || (target->GetEntry() != NPC_REANIMATED_FROSTWYRM && target->GetEntry() != NPC_TURGID && target->GetEntry() != NPC_DEATHGAZE))
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        uint32 newEntry = 0;
+
+        switch (spell->GetUnitTarget()->GetEntry())
+        {
+            case NPC_REANIMATED_FROSTWYRM: newEntry = NPC_WEAK_REANIMATED_FROSTWYRM; break;
+            case NPC_TURGID: newEntry = NPC_WEAK_TURGID; break;
+            case NPC_DEATHGAZE: newEntry = NPC_WEAK_DEATHGAZE; break;
+        }
+
+        if (newEntry)
+            static_cast<Creature*>(spell->GetUnitTarget())->UpdateEntry(newEntry);
+    }
+};
+
+enum
+{
+    // target woodlands walker
+    SPELL_STRENGTH_ANCIENTS             = 47575,
+    SPELL_CREATE_BARK_WALKERS           = 47550,
+    FACTION_HOSTILE                     = 16,
+
+    EMOTE_AGGRO                         = -1000551,
+    EMOTE_CREATE                        = -1000552,
+};
+
+// 47575 - Strengthen the Ancients: On Interact Dummy to Woodlands Walker
+struct StrengthenTheAncientsOnInteractDummy : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->IsPlayer())
+        {
+            if (urand(0, 1))
+            {
+                DoScriptText(EMOTE_AGGRO, target);
+                target->setFaction(FACTION_HOSTILE);
+                target->AI()->AttackStart(caster);
+            }
+            else
+            {
+                DoScriptText(EMOTE_CREATE, target);
+                caster->CastSpell(caster, SPELL_CREATE_BARK_WALKERS, TRIGGERED_OLD_TRIGGERED);
+                static_cast<Creature*>(target)->ForcedDespawn(5000);
+            }
+        }
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -508,4 +585,5 @@ void AddSC_dragonblight()
     RegisterSpellScript<RescueVillager>("spell_rescue_villager");
     RegisterSpellScript<DropOffGnome>("spell_drop_off_gnome");
     RegisterSpellScript<LapsingDream>("spell_lapsing_dream");
+    RegisterSpellScript<StrengthenTheAncientsOnInteractDummy>("spell_strengthen_the_ancients_on_interact_dummy");
 }

@@ -778,6 +778,78 @@ struct FlurryOfClaws : public AuraScript
     }
 };
 
+enum
+{
+    // quest 12589
+    SPELL_HIT_APPLE                     = 51331,
+    SPELL_MISS_APPLE                    = 51332,
+    SPELL_MISS_APPLE_HIT_BIRD           = 51366,
+    SPELL_APPLE_FALLS_TO_GROUND         = 51371,
+    NPC_APPLE                           = 28053,
+    NPC_LUCKY_WILHELM                   = 28054,
+    NPC_DROSTAN                         = 28328,
+    SAY_LUCKY_HIT_1                     = -1000644,
+    SAY_LUCKY_HIT_2                     = -1000645,
+    SAY_LUCKY_HIT_3                     = -1000646,
+    SAY_LUCKY_HIT_APPLE                 = -1000647,
+    SAY_DROSTAN_GOT_LUCKY_1             = -1000648,
+    SAY_DROSTAN_GOT_LUCKY_2             = -1000649,
+    SAY_DROSTAN_HIT_BIRD_1              = -1000650,
+    SAY_DROSTAN_HIT_BIRD_2              = -1000651,
+};
+
+// 51331 - Hit Apple
+struct HitApple : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->IsPlayer())
+            static_cast<Player*>(caster)->KilledMonsterCredit(target->GetEntry(), target->GetObjectGuid());
+
+        target->CastSpell(nullptr, SPELL_APPLE_FALLS_TO_GROUND, TRIGGERED_NONE);
+
+        if (Creature* luckyWilhelm = GetClosestCreatureWithEntry(target, NPC_LUCKY_WILHELM, 2 * INTERACTION_DISTANCE))
+            DoScriptText(SAY_LUCKY_HIT_APPLE, luckyWilhelm);
+    }
+};
+
+// 51332 - Miss Apple
+struct MissApple : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        switch (urand(1, 3))
+        {
+            case 1: DoScriptText(SAY_LUCKY_HIT_1, target); break;
+            case 2: DoScriptText(SAY_LUCKY_HIT_2, target); break;
+            case 3: DoScriptText(SAY_LUCKY_HIT_3, target); break;
+        }
+
+        if (Creature* drostan = GetClosestCreatureWithEntry(target, NPC_DROSTAN, 4 * INTERACTION_DISTANCE))
+            DoScriptText(urand(0, 1) ? SAY_DROSTAN_GOT_LUCKY_1 : SAY_DROSTAN_GOT_LUCKY_2, drostan);
+    }
+};
+
+// 51366 - Miss Apple, Hit Bird
+struct MissAppleHitBird : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+
+        if (Creature* drostan = GetClosestCreatureWithEntry(target, NPC_DROSTAN, 5 * INTERACTION_DISTANCE))
+            DoScriptText(urand(0, 1) ? SAY_DROSTAN_HIT_BIRD_1 : SAY_DROSTAN_HIT_BIRD_2, drostan);
+
+        target->Suicide();
+    }
+};
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript = new Script;
@@ -822,4 +894,7 @@ void AddSC_sholazar_basin()
     RegisterSpellScript<DevourWind>("spell_devour_wind");
     RegisterSpellScript<DevourWater>("spell_devour_water");
     RegisterSpellScript<FlurryOfClaws>("spell_flurry_of_claws");
+    RegisterSpellScript<HitApple>("spell_hit_apple");
+    RegisterSpellScript<MissApple>("spell_miss_apple");
+    RegisterSpellScript<MissAppleHitBird>("spell_miss_apple_hit_bird");
 }

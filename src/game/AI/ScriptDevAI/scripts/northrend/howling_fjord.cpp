@@ -973,6 +973,48 @@ struct UseBricksBonesaw : public SpellScript
     }
 };
 
+enum
+{
+    // quest 11314, item 33606
+    SPELL_LURIELLES_PENDANT             = 43340,
+    NPC_CHILL_NYMPH                     = 23678,
+    NPC_LURIELLE                        = 24117,
+    FACTION_FRIENDLY                    = 35,
+    SAY_FREE_1                          = -1000781,
+    SAY_FREE_2                          = -1000782,
+    SAY_FREE_3                          = -1000783,
+};
+
+// 43340 - Lurielle's Pendant
+struct LuriellesPendant : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        return target->GetEntry() == NPC_CHILL_NYMPH;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (target == nullptr || !spell->GetCaster()->IsPlayer())
+            return;
+
+        switch (urand(0, 2))
+        {
+            case 0: DoScriptText(SAY_FREE_1, target); break;
+            case 1: DoScriptText(SAY_FREE_2, target); break;
+            case 2: DoScriptText(SAY_FREE_3, target); break;
+        }
+
+        static_cast<Player*>(spell->GetCaster())->KilledMonsterCredit(NPC_LURIELLE);
+        static_cast<Creature*>(target)->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
+        target->DeleteThreatList();
+        target->AttackStop(true);
+        target->GetMotionMaster()->MoveFleeing(spell->GetCaster(), 7);
+        static_cast<Creature*>(target)->ForcedDespawn(7 * IN_MILLISECONDS);
+    }
+};
+
 void AddSC_howling_fjord()
 {
     Script* pNewScript = new Script;
@@ -1028,4 +1070,5 @@ void AddSC_howling_fjord()
     RegisterSpellScript<GrapplingBeam>("spell_grappling_beam");
     RegisterSpellScript<BurnBody>("spell_burn_body");
     RegisterSpellScript<UseBricksBonesaw>("spell_use_bricks_bonesaw");
+    RegisterSpellScript<LuriellesPendant>("spell_lurielles_pendant");
 }

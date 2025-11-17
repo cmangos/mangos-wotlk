@@ -838,6 +838,142 @@ struct TailsUpSummonFemaleIcepawBear : public SpellScript
     }
 };
 
+enum
+{
+    // quest 13549
+    SPELL_TAILS_UP_GENDER_MASTER        = 62110,
+    SPELL_TAILS_UP_AURA                 = 62109,
+    SPELL_FORCE_LEOPARD_SUMMON          = 62117,
+    SPELL_FORCE_BEAR_SUMMON             = 62118,
+    NPC_FROST_LEOPARD                   = 29327,
+    NPC_ICEPAW_BEAR                     = 29319,
+    NPC_LEOPARD_KILL_CREDIT             = 33005,
+    NPC_BEAR_KILL_CREDIT                = 33006,
+    SAY_ITS_FEMALE                      = -1000642,
+    SAY_ITS_MALE                        = -1000643,
+};
+
+// 62110 - Tails Up: Gender Master
+struct TailsUpGenderMaster : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        const bool isMale = urand(0, 1) != 0;
+        Unit* target = spell->GetUnitTarget();
+        if (!target->IsCreature())
+            return;
+
+        Player* player = static_cast<Creature*>(target)->GetLootRecipient();
+
+        if (isMale)
+            DoScriptText(SAY_ITS_MALE, target, player);
+        else
+            DoScriptText(SAY_ITS_FEMALE, target, player);
+
+        switch (target->GetEntry())
+        {
+            case NPC_FROST_LEOPARD:
+            {
+                if (isMale)
+                {
+                    target->CastSpell(nullptr, SPELL_TAILS_UP_AURA, TRIGGERED_OLD_TRIGGERED);
+                    target->RemoveAurasDueToSpell(62248);
+                    target->AI()->AttackStart(player);
+                }
+                else
+                {
+                    player->KilledMonsterCredit(NPC_LEOPARD_KILL_CREDIT, target->GetObjectGuid());
+                    target->CastSpell(player, SPELL_FORCE_LEOPARD_SUMMON, TRIGGERED_OLD_TRIGGERED);
+                    static_cast<Creature*>(target)->ForcedDespawn();
+                }
+
+                break;
+            }
+            case NPC_ICEPAW_BEAR:
+            {
+                if (isMale)
+                {
+                    target->CastSpell(nullptr, SPELL_TAILS_UP_AURA, TRIGGERED_OLD_TRIGGERED);
+                    target->RemoveAurasDueToSpell(62248);
+                    target->AI()->AttackStart(player);
+                }
+                else
+                {
+                    player->KilledMonsterCredit(NPC_BEAR_KILL_CREDIT, target->GetObjectGuid());
+                    target->CastSpell(player, SPELL_FORCE_BEAR_SUMMON, TRIGGERED_OLD_TRIGGERED);
+                    static_cast<Creature*>(target)->ForcedDespawn();
+                }
+
+                break;
+            }
+        }
+    }
+};
+
+enum
+{
+    // quest 12659, item 38731
+    SPELL_AHUNAES_KNIFE                 = 52090,
+    NPC_SCALPS_KILL_CREDIT_BUNNY        = 28622,
+
+    NPC_HEBDRAKKAR_HEADHUNTER           = 28600,
+    NPC_HEBDRAKKAR_STRIKER              = 28465,
+};
+
+// 52090 - Ahunae's Knife
+struct AhunaesKnife : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || (target->GetEntry() != NPC_HEBDRAKKAR_HEADHUNTER && target->GetEntry() != NPC_HEBDRAKKAR_STRIKER))
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster->IsPlayer() || !spell->GetUnitTarget())
+            return;
+
+        static_cast<Player*>(caster)->KilledMonsterCredit(NPC_SCALPS_KILL_CREDIT_BUNNY);
+        static_cast<Creature*>(spell->GetUnitTarget())->ForcedDespawn();
+    }
+};
+
+enum
+{
+    // for quest 12516
+    SPELL_MODIFIED_MOJO                 = 50706,
+
+    NPC_PROPHET_OF_SSERATUS             = 28068,
+    NPC_WEAK_PROPHET_OF_SSERATUS        = 28151,
+};
+
+// 50706 - Modified Mojo
+struct ModifiedMojo : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_PROPHET_OF_SSERATUS)
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        // TODO:
+        // Apparently done before updateEntry, so need to make a way to handle that
+        // "Mmm, more mojo"
+        // "%s drinks the Mojo"
+        // "NOOOOOOOOOOOOooooooo...............!"
+
+        static_cast<Creature*>(spell->GetUnitTarget())->UpdateEntry(NPC_WEAK_PROPHET_OF_SSERATUS);
+    }
+};
+
 void AddSC_zuldrak()
 {
     Script* pNewScript = new Script;
@@ -894,4 +1030,7 @@ void AddSC_zuldrak()
     RegisterSpellScript<RandomRadiusPicker>("spell_random_radius_picker");
     RegisterSpellScript<TailsUpSummonFemaleFrostLeopard>("spell_tails_up_summon_female_frost_leopard");
     RegisterSpellScript<TailsUpSummonFemaleIcepawBear>("spell_tails_up_summon_female_icepaw_bear");
+    RegisterSpellScript<TailsUpGenderMaster>("spell_tails_up_gender_master");
+    RegisterSpellScript<AhunaesKnife>("spell_ahunaes_knife");
+    RegisterSpellScript<ModifiedMojo>("spell_modified_mojo");
 }
