@@ -131,7 +131,11 @@ int32 AbstractRandomMovementGenerator::_setLocation(Unit& owner)
 
     Movement::MoveSplineInit init(owner);
     init.MovebyPath(m_pathFinder->getPath());
-    init.SetWalk(i_walk);
+
+    if (i_randomRunWander)
+        init.SetWalk(urand(0, 99) >= 15);
+    else
+        init.SetWalk(i_walk);
 
     if (owner.IsSlowedInCombat())
         init.SetCombatSlowed(1.f - ((30.f - std::min(owner.GetHealthPercent(), 30.f)) * 1.67) / 100);
@@ -158,7 +162,7 @@ ConfusedMovementGenerator::ConfusedMovementGenerator(const Unit& owner) :
 {
 }
 
-WanderMovementGenerator::WanderMovementGenerator(float x, float y, float z, float radius, float verticalZ, bool walk) :
+WanderMovementGenerator::WanderMovementGenerator(Unit const& unit, float x, float y, float z, float radius, float verticalZ, bool walk) :
     AbstractRandomMovementGenerator(UNIT_STAT_ROAMING, UNIT_STAT_ROAMING_MOVE, 3000, 10000, 3, walk)
 {
     i_x = x;
@@ -166,11 +170,14 @@ WanderMovementGenerator::WanderMovementGenerator(float x, float y, float z, floa
     i_z = z;
     i_radius = radius;
     i_verticalZ = verticalZ;
+    if (unit.IsCreature())
+        i_randomRunWander = static_cast<Creature const&>(unit).GetCreatureInfo()->HasFlag(CREATURE_EXTRA_FLAG_RUN_DURING_WANDER);
 }
 
 WanderMovementGenerator::WanderMovementGenerator(const Creature& npc) :
     AbstractRandomMovementGenerator(UNIT_STAT_ROAMING, UNIT_STAT_ROAMING_MOVE, 3000, 10000, 3)
 {
+    i_randomRunWander = npc.GetCreatureInfo()->HasFlag(CREATURE_EXTRA_FLAG_RUN_DURING_WANDER);
     npc.GetRespawnCoord(i_x, i_y, i_z, nullptr, &i_radius);
 }
 
@@ -203,9 +210,16 @@ void WanderMovementGenerator::AddToRandomPauseTime(int32 waitTimeDiff, bool forc
     }
 }
 
-TimedWanderMovementGenerator::TimedWanderMovementGenerator(Creature const& npc, uint32 timer, float radius, float verticalZ)
-    : TimedWanderMovementGenerator(timer, npc.GetPositionX(), npc.GetPositionY(), npc.GetPositionZ(), radius, verticalZ)
+TimedWanderMovementGenerator::TimedWanderMovementGenerator(Unit const& npc, uint32 timer, float radius, float verticalZ)
+    : TimedWanderMovementGenerator(npc, timer, npc.GetPositionX(), npc.GetPositionY(), npc.GetPositionZ(), radius, verticalZ)
 {
+
+}
+
+TimedWanderMovementGenerator::TimedWanderMovementGenerator(Unit const& unit, uint32 timer, float x, float y, float z, float radius, float verticalZ, bool walk)
+    : WanderMovementGenerator(unit, x, y, z, radius, verticalZ, walk), m_durationTimer(timer)
+{
+
 }
 
 bool TimedWanderMovementGenerator::Update(Unit& owner, const uint32& diff)

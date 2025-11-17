@@ -178,9 +178,9 @@ struct boss_sindragosaAI : public ScriptedAI
     void SetFlying(bool bIsFlying)
     {
         if (bIsFlying)
-            m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetAnimTier(AnimTier::Hover);
         else
-            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetAnimTier(AnimTier::Ground);
 
         m_creature->SetLevitate(bIsFlying);
         m_creature->SetWalk(bIsFlying);
@@ -503,9 +503,9 @@ struct npc_rimefang_iccAI : public ScriptedAI
     void SetFlying(bool bIsFlying)
     {
         if (bIsFlying)
-            m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetAnimTier(AnimTier::Hover);
         else
-            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetAnimTier(AnimTier::Ground);
 
         m_creature->SetLevitate(bIsFlying);
         m_creature->SetWalk(bIsFlying);
@@ -683,9 +683,9 @@ struct npc_spinestalker_iccAI : public ScriptedAI
     void SetFlying(bool bIsFlying)
     {
         if (bIsFlying)
-            m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetAnimTier(AnimTier::Hover);
         else
-            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            m_creature->SetAnimTier(AnimTier::Ground);
 
         m_creature->SetLevitate(bIsFlying);
         m_creature->SetWalk(bIsFlying);

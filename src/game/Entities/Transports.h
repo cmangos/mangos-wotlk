@@ -88,7 +88,7 @@ class ElevatorTransport : public GenericTransport
 
         void SetGoState(GOState state) override;
 
-        bool IsCrossMapTransport() const { return false; }
+        bool IsCrossMapTransport() const override { return false; }
     private:
         TransportAnimation const* m_animationInfo;
         uint32 m_currentSeg;

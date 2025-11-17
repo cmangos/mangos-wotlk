@@ -312,7 +312,7 @@ struct npc_graufAI : public ScriptedAI
         m_uiFlightDelayTimer = 0;
 
         m_creature->SetLevitate(false);
-        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Ground);
 
         m_creature->SetHealth(m_creature->GetMaxHealth());
     }
@@ -430,7 +430,7 @@ struct npc_graufAI : public ScriptedAI
             {
                 m_creature->SetLevitate(true);
                 m_creature->SetWalk(false);
-                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                m_creature->SetAnimTier(AnimTier::Hover);
                 m_creature->GetMotionMaster()->MoveWaypoint();
                 m_uiFlightDelayTimer = 0;
             }

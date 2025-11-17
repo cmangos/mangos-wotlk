@@ -87,7 +87,7 @@ enum UnitBytes1Offsets : uint8
     UNIT_BYTES_1_OFFSET_STAND_STATE     = 0,
     UNIT_BYTES_1_OFFSET_PET_LOYALTY     = 1,
     UNIT_BYTES_1_OFFSET_VIS_FLAGS       = 2,
-    UNIT_BYTES_1_OFFSET_MISC_FLAGS      = 3,
+    UNIT_BYTES_1_OFFSET_ANIM_TIER       = 3,
 };
 
 enum UnitBytes2Offsets : uint8
@@ -127,18 +127,6 @@ enum UnitVisFlags
     UNIT_VIS_FLAG_UNK4          = 0x08,
     UNIT_VIS_FLAG_UNK5          = 0x10,
     UNIT_VIS_FLAGS_ALL          = 0xFF
-};
-
-// byte flags value (UNIT_FIELD_BYTES_1,3)
-// These flags seem to be related to miscellaneous animations
-enum UnitMiscFlags
-{
-    UNIT_BYTE1_FLAG_GROUND       = 0x00,
-    UNIT_BYTE1_FLAG_ALWAYS_STAND = 0x01,
-    UNIT_BYTE1_FLAG_FLY_ANIM     = 0x02,                    // Creature that can fly and are not on the ground appear to have this flag. If they are on the ground, flag is not present.
-    UNIT_BYTE1_FLAG_REAL_FLY_ANIM= 0x03,
-    UNIT_BYTE1_FLAG_SUBMERGED    = 0x04,
-    UNIT_BYTE1_FLAG_ALL          = 0xFF
 };
 
 // byte value (UNIT_FIELD_BYTES_2,UNIT_BYTES_2_OFFSET_SHEATH_STATE) // TODO - solve conflicting with SharedDefines.h enum SheathTypes
@@ -1537,6 +1525,9 @@ class Unit : public WorldObject
         void RemoveVisFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAGS, flags); }
         bool HasVisFlags(uint8 flags) { return GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_VIS_FLAGS) & flags; }
 
+        void SetAnimTier(AnimTier tier);
+        AnimTier GetAnimTier() const;
+
         bool IsMounted() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT); } // not used with creature non-aura mounts
         uint32 GetMountID() const { return GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID); }
         bool MountEntry(uint32 templateEntry, const Aura* aura = nullptr);
@@ -1771,6 +1762,17 @@ class Unit : public WorldObject
                 if (func(holder))
                     return true;
             }
+            return false;
+        }
+
+        template <typename Func>
+        bool HasAuraHolder(uint32 spellId, Func func) const
+        {
+            SpellAuraHolderConstBounds spair = GetSpellAuraHolderBounds(spellId);
+            for (SpellAuraHolderMap::const_iterator i_holder = spair.first; i_holder != spair.second; ++i_holder)
+                if (func(i_holder->second))
+                    return true;
+
             return false;
         }
 
@@ -2199,7 +2201,7 @@ class Unit : public WorldObject
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
         // function for low level grid visibility checks in player/creature cases
         virtual bool IsVisibleInGridForPlayer(Player* pl) const = 0;
-        virtual bool isInvisibleForAlive() const;
+        bool isInvisibleForAlive() const;
 
         TrackedAuraTargetMap&       GetTrackedAuraTargets(TrackedAuraType type)       { return m_trackedAuraTargets[type]; }
         TrackedAuraTargetMap const& GetTrackedAuraTargets(TrackedAuraType type) const { return m_trackedAuraTargets[type]; }

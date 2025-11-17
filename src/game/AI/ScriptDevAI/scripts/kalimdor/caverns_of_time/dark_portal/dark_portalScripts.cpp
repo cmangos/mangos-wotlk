@@ -42,22 +42,20 @@ enum
 
 struct npc_medivh_black_morassAI : public ScriptedAI
 {
-    npc_medivh_black_morassAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_medivh_black_morassAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
     void Reset() override { }
 
-    void AttackStart(Unit* /*pWho*/) override { }
+    void AttackStart(Unit* /*who*/) override { }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MEDIVH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_MEDIVH, FAIL);
         
         DoScriptText(SAY_DEATH, m_creature);
 
@@ -67,25 +65,19 @@ struct npc_medivh_black_morassAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_medivh_black_morass(Creature* pCreature)
+// 31326, 37853 - Corrupt Medivh
+struct CorruptMedivh : public SpellScript
 {
-    return new npc_medivh_black_morassAI(pCreature);
-}
-
-bool EffectDummyCreature_npc_medivh_black_morass(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if ((uiSpellId == SPELL_CORRUPT && uiEffIndex == EFFECT_INDEX_0) || (uiSpellId == SPELL_CORRUPT_AEONUS && uiEffIndex == EFFECT_INDEX_0))
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (instance_dark_portal* pInstance = (instance_dark_portal*)pCreatureTarget->GetInstanceData())
-            pInstance->SetData(TYPE_SHIELD, SPECIAL);
+        if (effIdx != EFFECT_INDEX_0)
+            return;
 
-        // always return true when we are handling this spell and effect
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        if (instance_dark_portal* instance = dynamic_cast<instance_dark_portal*>(target->GetInstanceData()))
+            instance->SetData(TYPE_SHIELD, SPECIAL);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_time_rift
@@ -377,32 +369,29 @@ UnitAI* GetAI_npc_time_rift(Creature* pCreature)
     return new npc_time_riftAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_time_rift_channel(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 31320 - Time Rift Periodic
+struct TimeRiftPeriodic : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_RIFT_PERIODIC && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (npc_time_riftAI* pTimeRiftAI = dynamic_cast<npc_time_riftAI*>(pCreatureTarget->AI()))
-            pTimeRiftAI->DoSummon();
-
-        // always return true when we are handling this spell and effect
-        return true;
+        Unit* target = spell->GetUnitTarget();
+        if (npc_time_riftAI* timeRiftAI = dynamic_cast<npc_time_riftAI*>(target->AI()))
+            timeRiftAI->DoSummon();
     }
-
-    return false;
-}
+};
 
 void AddSC_dark_portal()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_medivh_black_morass";
-    pNewScript->GetAI = &GetAI_npc_medivh_black_morass;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_medivh_black_morass;
+    pNewScript->GetAI = &GetNewAIInstance<npc_medivh_black_morassAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_time_rift";
     pNewScript->GetAI = &GetAI_npc_time_rift;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_time_rift_channel;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CorruptMedivh>("spell_corrupt_medivh");
+    RegisterSpellScript<TimeRiftPeriodic>("spell_time_rift_periodic");
 }

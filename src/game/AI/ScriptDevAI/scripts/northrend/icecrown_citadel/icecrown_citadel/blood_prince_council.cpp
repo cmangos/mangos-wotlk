@@ -147,7 +147,7 @@ struct npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
     void Reset() override
     {
         // Flying animation
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Hover);
     }
 
     void MoveInLineOfSight(Unit* pWho) override

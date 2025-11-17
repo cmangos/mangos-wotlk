@@ -65,7 +65,7 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
             AbstractPathMovementGenerator(path, orientation, offset), m_flying(flying), m_speed(speed), m_forcedMovement(forcedMovement) {}
         FixedPathMovementGenerator(const Movement::PointsArray& path, uint32 forcedMovement, bool flying = false, float speed = 0, int32 offset = 0) :
             FixedPathMovementGenerator(path, 0, forcedMovement, flying, speed, offset) {}
-        FixedPathMovementGenerator(Unit& unit, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying = false, float speed = 0, int32 offset = 0, bool cyclic = false, ObjectGuid guid = ObjectGuid());
+        FixedPathMovementGenerator(Unit& unit, int32 pathId, WaypointPathOrigin wpOrigin, ForcedMovement forcedMovement, bool flying = false, float speed = 0, int32 offset = 0, bool cyclic = false, ObjectGuid guid = ObjectGuid(), std::optional<AnimTier> animTier = std::nullopt);
         FixedPathMovementGenerator(Creature& creature);
 
         void Initialize(Unit& unit) override;
@@ -84,6 +84,7 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
         bool m_flying;
         float m_speed;
         uint32 m_forcedMovement;
+        std::optional<AnimTier> m_animTier;
 };
 
 class TaxiMovementGenerator : public AbstractPathMovementGenerator

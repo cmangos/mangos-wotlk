@@ -187,7 +187,7 @@ void MovementInfo::Read(ByteBuffer& data)
 
     if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
     {
-        data >> u_unk1;
+        data >> stepUpStartElevation;
     }
 }
 
@@ -232,7 +232,7 @@ void MovementInfo::Write(ByteBuffer& data) const
 
     if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
     {
-        data << u_unk1;
+        data << stepUpStartElevation;
     }
 }
 
@@ -586,7 +586,7 @@ void Unit::TriggerHomeEvents()
     {
         Unit* target = GetMaster();
         if (target && (!target->GetTransportInfo() || target->GetTransportInfo()->GetTransport() != this))
-            GetMotionMaster()->MoveFollow(target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, false, IsPlayer() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+            AI()->RequestFollow(target);
         else if (IsLinkingEventTrigger())
             GetMap()->GetCreatureLinkingHolder()->TryFollowMaster((Creature*)this);
     }
@@ -8898,6 +8898,16 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
     return WeaponSpeed * PPM / 600.0f;                      // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
 }
 
+void Unit::SetAnimTier(AnimTier tier)
+{
+    SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER, (uint8)tier);
+}
+
+AnimTier Unit::GetAnimTier() const
+{
+    return AnimTier(GetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_ANIM_TIER));
+}
+
 bool Unit::MountEntry(uint32 templateEntry, const Aura* aura)
 {
     CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(templateEntry);
@@ -12673,6 +12683,12 @@ void Unit::UpdateSplinePosition(bool relocateOnly)
     }
 
     m_lastMoveTime = GetMap()->GetCurrentClockTime();
+
+    if (movespline->hasAnim())
+        SetAnimTier(static_cast<AnimTier>(movespline->getAnim()));
+
+    if (movespline->hasExitVoluntary())
+        m_movementInfo.AddMovementFlags2(MOVEFLAG2_UNK4);
 
     if (relocateOnly)
     {

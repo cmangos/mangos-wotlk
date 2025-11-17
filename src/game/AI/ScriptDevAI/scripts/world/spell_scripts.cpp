@@ -143,416 +143,17 @@ struct CastFishingNet : public SpellScript
 
 enum
 {
-    // target hulking helboar
-    SPELL_ADMINISTER_ANTIDOTE           = 34665,
-    NPC_HELBOAR                         = 16880,
-    NPC_DREADTUSK                       = 16992,
-
-    // quest 11515
-    SPELL_FEL_SIPHON_DUMMY              = 44936,
-    NPC_FELBLOOD_INITIATE               = 24918,
-    NPC_EMACIATED_FELBLOOD              = 24955,
-
-    // target nestlewood owlkin
-    SPELL_INOCULATE_OWLKIN              = 29528,
-    NPC_OWLKIN                          = 16518,
-    NPC_OWLKIN_INOC                     = 16534,
-
-    // for quest 12516
-    SPELL_MODIFIED_MOJO                 = 50706,
-
-    NPC_PROPHET_OF_SSERATUS             = 28068,
-    NPC_WEAK_PROPHET_OF_SSERATUS        = 28151,
-
-    // for quest 12459
-    SPELL_SEEDS_OF_NATURES_WRATH        = 49587,
-
-    NPC_REANIMATED_FROSTWYRM            = 26841,
-    NPC_TURGID                          = 27808,
-    NPC_DEATHGAZE                       = 27122,
-
-    NPC_WEAK_REANIMATED_FROSTWYRM       = 27821,
-    NPC_WEAK_TURGID                     = 27809,
-    NPC_WEAK_DEATHGAZE                  = 27807,
-
-    // for quest 11730
-    SPELL_ULTRASONIC_SCREWDRIVER        = 46023,
-    SPELL_REPROGRAM_KILL_CREDIT         = 46027,
-
-    NPC_COLLECT_A_TRON                  = 25793,
-    SPELL_SUMMON_COLLECT_A_TRON         = 46034,
-
-    NPC_DEFENDO_TANK                    = 25758,
-    SPELL_SUMMON_DEFENDO_TANK           = 46058,
-
-    NPC_SCAVENGE_A8                     = 25752,
-    SPELL_SUMMON_SCAVENGE_A8            = 46063,
-
-    NPC_SCAVENGE_B6                     = 25792,
-    SPELL_SUMMON_SCAVENGE_B6            = 46066,
-
-    NPC_SENTRY_BOT                      = 25753,
-    SPELL_SUMMON_SENTRY_BOT             = 46068,
-
-    // target woodlands walker
-    SPELL_STRENGTH_ANCIENTS             = 47575,
-    SPELL_CREATE_BARK_WALKERS           = 47550,
-    FACTION_HOSTILE                     = 16,
-
-    EMOTE_AGGRO                         = -1000551,
-    EMOTE_CREATE                        = -1000552,
-
-    // Quest "Disrupt the Greengill Coast" (11541)
-    SPELL_ORB_OF_MURLOC_CONTROL         = 45109,
-    SPELL_GREENGILL_SLAVE_FREED         = 45110,
-    SPELL_ENRAGE                        = 45111,
-    NPC_FREED_GREENGILL_SLAVE           = 25085,
-    NPC_DARKSPINE_MYRMIDON              = 25060,
-    NPC_DARKSPINE_SIREN                 = 25073,
-
-    // quest 12659, item 38731
-    SPELL_AHUNAES_KNIFE                 = 52090,
-    NPC_SCALPS_KILL_CREDIT_BUNNY        = 28622,
-
-    // quest 13549
-    SPELL_TAILS_UP_GENDER_MASTER        = 62110,
-    SPELL_TAILS_UP_AURA                 = 62109,
-    SPELL_FORCE_LEOPARD_SUMMON          = 62117,
-    SPELL_FORCE_BEAR_SUMMON             = 62118,
-    NPC_FROST_LEOPARD                   = 29327,
-    NPC_ICEPAW_BEAR                     = 29319,
-    NPC_LEOPARD_KILL_CREDIT             = 33005,
-    NPC_BEAR_KILL_CREDIT                = 33006,
-    SAY_ITS_FEMALE                      = -1000642,
-    SAY_ITS_MALE                        = -1000643,
-
-    // quest 9849, item 24501
-    SPELL_THROW_GORDAWG_BOULDER         = 32001,
-    NPC_MINION_OF_GUROK                 = 18181,
-
-    // quest 12589
-    SPELL_HIT_APPLE                     = 51331,
-    SPELL_MISS_APPLE                    = 51332,
-    SPELL_MISS_APPLE_HIT_BIRD           = 51366,
-    SPELL_APPLE_FALLS_TO_GROUND         = 51371,
-    NPC_APPLE                           = 28053,
-    NPC_LUCKY_WILHELM                   = 28054,
-    NPC_DROSTAN                         = 28328,
-    SAY_LUCKY_HIT_1                     = -1000644,
-    SAY_LUCKY_HIT_2                     = -1000645,
-    SAY_LUCKY_HIT_3                     = -1000646,
-    SAY_LUCKY_HIT_APPLE                 = -1000647,
-    SAY_DROSTAN_GOT_LUCKY_1             = -1000648,
-    SAY_DROSTAN_GOT_LUCKY_2             = -1000649,
-    SAY_DROSTAN_HIT_BIRD_1              = -1000650,
-    SAY_DROSTAN_HIT_BIRD_2              = -1000651,
-
-    // quest 11314, item 33606
-    SPELL_LURIELLES_PENDANT             = 43340,
-    NPC_CHILL_NYMPH                     = 23678,
-    NPC_LURIELLE                        = 24117,
-    FACTION_FRIENDLY                    = 35,
-    SAY_FREE_1                          = -1000781,
-    SAY_FREE_2                          = -1000782,
-    SAY_FREE_3                          = -1000783,
-
     // quest 6661
     SPELL_MELODIOUS_RAPTURE             = 21050,
     SPELL_MELODIOUS_RAPTURE_VISUAL      = 21051,
     NPC_DEEPRUN_RAT                     = 13016,
     NPC_ENTHRALLED_DEEPRUN_RAT          = 13017,
-
-    // quest 12981
-    SPELL_THROW_ICE                     = 56099,
-    SPELL_FROZEN_IRON_SCRAP             = 56101,
-    NPC_SMOLDERING_SCRAP_BUNNY          = 30169,
-    GO_SMOLDERING_SCRAP                 = 192124,
 };
 
 bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     switch (uiSpellId)
     {
-        case SPELL_ADMINISTER_ANTIDOTE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_HELBOAR)
-                    return true;
-
-                // possible needs check for quest state, to not have any effect when quest really complete
-
-                pCreatureTarget->UpdateEntry(NPC_DREADTUSK);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_INOCULATE_OWLKIN:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_OWLKIN)
-                    return true;
-
-                pCreatureTarget->UpdateEntry(NPC_OWLKIN_INOC);
-                pCreatureTarget->AIM_Initialize();
-                ((Player*)pCaster)->KilledMonsterCredit(NPC_OWLKIN_INOC);
-
-                // set despawn timer, since we want to remove creature after a short time
-                pCreatureTarget->ForcedDespawn(15000);
-
-                return true;
-            }
-            return true;
-        }
-        case SPELL_MODIFIED_MOJO:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_PROPHET_OF_SSERATUS)
-                    return true;
-
-                // Apparently done before updateEntry, so need to make a way to handle that
-                // "Mmm, more mojo"
-                // "%s drinks the Mojo"
-                // "NOOOOOOOOOOOOooooooo...............!"
-
-                pCreatureTarget->UpdateEntry(NPC_WEAK_PROPHET_OF_SSERATUS);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_FEL_SIPHON_DUMMY:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_FELBLOOD_INITIATE)
-                    return true;
-
-                pCreatureTarget->UpdateEntry(NPC_EMACIATED_FELBLOOD);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_SEEDS_OF_NATURES_WRATH:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                uint32 uiNewEntry = 0;
-
-                switch (pCreatureTarget->GetEntry())
-                {
-                    case NPC_REANIMATED_FROSTWYRM:  uiNewEntry = NPC_WEAK_REANIMATED_FROSTWYRM; break;
-                    case NPC_TURGID:                uiNewEntry = NPC_WEAK_TURGID; break;
-                    case NPC_DEATHGAZE:             uiNewEntry = NPC_WEAK_DEATHGAZE; break;
-                }
-
-                if (uiNewEntry)
-                    pCreatureTarget->UpdateEntry(uiNewEntry);
-
-                return true;
-            }
-            return true;
-        }
-        case SPELL_STRENGTH_ANCIENTS:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if (urand(0, 1))
-                    {
-                        DoScriptText(EMOTE_AGGRO, pCreatureTarget);
-                        pCreatureTarget->setFaction(FACTION_HOSTILE);
-                        pCreatureTarget->AI()->AttackStart(pCaster);
-                    }
-                    else
-                    {
-                        DoScriptText(EMOTE_CREATE, pCreatureTarget);
-                        pCaster->CastSpell(pCaster, SPELL_CREATE_BARK_WALKERS, TRIGGERED_OLD_TRIGGERED);
-                        pCreatureTarget->ForcedDespawn(5000);
-                    }
-                }
-                return true;
-            }
-            return true;
-        }
-        case SPELL_ULTRASONIC_SCREWDRIVER:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->IsCorpse())
-                {
-                    uint32 newSpellId = 0;
-
-                    switch (pCreatureTarget->GetEntry())
-                    {
-                        case NPC_COLLECT_A_TRON:    newSpellId = SPELL_SUMMON_COLLECT_A_TRON; break;
-                        case NPC_DEFENDO_TANK:      newSpellId = SPELL_SUMMON_DEFENDO_TANK; break;
-                        case NPC_SCAVENGE_A8:       newSpellId = SPELL_SUMMON_SCAVENGE_A8; break;
-                        case NPC_SCAVENGE_B6:       newSpellId = SPELL_SUMMON_SCAVENGE_B6; break;
-                        case NPC_SENTRY_BOT:        newSpellId = SPELL_SUMMON_SENTRY_BOT; break;
-                    }
-
-                    if (const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(newSpellId))
-                    {
-                        pCaster->CastSpell(pCreatureTarget, pSpell->Id, TRIGGERED_OLD_TRIGGERED);
-
-                        if (Pet* pPet = pCaster->FindGuardianWithEntry(pSpell->EffectMiscValue[uiEffIndex]))
-                            pPet->CastSpell(pCaster, SPELL_REPROGRAM_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
-
-                        pCreatureTarget->ForcedDespawn();
-                    }
-                }
-                return true;
-            }
-            return true;
-        }
-        case SPELL_AHUNAES_KNIFE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() != TYPEID_PLAYER)
-                    return true;
-
-                ((Player*)pCaster)->KilledMonsterCredit(NPC_SCALPS_KILL_CREDIT_BUNNY);
-                pCreatureTarget->ForcedDespawn();
-                return true;
-            }
-            return true;
-        }
-        case SPELL_TAILS_UP_GENDER_MASTER:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                const bool isMale = urand(0, 1) != 0;
-                Player* pPlayer = pCreatureTarget->GetLootRecipient();
-
-                if (isMale)
-                    DoScriptText(SAY_ITS_MALE, pCreatureTarget, pPlayer);
-                else
-                    DoScriptText(SAY_ITS_FEMALE, pCreatureTarget, pPlayer);
-
-                switch (pCreatureTarget->GetEntry())
-                {
-                    case NPC_FROST_LEOPARD:
-                    {
-                        if (isMale)
-                        {
-                            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_TAILS_UP_AURA, TRIGGERED_OLD_TRIGGERED);
-                            pCreatureTarget->RemoveAurasDueToSpell(62248);
-                            pCreatureTarget->AI()->AttackStart(pPlayer);
-                        }
-                        else
-                        {
-                            pPlayer->KilledMonsterCredit(NPC_LEOPARD_KILL_CREDIT, pCreatureTarget->GetObjectGuid());
-                            pCreatureTarget->CastSpell(pPlayer, SPELL_FORCE_LEOPARD_SUMMON, TRIGGERED_OLD_TRIGGERED);
-                            pCreatureTarget->ForcedDespawn();
-                        }
-
-                        break;
-                    }
-                    case NPC_ICEPAW_BEAR:
-                    {
-                        if (isMale)
-                        {
-                            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_TAILS_UP_AURA, TRIGGERED_OLD_TRIGGERED);
-                            pCreatureTarget->RemoveAurasDueToSpell(62248);
-                            pCreatureTarget->AI()->AttackStart(pPlayer);
-                        }
-                        else
-                        {
-                            pPlayer->KilledMonsterCredit(NPC_BEAR_KILL_CREDIT, pCreatureTarget->GetObjectGuid());
-                            pCreatureTarget->CastSpell(pPlayer, SPELL_FORCE_BEAR_SUMMON, TRIGGERED_OLD_TRIGGERED);
-                            pCreatureTarget->ForcedDespawn();
-                        }
-
-                        break;
-                    }
-                }
-                return true;
-            }
-            return true;
-        }
-        case SPELL_THROW_GORDAWG_BOULDER:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    if (irand(i, 2))                        // 2-3 summons
-                        pCreatureTarget->SummonCreature(NPC_MINION_OF_GUROK, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
-                }
-
-                pCreatureTarget->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED); // suicide spell
-                return true;
-            }
-            return true;
-        }
-        case SPELL_HIT_APPLE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                    ((Player*)pCaster)->KilledMonsterCredit(pCreatureTarget->GetEntry(), pCreatureTarget->GetObjectGuid());
-
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_APPLE_FALLS_TO_GROUND, TRIGGERED_NONE);
-
-                if (Creature* pLuckyWilhelm = GetClosestCreatureWithEntry(pCreatureTarget, NPC_LUCKY_WILHELM, 2 * INTERACTION_DISTANCE))
-                    DoScriptText(SAY_LUCKY_HIT_APPLE, pLuckyWilhelm);
-            }
-            return true;
-        }
-        case SPELL_MISS_APPLE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                switch (urand(1, 3))
-                {
-                    case 1: DoScriptText(SAY_LUCKY_HIT_1, pCreatureTarget); break;
-                    case 2: DoScriptText(SAY_LUCKY_HIT_2, pCreatureTarget); break;
-                    case 3: DoScriptText(SAY_LUCKY_HIT_3, pCreatureTarget); break;
-                }
-
-                if (Creature* pDrostan = GetClosestCreatureWithEntry(pCreatureTarget, NPC_DROSTAN, 4 * INTERACTION_DISTANCE))
-                    DoScriptText(urand(0, 1) ? SAY_DROSTAN_GOT_LUCKY_1 : SAY_DROSTAN_GOT_LUCKY_2, pDrostan);
-            }
-            return true;
-        }
-        case SPELL_MISS_APPLE_HIT_BIRD:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (Creature* pDrostan = GetClosestCreatureWithEntry(pCreatureTarget, NPC_DROSTAN, 5 * INTERACTION_DISTANCE))
-                    DoScriptText(urand(0, 1) ? SAY_DROSTAN_HIT_BIRD_1 : SAY_DROSTAN_HIT_BIRD_2, pDrostan);
-
-                pCreatureTarget->Suicide();
-            }
-            return true;
-        }
-        case SPELL_LURIELLES_PENDANT:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_CHILL_NYMPH || pCaster->GetTypeId() != TYPEID_PLAYER)
-                    return true;
-
-                switch (urand(0, 2))
-                {
-                    case 0: DoScriptText(SAY_FREE_1, pCreatureTarget); break;
-                    case 1: DoScriptText(SAY_FREE_2, pCreatureTarget); break;
-                    case 2: DoScriptText(SAY_FREE_3, pCreatureTarget); break;
-                }
-
-                ((Player*)pCaster)->KilledMonsterCredit(NPC_LURIELLE);
-                pCreatureTarget->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
-                pCreatureTarget->DeleteThreatList();
-                pCreatureTarget->AttackStop(true);
-                pCreatureTarget->GetMotionMaster()->MoveFleeing(pCaster, 7);
-                pCreatureTarget->ForcedDespawn(7 * IN_MILLISECONDS);
-            }
-            return true;
-        }
         case SPELL_MELODIOUS_RAPTURE:
         {
             if (uiEffIndex == EFFECT_INDEX_0)
@@ -565,25 +166,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 pCreatureTarget->GetMotionMaster()->MoveFollow(pCaster, frand(0.5f, 3.0f), frand(M_PI_F * 0.8f, M_PI_F * 1.2f));
 
                 ((Player*)pCaster)->KilledMonsterCredit(NPC_ENTHRALLED_DEEPRUN_RAT);
-            }
-            return true;
-        }
-        case SPELL_THROW_ICE:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_SMOLDERING_SCRAP_BUNNY)
-                    return true;
-
-                if (GameObject* pScrap = GetClosestGameObjectWithEntry(pCreatureTarget, GO_SMOLDERING_SCRAP, 5.0f))
-                {
-                    if (pScrap->GetRespawnTime() != 0)
-                        return true;
-
-                    pCreatureTarget->CastSpell(pCreatureTarget, SPELL_FROZEN_IRON_SCRAP, TRIGGERED_OLD_TRIGGERED);
-                    pScrap->SetLootState(GO_JUST_DEACTIVATED);
-                    pCreatureTarget->ForcedDespawn(1000);
-                }
             }
             return true;
         }
@@ -1402,6 +984,52 @@ struct IllusionPassive : public AuraScript
     }
 };
 
+// 25680, 27628 - Random Aggro
+struct RandomAggro : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        // 27628 - unknown if it should cause some high threat
+        Unit* caster = spell->GetCaster();
+        spell->GetCaster()->AddThreat(spell->GetUnitTarget());
+    }
+};
+
+// 22913 - Random Aggro 
+struct RandomAggro1000000 : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        Spell::TargetList const& list = spell->GetTargetList();
+        if (!list.empty())
+        {
+            auto itr = list.begin();
+            std::advance(itr, urand(0, list.size() - 1));
+            Unit* target = spell->GetCaster()->GetMap()->GetPlayer((*itr).targetGUID);
+            if (target)
+                spell->GetCaster()->AddThreat(target, 1000000.f);
+        }
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        spell->GetCaster()->AddThreat(spell->GetUnitTarget());
+    }
+};
+
+// 10848, 27978, 40131 - Shroud of Death
+struct InvisibleForAlive : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->m_AuraFlags |= UNIT_AURAFLAG_ALIVE_INVISIBLE;
+        else
+            aura->GetTarget()->m_AuraFlags &= ~UNIT_AURAFLAG_ALIVE_INVISIBLE;
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1455,4 +1083,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<Submerged>("spell_submerged");
     RegisterSpellScript<Stand>("spell_stand");
     RegisterSpellScript<IllusionPassive>("spell_illusion_passive");
+    RegisterSpellScript<RandomAggro>("spell_random_aggro");
+    RegisterSpellScript<RandomAggro1000000>("spell_random_aggro_1000000");
+    RegisterSpellScript<InvisibleForAlive>("spell_shroud_of_death");
 }

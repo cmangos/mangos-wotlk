@@ -619,61 +619,69 @@ bool GossipSelect_npc_chess_generic(Player* pPlayer, Creature* pCreature, uint32
     return true;
 }
 
-bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 30253 - Chess: Move to Square
+struct ChessMoveToSquare : public SpellScript
 {
-    // movement perform spell
-    if (uiSpellId == SPELL_MOVE_TO_SQUARE && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCaster->GetTypeId() == TYPEID_UNIT)
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->IsCreature())
         {
-            pCaster->CastSpell(pCaster, SPELL_DISABLE_SQUARE, TRIGGERED_OLD_TRIGGERED);
-            pCaster->CastSpell(pCaster, SPELL_IS_SQUARE_USED, TRIGGERED_OLD_TRIGGERED);
+            caster->CastSpell(nullptr, SPELL_DISABLE_SQUARE, TRIGGERED_OLD_TRIGGERED);
+            caster->CastSpell(nullptr, SPELL_IS_SQUARE_USED, TRIGGERED_OLD_TRIGGERED);
+        }
+        if (target->IsCreature())
+        {
+            target->CastSpell(nullptr, SPELL_MOVE_COOLDOWN, TRIGGERED_NONE);
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target);
+        }
+    }
+};
 
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_MOVE_COOLDOWN, TRIGGERED_NONE);
-            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
+// 32225 - Karazhan - Chess NPC AI, Take action (melee)
+struct KarazhanChessNpcAiTakeActionMelee : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        uint32 meleeSpell = 0;
+
+        Unit* target = spell->GetUnitTarget();
+        switch (target->GetEntry())
+        {
+            case NPC_KING_LLANE: meleeSpell = SPELL_MELEE_KING_LLANE; break;
+            case NPC_HUMAN_CHARGER: meleeSpell = SPELL_MELEE_CHARGER; break;
+            case NPC_HUMAN_CLERIC: meleeSpell = SPELL_MELEE_CLERIC; break;
+            case NPC_HUMAN_CONJURER: meleeSpell = SPELL_MELEE_CONJURER; break;
+            case NPC_HUMAN_FOOTMAN: meleeSpell = SPELL_MELEE_FOOTMAN; break;
+            case NPC_CONJURED_WATER_ELEMENTAL: meleeSpell = SPELL_MELEE_WATER_ELEM; break;
+            case NPC_WARCHIEF_BLACKHAND: meleeSpell = SPELL_MELEE_WARCHIEF_BLACKHAND; break;
+            case NPC_ORC_GRUNT: meleeSpell = SPELL_MELEE_GRUNT; break;
+            case NPC_ORC_NECROLYTE: meleeSpell = SPELL_MELEE_NECROLYTE; break;
+            case NPC_ORC_WARLOCK: meleeSpell = SPELL_MELEE_WARLOCK; break;
+            case NPC_ORC_WOLF: meleeSpell = SPELL_MELEE_WOLF; break;
+            case NPC_SUMMONED_DAEMON: meleeSpell = SPELL_MELEE_DAEMON; break;
         }
 
-        return true;
+        target->CastSpell(nullptr, meleeSpell, TRIGGERED_OLD_TRIGGERED);
     }
-    // generic melee tick
-    if (uiSpellId == SPELL_ACTION_MELEE && uiEffIndex == EFFECT_INDEX_0)
+};
+
+// 30270 - Chess: Face Square
+struct ChessFaceSquare : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        uint32 uiMeleeSpell = 0;
-
-        switch (pCreatureTarget->GetEntry())
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (target->IsCreature())
         {
-            case NPC_KING_LLANE:            uiMeleeSpell = SPELL_MELEE_KING_LLANE;          break;
-            case NPC_HUMAN_CHARGER:         uiMeleeSpell = SPELL_MELEE_CHARGER;             break;
-            case NPC_HUMAN_CLERIC:          uiMeleeSpell = SPELL_MELEE_CLERIC;              break;
-            case NPC_HUMAN_CONJURER:        uiMeleeSpell = SPELL_MELEE_CONJURER;            break;
-            case NPC_HUMAN_FOOTMAN:         uiMeleeSpell = SPELL_MELEE_FOOTMAN;             break;
-            case NPC_CONJURED_WATER_ELEMENTAL: uiMeleeSpell = SPELL_MELEE_WATER_ELEM;       break;
-            case NPC_WARCHIEF_BLACKHAND:    uiMeleeSpell = SPELL_MELEE_WARCHIEF_BLACKHAND;  break;
-            case NPC_ORC_GRUNT:             uiMeleeSpell = SPELL_MELEE_GRUNT;               break;
-            case NPC_ORC_NECROLYTE:         uiMeleeSpell = SPELL_MELEE_NECROLYTE;           break;
-            case NPC_ORC_WARLOCK:           uiMeleeSpell = SPELL_MELEE_WARLOCK;             break;
-            case NPC_ORC_WOLF:              uiMeleeSpell = SPELL_MELEE_WOLF;                break;
-            case NPC_SUMMONED_DAEMON:       uiMeleeSpell = SPELL_MELEE_DAEMON;              break;
+            target->SetInFront(caster); // set movementinfo orientation, needed for next movement if any
+            target->SetFacingToObject(caster);
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, caster, target);
         }
-        
-        pCreatureTarget->CastSpell(pCreatureTarget, uiMeleeSpell, TRIGGERED_OLD_TRIGGERED);
-        return true;
     }
-        // square facing
-    if (uiSpellId == SPELL_FACE_SQUARE && uiEffIndex == EFFECT_INDEX_0)
-    {
-        if (pCaster->GetTypeId() == TYPEID_UNIT)
-        {
-            pCreatureTarget->SetInFront(pCaster);         // set movementinfo orientation, needed for next movement if any
-            pCreatureTarget->SetFacingToObject(pCaster);
-            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget);
-        }
-
-        return true;
-    }
-
-    return false;
-}
+};
 
 /*######
 ## npc_king_llane
@@ -1701,7 +1709,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_king_llane;
     pNewScript->pGossipHello = GossipHello_npc_king_llane;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1709,7 +1716,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_warchief_blackhand;
     pNewScript->pGossipHello = GossipHello_npc_warchief_blackhand;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1717,7 +1723,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_human_conjurer;
     pNewScript->pGossipHello = GossipHello_npc_human_conjurer;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1725,7 +1730,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_orc_warlock;
     pNewScript->pGossipHello = GossipHello_npc_orc_warlock;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1733,7 +1737,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_human_footman;
     pNewScript->pGossipHello = GossipHello_npc_human_footman;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1741,7 +1744,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_orc_grunt;
     pNewScript->pGossipHello = GossipHello_npc_orc_grunt;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1749,7 +1751,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_water_elemental;
     pNewScript->pGossipHello = GossipHello_npc_water_elemental;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1757,7 +1758,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_summoned_daemon;
     pNewScript->pGossipHello = GossipHello_npc_summoned_daemon;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1765,7 +1765,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_human_charger;
     pNewScript->pGossipHello = GossipHello_npc_human_charger;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1773,7 +1772,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_orc_wolf;
     pNewScript->pGossipHello = GossipHello_npc_orc_wolf;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1781,7 +1779,6 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_human_cleric;
     pNewScript->pGossipHello = GossipHello_npc_human_cleric;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1789,6 +1786,9 @@ void AddSC_chess_event()
     pNewScript->GetAI = GetAI_npc_orc_necrolyte;
     pNewScript->pGossipHello = GossipHello_npc_orc_necrolyte;
     pNewScript->pGossipSelect = GossipSelect_npc_chess_generic;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_chess_generic;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ChessMoveToSquare>("spell_chess_move_to_square");
+    RegisterSpellScript<KarazhanChessNpcAiTakeActionMelee>("spell_karazhan_chess_take_action_melee");
+    RegisterSpellScript<ChessFaceSquare>("spell_chess_face_square");
 }

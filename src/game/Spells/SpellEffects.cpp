@@ -5905,23 +5905,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
             {
                 case UNITNAME_SUMMON_TITLE_NONE:
                 {
-                    // those are classical totems - effectbasepoints is their hp and not summon ammount!
-                    // 121: 23035, battlestands
-                    // 647: 52893, Anti-Magic Zone (npc used)
-                    if (prop_id == 121 || prop_id == 647)
-                        summonResult = DoSummonTotem(summonPositions, eff_idx);
-                    else
-                    {
-                        switch (m_spellInfo->Id) // unable to distinguish based on prop_id, therefore spell by spell override
-                        {
-                            case 38544: // summon marmot, gives control of marmot pet
-                                summonResult = DoSummonPossessed(summonPositions, summon_prop, eff_idx, creatureLevel);
-                                break;
-                            default:
-                                summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, creatureLevel);
-                                break;
-                        }
-                    }
+                    summonResult = DoSummonWild(summonPositions, summon_prop, eff_idx, creatureLevel);
                     break;
                 }
                 case UNITNAME_SUMMON_TITLE_PET:
@@ -6433,14 +6417,14 @@ bool Spell::DoSummonTotem(CreatureSummonPositions& list, SpellEffectIndex eff_id
         pTotem->SetPvPSanctuary(true);
 
     // sending SMSG_TOTEM_CREATED before add to map (done in Summon)
-    if (slot < MAX_TOTEM_SLOT && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (slot < MAX_TOTEM_SLOT && m_caster->IsPlayer())
     {
         WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
         data << uint8(slot);
         data << pTotem->GetObjectGuid();
         data << uint32(m_duration);
         data << uint32(m_spellInfo->Id);
-        ((Player*)m_caster)->SendDirectMessage(data);
+        static_cast<Player*>(m_caster)->SendDirectMessage(data);
     }
 
     pTotem->Summon(m_caster);
@@ -11331,6 +11315,16 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     pGameObj->SetSpellId(m_spellInfo->Id);
     pGameObj->SetSpawnerGuid(m_trueCaster->GetObjectGuid());
     m_caster->AddGameObject(pGameObj);
+
+    if (slot < MAX_TOTEM_SLOT && m_caster->IsPlayer())
+    {
+        WorldPacket data(SMSG_TOTEM_CREATED, 1 + 8 + 4 + 4);
+        data << uint8(slot);
+        data << pGameObj->GetObjectGuid();
+        data << 0; // gos send no extra info
+        data << 0;
+        static_cast<Player*>(m_caster)->SendDirectMessage(data);
+    }
 
     map->Add(pGameObj);
     pGameObj->AIM_Initialize();

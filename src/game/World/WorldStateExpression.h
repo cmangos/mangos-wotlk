@@ -99,7 +99,7 @@ class WorldStateExpressionMgr
     public:
         std::shared_ptr<std::map<int32, WorldStateExpressionEntry>> Load();
 
-        bool Meets(Map const* map, int32 Id);
+        bool Meets(Map const* map, int32 Id) const;
 
         bool Exists(int32 Id);
 

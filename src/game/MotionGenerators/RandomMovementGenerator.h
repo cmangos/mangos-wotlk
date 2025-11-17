@@ -28,7 +28,7 @@ class AbstractRandomMovementGenerator : public MovementGenerator
 {
     public:
         explicit AbstractRandomMovementGenerator(uint32 stateActive, uint32 stateMotion, uint32 delayMin, uint32 delayMax, uint32 movesMax = 1, bool walk = true) :
-            i_x(0.0f), i_y(0.0f), i_z(0.0f), i_radius(0.0f), i_verticalZ(0.0f), i_pathLength(0.0f), i_walk(walk),
+            i_x(0.0f), i_y(0.0f), i_z(0.0f), i_radius(0.0f), i_verticalZ(0.0f), i_pathLength(0.0f), i_walk(walk), i_randomRunWander(false),
             i_nextMoveTimer(0), i_nextMoveCount(1), i_nextMoveCountMax(movesMax),
             i_nextMoveDelayMin(delayMin), i_nextMoveDelayMax(delayMax),
             i_stateActive(stateActive), i_stateMotion(stateMotion)
@@ -49,6 +49,7 @@ class AbstractRandomMovementGenerator : public MovementGenerator
         float i_verticalZ;
         float i_pathLength;
         bool i_walk;
+        bool i_randomRunWander;
 
         std::unique_ptr<PathFinder> m_pathFinder;
         ShortTimeTracker i_nextMoveTimer;
@@ -70,7 +71,7 @@ class WanderMovementGenerator : public AbstractRandomMovementGenerator
 {
     public:
         explicit WanderMovementGenerator(Creature const& npc);
-        WanderMovementGenerator(float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true);
+        WanderMovementGenerator(Unit const& unit, float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true);
 
         void Finalize(Unit& owner) override;
         void Interrupt(Unit& owner) override;
@@ -83,12 +84,8 @@ class WanderMovementGenerator : public AbstractRandomMovementGenerator
 class TimedWanderMovementGenerator : public WanderMovementGenerator
 {
     public:
-        explicit TimedWanderMovementGenerator(Creature const& npc, uint32 timer, float radius, float verticalZ = 0.0f);
-        TimedWanderMovementGenerator(uint32 timer, float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true)
-            : WanderMovementGenerator(x, y, z, radius, verticalZ, walk), m_durationTimer(timer)
-        {
-
-        }
+        explicit TimedWanderMovementGenerator(Unit const& npc, uint32 timer, float radius, float verticalZ = 0.0f);
+        TimedWanderMovementGenerator(Unit const& unit, uint32 timer, float x, float y, float z, float radius, float verticalZ = 0.0f, bool walk = true);
 
         bool Update(Unit& owner, const uint32& diff) override;
 

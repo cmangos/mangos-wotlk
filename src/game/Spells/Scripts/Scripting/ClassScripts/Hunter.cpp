@@ -262,6 +262,24 @@ struct ArcaneShotHunter : public SpellScript
     }
 };
 
+// 34701 - Random Aggro
+struct RandomAggroSnakeTrap : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        if (caster->CanAttack(target))
+        {
+            if (caster->IsVisibleForOrDetect(target, target, true))
+                caster->AI()->AttackStart(caster);
+        }
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<Entrapment>("spell_entrapment");
@@ -280,4 +298,5 @@ void LoadHunterScripts()
     RegisterSpellScript<GlyphOfSteadyShot>("spell_glyph_of_steady_shot");
     RegisterSpellScript<GlyphOfTrueshotAura>("spell_glyph_of_trueshot_aura");
     RegisterSpellScript<ArcaneShotHunter>("spell_arcane_shot_hunter");
+    RegisterSpellScript<RandomAggroSnakeTrap>("spell_random_aggro_snake_trap");
 }

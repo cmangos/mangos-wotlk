@@ -51,7 +51,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_NO_PARRY               = 0x00000004,       // 4 creature can't parry
     CREATURE_EXTRA_FLAG_NO_PARRY_HASTEN        = 0x00000008,       // 8 creature can't counter-attack at parry
     CREATURE_EXTRA_FLAG_NO_BLOCK               = 0x00000010,       // 16 creature can't block
-    CREATURE_EXTRA_FLAG_UNUSED                 = 0x00000020,       // 32
+    CREATURE_EXTRA_FLAG_RUN_DURING_WANDER      = 0x00000020,       // 32 15% chance during wander (random movement)
     CREATURE_EXTRA_FLAG_UNUSED2                = 0x00000040,       // 64
     CREATURE_EXTRA_FLAG_INVISIBLE              = 0x00000080,       // 128 creature is always invisible for player (mostly trigger creatures)
     CREATURE_EXTRA_FLAG_UNUSED3                = 0x00000100,       // 256
@@ -247,6 +247,11 @@ struct CreatureInfo
     bool IsLargeOrBiggerCreature() const
     {
         return HasFlag(CreatureStaticFlags::LARGE_AOI) || HasFlag(CreatureStaticFlags3::GIGANTIC_AOI) || HasFlag(CreatureStaticFlags3::INFINITE_AOI);
+    }
+
+    bool HasFlag(CreatureFlagsExtra flags) const
+    {
+        return bool(ExtraFlags & flags);
     }
 };
 
@@ -642,12 +647,11 @@ class Creature : public Unit
         bool CanWalk() const override { return (GetCreatureInfo()->InhabitType & INHABIT_GROUND) != 0; }
         bool CanSwim() const override { return (GetCreatureInfo()->InhabitType & INHABIT_WATER) != 0; }
         bool IsSwimming() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_SWIMMING); }
-        bool CanFly() const override { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetByteValue(UNIT_FIELD_BYTES_1, 3) & UNIT_BYTE1_FLAG_FLY_ANIM) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_HOVER | MOVEFLAG_CAN_FLY)); }
+        bool CanFly() const override { return (GetCreatureInfo()->InhabitType & INHABIT_AIR) || (GetAnimTier() == AnimTier::Fly) || m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_LEVITATING | MOVEFLAG_HOVER | MOVEFLAG_CAN_FLY)); }
         bool IsFlying() const override { return m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_FLYING | MOVEFLAG_HOVER | MOVEFLAG_LEVITATING)); }
         bool IsTrainerOf(Player* pPlayer, bool msg) const;
         bool CanInteractWithBattleMaster(Player* pPlayer, bool msg) const;
         bool CanTrainAndResetTalentsOf(Player* pPlayer) const;
-        bool isInvisibleForAlive() const override;
 
         void FillGuidsListFromThreatList(GuidVector& guids, uint32 maxamount = 0);
 

@@ -100,7 +100,7 @@ struct boss_savianaAI : public ScriptedAI
     {
         SetCombatMovement(true);
         m_creature->SetLevitate(false);
-        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetAnimTier(AnimTier::Ground);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SAVIANA, FAIL);
@@ -128,7 +128,7 @@ struct boss_savianaAI : public ScriptedAI
 
                 SetCombatMovement(true);
                 m_creature->SetLevitate(false);
-                m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                m_creature->SetAnimTier(AnimTier::Ground);
 
                 if (m_creature->GetVictim())
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
@@ -171,7 +171,7 @@ struct boss_savianaAI : public ScriptedAI
                     m_uiPhase = PHASE_TRANSITION;
 
                     SetCombatMovement(false);
-                    m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                    m_creature->SetAnimTier(AnimTier::Hover);
                     m_creature->SetLevitate(true);
 
                     m_creature->SetWalk(false);

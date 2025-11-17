@@ -183,7 +183,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
                         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                         // take off to location above
                         m_creature->SetLevitate(true);
-                        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_FLY_ANIM);
+                        m_creature->SetAnimTier(AnimTier::Hover);
                         m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX() + 50.0f, m_creature->GetPositionY(), m_creature->GetPositionZ() + 50.0f);
                         break;
                 }
@@ -3312,8 +3312,11 @@ struct Soaring : public AuraScript
     }
 };
 
-struct CoaxMarmot : public AuraScript
+// 38544 - Coax Marmot
+struct CoaxMarmot : public SpellScript, public AuraScript
 {
+    void OnSummon(Spell* spell, Creature* summon) const override { spell->GetCaster()->CastSpell(summon, 38586, TRIGGERED_OLD_TRIGGERED); }
+
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)

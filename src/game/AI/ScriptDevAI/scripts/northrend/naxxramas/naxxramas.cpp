@@ -795,11 +795,6 @@ void instance_naxxramas::DoTaunt()
     }
 }
 
-InstanceData* GetInstanceData_instance_naxxramas(Map* pMap)
-{
-    return new instance_naxxramas(pMap);
-}
-
 bool AreaTrigger_at_naxxramas(Player* player, AreaTriggerEntry const* areaTrigger)
 {
     if (areaTrigger->id == AREATRIGGER_KELTHUZAD)
@@ -861,7 +856,7 @@ void AddSC_instance_naxxramas()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_naxxramas";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_naxxramas;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_naxxramas>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

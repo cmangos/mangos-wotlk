@@ -921,19 +921,19 @@ UnitAI* GetAI_npc_grand_admiral_westwind(Creature* pCreature)
     return new npc_grand_admiral_westwindAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_grand_admiral_westwind(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 31699 - The Admiral Revealed: Lord-Commander's Nullifier Effect
+struct TheAdmiralRevealedLordCommandersNullifierEffect : public SpellScript
 {
-    if (uiSpellId == SPELL_NULLIFIER && uiEffIndex == EFFECT_INDEX_0 && pCaster->GetTypeId() == TYPEID_PLAYER)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (!pCreatureTarget->HasAura(SPELL_PROTECTION_SPHERE))
-            return true;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target->HasAura(SPELL_PROTECTION_SPHERE))
+            return;
 
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target);
     }
-
-    return false;
-}
+};
 
 /*######
 ## go_bloodstained_stone
@@ -973,7 +973,7 @@ static const SpellCreateLanceData createLanceData[] =
     {RACE_BLOODELF, 63923, 46070},
 };
 
-struct spell_create_lance : public SpellScript
+struct CreateLance : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -1448,7 +1448,6 @@ void AddSC_icecrown()
     pNewScript = new Script;
     pNewScript->Name = "npc_grand_admiral_westwind";
     pNewScript->GetAI = &GetAI_npc_grand_admiral_westwind;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_grand_admiral_westwind;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1461,7 +1460,8 @@ void AddSC_icecrown()
     pNewScript->GetAI = &GetNewAIInstance<npc_lithe_stalker>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_create_lance>("spell_create_lance");
+    RegisterSpellScript<TheAdmiralRevealedLordCommandersNullifierEffect>("spell_the_admiral_revealed_lord_commanders_nullify_effect");
+    RegisterSpellScript<CreateLance>("spell_create_lance");
     RegisterSpellScript<GrabCapturedCrusader>("spell_grab_captured_crusader");
     RegisterSpellScript<DropOffCapturedCrusader>("spell_drop_off_captured_crusader");
     RegisterSpellScript<ToIcecrownAirshipASummonVehicle>("spell_to_icecrown_air_ship_a_summon_vehicle");

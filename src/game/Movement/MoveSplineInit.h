@@ -23,20 +23,13 @@
 #include "Entities/Object.h"
 #include "Movement/MoveSplineInitArgs.h"
 #include "MotionGenerators/PathFinder.h"
+#include "MotionGenerators/MotionMaster.h"
 
 class Unit;
 class WorldObject;
 
 namespace Movement
 {
-    enum AnimType
-    {
-        ToGround    = 0, // 460 = ToGround, index of AnimationData.dbc
-        FlyToFly    = 1, // 461 = FlyToFly?
-        ToFly       = 2, // 458 = ToFly
-        FlyToGround = 3, // 463 = FlyToGround
-    };
-
     /*  Initializes and launches spline movement
      */
     class MoveSplineInit
@@ -62,7 +55,7 @@ namespace Movement
             /* Plays animation after movement done
              * can't be combined with parabolic movement
              */
-            void SetAnimation(AnimType anim);
+            void SetAnimation(AnimTier anim, uint32 animationStartIdx);
 
             /* Adds final facing animation
              * sets unit's facing to specified point/angle after all path done
@@ -126,6 +119,8 @@ namespace Movement
              */
             void SetExitVehicle();
 
+            void SetExitVoluntary() { args.toggleMoveflagUnk4 = true; }
+
             PointsArray& Path() { return args.path; }
 
             void SetCombatSlowed(float slowed) { args.slowed = slowed; }
@@ -182,9 +177,9 @@ namespace Movement
         args.flags.EnableParabolic();
     }
 
-    inline void MoveSplineInit::SetAnimation(AnimType anim)
+    inline void MoveSplineInit::SetAnimation(AnimTier anim, uint32 animationStartIdx)
     {
-        args.animation_start_Idx = 0.f;
+        args.animation_start_Idx = animationStartIdx;
         args.flags.EnableAnimation((uint8)anim);
     }
 

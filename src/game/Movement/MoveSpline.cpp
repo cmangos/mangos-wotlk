@@ -40,7 +40,7 @@ namespace Movement
         spline.evaluate_percent(point_Idx, u, c);
 
         if (splineflags.animation)
-            ;// MoveSplineFlag::Animation disables falling or parabolic movement
+            ; // MoveSplineFlag::Animation disables falling or parabolic movement
         else if (splineflags.parabolic)
             computeParabolicElevation(c.z);
         else if (splineflags.falling)
@@ -159,6 +159,7 @@ namespace Movement
         }
         point_Idx = spline.first();
         speed = args.velocity;
+        toggleMoveflagUnk4 = args.toggleMoveflagUnk4;
     }
 
     void MoveSpline::Initialize(const MoveSplineInitArgs& args)

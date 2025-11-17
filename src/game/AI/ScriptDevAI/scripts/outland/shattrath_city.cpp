@@ -352,7 +352,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
 {
     npc_khadgars_servantAI(Creature* creature) : npc_escortAI(creature), m_startPhase(0)
     {
-        AddCustomAction(0, 2000u, [=]() { HandleStart(); });
+        AddCustomAction(0, 2000u, [this]() { HandleStart(); });
         SetReactState(REACT_PASSIVE);
         Reset();
     }

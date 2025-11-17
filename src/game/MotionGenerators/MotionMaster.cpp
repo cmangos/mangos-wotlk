@@ -290,9 +290,9 @@ void MotionMaster::MoveRandomAroundPoint(float x, float y, float z, float radius
     {
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s move random.", m_owner->GetGuidStr().c_str());
         if (timer)
-            Mutate(new TimedWanderMovementGenerator(timer, x, y, z, radius, verticalZ, walk));
+            Mutate(new TimedWanderMovementGenerator(*m_owner, timer, x, y, z, radius, verticalZ, walk));
         else
-            Mutate(new WanderMovementGenerator(x, y, z, radius, verticalZ, walk));
+            Mutate(new WanderMovementGenerator(*m_owner, x, y, z, radius, verticalZ, walk));
     }
 }
 
@@ -405,9 +405,9 @@ void MotionMaster::MoveStay(float x, float y, float z, float o, bool asMain)
     Mutate(new StayMovementGenerator(x, y, z, o));
 }
 
-void MotionMaster::MovePoint(uint32 id, Position const& position, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/, float speed/* = 0.f*/, bool generatePath/* = true*/, ObjectGuid guid/* = ObjectGuid()*/, uint32 relayId/* = 0*/)
+void MotionMaster::MovePoint(uint32 id, Position const& position, ForcedMovement forcedMovement /* = FORCED_MOVEMENT_NONE*/, float speed /* = 0.f*/, bool generatePath /* = true*/, ObjectGuid guid /* = ObjectGuid()*/, uint32 relayId /* = 0*/, std::optional<AnimTier> animTier/* = std::nullopt*/)
 {
-    Mutate(new PointMovementGenerator(id, position.x, position.y, position.z, position.o, generatePath, forcedMovement, speed, guid, relayId));
+    Mutate(new PointMovementGenerator(id, position.x, position.y, position.z, position.o, generatePath, forcedMovement, speed, guid, relayId, animTier));
 }
 
 void MotionMaster::MovePoint(uint32 id, float x, float y, float z, ForcedMovement forcedMovement/* = FORCED_MOVEMENT_NONE*/, bool generatePath/* = true*/)
@@ -442,10 +442,10 @@ void MotionMaster::MovePath(std::vector<G3D::Vector3>& path, float o, ForcedMove
     Mutate(new FixedPathMovementGenerator(path, o, forcedMovement, flying));
 }
 
-void MotionMaster::MovePath(int32 pathId, WaypointPathOrigin wpOrigin /*= PATH_NO_PATH*/, ForcedMovement forcedMovement, bool flying, float speed, bool cyclic, ObjectGuid guid/* = ObjectGuid()*/)
+void MotionMaster::MovePath(int32 pathId, WaypointPathOrigin wpOrigin /*= PATH_NO_PATH*/, ForcedMovement forcedMovement, bool flying, float speed, bool cyclic, ObjectGuid guid/* = ObjectGuid()*/, std::optional<AnimTier> animTier)
 {
     m_currentPathId = pathId;
-    Mutate(new FixedPathMovementGenerator(*m_owner, pathId, wpOrigin, forcedMovement, flying, speed, 0, cyclic, guid));
+    Mutate(new FixedPathMovementGenerator(*m_owner, pathId, wpOrigin, forcedMovement, flying, speed, 0, cyclic, guid, animTier));
 }
 
 void MotionMaster::MoveRetreat(float x, float y, float z, float o, uint32 delay)
@@ -646,6 +646,21 @@ void MotionMaster::MovePathAndJumpVerticalSpeed(uint32 pathId, float horizontalS
 void MotionMaster::MovePathAndJump(uint32 pathId, float horizontalSpeed, float maxHeight, ForcedMovement forcedMovement, ObjectGuid guid)
 {
     Mutate(new PathJumpGenerator(pathId, forcedMovement, horizontalSpeed, maxHeight, guid));
+}
+
+void MotionMaster::MoveVehicle(MoveVehicleType type, Position pos, bool voluntary)
+{
+    Movement::MoveSplineInit init(*m_owner);
+    init.MoveTo(pos.x, pos.y, pos.z, false, true);
+    init.SetFacing(pos.o);
+    if (type == MoveVehicleType::Exit)
+        init.SetExitVehicle();
+    else if (type == MoveVehicleType::Enter)
+        init.SetBoardVehicle();
+    if (voluntary)
+        init.SetExitVoluntary();
+    init.Launch();
+    Mutate(new EffectMovementGenerator(init, 0));
 }
 
 void MotionMaster::Mutate(MovementGenerator* m)

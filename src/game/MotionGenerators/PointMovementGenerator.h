@@ -24,9 +24,10 @@
 class PointMovementGenerator : public MovementGenerator
 {
     public:
-        PointMovementGenerator(uint32 id, float x, float y, float z, float o, bool generatePath, uint32 forcedMovement, float speed = 0.f, ObjectGuid guid = ObjectGuid(), uint32 relayId = 0) :
-            m_x(x), m_y(y), m_z(z), m_o(o), m_speed(speed), m_generatePath(generatePath), m_forcedMovement(forcedMovement), m_id(id), m_speedChanged(false),
-            m_guid(guid), m_relayId(relayId) {}
+    PointMovementGenerator(uint32 id, float x, float y, float z, float o, bool generatePath, uint32 forcedMovement, float speed = 0.f, ObjectGuid guid = ObjectGuid(), uint32 relayId = 0, std::optional<AnimTier> animTier = std::nullopt) :
+            m_x(x), m_y(y), m_z(z), m_o(o), m_speed(speed), m_generatePath(generatePath), m_forcedMovement(forcedMovement), m_id(id), m_speedChanged(false), m_guid(guid), m_relayId(relayId), m_animTier(animTier)
+        {
+        }
         PointMovementGenerator(uint32 id, float x, float y, float z, bool generatePath, uint32 forcedMovement, float speed = 0.f) :
             PointMovementGenerator(id, x, y, z, 0, generatePath, forcedMovement, speed) {}
 
@@ -54,6 +55,7 @@ class PointMovementGenerator : public MovementGenerator
         bool m_speedChanged;
         ObjectGuid m_guid;
         uint32 m_relayId;
+        std::optional<AnimTier> m_animTier;
 };
 
 class RetreatMovementGenerator : public PointMovementGenerator
