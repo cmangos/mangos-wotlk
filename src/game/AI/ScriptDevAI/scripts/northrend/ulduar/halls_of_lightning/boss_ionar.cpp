@@ -289,38 +289,39 @@ struct boss_ionarAI : public ScriptedAI
     }
 };
 
-bool EffectDummyCreature_boss_ionar(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 52770 - Disperse
+struct DisperseIonar : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_DISPERSE && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCreatureTarget->GetEntry() != NPC_IONAR)
-            return true;
+        Unit* caster = spell->GetCaster();
+        if (caster->GetEntry() != NPC_IONAR)
+            return;
 
         for (uint8 i = 0; i < MAX_SPARKS; ++i)
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUMMON_SPARK, TRIGGERED_OLD_TRIGGERED);
+            caster->CastSpell(nullptr, SPELL_SUMMON_SPARK, TRIGGERED_OLD_TRIGGERED);
 
-        pCreatureTarget->AttackStop();
-        pCreatureTarget->SetVisibility(VISIBILITY_OFF);
+        caster->AttackStop();
+        caster->SetVisibility(VISIBILITY_OFF);
 
-        if (pCreatureTarget->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
-            pCreatureTarget->GetMotionMaster()->MovementExpired();
-
-        // always return true when we are handling this spell and effect
-        return true;
+        if (caster->GetMotionMaster()->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
+            caster->GetMotionMaster()->MovementExpired();
     }
-    if (uiSpellId == SPELL_SPARK_DESPAWN && uiEffIndex == EFFECT_INDEX_0)
+};
+
+// 52776 - Spark Despawn
+struct SparkDespawnIonar : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCreatureTarget->GetEntry() != NPC_IONAR)
-            return true;
+        Unit* caster = spell->GetCaster();
+        if (caster->GetEntry() != NPC_IONAR)
+            return;
 
-        if (boss_ionarAI* pIonarAI = dynamic_cast<boss_ionarAI*>(pCreatureTarget->AI()))
-            pIonarAI->DespawnSpark();
-
-        return true;
+        if (boss_ionarAI* ionarAI = dynamic_cast<boss_ionarAI*>(caster->AI()))
+            ionarAI->DespawnSpark();
     }
-    return false;
-}
+};
 
 /*######
 ## mob_spark_of_ionar
@@ -367,11 +368,13 @@ void AddSC_boss_ionar()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ionar";
     pNewScript->GetAI = &GetNewAIInstance<boss_ionarAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_boss_ionar;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_spark_of_ionar";
     pNewScript->GetAI = &GetNewAIInstance<mob_spark_of_ionarAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<DisperseIonar>("spell_disperse_ionar");
+    RegisterSpellScript<SparkDespawnIonar>("spell_spark_despawn_ionar");
 }

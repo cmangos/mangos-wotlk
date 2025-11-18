@@ -269,51 +269,40 @@ struct boss_volkhanAI : public ScriptedAI
     }
 };
 
-bool EffectDummyCreature_boss_volkhan(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 52654 - Temper
+struct TemperVolkhan : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_TEMPER_DUMMY && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCaster->GetEntry() != NPC_VOLKHAN_ANVIL || pCreatureTarget->GetEntry() != NPC_VOLKHAN)
-            return true;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->GetEntry() != NPC_VOLKHAN_ANVIL || target->GetEntry() != NPC_VOLKHAN)
+            return;
 
         for (uint8 i = 0; i < MAX_GOLEM; ++i)
-            pCreatureTarget->CastSpell(pCaster, SPELL_SUMMON_MOLTEN_GOLEM, TRIGGERED_OLD_TRIGGERED);
-
-        // always return true when we are handling this spell and effect
-        return true;
+            target->CastSpell(caster, SPELL_SUMMON_MOLTEN_GOLEM, TRIGGERED_OLD_TRIGGERED);
     }
+};
 
-    return false;
-}
-
-/*######
-## npc_volkhan_anvil
-######*/
-
-bool EffectDummyCreature_npc_volkhan_anvil(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 52238 - Temper
+struct TemperAnvil : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_TEMPER && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (pCaster->GetEntry() != NPC_VOLKHAN || pCreatureTarget->GetEntry() != NPC_VOLKHAN_ANVIL)
-            return true;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (caster->GetEntry() != NPC_VOLKHAN || target->GetEntry() != NPC_VOLKHAN_ANVIL)
+            return;
 
-        pCreatureTarget->CastSpell(pCaster, SPELL_TEMPER_DUMMY, TRIGGERED_NONE);
+        target->CastSpell(caster, SPELL_TEMPER_DUMMY, TRIGGERED_NONE);
         // ToDo: research how the visual spell is used
 
-        if (pCaster->GetVictim())
+        if (caster->GetVictim())
         {
-            pCaster->GetMotionMaster()->Clear();
-            pCaster->GetMotionMaster()->MoveChase(pCaster->GetVictim());
+            caster->AI()->DoStartMovement(caster->GetVictim());
         }
-
-        // always return true when we are handling this spell and effect
-        return true;
     }
-
-    return false;
-}
+};
 
 /*######
 ## mob_molten_golem
@@ -410,16 +399,13 @@ void AddSC_boss_volkhan()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_volkhan";
     pNewScript->GetAI = &GetNewAIInstance<boss_volkhanAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_boss_volkhan;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_volkhan_anvil";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_volkhan_anvil;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_molten_golem";
     pNewScript->GetAI = &GetNewAIInstance<mob_molten_golemAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TemperVolkhan>("spell_temper_volkhan");
+    RegisterSpellScript<TemperAnvil>("spell_temper_anvil");
 }
