@@ -717,16 +717,17 @@ bool GossipSelect_npc_death_knight_initiate(Player* pPlayer, Creature* pCreature
     return true;
 }
 
-bool EffectDummyCreature_npc_death_knight_initiate(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 52990 - Duel
+struct DuelDeathKnightInitiate : public SpellScript
 {
-    if (uiSpellId == SPELL_DUEL_TRIGGERED && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_START_EVENT, pCaster, pCreatureTarget);
-        return true;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (target->AI())
+            target->AI()->SendAIEvent(AI_EVENT_START_EVENT, caster, target);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_eye_of_acherus
@@ -970,17 +971,18 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
     }
 };
 
-bool EffectDummyCreature_npc_scarlet_ghoul(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 52514 - Gothik Ghoul Ping
+struct GothikGhoulPing : public SpellScript
 {
-    if (uiSpellId == SPELL_GOTHIK_GHOUL_PING && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
         // inform creature AI that was hit by spell
-        pCaster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
+        if (caster->AI())
+            caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_highlord_darion_mograine
@@ -1954,10 +1956,7 @@ struct spell_emblazon_runeblade : public SpellScript
     }
 };
 
-/*######
-## spell_emblazon_runeblade_aura - 51769
-######*/
-
+// 51769 - Emblazon Runeblade
 struct spell_emblazon_runeblade_aura : public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
@@ -1968,10 +1967,7 @@ struct spell_emblazon_runeblade_aura : public AuraScript
     }
 };
 
-/*######
-## spell_death_knight_initiate_visual - 51519
-######*/
-
+// 51519 - Death Knight Initiate Visual
 struct spell_death_knight_initiate_visual : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2006,10 +2002,7 @@ struct spell_death_knight_initiate_visual : public SpellScript
     }
 };
 
-/*######
-## spell_siphon_of_acherus_aura - 51859
-######*/
-
+// 51859 - Siphon of Acherus
 struct spell_siphon_of_acherus_aura : public AuraScript
 {
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
@@ -2020,10 +2013,7 @@ struct spell_siphon_of_acherus_aura : public AuraScript
     }
 };
 
-/*######
-## spell_siphon_of_acherus - 51858
-######*/
-
+// 51858 - Siphon of Acherus
 struct spell_siphon_of_acherus : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2052,10 +2042,10 @@ struct spell_siphon_of_acherus : public SpellScript
     }
 };
 
-/*######
-## spell_siphon_of_acherus_credit - 51973, 51976, 51979, 51981
-######*/
-
+// 51973 - Forge Credit
+// 51976 - Town Hall Credit
+// 51979 - Scarlet Hold
+// 51981 - Chapel Credit
 struct spell_siphon_of_acherus_credit : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2083,10 +2073,7 @@ struct spell_siphon_of_acherus_credit : public SpellScript
     }
 };
 
-/*######
-## spell_recall_eye_of_acherus - 52694
-######*/
-
+// 52694 - Recall Eye of Acherus
 struct spell_recall_eye_of_acherus : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2107,10 +2094,7 @@ struct spell_recall_eye_of_acherus : public SpellScript
     }
 };
 
-/*######
-## spell_summon_ghouls_scarlet_crusade - 51904
-######*/
-
+// 51904 - Summon Ghouls On Scarlet Crusade
 struct spell_summon_ghouls_scarlet_crusade : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2127,10 +2111,7 @@ struct spell_summon_ghouls_scarlet_crusade : public SpellScript
     }
 };
 
-/*######
-## spell_ghoulplosion - 52519
-######*/
-
+// 52519 - Ghoulplosion
 struct spell_ghoulplosion : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2148,10 +2129,7 @@ struct spell_ghoulplosion : public SpellScript
     }
 };
 
-/*######
-## spell_dispel_scarlet_ghoul_credit - 52555
-######*/
-
+// 52555 - Dispel Scarlet Ghoul Credit Counter
 struct spell_dispel_scarlet_ghoul_credit : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2176,10 +2154,7 @@ struct spell_dispel_scarlet_ghoul_credit : public SpellScript
     }
 };
 
-/*######
-## spell_gift_of_the_harvester - 52479
-######*/
-
+// 52479 - Gift of the Harvester
 struct spell_gift_of_the_harvester : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2217,10 +2192,7 @@ struct go_plague_cauldron : public GameObjectAI
     }
 };
 
-/*######
-## spell_devour_humanoid - 53110
-######*/
-
+// 53110 - Devour Humanoid
 struct spell_devour_humanoid : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2241,10 +2213,8 @@ struct spell_devour_humanoid : public SpellScript
     }
 };
 
-/*######
-## spell_portal_to_capital_city - 58418, 58420
-######*/
-
+// 58418 - Portal to Orgrimmar
+// 58420 - Portal to Stormwind
 struct spell_portal_to_capital_city : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2268,10 +2238,7 @@ struct spell_portal_to_capital_city : public SpellScript
     }
 };
 
-/*######
-## spell_acherus_deathcharger - 48778
-######*/
-
+// 48778 - Acherus Deathcharger (Summon)
 struct spell_acherus_deathcharger : public SpellScript
 {
     void OnCast(Spell* spell) const override
@@ -2295,10 +2262,7 @@ struct spell_acherus_deathcharger : public SpellScript
     }
 };
 
-/*######
-## spell_skeletal_gryphon_escape - 52588
-######*/
-
+// 52588 - Skeletal Gryphon Escape
 struct spell_skeletal_gryphon_escape : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2315,10 +2279,7 @@ struct spell_skeletal_gryphon_escape : public SpellScript
     }
 };
 
-/*######
-## spell_death_gate - 52751
-######*/
-
+// 52751 - Death Gate
 struct spell_death_gate : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -2336,6 +2297,7 @@ struct spell_death_gate : public SpellScript
     }
 };
 
+// 51852 - The Eye of Acherus
 struct EyeOfAcherus : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -2357,7 +2319,6 @@ void AddSC_ebon_hold()
     pNewScript->GetAI = &GetNewAIInstance<npc_death_knight_initiateAI>;
     pNewScript->pGossipHello = &GossipHello_npc_death_knight_initiate;
     pNewScript->pGossipSelect = &GossipSelect_npc_death_knight_initiate;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_death_knight_initiate;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -2368,7 +2329,6 @@ void AddSC_ebon_hold()
     pNewScript = new Script;
     pNewScript->Name = "npc_scarlet_ghoul";
     pNewScript->GetAI = &GetNewAIInstance<npc_scarlet_ghoulAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_scarlet_ghoul;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -2388,7 +2348,8 @@ void AddSC_ebon_hold()
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_plague_cauldron>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_emblazon_runeblade>("spell_emblazon_runeblade");
+    RegisterSpellScript<DuelDeathKnightInitiate>("spell_duel_deathknight_initiate");
+    RegisterSpellScript<GothikGhoulPing>("spell_gothik_ghoul_ping");
     RegisterSpellScript<spell_emblazon_runeblade_aura>("spell_emblazon_runeblade_aura");
     RegisterSpellScript<spell_death_knight_initiate_visual>("spell_death_knight_initiate_visual");
     RegisterSpellScript<spell_siphon_of_acherus_aura>("spell_siphon_of_acherus_aura");
