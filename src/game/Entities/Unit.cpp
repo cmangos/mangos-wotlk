@@ -11394,28 +11394,6 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID, bool lo
     return false;
 }
 
-bool Unit::SetStunnedByLogout(bool apply)
-{
-    if (SetStunned(apply, ObjectGuid(), 0, true))
-    {
-        // Sit down when eligible:
-        if (apply)
-        {
-            if (IsStandState())
-            {
-                if (!m_movementInfo.HasMovementFlag(MovementFlags(movementFlagsMask | MOVEFLAG_SWIMMING | MOVEFLAG_SPLINE_ENABLED)))
-                    SetStandState(UNIT_STAND_STATE_SIT);
-            }
-        }
-        // Stand up on cancel
-        else if (getStandState() == UNIT_STAND_STATE_SIT)
-            SetStandState(UNIT_STAND_STATE_STAND);
-
-        return true;
-    }
-    return false;
-}
-
 void Unit::SetImmobilizedState(bool apply, bool stun, bool logout)
 {
     const uint32 state = (stun ? (logout ? UNIT_STAT_LOGOUT_TIMER : UNIT_STAT_STUNNED) : UNIT_STAT_ROOT);
