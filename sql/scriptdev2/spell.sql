@@ -1183,6 +1183,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (69140,'spell_coldflame_targeting'),
 (69147,'spell_coldflame'),
 (69165,'spell_inhale_blight'),
+(69223,'spell_summon_reflections'),
 (69232,'spell_icy_blast'),
 (69347,'spell_necromantic_power'),
 (69402,'spell_incinerating_blast'),
