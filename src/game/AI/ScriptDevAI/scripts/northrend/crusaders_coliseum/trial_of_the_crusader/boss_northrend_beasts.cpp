@@ -856,17 +856,17 @@ struct boss_dreadscaleAI : public twin_jormungars_commonAI
     uint32 GetBiteSpell() override { return SPELL_BURNING_BITE; }
 };
 
-bool EffectDummyCreature_worm_emerge(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 66947, 66949 - Emerge
+struct WormEmergeBeasts : public SpellScript
 {
-    // always check spellid and effectindex
-    if ((uiSpellId == SPELL_STATIC_WORM_EMERGE || uiSpellId == SPELL_MOBILE_WORM_EMERGE) && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget);
-        return true;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (target->AI())
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, caster, target);
     }
-
-    return false;
-}
+};
 
 /*######
 ## boss_icehowl
@@ -1126,17 +1126,17 @@ void AddSC_northrend_beasts()
     pNewScript = new Script;
     pNewScript->Name = "boss_acidmaw";
     pNewScript->GetAI = &GetNewAIInstance<boss_acidmawAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_worm_emerge;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_dreadscale";
     pNewScript->GetAI = &GetNewAIInstance<boss_dreadscaleAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_worm_emerge;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_icehowl";
     pNewScript->GetAI = &GetNewAIInstance<boss_icehowlAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<WormEmergeBeasts>("spell_worm_emerge_beasts");
 }

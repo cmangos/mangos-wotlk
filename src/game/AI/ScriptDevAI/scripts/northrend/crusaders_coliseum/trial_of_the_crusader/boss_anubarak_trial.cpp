@@ -527,20 +527,19 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
     }
 };
 
-bool EffectDummyCreature_spell_dummy_permafrost(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 65872 - Permafrost
+struct PermafrostAnubarakToc : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_PERMAFROST_DUMMY && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (npc_anubarak_trial_spikeAI* pSpikeAI = dynamic_cast<npc_anubarak_trial_spikeAI*>(pCreatureTarget->AI()))
-            pSpikeAI->PermafrostHit((Creature*)pCaster);
-
-        // always return true when we are handling this spell and effect
-        return true;
+        Unit* caster = spell->GetCaster();
+        if (!caster->IsCreature())
+            return;
+        Unit* target = spell->GetUnitTarget();
+        if (npc_anubarak_trial_spikeAI* pSpikeAI = dynamic_cast<npc_anubarak_trial_spikeAI*>(target->AI()))
+            pSpikeAI->PermafrostHit(static_cast<Creature*>(caster));
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_anubarak_trial_frostsphere
@@ -683,11 +682,8 @@ struct npc_nerubian_burrowerAI : public CombatAI
     }
 };
 
-/*######
-## spell_burrower_submerge - 67322
-######*/
-
-struct spell_burrower_submerge : public SpellScript
+// 67322 - Submerge
+struct BurrowerEmerge : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -716,11 +712,8 @@ struct spell_burrower_submerge : public SpellScript
     }
 };
 
-/*######
-## spell_leeching_swarm_aura - 66118, 67630, 68646, 68647
-######*/
-
-struct spell_leeching_swarm_aura : public AuraScript
+// 66118, 67630, 68646, 68647 - Leeching Swarm
+struct LeechingSwarmAura : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
@@ -742,11 +735,8 @@ struct spell_leeching_swarm_aura : public AuraScript
     }
 };
 
-/*######
-## spell_pursuing_spikes - 67470
-######*/
-
-struct spell_pursuing_spikes : public SpellScript
+// 67470 - Pursuing Spikes
+struct PursuingSpikes : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -772,7 +762,6 @@ void AddSC_boss_anubarak_trial()
     pNewScript = new Script;
     pNewScript->Name = "npc_anubarak_spike";
     pNewScript->GetAI = &GetNewAIInstance<npc_anubarak_trial_spikeAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_permafrost;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -785,7 +774,8 @@ void AddSC_boss_anubarak_trial()
     pNewScript->GetAI = &GetNewAIInstance<npc_nerubian_burrowerAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_burrower_submerge>("spell_burrower_submerge");
-    RegisterSpellScript<spell_leeching_swarm_aura>("spell_leeching_swarm_aura");
-    RegisterSpellScript<spell_pursuing_spikes>("spell_pursuing_spikes");
+    RegisterSpellScript<PermafrostAnubarakToc>("spell_permafrost_anubarak_toc");
+    RegisterSpellScript<BurrowerEmerge>("spell_burrower_submerge");
+    RegisterSpellScript<LeechingSwarmAura>("spell_leeching_swarm_aura");
+    RegisterSpellScript<PursuingSpikes>("spell_pursuing_spikes");
 }
