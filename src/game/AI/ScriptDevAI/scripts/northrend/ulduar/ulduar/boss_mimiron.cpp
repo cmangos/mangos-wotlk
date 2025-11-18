@@ -1734,49 +1734,48 @@ UnitAI* GetAI_npc_bot_trigger(Creature* pCreature)
     return new npc_bot_triggerAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_bot_trigger(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 64425 - Summon Scrap Bot Trigger
+// 63820 - Summon Scrap Bot Trigger
+// 64620 - Summon Fire Bot Trigger
+struct SummonFireBotTrigger : public SpellScript
 {
-    // always check spellid and effectindex
-    if ((uiSpellId == SPELL_SUMMON_ASSAULT_BOT_TRIGGER || uiSpellId == SPELL_SUMMON_SCRAP_BOT_TRIGGER || uiSpellId == SPELL_SUMMON_FIRE_BOT_TRIGGER) && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        uint32 uiVisualSpell = 0;
-        uint32 uiSummonSpell = 0;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        uint32 visualSpell = 0;
+        uint32 summonSpell = 0;
 
-        switch (uiSpellId)
+        switch (spell->m_spellInfo->Id)
         {
             case SPELL_SUMMON_SCRAP_BOT_TRIGGER:
-                uiVisualSpell = SPELL_SUMMON_ASSAULT_BOT_VISUAL;
-                uiSummonSpell = SPELL_SUMMON_ASSAULT_BOT;
+                visualSpell = SPELL_SUMMON_ASSAULT_BOT_VISUAL;
+                summonSpell = SPELL_SUMMON_ASSAULT_BOT;
                 break;
             case SPELL_SUMMON_ASSAULT_BOT_TRIGGER:
-                uiVisualSpell = SPELL_SUMMON_SCRAP_BOT_VISUAL;
-                uiSummonSpell = SPELL_SUMMON_SCRAP_BOT;
+                visualSpell = SPELL_SUMMON_SCRAP_BOT_VISUAL;
+                summonSpell = SPELL_SUMMON_SCRAP_BOT;
                 break;
             case SPELL_SUMMON_FIRE_BOT_TRIGGER:
-                uiVisualSpell = SPELL_SUMMON_FIRE_BOT_VISUAL;
-                uiSummonSpell = SPELL_SUMMON_FIRE_BOT;
+                visualSpell = SPELL_SUMMON_FIRE_BOT_VISUAL;
+                summonSpell = SPELL_SUMMON_FIRE_BOT;
                 break;
         }
 
-        pCreatureTarget->CastSpell(pCreatureTarget, uiVisualSpell, TRIGGERED_OLD_TRIGGERED);
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget, uiSummonSpell);
+        target->CastSpell(nullptr, visualSpell, TRIGGERED_OLD_TRIGGERED);
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target, summonSpell);
 
         // search for a nearby teleporter and enable the visual
-        for (unsigned int aMimironTeleporter : aMimironTeleporters)
+        for (uint32 aMimironTeleporter : aMimironTeleporters)
         {
-            if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(pCreatureTarget, aMimironTeleporter, 2.0f))
+            if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(target, aMimironTeleporter, 2.0f))
             {
                 pTeleporter->UseDoorOrButton();
                 break;
             }
         }
-
-        // always return true when we are handling this spell and effect
-        return true;
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_mimiron_flames
@@ -2034,7 +2033,6 @@ void AddSC_boss_mimiron()
     pNewScript = new Script;
     pNewScript->Name = "npc_bot_trigger";
     pNewScript->GetAI = GetAI_npc_bot_trigger;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_bot_trigger;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -2066,4 +2064,6 @@ void AddSC_boss_mimiron()
     pNewScript->Name = "go_big_red_button";
     pNewScript->pGOUse = &GOUse_go_big_red_button;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonFireBotTrigger>("spell_summon_fire_bot_trigger");
 }

@@ -1377,37 +1377,34 @@ UnitAI* GetAI_npc_immortal_guardian(Creature* pCreature)
     return new npc_immortal_guardianAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_immortal_guardian(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 64161 - Empowered
+struct EmpoweredImmortalGuardian : public AuraScript
 {
-    // NOTE: this may not be 100% correct and may require additional research
-    if (uiSpellId == SPELL_EMPOWERED && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_IMMORTAL_GUARDIAN)
+    void OnPeriodicDummy(Aura* aura) const override
     {
-        uint8 uiProjectedStacks = pCreatureTarget->GetHealthPercent() * 0.1 - 1;
+        Unit* target = aura->GetTarget();
+        uint8 uiProjectedStacks = target->GetHealthPercent() * 0.1 - 1;
         uint8 uiCurrentStacks = 0;
 
-        if (SpellAuraHolder* pEmpowerAura = pCreatureTarget->GetSpellAuraHolder(SPELL_EMPOWERED_MOD))
-            uiCurrentStacks = pEmpowerAura->GetStackAmount();
+        if (SpellAuraHolder* empoweredAura = target->GetSpellAuraHolder(SPELL_EMPOWERED_MOD))
+            uiCurrentStacks = empoweredAura->GetStackAmount();
 
         // if creature already has the required stacks, ignore
         if (uiProjectedStacks == uiCurrentStacks)
-            return true;
+            return;
 
         if (uiCurrentStacks > uiProjectedStacks)
-            pCreatureTarget->RemoveAuraHolderFromStack(SPELL_EMPOWERED_MOD, uiCurrentStacks - uiProjectedStacks);
+            target->RemoveAuraHolderFromStack(SPELL_EMPOWERED_MOD, uiCurrentStacks - uiProjectedStacks);
         else
         {
             for (uint8 i = 0; i < uiProjectedStacks - uiCurrentStacks; ++i)
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_EMPOWERED_MOD, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(nullptr, SPELL_EMPOWERED_MOD, TRIGGERED_OLD_TRIGGERED);
         }
 
         if (uiCurrentStacks == 0 && uiCurrentStacks < uiProjectedStacks)
-            pCreatureTarget->RemoveAurasDueToSpell(SPELL_WEAKENED);
-
-        return true;
+            target->RemoveAurasDueToSpell(SPELL_WEAKENED);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_constrictor_tentacle
@@ -1707,7 +1704,6 @@ void AddSC_boss_yogg_saron()
     pNewScript = new Script;
     pNewScript->Name = "npc_immortal_guardian";
     pNewScript->GetAI = &GetAI_npc_immortal_guardian;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_immortal_guardian;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1741,5 +1737,6 @@ void AddSC_boss_yogg_saron()
     pNewScript->GetAI = &GetAI_npc_keeper_thorim;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<EmpoweredImmortalGuardian>("spell_empowered_immortal_guardian");
     RegisterSpellScript<HodirsProtectiveGaze>("spell_hodirs_protective_gaze");
 }

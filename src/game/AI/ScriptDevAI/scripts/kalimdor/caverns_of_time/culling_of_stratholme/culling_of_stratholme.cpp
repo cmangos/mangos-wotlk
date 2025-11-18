@@ -969,24 +969,23 @@ bool GossipSelect_npc_arthas(Player* pPlayer, Creature* pCreature, uint32 /*send
     return true;
 }
 
-/* *************
-** npc_spell_dummy_crusader_strike
-************* */
-
-bool EffectDummyCreature_npc_spell_dummy_crusader_strike(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 50773 - Crusader Strike
+struct CrusaderStrikeCoS : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CRUSADER_STRIKE && uiEffIndex == EFFECT_INDEX_0)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        // only apply this for certain citizens
-        if (pCreatureTarget->GetEntry() == NPC_STRATHOLME_RESIDENT || pCreatureTarget->GetEntry() == NPC_STRATHOLME_CITIZEN)
-            pCreatureTarget->Suicide();
-        // always return true when we are handling this spell and effect
-        return true;
+        Unit* target = spell->m_targets.getUnitTarget();
+        std::vector<uint32> targets = {NPC_STRATHOLME_RESIDENT, NPC_STRATHOLME_CITIZEN};
+        if (!target || std::find(targets.begin(), targets.end(), target->GetEntry()) == targets.end())
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
     }
 
-    return false;
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        spell->GetUnitTarget()->Suicide();
+    }
+};
 
 void AddSC_culling_of_stratholme()
 {
@@ -1004,10 +1003,6 @@ void AddSC_culling_of_stratholme()
     pNewScript->pGossipSelect = &GossipSelect_npc_arthas;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_spell_dummy_crusader_strike";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_spell_dummy_crusader_strike;
-    pNewScript->RegisterSelf();
-
     RegisterSpellScript<ArcaneDisruption>("spell_arcane_disruption");
+    RegisterSpellScript<CrusaderStrikeCoS>("spell_crusader_strike_cos");
 }

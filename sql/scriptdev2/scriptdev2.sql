@@ -672,7 +672,6 @@ INSERT INTO scripted_areatrigger VALUES
 /* THE CULLING OF STRATHOLME */
 UPDATE instance_template SET ScriptName='instance_culling_of_stratholme' WHERE map=595;
 UPDATE creature_template SET ScriptName='npc_chromie' WHERE entry IN (26527, 27915);
-UPDATE creature_template SET ScriptName='npc_spell_dummy_crusader_strike' WHERE entry IN (28167,28169);
 UPDATE creature_template SET ScriptName='npc_arthas' WHERE entry=26499;
 INSERT INTO scripted_areatrigger VALUES
 (5291,'at_culling_of_stratholme');
