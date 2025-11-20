@@ -11274,6 +11274,15 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
     init.Stop(forceSendStop);
 }
 
+void Unit::UpdateMoving()
+{
+    Movement::MoveSplineInit init(*this);
+    Position pos = GetPosition(GetTransport());
+    init.Launch(); // no need to attach to movegen, only sending update to client
+    UpdateSplinePosition();
+    EndSpline();
+}
+
 void Unit::InterruptMoving(bool forceSendStop /*=false*/)
 {
     bool isMoving = false;

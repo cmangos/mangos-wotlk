@@ -72,7 +72,7 @@ namespace Movement
         bool pathEmpty = false;
         if (args.path.empty())
         {
-            // should i do the things that user should do?
+            // should i do the things that user should do? - yes in fact a valid usecase
             MoveTo(real_position);
             pathEmpty = true;
         }

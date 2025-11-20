@@ -45,6 +45,7 @@
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
+#include "Movement/MoveSpline.h"
 #include "Maps/MapManager.h"
 #include "Entities/Transports.h"
 
@@ -838,7 +839,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             charmInfo = pVehicle->InitCharmInfo(pVehicle);
             charmInfo->SetCharmState((pVehicle->IsCreature() && static_cast<Creature*>(pVehicle)->GetSettings().HasFlag(CreatureStaticFlags2::ACTION_TRIGGERS_WHILE_CHARMED)) ? "" : "PossessedAI", false);
 
-            if (m_vehicleEntry->m_ID != 220)
+            if (pVehicle->movespline->Finalized()) // let spline finalization do the rest otherwise
             {
                 pVehicle->GetMotionMaster()->Clear();
                 pVehicle->GetMotionMaster()->MoveIdle();
@@ -941,8 +942,11 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pPlayer->UpdateClientControl(pVehicle, false);
             pPlayer->SetMover(nullptr);
 
-            pVehicle->StopMoving(true);
-            pVehicle->GetMotionMaster()->Clear();
+            if (pVehicle->movespline->Finalized())
+            {
+                pVehicle->UpdateMoving();
+                pVehicle->GetMotionMaster()->Clear();
+            }
 
             pVehicle->clearUnitState(UNIT_STAT_POSSESSED);
 
