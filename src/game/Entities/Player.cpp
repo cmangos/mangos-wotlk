@@ -25792,7 +25792,7 @@ bool Player::SetStunnedByLogout(bool apply)
         else if (getStandState() == UNIT_STAND_STATE_SIT)
             SetStandState(UNIT_STAND_STATE_STAND);
 
-        GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_LOGGING_OUT, apply);
+        ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_LOGGING_OUT, apply);
         return true;
     }
     return false;
@@ -25801,5 +25801,5 @@ bool Player::SetStunnedByLogout(bool apply)
 void Player::SetPet(Unit* pet)
 {
     Unit::SetPet(pet);
-    GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_CONTROLLING_PET, pet != nullptr);
+    ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_CONTROLLING_PET, pet != nullptr);
 }
