@@ -2350,6 +2350,7 @@ void AddSC_ebon_hold()
 
     RegisterSpellScript<DuelDeathKnightInitiate>("spell_duel_deathknight_initiate");
     RegisterSpellScript<GothikGhoulPing>("spell_gothik_ghoul_ping");
+    RegisterSpellScript<spell_emblazon_runeblade>("spell_emblazon_runeblade");
     RegisterSpellScript<spell_emblazon_runeblade_aura>("spell_emblazon_runeblade_aura");
     RegisterSpellScript<spell_death_knight_initiate_visual>("spell_death_knight_initiate_visual");
     RegisterSpellScript<spell_siphon_of_acherus_aura>("spell_siphon_of_acherus_aura");
