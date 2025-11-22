@@ -3790,6 +3790,9 @@ UPDATE spell_template SET EffectBasePoints1=3599 WHERE Id IN(2823,2824,3408,5761
 UPDATE spell_template SET EffectBasePoints1=1799 WHERE Id IN(3594,6650); -- Shadow oil and instant toxin
 UPDATE spell_template SET EffectBasePoints1=599 WHERE Id IN('8087','8088','8089','8090','8532','9092','43699','45731',64401); -- fishing lures
 
+-- Vrykul Bowshot - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 54548;
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
