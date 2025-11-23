@@ -784,7 +784,7 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
     data << uint32(progress->timedCriteriaFailed ? 1 : 0);
     data << uint32(secsToTimeBitFields(now));
     data << uint32(now - progress->date);                   // timer 1
-    data << uint32(now - progress->date);                   // timer 2
+    data << uint32(now - progress->date);                   // timer 2 - TODO: figure out
     GetPlayer()->SendDirectMessage(data);
 }
 
