@@ -782,7 +782,7 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
 
     data << GetPlayer()->GetPackGUID();
     data << uint32(progress->timedCriteriaFailed ? 1 : 0);
-    data << uint32(secsToTimeBitFields(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count()));
+    data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(now)));
     data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - progress->date)).count()); // timer 1
     data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - progress->date)).count()); // timer 2 - TODO: figure out
     GetPlayer()->SendDirectMessage(data);
