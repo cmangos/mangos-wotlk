@@ -36,11 +36,11 @@ typedef std::list<AchievementEntry const*>         AchievementEntryList;
 
 typedef std::map<uint32, AchievementCriteriaEntryList> AchievementCriteriaListByAchievement;
 typedef std::map<uint32, AchievementEntryList>         AchievementListByReferencedId;
-typedef std::map<uint32, time_t>                       AchievementCriteriaFailTimeMap;
+typedef std::map<uint32, TimePoint>                    AchievementCriteriaFailTimeMap;
 
 struct CriteriaProgress
 {
-    time_t date;
+    TimePoint date;
     uint32 counter;
     bool changed;
     bool timedCriteriaFailed;
@@ -276,7 +276,7 @@ typedef std::pair<AchievementRewardLocalesMap::const_iterator, AchievementReward
 
 struct CompletedAchievementData
 {
-    time_t date;
+    TimePoint date;
     bool changed;
 };
 
@@ -326,7 +326,7 @@ class AchievementMgr
         void SetCriteriaProgress(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement, uint32 changeValue, ProgressType ptype);
 
     private:
-        void SendAchievementEarned(AchievementEntry const* achievement) const;
+        void SendAchievementEarned(AchievementEntry const* achievement, TimePoint time) const;
         void SendCriteriaUpdate(uint32 id, CriteriaProgress const* progress) const;
         void CompletedCriteriaFor(AchievementEntry const* achievement);
         void CompletedAchievement(AchievementEntry const* achievement);

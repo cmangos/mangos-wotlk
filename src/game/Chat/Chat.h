@@ -863,7 +863,7 @@ class ChatHandler
 
         // Utility methods for commands
         bool ShowAccountListHelper(std::unique_ptr<QueryResult> queryResult, uint32* limit = nullptr, bool title = true, bool error = true);
-        void ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, time_t const* date = nullptr, Player* target = nullptr);
+        void ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, TimePoint const* date = nullptr, Player* target = nullptr);
         void ShowAchievementCriteriaListHelper(AchievementCriteriaEntry const* criEntry, AchievementEntry const* achEntry, LocaleConstant loc, Player* target = nullptr);
         void ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState = nullptr, Player* target = nullptr);
         void ShowItemListHelper(uint32 itemId, int loc_idx, Player* target = nullptr);

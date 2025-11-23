@@ -608,7 +608,7 @@ void AchievementMgr::SaveToDB()
             stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first);
 
             stmt = CharacterDatabase.CreateStatement(insComplAchievements, "INSERT INTO character_achievement (guid, achievement, date) VALUES (?, ?, ?)");
-            stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first, uint64(m_completedAchievement.second.date));
+            stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first, uint64(std::chrono::system_clock::to_time_t(m_completedAchievement.second.date)));
         }
     }
 
@@ -637,7 +637,7 @@ void AchievementMgr::SaveToDB()
             if (needSave)
             {
                 stmt = CharacterDatabase.CreateStatement(insProgress, "INSERT INTO character_achievement_progress (guid, criteria, counter, date) VALUES (?, ?, ?, ?)");
-                stmt.PExecute(GetPlayer()->GetGUIDLow(), m_criteriaProgres.first, m_criteriaProgres.second.counter, uint64(m_criteriaProgres.second.date));
+                stmt.PExecute(GetPlayer()->GetGUIDLow(), m_criteriaProgres.first, m_criteriaProgres.second.counter, uint64(m_criteriaProgres.second.date.time_since_epoch().count()));
             }
         }
     }
@@ -661,7 +661,7 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
                 continue;
 
             CompletedAchievementData& ca = m_completedAchievements[achievement_id];
-            ca.date = time_t(fields[1].GetUInt64());
+            ca.date = TimePoint(std::chrono::milliseconds(fields[1].GetUInt64()));
             ca.changed = false;
         }
         while (achievementResult->NextRow());
@@ -675,7 +675,7 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
 
             uint32 id      = fields[0].GetUInt32();
             uint32 counter = fields[1].GetUInt32();
-            time_t date    = time_t(fields[2].GetUInt64());
+            TimePoint date(std::chrono::seconds(fields[2].GetUInt64()));
 
             AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(id);
             if (!criteria)
@@ -701,10 +701,10 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
                 // Add not-completed achievements to time map
                 if (!IsCompletedCriteria(criteria, achievement))
                 {
-                    time_t failTime = time_t(progress.date + criteria->timeLimit);
+                    TimePoint failTime = progress.date + std::chrono::seconds(criteria->timeLimit);
                     m_criteriaFailTimes[criteria->ID] = failTime;
                     // A failed Achievement - will be removed by DoFailedTimedAchievementCriterias on next tick for player
-                    if (failTime <= time(nullptr))
+                    if (failTime <= GetPlayer()->GetMap()->GetCurrentClockTime())
                         progress.timedCriteriaFailed = true;
                 }
             }
@@ -723,7 +723,7 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
     }
 }
 
-void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) const
+void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement, TimePoint time) const
 {
     if (GetPlayer()->GetSession()->PlayerLoading())
         return;
@@ -766,8 +766,8 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) 
     WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8 + 4 + 8);
     data << GetPlayer()->GetPackGUID();
     data << uint32(achievement->ID);
-    data << uint32(secsToTimeBitFields(time(nullptr)));
-    data << uint32(0);
+    data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(time)));
+    data << uint32(0); // TODO: skip effect?
     GetPlayer()->SendMessageToSetInRange(data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
@@ -776,15 +776,15 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
     WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
     data << uint32(id);
 
-    time_t now = time(nullptr);
+    TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
     // the counter is packed like a packed Guid
     data.appendPackGUID(progress->counter);
 
     data << GetPlayer()->GetPackGUID();
     data << uint32(progress->timedCriteriaFailed ? 1 : 0);
-    data << uint32(secsToTimeBitFields(now));
-    data << uint32(now - progress->date);                   // timer 1
-    data << uint32(now - progress->date);                   // timer 2 - TODO: figure out
+    data << uint32(secsToTimeBitFields(std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()).count()));
+    data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - progress->date)).count()); // timer 1
+    data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - progress->date)).count()); // timer 2 - TODO: figure out
     GetPlayer()->SendDirectMessage(data);
 }
 
@@ -865,12 +865,14 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
         progress->changed = true;
         progress->counter = 0;
 
+        TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
+
         // Start with given startTime or now
-        progress->date = startTime ? startTime : time(nullptr);
+        progress->date = startTime ? TimePoint(std::chrono::seconds(startTime)) : now;
         progress->timedCriteriaFailed = false;
 
         // Add to timer map
-        m_criteriaFailTimes[achievementCriteria->ID] = time_t(progress->date + achievementCriteria->timeLimit);
+        m_criteriaFailTimes[achievementCriteria->ID] = progress->date + std::chrono::seconds(achievementCriteria->timeLimit);
 
         SendCriteriaUpdate(achievementCriteria->ID, progress);
     }
@@ -884,7 +886,7 @@ void AchievementMgr::DoFailedTimedAchievementCriterias()
     if (m_criteriaFailTimes.empty())
         return;
 
-    time_t now = time(nullptr);
+    TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
     for (AchievementCriteriaFailTimeMap::iterator iter = m_criteriaFailTimes.begin(); iter != m_criteriaFailTimes.end();)
     {
         if (iter->second > now)
@@ -1863,13 +1865,13 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
             {
-                time_t nextDailyResetTime = sWorld.GetNextDailyQuestsResetTime();
+                TimePoint nextDailyResetTime(std::chrono::seconds(sWorld.GetNextDailyQuestsResetTime()));
                 CriteriaProgress const* progress = GetCriteriaProgress(achievementCriteria);
 
                 if (!miscvalue1) // Login case.
                 {
                     // reset if player missed one day.
-                    if (progress && progress->date < (nextDailyResetTime - 2 * DAY))
+                    if (progress && progress->date < (nextDailyResetTime - std::chrono::days(2)))
                         SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                     continue;
                 }
@@ -1878,10 +1880,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!progress)
                     // 1st time. Start count.
                     progressType = PROGRESS_SET;
-                else if (progress->date < (nextDailyResetTime - 2 * DAY))
+                else if (progress->date < (nextDailyResetTime - std::chrono::days(2)))
                     // last progress is older than 2 days. Player missed 1 day => Retart count.
                     progressType = PROGRESS_SET;
-                else if (progress->date < (nextDailyResetTime - DAY))
+                else if (progress->date < (nextDailyResetTime - std::chrono::days(1)))
                     // last progress is between 1 and 2 days. => 1st time of the day.
                     progressType = PROGRESS_ACCUMULATE;
                 else
@@ -2230,13 +2232,13 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 
         progress = &m_criteriaProgress[criteria->ID];
 
-        progress->date = time(nullptr);
+        progress->date = GetPlayer()->GetMap()->GetCurrentClockTime();
         progress->timedCriteriaFailed = false;
 
         // timed criterias are added to fail-timer map, and send the starting with counter=0
         if (criteria->timeLimit)
         {
-            m_criteriaFailTimes[criteria->ID] = time_t(progress->date + criteria->timeLimit);
+            m_criteriaFailTimes[criteria->ID] = progress->date + std::chrono::seconds(criteria->timeLimit);
             progress->counter = 0;
             SendCriteriaUpdate(criteria->ID, progress);
         }
@@ -2324,10 +2326,11 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())
         return;
 
-    SendAchievementEarned(achievement);
     CompletedAchievementData& ca =  m_completedAchievements[achievement->ID];
-    ca.date = time(nullptr);
+    ca.date = GetPlayer()->GetMap()->GetCurrentClockTime();
     ca.changed = true;
+
+    SendAchievementEarned(achievement, ca.date);
 
     // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
     // TODO: where do set this instead?
@@ -2445,26 +2448,31 @@ void AchievementMgr::SendRespondInspectAchievements(Player* player)
  */
 void AchievementMgr::BuildAllDataPacket(WorldPacket& data)
 {
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    for (auto& completedAchievement : m_completedAchievements)
     {
-        data << uint32(iter->first);
-        data << uint32(secsToTimeBitFields(iter->second.date));
-    }
-    data << int32(-1);
+        // Skip hidden achievements
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(completedAchievement.first);
+        if (!achievement || achievement->flags & ACHIEVEMENT_FLAG_HIDDEN)
+            continue;
 
-    time_t now = time(nullptr);
-    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+        data << uint32(completedAchievement.first);
+        data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(completedAchievement.second.date)));
+    }
+    data << int32(-1); // loop terminator
+
+    TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
+    for (auto& itr : m_criteriaProgress)
     {
-        data << uint32(iter->first);
-        data.appendPackGUID(iter->second.counter);
+        data << uint32(itr.first);
+        data.appendPackGUID(itr.second.counter);
         data << GetPlayer()->GetPackGUID();
-        data << uint32(iter->second.timedCriteriaFailed ? 1 : 0);
-        data << uint32(secsToTimeBitFields(now));
-        data << uint32(now - iter->second.date);
-        data << uint32(now - iter->second.date);
+        data << uint32(itr.second.timedCriteriaFailed ? 1 : 0);
+        data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(now)));
+        data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - itr.second.date)).count());
+        data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - itr.second.date)).count()); // TODO: Same as criterion packet
     }
 
-    data << int32(-1);
+    data << int32(-1); // loop terminator
 }
 
 AchievementGlobalMgr::~AchievementGlobalMgr()
