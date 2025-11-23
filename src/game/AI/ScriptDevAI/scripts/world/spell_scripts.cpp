@@ -1035,6 +1035,7 @@ struct InvisibleForAlive : public AuraScript
 };
 
 // 17162 - Summon Water Elemental
+// 61128 - Summon Water Elementals
 struct SummonWaterElemental : public SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
