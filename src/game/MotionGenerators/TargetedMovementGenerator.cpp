@@ -93,7 +93,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
 
     HandleTargetedMovement(owner, time_diff);
 
-    if (owner.movespline->Finalized() && !i_targetReached) 
+    if (owner.movespline->Finalized() && !i_targetReached)
         HandleFinalizedMovement(owner);
 
     return true;
@@ -498,7 +498,6 @@ bool ChaseMovementGenerator::DispatchSplineToPosition(Unit& owner, float x, floa
         this->i_path = new PathFinder(&owner);
 
     bool gen = false;
-    z += owner.GetHoverOffset();
     if (owner.IsWithinDist3d(x, y, z, 200.f) && std::abs(owner.GetPositionZ() - z) < 5.f && owner.IsWithinLOS(x, y, z + i_target->GetCollisionHeight()) && !owner.IsInWater() && !i_target->IsInWater())
     {
         this->i_path->calculate(x, y, z, false, true);
@@ -744,7 +743,7 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     if (owner.HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) == i_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
 #ifdef ENABLE_PLAYERBOTS
-        if (!(!m_boost && owner.IsPlayer() && !((Player*)(&owner))->isRealPlayer())) //Do not speed up bots when not boosting. 
+        if (!(!m_boost && owner.IsPlayer() && !((Player*)(&owner))->isRealPlayer())) //Do not speed up bots when not boosting.
 #endif
         speed = i_target->GetSpeedInMotion();
     }
@@ -1438,7 +1437,7 @@ void FormationMovementGenerator::HandleTargetedMovement(Unit& owner, const uint3
     {
         if (i_target->movespline->Finalized() || !targetRelocation)
             needToRePos = true;
-        
+
         m_slot->GetRecomputePosition() = false;
     }
 
