@@ -555,9 +555,6 @@ struct SuperChargeIronCouncil : public SpellScript
             target->CastSpell(nullptr, SPELL_ELECTRICAL_CHARGE, TRIGGERED_OLD_TRIGGERED);
 
         target->SetHealthPercent(100.f);
-
-        if (target->AI())
-            target->AI()->SpellListChanged();
     }
 };
 
