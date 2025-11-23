@@ -21,7 +21,6 @@ SDComment:
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 #include "Entities/Transports.h"
 
@@ -664,14 +663,14 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             {
                 switch (urand(0,2))
                 {
-                    case 0: if(Unit* brundir = GetSingleCreatureFromStorage(NPC_BRUNDIR)) DoBroadcastText(34314, brundir); break;
-                    case 1: if(Unit* molgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM)) DoBroadcastText(34328, molgeim); break;
-                    case 2: if(Unit* steel = GetSingleCreatureFromStorage(NPC_STEELBREAKER)) DoBroadcastText(34321, steel); break;
+                    case 0: if(Unit* brundir = GetSingleCreatureFromStorage(NPC_BRUNDIR)) DoBroadcastText(SAY_BRUNDIR_AGGRO, brundir); break;
+                    case 1: if(Unit* molgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM)) DoBroadcastText(SAY_MOLGEIM_AGGRO, molgeim); break;
+                    case 2: if(Unit* steel = GetSingleCreatureFromStorage(NPC_STEELBREAKER)) DoBroadcastText(SAY_STEEL_AGGRO, steel); break;
                 }
 
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, false);
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, false);
-                SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, false);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, true);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, true);
+                SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, true);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_STUNNED, true);
             }
             else if (uiData == FAIL)
@@ -1231,6 +1230,26 @@ void instance_ulduar::SpawnFriendlyKeeper(uint32 uiWho)
         case NPC_KEEPER_THORIM:  pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[3].fX, m_aKeepersSpawnLocs[3].fY, m_aKeepersSpawnLocs[3].fZ, m_aKeepersSpawnLocs[3].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true); break;
         case NPC_KEEPER_FREYA:   pPlayer->SummonCreature(uiWho, m_aKeepersSpawnLocs[0].fX, m_aKeepersSpawnLocs[0].fY, m_aKeepersSpawnLocs[0].fZ, m_aKeepersSpawnLocs[0].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true); break;
     }
+}
+
+void instance_ulduar::CheckLastCouncilStanding(uint32 entry)
+{
+    auto* molgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM);
+    auto* brundir = GetSingleCreatureFromStorage(NPC_BRUNDIR);
+    auto* steelbreaker = GetSingleCreatureFromStorage(NPC_STEELBREAKER);
+    uint8 molgeimAlive = molgeim->IsAlive() && entry != NPC_MOLGEIM ? 1 : 0;
+    uint8 brundirAlive = brundir->IsAlive() && entry != NPC_BRUNDIR ? 1 : 0;
+    uint8 steelbreakerAlive = steelbreaker->IsAlive() && entry != NPC_STEELBREAKER ? 1 : 0;
+
+    if (molgeimAlive + brundirAlive + steelbreakerAlive > 1)
+        return;
+
+    if (auto* molgeimAI = static_cast<ScriptedAI*>(molgeim->AI()))
+        molgeimAI->SetDeathPrevention(false);
+    if (auto* brundirAI = static_cast<ScriptedAI*>(brundir->AI()))
+        brundirAI->SetDeathPrevention(false);
+    if (auto* steelbreakerAI = static_cast<ScriptedAI*>(steelbreaker->AI()))
+        steelbreakerAI->SetDeathPrevention(false);
 }
 
 // Spawn the keeper helpers for Yogg-Saron

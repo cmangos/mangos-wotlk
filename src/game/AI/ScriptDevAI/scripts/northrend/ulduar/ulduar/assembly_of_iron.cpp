@@ -21,13 +21,11 @@ SDComment: Lightning Tendrils target following could use some love from the core
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 
 enum
 {
-    SAY_BRUNDIR_AGGRO                   = 34314,
     SAY_BRUNDIR_WHIRL                   = 33962,
     SAY_BRUNDIR_DEATH_1                 = 34318,
     SAY_BRUNDIR_DEATH_2                 = 34319,
@@ -36,7 +34,6 @@ enum
     SAY_BRUNDIR_BERSERK                 = 34320,
     SAY_BRUNDIR_FLY                     = 34317,
 
-    SAY_MOLGEIM_AGGRO                   = 34328,
     SAY_MOLGEIM_DEATH_1                 = 34333,
     SAY_MOLGEIM_DEATH_2                 = 34334,
     SAY_MOLGEIM_DEATH_RUNE              = 34331,
@@ -45,7 +42,6 @@ enum
     SAY_MOLGEIM_SLAY_2                  = 34330,
     SAY_MOLGEIM_BERSERK                 = 34320,
 
-    SAY_STEEL_AGGRO                     = 34321,
     SAY_STEEL_DEATH_1                   = 34325,
     SAY_STEEL_DEATH_2                   = 34326,
     SAY_STEEL_SLAY_1                    = 34322,
@@ -59,6 +55,7 @@ enum
     SPELL_LIGHTNING_CHANNEL_PREFIGHT    = 61942,        // cast by Brundir on Steelbreaker
     SPELL_RUNE_OF_POWER_PREFIGHT        = 61975,        // cast by Molgeim on Stellbreaker
     SPELL_COUNCIL_KILL_CREDIT           = 65195,        // currently missing from DBC
+    SPELL_QUIET_SUICIDE                 = 3617,
 
     // Steelbreaker
     SPELL_HIGH_VOLTAGE                  = 61890,        // phase 1 spells
@@ -118,6 +115,7 @@ enum BrundirActions
 {
     BRUNDIR_PREFIGHT_CHANNEL,
     BRUNDIR_CLOSE_DOOR,
+    BRUNDIR_START_HOVER,
     BRUNDIR_ACTIONS_MAX,
 };
 
@@ -129,7 +127,6 @@ struct boss_brundirAI : public BossAI
     {
         AddOnKillText(SAY_BRUNDIR_SLAY_1, SAY_BRUNDIR_SLAY_2);
         AddOnDeathText(SAY_BRUNDIR_DEATH_1, SAY_BRUNDIR_DEATH_2);
-        AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
         AddCombatAction(BRUNDIR_CLOSE_DOOR, 3s);
         AddCustomAction(BRUNDIR_PREFIGHT_CHANNEL, 5s, [&]()
         {
@@ -144,8 +141,13 @@ struct boss_brundirAI : public BossAI
             steel->GetFirstCollisionPosition(dest, 10.f, o);
             m_creature->GetMotionMaster()->MovePoint(POINT_ID_PRECHANNEL, dest, FORCED_MOVEMENT_RUN);
         }, TIMER_COMBAT_OOC);
+        AddCustomAction(BRUNDIR_START_HOVER, true, [&]()
+        {
+            m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFT_OFF, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + m_creature->GetHoverOffset());
+        }, TIMER_COMBAT_COMBAT);
         m_creature->SetNoLoot(true);
         m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 13.f); // Should be 10.f but that results him rising only 10 units, when he should rise by 13 (probably some collision height calculations)
+        SetDeathPrevention(true);
     }
 
     instance_ulduar* m_instance;
@@ -167,7 +169,7 @@ struct boss_brundirAI : public BossAI
             m_instance->SetData(TYPE_ASSEMBLY, IN_PROGRESS);
 
         m_creature->InterruptNonMeleeSpells(false);
-        DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_BERSERK, CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
@@ -182,6 +184,13 @@ struct boss_brundirAI : public BossAI
         BossAI::JustDied(who);
         if (m_creature->GetHoverOffset() > 0)
             m_creature->GetMotionMaster()->MoveFall();
+        if (who->GetObjectGuid() == m_creature->GetObjectGuid())
+            return;
+        if (!m_instance)
+            return;
+        m_creature->SetNoLoot(false);
+        m_creature->CastSpell(nullptr, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
+        m_instance->SetData(TYPE_ASSEMBLY, DONE);
     }
 
     void MovementInform(uint32 movementType, uint32 data) override
@@ -203,11 +212,18 @@ struct boss_brundirAI : public BossAI
         {
             if (summoned->AI())
                 summoned->AI()->SetReactState(REACT_PASSIVE);
-            summoned->CastSpell(summoned, SPELL_OVERLOAD_AURA, TRIGGERED_OLD_TRIGGERED);
+            summoned->CastSpell(nullptr, SPELL_OVERLOAD_AURA, TRIGGERED_OLD_TRIGGERED);
             // Visual npc- shouldn't move and should despawn in 6 sec
             summoned->GetMotionMaster()->MoveIdle();
             summoned->ForcedDespawn(6000);
         }
+    }
+
+    void JustPreventedDeath(Unit* /*attacker*/) override
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+        m_instance->CheckLastCouncilStanding(NPC_BRUNDIR);
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
@@ -256,7 +272,6 @@ struct boss_molgeimAI : public BossAI
     {
         AddOnKillText(SAY_MOLGEIM_SLAY_1, SAY_MOLGEIM_SLAY_2);
         AddOnDeathText(SAY_MOLGEIM_DEATH_1, SAY_MOLGEIM_DEATH_2);
-        AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
         AddCustomAction(MOLGEIM_PRE_FIGHT_VISUAL, 5s, [&]()
         {
             Creature* steel = m_instance->GetSingleCreatureFromStorage(NPC_STEELBREAKER);
@@ -265,6 +280,7 @@ struct boss_molgeimAI : public BossAI
             m_creature->CastSpell(steel, SPELL_RUNE_OF_POWER_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
         });
         m_creature->SetNoLoot(true);
+        SetDeathPrevention(true);
     }
 
     instance_ulduar* m_instance;
@@ -277,7 +293,7 @@ struct boss_molgeimAI : public BossAI
             m_instance->SetData(TYPE_ASSEMBLY, IN_PROGRESS);
 
         m_creature->InterruptNonMeleeSpells(false);
-        DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_BERSERK, CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
@@ -285,6 +301,18 @@ struct boss_molgeimAI : public BossAI
         ResetTimer(MOLGEIM_PRE_FIGHT_VISUAL, 5s);
         if (m_instance)
             m_instance->SetData(TYPE_ASSEMBLY, FAIL);
+    }
+
+    void JustDied(Unit* who) override
+    {
+        BossAI::JustDied(who);
+        if (who->GetObjectGuid() == m_creature->GetObjectGuid())
+            return;
+        if (!m_instance)
+            return;
+        m_creature->SetNoLoot(false);
+        m_creature->CastSpell(nullptr, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
+        m_instance->SetData(TYPE_ASSEMBLY, DONE);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -297,19 +325,27 @@ struct boss_molgeimAI : public BossAI
         m_creature->AddSummonForOnDeathDespawn(summoned->GetObjectGuid());
         if (summoned->GetEntry() == NPC_RUNE_OF_SUMMONING)
         {
-            summoned->CastSpell(summoned, SPELL_RUNE_OF_SUMMONING_AURA, true, nullptr, nullptr, m_creature->GetObjectGuid());
+            summoned->CastSpell(nullptr, SPELL_RUNE_OF_SUMMONING_AURA, true, nullptr, nullptr, m_creature->GetObjectGuid());
             summoned->ForcedDespawn(20000);
         }
         else if (summoned->GetEntry() == NPC_LIGHTNING_ELEMENTAL)
         {
-            summoned->CastSpell(summoned, m_isRegularMode ? SPELL_LIGHTNING_ELEMENTAL_PASSIVE : SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H, TRIGGERED_OLD_TRIGGERED);
+            summoned->CastSpell(nullptr, m_isRegularMode ? SPELL_LIGHTNING_ELEMENTAL_PASSIVE : SPELL_LIGHTNING_ELEMENTAL_PASSIVE_H, TRIGGERED_OLD_TRIGGERED);
 
             if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
                 summoned->AI()->SetReactState(REACT_AGGRESSIVE);
+                summoned->AI()->SetAIImmobilizedState(false);
                 summoned->AI()->AttackStart(target);
             }
         }
+    }
+
+    void JustPreventedDeath(Unit* /*attacker*/) override
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+        m_instance->CheckLastCouncilStanding(NPC_MOLGEIM);
     }
 };
 
@@ -326,8 +362,8 @@ struct boss_steelbreakerAI : public BossAI
     {
         AddOnKillText(SAY_STEEL_SLAY_1, SAY_STEEL_SLAY_2);
         AddOnDeathText(SAY_STEEL_DEATH_1, SAY_STEEL_DEATH_2);
-        AddCastOnDeath({ObjectGuid(), SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED});
         m_creature->SetNoLoot(true);
+        SetDeathPrevention(true);
     }
 
     instance_ulduar* m_instance;
@@ -339,14 +375,33 @@ struct boss_steelbreakerAI : public BossAI
         if (m_instance)
             m_instance->SetData(TYPE_ASSEMBLY, IN_PROGRESS);
 
-        DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_HIGH_VOLTAGE : SPELL_HIGH_VOLTAGE_H, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_BERSERK, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_HIGH_VOLTAGE : SPELL_HIGH_VOLTAGE_H, CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
     {
         if (m_instance)
             m_instance->SetData(TYPE_ASSEMBLY, FAIL);
+    }
+
+    void JustDied(Unit* who) override
+    {
+        BossAI::JustDied(who);
+        if (who->GetObjectGuid() == m_creature->GetObjectGuid())
+            return;
+        if (!m_instance)
+            return;
+        m_creature->SetNoLoot(false);
+        m_creature->CastSpell(nullptr, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
+        m_instance->SetData(TYPE_ASSEMBLY, DONE);
+    }
+
+    void JustPreventedDeath(Unit* /*attacker*/) override
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+        m_instance->CheckLastCouncilStanding(NPC_STEELBREAKER);
     }
 };
 
@@ -368,45 +423,32 @@ struct LightningWhirlHeroic : public SpellScript
 
 struct SuperChargeIronCouncil : public SpellScript
 {
-    void OnInit(Spell* spell) const override
-    {
-        Unit* caster = spell->GetCaster();
-        if (!caster)
-            return;
-        if (caster->GetAuraCount(SPELL_SUPERCHARGE) >= 2)
-        {
-            if (instance_ulduar* instance = dynamic_cast<instance_ulduar*>(caster->GetInstanceData()))
-            {
-                switch (caster->GetEntry())
-                {
-                    case NPC_BRUNDIR: instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, true); break;
-                    case NPC_MOLGEIM: instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, true); break;
-                    case NPC_STEELBREAKER: instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, true); break;
-                }
-                caster->CastSpell(nullptr, SPELL_COUNCIL_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
-                instance->SetData(TYPE_ASSEMBLY, DONE);
-                static_cast<Creature*>(caster)->SetNoLoot(false);
-            }
-            return;
-        }
-    }
-
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
         if (eff != EFFECT_INDEX_2)
             return true;
         if (!target || !target->IsAlive())
             return false;
+        return true;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex eff) const override
+    {
+        if (eff != EFFECT_INDEX_2)
+            return;
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
         if (target->GetEntry() == NPC_BRUNDIR && target->GetAuraCount(SPELL_SUPERCHARGE) == 1)
             target->CastSpell(nullptr, SPELL_STORMSHIELD, TRIGGERED_OLD_TRIGGERED);
+
         if (target->GetEntry() == NPC_STEELBREAKER && target->GetAuraCount(SPELL_SUPERCHARGE) == 1)
-        {
             target->CastSpell(nullptr, SPELL_ELECTRICAL_CHARGE, TRIGGERED_OLD_TRIGGERED);
-        }
+
         target->SetHealthPercent(100.f);
+
         if (target->AI())
             target->AI()->SpellListChanged();
-        return true;
     }
 };
 
@@ -442,7 +484,6 @@ struct LightningTendrils : public SpellScript, public AuraScript
                 caster->AttackStop();
                 caster->SetTarget(nullptr);
                 caster->GetMotionMaster()->Clear();
-                caster->GetMotionMaster()->MovePoint(POINT_ID_LIFT_OFF, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ() + caster->GetHoverOffset());
             }
         }
         else
@@ -456,7 +497,7 @@ struct LightningTendrils : public SpellScript, public AuraScript
                 caster->AI()->SetCombatScriptStatus(false);
             }
             if (caster->GetVictim())
-                caster->GetMotionMaster()->MoveChase(caster->GetVictim());//caster->SetStunned(false);
+                caster->GetMotionMaster()->MoveChase(caster->GetVictim());
         }
     }
 
@@ -469,6 +510,11 @@ struct LightningTendrils : public SpellScript, public AuraScript
             return;
         if (aura->GetAuraTicks() <= 29)
         {
+            if (aura->GetAuraTicks() < 3)
+                return;
+            if (aura->GetAuraTicks() == 3)
+                if (boss_brundirAI* brundirAi = static_cast<boss_brundirAI*>(caster->AI()))
+                    brundirAi->ResetTimer(BRUNDIR_START_HOVER, 0s);
             if (!(aura->GetAuraTicks() % 5))
             {
                 if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
