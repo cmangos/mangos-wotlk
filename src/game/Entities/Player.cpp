@@ -21491,6 +21491,8 @@ void Player::SendInitialPacketsAfterAddToMap(bool reconnect)
 
     SendAurasForTarget(this);
 
+    // TODO: add SMSG_RESUME_CAST_BAR
+
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
 
