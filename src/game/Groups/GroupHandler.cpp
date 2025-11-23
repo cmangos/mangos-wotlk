@@ -71,8 +71,9 @@ void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false
 void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 {
     std::string membername;
+    uint32 proposedRoles;
     recv_data >> membername;
-    recv_data.read_skip<uint32>();                          // roles mask?
+    recv_data >> proposedRoles; // TODO: Add usage
 
     // attempt add selected player
 
