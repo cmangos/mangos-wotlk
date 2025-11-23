@@ -21,6 +21,7 @@ SDComment: Lightning Tendrils target following could use some love from the core
 SDCategory: Ulduar
 EndScriptData */
 
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
 
@@ -109,6 +110,30 @@ enum
     POINT_ID_LIFT_OFF                   = 1,
     POINT_ID_LAND                       = 2,
     POINT_ID_PRECHANNEL                 = 3,
+
+    LIST_BRUNDIR_PHASE_1_N              = 3285700,
+    LIST_BRUNDIR_PHASE_2_N              = 3285701,
+    LIST_BRUNDIR_PHASE_3_N              = 3285702,
+
+    LIST_MOLGEIM_PHASE_1_N              = 3292700,
+    LIST_MOLGEIM_PHASE_2_N              = 3292701,
+    LIST_MOLGEIM_PHASE_3_N              = 3292702,
+
+    LIST_STEELBREAKER_PHASE_1_N         = 3286700,
+    LIST_STEELBREAKER_PHASE_2_N         = 3286701,
+    LIST_STEELBREAKER_PHASE_3_N         = 3286702,
+
+    LIST_BRUNDIR_PHASE_1_H              = 3369400,
+    LIST_BRUNDIR_PHASE_2_H              = 3369401,
+    LIST_BRUNDIR_PHASE_3_H              = 3369402,
+
+    LIST_MOLGEIM_PHASE_1_H              = 3369200,
+    LIST_MOLGEIM_PHASE_2_H              = 3369201,
+    LIST_MOLGEIM_PHASE_3_H              = 3369202,
+
+    LIST_STEELBREAKER_PHASE_1_H         = 3369300,
+    LIST_STEELBREAKER_PHASE_2_H         = 3369301,
+    LIST_STEELBREAKER_PHASE_3_H         = 3369302,
 };
 
 enum BrundirActions
@@ -116,6 +141,8 @@ enum BrundirActions
     BRUNDIR_PREFIGHT_CHANNEL,
     BRUNDIR_CLOSE_DOOR,
     BRUNDIR_START_HOVER,
+    BRUNDIR_PHASE_2_CHECK,
+    BRUNDIR_PHASE_3_CHECK,
     BRUNDIR_ACTIONS_MAX,
 };
 
@@ -145,6 +172,8 @@ struct boss_brundirAI : public BossAI
         {
             m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFT_OFF, Position(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + m_creature->GetHoverOffset()), FORCED_MOVEMENT_FLIGHT, 0.f, true, ObjectGuid(), 0, AnimTier::Hover);
         }, TIMER_COMBAT_COMBAT);
+        AddTimerlessCombatAction(BRUNDIR_PHASE_2_CHECK, true);
+        AddTimerlessCombatAction(BRUNDIR_PHASE_3_CHECK, false);
         m_creature->SetNoLoot(true);
         m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 13.f); // Should be 10.f but that results him rising only 10 units, when he should rise by 13 (probably some collision height calculations)
         SetDeathPrevention(true);
@@ -254,6 +283,28 @@ struct boss_brundirAI : public BossAI
                 if (GameObject* door = m_instance->GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
                     door->SetGoState(GO_STATE_READY);
             DisableCombatAction(action);
+            return;
+        }
+        if (action == BRUNDIR_PHASE_2_CHECK)
+        {
+            if (m_creature->GetAuraCount(SPELL_SUPERCHARGE) >= 1)
+            {
+                m_creature->SetSpellList(m_isRegularMode ? LIST_BRUNDIR_PHASE_2_N : LIST_BRUNDIR_PHASE_2_H);
+                SpellListChanged();
+                DisableCombatAction(action);
+                SetActionReadyStatus(BRUNDIR_PHASE_3_CHECK, true);
+            }
+            return;
+        }
+        if (action == BRUNDIR_PHASE_3_CHECK)
+        {
+            if (m_creature->GetAuraCount(SPELL_SUPERCHARGE) >= 2)
+            {
+                m_creature->SetSpellList(m_isRegularMode ? LIST_BRUNDIR_PHASE_3_N : LIST_BRUNDIR_PHASE_3_H);
+                SpellListChanged();
+                DisableCombatAction(action);
+            }
+            return;
         }
     }
 };
@@ -261,6 +312,8 @@ struct boss_brundirAI : public BossAI
 enum MolgeimActions
 {
     MOLGEIM_PRE_FIGHT_VISUAL,
+    MOLGEIM_PHASE_2_CHECK,
+    MOLGEIM_PHASE_3_CHECK,
     MOLGEIM_ACTIONS_MAX,
 };
 
@@ -279,6 +332,8 @@ struct boss_molgeimAI : public BossAI
                 return;
             m_creature->CastSpell(steel, SPELL_RUNE_OF_POWER_PREFIGHT, TRIGGERED_OLD_TRIGGERED);
         });
+        AddTimerlessCombatAction(MOLGEIM_PHASE_2_CHECK, true);
+        AddTimerlessCombatAction(MOLGEIM_PHASE_3_CHECK, false);
         m_creature->SetNoLoot(true);
         SetDeathPrevention(true);
     }
@@ -347,10 +402,37 @@ struct boss_molgeimAI : public BossAI
         m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
         m_instance->CheckLastCouncilStanding(NPC_MOLGEIM);
     }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == MOLGEIM_PHASE_2_CHECK)
+        {
+            if (m_creature->GetAuraCount(SPELL_SUPERCHARGE) >= 1)
+            {
+                m_creature->SetSpellList(m_isRegularMode ? LIST_MOLGEIM_PHASE_2_N : LIST_MOLGEIM_PHASE_2_H);
+                SpellListChanged();
+                DisableCombatAction(action);
+                SetActionReadyStatus(MOLGEIM_PHASE_3_CHECK, true);
+            }
+            return;
+        }
+        if (action == MOLGEIM_PHASE_3_CHECK)
+        {
+            if (m_creature->GetAuraCount(SPELL_SUPERCHARGE) >= 2)
+            {
+                m_creature->SetSpellList(m_isRegularMode ? LIST_MOLGEIM_PHASE_3_N : LIST_MOLGEIM_PHASE_3_H);
+                SpellListChanged();
+                DisableCombatAction(action);
+            }
+            return;
+        }
+    }
 };
 
 enum STEELBREAKER_ACTIONS
 {
+    STEELBREAKER_PHASE_2_CHECK,
+    STEELBREAKER_PHASE_3_CHECK,
     STEELBREAKER_ACTION_MAX,
 };
 
@@ -362,6 +444,8 @@ struct boss_steelbreakerAI : public BossAI
     {
         AddOnKillText(SAY_STEEL_SLAY_1, SAY_STEEL_SLAY_2);
         AddOnDeathText(SAY_STEEL_DEATH_1, SAY_STEEL_DEATH_2);
+        AddTimerlessCombatAction(STEELBREAKER_PHASE_2_CHECK, true);
+        AddTimerlessCombatAction(STEELBREAKER_PHASE_3_CHECK, false);
         m_creature->SetNoLoot(true);
         SetDeathPrevention(true);
     }
@@ -402,6 +486,31 @@ struct boss_steelbreakerAI : public BossAI
         m_creature->CastSpell(nullptr, SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED);
         m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
         m_instance->CheckLastCouncilStanding(NPC_STEELBREAKER);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == STEELBREAKER_PHASE_2_CHECK)
+        {
+            if (m_creature->GetAuraCount(SPELL_SUPERCHARGE) >= 1)
+            {
+                m_creature->SetSpellList(m_isRegularMode ? LIST_STEELBREAKER_PHASE_2_N : LIST_STEELBREAKER_PHASE_2_H);
+                SpellListChanged();
+                DisableCombatAction(action);
+                SetActionReadyStatus(STEELBREAKER_PHASE_3_CHECK, true);
+            }
+            return;
+        }
+        if (action == STEELBREAKER_PHASE_3_CHECK)
+        {
+            if (m_creature->GetAuraCount(SPELL_SUPERCHARGE) >= 2)
+            {
+                m_creature->SetSpellList(m_isRegularMode ? LIST_STEELBREAKER_PHASE_3_N : LIST_STEELBREAKER_PHASE_3_H);
+                SpellListChanged();
+                DisableCombatAction(action);
+            }
+            return;
+        }
     }
 };
 
