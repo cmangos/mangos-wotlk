@@ -143,7 +143,7 @@ struct boss_brundirAI : public BossAI
         }, TIMER_COMBAT_OOC);
         AddCustomAction(BRUNDIR_START_HOVER, true, [&]()
         {
-            m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFT_OFF, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + m_creature->GetHoverOffset());
+            m_creature->GetMotionMaster()->MovePoint(POINT_ID_LIFT_OFF, Position(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + m_creature->GetHoverOffset()), FORCED_MOVEMENT_FLIGHT, 0.f, true, ObjectGuid(), 0, AnimTier::Hover);
         }, TIMER_COMBAT_COMBAT);
         m_creature->SetNoLoot(true);
         m_creature->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 13.f); // Should be 10.f but that results him rising only 10 units, when he should rise by 13 (probably some collision height calculations)
@@ -527,7 +527,7 @@ struct LightningTendrils : public SpellScript, public AuraScript
             {
                 float gZ = caster->GetMap()->GetHeight(caster->GetPhaseMask(), caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
                 caster->GetMotionMaster()->Clear();
-                caster->GetMotionMaster()->MovePointTOL(POINT_ID_LAND, caster->GetPositionX(), caster->GetPositionY(), gZ, false);
+                caster->GetMotionMaster()->MovePoint(POINT_ID_LAND, Position(caster->GetPositionX(), caster->GetPositionY(), gZ), FORCED_MOVEMENT_NONE, 0.f, true, ObjectGuid(), 0, AnimTier::Ground);
                 caster->SetHover(false);
             }
             return;
