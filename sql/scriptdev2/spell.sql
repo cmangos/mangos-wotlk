@@ -985,6 +985,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54432,'spell_sparksocket_aa_aggrocheck'),
 (54496,'spell_summon_plague_spray'),
 (54517,'spell_magnetic_pull_thaddius'),
+(54798,'spell_flaming_arrow_triggered_effect'),
 (54956,'spell_impaling_charge'),
 (54969,'spell_summon_constrictor_sladran'),
 (54997,'spell_cast_net_stormforged_pursuer'),
