@@ -417,6 +417,40 @@ struct ThrowIce : public SpellScript
     }
 };
 
+// 54798 - FLAMING Arrow Triggered Effect
+struct FArrowTEff : public AuraScript
+{
+    enum
+    {
+        NPC_GIANT       = 29351,    // Niffelem Frost Giant 29351
+        NPC_FROSTWORG   = 29358,    // Frostworg 29358
+    };
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        Unit* target = aura->GetTarget();
+
+        if (target->HasAura(54690))
+            return;
+        else
+        {
+            if (target->GetEntry() == NPC_FROSTWORG)
+            {
+                target->CastSpell(nullptr, 54683, TRIGGERED_OLD_TRIGGERED); // 54683 Ablaze
+                target->CastSpell(nullptr, 54690, TRIGGERED_OLD_TRIGGERED); // 54690 Cosmetic - Immolation (Whole Body) 6 Sec
+                target->CastSpell(caster, 58183, TRIGGERED_OLD_TRIGGERED);  // 58183 Frostworg Kill Credit 02
+            }
+            else if (target->GetEntry() == NPC_GIANT)
+            {
+                target->CastSpell(nullptr, 54683, TRIGGERED_OLD_TRIGGERED); // 54683 Ablaze
+                target->CastSpell(nullptr, 54690, TRIGGERED_OLD_TRIGGERED); // 54690 Cosmetic - Immolation (Whole Body) 6 Sec
+                target->CastSpell(caster, 58184, TRIGGERED_OLD_TRIGGERED);  // 58184 Frost Giant Kill Credit 02
+            }
+        }
+    }
+};
+
 void AddSC_storm_peaks()
 {
     Script* pNewScript = new Script;
@@ -445,4 +479,5 @@ void AddSC_storm_peaks()
     RegisterSpellScript<BlowHodirsHorn>("spell_blow_hodirs_horn");
     RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
     RegisterSpellScript<ThrowIce>("spell_throw_ice");
+    RegisterSpellScript<FArrowTEff>("spell_flaming_arrow_triggered_effect");
 }
