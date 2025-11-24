@@ -4846,7 +4846,7 @@ void Spell::EffectPowerDrain(SpellEffectIndex eff_idx)
 void Spell::EffectSendEvent(SpellEffectIndex effectIndex)
 {
     DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[effectIndex], m_spellInfo->Id);
-    StartEvents_Event(m_trueCaster->GetMap(), m_spellInfo->EffectMiscValue[effectIndex], m_trueCaster, m_eventTarget, true);
+    m_trueCaster->GetMap()->StartEvent(m_spellInfo->EffectMiscValue[effectIndex], m_trueCaster, m_eventTarget, true);
 }
 
 void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)

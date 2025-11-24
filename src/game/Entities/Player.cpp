@@ -14609,6 +14609,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         SetDailyQuestStatus(quest_id);
         if (pQuest->IsDaily())
         {
+            GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::CompleteDailyQuest);
             GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST, 1);
             GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY, quest_id);
         }
@@ -20355,7 +20356,7 @@ void Player::OnTaxiFlightRouteProgress(const TaxiPathNodeEntry* node, const Taxi
         {
             const char* desc = (arrival ? "arrival" : "departure");
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Taxi %s event %u of node %u of path %u for player %s", desc, eventid, node->index, node->path, GetName());
-            StartEvents_Event(GetMap(), eventid, this, this, !arrival);
+            GetMap()->StartEvent(eventid, this, this, !arrival);
         }
     }
 }
@@ -23758,9 +23759,9 @@ void Player::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 mis
     GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time);
 }
 
-void Player::StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime /*= 0*/)
+void Player::StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId)
 {
-    GetAchievementMgr().StartTimedAchievementCriteria(type, timedRequirementId, startTime);
+    GetAchievementMgr().StartTimedAchievementCriteria(type, timedRequirementId);
 }
 
 PlayerTalent const* Player::GetKnownTalentById(int32 talentId) const

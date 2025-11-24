@@ -1524,6 +1524,8 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
 
     if (unit->IsPlayer())
     {
+        static_cast<Player*>(unit)->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::BeSpellTarget, m_spellInfo->Id);
+        static_cast<Player*>(unit)->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::BeSpellTarget, m_spellInfo->Id); // unused but implemented
         static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, m_spellInfo->Id);
         static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, m_spellInfo->Id);
     }

@@ -1300,9 +1300,9 @@ bool ChatHandler::HandleAchievementCommand(char* args)
 
     CompletedAchievementData const* completed = target ? target->GetAchievementMgr().GetCompleteData(achId) : nullptr;
 
-    ShowAchievementListHelper(achEntry, loc, completed ? &completed->date : nullptr, target);
+    ShowAchievementListHelper(achEntry, loc, completed ? &completed->updateDate : nullptr, target);
 
-    if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
+    if (AchievementCriteriaEntryVector const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
     {
         SendSysMessage(LANG_COMMAND_ACHIEVEMENT_CRITERIA);
         for (auto itr : *criteriaList)
@@ -1334,7 +1334,7 @@ bool ChatHandler::HandleAchievementAddCommand(char* args)
 
     AchievementMgr& mgr = target->GetAchievementMgr();
 
-    if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
+    if (AchievementCriteriaEntryVector const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
     {
         for (auto itr : *criteriaList)
         {
@@ -1350,7 +1350,7 @@ bool ChatHandler::HandleAchievementAddCommand(char* args)
 
     LocaleConstant loc = GetSessionDbcLocale();
     CompletedAchievementData const* completed = target ? target->GetAchievementMgr().GetCompleteData(achId) : nullptr;
-    ShowAchievementListHelper(achEntry, loc, completed ? &completed->date : nullptr, target);
+    ShowAchievementListHelper(achEntry, loc, completed ? &completed->updateDate : nullptr, target);
     return true;
 }
 
@@ -1376,13 +1376,13 @@ bool ChatHandler::HandleAchievementRemoveCommand(char* args)
 
     AchievementMgr& mgr = target->GetAchievementMgr();
 
-    if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
+    if (AchievementCriteriaEntryVector const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
         for (auto itr : *criteriaList)
             mgr.SetCriteriaProgress(itr, achEntry, 0, AchievementMgr::PROGRESS_SET);
 
     LocaleConstant loc = GetSessionDbcLocale();
     CompletedAchievementData const* completed = target ? target->GetAchievementMgr().GetCompleteData(achId) : nullptr;
-    ShowAchievementListHelper(achEntry, loc, completed ? &completed->date : nullptr, target);
+    ShowAchievementListHelper(achEntry, loc, completed ? &completed->updateDate : nullptr, target);
     return true;
 }
 

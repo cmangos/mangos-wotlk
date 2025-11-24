@@ -327,6 +327,8 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
     if (Player* player = sObjectMgr.GetPlayer(guid))
     {
+        player->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::ModifyPartyStatus);
+
         _updateMembersOnRosterChanged(player);
 
         if (!IsLeader(player->GetObjectGuid()) && !IsBattleGroup())

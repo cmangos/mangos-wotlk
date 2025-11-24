@@ -87,16 +87,41 @@ enum AchievementFlags
     ACHIEVEMENT_FLAG_REALM_FIRST_KILL       = 0x00000200,   //
 };
 
-enum AchievementCriteriaCondition
+enum class CriteriaFailEvent : uint8
 {
-    ACHIEVEMENT_CRITERIA_CONDITION_NONE      = 0,
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH  = 1,
-    ACHIEVEMENT_CRITERIA_CONDITION_UNK1      = 2,           // only used in "Complete a daily quest every day for five consecutive days"
-    ACHIEVEMENT_CRITERIA_CONDITION_MAP       = 3,           // requires you to be on specific map
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE  = 4,           // only used in "Win 10 arenas without losing"
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT = 9,        // not hit by spell; Only 6 criterias in 3.x
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_GROUP  = 10,          // not in a group
-    ACHIEVEMENT_CRITERIA_CONDITION_UNK3      = 13,          // unk
+    None                                = 0,
+    Death                               = 1,    // Death
+    Hours24WithoutCompletingDailyQuest  = 2,    // 24 hours without completing a daily quest
+    LeaveBattleground                   = 3,    // Leave a battleground
+    LoseRankedArenaMatchWithTeamSize    = 4,    // Lose a ranked arena match with team size {#Team Size}
+    LoseAura                            = 5,    // Lose aura "{Spell}"
+    GainAura                            = 6,    // Gain aura "{Spell}"
+    GainAuraEffect                      = 7,    // Gain aura effect "{SpellAuraNames.EnumID}"
+    CastSpell                           = 8,    // Cast spell "{Spell}"
+    BeSpellTarget                       = 9,    // Have spell "{Spell}" cast on you
+    ModifyPartyStatus                   = 10,   // Modify your party status
+
+    Count
+};
+
+enum class CriteriaStartEvent : uint8
+{
+    None                            = 0, // - NONE -
+    ReachLevel                      = 1, // Reach level {#Level}
+    CompleteDailyQuest              = 2, // Complete daily quest "{QuestV2}"
+    StartBattleground               = 3, // Start battleground "{Map}"
+    WinRankedArenaMatchWithTeamSize = 4, // Win a ranked arena match with team size {#Team Size}
+    GainAura                        = 5, // Gain aura "{Spell}"
+    GainAuraEffect                  = 6, // Gain aura effect "{SpellAuraNames.EnumID}"
+    CastSpell                       = 7, // Cast spell "{Spell}"
+    BeSpellTarget                   = 8, // Have spell "{Spell}" cast on you
+    AcceptQuest                     = 9, // Accept quest "{QuestV2}"
+    KillNPC                         = 10, // Kill NPC "{Creature}"
+    KillPlayer                      = 11, // Kill player
+    UseItem                         = 12, // Use item "{Item}"
+    SendEvent                       = 13, // Send event "{GameEvents}" (player-sent/instance only)
+
+    Count
 };
 
 enum AchievementCriteriaCompletionFlags

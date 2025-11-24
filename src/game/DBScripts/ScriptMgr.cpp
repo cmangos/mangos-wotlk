@@ -3477,47 +3477,6 @@ std::shared_ptr<ScriptMapMapName> ScriptMgr::GetScriptMap(ScriptMapType scriptMa
     return m_scriptMaps[scriptMapType];
 }
 
-// Starters for events
-bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart/*=true*/)
-{
-    MANGOS_ASSERT(source);
-
-    // Handle SD2 script
-    if (sScriptDevAIMgr.OnProcessEvent(id, source, target, isStart))
-        return true;
-
-    // Handle PvP Calls
-    if (source->IsGameObject() || source->IsUnit())
-    {
-        BattleGround* bg = nullptr;
-        OutdoorPvP* opvp = nullptr;
-        uint32 zoneId = 0;
-        if (source->IsPlayer())
-            zoneId = static_cast<Player*>(source)->GetCachedZoneId();
-        else
-            zoneId = static_cast<WorldObject*>(source)->GetZoneId();
-
-        if (map->IsBattleGroundOrArena())
-            bg = static_cast<BattleGroundMap*>(map)->GetBG();
-        else                                            // Use the go, because GOs don't move
-            opvp = sOutdoorPvPMgr.GetScript(zoneId);
-
-        if (bg && bg->HandleEvent(id, source, target))
-            return true;
-
-        if (opvp && opvp->HandleEvent(id, source, target))
-            return true;
-    }
-
-    Map::ScriptExecutionParam execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET;
-    if (source->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
-        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE;
-    else if (target && target->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
-        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET;
-
-    return map->ScriptsStart(SCRIPT_TYPE_EVENT, id, source, target, execParam);
-}
-
 bool ScriptMgr::ExistsStringId(uint32 stringId)
 {
     return m_stringIds->find(stringId) != m_stringIds->end();

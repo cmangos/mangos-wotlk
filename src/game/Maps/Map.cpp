@@ -2569,6 +2569,57 @@ bool Map::CanEnter(Player* player)
     return true;
 }
 
+void Map::StartEventForAllPlayersInMap(uint32 eventId, Object* target)
+{
+    for (auto& playerRef : GetPlayers())
+    {
+        StartEvent(eventId, playerRef.getSource(), target);
+    }
+}
+
+bool Map::StartEvent(uint32 eventId, Object* source, Object* target, bool isStart)
+{
+    MANGOS_ASSERT(source);
+
+    if (source->IsPlayer())
+        static_cast<Player*>(source)->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::SendEvent, eventId);
+
+    // Handle SD2 script
+    if (sScriptDevAIMgr.OnProcessEvent(eventId, source, target, isStart))
+        return true;
+
+    // Handle PvP Calls
+    if (source->IsGameObject() || source->IsUnit())
+    {
+        BattleGround* bg = nullptr;
+        OutdoorPvP* opvp = nullptr;
+        uint32 zoneId = 0;
+        if (source->IsPlayer())
+            zoneId = static_cast<Player*>(source)->GetCachedZoneId();
+        else
+            zoneId = static_cast<WorldObject*>(source)->GetZoneId();
+
+        if (IsBattleGroundOrArena())
+            bg = static_cast<BattleGroundMap*>(this)->GetBG();
+        else // Use the go, because GOs don't move
+            opvp = sOutdoorPvPMgr.GetScript(zoneId);
+
+        if (bg && bg->HandleEvent(eventId, source, target))
+            return true;
+
+        if (opvp && opvp->HandleEvent(eventId, source, target))
+            return true;
+    }
+
+    Map::ScriptExecutionParam execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET;
+    if (source->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
+        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE;
+    else if (target && target->isType(TYPEMASK_CREATURE_OR_GAMEOBJECT))
+        execParam = Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET;
+
+    return ScriptsStart(SCRIPT_TYPE_EVENT, eventId, source, target, execParam);
+}
+
 /// Put scripts in the execution queue
 bool Map::ScriptsStart(ScriptMapType scriptType, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams /*=SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET*/)
 {

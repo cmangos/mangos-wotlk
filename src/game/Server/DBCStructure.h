@@ -80,10 +80,6 @@ struct AchievementCriteriaEntry
         {
             uint32  creatureID;                             // 3
             uint32  creatureCount;                          // 4
-            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0, 3 or 13
-            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3 or 9
-            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } kill_creature;
 
         // ACHIEVEMENT_CRITERIA_TYPE_WIN_BG                 = 1
@@ -91,10 +87,6 @@ struct AchievementCriteriaEntry
         {
             uint32  bgMapID;                                // 3
             uint32  winCount;                               // 4
-            uint32  additionalRequirement1_type;            // 5
-            uint32  additionalRequirement1_value;           // 6
-            uint32  additionalRequirement2_type;            // 7
-            uint32  additionalRequirement2_value;           // 8
         } win_bg;
 
         // ACHIEVEMENT_CRITERIA_TYPE_REACH_LEVEL            = 5
@@ -193,9 +185,6 @@ struct AchievementCriteriaEntry
         {
             uint32  questID;                                // 3
             uint32  questCount;                             // 4
-            uint32  unused1;                                // 5
-            uint32  unused2;                                // 6
-            uint32  condFlag;                               // 7 condition flag; in wotlk value can be 0 or 10
         } complete_quest;
 
         // ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET        = 28
@@ -204,10 +193,6 @@ struct AchievementCriteriaEntry
         {
             uint32  spellID;                                // 3
             uint32  spellCount;                             // 4
-            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0, 3 or 13
-            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3 or 9
-            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } be_spell_target;
 
         // ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL             = 29
@@ -216,10 +201,6 @@ struct AchievementCriteriaEntry
         {
             uint32  spellID;                                // 3
             uint32  castCount;                              // 4
-            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
-            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
-            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } cast_spell;
 
         // ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE   = 30
@@ -227,10 +208,6 @@ struct AchievementCriteriaEntry
         {
             uint32  objectiveId;                            // 3 related to battleground objectives; each objective action has a defined id
             uint32  count;                                  // 4
-            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
-            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 1 or 3
-            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } capture_bg_objective;
 
         // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA = 31
@@ -238,10 +215,6 @@ struct AchievementCriteriaEntry
         {
             uint32  areaID;                                 // 3 Reference to AreaTable.dbc
             uint32  killCount;                              // 4
-            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
-            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
-            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } honorable_kill_at_area;
 
         // ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA              = 32
@@ -268,10 +241,6 @@ struct AchievementCriteriaEntry
         {
             uint32  unused;                                 // 3
             uint32  count;                                  // 4
-            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
-            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 1 or 3
-            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } honorable_kill_battleground;
 
         // ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM               = 36
@@ -286,7 +255,6 @@ struct AchievementCriteriaEntry
         {
             uint32  unused;                                 // 3
             uint32  count;                                  // 4
-            uint32  flag;                                   // 5 4=in a row
         } win_rated_arena;
 
         // ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_TEAM_RATING    = 38
@@ -413,8 +381,6 @@ struct AchievementCriteriaEntry
         {
             uint32  unused;                                 // 3
             uint32  count;                                  // 4
-            uint32  flag;                                   // 5 =3 for battleground healing
-            uint32  mapid;                                  // 6
         } healing_done;
 
         // ACHIEVEMENT_CRITERIA_TYPE_EQUIP_ITEM             = 57
@@ -452,10 +418,6 @@ struct AchievementCriteriaEntry
         {
             uint32  unused;                                 // 3
             uint32  killCount;                              // 4
-            uint32  flag1;                                  // 5    0 or 3; if !0 then mapId1 is provided; Possible guess: flag1 and mapId1 are checked for normal battleground difficulty;
-            uint32  mapId1;                                 // 6
-            uint32  flag2;                                  // 7    0 or 3; if !0 then mapId2 is provided; Possible guess: flag2 and mapId2 are checked for max lvl battleground difficulty
-            uint32  mapId2;                                 // 8
         } special_pvp_kill;
 
         // ACHIEVEMENT_CRITERIA_TYPE_FISH_IN_GAMEOBJECT     = 72
@@ -528,12 +490,12 @@ struct AchievementCriteriaEntry
         {
             uint32  value;                                  // 3        m_asset_id
             uint32  count;                                  // 4        m_quantity
-            uint32  additionalRequirement1_type;            // 5        m_start_event
-            uint32  additionalRequirement1_value;           // 6        m_start_asset
-            uint32  additionalRequirement2_type;            // 7        m_fail_event
-            uint32  additionalRequirement2_value;           // 8        m_fail_asset
         } raw;
     };
+    uint32 startEvent;                                      // 5        m_start_event
+    uint32 startAsset;                                      // 6        m_start_asset
+    uint32 failEvent;                                       // 7        m_fail_event
+    uint32 failAsset;                                       // 8        m_fail_asset
     char*  name[16];                                        // 9-24     m_description_lang
     // uint32 name_flags;                                   // 25
     uint32  completionFlag;                                 // 26       m_flags

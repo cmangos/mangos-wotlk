@@ -729,8 +729,5 @@ class ScriptMgr
         std::shared_ptr<StringIdMapByString> m_stringIdsByString;
 };
 
-// Starters for events
-bool StartEvents_Event(Map* map, uint32 id, Object* source, Object* target, bool isStart = true);
-
 #define sScriptMgr MaNGOS::Singleton<ScriptMgr>::Instance()
 #endif

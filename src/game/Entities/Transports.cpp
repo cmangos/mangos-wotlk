@@ -720,7 +720,7 @@ void ElevatorTransport::Update(const uint32 diff)
                 if (eventId)
                 {
                     m_eventTriggered = true;
-                    StartEvents_Event(GetMap(), eventId, this, this, true);
+                    GetMap()->StartEvent(eventId, this, this, true);
                 }
             }
         }
@@ -891,7 +891,7 @@ void Transport::DoEventIfAny(TaxiPathNodeEntry const& node, bool departure)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Taxi %s event %u of node %u of %s \"%s\") path", departure ? "departure" : "arrival", eventid, node.index, GetGuidStr().c_str(), GetName());
 
-        StartEvents_Event(GetMap(), eventid, this, this, departure);
+        GetMap()->StartEvent(eventid, this, this, departure);
     }
 }
 

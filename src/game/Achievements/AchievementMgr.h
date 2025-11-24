@@ -31,19 +31,20 @@
 struct AchievementEntry;
 struct AchievementCriteriaEntry;
 
-typedef std::list<AchievementCriteriaEntry const*> AchievementCriteriaEntryList;
-typedef std::list<AchievementEntry const*>         AchievementEntryList;
+typedef std::vector<AchievementCriteriaEntry const*> AchievementCriteriaEntryVector;
+typedef std::list<AchievementEntry const*>           AchievementEntryList;
 
-typedef std::map<uint32, AchievementCriteriaEntryList> AchievementCriteriaListByAchievement;
+typedef std::map<uint32, AchievementCriteriaEntryVector> AchievementCriteriaListByAchievement;
 typedef std::map<uint32, AchievementEntryList>         AchievementListByReferencedId;
 typedef std::map<uint32, TimePoint>                    AchievementCriteriaFailTimeMap;
 
 struct CriteriaProgress
 {
-    TimePoint date;
+    TimePoint updateDate;
+    TimePoint startDate;
     uint32 counter;
     bool changed;
-    bool timedCriteriaFailed;
+    bool criteriaFailed;
 };
 
 enum AchievementCriteriaRequirementType
@@ -276,7 +277,7 @@ typedef std::pair<AchievementRewardLocalesMap::const_iterator, AchievementReward
 
 struct CompletedAchievementData
 {
-    TimePoint date;
+    TimePoint updateDate;
     bool changed;
 };
 
@@ -297,8 +298,9 @@ class AchievementMgr
         static void DeleteFromDB(ObjectGuid guid);
         void LoadFromDB(std::unique_ptr<QueryResult> achievementResult, std::unique_ptr<QueryResult> criteriaResult);
         void SaveToDB();
-        void ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0);
-        void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime = 0);
+        void StartAchievementCriteria(CriteriaStartEvent startEvent, uint32 startAsset = 0);
+        void FailAchievementCriteria(CriteriaFailEvent failEvent, uint32 failAsset = 0);
+        void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId);
         void DoFailedTimedAchievementCriterias();
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = nullptr, uint32 time = 0);
         void CheckAllAchievementCriteria();
@@ -322,7 +324,7 @@ class AchievementMgr
         static uint32 GetCriteriaProgressMaxCounter(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement);
 
         // Use PROGRESS_SET only for reset/downgrade criteria progress
-        enum ProgressType { PROGRESS_SET, PROGRESS_ACCUMULATE, PROGRESS_HIGHEST };
+        enum ProgressType { PROGRESS_SET, PROGRESS_ACCUMULATE, PROGRESS_HIGHEST, PROGRESS_FAIL };
         void SetCriteriaProgress(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement, uint32 changeValue, ProgressType ptype);
 
     private:
@@ -345,8 +347,10 @@ class AchievementGlobalMgr
     public:
         ~AchievementGlobalMgr();
 
-        AchievementCriteriaEntryList const& GetAchievementCriteriaByType(AchievementCriteriaTypes type) const;
-        AchievementCriteriaEntryList const* GetAchievementCriteriaByAchievement(uint32 id);
+        AchievementCriteriaEntryVector const& GetAchievementCriteriaByType(AchievementCriteriaTypes type) const;
+        AchievementCriteriaEntryVector const& GetAchievementCriteriaByFailEvent(CriteriaFailEvent failEvent) const;
+        AchievementCriteriaEntryVector const& GetAchievementCriteriaByStartEvent(CriteriaStartEvent startEvent) const;
+        AchievementCriteriaEntryVector const* GetAchievementCriteriaByAchievement(uint32 id);
         AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const;
         AchievementReward const* GetAchievementReward(AchievementEntry const* achievement, uint8 gender) const;
         AchievementRewardLocale const* GetAchievementRewardLocale(AchievementEntry const* achievement, uint8 gender) const;
@@ -376,11 +380,13 @@ class AchievementGlobalMgr
         AchievementCriteriaRequirementMap m_criteriaRequirementMap;
 
         // store achievement criterias by type to speed up lookup
-        AchievementCriteriaEntryList m_AchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
+        AchievementCriteriaEntryVector m_AchievementCriteriasByType[ACHIEVEMENT_CRITERIA_TYPE_TOTAL];
         // store achievement criterias by achievement to speed up lookup
         AchievementCriteriaListByAchievement m_AchievementCriteriaListByAchievement;
         // store achievements by referenced achievement id to speed up lookup
         AchievementListByReferencedId m_AchievementListByReferencedId;
+        AchievementCriteriaEntryVector m_achievementCriteriaByFailEvent[uint8(CriteriaFailEvent::Count)];
+        AchievementCriteriaEntryVector m_achievementCriteriaByStartEvent[uint8(CriteriaStartEvent::Count)];
 
         typedef std::set<uint32> AllCompletedAchievements;
         AllCompletedAchievements m_allCompletedAchievements;

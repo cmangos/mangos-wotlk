@@ -1220,6 +1220,9 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
         if (damagetype != INSTAKILL)
             playerVictim->SetPvPDeath(responsiblePlayer != nullptr);
 
+        // reset no death achievements
+        playerVictim->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::Death);
+
         // achievement stuff
         if (responsiblePlayer)
             responsiblePlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, victim);

@@ -1433,7 +1433,7 @@ bool ChatHandler::HandleGUIDCommand(char* /*args*/)
     return true;
 }
 
-void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, TimePoint const* date /*= nullptr*/, Player* target /*= nullptr */)
+void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, TimePoint const* updateDate /*= nullptr*/, Player* target /*= nullptr */)
 {
     std::string name = achEntry->name[loc];
 
@@ -1444,10 +1444,10 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
     if (m_session)
     {
         ss << achEntry->ID << " - |cffffffff|Hachievement:" << achEntry->ID << ":" << std::hex << guid.GetRawValue() << std::dec;
-        if (date)
+        if (updateDate)
         {
             // complete date
-            time_t timeDate = std::chrono::system_clock::to_time_t(*date);
+            time_t timeDate = std::chrono::system_clock::to_time_t(*updateDate);
             tm* aTm = localtime(&timeDate);
             ss << ":1:" << aTm->tm_mon + 1 << ":" << aTm->tm_mday << ":" << (aTm->tm_year + 1900 - 2000) << ":";
 
@@ -1465,7 +1465,7 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                 uint32 criteriaMask[4] = {0, 0, 0, 0};
 
                 if (AchievementMgr const* mgr = target ? &target->GetAchievementMgr() : nullptr)
-                    if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
+                    if (AchievementCriteriaEntryVector const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
                         for (auto itr : *criteriaList)
                             if (mgr->IsCompletedCriteria(itr, achEntry))
                                 criteriaMask[(itr->showOrder - 1) / 32] |= (1 << ((itr->showOrder - 1) % 32));
@@ -1482,8 +1482,8 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
     else
         ss << achEntry->ID << " - " << name << " " << localeNames[loc];
 
-    if (target && date)
-        ss << " [" << TimeToTimestampStr(std::chrono::system_clock::to_time_t(*date)) << "]";
+    if (target && updateDate)
+        ss << " [" << TimeToTimestampStr(std::chrono::system_clock::to_time_t(*updateDate)) << "]";
 
     SendSysMessage(ss.str().c_str());
 }
@@ -1538,7 +1538,7 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
         if (loc < MAX_LOCALE)
         {
             CompletedAchievementData const* completed = target ? target->GetAchievementMgr().GetCompleteData(id) : nullptr;
-            ShowAchievementListHelper(achEntry, LocaleConstant(loc), completed ? &completed->date : nullptr, target);
+            ShowAchievementListHelper(achEntry, LocaleConstant(loc), completed ? &completed->updateDate : nullptr, target);
             ++counter;
         }
     }
@@ -1560,7 +1560,7 @@ bool ChatHandler::HandleCharacterAchievementsCommand(char* args)
     for (const auto& itr : complitedList)
     {
         AchievementEntry const* achEntry = sAchievementStore.LookupEntry(itr.first);
-        ShowAchievementListHelper(achEntry, loc, &itr.second.date, target);
+        ShowAchievementListHelper(achEntry, loc, &itr.second.updateDate, target);
     }
     return true;
 }

@@ -290,6 +290,9 @@ class Map : public GridRefManager<NGridType>
             SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET        = 0x02,   // Start Script only if not yet started (uniqueness identified by id and target)
             SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET = 0x03,   // Start Script only if not yet started (uniqueness identified by id, source and target)
         };
+
+        void StartEventForAllPlayersInMap(uint32 eventId, Object* target); // only do this for instances
+        bool StartEvent(uint32 eventId, Object* source, Object* target, bool isStart = true);
         bool ScriptsStart(ScriptMapType scriptType, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams = SCRIPT_EXEC_PARAM_NONE);
         void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
 

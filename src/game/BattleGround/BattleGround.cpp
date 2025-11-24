@@ -921,6 +921,7 @@ void BattleGround::EndBattleGround(Team winner)
         {
             if (team == winner)
             {
+                plr->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::WinRankedArenaMatchWithTeamSize);
                 // update achievement BEFORE personal rating update
                 ArenaTeamMember* member = winner_arena_team->GetMember(plr->GetObjectGuid());
                 if (member)
@@ -939,7 +940,7 @@ void BattleGround::EndBattleGround(Team winner)
                 loser_arena_team->MemberLost(plr, winner_rating);
 
                 // Arena lost => reset the win_rated_arena having the "no_loose" condition
-                plr->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA, ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE);
+                plr->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::LoseRankedArenaMatchWithTeamSize);
             }
         }
 
@@ -1591,15 +1592,7 @@ void BattleGround::AddPlayer(Player* player)
     }
 
     // reset achievement criterias based on map requirements
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEVEMENT_CRITERIA_CONDITION_MAP, GetMapId());
+    player->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::StartBattleground, GetMapId());
 
     // setup BG group membership
     PlayerAddedToBgCheckIfBgIsRunning(player);
@@ -1697,7 +1690,7 @@ void BattleGround::EventPlayerLoggedOut(Player* player)
   @param    player
   @param    guid
 */
-void BattleGround::RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/)
+void BattleGround::RemovePlayer(Player* player, ObjectGuid /*guid*/)
 {
     // Handle arena logic
     if (IsArena())
@@ -1709,6 +1702,8 @@ void BattleGround::RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/)
         GetBgMap()->GetVariableManager().SetVariable(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
 
         CheckArenaWinConditions();
+
+        player->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::LeaveBattleground, GetMapId());
     }
 }
 
@@ -2251,11 +2246,6 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
     // to be able to remove insignia -- ONLY IN BattleGrounds
     if (!IsArena())
         player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-
-    // reset no death achievements
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
-    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
 
     // handle generic arena logic
     if (IsArena())

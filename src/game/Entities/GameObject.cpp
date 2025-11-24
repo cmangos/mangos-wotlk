@@ -1575,7 +1575,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             if (GetGOInfo()->chest.eventId > 0)
             {
                 DEBUG_LOG("Chest ScriptStart id %u for %s (opened by %s)", GetGOInfo()->chest.eventId, GetGuidStr().c_str(), user->GetGuidStr().c_str());
-                StartEvents_Event(GetMap(), GetGOInfo()->chest.eventId, user, this);
+                GetMap()->StartEvent(GetGOInfo()->chest.eventId, user, this);
             }
 
             if (!GetGOInfo()->chest.lockId)
@@ -1658,7 +1658,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             if (uint32 eventId = GetGOInfo()->chair.triggeredEvent)
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Chair ScriptStart id %u for %s (Used by %s).", eventId, GetGuidStr().c_str(), player->GetGuidStr().c_str());
-                StartEvents_Event(GetMap(), eventId, user, this);
+                GetMap()->StartEvent(eventId, user, this);
             }
             return;
         }
@@ -1716,7 +1716,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
                 {
                     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for %s (Used by %s).", info->goober.eventId, GetGuidStr().c_str(), player->GetGuidStr().c_str());
 
-                    StartEvents_Event(GetMap(), info->goober.eventId, player, this);
+                    GetMap()->StartEvent(info->goober.eventId, player, this);
                 }
 
                 // possible quest objective for active quests
@@ -1760,7 +1760,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
                 player->SendCinematicStart(info->camera.cinematicId);
 
             if (info->camera.eventID)
-                StartEvents_Event(GetMap(), info->camera.eventID, player, this);
+                GetMap()->StartEvent(info->camera.eventID, player, this);
 
             return;
         }
@@ -2036,7 +2036,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
                 GameObjectInfo const* info = GetGOInfo();
                 if (info && info->flagdrop.eventID)
                 {
-                    StartEvents_Event(GetMap(), info->flagdrop.eventID, this, player, true);
+                    GetMap()->StartEvent(info->flagdrop.eventID, this, player, true);
 
                     // handle spell data if available; this usually marks the player as the flag carrier in a battleground
                     spellId = info->flagdrop.pickupSpell;
@@ -2545,7 +2545,7 @@ void GameObject::TickCapturePoint()
     }
 
     if (eventId)
-        StartEvents_Event(GetMap(), eventId, this, *capturingPlayers.begin(), true);
+        GetMap()->StartEvent(eventId, this, *capturingPlayers.begin(), true);
 }
 
 // ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2599,7 +2599,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
         m_useTimes = GetMaxHealth();
         // Start Event if exist
         if (caster && m_goInfo->destructibleBuilding.rebuildingEvent)
-            StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.rebuildingEvent, this, caster->GetBeneficiary(), true);
+            GetMap()->StartEvent(m_goInfo->destructibleBuilding.rebuildingEvent, this, caster->GetBeneficiary(), true);
     }
     else                                                    // Set to value
         m_useTimes = uint32(diff);
@@ -2617,7 +2617,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 
         // Start Event if exist
         if (caster && m_goInfo->destructibleBuilding.intactEvent)
-            StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.intactEvent, this, caster->GetBeneficiary(), true);
+            GetMap()->StartEvent(m_goInfo->destructibleBuilding.intactEvent, this, caster->GetBeneficiary(), true);
     }
     else if (m_useTimes == 0)                               // Destroyed
     {
@@ -2644,7 +2644,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 
             // Start Event if exist
             if (caster && m_goInfo->destructibleBuilding.destroyedEvent)
-                StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.destroyedEvent, this, caster->GetBeneficiary(), true);
+                GetMap()->StartEvent(m_goInfo->destructibleBuilding.destroyedEvent, this, caster->GetBeneficiary(), true);
         }
     }
     else if (m_useTimes <= m_goInfo->destructibleBuilding.damagedNumHits) // Damaged
@@ -2663,7 +2663,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
 
             // Start Event if exist
             if (caster && m_goInfo->destructibleBuilding.damagedEvent)
-                StartEvents_Event(GetMap(), m_goInfo->destructibleBuilding.damagedEvent, this, caster->GetBeneficiary(), true);
+                GetMap()->StartEvent(m_goInfo->destructibleBuilding.damagedEvent, this, caster->GetBeneficiary(), true);
         }
     }
 
