@@ -95,7 +95,8 @@ struct boss_keristraszaAI : public BossAI
 
         DoCastSpellIfCan(nullptr, SPELL_INTENSE_COLD, CAST_AURA_NOT_PRESENT);
 
-        m_creature->GetMap()->StartEventForAllPlayersInMap(EVENT_ID_INTENSE_COLD, m_creature);
+        if (!m_isRegularMode)
+            m_creature->GetMap()->StartEventForAllPlayersInMap(EVENT_ID_INTENSE_COLD, m_creature);
     }
 
     void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
