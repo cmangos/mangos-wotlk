@@ -5,6 +5,8 @@
 #ifndef DEF_NEXUS_H
 #define DEF_NEXUS_H
 
+#include "Chat/Chat.h"
+
 enum
 {
     MAX_ENCOUNTER                  = 4,
@@ -64,13 +66,16 @@ class instance_nexus : public ScriptedInstance
 
         void Load(const char* chrIn) override;
 
+        void ShowChatCommands(ChatHandler* handler);
+        void ExecuteChatCommand(ChatHandler* handler, char* args);
+
+        void ReleaseKeristrasza();
+
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
-
-        std::set<uint32> m_sIntenseColdFailPlayers;
 };
 
 #endif

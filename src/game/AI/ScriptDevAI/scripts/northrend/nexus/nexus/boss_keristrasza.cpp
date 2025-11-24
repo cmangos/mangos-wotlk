@@ -47,7 +47,10 @@ enum
 
     SPELL_TAIL_SWEEP            = 50155,
 
-    SPELL_ENRAGE                = 8599
+    SPELL_ENRAGE                = 8599,
+
+    EVENT_ID_INTENSE_COLD       = 20542,
+    SPELL_FAIL_ACHIEVEMENT_INTENSE_COLD = 59900,
 };
 
 enum KeristraszaActions
@@ -91,6 +94,8 @@ struct boss_keristraszaAI : public BossAI
         BossAI::Aggro(who);
 
         DoCastSpellIfCan(nullptr, SPELL_INTENSE_COLD, CAST_AURA_NOT_PRESENT);
+
+        m_creature->GetMap()->StartEventForAllPlayersInMap(EVENT_ID_INTENSE_COLD, m_creature);
     }
 
     void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
@@ -118,8 +123,7 @@ struct IntenseColdAura : public AuraScript
         // check achiev
         if (aura->GetStackAmount() > MAX_INTENSE_COLD_STACK)
         {
-            if (instance_nexus* pInstance = static_cast<instance_nexus*>(target->GetInstanceData()))
-                pInstance->SetData(TYPE_INTENSE_COLD_FAILED, target->GetGUIDLow());
+            target->CastSpell(nullptr, SPELL_FAIL_ACHIEVEMENT_INTENSE_COLD, TRIGGERED_OLD_TRIGGERED);
         }
     }
 };
