@@ -950,10 +950,23 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_FLOAT_SCALE_RARE_HEALTH, "Creature.Scale.Rare.Health", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_INSTANCE_DAMAGE, "Creature.Scale.Instance.Damage", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_INSTANCE_HEALTH, "Creature.Scale.Instance.Health", 1.0f);
-    setConfig(CONFIG_UINT32_DOUBLE_DROP_CHANCE_NORMAL, "Creature.DoubleDrop.Chance.Normal", 0);
-    setConfig(CONFIG_UINT32_DOUBLE_DROP_CHANCE_ELITE, "Creature.DoubleDrop.Chance.Elite", 0);
-    setConfig(CONFIG_UINT32_DOUBLE_DROP_CHANCE_RARE, "Creature.DoubleDrop.Chance.Rare", 0);
-    setConfig(CONFIG_UINT32_DOUBLE_DROP_CHANCE_BOSS, "Creature.DoubleDrop.Chance.Boss", 0);
+    setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_NORMAL, "Creature.DoubleDrop.Chance.Normal", 0.0f);
+    setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_ELITE, "Creature.DoubleDrop.Chance.Elite", 0.0f);
+    setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_RARE, "Creature.DoubleDrop.Chance.Rare", 0.0f);
+    setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_BOSS, "Creature.DoubleDrop.Chance.Boss", 0.0f);
+    setConfig(CONFIG_FLOAT_DROP_MIN_CHANCE_NORMAL, "Creature.Drop.MinChance.Normal", 0.0f);
+    setConfig(CONFIG_FLOAT_DROP_MIN_CHANCE_ELITE, "Creature.Drop.MinChance.Elite", 0.0f);
+    setConfig(CONFIG_FLOAT_DROP_MIN_CHANCE_RARE, "Creature.Drop.MinChance.Rare", 0.0f);
+    setConfig(CONFIG_FLOAT_DROP_MIN_CHANCE_BOSS, "Creature.Drop.MinChance.Boss", 0.0f);
+    setConfig(CONFIG_UINT32_DROP_MIN_ITEMS_NORMAL, "Creature.Drop.MinItems.Normal", 0);
+    setConfig(CONFIG_UINT32_DROP_MIN_ITEMS_ELITE, "Creature.Drop.MinItems.Elite", 0);
+    setConfig(CONFIG_UINT32_DROP_MIN_ITEMS_RARE, "Creature.Drop.MinItems.Rare", 0);
+    setConfig(CONFIG_UINT32_DROP_MIN_ITEMS_BOSS, "Creature.Drop.MinItems.Boss", 0);
+    setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_NORMAL, "Creature.Drop.MaxItems.Normal", 0);
+    setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_ELITE, "Creature.Drop.MaxItems.Elite", 0);
+    setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_RARE, "Creature.Drop.MaxItems.Rare", 0);
+    setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_BOSS, "Creature.Drop.MaxItems.Boss", 0);
+
 
     sLog.outString();
 }

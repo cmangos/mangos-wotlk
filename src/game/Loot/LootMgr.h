@@ -218,7 +218,7 @@ struct LootStoreItem
           group(_group), needs_quest(_chanceOrQuestChance < 0), maxcount(_maxcount), conditionId(_conditionId)
     {}
 
-    bool Roll(bool rate) const;                             // Checks if the entry takes it's chance (at loot generation)
+    bool Roll(bool rate) const; // Checks if the entry takes it's chance (at loot generation)
 };
 
 struct LootItem
@@ -269,7 +269,7 @@ class LootTemplate
                 bool HasQuestDropForPlayer(Player const* player) const;
                 // The same for active quests of the player
                 // Rolls an item from the group (if any) and adds the item to the loot
-                void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStats = nullptr) const;
+                void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStats = nullptr, Creature const* creature = nullptr, bool reroll = false) const;
                 float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
                 float TotalChance() const;                          // Overall chance for the group
 
@@ -281,21 +281,25 @@ class LootTemplate
                 LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
 
                 // Rolls an item from the group, returns nullptr if all miss their chances
-                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner) const;
+                LootStoreItem const* Roll(Loot const& loot, Player const* lootOwner, float minDropChance) const;
         };
         using LootGroups = std::vector<LootGroup>;
 
     public:
+        static float GetDoubleDropChance(Creature const* creature);
+        static float GetMinDropChance(Creature const* creature);
+        static uint32 GetMinDropCount(Creature const* creature);
+        static uint32 GetMaxDropCount(Creature const* creature);
+
         // Adds an entry to the group (at loading stage)
         void AddEntry(LootStoreItem const& item);
         // Rolls for every item in the template and adds the rolled items the the loot
-        void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr, Creature* creature = nullptr) const;
+        void Process(Loot& loot, Player const* lootOwner, bool rate, LootStatsData* lootStatsData = nullptr, Creature const* creature = nullptr, bool reroll = false) const;
 
         // True if template includes at least 1 quest drop entry
         bool HasQuestDrop(uint8 groupId = 0) const;
         // True if template includes at least 1 quest drop for an active quest of the player
         bool HasQuestDropForPlayer(Player const* player, uint8 groupId = 0) const;
-        uint32 GetDoubleDropChance(Creature* creature) const;
 
         // True if at least one player fulfills loot condition
         static bool PlayerOrGroupFulfilsCondition(const Loot& loot, Player const* lootOwner, uint16 conditionId);
@@ -384,6 +388,7 @@ class Loot
         bool IsItemAlreadyIn(uint32 itemId) const;
         void PrintLootList(ChatHandler& chat, WorldSession* session) const;
         bool HasLoot() const;
+        uint32 GetLootCount() const { return m_lootItems.size(); }
         uint32 GetGoldAmount() const { return m_gold; }
         LootType GetLootType() const { return m_lootType; }
         LootItem* GetLootItemInSlot(uint32 itemSlot);

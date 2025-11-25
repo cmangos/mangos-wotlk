@@ -2036,6 +2036,24 @@ CharDelete.KeepDays = 30
 #    Creature.DoubleDrop.Chance.Elite
 #    Creature.DoubleDrop.Chance.Boss
 #    Creature.DoubleDrop.Chance.Rare
+#        Default: 0.0
+#
+#    Creature.Drop.MinChance.Normal
+#    Creature.Drop.MinChance.Elite
+#    Creature.Drop.MinChance.Boss
+#    Creature.Drop.MinChance.Rare
+#        Default: 0.0
+#
+#    Creature.Drop.MinItems.Normal
+#    Creature.Drop.MinItems.Elite
+#    Creature.Drop.MinItems.Boss
+#    Creature.Drop.MinItems.Rare
+#        Default: 0
+#
+#    Creature.Drop.MaxItems.Normal
+#    Creature.Drop.MaxItems.Elite
+#    Creature.Drop.MaxItems.Boss
+#    Creature.Drop.MaxItems.Rare
 #        Default: 0
 #
 ###################################################################################################################
