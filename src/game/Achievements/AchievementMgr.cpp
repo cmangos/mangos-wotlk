@@ -536,8 +536,6 @@ void AchievementMgr::StartAchievementCriteria(CriteriaStartEvent startEvent, uin
         // Add to timer map in special case
         if (CriteriaFailEvent(achievementCriteria->failEvent) == CriteriaFailEvent::Hours24WithoutCompletingDailyQuest)
             m_criteriaFailTimes[achievementCriteria->ID] = progress->updateDate + std::chrono::days(1);
-        else if (achievementCriteria->timeLimit)
-            m_criteriaFailTimes[achievementCriteria->ID] = progress->updateDate + std::chrono::seconds(achievementCriteria->timeLimit);
 
         SendCriteriaUpdate(achievementCriteria->ID, progress);
     }
@@ -949,6 +947,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             if (itr->second.criteriaFailed) // started but failed
                 continue;
         }
+
+        // if has timed event, do not update until started
+        if (achievementCriteria->IsExplicitlyStartedTimedCriteria() && m_criteriaFailTimes.find(achievementCriteria->ID) == m_criteriaFailTimes.end())
+            continue;
 
         // init values, real set in switch
         uint32 change = 0;

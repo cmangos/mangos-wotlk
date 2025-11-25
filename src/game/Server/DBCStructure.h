@@ -507,11 +507,7 @@ struct AchievementCriteriaEntry
     // helpers
     bool IsExplicitlyStartedTimedCriteria() const
     {
-        if (!timeLimit)
-            return false;
-
-        // in case raw.value == timedCriteriaMiscId in timedCriteriaMiscId stored spellid/itemids for cast/use, so repeating aura start at first cast/use until fails
-        return requiredType == ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST || raw.value != timedCriteriaMiscId;
+        return timedCriteriaStartType > 0;
     }
 };
 
