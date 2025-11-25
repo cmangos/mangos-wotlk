@@ -1610,9 +1610,12 @@ void Map::SetNewDifficultyCooldown(TimePoint const& newCooldown)
 
 // This is not retail like
 // Get xp rate for given type
-float Map::GetXPModRate(RateModType type) const
+float Map::GetXPModRate(RateModType type, Unit const* unit) const
 {
     float expMod = 1.0f;
+
+    bool autoScalingEnabled = sWorld.getConfig(CONFIG_BOOL_XP_AUTO_SCALE);
+
     switch (type)
     {
         case RateModType::QUEST: {
@@ -1624,6 +1627,12 @@ float Map::GetXPModRate(RateModType type) const
                 default: expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST_WOTLK); break;
             }
             expMod *= sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST);
+
+            if (autoScalingEnabled && unit->IsPlayer())
+            {
+                expMod += sWorld.getConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_QUEST) * unit->GetLevel();
+            }
+
             break;
         }
 
@@ -1636,6 +1645,12 @@ float Map::GetXPModRate(RateModType type) const
                 default: expMod = sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL_WOTLK); break;
             }
             expMod *= sWorld.getConfig(CONFIG_FLOAT_RATE_XP_KILL);
+
+            if (autoScalingEnabled && unit->IsPlayer())
+            {
+                expMod += sWorld.getConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_KILL) * unit->GetLevel();
+            }
+
             break;
         }
 

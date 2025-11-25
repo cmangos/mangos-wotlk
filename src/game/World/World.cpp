@@ -944,6 +944,9 @@ void World::LoadConfigSettings(bool reload)
 
     // Custom configs
     setConfig(CONFIG_BOOL_INSTANCE_AUTO_SCALE, "Instance.AutoScaling", false);
+    setConfig(CONFIG_BOOL_XP_AUTO_SCALE, "XP.AutoScaling", false);
+    setConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_KILL, "XP.AutoScaling.Factor.Kill", 0.07);
+    setConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_QUEST, "XP.AutoScaling.Factor.Quest", 0.07);
     setConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE, "Creature.Scale.Default.Damage", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH, "Creature.Scale.Default.Health", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_RARE_DAMAGE, "Creature.Scale.Rare.Damage", 1.0f);

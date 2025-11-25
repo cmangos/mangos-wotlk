@@ -2561,13 +2561,9 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
 
         float chance = rand_chance_f();
 
-        uint32 count = 0;
-
         // as the new vector is randomized we can start from first element and stop at first one that meet the condition
         for (std::vector <LootStoreItem const*>::const_iterator itr = lootStoreItemVector.begin(); itr != lootStoreItemVector.end(); ++itr)
         {
-            count++;
-
             LootStoreItem const* lsi = *itr;
 
             if (lsi->conditionId && lootOwner && !LootTemplate::PlayerOrGroupFulfilsCondition(loot, lootOwner, lsi->conditionId))
@@ -2577,18 +2573,14 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
             }
 
             if (lsi->chance >= 100.0f) {
-                sLog.outBasic("group loot found (min chance) from: %u", count);
                 return lsi;
             }
 
             chance -= lsi->chance >= minDropChance ? lsi->chance : minDropChance;
             if (chance < 0) {
-                sLog.outBasic("group loot found (real chance) from: %u", count);
                 return lsi;
             }
         }
-
-        sLog.outBasic("group loot missed from: %u", count);
     }
 
     if (!EqualChanced.empty())                              // If nothing selected yet - an item is taken from equal-chanced part

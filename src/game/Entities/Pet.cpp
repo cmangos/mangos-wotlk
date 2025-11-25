@@ -899,7 +899,7 @@ void Pet::GivePetXP(uint32 xp)
     if (level < maxlevel)
     {
 
-        xp *= GetMap()->GetXPModRate(RateModType::PETKILL);
+        xp *= GetMap()->GetXPModRate(RateModType::PETKILL, this);
 
         uint32 nextLvlXP = GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP);
         uint32 curXP = GetUInt32Value(UNIT_FIELD_PETEXPERIENCE);

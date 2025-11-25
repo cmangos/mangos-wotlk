@@ -242,7 +242,7 @@ class Map : public GridRefManager<NGridType>
         TimePoint const& GetNewDifficultyCooldown() const { return m_dynamicDifficultyCooldown; }
 
         uint32 GetExpansion() const { return (i_mapEntry) ? i_mapEntry->Expansion() : 0u; }
-        float GetXPModRate(RateModType type) const;
+        float GetXPModRate(RateModType type, Unit const* unit) const;
 
         MapEntry const* GetEntry() const { return i_mapEntry; }
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }

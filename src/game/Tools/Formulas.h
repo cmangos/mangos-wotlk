@@ -181,7 +181,7 @@ namespace MaNGOS
 
             xp_gain = target->GetModifierXpBasedOnDamageReceived(xp_gain);
 
-            return (uint32)(std::nearbyint(xp_gain * target->GetMap()->GetXPModRate(RateModType::KILL)));
+            return (uint32)(std::nearbyint(xp_gain * target->GetMap()->GetXPModRate(RateModType::KILL, unit)));
         }
 
         inline float xp_in_group_rate(uint32 count, bool /*isRaid*/)
