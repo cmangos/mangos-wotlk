@@ -1729,6 +1729,10 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_EQUIPMENT_SET_USE");
     recv_data.hexlike();
 
+    bool weaponChanged = false;
+    bool bagsFull = false;
+    bool fail = false;
+
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END; ++i)
     {
         ObjectGuid itemGuid;
@@ -1739,13 +1743,15 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
 
         DEBUG_LOG("Item (%s): srcbag %u, srcslot %u", itemGuid.GetString().c_str(), srcbag, srcslot);
 
+        // TODO: Add check against swapping from bank when bank not opened
+
         // check if item slot is set to "ignored" (raw value == 1), must not be unequipped then
         if (itemGuid.GetRawValue() == 1)
             continue;
 
         Item* item = _player->GetItemByGuid(itemGuid);
 
-        uint16 dstpos = i | (INVENTORY_SLOT_BAG_0 << 8);
+        uint16 dest = i | (INVENTORY_SLOT_BAG_0 << 8);
 
         if (!item)
         {
@@ -1761,18 +1767,31 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
                 _player->StoreItem(sDest, uItem, true);
             }
             else
+            {
                 _player->SendEquipError(msg, uItem, nullptr);
+                if (msg == EQUIP_ERR_BAG_FULL)
+                    bagsFull = true;
+                else
+                    fail = true;
+            }
 
             continue;
         }
 
-        if (item->GetPos() == dstpos)
+        if (item->GetPos() == dest)
             continue;
 
-        _player->SwapItem(item->GetPos(), dstpos);
+        uint8 src = item->GetPos();
+        _player->SwapItem(src, dest);
+
+        if (dest == EQUIPMENT_SLOT_MAINHAND || dest == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+            weaponChanged = true;
     }
 
     WorldPacket data(SMSG_USE_EQUIPMENT_SET_RESULT, 1);
-    data << uint8(0);                                       // 4 - equipment swap failed - inventory is full
+    data << uint8(bagsFull ? 4 : (fail ? 1 : 0)); // 4 - equipment swap failed - inventory is full, 1 any failure
     SendPacket(data);
+
+    if (weaponChanged)
+        _player->SendResetRangedCombatTimer();
 }

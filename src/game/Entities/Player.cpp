@@ -12769,6 +12769,13 @@ void Player::SendOpenContainer(ObjectGuid itemGuid)
     GetSession()->SendPacket(data);
 }
 
+void Player::SendResetRangedCombatTimer()
+{
+    WorldPacket data(SMSG_RESET_RANGED_COMBAT_TIMER, 4);
+    data << uint32(GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME));
+    GetSession()->SendPacket(data);
+}
+
 void Player::TradeCancel(bool sendback, TradeStatus status /*= TRADE_STATUS_TRADE_CANCELED*/)
 {
     if (m_trade)

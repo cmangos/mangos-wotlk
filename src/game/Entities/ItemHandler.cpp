@@ -137,6 +137,9 @@ void WorldSession::HandleSwapItem(WorldPacket& recv_data)
     }
 
     _player->SwapItem(src, dst);
+
+    if (dst == EQUIPMENT_SLOT_MAINHAND || dst == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+        _player->SendResetRangedCombatTimer();
 }
 
 void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
@@ -234,6 +237,8 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
 
     if (Player::IsBagPos(dest))
         _player->SendOpenContainer(pSrcItem->GetObjectGuid());
+    else if (dest == EQUIPMENT_SLOT_MAINHAND || dest == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+        _player->SendResetRangedCombatTimer();
 }
 
 void WorldSession::HandleDestroyItemOpcode(WorldPacket& recv_data)
