@@ -227,7 +227,7 @@ void BattleGroundSA::Update(uint32 diff)
                     SendBattlegroundWarning(LANG_BG_SA_BEGIN);
                     GetBgMap()->GetVariableManager().SetVariable(BG_SA_STATE_ENABLE_TIMER, WORLD_STATE_ADD);
                     EnableDemolishers();
-                    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE);
+                    GetBgMap()->StartEventForAllPlayersInMap(GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE, nullptr);
                     m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
                     break;
                 case BG_SA_STAGE_ROUND_2:
@@ -315,7 +315,7 @@ void BattleGroundSA::StartingEventOpenDoors()
 
     SendBattlegroundWarning(LANG_BG_SA_BEGIN);
     GetBgMap()->GetVariableManager().SetVariable(BG_SA_STATE_ENABLE_TIMER, WORLD_STATE_ADD);
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE);
+    GetBgMap()->StartEventForAllPlayersInMap(GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE, nullptr);
 }
 
 // function to allow demolishers to be used by players

@@ -99,7 +99,7 @@ void BattleGroundEY::StartingEventOpenDoors()
     OpenDoorEvent(BG_EVENT_DOOR);
 
     // Players that join battleground after start are not eligible to get achievement.
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, EY_TIMED_ACHIEV_FLURRY);
+    GetBgMap()->StartEventForAllPlayersInMap(EY_TIMED_ACHIEV_FLURRY, nullptr);
 
     // setup graveyards
     GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_ALLIANCE, EY_ZONE_ID_MAIN, ALLIANCE);

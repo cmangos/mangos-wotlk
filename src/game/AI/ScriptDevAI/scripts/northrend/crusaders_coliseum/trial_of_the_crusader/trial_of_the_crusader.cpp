@@ -391,7 +391,7 @@ void instance_trial_of_the_crusader::SetData(uint32 uiType, uint32 uiData)
             else if (uiData == DONE)
                 StartNextDialogueText(EVENT_TWINS_KILLED);
             else if (uiData == IN_PROGRESS)
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_VALKYRS_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_VALKYRS_ID, nullptr);
             // combat doors
             if (uiData != SPECIAL)
             {

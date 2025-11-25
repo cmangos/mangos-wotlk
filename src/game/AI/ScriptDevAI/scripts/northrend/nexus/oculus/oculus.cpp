@@ -116,7 +116,7 @@ void instance_oculus::SetData(uint32 uiType, uint32 uiData)
                 DoUpdateWorldState(WORLD_STATE_CONSTRUCTS, 1);
                 DoUpdateWorldState(WORLD_STATE_CONSTRUCTS_COUNT, m_sConstructsAliveGUIDSet.size());
 
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_EREGOS_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_EREGOS_ID, nullptr);
             }
             break;
         case TYPE_VAROS:

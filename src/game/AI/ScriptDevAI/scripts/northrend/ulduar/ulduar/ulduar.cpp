@@ -555,7 +555,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             if (uiData == IN_PROGRESS)
             {
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_IGNIS_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_IGNIS_ID, nullptr);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHATTERED, false);
             }
             break;
@@ -630,7 +630,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_XT002_GATE);
             if (uiData == IN_PROGRESS)
             {
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_XT002_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_XT002_ID, nullptr);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_NERF_ENG, true);
             }
             break;
@@ -909,7 +909,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             else if (uiData == IN_PROGRESS)
             {
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_YOGG_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_YOGG_ID, nullptr);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_DRIVE_CRAZY, true);
             }
             break;
@@ -1035,7 +1035,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         case TYPE_FREYA_CONSPEEDATORY:
             m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY] = uiData;
             if (uiData == DONE)
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, ACHIEV_START_FREYA_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_FREYA_ID, nullptr);
             break;
 
         // Other types - not saved

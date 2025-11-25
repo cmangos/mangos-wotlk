@@ -816,18 +816,18 @@ static const uint32 achievIdByRace[MAX_RACES]    = { 0, 1408, 1410, 1407, 1409, 
 /**
  * this function will be called whenever the user might have done a timed-criteria relevant action, or by scripting side?
  */
-void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId)
+void AchievementMgr::StartTimedAchievementCriteria(CriteriaTimedEvent timedEvent, uint32 timedAsset)
 {
-    DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::StartTimedAchievementCriteria(%u, %u)", type, timedRequirementId);
+    DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::StartTimedAchievementCriteria(%u, %u)", timedEvent, timedAsset);
 
     if (!sWorld.getConfig(CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
         return;
 
-    AchievementCriteriaEntryVector const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryVector const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByTimedEvent(timedEvent);
     for (auto achievementCriteria : achievementCriteriaList)
     {
         // only apply to specific timedRequirementId related criteria
-        if (achievementCriteria->timedCriteriaMiscId != timedRequirementId)
+        if (achievementCriteria->timedCriteriaMiscId != timedAsset)
             continue;
 
         if (!achievementCriteria->IsExplicitlyStartedTimedCriteria())
@@ -2455,6 +2455,11 @@ AchievementCriteriaEntryVector const& AchievementGlobalMgr::GetAchievementCriter
     return m_achievementCriteriaByStartEvent[uint8(startEvent)];
 }
 
+AchievementCriteriaEntryVector const& AchievementGlobalMgr::GetAchievementCriteriaByTimedEvent(CriteriaTimedEvent timedEvent) const
+{
+    return m_achievementCriteriaByTimedEvent[uint8(timedEvent)];
+}
+
 AchievementCriteriaEntryVector const* AchievementGlobalMgr::GetAchievementCriteriaByAchievement(uint32 id)
 {
     AchievementCriteriaListByAchievement::const_iterator itr = m_AchievementCriteriaListByAchievement.find(id);
@@ -2542,6 +2547,8 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
             m_achievementCriteriaByFailEvent[criteria->failEvent].push_back(criteria);
         if (criteria->startEvent != 0)
             m_achievementCriteriaByStartEvent[criteria->startEvent].push_back(criteria);
+        if (criteria->timedCriteriaStartType != 0)
+            m_achievementCriteriaByStartEvent[criteria->timedCriteriaStartType].push_back(criteria);
         ++count;
     }
 

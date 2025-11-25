@@ -2515,7 +2515,6 @@ class Player : public Unit
         AchievementMgr const& GetAchievementMgr() const { return m_achievementMgr; }
         AchievementMgr& GetAchievementMgr() { return m_achievementMgr; }
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = nullptr, uint32 time = 0);
-        void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId);
 
         bool HasTitle(uint32 bitIndex) const;
         bool HasTitle(CharTitlesEntry const* title) const { return HasTitle(title->bit_index); }

@@ -2582,7 +2582,10 @@ bool Map::StartEvent(uint32 eventId, Object* source, Object* target, bool isStar
     MANGOS_ASSERT(source);
 
     if (source->IsPlayer())
+    {
         static_cast<Player*>(source)->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::SendEvent, eventId);
+        static_cast<Player*>(source)->GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::SendEvent, eventId);
+    }
 
     // Handle SD2 script
     if (sScriptDevAIMgr.OnProcessEvent(eventId, source, target, isStart))

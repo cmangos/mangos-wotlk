@@ -103,7 +103,7 @@ void instance_halls_of_lightning::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_LOKEN:
             if (uiData == IN_PROGRESS)
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_LOKEN_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_LOKEN_ID, nullptr);
             else if (uiData == DONE)
             {
                 if (GameObject* pGlobe = GetSingleGameObjectFromStorage(GO_LOKEN_THRONE))

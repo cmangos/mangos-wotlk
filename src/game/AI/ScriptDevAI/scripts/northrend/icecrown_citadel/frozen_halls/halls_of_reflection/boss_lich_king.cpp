@@ -197,7 +197,7 @@ struct boss_lich_king_horAI : public ScriptedAI
             if (m_pInstance)
             {
                 DoCastSpellIfCan(m_creature, m_pInstance->GetPlayerTeam() == ALLIANCE ? SPELL_STUN_BREAK_VISUAL_A : SPELL_STUN_BREAK_VISUAL_H);
-                m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, ACHIEV_START_NOT_RETREATING_ID);
+                m_pInstance->instance->StartEventForAllPlayersInMap(ACHIEV_START_NOT_RETREATING_ID, m_creature);
             }
         }
     }

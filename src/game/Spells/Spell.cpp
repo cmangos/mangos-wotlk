@@ -1526,6 +1526,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
     {
         static_cast<Player*>(unit)->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::BeSpellTarget, m_spellInfo->Id);
         static_cast<Player*>(unit)->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::BeSpellTarget, m_spellInfo->Id); // unused but implemented
+        static_cast<Player*>(unit)->GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::BeSpellTarget, m_spellInfo->Id);
         static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, m_spellInfo->Id);
         static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, m_spellInfo->Id);
     }
@@ -3717,13 +3718,6 @@ SpellCastResult Spell::cast(bool skipCheck)
     m_targets.updateTradeSlotItem();
 
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster, nullptr, m_auraScript);
-    if (m_trueCaster->IsPlayer())
-    {
-        if (!m_IsTriggeredSpell && m_CastItem)
-            static_cast<Player*>(m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
-
-        static_cast<Player*>(m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
-    }
 
     FillTargetMap();
 
@@ -3756,6 +3750,20 @@ SpellCastResult Spell::cast(bool skipCheck)
     InitializeDamageMultipliers();
 
     OnCast();
+
+    if (m_trueCaster->IsPlayer())
+    {
+        if (!m_IsTriggeredSpell && m_CastItem)
+        {
+            static_cast<Player*>(m_trueCaster)->GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::UseItem, m_CastItem->GetEntry());
+            static_cast<Player*>(m_trueCaster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
+        }
+
+        // static_cast<Player*>(m_trueCaster)->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::CastSpell, m_spellInfo->Id); // unused
+        // static_cast<Player*>(m_trueCaster)->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::CastSpell, m_spellInfo->Id); // unused
+        static_cast<Player*>(m_trueCaster)->GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::CastSpell, m_spellInfo->Id);
+        static_cast<Player*>(m_trueCaster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
+    }
 
     if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
         m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);

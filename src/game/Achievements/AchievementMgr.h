@@ -300,7 +300,7 @@ class AchievementMgr
         void SaveToDB();
         void StartAchievementCriteria(CriteriaStartEvent startEvent, uint32 startAsset = 0);
         void FailAchievementCriteria(CriteriaFailEvent failEvent, uint32 failAsset = 0);
-        void StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId);
+        void StartTimedAchievementCriteria(CriteriaTimedEvent timedEvent, uint32 timedAsset);
         void DoFailedTimedAchievementCriterias();
         void UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1 = 0, uint32 miscvalue2 = 0, Unit* unit = nullptr, uint32 time = 0);
         void CheckAllAchievementCriteria();
@@ -350,6 +350,7 @@ class AchievementGlobalMgr
         AchievementCriteriaEntryVector const& GetAchievementCriteriaByType(AchievementCriteriaTypes type) const;
         AchievementCriteriaEntryVector const& GetAchievementCriteriaByFailEvent(CriteriaFailEvent failEvent) const;
         AchievementCriteriaEntryVector const& GetAchievementCriteriaByStartEvent(CriteriaStartEvent startEvent) const;
+        AchievementCriteriaEntryVector const& GetAchievementCriteriaByTimedEvent(CriteriaTimedEvent timedEvent) const;
         AchievementCriteriaEntryVector const* GetAchievementCriteriaByAchievement(uint32 id);
         AchievementEntryList const* GetAchievementByReferencedId(uint32 id) const;
         AchievementReward const* GetAchievementReward(AchievementEntry const* achievement, uint8 gender) const;
@@ -387,6 +388,7 @@ class AchievementGlobalMgr
         AchievementListByReferencedId m_AchievementListByReferencedId;
         AchievementCriteriaEntryVector m_achievementCriteriaByFailEvent[uint8(CriteriaFailEvent::Count)];
         AchievementCriteriaEntryVector m_achievementCriteriaByStartEvent[uint8(CriteriaStartEvent::Count)];
+        AchievementCriteriaEntryVector m_achievementCriteriaByTimedEvent[uint8(CriteriaTimedEvent::Count)];
 
         typedef std::set<uint32> AllCompletedAchievements;
         AllCompletedAchievements m_allCompletedAchievements;

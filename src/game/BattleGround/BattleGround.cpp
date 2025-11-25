@@ -1500,19 +1500,6 @@ void BattleGround::StartBattleGround()
 }
 
 /**
-  Method that starts timed achievements for all battleground players
-
-  @param    achiev criteria type
-  @param    entry
-*/
-void BattleGround::StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry)
-{
-    for (const auto& itr : GetPlayers())
-        if (Player* pPlayer = GetBgMap()->GetPlayer(itr.first))
-            pPlayer->GetAchievementMgr().StartTimedAchievementCriteria(type, entry);
-}
-
-/**
   Method that is called when adding a player to the battleground
 
   @param    player

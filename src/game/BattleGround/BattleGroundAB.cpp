@@ -164,7 +164,7 @@ void BattleGroundAB::StartingEventOpenDoors()
     OpenDoorEvent(BG_EVENT_DOOR);
 
     // Players that join battleground after start are not eligible to get achievement.
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, AB_TIMED_ACHIEV_GET_THIS_DONE);
+    GetBgMap()->StartEventForAllPlayersInMap(AB_TIMED_ACHIEV_GET_THIS_DONE, nullptr);
 
     // setup graveyards
     // enable gy near base after bg start

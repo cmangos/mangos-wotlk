@@ -106,7 +106,7 @@ void instance_eye_of_eternity::SetData(uint32 type, uint32 data)
     if (data == IN_PROGRESS)
     {
         // Portal and iris despawn handled in DB
-        DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MALYGOS_ID);
+        instance->StartEventForAllPlayersInMap(ACHIEV_START_MALYGOS_ID, nullptr);
     }
     else if (data == FAIL)
     {

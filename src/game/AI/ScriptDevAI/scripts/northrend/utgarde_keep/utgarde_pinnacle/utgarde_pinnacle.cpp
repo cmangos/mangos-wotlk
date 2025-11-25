@@ -242,7 +242,7 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                 case SPECIAL:
                     // Prepare achievements
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_LOVE_SKADI, true);
-                    DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_SKADI_ID);
+                    instance->StartEventForAllPlayersInMap(ACHIEV_START_SKADI_ID, nullptr);
 
                     m_uiGauntletCheckTimer = 7000;
                     m_auiEncounter[uiType] = uiData;

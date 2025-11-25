@@ -15548,6 +15548,7 @@ void Player::KilledMonster(CreatureInfo const* cInfo, Creature const* creature)
 void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid)
 {
     uint32 addkillcount = 1;
+    GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::KillNpc, entry);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, entry, addkillcount);
 
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -23757,11 +23758,6 @@ void Player::HandleFall(MovementInfo const& movementInfo)
 void Player::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1/*=0*/, uint32 miscvalue2/*=0*/, Unit* unit/*=nullptr*/, uint32 time/*=0*/)
 {
     GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time);
-}
-
-void Player::StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId)
-{
-    GetAchievementMgr().StartTimedAchievementCriteria(type, timedRequirementId);
 }
 
 PlayerTalent const* Player::GetKnownTalentById(int32 talentId) const
