@@ -451,6 +451,15 @@ struct FArrowTEff : public AuraScript
     }
 };
 
+// 55028 - Summon Freed Proto-Drake
+struct SummonFreedProtoDrake : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->GetCaster()->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    }
+};
+
 void AddSC_storm_peaks()
 {
     Script* pNewScript = new Script;
@@ -480,4 +489,5 @@ void AddSC_storm_peaks()
     RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
     RegisterSpellScript<ThrowIce>("spell_throw_ice");
     RegisterSpellScript<FArrowTEff>("spell_flaming_arrow_triggered_effect");
+    RegisterSpellScript<SummonFreedProtoDrake>("spell_summon_freed_protodrake");
 }
