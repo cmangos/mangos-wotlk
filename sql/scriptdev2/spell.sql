@@ -989,6 +989,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54956,'spell_impaling_charge'),
 (54969,'spell_summon_constrictor_sladran'),
 (54997,'spell_cast_net_stormforged_pursuer'),
+(55028,'spell_summon_freed_protodrake'),
 (55093,'spell_grip_of_sladran'),
 (55099,'spell_gundrak_snake_wrap'),
 (55163,'spell_mojo_frenzy'),
