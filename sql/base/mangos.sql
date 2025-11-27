@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14096_01_mangos_closing_text` bit(1) DEFAULT NULL
+  `required_14098_01_mangos_wmogroupgen` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1026,6 +1026,7 @@ CREATE TABLE `creature_zone` (
   `Guid` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
   `ZoneId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Zone Identifier',
   `AreaId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Area Identifier',
+  `WmoGroupId` INT DEFAULT 0,
   PRIMARY KEY(`Guid`)
 );
 
@@ -2280,6 +2281,7 @@ CREATE TABLE `gameobject_zone` (
   `Guid` int unsigned NOT NULL AUTO_INCREMENT COMMENT 'Global Unique Identifier',
   `ZoneId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Zone Identifier',
   `AreaId` mediumint unsigned NOT NULL DEFAULT '0' COMMENT 'Area Identifier',
+  `WmoGroupId` INT DEFAULT 0,
   PRIMARY KEY(`Guid`)
 );
 
