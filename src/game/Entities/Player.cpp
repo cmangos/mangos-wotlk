@@ -7383,7 +7383,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
             uint32 k_level = GetLevel();
             uint32 v_level = pVictim->GetLevel();
 
-            uint32 victim_rank = pVictim->GetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_LIFETIME_MAX_PVP_RANK); 
+            victim_rank = pVictim->GetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_LIFETIME_MAX_PVP_RANK); 
 
             uint32 k_grey = MaNGOS::XP::GetGrayLevel(k_level);
 
