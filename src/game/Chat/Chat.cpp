@@ -1130,6 +1130,38 @@ ChatCommand* ChatHandler::getCommandTable()
     return commandTable;
 }
 
+uint32 ChatHandler::GetGameObjecGuidFromArgs(char* args, bool popLastObject)
+{
+    Player* player = m_session->GetPlayer();
+
+    uint32 guid;
+
+    if (!player)
+    {
+        SendSysMessage("Cannot teleport to the entrance: Internal error, player does not exist!");
+        return 0;
+    }
+
+    if (strcmp(args, "last") == 0 && !player->GameObjectsAdded.empty())
+    {
+        guid = player->GameObjectsAdded.front();
+
+        if (popLastObject)
+        {
+            player->GameObjectsAdded.pop_front();
+        }
+
+        return guid;
+    }
+    
+    if (!ExtractUint32KeyFromLink(&args, "Hgameobject", guid))
+    {
+        return 0;
+    }
+
+    return guid;
+}
+
 ChatHandler::ChatHandler(WorldSession* session) : m_session(session), sentErrorMessage(false)
 {}
 

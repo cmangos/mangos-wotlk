@@ -196,6 +196,8 @@ class ChatHandler
         void CheckIntegrity(ChatCommand* table, ChatCommand* parentCommand) const;
         ChatCommand* getCommandTable();
 
+        uint32 GetGameObjecGuidFromArgs(char* args, bool popLastObject = false);
+
 #include "Anticheat/module/AnticheatChatCommandsFunctions.h"
 
         bool HandleAccountCommand(char* args);

@@ -1081,6 +1081,8 @@ class Player : public Unit
         explicit Player(WorldSession* session);
         ~Player();
 
+        std::deque<uint32> GameObjectsAdded;
+
         void CleanupsBeforeDelete() override;
 
         void AddToWorld() override;

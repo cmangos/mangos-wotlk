@@ -993,9 +993,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
 bool ChatHandler::HandleGameObjectDeleteCommand(char* args)
 {
     // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-    uint32 dbGuid;
-    if (!ExtractUint32KeyFromLink(&args, "Hgameobject", dbGuid))
-        return false;
+    uint32 dbGuid = GetGameObjecGuidFromArgs(args, true);
 
     if (!dbGuid)
         return false;
@@ -1213,6 +1211,9 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     sObjectMgr.AddGameobjectToGrid(db_lowGUID, sObjectMgr.GetGOData(db_lowGUID));
 
     PSendSysMessage(LANG_GAMEOBJECT_ADD, id, gInfo->name, db_lowGUID, x, y, z);
+
+    plr->GameObjectsAdded.emplace_front(db_lowGUID);
+
     return true;
 }
 
