@@ -1138,7 +1138,7 @@ uint32 ChatHandler::GetGameObjecGuidFromArgs(char* args, bool popLastObject)
 
     if (!player)
     {
-        SendSysMessage("Cannot teleport to the entrance: Internal error, player does not exist!");
+        SendSysMessage("Internal error, player does not exist!");
         return 0;
     }
 
