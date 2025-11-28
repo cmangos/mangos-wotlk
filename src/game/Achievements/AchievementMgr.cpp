@@ -2719,9 +2719,6 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
             default:                                        // type not use DB data, ignore
                 continue;
         }
-
-        if (!GetCriteriaRequirementSet(criteria))
-            sLog.outErrorDb("Table `achievement_criteria_requirement` is missing expected data for `criteria_id` %u (type: %u) for achievement %u.", criteria->ID, criteria->requiredType, criteria->referredAchievement);
     }
 
     sLog.outString();
