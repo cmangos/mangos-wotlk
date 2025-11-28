@@ -7360,7 +7360,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
         return false;
 
     ObjectGuid victim_guid;
-    uint32 victim_rank = 0;
+    int32 victim_rank = 0;
 
     // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
     UpdateHonorFields();
@@ -7372,7 +7372,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
 
         victim_guid = uVictim->GetObjectGuid();
 
-        if (uVictim->GetTypeId() == TYPEID_PLAYER)
+        if (uVictim->IsPlayer())
         {
             Player* pVictim = (Player*)uVictim;
 
@@ -7396,14 +7396,10 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
                 //  title[1..14]  -> rank[5..18]
                 //  title[15..28] -> rank[5..18]
                 //  title[other]  -> 0
-                if (victim_title == 0)
-                    victim_guid.Clear();                    // Don't show HK: <rank> message, only log.
-                else if (victim_title < 15)
+                if (victim_title < 15)
                     victim_rank = victim_title + 4;
                 else if (victim_title < 29)
                     victim_rank = victim_title - 14 + 4;
-                else
-                    victim_guid.Clear();                    // Don't show HK: <rank> message, only log.
             }
 
             uint32 k_grey = MaNGOS::XP::GetGrayLevel(k_level);
@@ -7430,13 +7426,36 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
         }
         else
         {
-            Creature* cVictim = (Creature*)uVictim;
+            Creature* honorableCreature = static_cast<Creature*>(uVictim);
 
-            if (!cVictim->IsRacialLeader())
-                return false;
+            if (honorableCreature->IsRacialLeader())
+                victim_rank = 19; // HK: Leader
+            else
+                victim_rank = -1; // Special unranked case for npcs in wotlk
 
-            honor = 100;                                    // ??? need more info
-            victim_rank = 19;                               // HK: Leader
+            switch (honorableCreature->GetEntry()) // currently unknown if like bg xp it scales with level of recipient
+            {
+                case 3057: // Cairne Bloodhoof
+                    honor = 2000;
+                    break;
+                case 10181: // Lady Sylvanas Windrunner
+                    honor = 2700;
+                    break;
+                case 31125: // Archavon
+                case 33993: // Emalon
+                case 35013: // Koralon
+                case 38433: // Toravon
+                    honor = 4200; // WIP
+                    break;
+                default: // TODO: More research
+                    if (honorableCreature->IsRacialLeader())
+                        honor = 2500;
+                    else
+                        return false;
+                    break;
+            }
+
+            honor = std::round(float(honor) / groupsize);
         }
     }
 
@@ -7459,7 +7478,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
     WorldPacket data(SMSG_PVP_CREDIT, 4 + 8 + 4);
     data << uint32(honor);
     data << ObjectGuid(victim_guid);
-    data << uint32(victim_rank);
+    data << int32(victim_rank);
     GetSession()->SendPacket(data);
 
     // add honor points
