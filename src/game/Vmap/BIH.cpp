@@ -58,14 +58,29 @@ void BIH::subdivide(int left, int right, std::vector<uint32>& tempTree, buildDat
         Vector3 d(gridBox.hi - gridBox.lo);
         if (d.x < 0 || d.y < 0 || d.z < 0)
             throw std::logic_error("negative node extents");
-        for (int i = 0; i < 3; ++i)
+
+        try
         {
-            if (nodeBox.hi[i] < gridBox.lo[i] || nodeBox.lo[i] > gridBox.hi[i])
+            for (int i = 0; i < 3; ++i)
             {
-                // UI.printError(Module.ACCEL, "Reached tree area in error - discarding node with: %d objects", right - left + 1);
-                throw std::logic_error("invalid node overlap");
+                if (nodeBox.hi[i] < gridBox.lo[i] || nodeBox.lo[i] > gridBox.hi[i])
+                {
+                    // UI.printError(Module.ACCEL, "Reached tree area in error - discarding node with: %d objects", right - left + 1);
+                    throw std::logic_error("invalid node overlap");
+                }
             }
         }
+        catch (std::exception ex)
+        {
+            sLog.outError("Subdivide failed with std::exception");
+            return;
+        }
+        catch (...)
+        {
+            sLog.outError("Subdivide failed with unknown exception");
+            return;
+        }
+        
         // find longest axis
         axis = d.primaryAxis();
         split = 0.5f * (gridBox.lo[axis] + gridBox.hi[axis]);
