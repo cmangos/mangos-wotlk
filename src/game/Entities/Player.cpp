@@ -7390,7 +7390,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
                 //  [15..28] Horde honor titles and player name
                 //  [29..38] Other title and player name
                 //  [39+]    Nothing
-                uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE);
+                uint32 victim_title = pVictim->GetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_LIFETIME_MAX_PVP_RANK);
                 // Get Killer titles, CharTitlesEntry::bit_index
                 // Ranks:
                 //  title[1..14]  -> rank[5..18]
