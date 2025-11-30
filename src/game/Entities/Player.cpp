@@ -18068,7 +18068,7 @@ void Player::SendSavedInstances()
         }
     }
 
-    // Send opcode 811. true or false means, whether you have current raid/heroic instances
+    // true or false means, whether you own the current instance
     data.Initialize(SMSG_UPDATE_INSTANCE_OWNERSHIP);
     data << uint32(hasBeenSaved);
     GetSession()->SendPacket(data);
@@ -21399,7 +21399,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
             if (time_t timeReset = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(GetMap()->GetId(), diff))
             {
                 uint32 timeleft = uint32(timeReset - time(nullptr));
-                SendInstanceResetWarning(GetMap()->GetId(), diff, timeleft);
+                InstancePlayerBind* instanceBind = GetBoundInstance(GetMap()->GetId(), Difficulty(GetMap()->GetDifficulty()), true);
+                SendInstanceResetWarning(GetMap()->GetId(), diff, timeleft, instanceBind, instanceBind ? instanceBind->extendState == EXTEND_STATE_EXTENDED : false);
             }
         }
     }
@@ -21608,7 +21609,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
     }
 }
 
-void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time) const
+void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool locked, bool extended) const
 {
     // type of warning, based on the time remaining until reset
     uint32 type;

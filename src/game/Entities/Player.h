@@ -1117,7 +1117,7 @@ class Player : public Unit
 
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap(bool reconnect);
-        void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time) const;
+        void SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool locked, bool extended) const;
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
         GameObject* GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameobject_type = MAX_GAMEOBJECT_TYPE);

@@ -2431,7 +2431,10 @@ void DungeonMap::UnloadAll(bool pForce)
 void DungeonMap::SendResetWarnings(uint32 timeLeft) const
 {
     for (const auto& itr : m_mapRefManager)
-        itr.getSource()->SendInstanceResetWarning(GetId(), itr.getSource()->GetDifficulty(IsRaid()), timeLeft);
+    {
+        InstancePlayerBind* instanceBind = itr.getSource()->GetBoundInstance(GetId(), Difficulty(GetDifficulty()), true);
+        itr.getSource()->SendInstanceResetWarning(GetId(), itr.getSource()->GetDifficulty(IsRaid()), timeLeft, instanceBind, instanceBind ? instanceBind->extendState == EXTEND_STATE_EXTENDED : false);
+    }
 }
 
 void DungeonMap::SetResetSchedule(bool on)
