@@ -70,14 +70,8 @@ void BIH::subdivide(int left, int right, std::vector<uint32>& tempTree, buildDat
                 }
             }
         }
-        catch (std::exception ex)
-        {
-            sLog.outError("Subdivide failed with std::exception");
-            return;
-        }
         catch (...)
         {
-            sLog.outError("Subdivide failed with unknown exception");
             return;
         }
         
