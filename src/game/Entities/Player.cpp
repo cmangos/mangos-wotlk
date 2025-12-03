@@ -21629,8 +21629,8 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
     data << uint32(time);
     if (type == RAID_INSTANCE_WELCOME)
     {
-        data << uint8(0);                                   // is your (1)
-        data << uint8(0);                                   // is extended (1), ignored if prev field is 0
+        data << uint8(locked);                              // is locked
+        data << uint8(extended);                            // is extended
     }
     GetSession()->SendPacket(data);
 }
