@@ -335,6 +335,7 @@ class AchievementMgr
         void IncompletedAchievement(AchievementEntry const* achievement);
         bool IsCompletedAchievement(AchievementEntry const* entry);
         void BuildAllDataPacket(WorldPacket& data);
+        TimePoint GetTimeFromMap() const;
 
         Player* m_player;
         CriteriaProgressMap m_criteriaProgress;
