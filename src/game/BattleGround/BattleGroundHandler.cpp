@@ -378,6 +378,8 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
             SendPacket(data);
             break;
         }
+        case BATTLEGROUND_SA: // TODO: Add and check IoC too
+            break;
         default:
             // maybe it is sent also in arena - do nothing
             break;
