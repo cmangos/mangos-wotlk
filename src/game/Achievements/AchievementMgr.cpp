@@ -699,7 +699,7 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
                         TimePoint failTime = progress.updateDate + std::chrono::seconds(criteria->timeLimit);
                         m_criteriaFailTimes[criteria->ID] = failTime;
                         // A failed Achievement - will be removed by DoFailedTimedAchievementCriterias on next tick for player
-                        if (failTime <= GetPlayer()->GetMap()->GetCurrentClockTime())
+                        if (failTime <= sWorld.GetCurrentClockTime())
                             progress.criteriaFailed = true;
                     }
                 }
