@@ -129,6 +129,9 @@ void CreatureAI::AttackPassengersIfCan(Unit* who)
             if (seatEntry->m_flags & SEAT_FLAG_NOT_SELECTABLE || seatEntry->m_flags & SEAT_FLAG_HIDE_PASSENGER)
                 continue;
 
+            if (!m_creature->CanAttack(passenger))
+                continue;
+
             m_creature->AddThreat(passenger);
             m_creature->SetInCombatWith(passenger);
             passenger->SetInCombatWith(m_creature);
