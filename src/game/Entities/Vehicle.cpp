@@ -897,8 +897,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
     {
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
-            passenger->SetCharm(pVehicle);
-            pVehicle->SetCharmer(passenger);
+            // vehicle 222 confirmed to not set charm
+            // passenger->SetCharm(pVehicle);
+            // pVehicle->SetCharmer(passenger);
 
             // Change vehicle react state; ToDo: also change the vehicle faction?
             if (pVehicle->GetTypeId() == TYPEID_UNIT)
