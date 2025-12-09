@@ -3388,10 +3388,11 @@ void Spell::Prepare()
             m_caster->AI()->OnSpellCastStateChange(this, true, m_targets.getUnitTarget());
     }
 
-    m_castPositionX = m_trueCaster->GetPositionX();
-    m_castPositionY = m_trueCaster->GetPositionY();
-    m_castPositionZ = m_trueCaster->GetPositionZ();
-    m_castOrientation = m_trueCaster->GetOrientation();
+    Position pos = m_trueCaster->GetPosition(m_trueCaster->GetTransport());
+    m_castPositionX = pos.GetPositionX();
+    m_castPositionY = pos.GetPositionY();
+    m_castPositionZ = pos.GetPositionZ();
+    m_castOrientation = pos.GetPositionO();
 
     OnSuccessfulStart();
 
@@ -4084,9 +4085,10 @@ void Spell::update(uint32 difftime)
         return;
     }
 
+    Position pos = m_trueCaster->GetPosition(m_trueCaster->GetTransport());
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if ((m_trueCaster->IsUnit() && m_timer != 0) &&
-            (m_castPositionX != m_trueCaster->GetPositionX() || m_castPositionY != m_trueCaster->GetPositionY() || m_castPositionZ != m_trueCaster->GetPositionZ()) &&
+        (m_castPositionX != pos.GetPositionX() || m_castPositionY != pos.GetPositionY() || m_castPositionZ != pos.GetPositionZ()) &&
             (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
     {
         // always cancel for channeled spells
