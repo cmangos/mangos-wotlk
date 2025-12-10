@@ -6669,11 +6669,18 @@ void ObjectMgr::GenerateZoneAndAreaIds()
     int i = 0;
     int total = 0;
     std::string query = "";
+    std::vector<uint32> skipMapIds =
+    {
+        582, 584, 586, 587, 588, 589, 590, 591, 592, 593, 594, 596, 610, 612, 613, 614, 620, 621, 622, 623, 641, 642, 647, 672, 673, 712, 713, 718
+    };
     for (auto& data : mCreatureDataMap)
     {
         CreatureData const& creature = data.second;
         uint32 zoneId, areaId;
         int32 wmoGroupId = 0;
+        if (std::find(skipMapIds.begin(), skipMapIds.end(), creature.mapid) != skipMapIds.end())
+            continue;
+
         TerrainInfo* info = sTerrainMgr.LoadTerrain(creature.mapid);
         MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), creature.mapid, 0);
         CellPair p = MaNGOS::ComputeCellPair(creature.posX, creature.posY);
@@ -6702,6 +6709,9 @@ void ObjectMgr::GenerateZoneAndAreaIds()
         GameObjectData const& go = data.second;
         uint32 zoneId, areaId;
         int32 wmoGroupId = 0;
+        if (std::find(skipMapIds.begin(), skipMapIds.end(), go.mapid) != skipMapIds.end())
+            continue;
+
         TerrainInfo* info = sTerrainMgr.LoadTerrain(go.mapid);
         MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), go.mapid, 0);
         CellPair p = MaNGOS::ComputeCellPair(go.posX, go.posY);
