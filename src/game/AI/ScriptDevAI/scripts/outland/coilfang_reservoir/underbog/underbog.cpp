@@ -30,16 +30,7 @@ instance_underbog::instance_underbog(Map* map) : ScriptedInstance(map), m_bGhaza
     Initialize();
 }
 
-void instance_underbog::Initialize()
-{
-    instance->GetVariableManager().SetVariable(WORLD_STATE_UNDERBOG_GROUP_3, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_UNDERBOG_GROUP_18, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_UNDERBOG_GROUP_19, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_UNDERBOG_GROUP_20, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_UNDERBOG_GROUP_22, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_UNDERBOG_GROUP_24, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_UNDERBOG_GROUP_25, urand(0, 1));
-}
+void instance_underbog::Initialize(){}
 
 void instance_underbog::SetData(uint32 type, uint32 data)
 {
