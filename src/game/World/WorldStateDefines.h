@@ -387,14 +387,6 @@ enum WorldStateID : int32
     WORLD_STATE_SHADOW_LAB_ASSASIN_01 = 5550006,
     WORLD_STATE_SHADOW_LAB_ASSASIN_02 = 5550007,
 
-    // Sethekk Halls
-    WORLD_STATE_SETHEKK_GROUP_12    = 5560001,              // 2 Possible group versions
-    WORLD_STATE_SETHEKK_GROUP_13    = 5560002,              // 2 Possible group versions
-    WORLD_STATE_SETHEKK_GROUP_14    = 5560003,              // 2 Possible group versions
-    WORLD_STATE_SETHEKK_GROUP_16    = 5560004,              // 2 Possible group versions
-    WORLD_STATE_SETHEKK_GROUP_20    = 5560005,              // 2 Possible group versions
-    WORLD_STATE_SETHEKK_GROUP_21    = 5560006,              // 2 Possible group versions
-
     // Mana Tombs
     WORLD_STATE_MANA_TOMBS_GROUP_18 = 5570001,              // 2 Possible group versions
     WORLD_STATE_MANA_TOMBS_GROUP_20 = 5570002,              // 2 Possible group versions

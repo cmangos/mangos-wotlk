@@ -33,12 +33,6 @@ instance_sethekk_halls::instance_sethekk_halls(Map* pMap) : ScriptedInstance(pMa
 void instance_sethekk_halls::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SETHEKK_GROUP_12, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SETHEKK_GROUP_13, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SETHEKK_GROUP_14, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SETHEKK_GROUP_16, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SETHEKK_GROUP_20, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SETHEKK_GROUP_21, urand(0, 1));
 }
 
 void instance_sethekk_halls::OnCreatureCreate(Creature* pCreature)
