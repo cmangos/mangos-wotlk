@@ -59,7 +59,7 @@ bool ChatHandler::HandleTpCommand(char* args)
         }
     }
 
-    AreaTrigger const* at = sObjectMgr.GetGoBackTrigger(mapEntry->MapID);
+    AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(mapEntry->MapID);
 
     if (!at)
     {
