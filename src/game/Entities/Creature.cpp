@@ -830,11 +830,11 @@ void Creature::Update(const uint32 diff)
             if (m_delayedBoardingSpell && !ItsNewObject()) // after being added to world
                 TriggerDelayedBoarding();
 
-            UpdateWorldAutoscale();
 
             auto map = GetMap();
 
-            if (!map) {
+            if (!map)
+            {
                 break;
             }
 
@@ -852,9 +852,11 @@ void Creature::Update(const uint32 diff)
             auto distance = player->GetDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ());
 
             std::cout << "distance from target: " << distance << std::endl;
-            std::cout << "  - autoscale amount: " << m_additionalScaleAmount << std::endl;
-            std::cout << "  - downscale at: " << m_downscaleAt << std::endl;
+            std::cout << "  - autoscale amount: " << m_wScaleAmount << std::endl;
+            std::cout << "  - downscale at: " << m_wScaleDownscaleAt << std::endl;
             std::cout << "  - health: " << GetHealth() << std::endl;
+
+            UpdateWorldAutoscale();
 
             break;
         }
@@ -1369,7 +1371,7 @@ float Creature::GetHealthScale() const
     Map* map = GetMap();
 
     float worldScaleRate = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_HEALTH);
-    float worldAdditionalScale = worldScaleRate * m_additionalScaleAmount;
+    float worldAdditionalScale = worldScaleRate * m_wScaleAmount;
 
     if (!map || !map->IsDungeon())
     {
@@ -1418,7 +1420,7 @@ float Creature::GetDamageScale() const
     Map* map = GetMap();
 
     float worldScaleRate = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_DAMAGE);
-    float worldAdditionalScale = worldScaleRate * m_additionalScaleAmount;
+    float worldAdditionalScale = worldScaleRate * m_wScaleAmount;
 
     if (!map || !map->IsDungeon())
     {
@@ -1616,22 +1618,9 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, 
     float healthPercent = preserveState ? GetHealthPercent() : 100.0f;
     float powerPercent = preserveState ? GetPowerPercent() : 100.0f;
 
-    if (preserveState && GetMaxHealth() <= health)
-    {
-        SetMaxHealth(health);
-        SetHealth(health * (healthPercent / 100.0f));
-    }
-    else if (preserveState && GetMaxHealth() > health)
-    {
-        SetHealth(health * (healthPercent / 100.0f));
-        SetMaxHealth(health);
-    }
-    else
-    {
-        SetCreateHealth(health);
-        SetMaxHealth(health);
-        SetHealth(GetMaxHealth());
-    }
+    // health
+    SetCreateHealth(health);
+    SetMaxHealth(health);
 
     // all power types
     for (int i = POWER_MANA; i <= POWER_RUNIC_POWER; ++i)
@@ -1691,11 +1680,16 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, 
     SetModifierValue(UnitMods(UNIT_MOD_MANA + (int)GetPowerType()), TOTAL_PCT, powerMultiplier);
 
     UpdateAllStats();
+
+    if (preserveState)
+        SetHealthPercent(healthPercent);
+    else
+        SetHealth(GetMaxHealth());
     
     for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
     {
-        if (preserveState && GetPowerType() == Powers(i))
-            SetPower(Powers(i), GetMaxPower(Powers(i)) * powerPercent);
+        if (preserveState)
+            SetPower(Powers(i), GetMaxPower(Powers(i)) * (powerPercent / 100.0f));
         else
             SetPower(Powers(i), GetMaxPower(Powers(i)));
     }
@@ -2787,38 +2781,49 @@ void Creature::UpdateWorldAutoscale()
         return;
     }
 
+    auto worldTime = sWorld.GetCurrentMSTime();
+
+    if (m_wScaleNextUpdateAt != 0 && worldTime < m_wScaleNextUpdateAt)
+    {
+        return;
+    }
+
+    m_wScaleNextUpdateAt = worldTime + 500;
+
+    std::cout << "updated" << std::endl;
+
     uint32 playersCount = map->GetPlayersCountInAutoscaleDistance(GetPosition());
     uint32 newScaleAmount = playersCount > m_wScalePlayersThreshold ? playersCount - m_wScalePlayersThreshold : 0;
 
-    if (m_additionalScaleAmount == newScaleAmount)
+    if (m_wScaleAmount == newScaleAmount)
     {
-        if (m_downscaleAt != 0) {
-            m_downscaleAt = 0;
+        if (m_wScaleDownscaleAt != 0) {
+             m_wScaleDownscaleAt = 0;
         }
 
         return;
     }
 
-    if (newScaleAmount < m_additionalScaleAmount && m_downscaleAt == 0)
+    if (newScaleAmount < m_wScaleAmount && m_wScaleDownscaleAt == 0)
     {
         uint32 downscaleDelayMS = m_wScaleDownscaleDelayMS;
 
-        m_downscaleAt = sWorld.GetCurrentMSTime() + downscaleDelayMS;
+        m_wScaleDownscaleAt = worldTime + downscaleDelayMS;
         
         return;
     }
 
-    bool downscaleDelayExpired = m_downscaleAt > 0 && sWorld.GetCurrentMSTime() > m_downscaleAt;
-    bool shouldDownscale = (!IsInCombat() || downscaleDelayExpired) && newScaleAmount < m_additionalScaleAmount;
-    bool shouldUpscale = newScaleAmount > m_additionalScaleAmount;
+    bool downscaleDelayExpired = m_wScaleDownscaleAt > 0 && worldTime > m_wScaleDownscaleAt;
+    bool shouldDownscale = (!IsInCombat() || downscaleDelayExpired) && newScaleAmount < m_wScaleAmount;
+    bool shouldUpscale = newScaleAmount > m_wScaleAmount;
 
     if (shouldDownscale || shouldUpscale)
     {
         auto healthPercent = GetHealthPercent();
         auto level = GetLevel();
 
-        m_additionalScaleAmount = newScaleAmount;
-        m_downscaleAt = 0;
+        m_wScaleAmount = newScaleAmount;
+        m_wScaleDownscaleAt = 0;
 
         SelectLevel(level, true);
     }

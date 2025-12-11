@@ -1018,8 +1018,12 @@ class Creature : public Unit
         VendorItemCounts m_vendorItemCounts;
 
         // open world autoscaling:
-        uint32 m_downscaleAt = 0;
-        uint32 m_additionalScaleAmount = 0;
+        bool m_wScaleEnabled;
+        uint32 m_wScalePlayersThreshold;
+        uint32 m_wScaleDownscaleDelayMS;
+        uint32 m_wScaleDownscaleAt = 0;
+        uint32 m_wScaleNextUpdateAt = 0;
+        uint32 m_wScaleAmount = 0;
 
         uint32 m_gossipMenuId;
         uint32 m_lootMoney;
@@ -1100,10 +1104,6 @@ class Creature : public Unit
         float m_modelRunSpeed;
 
         bool m_combatOnlyStealth;
-
-        bool m_wScaleEnabled;
-        uint32 m_wScalePlayersThreshold;
-        uint32 m_wScaleDownscaleDelayMS;
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent

@@ -781,14 +781,14 @@ uint32 Map::GetPlayersCountInAutoscaleDistance(Position const& position)
         auto player = itr.getSource();
         auto playerDistance = player->GetDistance(position.x, position.y, position.z);
 
-        if (playerDistance <= m_wScaleCombatDistance)
+        if (playerDistance > m_wScaleMaxDistance)
         {
-            count++;
             continue;
         }
 
-        if (playerDistance > m_wScaleCombatDistance)
+        if (playerDistance <= m_wScaleCombatDistance)
         {
+            count++;
             continue;
         }
 
