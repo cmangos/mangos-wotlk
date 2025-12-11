@@ -258,6 +258,9 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Group* gr
 {
     m_weatherSystem = new WeatherSystem(this);
     m_transportGuids.Set(sMapMgr.GetTransportCounter());
+
+    m_wScaleMaxDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX);
+    m_wScaleCombatDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT);
 }
 
 void Map::Initialize(bool loadInstanceData /*= true*/)
@@ -766,33 +769,33 @@ Player* Map::GetPlayerByName(std::string name)
 
 uint32 Map::GetPlayersCountInAutoscaleDistance(Position const& position)
 {
-    float autoscaleDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX);
-    float combatDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT);
+    if (m_mapRefManager.isEmpty())
+    {
+        return 0;
+    }
 
     uint32 count = 0;
 
-    Map::PlayerList const& pList = GetPlayers();
-    for (const auto& itr : pList)
+    for (const auto& itr : m_mapRefManager)
     {
         auto player = itr.getSource();
         auto playerDistance = player->GetDistance(position.x, position.y, position.z);
 
-        if (playerDistance <= combatDistance)
+        if (playerDistance <= m_wScaleCombatDistance)
         {
             count++;
             continue;
         }
 
-        auto lastTarget = player->GetLastTargetedUnit();
-
-        if (playerDistance > autoscaleDistance || !lastTarget)
+        if (playerDistance > m_wScaleCombatDistance)
         {
             continue;
         }
 
-        auto lastTargetDistance = lastTarget->GetDistance(position.x, position.y, position.z);
+        auto lastTarget = player->GetLastTargetedUnit();
+        auto lastTargetDistance = lastTarget ? lastTarget->GetDistance(position.x, position.y, position.z) : 0;
 
-        if (lastTargetDistance <= combatDistance)
+        if (lastTarget && lastTargetDistance <= m_wScaleCombatDistance)
         {
             count++;
         }

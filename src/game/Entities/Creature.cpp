@@ -156,6 +156,10 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 {
     m_valuesCount = UNIT_END;
 
+    m_wScaleEnabled = sWorld.getConfig(CONFIG_BOOL_WORLD_AUTOSCALE);
+    m_wScalePlayersThreshold = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYERS_THRESHOLD);
+    m_wScaleDownscaleDelayMS = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_DOWNSCALE_DELAY) * 1000;
+
     SetWalk(true, true);
 }
 
@@ -827,6 +831,30 @@ void Creature::Update(const uint32 diff)
                 TriggerDelayedBoarding();
 
             UpdateWorldAutoscale();
+
+            auto map = GetMap();
+
+            if (!map) {
+                break;
+            }
+
+            auto player = map->GetPlayerByName("gmutyus");
+
+            if (!player || player->GetTarget() != this)
+            {
+                break;
+            }
+
+            auto target = this->GetTarget();
+            auto position = this->GetPosition();
+            auto targetPosition = target ? target->GetPosition() : position;
+
+            auto distance = player->GetDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ());
+
+            std::cout << "distance from target: " << distance << std::endl;
+            std::cout << "  - autoscale amount: " << m_additionalScaleAmount << std::endl;
+            std::cout << "  - downscale at: " << m_downscaleAt << std::endl;
+            std::cout << "  - health: " << GetHealth() << std::endl;
 
             break;
         }
@@ -2748,48 +2776,52 @@ void Creature::UpdateImmunitiesSet(uint32 immunitySet)
 
 void Creature::UpdateWorldAutoscale()
 {
-    bool autoscalingEnabled = sWorld.getConfig(CONFIG_BOOL_WORLD_AUTOSCALE);
+    if (!m_wScaleEnabled || IsNpc() || IsBoss() || IsWorldBoss()) {
+        return;
+    }
+
     auto map = GetMap();
 
-    if (!autoscalingEnabled || IsNpc() || IsBoss() || IsWorldBoss() || !map || map->IsDungeon())
+    if (!map || map->IsDungeon())
     {
         return;
     }
 
     uint32 playersCount = map->GetPlayersCountInAutoscaleDistance(GetPosition());
-    uint32 playersThreshold = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYERS_THRESHOLD);
-    uint32 newScaleAmount = playersCount > playersThreshold ? playersCount - playersThreshold : 0;
+    uint32 newScaleAmount = playersCount > m_wScalePlayersThreshold ? playersCount - m_wScalePlayersThreshold : 0;
+
+    if (m_additionalScaleAmount == newScaleAmount)
+    {
+        if (m_downscaleAt != 0) {
+            m_downscaleAt = 0;
+        }
+
+        return;
+    }
 
     if (newScaleAmount < m_additionalScaleAmount && m_downscaleAt == 0)
     {
-        uint32 downscaleDelayMS = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_DOWNSCALE_DELAY) * 1000;
+        uint32 downscaleDelayMS = m_wScaleDownscaleDelayMS;
 
         m_downscaleAt = sWorld.GetCurrentMSTime() + downscaleDelayMS;
         
         return;
     }
 
-    if (newScaleAmount >= m_additionalScaleAmount && m_downscaleAt != 0)
-    {
-        m_downscaleAt = 0;
-    }
-
     bool downscaleDelayExpired = m_downscaleAt > 0 && sWorld.GetCurrentMSTime() > m_downscaleAt;
     bool shouldDownscale = (!IsInCombat() || downscaleDelayExpired) && newScaleAmount < m_additionalScaleAmount;
     bool shouldUpscale = newScaleAmount > m_additionalScaleAmount;
 
-    if (!shouldDownscale && !shouldUpscale)
+    if (shouldDownscale || shouldUpscale)
     {
-        return;
+        auto healthPercent = GetHealthPercent();
+        auto level = GetLevel();
+
+        m_additionalScaleAmount = newScaleAmount;
+        m_downscaleAt = 0;
+
+        SelectLevel(level, true);
     }
-
-    auto healthPercent = GetHealthPercent();
-    auto level = GetLevel();
-
-    m_additionalScaleAmount = newScaleAmount;
-    m_downscaleAt = 0;
-
-    SelectLevel(level, true);
 }
 
 time_t Creature::GetRespawnTimeEx() const

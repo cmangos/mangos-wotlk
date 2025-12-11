@@ -1100,6 +1100,10 @@ class Creature : public Unit
         float m_modelRunSpeed;
 
         bool m_combatOnlyStealth;
+
+        bool m_wScaleEnabled;
+        uint32 m_wScalePlayersThreshold;
+        uint32 m_wScaleDownscaleDelayMS;
 };
 
 class ForcedDespawnDelayEvent : public BasicEvent
