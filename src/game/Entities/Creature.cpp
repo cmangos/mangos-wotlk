@@ -826,6 +826,30 @@ void Creature::Update(const uint32 diff)
             if (m_delayedBoardingSpell && !ItsNewObject()) // after being added to world
                 TriggerDelayedBoarding();
 
+            auto map = GetMap();
+
+            if (!map) {
+                break;
+            }
+
+            auto player = map->GetPlayerByName("gmutyus");
+
+            if (!player || player->GetTarget() != this)
+            {
+                break;
+            }
+
+            auto target = this->GetTarget();
+            auto position = this->GetPosition();
+            auto targetPosition = target ? target->GetPosition() : position;
+
+            auto distance = player->GetDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ());
+
+            std::cout << "distance from target: " << distance << std::endl;
+            std::cout << "  - autoscale amount: " << m_additionalScaleAmount << std::endl;
+            std::cout << "  - downscale at: " << m_downscaleAt << std::endl;
+            std::cout << "  - health: " << GetHealth() << std::endl;
+
             UpdateWorldAutoscale();
 
             break;
@@ -2748,11 +2772,7 @@ void Creature::UpdateWorldAutoscale()
         return;
     }
 
-    auto target = GetTarget();
-    auto position = GetPosition();
-    auto targetPosition = target ? target->GetPosition() : position;
-
-    uint32 playersCount = map->GetPlayersCountInAutoscaleDistance(targetPosition);
+    uint32 playersCount = map->GetPlayersCountInAutoscaleDistance(GetPosition());
     uint32 playerThreshold = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYER_THRESHOLD);
     uint32 newScaleAmount = playersCount > playerThreshold ? playersCount - playerThreshold : 0;
 
