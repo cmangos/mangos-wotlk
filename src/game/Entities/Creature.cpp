@@ -1501,7 +1501,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel)) / (maxlevel - minlevel);
 
             // health
-            if (health == -1.f)
+            if (health == -1)
             {
                 uint32 minhealth = std::min(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
                 uint32 maxhealth = std::max(cinfo->MaxLevelHealth, cinfo->MinLevelHealth);
@@ -1509,7 +1509,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             }
 
             // mana
-            if (mana == -1.f)
+            if (mana == -1)
             {
                 uint32 minmana = std::min(cinfo->MaxLevelMana, cinfo->MinLevelMana);
                 uint32 maxmana = std::max(cinfo->MaxLevelMana, cinfo->MinLevelMana);
@@ -1517,7 +1517,7 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
             }
 
             // armor
-            if (armor == -1.f)
+            if (armor == -1)
                 armor = cinfo->Armor;
 
             // damage
