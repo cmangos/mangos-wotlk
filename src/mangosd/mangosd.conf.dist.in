@@ -2065,7 +2065,7 @@ CharDelete.KeepDays = 30
 #
 #    OpenWorld.AutoScaling
 #        Default: 0
-#    OpenWorld.AutoScaling.PlayerThreshold
+#    OpenWorld.AutoScaling.PlayersThreshold
 #        Default: 1
 #    OpenWorld.AutoScaling.Distance.Max
 #        Default: 45.0

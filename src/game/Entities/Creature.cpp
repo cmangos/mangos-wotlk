@@ -826,30 +826,6 @@ void Creature::Update(const uint32 diff)
             if (m_delayedBoardingSpell && !ItsNewObject()) // after being added to world
                 TriggerDelayedBoarding();
 
-            auto map = GetMap();
-
-            if (!map) {
-                break;
-            }
-
-            auto player = map->GetPlayerByName("gmutyus");
-
-            if (!player || player->GetTarget() != this)
-            {
-                break;
-            }
-
-            auto target = this->GetTarget();
-            auto position = this->GetPosition();
-            auto targetPosition = target ? target->GetPosition() : position;
-
-            auto distance = player->GetDistance(this->GetPositionX(), this->GetPositionY(), this->GetPositionZ());
-
-            std::cout << "distance from target: " << distance << std::endl;
-            std::cout << "  - autoscale amount: " << m_additionalScaleAmount << std::endl;
-            std::cout << "  - downscale at: " << m_downscaleAt << std::endl;
-            std::cout << "  - health: " << GetHealth() << std::endl;
-
             UpdateWorldAutoscale();
 
             break;
@@ -1450,7 +1426,7 @@ float Creature::GetDamageScale() const
     return defaultScale + worldAdditionalScale;
 }
 
-void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, bool preserveHealthAndPower)
+void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, bool preserveState)
 {
     float healthScale = GetHealthScale();
     float damageScale = GetDamageScale();
@@ -1609,12 +1585,25 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, 
     // Set values
     //////////////////////////////////////////////////////////////////////////
 
-    float healthPercent = preserveHealthAndPower ? GetHealthPercent() : 100.0f;
-    float powerPercent = preserveHealthAndPower ? GetPowerPercent() : 100.0f;
+    float healthPercent = preserveState ? GetHealthPercent() : 100.0f;
+    float powerPercent = preserveState ? GetPowerPercent() : 100.0f;
 
-    // health
-    SetCreateHealth(health);
-    SetMaxHealth(health);
+    if (preserveState && GetMaxHealth() <= health)
+    {
+        SetMaxHealth(health);
+        SetHealth(health * (healthPercent / 100.0f));
+    }
+    else if (preserveState && GetMaxHealth() > health)
+    {
+        SetHealth(health * (healthPercent / 100.0f));
+        SetMaxHealth(health);
+    }
+    else
+    {
+        SetCreateHealth(health);
+        SetMaxHealth(health);
+        SetHealth(GetMaxHealth());
+    }
 
     // all power types
     for (int i = POWER_MANA; i <= POWER_RUNIC_POWER; ++i)
@@ -1674,15 +1663,10 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, 
     SetModifierValue(UnitMods(UNIT_MOD_MANA + (int)GetPowerType()), TOTAL_PCT, powerMultiplier);
 
     UpdateAllStats();
-
-    if (preserveHealthAndPower)
-        SetHealthPercent(healthPercent);
-    else
-        SetHealth(GetMaxHealth());
     
     for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
     {
-        if (preserveHealthAndPower && GetPowerType() == Powers(i))
+        if (preserveState && GetPowerType() == Powers(i))
             SetPower(Powers(i), GetMaxPower(Powers(i)) * powerPercent);
         else
             SetPower(Powers(i), GetMaxPower(Powers(i)));
@@ -2773,8 +2757,8 @@ void Creature::UpdateWorldAutoscale()
     }
 
     uint32 playersCount = map->GetPlayersCountInAutoscaleDistance(GetPosition());
-    uint32 playerThreshold = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYER_THRESHOLD);
-    uint32 newScaleAmount = playersCount > playerThreshold ? playersCount - playerThreshold : 0;
+    uint32 playersThreshold = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYERS_THRESHOLD);
+    uint32 newScaleAmount = playersCount > playersThreshold ? playersCount - playersThreshold : 0;
 
     if (newScaleAmount < m_additionalScaleAmount && m_downscaleAt == 0)
     {
@@ -2791,7 +2775,7 @@ void Creature::UpdateWorldAutoscale()
     }
 
     bool downscaleDelayExpired = m_downscaleAt > 0 && sWorld.GetCurrentMSTime() > m_downscaleAt;
-    bool shouldDownscale = downscaleDelayExpired && newScaleAmount < m_additionalScaleAmount;
+    bool shouldDownscale = (!IsInCombat() || downscaleDelayExpired) && newScaleAmount < m_additionalScaleAmount;
     bool shouldUpscale = newScaleAmount > m_additionalScaleAmount;
 
     if (!shouldDownscale && !shouldUpscale)
