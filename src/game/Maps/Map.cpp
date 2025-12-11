@@ -261,6 +261,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Group* gr
 
     m_wScaleMaxDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX);
     m_wScaleCombatDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT);
+    m_wScaleMinPlayerLevel = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_MIN_PLAYER_LEVEL);
 }
 
 void Map::Initialize(bool loadInstanceData /*= true*/)
@@ -781,7 +782,7 @@ uint32 Map::GetPlayersCountInAutoscaleDistance(Position const& position)
         auto player = itr.getSource();
         auto playerDistance = player->GetDistance(position.x, position.y, position.z);
 
-        if (playerDistance > m_wScaleMaxDistance)
+        if (playerDistance > m_wScaleMaxDistance || player->GetLevel() < m_wScaleMinPlayerLevel)
         {
             continue;
         }

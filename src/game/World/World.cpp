@@ -949,6 +949,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_WORLD_AUTOSCALE, "OpenWorld.AutoScaling", false);
     setConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYERS_THRESHOLD, "OpenWorld.AutoScaling.PlayersThreshold", 1);
+    setConfig(CONFIG_UINT32_WORLD_AUTOSCALE_MIN_PLAYER_LEVEL, "OpenWorld.AutoScaling.MinPlayerLevel", 0);
     setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX, "OpenWorld.AutoScaling.Distance.Max", 45.0f);
     setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT, "OpenWorld.AutoScaling.Distance.Combat", 27.0f);
     setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_HEALTH, "OpenWorld.AutoScaling.Rate.Health", 0.25f);

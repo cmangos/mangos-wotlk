@@ -587,6 +587,7 @@ class Map : public GridRefManager<NGridType>
 
         float m_wScaleMaxDistance;
         float m_wScaleCombatDistance;
+        uint32 m_wScaleMinPlayerLevel;
 
         // Type specific code for add/remove to/from grid
         template<class T>
