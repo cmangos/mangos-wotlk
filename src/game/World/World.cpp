@@ -520,8 +520,6 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_GRID_UNLOAD, "GridUnload", true);
     setConfig(CONFIG_UINT32_MAX_WHOLIST_RETURNS, "MaxWhoListReturns", 49);
 
-
-
     std::string forceLoadGridOnMaps = sConfig.GetStringDefault("LoadAllGridsOnMaps");
     if (!forceLoadGridOnMaps.empty())
     {
@@ -943,20 +941,32 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP, "Spawns.ZoneArea", false);
 
     // Custom configs
-    setConfig(CONFIG_BOOL_INSTANCE_AUTO_SCALE, "Instance.AutoScaling", false);
-    setConfig(CONFIG_BOOL_XP_AUTO_SCALE, "XP.AutoScaling", false);
-    setConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_KILL, "XP.AutoScaling.Factor.Kill", 0.07);
-    setConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_QUEST, "XP.AutoScaling.Factor.Quest", 0.07);
+    setConfig(CONFIG_BOOL_INSTANCE_AUTOSCALE, "Instance.AutoScaling", false);
+
+    setConfig(CONFIG_BOOL_XP_AUTOSCALE, "XP.AutoScaling", false);
+    setConfig(CONFIG_FLOAT_XP_AUTOSCALE_FACTOR_KILL, "XP.AutoScaling.Factor.Kill", 0.07);
+    setConfig(CONFIG_FLOAT_XP_AUTOSCALE_FACTOR_QUEST, "XP.AutoScaling.Factor.Quest", 0.07);
+
+    setConfig(CONFIG_BOOL_WORLD_AUTOSCALE, "OpenWorld.AutoScaling", false);
+    setConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYER_THRESHOLD, "OpenWorld.AutoScaling.PlayerThreshold", 1);
+    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX, "OpenWorld.AutoScaling.Distance.Max", 45.0f);
+    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT, "OpenWorld.AutoScaling.Distance.Combat", 27.0f);
+    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_HEALTH, "OpenWorld.AutoScaling.Rate.Health", 0.25f);
+    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_DAMAGE, "OpenWorld.AutoScaling.Rate.Damage", 0.25f);
+    setConfig(CONFIG_UINT32_WORLD_AUTOSCALE_DOWNSCALE_DELAY, "OpenWorld.AutoScaling.DownScaleDelay", 5);
+
     setConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE, "Creature.Scale.Default.Damage", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH, "Creature.Scale.Default.Health", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_RARE_DAMAGE, "Creature.Scale.Rare.Damage", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_RARE_HEALTH, "Creature.Scale.Rare.Health", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_INSTANCE_DAMAGE, "Creature.Scale.Instance.Damage", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_INSTANCE_HEALTH, "Creature.Scale.Instance.Health", 1.0f);
+
     setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_NORMAL, "Creature.DoubleDrop.Chance.Normal", 0.0f);
     setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_ELITE, "Creature.DoubleDrop.Chance.Elite", 0.0f);
     setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_RARE, "Creature.DoubleDrop.Chance.Rare", 0.0f);
     setConfig(CONFIG_FLOAT_DOUBLE_DROP_CHANCE_BOSS, "Creature.DoubleDrop.Chance.Boss", 0.0f);
+
     setConfig(CONFIG_FLOAT_DROP_MIN_CHANCE_NORMAL, "Creature.Drop.MinChance.Normal", 0.0f);
     setConfig(CONFIG_FLOAT_DROP_MIN_CHANCE_ELITE, "Creature.Drop.MinChance.Elite", 0.0f);
     setConfig(CONFIG_FLOAT_DROP_MIN_CHANCE_RARE, "Creature.Drop.MinChance.Rare", 0.0f);
@@ -969,7 +979,6 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_ELITE, "Creature.Drop.MaxItems.Elite", 0);
     setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_RARE, "Creature.Drop.MaxItems.Rare", 0);
     setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_BOSS, "Creature.Drop.MaxItems.Boss", 0);
-
 
     sLog.outString();
 }

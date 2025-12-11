@@ -2780,6 +2780,7 @@ class Unit : public WorldObject
         bool m_isCreatureLinkingTrigger;
         bool m_isSpawningLinked;
         ObjectGuid m_rootVehicle;
+        ObjectGuid m_lastTarget;
 
         CombatData* m_combatData;
         CombatManager m_combatManager;
@@ -2806,7 +2807,15 @@ class Unit : public WorldObject
         void SetCreatorGuid(ObjectGuid const& creator) { SetGuidValue(UNIT_FIELD_CREATEDBY, creator); }
         // Target: current target guid as advertised on unit frames (also known as selection)
         ObjectGuid const& GetTargetGuid() const { return GetGuidValue(UNIT_FIELD_TARGET); }
-        void SetTargetGuid(ObjectGuid const& targetGuid) { SetGuidValue(UNIT_FIELD_TARGET, targetGuid); }
+        ObjectGuid const& GetLastTargetGuid() const { return m_lastTarget; }
+        void SetTargetGuid(ObjectGuid const& targetGuid) {
+            if (targetGuid.GetRawValue() != 0)
+            {
+                m_lastTarget = targetGuid;
+            }
+
+            SetGuidValue(UNIT_FIELD_TARGET, targetGuid);
+        }
         // Channel target: current channeling spell's target worldobject guid
         ObjectGuid const& GetChannelObjectGuid() const { return GetGuidValue(UNIT_FIELD_CHANNEL_OBJECT); }
         void SetChannelObjectGuid(ObjectGuid const& targetGuid) { SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, targetGuid); }

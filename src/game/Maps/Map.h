@@ -173,6 +173,10 @@ class Map : public GridRefManager<NGridType>
         void ExecuteMapWorkerZone(uint32 zoneId, std::function<void(Player*)> const& worker);
         void ExecuteMapWorkerArea(uint32 areaId, std::function<void(Player*)> const& worker);
 
+        // Only for debugging purposes:
+        Player* GetPlayerByName(std::string name);
+        uint32 GetPlayersCountInAutoscaleDistance(Position const& position);
+
         float GetVisibilityDistance() const { return m_VisibleDistance; }
         // function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();

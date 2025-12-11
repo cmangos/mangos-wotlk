@@ -826,6 +826,8 @@ void Creature::Update(const uint32 diff)
             if (m_delayedBoardingSpell && !ItsNewObject()) // after being added to world
                 TriggerDelayedBoarding();
 
+            UpdateWorldAutoscale();
+
             break;
         }
         default:
@@ -1330,7 +1332,16 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 
 float Creature::GetHealthScale() const
 {
+    // Do not scale npcs:
+    if (IsNpc())
+    {
+        return 1.0f;
+    }
+
     Map* map = GetMap();
+
+    float worldScaleRate = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_HEALTH);
+    float worldAdditionalScale = worldScaleRate * m_additionalScaleAmount;
 
     if (!map || !map->IsDungeon())
     {
@@ -1339,13 +1350,19 @@ float Creature::GetHealthScale() const
             return sWorld.getConfig(CONFIG_FLOAT_SCALE_RARE_HEALTH);
         }
 
-        return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH);
+        // Do not autoscale bosses:
+        if (IsBoss() || IsWorldBoss())
+        {
+            return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH);
+        }
+
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH) + worldAdditionalScale;
     }
 
-    bool autoScaleEnabled = sWorld.getConfig(CONFIG_BOOL_INSTANCE_AUTO_SCALE);
-    bool defaultScale = sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_HEALTH);
+    bool instanceAutoscaleEnabled = sWorld.getConfig(CONFIG_BOOL_INSTANCE_AUTOSCALE);
+    float defaultScale = sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_HEALTH);
 
-    if (autoScaleEnabled)
+    if (instanceAutoscaleEnabled)
     {
         Group* group = map->GetGroup();
         uint32 playerCount = group ? group->GetMembersCount() : 1;
@@ -1358,13 +1375,23 @@ float Creature::GetHealthScale() const
         return playerCount * (defaultScale / 5.0f);
     }
 
-    return defaultScale;
+    return defaultScale + worldAdditionalScale;
 }
 
+//reature.cpp(1399,31)
 float Creature::GetDamageScale() const
 {
+    // Do not scale npcs:
+    if (IsNpc())
+    {
+        return 1.0f;
+    }
+
     Map* map = GetMap();
- 
+
+    float worldScaleRate = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_DAMAGE);
+    float worldAdditionalScale = worldScaleRate * m_additionalScaleAmount;
+
     if (!map || !map->IsDungeon())
     {
         if (IsRare())
@@ -1372,11 +1399,16 @@ float Creature::GetDamageScale() const
             return sWorld.getConfig(CONFIG_FLOAT_SCALE_RARE_DAMAGE);
         }
 
-        return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE);
+        // Do not autoscale bosses:
+        if (IsBoss() || IsWorldBoss())
+        {
+            return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE);
+        }
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE) + worldAdditionalScale;
     }
 
-    bool autoScaleEnabled = sWorld.getConfig(CONFIG_BOOL_INSTANCE_AUTO_SCALE);
-    bool defaultScale = sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_DAMAGE);
+    bool autoScaleEnabled = sWorld.getConfig(CONFIG_BOOL_INSTANCE_AUTOSCALE);
+    float defaultScale = sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_DAMAGE);
     
     if (autoScaleEnabled)
     {
@@ -1391,10 +1423,10 @@ float Creature::GetDamageScale() const
         return defaultScale + (playerCount - 5) * (defaultScale / 4.0f);
     }
 
-    return defaultScale;
+    return defaultScale + worldAdditionalScale;
 }
 
-void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
+void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, bool preserveHealthAndPower)
 {
     float healthScale = GetHealthScale();
     float damageScale = GetDamageScale();
@@ -1553,6 +1585,9 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
     // Set values
     //////////////////////////////////////////////////////////////////////////
 
+    float healthPercent = preserveHealthAndPower ? GetHealthPercent() : 100.0f;
+    float powerPercent = preserveHealthAndPower ? GetPowerPercent() : 100.0f;
+
     // health
     SetCreateHealth(health);
     SetMaxHealth(health);
@@ -1616,9 +1651,18 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
     UpdateAllStats();
 
-    SetHealth(GetMaxHealth());
+    if (preserveHealthAndPower)
+        SetHealthPercent(healthPercent);
+    else
+        SetHealth(GetMaxHealth());
+    
     for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
-        SetPower(Powers(i), GetMaxPower(Powers(i)));
+    {
+        if (preserveHealthAndPower && GetPowerType() == Powers(i))
+            SetPower(Powers(i), GetMaxPower(Powers(i)) * powerPercent);
+        else
+            SetPower(Powers(i), GetMaxPower(Powers(i)));
+    }
 }
 
 float Creature::_GetHealthMod(int32 Rank)
@@ -2692,6 +2736,56 @@ void Creature::UpdateImmunitiesSet(uint32 immunitySet)
         ApplySpellImmune(nullptr, data.type, data.value, true);
 
     m_immunitySet = immunitySet;
+}
+
+void Creature::UpdateWorldAutoscale()
+{
+    bool autoscalingEnabled = sWorld.getConfig(CONFIG_BOOL_WORLD_AUTOSCALE);
+    auto map = GetMap();
+
+    if (!autoscalingEnabled || IsNpc() || IsBoss() || IsWorldBoss() || !map || map->IsDungeon())
+    {
+        return;
+    }
+
+    auto target = GetTarget();
+    auto position = GetPosition();
+    auto targetPosition = target ? target->GetPosition() : position;
+
+    uint32 playersCount = map->GetPlayersCountInAutoscaleDistance(targetPosition);
+    uint32 playerThreshold = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYER_THRESHOLD);
+    uint32 newScaleAmount = playersCount > playerThreshold ? playersCount - playerThreshold : 0;
+
+    if (newScaleAmount < m_additionalScaleAmount && m_downscaleAt == 0)
+    {
+        uint32 downscaleDelayMS = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_DOWNSCALE_DELAY) * 1000;
+
+        m_downscaleAt = sWorld.GetCurrentMSTime() + downscaleDelayMS;
+        
+        return;
+    }
+
+    if (newScaleAmount >= m_additionalScaleAmount && m_downscaleAt != 0)
+    {
+        m_downscaleAt = 0;
+    }
+
+    bool downscaleDelayExpired = m_downscaleAt > 0 && sWorld.GetCurrentMSTime() > m_downscaleAt;
+    bool shouldDownscale = downscaleDelayExpired && newScaleAmount < m_additionalScaleAmount;
+    bool shouldUpscale = newScaleAmount > m_additionalScaleAmount;
+
+    if (!shouldDownscale && !shouldUpscale)
+    {
+        return;
+    }
+
+    auto healthPercent = GetHealthPercent();
+    auto level = GetLevel();
+
+    m_additionalScaleAmount = newScaleAmount;
+    m_downscaleAt = 0;
+
+    SelectLevel(level, true);
 }
 
 time_t Creature::GetRespawnTimeEx() const

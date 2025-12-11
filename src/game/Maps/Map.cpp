@@ -745,6 +745,62 @@ void Map::ExecuteMapWorkerArea(uint32 areaId, std::function<void(Player*)> const
             worker(itr.getSource());
 }
 
+Player* Map::GetPlayerByName(std::string name)
+{
+    Map::PlayerList const& pList = GetPlayers();
+
+    for (const auto& itr : pList) 
+    {
+        Player* player = itr.getSource();
+        auto currentName = player->GetNameStr();
+
+        std::transform(name.begin(), name.end(), name.begin(), ::toupper);
+        std::transform(currentName.begin(), currentName.end(), currentName.begin(), ::toupper);
+
+        if (currentName == name)
+            return player;
+    }
+     
+    return nullptr;
+}
+
+uint32 Map::GetPlayersCountInAutoscaleDistance(Position const& position)
+{
+    float autoscaleDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX);
+    float combatDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT);
+
+    uint32 count = 0;
+
+    Map::PlayerList const& pList = GetPlayers();
+    for (const auto& itr : pList)
+    {
+        auto player = itr.getSource();
+        auto playerDistance = player->GetDistance(position.x, position.y, position.z);
+
+        if (playerDistance <= combatDistance)
+        {
+            count++;
+            continue;
+        }
+
+        auto lastTarget = player->GetLastTargetedUnit();
+
+        if (playerDistance > autoscaleDistance || !lastTarget)
+        {
+            continue;
+        }
+
+        auto lastTargetDistance = lastTarget->GetDistance(position.x, position.y, position.z);
+
+        if (lastTargetDistance <= combatDistance)
+        {
+            count++;
+        }
+    }
+    
+    return count;
+}
+
 bool Map::loaded(const GridPair& p) const
 {
     return (getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord));
@@ -1614,7 +1670,7 @@ float Map::GetXPModRate(RateModType type, Unit const* unit) const
 {
     float expMod = 1.0f;
 
-    bool autoScalingEnabled = sWorld.getConfig(CONFIG_BOOL_XP_AUTO_SCALE);
+    bool autoScalingEnabled = sWorld.getConfig(CONFIG_BOOL_XP_AUTOSCALE);
 
     switch (type)
     {
@@ -1630,7 +1686,7 @@ float Map::GetXPModRate(RateModType type, Unit const* unit) const
 
             if (autoScalingEnabled && unit->IsPlayer())
             {
-                expMod += sWorld.getConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_QUEST) * unit->GetLevel();
+                expMod += sWorld.getConfig(CONFIG_FLOAT_XP_AUTOSCALE_FACTOR_QUEST) * unit->GetLevel();
             }
 
             break;
@@ -1648,7 +1704,7 @@ float Map::GetXPModRate(RateModType type, Unit const* unit) const
 
             if (autoScalingEnabled && unit->IsPlayer())
             {
-                expMod += sWorld.getConfig(CONFIG_FLOAT_XP_AUTO_SCALE_FACTOR_KILL) * unit->GetLevel();
+                expMod += sWorld.getConfig(CONFIG_FLOAT_XP_AUTOSCALE_FACTOR_KILL) * unit->GetLevel();
             }
 
             break;

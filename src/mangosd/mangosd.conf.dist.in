@@ -2063,6 +2063,20 @@ CharDelete.KeepDays = 30
 #    XP.AutoScaling.Factor.Quest
 #        Default: 0.07
 #
+#    OpenWorld.AutoScaling
+#        Default: 0
+#    OpenWorld.AutoScaling.PlayerThreshold
+#        Default: 1
+#    OpenWorld.AutoScaling.Distance.Max
+#        Default: 45.0
+#    OpenWorld.AutoScaling.Distance.Combat
+#        Default: 27.0
+#    OpenWorld.AutoScaling.Rate.Health
+#    OpenWorld.AutoScaling.Rate.Damage
+#        Default: 0.25
+#    OpenWorld.AutoScaling.DownScaleDelay
+#        Default: 5
+#
 ###################################################################################################################
 
 Metric.Enable = 0

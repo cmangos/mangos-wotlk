@@ -2426,6 +2426,8 @@ class Player : public Unit
         void RemoveControllable(Unit* controlled);
         GuidSet const& GetControlled() { return m_controlled; }
 
+        Unit* GetLastTargetedUnit();
+
         void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId) const;
 

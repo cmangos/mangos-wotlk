@@ -6901,6 +6901,18 @@ void Player::SendDirectMessage(WorldPacket const& data) const
     GetSession()->SendPacket(data);
 }
 
+Unit* Player::GetLastTargetedUnit()
+{
+    auto map = this->GetMap();
+
+    if (!map)
+    {
+        return nullptr;
+    }
+
+    return map->GetUnit(this->GetLastTargetGuid());
+}
+
 void Player::SendCinematicStart(uint32 CinematicSequenceId)
 {
     WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);

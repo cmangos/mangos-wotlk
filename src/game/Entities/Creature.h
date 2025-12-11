@@ -609,7 +609,7 @@ class Creature : public Unit
         float GetDamageScale() const; 
 
         // SelectLevel set creature bases stats for given level or for default levels stored in db
-        void SelectLevel(uint32 forcedLevel = USE_DEFAULT_DATABASE_LEVEL);
+        void SelectLevel(uint32 forcedLevel = USE_DEFAULT_DATABASE_LEVEL, bool preserveHealthAndPower = false);
         void LoadEquipment(uint32 equip_entry, bool force = false);
 
         bool HasStaticDBSpawnData() const;                  // listed in `creature` table and have fixed in DB guid
@@ -677,6 +677,11 @@ class Creature : public Unit
             return rank == CREATURE_ELITE_RARE;
         }
 
+        bool IsNpc() const
+        {
+            return m_creatureInfo->NpcFlags != 0;
+        }
+
         bool IsBoss() const
         {
             if (IsPet())
@@ -729,6 +734,8 @@ class Creature : public Unit
         void UpdateSpell(int32 index, int32 newSpellId);
         void SetSpellList(uint32 spellSet);
         void UpdateImmunitiesSet(uint32 immunitySet);
+
+        void UpdateWorldAutoscale();
 
         bool UpdateEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true, bool randomizeLevels = true);
         void ResetEntry(bool respawn = false);
@@ -1009,6 +1016,10 @@ class Creature : public Unit
 
         // vendor items
         VendorItemCounts m_vendorItemCounts;
+
+        // open world autoscaling:
+        uint32 m_downscaleAt = 0;
+        uint32 m_additionalScaleAmount = 0;
 
         uint32 m_gossipMenuId;
         uint32 m_lootMoney;
