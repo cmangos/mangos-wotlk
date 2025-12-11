@@ -1363,7 +1363,7 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 float Creature::GetHealthScale() const
 {
     // Do not scale npcs:
-    if (IsNpc())
+    if (IsNpc() || IsPet())
     {
         return 1.0f;
     }
@@ -1412,7 +1412,7 @@ float Creature::GetHealthScale() const
 float Creature::GetDamageScale() const
 {
     // Do not scale npcs:
-    if (IsNpc())
+    if (IsNpc() || IsPet())
     {
         return 1.0f;
     }
@@ -2770,7 +2770,8 @@ void Creature::UpdateImmunitiesSet(uint32 immunitySet)
 
 void Creature::UpdateWorldAutoscale()
 {
-    if (!m_wScaleEnabled || IsNpc() || IsBoss() || IsWorldBoss()) {
+    if (!m_wScaleEnabled || IsNpc() || IsBoss() || IsWorldBoss() || IsPet())
+    {
         return;
     }
 
