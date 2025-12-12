@@ -2056,6 +2056,10 @@ CharDelete.KeepDays = 30
 #    Creature.Drop.MaxItems.Rare
 #        Default: 0
 #
+#    Rate.DropAmount.Item.Quest.Min
+#    Rate.DropAmount.Item.Quest.Max
+#        Default: 1
+#
 #    Group.Loot.RollInFreeForAll
 #        Default: 0
 #

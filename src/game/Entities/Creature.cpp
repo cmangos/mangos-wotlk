@@ -1407,7 +1407,6 @@ float Creature::GetHealthScale() const
     return defaultScale + worldAdditionalScale;
 }
 
-//reature.cpp(1399,31)
 float Creature::GetDamageScale() const
 {
     if (IsNpc() || IsPet())

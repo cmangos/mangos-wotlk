@@ -136,6 +136,9 @@ void LootStore::LoadLootTable()
     //                                                 0      1     2                    3        4              5         6
     auto queryResult = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, condition_id FROM %s", GetName());
 
+    float questItemMultiMin = sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_AMOUNT_ITEM_QUEST_MIN);
+    float questItemMultiMax = sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_AMOUNT_ITEM_QUEST_MAX);
+
     if (queryResult)
     {
         BarGoLink bar(queryResult->GetRowCount());
@@ -178,6 +181,15 @@ void LootStore::LoadLootTable()
             // Validity checks
             if (!IsValidItemTemplate(entry, item, group, mincountOrRef, chanceOrQuestChance, maxcount))
                 continue;
+
+            bool isQuestItem = chanceOrQuestChance < 0.0f;
+            bool isGuaranteed = chanceOrQuestChance == -100.0f;
+
+            if (isQuestItem && !isGuaranteed && mincountOrRef > 0 && maxcount > 0)
+            {
+                mincountOrRef *= questItemMultiMin;
+                maxcount *= questItemMultiMax;
+            }
 
             // Add the item to the loot store
             ++validItems[entry];
