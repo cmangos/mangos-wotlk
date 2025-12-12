@@ -980,6 +980,8 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_ELITE, "Creature.Drop.MaxItems.Elite", 0);
     setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_RARE, "Creature.Drop.MaxItems.Rare", 0);
     setConfig(CONFIG_UINT32_DROP_MAX_ITEMS_BOSS, "Creature.Drop.MaxItems.Boss", 0);
+    
+    setConfig(CONFIG_BOOL_GROUP_ROLL_IN_FFA, "Group.Loot.RollInFreeForAll", false);
 
     sLog.outString();
 }

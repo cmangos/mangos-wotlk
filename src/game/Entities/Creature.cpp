@@ -1362,7 +1362,6 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
 
 float Creature::GetHealthScale() const
 {
-    // Do not scale npcs:
     if (IsNpc() || IsPet())
     {
         return 1.0f;
@@ -1411,7 +1410,6 @@ float Creature::GetHealthScale() const
 //reature.cpp(1399,31)
 float Creature::GetDamageScale() const
 {
-    // Do not scale npcs:
     if (IsNpc() || IsPet())
     {
         return 1.0f;

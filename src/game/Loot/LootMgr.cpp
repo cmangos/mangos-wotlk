@@ -519,8 +519,14 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
         switch (loot->m_lootMethod)
         {
             case NOT_GROUP_TYPE_LOOT:
-            case FREE_FOR_ALL:
+            case FREE_FOR_ALL: {
+                if (isBlocked)
+                {
+                    return LOOT_SLOT_VIEW;
+                }
+
                 return LOOT_SLOT_OWNER;
+            }
 
             default:
                 if (!isUnderThreshold && lootItemType == LOOTITEM_TYPE_CONDITIONNAL && loot->m_lootMethod == MASTER_LOOT)
@@ -542,7 +548,14 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
     switch (loot->m_lootMethod)
     {
         case FREE_FOR_ALL:
+        {
+            if (isBlocked)
+            {
+                return LOOT_SLOT_VIEW;
+            }
+
             return LOOT_SLOT_OWNER;
+        }
         case GROUP_LOOT:
         case NEED_BEFORE_GREED:
         {
@@ -591,7 +604,14 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
             return MAX_LOOT_SLOT_TYPE;
         }
         case NOT_GROUP_TYPE_LOOT:
+        {
+            if (isBlocked)
+            {
+                return LOOT_SLOT_VIEW;
+            }
+            
             return LOOT_SLOT_OWNER;
+        }
         default:
             return MAX_LOOT_SLOT_TYPE;
     }
@@ -1072,6 +1092,8 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
         }
     }
 
+    bool rollInFreeForAll = sWorld.getConfig(CONFIG_BOOL_GROUP_ROLL_IN_FFA) && m_ownerSet.size() > 1;
+
     // check if item have to be rolled
     for (auto lootItem : m_lootItems)
     {
@@ -1094,6 +1116,13 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
                 case NEED_BEFORE_GREED:
                 {
                     lootItem->isBlocked = true;
+                    break;
+                }
+
+                case NOT_GROUP_TYPE_LOOT:
+                {
+                    if (rollInFreeForAll)
+                        lootItem->isBlocked = true;
                     break;
                 }
 
@@ -1591,7 +1620,9 @@ void Loot::ShowContentTo(Player* plr)
             SetGroupLootRight(plr);
     }
 
-    if (m_lootMethod != NOT_GROUP_TYPE_LOOT && !m_isChecked)
+    bool rollInFreeForAll = sWorld.getConfig(CONFIG_BOOL_GROUP_ROLL_IN_FFA) && m_ownerSet.size() > 1;
+
+    if ((m_lootMethod != NOT_GROUP_TYPE_LOOT || rollInFreeForAll) && !m_isChecked)
         GroupCheck();
 
     WorldPacket data(SMSG_LOOT_RESPONSE);
@@ -1802,8 +1833,11 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
                         m_ownerSet.insert(threatEntry->getTarget()->GetObjectGuid());
             }
             else if (player)
+            {
                 // setting loot right
                 SetGroupLootRight(player);
+            }
+                
             m_clientLootType = CLIENT_LOOT_CORPSE;
 
             if ((creatureInfo->LootId && FillLoot(creatureInfo->LootId, LootTemplates_Creature, player, false, false, creature)) || creatureInfo->MaxLootGold > 0)

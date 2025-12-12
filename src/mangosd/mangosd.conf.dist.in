@@ -2056,9 +2056,11 @@ CharDelete.KeepDays = 30
 #    Creature.Drop.MaxItems.Rare
 #        Default: 0
 #
-#    XP.AutoScaling
+#    Group.Loot.RollInFreeForAll
 #        Default: 0
 #
+#    XP.AutoScaling
+#        Default: 0
 #    XP.AutoScaling.Factor.Kill
 #    XP.AutoScaling.Factor.Quest
 #        Default: 0.07
