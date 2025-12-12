@@ -4161,6 +4161,24 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleNpcMacroCommand(char* args)
+{
+    Creature* target = getSelectedCreature();
+
+    if (!target)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    uint32 Entry = target->GetEntry();
+    
+    PSendSysMessage("/say .npc add %u", Entry);
+
+    return true;
+}
+
 bool ChatHandler::HandleNpcThreatCommand(char* /*args*/)
 {
     Unit* target = getSelectedUnit();
