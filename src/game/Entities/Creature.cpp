@@ -2770,7 +2770,7 @@ void Creature::UpdateImmunitiesSet(uint32 immunitySet)
 
 void Creature::UpdateWorldAutoscale()
 {
-    if (!m_wScaleEnabled || IsNpc() || IsBoss() || IsWorldBoss() || IsPet())
+    if (!m_wScaleEnabled || IsNpc() || !IsNormal())
     {
         return;
     }

@@ -699,6 +699,14 @@ class Creature : public Unit
             return GetCreatureInfo()->Rank == CREATURE_ELITE_WORLDBOSS;
         }
 
+        bool IsNormal() const
+        {
+            if (IsPet())
+                return false;
+
+            return GetCreatureInfo()->Rank == CREATURE_ELITE_NORMAL;
+        }
+
         uint32 GetLevelForTarget(Unit const* target) const override; // overwrite Unit::GetLevelForTarget for boss level support
 
         uint8 getRace() const override;
