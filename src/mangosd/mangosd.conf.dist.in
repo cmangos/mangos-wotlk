@@ -2058,7 +2058,10 @@ CharDelete.KeepDays = 30
 #
 #    Rate.DropAmount.Item.Quest.Min
 #    Rate.DropAmount.Item.Quest.Max
-#        Default: 1
+#        Default: 1.0
+#
+#    Rate.Fishing.Chance
+#        Default: 1.0
 #
 #    Group.Loot.RollInFreeForAll
 #        Default: 0

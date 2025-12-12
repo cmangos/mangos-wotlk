@@ -1793,8 +1793,9 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
                     if (!zone_skill)
                         sLog.outErrorDb("Fishable areaId %u are not properly defined in `skill_fishing_base_level`.", subzone);
 
+                    float multiplier = sWorld.getConfig(CONFIG_FLOAT_RATE_FISHING_CHANCE);
                     int32 skill = player->GetSkillValue(SKILL_FISHING);
-                    int32 chance = skill - zone_skill + 5;
+                    int32 chance = (skill - zone_skill + 5) * multiplier;
                     int32 roll = irand(1, 100);
 
                     DEBUG_LOG("Fishing check (skill: %i zone min skill: %i chance %i roll: %i", skill, zone_skill, chance, roll);

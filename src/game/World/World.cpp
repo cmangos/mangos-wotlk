@@ -986,6 +986,8 @@ void World::LoadConfigSettings(bool reload)
 
     setConfig(CONFIG_BOOL_GROUP_ROLL_IN_FFA, "Group.Loot.RollInFreeForAll", false);
 
+    setConfig(CONFIG_FLOAT_RATE_FISHING_CHANCE, "Rate.Fishing.Chance", 1.0f);
+
     sLog.outString();
 }
 
