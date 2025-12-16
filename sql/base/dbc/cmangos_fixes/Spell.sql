@@ -2543,6 +2543,9 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- was 4 (poison) - and source has immunity to it - so it prevents itself with applying aura - had to remove it.
 UPDATE spell_template SET Dispel = 0 WHERE id = 14108;
 
+-- doesnt stack multiple times
+UPDATE spell_template SET AttributesEx=AttributesEx|0x00000800 WHERE Id IN(15971); -- Demoralizing Roar
+
 -- ============================================================
 -- TBC section
 -- ============================================================
