@@ -973,6 +973,8 @@ void ScriptMgr::LoadScripts(ScriptMapType scriptType)
                     continue;
                 }
                 break;
+            case SCRIPT_COMMAND_TELEPORT_HOME: // 58
+                break;
             default:
             {
                 sLog.outErrorDb("Table `%s` unknown command %u, skipping", tablename, tmp.command);
@@ -3346,6 +3348,14 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 break;
 
             static_cast<Unit*>(pSource)->SetAnimTier(AnimTier(m_script->animTier.animTier));
+            break;
+        }
+        case SCRIPT_COMMAND_TELEPORT_HOME: {
+            Player* pPlayer = GetPlayerTargetOrSourceAndLog(pSource, pTarget);
+            if (!pPlayer)
+                break;
+
+            pPlayer->TeleportToHomebind();
             break;
         }
         default:
