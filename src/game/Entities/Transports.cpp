@@ -167,7 +167,6 @@ void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* m
 
     // If we someday decide to use the grid to track transports, here:
     t->SetMap(map);
-    t->Object::AddToWorld();
 
     // creates the Gameobject
     if (!t->Create(transportTemplate.counter, transportTemplate.entry, map->GetId(), x, y, z, o, GO_ANIMPROGRESS_DEFAULT, 0))
@@ -175,6 +174,8 @@ void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* m
         delete t;
         return;
     }
+
+    t->Object::AddToWorld();
 
     map->AddTransport(t);
 

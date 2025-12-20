@@ -315,6 +315,21 @@ void Map::InitVisibilityDistance()
     m_VisibleDistance = World::GetMaxVisibleDistanceOnContinents();
 }
 
+void Map::VisiblityDistanceChanged(WorldObject* obj, float oldVisibility, VisibilityDistanceType newVisiblity)
+{
+    if (oldVisibility > VISIBILITY_DISTANCE_GIGANTIC && newVisiblity != VisibilityDistanceType::Infinite)
+        m_infiniteObjects.erase(obj);
+    else if (oldVisibility >= VISIBILITY_DISTANCE_LARGE && newVisiblity < VisibilityDistanceType::Large)
+        m_largeObjects.erase(obj);
+
+    if (oldVisibility <= VISIBILITY_DISTANCE_GIGANTIC && newVisiblity == VisibilityDistanceType::Infinite)
+        m_infiniteObjects.insert(obj);
+    else if (oldVisibility < VISIBILITY_DISTANCE_LARGE && newVisiblity >= VisibilityDistanceType::Large)
+        m_largeObjects.insert(obj);
+
+    AddUpdateMovementObject(obj);
+}
+
 // Template specialization of utility methods
 template<class T>
 void Map::AddToGrid(T* obj, NGridType* grid, Cell const& cell)
@@ -590,7 +605,7 @@ void Map::Add(T* obj)
     if (obj->GetVisibilityData().IsInfiniteVisibility())
         m_infiniteObjects.insert(obj);
     else if (obj->GetVisibilityData().IsLargeVisibility())
-        m_largeObjects.insert(std::make_pair(obj, obj->GetEntry()));
+        m_largeObjects.insert(obj);
 
     DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "%s enters grid[%u,%u]", obj->GetGuidStr().c_str(), cell.GridX(), cell.GridY());
 
@@ -1085,7 +1100,7 @@ void Map::Update(const uint32& t_diff)
         }
     }
 
-    auto visitHomeCell = [&](WorldObject* largeObj)
+    auto visitHomeCell = [&](WorldObject const* largeObj)
     {
         CellPair p = MaNGOS::ComputeCellPair(largeObj->GetPositionX(), largeObj->GetPositionY());
         Cell cell(p);
@@ -1103,7 +1118,7 @@ void Map::Update(const uint32& t_diff)
     {
         if (!m_infiniteObjects.empty())
         {
-            for (auto& infiniteObject : m_infiniteObjects)
+            for (WorldObject const* infiniteObject : m_infiniteObjects)
             {
                 visitHomeCell(infiniteObject);
             }
@@ -1111,9 +1126,8 @@ void Map::Update(const uint32& t_diff)
 
         if (!m_largeObjects.empty())
         {
-            for (auto& largeObjData : m_largeObjects)
+            for (WorldObject const* largeObj : m_largeObjects)
             {
-                WorldObject* largeObj = largeObjData.first;
                 visitHomeCell(largeObj);
             }
         }
@@ -1275,7 +1289,7 @@ void Map::Remove(T* obj, bool remove)
     if (obj->GetVisibilityData().IsInfiniteVisibility())
         m_infiniteObjects.erase(obj);
     else if (obj->GetVisibilityData().IsLargeVisibility())
-        m_largeObjects.erase(std::make_pair(obj, obj->GetEntry()));
+        m_largeObjects.erase(obj);
 
     if (remove)
         obj->CleanupsBeforeDelete();
@@ -2897,12 +2911,12 @@ void Map::UpdateVisibility(UpdateDataMapType& update_players)
 
     if (m_clientUpdateTick % 6 == 0) // every 2400ms update vis on large and gigantic objects
     {
-        for (auto& largeObj : m_largeObjects)
+        for (WorldObject* largeObj : m_largeObjects)
         {
-            if (visited.find(largeObj.first) == visited.end())
+            if (visited.find(largeObj) == visited.end())
             {
-                largeObj.first->UpdateVisibility(update_players);
-                visited.insert(largeObj.first);
+                largeObj->UpdateVisibility(update_players);
+                visited.insert(largeObj);
             }
         }
     }
