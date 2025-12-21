@@ -673,7 +673,11 @@ bool GridMap::ExistMap(uint32 mapid, int gx, int gy)
 
     GridMapFileHeader header;
     if (fread(&header, sizeof(header), 1, pf) != 1)
+    {
+        delete[] tmp;
+        fclose(pf);
         return false;
+    }
     if (header.mapMagic != *((uint32 const*)(MAP_MAGIC)) ||
             header.versionMagic != *((uint32 const*)(MAP_VERSION_MAGIC)) ||
             !IsAcceptableClientBuild(header.buildMagic))
