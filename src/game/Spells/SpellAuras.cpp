@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "SpellAuras.h"
 #include "Common.h"
+#include "SpellAuras.h"
 #include "Database/DatabaseEnv.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
@@ -1605,7 +1605,7 @@ void Aura::TriggerSpell()
 //                    // Professor Dabiri Talks
 //                    case 36064: break;
 //                    // They Must Burn Bomb Aura
-//                    case 36344: break;        
+//                    case 36344: break;
                     case 36350:                             // They Must Burn Bomb Aura (self)
                         trigger_spell_id = 36325;           // They Must Burn Bomb Drop (DND)
                         break;
@@ -2091,7 +2091,7 @@ void Aura::TriggerSpell()
         // Reget trigger spell proto
         triggeredSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(trigger_spell_id);
     }
-    else 
+    else
     {
         // for channeled spell cast applied from aura owner to channel target (persistent aura affects already applied to true target)
         // come periodic casts applied to targets, so need select proper caster (ex. 15790)
@@ -7937,7 +7937,7 @@ void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
         if (target->IsNonMeleeSpellCasted(false))
             target->InterruptNonMeleeSpells(false);
 
-        // set health and mana to maximum        
+        // set health and mana to maximum
         target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
     }
     // die at aura end
@@ -8133,7 +8133,7 @@ void Aura::PeriodicTick()
             }
 
             // Check for immune (not use charges)
-            // Aura of anger - video evidence confirms this, but attribute is legit because aura is still applied during 
+            // Aura of anger - video evidence confirms this, but attribute is legit because aura is still applied during
             if (!spellProto->HasAttribute(SPELL_ATTR_NO_IMMUNITIES) || overrideImmune) // confirmed Impaling spine goes through immunity
             {
                 if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
@@ -11243,7 +11243,7 @@ GameObjectAura::GameObjectAura(SpellEntry const* spellproto, SpellEffectIndex ef
 }
 
 GameObjectAura::~GameObjectAura()
-{    
+{
 }
 
 void GameObjectAura::Update(uint32 diff)
