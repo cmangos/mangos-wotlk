@@ -97,7 +97,7 @@ class PlayerbotWarriorAI : PlayerbotClassAI
 {
     public:
         PlayerbotWarriorAI(Player& master, Player& bot, PlayerbotAI& ai);
-        virtual ~PlayerbotWarriorAI();
+        virtual ~PlayerbotWarriorAI() override;
 
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
