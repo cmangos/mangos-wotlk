@@ -10389,7 +10389,7 @@ float Unit::GetModifierValue(UnitMods unitMod, UnitModifierType modifierType) co
 
 float Unit::GetTotalStatValue(Stats stat) const
 {
-    UnitMods unitMod = UnitMods(UNIT_MOD_STAT_START + stat);
+    UnitMods unitMod = UnitMods(static_cast<uint32>(UNIT_MOD_STAT_START) + static_cast<uint32>(stat));
 
     if (m_auraModifiersGroup[unitMod][TOTAL_PCT] <= 0.0f)
         return 0.0f;
@@ -10405,7 +10405,7 @@ float Unit::GetTotalStatValue(Stats stat) const
 
 float Unit::GetTotalResistanceValue(SpellSchools school) const
 {
-    UnitMods unitMod = UnitMods(UNIT_MOD_RESISTANCE_START + school);
+    UnitMods unitMod = UnitMods(static_cast<uint32>(UNIT_MOD_RESISTANCE_START) + static_cast<uint32>(school));
 
     if (m_auraModifiersGroup[unitMod][TOTAL_PCT] <= 0.0f)
         return 0.0f;
@@ -10618,7 +10618,7 @@ void Unit::SetPower(Powers power, float val, bool withPowerUpdate /*= true*/)
     if (maxPower < val)
         val = maxPower;
 
-    SetStatInt32Value(UNIT_FIELD_POWER1 + power, int32(val));
+    SetStatInt32Value(static_cast<uint16>(UNIT_FIELD_POWER1) + static_cast<uint16>(power), int32(val));
     m_unitPower[power] = val;
 
     if (withPowerUpdate && !GetMap()->IsUpdateObjectTick())
@@ -10655,7 +10655,7 @@ void Unit::SetPower(Powers power, float val, bool withPowerUpdate /*= true*/)
 void Unit::SetMaxPower(Powers power, uint32 val)
 {
     uint32 cur_power = GetPower(power);
-    SetStatInt32Value(UNIT_FIELD_MAXPOWER1 + power, val);
+    SetStatInt32Value(static_cast<uint16>(UNIT_FIELD_MAXPOWER1) + static_cast<uint16>(power), val);
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
@@ -10677,7 +10677,7 @@ void Unit::SetMaxPower(Powers power, uint32 val)
 void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
 {
     m_unitPower[power] = m_unitPower[power] + (apply ? val : -val);
-    ApplyModUInt32Value(UNIT_FIELD_POWER1 + power, val, apply);
+    ApplyModUInt32Value(static_cast<uint16>(UNIT_FIELD_POWER1) + static_cast<uint16>(power), val, apply);
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
@@ -10695,7 +10695,7 @@ void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
 
 void Unit::ApplyMaxPowerMod(Powers power, uint32 val, bool apply)
 {
-    ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1 + power, val, apply);
+    ApplyModUInt32Value(static_cast<uint16>(UNIT_FIELD_MAXPOWER1) + static_cast<uint16>(power), val, apply);
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
@@ -11822,18 +11822,18 @@ bool Unit::HasBreakableByDamageCrowdControlAura(Unit* excludeCasterChannel, uint
 
 void Unit::ApplyAttackTimePercentMod(WeaponAttackType att, float val, bool apply)
 {
-    float oldVal = GetFloatValue(UNIT_FIELD_BASEATTACKTIME + att);
+    float oldVal = GetFloatValue(static_cast<uint16>(UNIT_FIELD_BASEATTACKTIME) + static_cast<uint16>(att));
     if (val > 0)
     {
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], val, !apply);
-        ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME + att, val, !apply);
+        ApplyPercentModFloatValue(static_cast<uint16>(UNIT_FIELD_BASEATTACKTIME) + static_cast<uint16>(att), val, !apply);
     }
     else
     {
         ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
-        ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME + att, -val, apply);
+        ApplyPercentModFloatValue(static_cast<uint16>(UNIT_FIELD_BASEATTACKTIME) + static_cast<uint16>(att), -val, apply);
     }
-    float newVal = GetFloatValue(UNIT_FIELD_BASEATTACKTIME + att);
+    float newVal = GetFloatValue(static_cast<uint16>(UNIT_FIELD_BASEATTACKTIME) + static_cast<uint16>(att));
     uint32 attackTimer = getAttackTimer(att);
     int32 diff = newVal - oldVal;
     setAttackTimer(att, diff < -int32(attackTimer) ? 0 : attackTimer + diff);

@@ -382,7 +382,7 @@ void BattleGround::Update(uint32 diff)
     if (IsArena() && !m_arenaBuffSpawned)
     {
         // 60 seconds after start the buffobjects in arena should get spawned
-        if (m_startTime > uint32(m_startDelayTimes[BG_STARTING_EVENT_FIRST] + ARENA_SPAWN_BUFF_OBJECTS))
+        if (m_startTime > uint32(static_cast<uint32>(m_startDelayTimes[BG_STARTING_EVENT_FIRST]) + static_cast<uint32>(ARENA_SPAWN_BUFF_OBJECTS)))
         {
             SpawnEvent(ARENA_BUFF_EVENT, 0, true);
             m_arenaBuffSpawned = true;
@@ -498,7 +498,7 @@ void BattleGround::Update(uint32 diff)
     if (GetStatus() == STATUS_IN_PROGRESS && IsArena())
     {
         // after 45 minutes without one team losing, the arena closes with no winner and -16 rating change for both
-        if (m_startTime > uint32(m_startDelayTimes[BG_STARTING_EVENT_FIRST] + ARENA_FORCED_DRAW))
+        if (m_startTime > uint32(static_cast<uint32>(m_startDelayTimes[BG_STARTING_EVENT_FIRST]) + static_cast<uint32>(ARENA_FORCED_DRAW)))
         {
             EndBattleGround(TEAM_NONE);
         }

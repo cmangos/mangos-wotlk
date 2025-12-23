@@ -386,7 +386,7 @@ struct npc_putricides_trapAI : public ScriptedAI
             if (m_uiSummonTimer <= uiDiff)
             {
                 float fX, fY, fZ;
-                uint8 uiMaxInsects = urand(MAX_INSECT_PER_ROUND * 0.5, MAX_INSECT_PER_ROUND);
+                uint8 uiMaxInsects = urand(static_cast<float>(MAX_INSECT_PER_ROUND) * 0.5f, static_cast<float>(MAX_INSECT_PER_ROUND));
                 for (uint8 i = 0; i < uiMaxInsects; ++i)
                 {
                     m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);

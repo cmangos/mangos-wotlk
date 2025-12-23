@@ -538,12 +538,12 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
         if (VehicleSeatParameters const* params = sObjectMgr.GetVehicleSeatParameters(seatEntry->m_ID))
         {
-            if (params->exitParamValue == SEAT_EXIT_PARAMS_OFFSET)
+            if (params->exitParamValue == static_cast<float>(SEAT_EXIT_PARAMS_OFFSET))
             {
                 exitPos.RelocateOffset(Position(params->exitParamX, params->exitParamY, params->exitParamZ, params->exitParamO));
                 m_owner->UpdateAllowedPositionZ(exitPos.x, exitPos.y, exitPos.z);
             }
-            else if (params->exitParamValue == SEAT_EXIT_PARAMS_ABSOLUTE_POS)
+            else if (params->exitParamValue == static_cast<float>(SEAT_EXIT_PARAMS_ABSOLUTE_POS))
             {
                 exitPos.x = params->exitParamX;
                 exitPos.y = params->exitParamY;
