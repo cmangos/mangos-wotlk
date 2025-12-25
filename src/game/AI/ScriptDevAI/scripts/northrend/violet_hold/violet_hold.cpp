@@ -401,8 +401,7 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
                 }
 
                 // set achiev to failed
-                if (m_bIsDefenseless)
-                    m_bIsDefenseless = false;
+                m_bIsDefenseless = false;
 
                 if (!m_uiWorldStateSealCount)
                 {
