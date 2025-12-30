@@ -72,7 +72,7 @@ class RegularGrid2D
                     delete nodes[x][y];
         }
 
-        virtual void insert(const T& value)
+        void insert(const T& value)
         {
             G3D::AABox bounds;
             BoundsFunc::getBounds(value, bounds);
@@ -110,7 +110,7 @@ class RegularGrid2D
             return { map.equal_range(key) };
         }
 
-        virtual void remove(const T& value)
+        void remove(const T& value)
         {
             for (auto& p : MapEqualRange(memberTable, &value))
                 p.second->remove(value);
@@ -118,7 +118,7 @@ class RegularGrid2D
             memberTable.erase(&value);
         }
 
-        virtual void balance()
+        void balance()
         {
             for (int x = 0; x < CELL_NUMBER; ++x)
                 for (int y = 0; y < CELL_NUMBER; ++y)

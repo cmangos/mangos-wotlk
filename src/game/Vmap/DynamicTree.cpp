@@ -63,19 +63,19 @@ struct DynTreeImpl : public ParentTree/*, public Intersectable*/
     {
     }
 
-    void insert(const Model& mdl) override
+    void insert(const Model& mdl)
     {
         base::insert(mdl);
         ++unbalanced_times;
     }
 
-    void remove(const Model& mdl) override
+    void remove(const Model& mdl)
     {
         base::remove(mdl);
         ++unbalanced_times;
     }
 
-    void balance() override
+    void balance()
     {
         base::balance();
         unbalanced_times = 0;
