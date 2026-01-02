@@ -1213,7 +1213,7 @@ time_t MapPersistentStateManager::GetSubsequentResetTime(uint32 mapid, Difficult
     }
 
     time_t resetHour = sWorld.getConfig(CONFIG_UINT32_INSTANCE_RESET_TIME_HOUR);
-    time_t period = uint32(((mapDiff->resetTime * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)) / DAY) * DAY);
+    time_t period = uint32(((mapDiff->resetTime * sWorld.getConfig(CONFIG_FLOAT_RATE_INSTANCE_RESET_TIME)) / static_cast<float>(DAY)) * DAY);
     if (period < DAY)
         period = DAY;
 

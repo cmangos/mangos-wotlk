@@ -2123,9 +2123,9 @@ struct QuaternionCompressed
     void Set(const Quat& quat)
     {
         int8 w_sign = (quat.w >= 0 ? 1 : -1);
-        int64 X = int32(quat.x * PACK_COEFF_X) * w_sign & ((1 << 22) - 1);
-        int64 Y = int32(quat.y * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
-        int64 Z = int32(quat.z * PACK_COEFF_YZ) * w_sign & ((1 << 21) - 1);
+        int64 X = int32(quat.x * static_cast<double>(PACK_COEFF_X)) * w_sign & ((1 << 22) - 1);
+        int64 Y = int32(quat.y * static_cast<double>(PACK_COEFF_YZ)) * w_sign & ((1 << 21) - 1);
+        int64 Z = int32(quat.z * static_cast<double>(PACK_COEFF_YZ)) * w_sign & ((1 << 21) - 1);
         m_raw = Z | (Y << 21) | (X << 42);
     }
 
