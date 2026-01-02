@@ -394,7 +394,7 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
                 textEntry = m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? LANG_BG_IC_NODE_DEFENDED : LANG_BG_IC_NODE_ASSAULTED;
                 soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
-                nextFlagEntry = m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? i.nextObjectDefend : i.nextObjectDefend;
+                nextFlagEntry = m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? i.nextObjectDefend : i.nextObjectAssault;
 
                 // re-apply benefits
                 if (m_isleNode[nodeId].nodeConquerer == newOwnerIdx)
