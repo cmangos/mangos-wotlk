@@ -627,7 +627,7 @@ class AreaAura : public Aura
 {
     public:
         AreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr, uint32 originalRankSpellId = 0);
-        virtual ~AreaAura();
+        virtual ~AreaAura() override;
 
         bool OnAreaAuraCheckTarget(Unit* target) const;
     protected:
@@ -642,7 +642,7 @@ class PersistentAreaAura : public Aura
 {
     public:
         PersistentAreaAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
-        virtual ~PersistentAreaAura();
+        virtual ~PersistentAreaAura() override;
     protected:
         void Update(uint32 diff) override;
 };
@@ -652,7 +652,7 @@ class GameObjectAura : public Aura
 {
     public:
         GameObjectAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, GameObject* caster);
-        virtual ~GameObjectAura();
+        virtual ~GameObjectAura() override;
 
     protected:
         void Update(uint32 diff) override;

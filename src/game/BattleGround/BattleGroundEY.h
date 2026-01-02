@@ -286,7 +286,6 @@ class BattleGroundEYScore : public BattleGroundScore
 {
     public:
         BattleGroundEYScore() : flagCaptures(0) {};
-        virtual ~BattleGroundEYScore() {};
 
         uint32 flagCaptures;
 };

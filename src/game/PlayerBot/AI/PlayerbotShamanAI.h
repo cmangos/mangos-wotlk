@@ -132,7 +132,7 @@ class PlayerbotShamanAI : PlayerbotClassAI
 {
     public:
         PlayerbotShamanAI(Player& master, Player& bot, PlayerbotAI& ai);
-        virtual ~PlayerbotShamanAI();
+        virtual ~PlayerbotShamanAI() override;
 
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
@@ -142,7 +142,7 @@ class PlayerbotShamanAI : PlayerbotClassAI
         void DoNonCombatActions() override;
 
         // Utility Functions
-        bool CastHoTOnTank();
+        bool CastHoTOnTank() override;
 
     private:
         CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget) override;

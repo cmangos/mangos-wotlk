@@ -692,10 +692,9 @@ class BattleGroundICScore : public BattleGroundScore
 {
     public:
         BattleGroundICScore(): basesAssaulted(0), basesDefended(0) {};
-        virtual ~BattleGroundICScore() {};
 
-        uint32 GetAttr1() const { return basesAssaulted; }
-        uint32 GetAttr2() const { return basesDefended; }
+        uint32 GetAttr1() const override { return basesAssaulted; }
+        uint32 GetAttr2() const override { return basesDefended; }
 
         uint32 basesAssaulted;
         uint32 basesDefended;
