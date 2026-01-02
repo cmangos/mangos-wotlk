@@ -772,7 +772,7 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
     WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
     data << uint32(id);
 
-    TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
+    TimePoint now = sWorld.GetCurrentClockTime();
     // the counter is packed like a packed Guid
     data.appendPackGUID(progress->counter);
 
