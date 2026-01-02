@@ -729,8 +729,7 @@ void Unit::SendMoveRoot(bool state, bool/* broadcastOnly*/)
         {
             m_movementInfo.RemoveMovementFlag(movementFlagsMask);
             m_movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
-            if (!client)
-                StopMoving(true);
+            StopMoving(true);
         }
         else
             m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
