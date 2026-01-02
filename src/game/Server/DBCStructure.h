@@ -1984,7 +1984,7 @@ struct SpellCastTimesEntry
 struct SpellCategoryEntry
 {
     uint32 ID;                                           // 0        m_ID
-    uint32 Flags;                                        // 1        m_flags
+    uint32 flags;                                        // 1        m_flags
 };
 
 struct SpellFocusObjectEntry
