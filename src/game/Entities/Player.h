@@ -1896,7 +1896,7 @@ class Player : public Unit
         void SendPetBar();
         void StartCinematic();
         void StopCinematic();
-        bool UpdateSkill(uint16 id, uint16 diff);
+        void UpdateSkill(uint16 id, uint16 diff);
         bool UpdateSkillPro(uint16 id, int32 Chance, uint16 diff);
 
         bool UpdateCraftSkill(uint32 spellid);
@@ -2011,9 +2011,9 @@ class Player : public Unit
         void UpdateLocalChannels(uint32 newZone);
         void LeaveLFGChannel();
 
-        void UpdateDefense();
+        void UpdateDefense(uint32 procEx);
         void UpdateWeaponSkill(WeaponAttackType attType);
-        void UpdateCombatSkills(Unit* pVictim, WeaponAttackType attType, bool defence);
+        void UpdateCombatSkills(uint32 procEx, WeaponAttackType attType, bool defence);
         uint16 GetWeaponSkillIdForAttack(WeaponAttackType attType) const;
 
         SkillRaceClassInfoEntry const* GetSkillInfo(uint16 id, std::function<bool (SkillRaceClassInfoEntry const&)> filterfunc = nullptr) const;
