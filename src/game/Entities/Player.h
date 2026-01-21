@@ -43,6 +43,7 @@
 #include "Cinematics/CinematicMgr.h"
 #include "LFG/LFG.h"
 #include "BattleGround/BattleGroundDefines.h"
+#include "Config/Config.h"
 
 #include <functional>
 #include <vector>
@@ -3017,6 +3018,8 @@ class Player : public Unit
         bool m_pendingDismount;
         bool m_pendingTaxi;
         bool m_pendingPhaseChange;
+
+        bool m_debugTargetAutoScaling;
 };
 
 void AddItemsSetItem(Player* player, Item* item);

@@ -259,9 +259,9 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode, Group* gr
     m_weatherSystem = new WeatherSystem(this);
     m_transportGuids.Set(sMapMgr.GetTransportCounter());
 
-    m_wScaleMaxDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX);
-    m_wScaleCombatDistance = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT);
-    m_wScaleMinPlayerLevel = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_MIN_PLAYER_LEVEL);
+    m_scalingMaxDistance = sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_DISTANCE_MAX);
+    m_scalingCombatDistance = sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_DISTANCE_COMBAT);
+    m_scalingMinPlayerLevel = sWorld.getConfig(CONFIG_UINT32_CREATURE_AUTOSCALE_MIN_PLAYER_LEVEL);
 }
 
 void Map::Initialize(bool loadInstanceData /*= true*/)
@@ -782,12 +782,12 @@ uint32 Map::GetPlayersCountInAutoscaleDistance(Position const& position)
         auto player = itr.getSource();
         auto playerDistance = player->GetDistance(position.x, position.y, position.z);
 
-        if (playerDistance > m_wScaleMaxDistance || player->GetLevel() < m_wScaleMinPlayerLevel)
+        if (playerDistance > m_scalingMaxDistance || player->GetLevel() < m_scalingMinPlayerLevel)
         {
             continue;
         }
 
-        if (playerDistance <= m_wScaleCombatDistance)
+        if (playerDistance <= m_scalingCombatDistance)
         {
             count++;
             continue;
@@ -796,7 +796,7 @@ uint32 Map::GetPlayersCountInAutoscaleDistance(Position const& position)
         auto lastTarget = player->GetLastTargetedUnit();
         auto lastTargetDistance = lastTarget ? lastTarget->GetDistance(position.x, position.y, position.z) : 0;
 
-        if (lastTarget && lastTargetDistance <= m_wScaleCombatDistance)
+        if (lastTarget && lastTargetDistance <= m_scalingCombatDistance)
         {
             count++;
         }

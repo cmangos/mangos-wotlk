@@ -591,6 +591,12 @@ enum TemporaryFactionFlags                                  // Used at real fact
     TEMPFACTION_ALL,
 };
 
+enum AttributeScaleTypes
+{
+    STYPE_DAMAGE,
+    STYPE_HEALTH,
+};
+
 class Creature : public Unit
 {
     public:
@@ -605,8 +611,9 @@ class Creature : public Unit
         bool Create(uint32 dbGuid, uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool LoadCreatureAddon(bool reload);
 
-        float GetHealthScale() const; 
-        float GetDamageScale() const; 
+        float GetDefaultScale(AttributeScaleTypes type, bool inDungeon) const;
+        float GetAdditionalScale(AttributeScaleTypes type, bool inDungeon) const;
+        float GetScaleMultiplier(AttributeScaleTypes type) const; 
 
         // SelectLevel set creature bases stats for given level or for default levels stored in db
         void SelectLevel(uint32 forcedLevel = USE_DEFAULT_DATABASE_LEVEL, bool preserveHealthAndPower = false);
@@ -743,7 +750,8 @@ class Creature : public Unit
         void SetSpellList(uint32 spellSet);
         void UpdateImmunitiesSet(uint32 immunitySet);
 
-        void UpdateWorldAutoscale();
+        void UpdateAutoscale();
+        void PrintAutoscaleDebugInfo(Player const* targetedBy);
 
         bool UpdateEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true, bool randomizeLevels = true);
         void ResetEntry(bool respawn = false);
@@ -1025,13 +1033,16 @@ class Creature : public Unit
         // vendor items
         VendorItemCounts m_vendorItemCounts;
 
-        // open world autoscaling:
-        bool m_wScaleEnabled;
-        uint32 m_wScalePlayersThreshold;
-        uint32 m_wScaleDownscaleDelayMS;
-        uint32 m_wScaleDownscaleAt = 0;
-        uint32 m_wScaleNextUpdateAt = 0;
-        uint32 m_wScaleAmount = 0;
+        // creature autoscaling options:
+        bool m_scalingEnabledWorld;
+        bool m_scalingEnabledInstance;
+        uint32 m_scalingPlayersThreshold;
+        uint32 m_scalingDownscaleDelayMS;
+        uint32 m_scalingDownscaleAt = 0;
+        uint32 m_scalingNextUpdateAt = 0;
+        // dungeon -> actual players count in autoscale distance
+        // world -> additional players count in autoscale distance (actual count - players threshold)
+        uint32 m_scalingPlayersCount = 0;
 
         uint32 m_gossipMenuId;
         uint32 m_lootMoney;

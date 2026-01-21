@@ -156,9 +156,10 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
 {
     m_valuesCount = UNIT_END;
 
-    m_wScaleEnabled = sWorld.getConfig(CONFIG_BOOL_WORLD_AUTOSCALE);
-    m_wScalePlayersThreshold = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYERS_THRESHOLD);
-    m_wScaleDownscaleDelayMS = sWorld.getConfig(CONFIG_UINT32_WORLD_AUTOSCALE_DOWNSCALE_DELAY) * 1000;
+    m_scalingEnabledWorld = sWorld.getConfig(CONFIG_BOOL_CREATURE_AUTOSCALE_WORLD);
+    m_scalingEnabledInstance = sWorld.getConfig(CONFIG_BOOL_CREATURE_AUTOSCALE_INSTANCE);
+    m_scalingPlayersThreshold = sWorld.getConfig(CONFIG_UINT32_CREATURE_AUTOSCALE_PLAYERS_THRESHOLD);
+    m_scalingDownscaleDelayMS = sWorld.getConfig(CONFIG_UINT32_CREATURE_AUTOSCALE_DOWNSCALE_DELAY) * 1000;
 
     SetWalk(true, true);
 }
@@ -830,7 +831,7 @@ void Creature::Update(const uint32 diff)
             if (m_delayedBoardingSpell && !ItsNewObject()) // after being added to world
                 TriggerDelayedBoarding();
 
-            UpdateWorldAutoscale();
+            UpdateAutoscale();
 
             break;
         }
@@ -1334,103 +1335,122 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask)
     WorldDatabase.CommitTransaction();
 }
 
-float Creature::GetHealthScale() const
+float Creature::GetDefaultScale(AttributeScaleTypes type, bool inDungeon) const
 {
-    if (IsNpc() || IsPet())
+    // Any creature, in dungeon:
+    if (inDungeon && type == STYPE_DAMAGE)
     {
-        return 1.0f;
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_DAMAGE);
+    }
+    if (inDungeon && type == STYPE_HEALTH)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_HEALTH);
+    }
+    
+    // Normal creature, open world:
+    if (IsNormal() && type == STYPE_DAMAGE)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_NORMAL_DAMAGE);
+    }
+    if (IsNormal() && type == STYPE_HEALTH)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_NORMAL_HEALTH);
     }
 
-    Map* map = GetMap();
-
-    float worldScaleRate = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_HEALTH);
-    float worldAdditionalScale = worldScaleRate * m_wScaleAmount;
-
-    if (!map || !map->IsDungeon())
+    // Rare creature, open world:
+    if (IsRare() && type == STYPE_DAMAGE)
     {
-        if (IsRare())
-        {
-            return sWorld.getConfig(CONFIG_FLOAT_SCALE_RARE_HEALTH);
-        }
-
-        // Do not autoscale bosses:
-        if (IsBoss() || IsWorldBoss())
-        {
-            return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH);
-        }
-
-        return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH) + worldAdditionalScale;
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_RARE_DAMAGE);
+    }
+    if (IsRare() && type == STYPE_HEALTH)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_SCALE_RARE_HEALTH);
     }
 
-    bool instanceAutoscaleEnabled = sWorld.getConfig(CONFIG_BOOL_INSTANCE_AUTOSCALE);
-    float defaultScale = sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_HEALTH);
-
-    if (instanceAutoscaleEnabled)
-    {
-        Group* group = map->GetGroup();
-        uint32 playerCount = group ? group->GetMembersCount() : 1;
-
-        if (playerCount < 3)
-        {
-            return defaultScale * 0.6f;
-        }
-
-        return playerCount * (defaultScale / 5.0f);
-    }
-
-    return defaultScale + worldAdditionalScale;
+    return 1.0f;
 }
 
-float Creature::GetDamageScale() const
+float Creature::GetAdditionalScale(AttributeScaleTypes type, bool inDungeon) const
 {
-    if (IsNpc() || IsPet())
+    // Any creature, in dungeon:
+    if (inDungeon && type == STYPE_DAMAGE)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_INSTANCE_DAMAGE);
+    }
+    if (inDungeon && type == STYPE_HEALTH)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_INSTANCE_HEALTH);
+    }
+
+    // Normal creature, open world:
+    if (IsNormal() && type == STYPE_DAMAGE)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_NORMAL_DAMAGE);
+    }
+    if (IsNormal() && type == STYPE_HEALTH)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_NORMAL_HEALTH);
+    }
+
+    // Rare creature, open world:
+    if (IsRare() && type == STYPE_DAMAGE)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_RARE_DAMAGE);
+    }
+    if (IsRare() && type == STYPE_HEALTH)
+    {
+        return sWorld.getConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_RARE_HEALTH);
+    }
+
+    return 0.0f;
+}
+
+float Creature::GetScaleMultiplier(AttributeScaleTypes type) const
+{
+    auto map = GetMap();
+    bool inDungeon = map ? map->IsDungeon() : false;
+
+    if (IsNpc() || IsPet() || !map)
     {
         return 1.0f;
     }
 
-    Map* map = GetMap();
+    float defaultScale = GetDefaultScale(type, inDungeon);
+    float additionalScale = GetAdditionalScale(type, inDungeon);
 
-    float worldScaleRate = sWorld.getConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_DAMAGE);
-    float worldAdditionalScale = worldScaleRate * m_wScaleAmount;
+    bool scalingEnabled = inDungeon
+        ? sWorld.getConfig(CONFIG_BOOL_CREATURE_AUTOSCALE_INSTANCE)
+        : sWorld.getConfig(CONFIG_BOOL_CREATURE_AUTOSCALE_WORLD);
 
-    if (!map || !map->IsDungeon())
+    if (!scalingEnabled)
     {
-        if (IsRare())
-        {
-            return sWorld.getConfig(CONFIG_FLOAT_SCALE_RARE_DAMAGE);
-        }
-
-        // Do not autoscale bosses:
-        if (IsBoss() || IsWorldBoss())
-        {
-            return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE);
-        }
-        return sWorld.getConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE) + worldAdditionalScale;
+        return defaultScale;
     }
 
-    bool autoScaleEnabled = sWorld.getConfig(CONFIG_BOOL_INSTANCE_AUTOSCALE);
-    float defaultScale = sWorld.getConfig(CONFIG_FLOAT_SCALE_INSTANCE_DAMAGE);
-    
-    if (autoScaleEnabled)
-    {
-        Group* group = map->GetGroup();
-        uint32 playerCount = group ? group->GetMembersCount() : 1;
+    uint32 playersCount = m_scalingPlayersCount;
 
-        if (playerCount <= 5)
-        {
-            return defaultScale;
+    if (inDungeon)
+    {
+        playersCount = playersCount > 3 ? playersCount : 3;
+
+        if (playersCount < 5)
+        { 
+            // Damage should not be scaled down:
+            if (type == STYPE_DAMAGE) return defaultScale;
+           
+            return defaultScale * (playersCount / 5.0f);
         }
-            
-        return defaultScale + (playerCount - 5) * (defaultScale / 4.0f);
+
+        return defaultScale + (playersCount - 5) * additionalScale;
     }
 
-    return defaultScale + worldAdditionalScale;
+    return defaultScale + playersCount * additionalScale;
 }
 
 void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/, bool preserveState)
 {
-    float healthScale = GetHealthScale();
-    float damageScale = GetDamageScale();
+    float healthScale = GetScaleMultiplier(STYPE_HEALTH);
+    float damageScale = GetScaleMultiplier(STYPE_DAMAGE);
 
     CreatureInfo const* cinfo = GetCreatureInfo();
     if (!cinfo)
@@ -2739,64 +2759,83 @@ void Creature::UpdateImmunitiesSet(uint32 immunitySet)
     m_immunitySet = immunitySet;
 }
 
-void Creature::UpdateWorldAutoscale()
+void Creature::UpdateAutoscale()
 {
-    if (!m_wScaleEnabled || IsNpc() || !IsNormal())
-    {
-        return;
-    }
-
     auto map = GetMap();
+    bool inDungeon = map ? map->IsDungeon() : false;
 
-    if (!map || map->IsDungeon())
+    if (!map || (inDungeon && !m_scalingEnabledInstance) || (!inDungeon && !m_scalingEnabledWorld))
     {
         return;
     }
 
     auto worldTime = sWorld.GetCurrentMSTime();
 
-    if (m_wScaleNextUpdateAt != 0 && worldTime < m_wScaleNextUpdateAt)
+    if (m_scalingNextUpdateAt != 0 && worldTime < m_scalingNextUpdateAt)
     {
         return;
     }
+    m_scalingNextUpdateAt = worldTime + 500;
 
-    m_wScaleNextUpdateAt = worldTime + 500;
+    uint32 newPlayersCount = map->GetPlayersCountInAutoscaleDistance(GetPosition());
 
-    uint32 playersCount = map->GetPlayersCountInAutoscaleDistance(GetPosition());
-    uint32 newScaleAmount = playersCount > m_wScalePlayersThreshold ? playersCount - m_wScalePlayersThreshold : 0;
-
-    if (m_wScaleAmount == newScaleAmount)
+    // Do not scale below 3 players in dungeons:
+    if (!inDungeon)
     {
-        if (m_wScaleDownscaleAt != 0) {
-             m_wScaleDownscaleAt = 0;
+        newPlayersCount = newPlayersCount > m_scalingPlayersThreshold ? newPlayersCount - m_scalingPlayersThreshold : 0;
+    }
+
+    if (m_scalingPlayersCount == newPlayersCount)
+    {
+        if (m_scalingDownscaleAt != 0) {
+            m_scalingDownscaleAt = 0;
         }
 
         return;
-    }
+    }    
 
-    if (newScaleAmount < m_wScaleAmount && m_wScaleDownscaleAt == 0)
+    if (m_scalingPlayersCount > newPlayersCount && m_scalingDownscaleAt == 0)
     {
-        uint32 downscaleDelayMS = m_wScaleDownscaleDelayMS;
-
-        m_wScaleDownscaleAt = worldTime + downscaleDelayMS;
+        m_scalingDownscaleAt = worldTime + m_scalingDownscaleDelayMS;
         
         return;
     }
 
-    bool downscaleDelayExpired = m_wScaleDownscaleAt > 0 && worldTime > m_wScaleDownscaleAt;
-    bool shouldDownscale = (!IsInCombat() || downscaleDelayExpired) && newScaleAmount < m_wScaleAmount;
-    bool shouldUpscale = newScaleAmount > m_wScaleAmount;
+    bool downscaleDelayExpired = m_scalingDownscaleAt > 0 && worldTime > m_scalingDownscaleAt;
+    bool shouldDownscale = (!IsInCombat() || downscaleDelayExpired) && newPlayersCount < m_scalingPlayersCount;
+    bool shouldUpscale = newPlayersCount > m_scalingPlayersCount;
 
     if (shouldDownscale || shouldUpscale)
     {
         auto healthPercent = GetHealthPercent();
         auto level = GetLevel();
 
-        m_wScaleAmount = newScaleAmount;
-        m_wScaleDownscaleAt = 0;
+        m_scalingPlayersCount = newPlayersCount;
+        m_scalingDownscaleAt = 0;
 
         SelectLevel(level, true);
     }
+}
+
+void Creature::PrintAutoscaleDebugInfo(Player const* targetedBy)
+{
+    auto map = GetMap();
+
+    if (!map || IsNpc() || IsPet())
+    {
+        return;
+    }
+
+    auto inDungeon = map->IsDungeon();
+    auto distance = targetedBy->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ());
+
+    std::cout << "target distance: " << distance << std::endl;
+    std::cout << "  - amount: " << m_scalingPlayersCount << std::endl;
+    std::cout << "  - downscale at: " << m_scalingDownscaleAt << std::endl;
+    std::cout << "  - health scale: " << GetDefaultScale(STYPE_HEALTH, inDungeon) << " -> " << GetScaleMultiplier(STYPE_HEALTH) << std::endl;
+    std::cout << "  - damage scale: " << GetDefaultScale(STYPE_DAMAGE, inDungeon) << " -> " << GetScaleMultiplier(STYPE_DAMAGE) << std::endl;
+    std::cout << "  - in dungeon: " << inDungeon << std::endl;
+    std::cout << "  - health: " << GetHealth() << std::endl;
 }
 
 time_t Creature::GetRespawnTimeEx() const

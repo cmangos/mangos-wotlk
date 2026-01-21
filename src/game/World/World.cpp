@@ -940,24 +940,26 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP, "Spawns.ZoneArea", false);
     setConfig(CONFIG_BOOL_REGEN_ZONE_AREA_ON_STARTUP, "Spawns.ZoneArea", false);
 
-    // Custom configs
-    setConfig(CONFIG_BOOL_INSTANCE_AUTOSCALE, "Instance.AutoScaling", false);
-
     setConfig(CONFIG_BOOL_XP_AUTOSCALE, "XP.AutoScaling", false);
     setConfig(CONFIG_FLOAT_XP_AUTOSCALE_FACTOR_KILL, "XP.AutoScaling.Factor.Kill", 0.07);
     setConfig(CONFIG_FLOAT_XP_AUTOSCALE_FACTOR_QUEST, "XP.AutoScaling.Factor.Quest", 0.07);
 
-    setConfig(CONFIG_BOOL_WORLD_AUTOSCALE, "OpenWorld.AutoScaling", false);
-    setConfig(CONFIG_UINT32_WORLD_AUTOSCALE_PLAYERS_THRESHOLD, "OpenWorld.AutoScaling.PlayersThreshold", 1);
-    setConfig(CONFIG_UINT32_WORLD_AUTOSCALE_MIN_PLAYER_LEVEL, "OpenWorld.AutoScaling.MinPlayerLevel", 0);
-    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_MAX, "OpenWorld.AutoScaling.Distance.Max", 45.0f);
-    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_DISTANCE_COMBAT, "OpenWorld.AutoScaling.Distance.Combat", 27.0f);
-    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_HEALTH, "OpenWorld.AutoScaling.Rate.Health", 0.25f);
-    setConfig(CONFIG_FLOAT_WORLD_AUTOSCALE_RATE_DAMAGE, "OpenWorld.AutoScaling.Rate.Damage", 0.25f);
-    setConfig(CONFIG_UINT32_WORLD_AUTOSCALE_DOWNSCALE_DELAY, "OpenWorld.AutoScaling.DownScaleDelay", 5);
+    setConfig(CONFIG_BOOL_CREATURE_AUTOSCALE_WORLD, "Creature.AutoScaling.World", false);
+    setConfig(CONFIG_BOOL_CREATURE_AUTOSCALE_INSTANCE, "Creature.AutoScaling.Instance", false);
+    setConfig(CONFIG_UINT32_CREATURE_AUTOSCALE_PLAYERS_THRESHOLD, "Creature.AutoScaling.PlayersThreshold", 1);
+    setConfig(CONFIG_UINT32_CREATURE_AUTOSCALE_MIN_PLAYER_LEVEL, "Creature.AutoScaling.MinPlayerLevel", 0);
+    setConfig(CONFIG_UINT32_CREATURE_AUTOSCALE_DOWNSCALE_DELAY, "Creature.AutoScaling.DownScaleDelaySecs", 5);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_DISTANCE_MAX, "Creature.AutoScaling.Distance.Max", 45.0f);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_DISTANCE_COMBAT, "Creature.AutoScaling.Distance.Combat", 27.0f);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_NORMAL_HEALTH, "Creature.AutoScaling.Rate.Normal.Health", 0.25f);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_NORMAL_DAMAGE, "Creature.AutoScaling.Rate.Normal.Damage", 0.25f);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_RARE_HEALTH, "Creature.AutoScaling.Rate.Rare.Health", 0.25f);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_RARE_DAMAGE, "Creature.AutoScaling.Rate.Rare.Damage", 0.25f);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_INSTANCE_HEALTH, "Creature.AutoScaling.Rate.Instance.Health", 0.25f);
+    setConfig(CONFIG_FLOAT_CREATURE_AUTOSCALE_RATE_INSTANCE_DAMAGE, "Creature.AutoScaling.Rate.Instance.Damage", 0.25f);
 
-    setConfig(CONFIG_FLOAT_SCALE_DEFAULT_DAMAGE, "Creature.Scale.Default.Damage", 1.0f);
-    setConfig(CONFIG_FLOAT_SCALE_DEFAULT_HEALTH, "Creature.Scale.Default.Health", 1.0f);
+    setConfig(CONFIG_FLOAT_SCALE_NORMAL_DAMAGE, "Creature.Scale.Normal.Damage", 1.0f);
+    setConfig(CONFIG_FLOAT_SCALE_NORMAL_HEALTH, "Creature.Scale.Normal.Health", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_RARE_DAMAGE, "Creature.Scale.Rare.Damage", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_RARE_HEALTH, "Creature.Scale.Rare.Health", 1.0f);
     setConfig(CONFIG_FLOAT_SCALE_INSTANCE_DAMAGE, "Creature.Scale.Instance.Damage", 1.0f);

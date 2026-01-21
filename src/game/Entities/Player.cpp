@@ -710,6 +710,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_pendingMountAuraFlying = false;
     m_pendingDismount = false;
     m_pendingTaxi = false;
+
+    m_debugTargetAutoScaling = false;
 }
 
 Player::~Player()
@@ -1723,6 +1725,13 @@ void Player::Update(const uint32 diff)
 
     if (IsHasDelayedTeleport() && !m_semaphoreTeleport_Near)
         TeleportTo(m_teleport_dest, m_teleport_options);
+
+    Unit* target = GetTarget();
+
+    if (m_debugTargetAutoScaling && target && target->IsCreature())
+    {
+        ((Creature*)target)->PrintAutoscaleDebugInfo(this);
+    }
 
 #ifdef BUILD_DEPRECATED_PLAYERBOT
     if (m_playerbotAI)
@@ -16955,6 +16964,18 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     m_achievementMgr.CheckAllAchievementCriteria();
 
     _LoadEquipmentSets(holder->GetResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
+    
+    auto debugAutoScalingPlayerName = sConfig.GetStringDefault("Debug.Creature.AutoScaling.PlayerName", "");
+
+    if (!debugAutoScalingPlayerName.empty()) {
+        std::string name(m_name);
+        std::transform(name.begin(), name.end(), name.begin(), [](char c) { return std::tolower(c); });
+
+        std::string cfgName(debugAutoScalingPlayerName);
+        std::transform(cfgName.begin(), cfgName.end(), cfgName.begin(), [](char c) { return std::tolower(c); });
+
+        m_debugTargetAutoScaling = name == cfgName;
+    }
 
     return true;
 }

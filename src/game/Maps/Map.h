@@ -585,9 +585,9 @@ class Map : public GridRefManager<NGridType>
         ObjectGuidGenerator<HIGHGUID_VEHICLE> m_VehicleGuids;
         ObjectGuidGenerator<HIGHGUID_MO_TRANSPORT> m_transportGuids;
 
-        float m_wScaleMaxDistance;
-        float m_wScaleCombatDistance;
-        uint32 m_wScaleMinPlayerLevel;
+        float m_scalingMaxDistance;
+        float m_scalingCombatDistance;
+        uint32 m_scalingMinPlayerLevel;
 
         // Type specific code for add/remove to/from grid
         template<class T>

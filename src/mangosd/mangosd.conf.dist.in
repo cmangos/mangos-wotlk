@@ -2019,14 +2019,8 @@ CharDelete.KeepDays = 30
 ###################################################################################################################
 # CUSTOM CONFIGURATION:
 #
-#    Instance.AutoScaling
-#        Enable or disable instance auto-scaling based on player count.
-#        Value of Instance.Scale
-#        Default: 0  - Disabled
-#                 1  - Enable
-#
-#    Creature.Scale.Default.Damage
-#    Creature.Scale.Default.Health
+#    Creature.Scale.Normal.Damage
+#    Creature.Scale.Normal.Health
 #    Creature.Scale.Instance.Damage
 #    Creature.Scale.Instance.Health
 #        Fixed scale for creatures health and damage.
@@ -2072,21 +2066,29 @@ CharDelete.KeepDays = 30
 #    XP.AutoScaling.Factor.Quest
 #        Default: 0.07
 #
-#    OpenWorld.AutoScaling
+#    Creature.AutoScaling.World
 #        Default: 0
-#    OpenWorld.AutoScaling.PlayersThreshold
+#    Creature.AutoScaling.Instance
+#        Default: 0
+#    Creature.AutoScaling.PlayersThreshold
 #        Default: 1
-#    OpenWorld.AutoScaling.MinPlayerLevel
+#    Creature.AutoScaling.MinPlayerLevel
 #        Default: 0
-#    OpenWorld.AutoScaling.Distance.Max
+#    Creature.AutoScaling.Distance.Max
 #        Default: 45.0
-#    OpenWorld.AutoScaling.Distance.Combat
+#    Creature.AutoScaling.Distance.Combat
 #        Default: 27.0
-#    OpenWorld.AutoScaling.Rate.Health
-#    OpenWorld.AutoScaling.Rate.Damage
+#    Creature.AutoScaling.Rate.Normal.Health
+#    Creature.AutoScaling.Rate.Normal.Damage
+#    Creature.AutoScaling.Rate.Rare.Health
+#    Creature.AutoScaling.Rate.Rare.Damage
+#    Creature.AutoScaling.Rate.Instance.Health
+#    Creature.AutoScaling.Rate.Instance.Damage
 #        Default: 0.25
-#    OpenWorld.AutoScaling.DownScaleDelay
+#    Creature.AutoScaling.DownScaleDelay
 #        Default: 5
+#
+#    Debug.Creature.AutoScaling.PlayerName
 #
 ###################################################################################################################
 
