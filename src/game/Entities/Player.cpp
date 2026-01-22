@@ -16965,15 +16965,11 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     _LoadEquipmentSets(holder->GetResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
     
-    auto debugAutoScalingPlayerName = sConfig.GetStringDefault("Debug.Creature.AutoScaling.PlayerName", "");
+    std::string cfgName = sConfig.GetStringDefault("Debug.Creature.AutoScaling.PlayerName", "");
+    std::string name = m_name;
 
-    if (!debugAutoScalingPlayerName.empty()) {
-        std::string name(m_name);
-        std::transform(name.begin(), name.end(), name.begin(), [](char c) { return std::tolower(c); });
-
-        std::string cfgName(debugAutoScalingPlayerName);
-        std::transform(cfgName.begin(), cfgName.end(), cfgName.begin(), [](char c) { return std::tolower(c); });
-
+    if (normalizePlayerName(cfgName) && normalizePlayerName(name))
+    {
         m_debugTargetAutoScaling = name == cfgName;
     }
 

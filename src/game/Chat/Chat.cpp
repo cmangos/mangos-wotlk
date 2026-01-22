@@ -988,6 +988,7 @@ ChatCommand* ChatHandler::getCommandTable()
     {
         { "tpout",          SEC_PLAYER,         true,  &ChatHandler::HandleTpCommand,                     "", nullptr              },
         { "toraid",         SEC_PLAYER,         true,  &ChatHandler::HandleConvertToRaid,                 "", nullptr              },
+        { "come",           SEC_GAMEMASTER,     true,  &ChatHandler::HandleComeCommand,                   "", nullptr              },
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  true,  nullptr,                                           "", achievementCommandTable },
         { "anticheat",      SEC_GAMEMASTER,     true,  nullptr,                                           "", anticheatCommandTable},

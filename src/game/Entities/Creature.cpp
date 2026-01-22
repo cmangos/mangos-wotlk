@@ -2830,7 +2830,7 @@ void Creature::PrintAutoscaleDebugInfo(Player const* targetedBy)
     auto distance = targetedBy->GetDistance(GetPositionX(), GetPositionY(), GetPositionZ());
 
     std::cout << "target distance: " << distance << std::endl;
-    std::cout << "  - amount: " << m_scalingPlayersCount << std::endl;
+    std::cout << "  - scale amount: " << m_scalingPlayersCount << std::endl;
     std::cout << "  - downscale at: " << m_scalingDownscaleAt << std::endl;
     std::cout << "  - health scale: " << GetDefaultScale(STYPE_HEALTH, inDungeon) << " -> " << GetScaleMultiplier(STYPE_HEALTH) << std::endl;
     std::cout << "  - damage scale: " << GetDefaultScale(STYPE_DAMAGE, inDungeon) << " -> " << GetScaleMultiplier(STYPE_DAMAGE) << std::endl;
