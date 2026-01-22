@@ -987,6 +987,7 @@ ChatCommand* ChatHandler::getCommandTable()
     static ChatCommand commandTable[] =
     {
         { "tpout",          SEC_PLAYER,         true,  &ChatHandler::HandleTpCommand,                     "", nullptr              },
+        { "toraid",         SEC_PLAYER,         true,  &ChatHandler::HandleConvertToRaid,                 "", nullptr              },
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  true,  nullptr,                                           "", achievementCommandTable },
         { "anticheat",      SEC_GAMEMASTER,     true,  nullptr,                                           "", anticheatCommandTable},

@@ -72,6 +72,19 @@ bool ChatHandler::HandleTpCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleConvertToRaid(char* args)
+{
+    Player* player = m_session->GetPlayer();
+    Group* group = player ? player->GetGroup() : nullptr;
+
+    if (group && !group->IsRaidGroup() && (player->IsGameMaster() || group->IsLeader(player->GetObjectGuid())))
+    {
+        group->ConvertToRaid();
+    }
+
+    return true;
+}
+
 bool ChatHandler::HandleHelpCommand(char* args)
 {
     if (!*args)

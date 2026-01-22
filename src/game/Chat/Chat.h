@@ -895,6 +895,8 @@ class ChatHandler
         bool HandleSendMailHelper(MailDraft& draft, char* args);
         bool HandleSendMoneyHelper(MailDraft& draft, char* args);
 
+        bool HandleConvertToRaid(char* args);
+
         template<typename T>
         void ShowNpcOrGoSpawnInformation(uint32 guid);
         template <typename T>
