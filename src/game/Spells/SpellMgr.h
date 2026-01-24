@@ -412,21 +412,6 @@ inline bool IsAutocastable(uint32 spellId)
     return IsAutocastable(spellInfo);
 }
 
-// TODO: Unify with creature_template_spells so that we can set both attack and pet bar visibility
-// If true, only gives access to spellbar, and not states and commands
-// Works in connection with AI-CanHandleCharm
-inline bool IsPossessCharmType(uint32 spellId)
-{
-    switch (spellId)
-    {
-        case 30019: // Control Piece - Chess event
-        case 39219: // Death's Door Fel Cannon
-        case 52244: // Charm Geist
-            return true;
-        default: return false;
-    }
-}
-
 inline bool IsSpellNeedSendOnObjectUpdate(uint32 spellId)
 {
     switch (spellId)

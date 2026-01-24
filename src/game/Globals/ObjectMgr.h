@@ -378,6 +378,16 @@ struct QuestPOI
 typedef std::vector<QuestPOI> QuestPOIVector;
 typedef std::unordered_map<uint32, QuestPOIVector> QuestPOIMap;
 
+struct PetAutocastSpellList
+{
+    uint32 creatureEntry;
+    uint32 spellId;
+    int32 combatCondition;
+    int32 targetId;
+};
+
+typedef std::map<std::pair<uint32, uint32>, PetAutocastSpellList> PetAutocastSpellMap;
+
 struct DungeonEncounter
 {
     DungeonEncounter(DungeonEncounterEntry const* _dbcEntry, EncounterCreditType _creditType, uint32 _creditEntry, uint32 _lastEncounterDungeon)
@@ -783,6 +793,7 @@ class ObjectMgr
         void LoadExplorationBaseXP();
         void LoadPetNames();
         void LoadPetNumber();
+        void LoadPetAutocastInfo();
         void LoadCorpses();
         void LoadFishingBaseSkillLevel();
 
@@ -1288,6 +1299,7 @@ class ObjectMgr
 
         CreatureSpellList* GetCreatureSpellList(uint32 Id) const; // only for starttime checks - else use Map
         std::shared_ptr<CreatureSpellListContainer> GetCreatureSpellListContainer() { return m_spellListContainer; }
+        std::shared_ptr<PetAutocastSpellMap> GetPetAutocastContainer() { return m_petAutocastContainer; }
         std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroupContainer() { return m_spawnGroupContainer; }
 
         bool HasWorldStateName(int32 Id) const;
@@ -1478,6 +1490,7 @@ class ObjectMgr
         CreatureImmunityContainer m_creatureImmunities;
 
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
+        std::shared_ptr<PetAutocastSpellMap> m_petAutocastContainer;
 
         std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupContainer;
 

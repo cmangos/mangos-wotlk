@@ -12989,8 +12989,6 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
 
-    bool isPossessCharm = IsPossessCharmType(spellId);
-
     Position combatStartPosition;
 
     if (charmed->IsPlayer())
@@ -13004,15 +13002,10 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         charmInfo->SetCharmState("PetAI");
         charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
 
-        if (isPossessCharm)
-            charmInfo->InitPossessCreateSpells();
-        else
-        {
-            charmInfo->InitCharmCreateSpells();
-            charmed->AI()->SetReactState(REACT_DEFENSIVE);
-            charmInfo->SetCommandState(COMMAND_FOLLOW);
-            charmInfo->SetIsRetreating(true);
-        }
+        charmInfo->InitCharmCreateSpells();
+        charmed->AI()->SetReactState(REACT_DEFENSIVE);
+        charmInfo->SetCommandState(COMMAND_FOLLOW);
+        charmInfo->SetIsRetreating(true);
 
         charmedPlayer->ClearSelectionGuid();
 
@@ -13024,10 +13017,8 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
 
         charmedCreature->GetCombatStartPosition(combatStartPosition);
 
-        if (charmed->AI() && charmed->AI()->CanHandleCharm())
-            charmInfo->SetCharmState("", false);
-        else
-            charmInfo->SetCharmState("PetAI");
+        bool changeAI = !static_cast<Creature*>(charmed)->GetSettings().HasFlag(CreatureStaticFlags2::ACTION_TRIGGERS_WHILE_CHARMED);
+        charmInfo->SetCharmState(changeAI ? "PetAI" : "", changeAI);
 
         charmedCreature->SetWalk(IsWalking(), true);
 
@@ -13038,11 +13029,9 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         if (uint32 charmedSpellList = charmedCreature->GetCreatureInfo()->CharmedSpellList)
             charmedCreature->SetSpellList(charmedSpellList);
 
-        if (isPossessCharm)
-            charmInfo->InitPossessCreateSpells();
-        else
+        charmInfo->InitCharmCreateSpells();
+        if (changeAI)
         {
-            charmInfo->InitCharmCreateSpells();
             charmed->AI()->SetReactState(REACT_DEFENSIVE);
             charmInfo->SetCommandState(COMMAND_FOLLOW);
             charmInfo->SetIsRetreating(true);
@@ -13192,11 +13181,13 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     else
         m_charmedUnitsPrivate.erase(charmedGuid);
 
+    bool changeAI = charmed->IsCreature() && static_cast<Creature*>(charmed)->GetSettings().HasFlag(CreatureStaticFlags2::ACTION_TRIGGERS_WHILE_CHARMED);
+
     // Update movement of the victim
     // Update crowd controlled movement if required:
     // TODO: requires motionmster upgrade for proper handling past this line
     // We are effectively rebuilding motion master contents: confused > fleeing > panic
-    if (!IsPossessCharmType(spellId))
+    if (changeAI)
     {
         const bool panic = charmed->IsInPanic(), fleeing = charmed->IsFleeing(), confused = charmed->IsConfused();
 
