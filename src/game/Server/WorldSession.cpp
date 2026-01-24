@@ -496,15 +496,15 @@ bool WorldSession::Update(uint32 /*diff*/)
                 m_socket = m_requestSocket;
                 m_requestSocket = nullptr;
                 sLog.outDetail("New Session key %s", m_socket->GetSessionKey().AsHexStr());
-                SendAuthOk();
             }
+            
+            if (m_inQueue)
+                SendAuthQueued();
             else
-            {
-                if (m_inQueue)
-                    SendAuthQueued();
-                else
-                    SendAuthOk();
-            }
+                SendAuthOk();
+
+            SendClientCacheVersion();
+            SendTutorialsData();
             SetInCharSelection();
             return true;
         }
@@ -1327,6 +1327,13 @@ void WorldSession::SendTimeSync()
     m_pendingTimeSyncRequests[m_timeSyncNextCounter] = WorldTimer::getMSTime();
 
     m_timeSyncNextCounter++;
+}
+
+void WorldSession::SendClientCacheVersion() const
+{
+    WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
+    pkt << uint32(sWorld.getConfig(CONFIG_UINT32_CLIENTCACHE_VERSION));
+    SendPacket(pkt);
 }
 
 void WorldSession::InitializeAnticheat(const BigNumber& K)

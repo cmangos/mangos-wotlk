@@ -275,12 +275,6 @@ World::AddSession_(WorldSession* s)
         return;
     }
 
-    WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
-    pkt << uint32(getConfig(CONFIG_UINT32_CLIENTCACHE_VERSION));
-    s->SendPacket(pkt);
-
-    s->SendTutorialsData();
-
     UpdateMaxSessionCounters();
 
     // Updates the population
@@ -363,12 +357,7 @@ bool World::RemoveQueuedSession(WorldSession* sess)
         pop_sess->SetInQueue(false);
         pop_sess->SendAuthWaitQue(0);
 
-        WorldPacket pkt(SMSG_CLIENTCACHE_VERSION, 4);
-        pkt << uint32(getConfig(CONFIG_UINT32_CLIENTCACHE_VERSION));
-        pop_sess->SendPacket(pkt);
-
         pop_sess->SendAccountDataTimes(GLOBAL_CACHE_MASK);
-        pop_sess->SendTutorialsData();
 
         m_QueuedSessions.pop_front();
 
