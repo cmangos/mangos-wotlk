@@ -273,6 +273,7 @@ class WorldSession
         void SendOfflineNameQueryResponses();
         void SendNotification(const char* format, ...) const ATTR_PRINTF(2, 3);
         void SendNotification(int32 string_id, ...) const;
+        void SendClientCacheVersion() const;
         void SendPetNameInvalid(uint32 error, const std::string& name, DeclinedName* declinedName) const;
         static WorldPacket BuildLfgJoinResult(LfgJoinResultData joinResult);
         static WorldPacket BuildLfgUpdate(LfgUpdateData const& updateData, bool isGroup);

@@ -571,8 +571,6 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
             std::unique_ptr<SessionAnticheatInterface> anticheat = sAnticheatLib->NewSession(session, K);
 
-            session->SendAuthOk();
-
             // when false, the client sent invalid addon data.  kick!
             WorldPacket addonPacket; // yes its copypasted atm cos of reconnect
             if (!anticheat->ReadAddonInfo(const_cast<WorldPacket*>(&recvPacket), addonPacket))
@@ -618,8 +616,6 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
         m_session->SetOS(clientOS);
         m_session->SetPlatform(clientPlatform);
         m_session->InitializeAnticheat(K);
-
-        m_session->SendAuthOk();
 
         // when false, the client sent invalid addon data.  kick!
         WorldPacket addonPacket;
