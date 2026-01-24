@@ -76,7 +76,7 @@ enum AchievementFlags
 {
     ACHIEVEMENT_FLAG_NONE                   = 0x00000000,
     ACHIEVEMENT_FLAG_COUNTER                = 0x00000001,   // ACHIEVEMENT_FLAG_STATISTIC Just count statistic (never stop and complete)
-    ACHIEVEMENT_FLAG_UNK2                   = 0x00000002,   // ACHIEVEMENT_FLAG_HIDDEN not used
+    ACHIEVEMENT_FLAG_HIDDEN                 = 0x00000002,   // ACHIEVEMENT_FLAG_HIDDEN not used
     ACHIEVEMENT_FLAG_STORE_MAX_VALUE        = 0x00000004,   // ACHIEVEMENT_FLAG_HIDDEN_TILL_AWARDED Store only max value? used only in "Reach level xx"
     ACHIEVEMENT_FLAG_SUMM                   = 0x00000008,   // ACHIEVEMENT_FLAG_CUMULATIVE Use summ criteria value from all requirements (and calculate max value)
     ACHIEVEMENT_FLAG_MAX_USED               = 0x00000010,   // ACHIEVEMENT_FLAG_DISPLAY_HIGHEST Show max criteria (and calculate max value ??)
@@ -87,16 +87,41 @@ enum AchievementFlags
     ACHIEVEMENT_FLAG_REALM_FIRST_KILL       = 0x00000200,   //
 };
 
-enum AchievementCriteriaCondition
+enum class CriteriaFailEvent : uint8
 {
-    ACHIEVEMENT_CRITERIA_CONDITION_NONE      = 0,
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH  = 1,
-    ACHIEVEMENT_CRITERIA_CONDITION_UNK1      = 2,           // only used in "Complete a daily quest every day for five consecutive days"
-    ACHIEVEMENT_CRITERIA_CONDITION_MAP       = 3,           // requires you to be on specific map
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE  = 4,           // only used in "Win 10 arenas without losing"
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT = 9,        // not hit by spell; Only 6 criterias in 3.x
-    ACHIEVEMENT_CRITERIA_CONDITION_NO_GROUP  = 10,          // not in a group
-    ACHIEVEMENT_CRITERIA_CONDITION_UNK3      = 13,          // unk
+    None                                = 0,
+    Death                               = 1,    // Death
+    Hours24WithoutCompletingDailyQuest  = 2,    // 24 hours without completing a daily quest
+    LeaveBattleground                   = 3,    // Leave a battleground
+    LoseRankedArenaMatchWithTeamSize    = 4,    // Lose a ranked arena match with team size {#Team Size}
+    LoseAura                            = 5,    // Lose aura "{Spell}"
+    GainAura                            = 6,    // Gain aura "{Spell}"
+    GainAuraEffect                      = 7,    // Gain aura effect "{SpellAuraNames.EnumID}"
+    CastSpell                           = 8,    // Cast spell "{Spell}"
+    BeSpellTarget                       = 9,    // Have spell "{Spell}" cast on you
+    ModifyPartyStatus                   = 10,   // Modify your party status
+
+    Count
+};
+
+enum class CriteriaStartEvent : uint8
+{
+    None                            = 0, // - NONE -
+    ReachLevel                      = 1, // Reach level {#Level}
+    CompleteDailyQuest              = 2, // Complete daily quest "{QuestV2}"
+    StartBattleground               = 3, // Start battleground "{Map}"
+    WinRankedArenaMatchWithTeamSize = 4, // Win a ranked arena match with team size {#Team Size}
+    GainAura                        = 5, // Gain aura "{Spell}"
+    GainAuraEffect                  = 6, // Gain aura effect "{SpellAuraNames.EnumID}"
+    CastSpell                       = 7, // Cast spell "{Spell}"
+    BeSpellTarget                   = 8, // Have spell "{Spell}" cast on you
+    AcceptQuest                     = 9, // Accept quest "{QuestV2}"
+    KillNPC                         = 10, // Kill NPC "{Creature}"
+    KillPlayer                      = 11, // Kill player
+    UseItem                         = 12, // Use item "{Item}"
+    SendEvent                       = 13, // Send event "{GameEvents}" (player-sent/instance only)
+
+    Count
 };
 
 enum AchievementCriteriaCompletionFlags
@@ -110,14 +135,15 @@ enum AchievementCriteriaCompletionFlags
     ACHIEVEMENT_CRITERIA_FLAG_IS_ACHIEVEMENT_ID = 0x00000040,
 };
 
-enum AchievementCriteriaTimedTypes
+enum class CriteriaTimedEvent
 {
-    ACHIEVEMENT_TIMED_TYPE_EVENT            = 1,            // Timer is started by internal event with id in timerStartEvent
-    ACHIEVEMENT_TIMED_TYPE_QUEST            = 2,            // Timer is started by accepting quest with entry in timerStartEvent
-    ACHIEVEMENT_TIMED_TYPE_SPELL_CASTER     = 5,            // Timer is started by casting a spell with entry in timerStartEvent
-    ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET     = 6,            // Timer is started by being target of spell with entry in timerStartEvent
-    ACHIEVEMENT_TIMED_TYPE_CREATURE         = 7,            // Timer is started by killing creature with entry in timerStartEvent
-    ACHIEVEMENT_TIMED_TYPE_ITEM             = 9,            // Timer is started by using item with entry in timerStartEvent
+    SendEvent       = 1,            // Timer is started by internal event with id in timerStartEvent
+    AcceptQuest     = 2,            // Timer is started by accepting quest with entry in timerStartEvent
+    CastSpell       = 5,            // Timer is started by casting a spell with entry in timerStartEvent
+    BeSpellTarget   = 6,            // Timer is started by being target of spell with entry in timerStartEvent
+    KillNpc         = 7,            // Timer is started by killing creature with entry in timerStartEvent
+    UseItem         = 9,            // Timer is started by using item with entry in timerStartEvent
+    Count
 };
 
 enum AchievementCriteriaTypes

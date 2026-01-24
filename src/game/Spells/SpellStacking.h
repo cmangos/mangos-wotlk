@@ -19,8 +19,8 @@
 #ifndef _SPELLSTACKING_H
 #define _SPELLSTACKING_H
 
-#include "Server/DBCEnums.h"
 #include "Platform/Define.h"
+#include "Server/DBCEnums.h"
 #include <map>
 #include <vector>
 #include <string>

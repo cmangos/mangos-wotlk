@@ -853,40 +853,41 @@ UnitAI* GetAI_npc_harpoon_fire_state(Creature* pCreature)
     return new npc_harpoon_fire_stateAI(pCreature);
 }
 
-bool EffectDummyCreature_npc_harpoon_fire_state(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 62669 - Firebolt
+struct FireboltRazorscale : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_FIREBOLT && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_HARPOON_FIRE_STATE)
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
     {
-        pCreatureTarget->CastSpell(pCreatureTarget, SPELL_HARPOON_FIRE, TRIGGERED_OLD_TRIGGERED);
+        return target->GetEntry() == NPC_HARPOON_FIRE_STATE;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        target->CastSpell(nullptr, SPELL_HARPOON_FIRE, TRIGGERED_OLD_TRIGGERED);
 
         // search for each entry of the nearby harpoon
-        GameObject* pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_1, 5.0f);
+        GameObject* pHarpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_1, 5.0f);
         if (!pHarpoon)
-            pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_2, 5.0f);
+            pHarpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_2, 5.0f);
         if (!pHarpoon)
-            pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_3, 5.0f);
+            pHarpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_3, 5.0f);
         if (!pHarpoon)
-            pHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_HARPOON_GUN_4, 5.0f);
+            pHarpoon = GetClosestGameObjectWithEntry(target, GO_HARPOON_GUN_4, 5.0f);
 
         // despawn the repaired harpoon
         if (pHarpoon)
             pHarpoon->SetLootState(GO_JUST_DEACTIVATED);
 
         // respawn broken harpoon
-        if (GameObject* pNewHarpoon = GetClosestGameObjectWithEntry(pCreatureTarget, GO_BROKEN_HARPOON, 5.0f))
+        if (GameObject* pNewHarpoon = GetClosestGameObjectWithEntry(target, GO_BROKEN_HARPOON, 5.0f))
             pNewHarpoon->Respawn();
 
         // force reset for harpoon trigger npcs
-        if (Creature* pTrigger = GetClosestCreatureWithEntry(pCreatureTarget, NPC_RAZORSCALE_CONTROLLER, 5.0f))
+        if (Creature* pTrigger = GetClosestCreatureWithEntry(target, NPC_RAZORSCALE_CONTROLLER, 5.0f))
             pTrigger->InterruptNonMeleeSpells(false);
-
-        // always return true when we are handling this spell and effect
-        return true;
     }
-
-    return false;
-}
+};
 
 /*######
 ## event_spell_harpoon_shot
@@ -931,11 +932,12 @@ void AddSC_boss_razorscale()
     pNewScript = new Script;
     pNewScript->Name = "npc_harpoon_fire_state";
     pNewScript->GetAI = GetAI_npc_harpoon_fire_state;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_harpoon_fire_state;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "event_spell_harpoon_shot";
     pNewScript->pProcessEventId = &ProcessEventId_event_spell_harpoon_shot;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<FireboltRazorscale>("spell_firebolt_razorscale");
 }

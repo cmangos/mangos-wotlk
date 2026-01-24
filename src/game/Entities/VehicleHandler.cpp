@@ -25,26 +25,31 @@
 #include "Entities/Vehicle.h"
 #include "Globals/ObjectMgr.h"
 
-void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvPacket)
+void WorldSession::HandleDismissControlledVehicle(WorldPacket& recvData)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_DISMISS_CONTROLLED_VEHICLE");
-    recvPacket.hexlike();
+    recvData.hexlike();
 
     ObjectGuid vehicleGuid;
     MovementInfo movementInfo;                              // Not used at the moment
 
-    recvPacket >> vehicleGuid.ReadAsPacked();
-    recvPacket >> movementInfo;
+    recvData >> vehicleGuid.ReadAsPacked();
+    recvData >> movementInfo;
 
     TransportInfo* transportInfo = _player->GetTransportInfo();
     if (!transportInfo || !transportInfo->IsOnVehicle())
         return;
 
-    Unit* vehicle = (Unit*)transportInfo->GetTransport();
+    Unit* vehicle = static_cast<Unit*>(transportInfo->GetTransport());
 
     // Something went wrong
     if (vehicleGuid != vehicle->GetObjectGuid())
         return;
+
+    if (vehicle->IsRooted())
+        movementInfo.AddMovementFlag(MOVEFLAG_ROOT);
+
+    ProcessMovementInfo(movementInfo, vehicle, dynamic_cast<Player*>(vehicle), recvData);
 
     // Remove Vehicle Control Aura
     vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());

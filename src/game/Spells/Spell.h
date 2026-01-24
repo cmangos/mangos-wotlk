@@ -351,7 +351,7 @@ class SpellModRAII
 class SpellCastArgs
 {
     public:
-        SpellCastArgs() : m_target(nullptr), m_scriptValue(0), m_scriptValueSet(false), m_destinationSet(false)
+        SpellCastArgs() : m_target(nullptr), m_scriptValue(0), m_scriptValueSet(false), m_destinationSet(false), m_itemSet(false), m_itemTarget(nullptr)
         {
             memset(m_basePoints, 0, sizeof(m_basePoints));
         }
@@ -388,6 +388,15 @@ class SpellCastArgs
         }
         bool IsDestinationSet() const { return m_destinationSet; }
         Position GetDestination() const { return m_destination; }
+
+        SpellCastArgs& SetItemTarget(Item* itemTarget)
+        {
+            m_itemSet = true;
+            m_itemTarget = itemTarget;
+            return *this;
+        }
+        bool IsItemTargetSet() const { return m_itemSet; }
+        Item* GetItemTarget() const { return m_itemTarget; }
     private:
         Unit* m_target;
         uint64 m_scriptValue;
@@ -395,6 +404,8 @@ class SpellCastArgs
         int32* m_basePoints[3];
         bool m_destinationSet;
         Position m_destination;
+        bool m_itemSet;
+        Item* m_itemTarget;
 };
 
 static const uint32 SPELL_INTERRUPT_NONPLAYER = 32747;
@@ -689,7 +700,7 @@ class Spell
 
             return false;
         }
-        bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_SPELL) != 0; }
+        bool IsChannelActive() const { return m_caster && m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT);  }
         bool IsRangedAttackResetSpell() const { return !m_IsTriggeredSpell && IsRangedSpell() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_COMBAT); }
         bool IsEffectWithImplementedMultiplier(uint32 effectId) const;

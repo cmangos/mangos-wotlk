@@ -118,7 +118,7 @@ struct boss_volazjAI : public ScriptedAI
             m_pInstance->SetData(TYPE_VOLAZJ, IN_PROGRESS);
 
             // Start achievement only on first aggro
-            m_pInstance->DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_VOLAZJ_ID);
+            m_pInstance->instance->StartEventForAllPlayersInMap(ACHIEV_START_VOLAZJ_ID, m_creature);
         }
     }
 

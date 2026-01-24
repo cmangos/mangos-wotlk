@@ -183,7 +183,7 @@ struct FlagClickBg : public SpellScript
         // misusing original caster to pass along original flag GO - if in future conflicts, substitute it for something else
         SpellCastResult result = target->CastSpell(target, spellId, TRIGGERED_IGNORE_GCD | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL, nullptr, nullptr, spell->GetTrueCaster()->GetObjectGuid());
         if (result == SPELL_CAST_OK) // wotlk+ done like this
-            StartEvents_Event(spell->GetTrueCaster()->GetMap(), eventId, target, spell->GetTrueCaster(), true);
+            spell->GetTrueCaster()->GetMap()->StartEvent(eventId, target, spell->GetTrueCaster(), true);
     }
 };
 

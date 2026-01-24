@@ -6665,14 +6665,22 @@ void ObjectMgr::GenerateZoneAndAreaIds()
     WorldDatabase.DirectExecute("TRUNCATE creature_zone");
     WorldDatabase.DirectExecute("TRUNCATE gameobject_zone");
 
-    std::string baseCreature = "INSERT INTO creature_zone(Guid, ZoneId, AreaId) VALUES";
+    std::string baseCreature = "INSERT INTO creature_zone(Guid, ZoneId, AreaId, WmoGroupId) VALUES";
     int i = 0;
     int total = 0;
     std::string query = "";
+    std::vector<uint32> skipMapIds =
+    {
+        582, 584, 586, 587, 588, 589, 590, 591, 592, 593, 594, 596, 610, 612, 613, 614, 620, 621, 622, 623, 641, 642, 647, 672, 673, 712, 713, 718
+    };
     for (auto& data : mCreatureDataMap)
     {
         CreatureData const& creature = data.second;
         uint32 zoneId, areaId;
+        int32 wmoGroupId = 0;
+        if (std::find(skipMapIds.begin(), skipMapIds.end(), creature.mapid) != skipMapIds.end())
+            continue;
+
         TerrainInfo* info = sTerrainMgr.LoadTerrain(creature.mapid);
         MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), creature.mapid, 0);
         CellPair p = MaNGOS::ComputeCellPair(creature.posX, creature.posY);
@@ -6681,9 +6689,9 @@ void ObjectMgr::GenerateZoneAndAreaIds()
         int gx = (MAX_NUMBER_OF_GRIDS - 1) - gp.x_coord;
         int gy = (MAX_NUMBER_OF_GRIDS - 1) - gp.y_coord;
         info->LoadMapAndVMap(gx, gy);
-        info->GetZoneAndAreaId(zoneId, areaId, creature.posX, creature.posY, creature.posZ);
+        info->GetZoneAndAreaId(zoneId, areaId, creature.posX, creature.posY, creature.posZ, &wmoGroupId);
 
-        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "),";
+        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "," + std::to_string(wmoGroupId) + "),";
         ++i; ++total;
         if (i >= 100)
         {
@@ -6695,11 +6703,15 @@ void ObjectMgr::GenerateZoneAndAreaIds()
         }
     }
 
-    std::string baseGo = "INSERT INTO gameobject_zone(Guid, ZoneId, AreaId) VALUES";
+    std::string baseGo = "INSERT INTO gameobject_zone(Guid, ZoneId, AreaId, WmoGroupId) VALUES";
     for (auto& data : mGameObjectDataMap)
     {
         GameObjectData const& go = data.second;
         uint32 zoneId, areaId;
+        int32 wmoGroupId = 0;
+        if (std::find(skipMapIds.begin(), skipMapIds.end(), go.mapid) != skipMapIds.end())
+            continue;
+
         TerrainInfo* info = sTerrainMgr.LoadTerrain(go.mapid);
         MMAP::MMapFactory::createOrGetMMapManager()->loadMapInstance(sWorld.GetDataPath(), go.mapid, 0);
         CellPair p = MaNGOS::ComputeCellPair(go.posX, go.posY);
@@ -6708,9 +6720,9 @@ void ObjectMgr::GenerateZoneAndAreaIds()
         int gx = (MAX_NUMBER_OF_GRIDS - 1) - gp.x_coord;
         int gy = (MAX_NUMBER_OF_GRIDS - 1) - gp.y_coord;
         info->LoadMapAndVMap(gx, gy);
-        info->GetZoneAndAreaId(zoneId, areaId, go.posX, go.posY, go.posZ + 1);
+        info->GetZoneAndAreaId(zoneId, areaId, go.posX, go.posY, go.posZ + 1, &wmoGroupId);
 
-        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "),";
+        query += "(" + std::to_string(data.first) + "," + std::to_string(zoneId) + "," + std::to_string(areaId) + "," + std::to_string(wmoGroupId) + "),";
         ++i; ++total;
         if (i >= 100)
         {
@@ -7594,8 +7606,11 @@ void ObjectMgr::LoadGameObjectLocales()
 
     auto queryResult = WorldDatabase.Query("SELECT entry,"
                           "name_loc1,name_loc2,name_loc3,name_loc4,name_loc5,name_loc6,name_loc7,name_loc8,"
-                          "castbarcaption_loc1,castbarcaption_loc2,castbarcaption_loc3,castbarcaption_loc4,"
-                          "castbarcaption_loc5,castbarcaption_loc6,castbarcaption_loc7,castbarcaption_loc8 FROM locales_gameobject");
+                          "opening_text_loc1,opening_text_loc2,opening_text_loc3,opening_text_loc4,"
+                          "opening_text_loc5,opening_text_loc6,opening_text_loc7,opening_text_loc8,"
+                          "closing_text_loc1,closing_text_loc2,closing_text_loc3,closing_text_loc4,"
+                          "closing_text_loc5,closing_text_loc6,closing_text_loc7,closing_text_loc8 "
+                          "FROM locales_gameobject");
 
     if (!queryResult)
     {
@@ -7624,32 +7639,60 @@ void ObjectMgr::LoadGameObjectLocales()
 
         for (int i = 1; i < MAX_LOCALE; ++i)
         {
-            std::string str = fields[i].GetCppString();
-            if (!str.empty())
+            auto& field = fields[i];
+            if (!field.IsNULL())
             {
-                int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
-                if (idx >= 0)
+                std::string str = field.GetCppString();
+                if (!str.empty())
                 {
-                    if ((int32)data.Name.size() <= idx)
-                        data.Name.resize(idx + 1);
+                    int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
+                    if (idx >= 0)
+                    {
+                        if ((int32)data.Name.size() <= idx)
+                            data.Name.resize(idx + 1);
 
-                    data.Name[idx] = str;
+                        data.Name[idx] = str;
+                    }
                 }
             }
         }
 
         for (int i = 1; i < MAX_LOCALE; ++i)
         {
-            std::string str = fields[i + (MAX_LOCALE - 1)].GetCppString();
-            if (!str.empty())
+            auto& field = fields[i + (MAX_LOCALE - 1)];
+            if (!field.IsNULL())
             {
-                int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
-                if (idx >= 0)
+                std::string str = field.GetCppString();
+                if (!str.empty())
                 {
-                    if ((int32)data.CastBarCaption.size() <= idx)
-                        data.CastBarCaption.resize(idx + 1);
+                    int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
+                    if (idx >= 0)
+                    {
+                        if ((int32)data.OpeningText.size() <= idx)
+                            data.OpeningText.resize(idx + 1);
 
-                    data.CastBarCaption[idx] = str;
+                        data.OpeningText[idx] = str;
+                    }
+                }
+            }
+        }
+
+        for (int i = 1; i < MAX_LOCALE; ++i)
+        {
+            auto& field = fields[i + (MAX_LOCALE - 1) * 2];
+            if (!field.IsNULL())
+            {
+                std::string str = field.GetCppString();
+                if (!str.empty())
+                {
+                    int idx = GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
+                    if (idx >= 0)
+                    {
+                        if ((int32)data.ClosingText.size() <= idx)
+                            data.ClosingText.resize(idx + 1);
+
+                        data.ClosingText[idx] = str;
+                    }
                 }
             }
         }

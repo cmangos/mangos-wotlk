@@ -23,8 +23,8 @@
 
 #include "Spells/SpellTargetDefines.h"
 #include "Spells/SpellEffectDefines.h"
-#include "Server/DBCEnums.h"
 #include "Platform/Define.h"
+#include "Server/DBCEnums.h"
 
 #include <map>
 #include <utility>

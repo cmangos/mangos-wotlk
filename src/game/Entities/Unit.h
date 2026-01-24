@@ -1978,7 +1978,7 @@ class Unit : public WorldObject
         Player const* GetClientControlling() const;
 
         Pet* GetPet() const;
-        void SetPet(Unit* pet) { SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
+        virtual void SetPet(Unit* pet) { SetPetGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
 
         Pet* GetMiniPet() const;
         void SetMiniPet(Unit* pet) { SetCritterGuid(pet ? pet->GetObjectGuid() : ObjectGuid()); }
@@ -2452,6 +2452,7 @@ class Unit : public WorldObject
 
         bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
         void StopMoving(bool forceSendStop = false);
+        void UpdateMoving(); // special vehicle update movement case - confirmed after CMSG_DISMISS_CONTROLLED_VEHICLE
         void InterruptMoving(bool forceSendStop = false);
 
         ///----------Various crowd control methods-----------------
@@ -2467,7 +2468,6 @@ class Unit : public WorldObject
         bool SetStunned(bool apply, ObjectGuid casterGuid = ObjectGuid(), uint32 spellID = 0, bool logout = false);
 
         inline bool IsStunnedByLogout() const { return hasUnitState(UNIT_STAT_LOGOUT_TIMER); }
-        bool SetStunnedByLogout(bool apply);
 
         // Panic: AI reaction script, NPC flees (e.g. at low health)
         inline bool IsInPanic() const { return hasUnitState(UNIT_STAT_PANIC); }

@@ -290,7 +290,7 @@ void instance_azjol_nerub::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_DOOR_ANUBARAK_2);
             DoUseDoorOrButton(GO_DOOR_ANUBARAK_3);
             if (uiData == IN_PROGRESS)
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_ANUB_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_ANUB_ID, nullptr);
             break;
     }
 

@@ -94,6 +94,15 @@ struct GuardianAggroSpell : public SpellScript
     }
 };
 
+// 33876 - Mangle (Cat)
+struct MangleCat : public SpellScript
+{
+    void OnAfterHit(Spell* spell) const override
+    {
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 34071, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 struct WildGrowth : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -371,6 +380,7 @@ void LoadDruidScripts()
     RegisterSpellScript<ForceOfNatureSummon>("spell_force_of_nature_summon");
     RegisterSpellScript<GuardianAggroSpell>("spell_guardian_aggro_spell");
     RegisterSpellScript<StarfireBonus>("spell_starfire_bonus");
+    RegisterSpellScript<MangleCat>("spell_mangle_cat");
     RegisterSpellScript<WildGrowth>("spell_wild_growth");
     RegisterSpellScript<Brambles>("spell_brambles");
     RegisterSpellScript<ShredDruid>("spell_shred_druid");

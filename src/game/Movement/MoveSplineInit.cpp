@@ -72,7 +72,7 @@ namespace Movement
         bool pathEmpty = false;
         if (args.path.empty())
         {
-            // should i do the things that user should do?
+            // should i do the things that user should do? - yes in fact a valid usecase
             MoveTo(real_position);
             pathEmpty = true;
         }
@@ -83,7 +83,7 @@ namespace Movement
 
         args.flags.enter_cycle = args.flags.cyclic;
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
-        if (args.flags.walkmode)
+        if (args.walk)
             moveFlags |= MOVEFLAG_WALK_MODE;
         else
             moveFlags &= ~MOVEFLAG_WALK_MODE;
@@ -97,6 +97,9 @@ namespace Movement
             if (args.slowed != 0.f) // when set always > 0.5
                 args.velocity *= args.slowed;
         }
+
+        // limit the speed in the same way the client does
+        args.velocity = std::min(args.velocity, args.flags.catmullrom || args.flags.flying ? 50.0f : std::max(28.0f, unit.GetSpeed(MOVE_RUN) * 4.0f));
 
         if (!args.Validate(&unit))
             return 0;
@@ -217,7 +220,7 @@ namespace Movement
     MoveSplineInit::MoveSplineInit(Unit& m) : unit(m)
     {
         // mix existing state into new
-        args.flags.walkmode = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_WALK_MODE | MOVEFLAG_HOVER));
+        args.walk = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_WALK_MODE | MOVEFLAG_HOVER));
         args.flags.flying = unit.m_movementInfo.HasMovementFlag((MovementFlags)(MOVEFLAG_CAN_FLY | MOVEFLAG_FLYING | MOVEFLAG_LEVITATING));
     }
 

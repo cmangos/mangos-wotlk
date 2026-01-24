@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_14087_01_characters_equip_size` bit(1) DEFAULT NULL
+  `required_14097_01_characters_achievement_failed` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -327,6 +327,7 @@ CREATE TABLE `character_achievement_progress` (
   `criteria` int(11) unsigned NOT NULL,
   `counter` int(11) unsigned NOT NULL,
   `date` bigint(11) unsigned NOT NULL DEFAULT '0',
+  `failed` tinyint unsigned NOT NULL DEFAULT 0,
   PRIMARY KEY (`guid`,`criteria`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 

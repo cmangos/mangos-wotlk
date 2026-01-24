@@ -180,6 +180,7 @@ class Map : public GridRefManager<NGridType>
         float GetVisibilityDistance() const { return m_VisibleDistance; }
         // function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
+        void VisiblityDistanceChanged(WorldObject* obj, float oldVisibility, VisibilityDistanceType newVisiblity);
 
         void PlayerRelocation(Player*, float x, float y, float z, float orientation);
         void CreatureRelocation(Creature* creature, float x, float y, float z, float ang);
@@ -296,6 +297,9 @@ class Map : public GridRefManager<NGridType>
             SCRIPT_EXEC_PARAM_UNIQUE_BY_TARGET        = 0x02,   // Start Script only if not yet started (uniqueness identified by id and target)
             SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE_TARGET = 0x03,   // Start Script only if not yet started (uniqueness identified by id, source and target)
         };
+
+        void StartEventForAllPlayersInMap(uint32 eventId, Object* target); // only do this for instances
+        bool StartEvent(uint32 eventId, Object* source, Object* target, bool isStart = true);
         bool ScriptsStart(ScriptMapType scriptType, uint32 id, Object* source, Object* target, ScriptExecutionParam execParams = SCRIPT_EXEC_PARAM_NONE);
         void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
 
@@ -521,7 +525,7 @@ class Map : public GridRefManager<NGridType>
         std::vector<std::pair<GuidSet, ObjectGuid>> m_objectsToClientRemove;
         std::unordered_map<Object*, PlayerSet> m_visibilityAdded;
 
-        std::set<std::pair<WorldObject*, uint32>> m_largeObjects;
+        std::set<WorldObject*> m_largeObjects;
         std::set<WorldObject*> m_infiniteObjects;
         std::set<Unit*> m_waypointingNpcs;
 

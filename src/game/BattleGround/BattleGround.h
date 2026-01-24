@@ -634,9 +634,6 @@ class BattleGround
         // Handle achievement criteria requirements
         virtual bool CheckAchievementCriteriaMeet(uint32 /*criteria_id*/, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/) { return false; }
 
-        // function that start timed achievement
-        void StartTimedAchievement(AchievementCriteriaTypes /*type*/, uint32 /*entry*/);
-
         struct EventObjects
         {
             std::vector<uint32> gameobjects;

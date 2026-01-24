@@ -356,7 +356,7 @@ void BattleGroundAV::StartingEventOpenDoors()
     OpenDoorEvent(BG_EVENT_DOOR);
 
     // Players that join battleground after start are not available to get achievement.
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, BG_AV_TIMED_ACHIEV_ALTERAC_BLITZ);
+    GetBgMap()->StartEventForAllPlayersInMap(BG_AV_TIMED_ACHIEV_ALTERAC_BLITZ, nullptr);
 }
 
 void BattleGroundAV::AddPlayer(Player* player)
@@ -435,8 +435,8 @@ void BattleGroundAV::EndBattleGround(Team winner)
     // both teams get honor for completing the BG
     if (m_honorMapComplete)
     {
-        RewardHonorToTeam(m_honorMapComplete, ALLIANCE);
-        RewardHonorToTeam(m_honorMapComplete, HORDE);
+        RewardHonorToTeam(GetBonusHonorFromKill(m_honorMapComplete), ALLIANCE);
+        RewardHonorToTeam(GetBonusHonorFromKill(m_honorMapComplete), HORDE);
     }
 
     BattleGround::EndBattleGround(winner);

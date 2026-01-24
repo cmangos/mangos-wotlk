@@ -1107,7 +1107,6 @@ void AddSC_shade_of_the_horseman()
     RegisterSpellScript<HorsemanConflagrateTargetTest>("spell_horseman_conflagrate_target_test");
     RegisterSpellScript<BucketLands>("spell_bucket_lands");
     RegisterSpellScript<FireExtinguish>("spell_fire_extinguish");
-    RegisterSpellScript<HumanChildLaughter>("spell_human_child_laughter");
     RegisterSpellScript<OrcChildLaughter>("spell_orc_child_laughter");
     RegisterSpellScript<HumanChildLaughter>("spell_human_child_laughter");
     RegisterSpellScript<HumanChildCrying>("spell_human_child_crying");

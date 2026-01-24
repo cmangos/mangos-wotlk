@@ -152,13 +152,6 @@ void instance_nexus::SetData(uint32 type, uint32 data)
             break;
         case TYPE_KERISTRASZA:
             m_auiEncounter[type] = data;
-            if (data == IN_PROGRESS)
-                m_sIntenseColdFailPlayers.clear();
-            break;
-        case TYPE_INTENSE_COLD_FAILED:
-            // Insert the players who fail the achiev and haven't been already inserted in the set
-            if (m_sIntenseColdFailPlayers.find(data) == m_sIntenseColdFailPlayers.end())
-                m_sIntenseColdFailPlayers.insert(data);
             break;
         default:
             script_error_log("Instance Nexus: ERROR SetData = %u for type %u does not exist/not implemented.", type, data);
@@ -169,13 +162,7 @@ void instance_nexus::SetData(uint32 type, uint32 data)
     {
         // release Keristrasza from her prison here
         SetData(TYPE_KERISTRASZA, SPECIAL);
-
-        Creature* creature = GetSingleCreatureFromStorage(NPC_KERISTRASZA);
-        if (creature && creature->IsAlive())
-        {
-            creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
-            creature->RemoveAurasDueToSpell(SPELL_FROZEN_PRISON);
-        }
+        ReleaseKeristrasza();
     }
 
     if (data == DONE || data == SPECIAL)
@@ -208,7 +195,7 @@ bool instance_nexus::CheckAchievementCriteriaMeet(uint32 criteriaId, Player cons
             return m_abAchievCriteria[TYPE_ACHIEV_SPLIT_PERSONALITY];
         case ACHIEV_CRIT_INTENSE_COLD:
             // Return true if not found in the set
-            return m_sIntenseColdFailPlayers.find(source->GetGUIDLow()) == m_sIntenseColdFailPlayers.end();
+            return true;
 
         default:
             return false;
@@ -235,6 +222,33 @@ void instance_nexus::Load(const char* chrIn)
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+void instance_nexus::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands:\n releaseKeri");
+}
+
+void instance_nexus::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "releaseKeri")
+    {
+        ReleaseKeristrasza();
+    }
+}
+
+void instance_nexus::ReleaseKeristrasza()
+{
+    Creature* creature = GetSingleCreatureFromStorage(NPC_KERISTRASZA);
+    if (creature && creature->IsAlive())
+    {
+        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+        creature->RemoveAurasDueToSpell(SPELL_FROZEN_PRISON);
+    }
 }
 
 void AddSC_instance_nexus()

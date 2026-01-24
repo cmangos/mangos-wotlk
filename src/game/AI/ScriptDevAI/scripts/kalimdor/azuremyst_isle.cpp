@@ -291,7 +291,7 @@ struct InoculateNestlewoodOwlkin : public SpellScript, public AuraScript
         return SPELL_CAST_OK;
     }
 
-    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
     {
         Creature* target = static_cast<Creature*>(aura->GetTarget());
 

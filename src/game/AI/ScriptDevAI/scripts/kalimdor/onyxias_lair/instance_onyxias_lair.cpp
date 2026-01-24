@@ -94,7 +94,7 @@ void instance_onyxias_lair::SetData(uint32 uiType, uint32 uiData)
             m_tPhaseTwoStart = time(nullptr);
             break;
         case IN_PROGRESS:
-            DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_ONYXIA_ID);
+            instance->StartEventForAllPlayersInMap(ACHIEV_START_ONYXIA_ID, nullptr);
             m_uiAchievWhelpsCount = 0;
             // Respawn dead Onyxian Warders
             for (GuidList::const_iterator itr = m_lWarderGUIDList.begin(); itr != m_lWarderGUIDList.end(); ++itr)

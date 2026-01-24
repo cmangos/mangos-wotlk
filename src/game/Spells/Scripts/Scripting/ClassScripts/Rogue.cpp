@@ -356,6 +356,15 @@ struct SprintRogue : public AuraScript
     }
 };
 
+// 16511 - Hemorrhage
+struct Hemorrhage : public SpellScript
+{
+    void OnAfterHit(Spell* spell) const override
+    {
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 34071, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadRogueScripts()
 {
     RegisterSpellScript<Preparation>("spell_preparation");
@@ -372,4 +381,5 @@ void LoadRogueScripts()
     RegisterSpellScript<GlyphOfSafeFall>("spell_glyph_of_safe_fall");
     RegisterSpellScript<BackstabRogue>("spell_backstab");
     RegisterSpellScript<SprintRogue>("spell_sprint_rogue");
+    RegisterSpellScript<Hemorrhage>("spell_hemorrhage");
 }

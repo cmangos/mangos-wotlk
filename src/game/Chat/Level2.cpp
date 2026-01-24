@@ -1291,7 +1291,11 @@ bool ChatHandler::HandleGameObjectNearCommand(char* args)
             if (SpawnGroupEntry* groupEntry = pl->GetMap()->GetMapDataContainer().GetSpawnGroupByGuid(guid, TYPEID_GAMEOBJECT))
                 spawnGroupId = groupEntry->Id;
 
-            PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, guid, name, x, y, z, mapid, spawnGroupId);
+            uint32 dynGuid = 0;
+            if (GameObject* go = pl->GetMap()->GetGameObject(guid))
+                dynGuid = go->GetGUIDLow();
+
+            PSendSysMessage(LANG_GO_MIXED_LIST_CHAT, guid, PrepareStringNpcOrGoSpawnInformation<GameObject>(guid).c_str(), entry, dynGuid, entry, name, x, y, z, mapid, spawnGroupId);
 
 
             ++count;
@@ -1434,7 +1438,7 @@ bool ChatHandler::HandleGUIDCommand(char* /*args*/)
     return true;
 }
 
-void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, time_t const* date /*= nullptr*/, Player* target /*= nullptr */)
+void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, TimePoint const* updateDate /*= nullptr*/, Player* target /*= nullptr */)
 {
     std::string name = achEntry->name[loc];
 
@@ -1445,10 +1449,11 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
     if (m_session)
     {
         ss << achEntry->ID << " - |cffffffff|Hachievement:" << achEntry->ID << ":" << std::hex << guid.GetRawValue() << std::dec;
-        if (date)
+        if (updateDate)
         {
             // complete date
-            tm* aTm = localtime(date);
+            time_t timeDate = std::chrono::system_clock::to_time_t(*updateDate);
+            tm* aTm = localtime(&timeDate);
             ss << ":1:" << aTm->tm_mon + 1 << ":" << aTm->tm_mday << ":" << (aTm->tm_year + 1900 - 2000) << ":";
 
             // complete criteria mask (all bits set)
@@ -1465,7 +1470,7 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
                 uint32 criteriaMask[4] = {0, 0, 0, 0};
 
                 if (AchievementMgr const* mgr = target ? &target->GetAchievementMgr() : nullptr)
-                    if (AchievementCriteriaEntryList const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
+                    if (AchievementCriteriaEntryVector const* criteriaList = sAchievementMgr.GetAchievementCriteriaByAchievement(achEntry->ID))
                         for (auto itr : *criteriaList)
                             if (mgr->IsCompletedCriteria(itr, achEntry))
                                 criteriaMask[(itr->showOrder - 1) / 32] |= (1 << ((itr->showOrder - 1) % 32));
@@ -1482,8 +1487,8 @@ void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, Lo
     else
         ss << achEntry->ID << " - " << name << " " << localeNames[loc];
 
-    if (target && date)
-        ss << " [" << TimeToTimestampStr(*date) << "]";
+    if (target && updateDate)
+        ss << " [" << TimeToTimestampStr(std::chrono::system_clock::to_time_t(*updateDate)) << "]";
 
     SendSysMessage(ss.str().c_str());
 }
@@ -1538,7 +1543,7 @@ bool ChatHandler::HandleLookupAchievementCommand(char* args)
         if (loc < MAX_LOCALE)
         {
             CompletedAchievementData const* completed = target ? target->GetAchievementMgr().GetCompleteData(id) : nullptr;
-            ShowAchievementListHelper(achEntry, LocaleConstant(loc), completed ? &completed->date : nullptr, target);
+            ShowAchievementListHelper(achEntry, LocaleConstant(loc), completed ? &completed->updateDate : nullptr, target);
             ++counter;
         }
     }
@@ -1560,7 +1565,7 @@ bool ChatHandler::HandleCharacterAchievementsCommand(char* args)
     for (const auto& itr : complitedList)
     {
         AchievementEntry const* achEntry = sAchievementStore.LookupEntry(itr.first);
-        ShowAchievementListHelper(achEntry, loc, &itr.second.date, target);
+        ShowAchievementListHelper(achEntry, loc, &itr.second.updateDate, target);
     }
     return true;
 }
@@ -3015,7 +3020,7 @@ inline Creature* Helper_CreateWaypointFor(Creature* wpOwner, WaypointPathOrigin 
     TempSpawnSettings settings;
     settings.spawner = wpOwner;
     settings.entry = VISUAL_WAYPOINT;
-    settings.x = wpNode->x; settings.y = wpNode->y; settings.z = wpNode->z; settings.ori = wpNode->orientation;
+    settings.x = wpNode->x; settings.y = wpNode->y; settings.z = wpNode->z; settings.ori = wpNode->orientation ? *wpNode->orientation : 0.f;
     settings.activeObject = true;
     settings.spawnDataEntry = 2;
     settings.spawnType = TEMPSPAWN_TIMED_DESPAWN;
@@ -3812,7 +3817,7 @@ bool ChatHandler::HandleWpExportCommand(char* args)
         outfile << itr->second.x << ",";
         outfile << itr->second.y << ",";
         outfile << itr->second.z << ",";
-        outfile << itr->second.orientation << ",";
+        outfile << (itr->second.orientation ? *itr->second.orientation : 100.f) << ",";
         outfile << itr->second.delay << ",";
         if (wpOrigin != PATH_FROM_EXTERNAL)                 // Only for normal waypoints
             outfile << itr->second.script_id << ")";

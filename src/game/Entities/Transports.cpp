@@ -167,7 +167,6 @@ void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* m
 
     // If we someday decide to use the grid to track transports, here:
     t->SetMap(map);
-    t->Object::AddToWorld();
 
     // creates the Gameobject
     if (!t->Create(transportTemplate.counter, transportTemplate.entry, map->GetId(), x, y, z, o, GO_ANIMPROGRESS_DEFAULT, 0))
@@ -175,6 +174,8 @@ void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* m
         delete t;
         return;
     }
+
+    t->Object::AddToWorld();
 
     map->AddTransport(t);
 
@@ -720,7 +721,7 @@ void ElevatorTransport::Update(const uint32 diff)
                 if (eventId)
                 {
                     m_eventTriggered = true;
-                    StartEvents_Event(GetMap(), eventId, this, this, true);
+                    GetMap()->StartEvent(eventId, this, this, true);
                 }
             }
         }
@@ -891,7 +892,7 @@ void Transport::DoEventIfAny(TaxiPathNodeEntry const& node, bool departure)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, "Taxi %s event %u of node %u of %s \"%s\") path", departure ? "departure" : "arrival", eventid, node.index, GetGuidStr().c_str(), GetName());
 
-        StartEvents_Event(GetMap(), eventid, this, this, departure);
+        GetMap()->StartEvent(eventid, this, this, departure);
     }
 }
 

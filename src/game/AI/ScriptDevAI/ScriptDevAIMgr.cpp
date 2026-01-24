@@ -399,16 +399,6 @@ bool ScriptDevAIMgr::OnItemLoot(Player* pPlayer, Item* pItem, bool apply)
     return pTempScript->pItemLoot(pPlayer, pItem, apply);
 }
 
-bool ScriptDevAIMgr::OnEffectDummy(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pTarget, ObjectGuid originalCasterGuid)
-{
-    Script* pTempScript = GetScript(pTarget->GetScriptId());
-
-    if (!pTempScript || !pTempScript->pEffectDummyNPC)
-        return false;
-
-    return pTempScript->pEffectDummyNPC(pCaster, spellId, effIndex, pTarget, originalCasterGuid);
-}
-
 bool ScriptDevAIMgr::OnNpcSpellClick(Player* pPlayer, Creature* pClickedCreature, uint32 spellId)
 {
     Script* pTempScript = m_scripts[pClickedCreature->GetScriptId()];

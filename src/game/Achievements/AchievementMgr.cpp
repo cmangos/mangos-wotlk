@@ -491,14 +491,64 @@ void AchievementMgr::Reset()
     CheckAllAchievementCriteria();
 }
 
-void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uint32 miscvalue1, uint32 miscvalue2)
+void AchievementMgr::StartAchievementCriteria(CriteriaStartEvent startEvent, uint32 startAsset)
 {
-    DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::ResetAchievementCriteria(%u, %u, %u)", type, miscvalue1, miscvalue2);
+    DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::StartAchievementCriteria(%u, %u)", startEvent, startAsset);
 
     if (!sWorld.getConfig(CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
         return;
 
-    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryVector const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByStartEvent(startEvent);
+    for (auto achievementCriteria : achievementCriteriaList)
+    {
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
+        // Checked in LoadAchievementCriteriaList
+
+        // don't reset completed achievs
+        if (IsCompletedAchievement(achievement))
+            continue;
+
+        // don't update already completed criteria; exception for criterias that can fail
+        if (IsCompletedCriteria(achievementCriteria, achievement) && !(achievementCriteria->completionFlag & ACHIEVEMENT_CRITERIA_FLAG_RESET_ON_START))
+            continue;
+
+        if (startAsset != achievementCriteria->startAsset)
+            continue;
+
+        CriteriaProgress* progress;
+
+        CriteriaProgressMap::iterator iter = m_criteriaProgress.find(achievementCriteria->ID);
+        if (iter == m_criteriaProgress.end())
+            progress = &m_criteriaProgress[achievementCriteria->ID];
+        else
+            progress = &iter->second;
+
+        progress->changed = true;
+        progress->counter = 0;
+
+        TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
+
+        // Start with given startTime or now
+        progress->startDate = now;
+        progress->updateDate = now;
+        progress->criteriaFailed = false;
+
+        // Add to timer map in special case
+        if (CriteriaFailEvent(achievementCriteria->failEvent) == CriteriaFailEvent::Hours24WithoutCompletingDailyQuest)
+            m_criteriaFailTimes[achievementCriteria->ID] = progress->updateDate + std::chrono::days(1);
+
+        SendCriteriaUpdate(achievementCriteria->ID, progress);
+    }
+}
+
+void AchievementMgr::FailAchievementCriteria(CriteriaFailEvent failEvent, uint32 failAsset)
+{
+    DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::FailAchievementCriteria(%u, %u)", failEvent, failAsset);
+
+    if (!sWorld.getConfig(CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
+        return;
+
+    AchievementCriteriaEntryVector const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByFailEvent(failEvent);
     for (auto achievementCriteria : achievementCriteriaList)
     {
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
@@ -512,68 +562,10 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
         if (IsCompletedCriteria(achievementCriteria, achievement) && !(achievementCriteria->completionFlag & ACHIEVEMENT_CRITERIA_FLAG_FAIL_ACHIEVEMENT))
             continue;
 
-        switch (type)
-        {
-            case ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE:     // have total statistic also not expected to be reset
-            case ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE:    // have total statistic also not expected to be reset
-                if (achievementCriteria->healing_done.flag == miscvalue1 &&
-                        achievementCriteria->healing_done.mapid == miscvalue2)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA: // have total statistic also not expected to be reset
-                // reset only the criteria having the miscvalue1 condition
-                if (achievementCriteria->win_rated_arena.flag == miscvalue1)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
-                if (achievementCriteria->be_spell_target.condFlag1 == miscvalue1 &&
-                    achievementCriteria->be_spell_target.condVal1 == miscvalue2)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL:
-                if (achievementCriteria->cast_spell.condFlag1 == miscvalue1 &&
-                    achievementCriteria->cast_spell.condVal1 == miscvalue2)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL:                                // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
-                if (achievementCriteria->special_pvp_kill.flag1 == miscvalue1 &&
-                    achievementCriteria->special_pvp_kill.mapId1 == miscvalue2)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:                          // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
-                if (achievementCriteria->honorable_kill_at_area.condFlag1 == miscvalue1 &&
-                    achievementCriteria->honorable_kill_at_area.condVal1 == miscvalue2)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:                                  // reset only achievements that have a no death condition;
-                if (achievementCriteria->honorable_kill_battleground.condFlag2 == miscvalue1)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:                                          // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
-                if (achievementCriteria->win_bg.additionalRequirement1_type == miscvalue1 &&
-                    achievementCriteria->win_bg.additionalRequirement1_value == miscvalue2)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:                               // reset only achievements that have a map / no death condition; they need to be completed as part of one single pvp match
-                if ((achievementCriteria->honorable_kill_battleground.condFlag1 == miscvalue1 &&
-                    achievementCriteria->honorable_kill_battleground.condVal1 == miscvalue2) ||
-                    achievementCriteria->honorable_kill_battleground.condFlag2 == miscvalue1)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:                            // reset only achievements that have a map / no death condition; they need to be completed as part of one single pvp match
-                if ((achievementCriteria->capture_bg_objective.condFlag1 == miscvalue1 &&
-                    achievementCriteria->capture_bg_objective.condVal1 == miscvalue2) ||
-                    achievementCriteria->capture_bg_objective.condFlag2 == miscvalue1)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:                                   // reset only achievements that have a map / no spell hit condition;
-                if (achievementCriteria->kill_creature.condFlag2 == miscvalue1 &&
-                    achievementCriteria->kill_creature.condVal2 == miscvalue2)
-                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                break;
-            default:                                        // reset all cases
-                break;
-        }
+        if (failAsset != achievementCriteria->failAsset)
+            continue;
+
+        SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_FAIL);
     }
 }
 
@@ -608,7 +600,7 @@ void AchievementMgr::SaveToDB()
             stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first);
 
             stmt = CharacterDatabase.CreateStatement(insComplAchievements, "INSERT INTO character_achievement (guid, achievement, date) VALUES (?, ?, ?)");
-            stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first, uint64(m_completedAchievement.second.date));
+            stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first, uint64(std::chrono::system_clock::to_time_t(m_completedAchievement.second.updateDate)));
         }
     }
 
@@ -620,14 +612,14 @@ void AchievementMgr::SaveToDB()
             if (!m_criteriaProgres.second.changed)
                 continue;
 
-            /// mark as updated in db
+            // mark as updated in db
             m_criteriaProgres.second.changed = false;
 
             // new/changed record data
             SqlStatement stmt = CharacterDatabase.CreateStatement(delProgress, "DELETE FROM character_achievement_progress WHERE guid = ? AND criteria = ?");
             stmt.PExecute(GetPlayer()->GetGUIDLow(), m_criteriaProgres.first);
 
-            bool needSave = m_criteriaProgres.second.counter != 0;
+            bool needSave = m_criteriaProgres.second.counter != 0 || m_criteriaProgres.second.criteriaFailed;
             if (!needSave)
             {
                 AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(m_criteriaProgres.first);
@@ -636,8 +628,8 @@ void AchievementMgr::SaveToDB()
 
             if (needSave)
             {
-                stmt = CharacterDatabase.CreateStatement(insProgress, "INSERT INTO character_achievement_progress (guid, criteria, counter, date) VALUES (?, ?, ?, ?)");
-                stmt.PExecute(GetPlayer()->GetGUIDLow(), m_criteriaProgres.first, m_criteriaProgres.second.counter, uint64(m_criteriaProgres.second.date));
+                stmt = CharacterDatabase.CreateStatement(insProgress, "INSERT INTO character_achievement_progress (guid, criteria, counter, date, failed) VALUES (?, ?, ?, ?, ?)");
+                stmt.PExecute(GetPlayer()->GetGUIDLow(), m_criteriaProgres.first, m_criteriaProgres.second.counter, uint64(m_criteriaProgres.second.updateDate.time_since_epoch().count()), uint8(m_criteriaProgres.second.criteriaFailed));
             }
         }
     }
@@ -661,7 +653,7 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
                 continue;
 
             CompletedAchievementData& ca = m_completedAchievements[achievement_id];
-            ca.date = time_t(fields[1].GetUInt64());
+            ca.updateDate = TimePoint(std::chrono::milliseconds(fields[1].GetUInt64()));
             ca.changed = false;
         }
         while (achievementResult->NextRow());
@@ -673,9 +665,10 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
         {
             Field* fields = criteriaResult->Fetch();
 
-            uint32 id      = fields[0].GetUInt32();
-            uint32 counter = fields[1].GetUInt32();
-            time_t date    = time_t(fields[2].GetUInt64());
+            uint32 id       = fields[0].GetUInt32();
+            uint32 counter  = fields[1].GetUInt32();
+            TimePoint updateDate(std::chrono::seconds(fields[2].GetUInt64()));
+            bool failed     = fields[3].GetBool();
 
             AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(id);
             if (!criteria)
@@ -688,24 +681,27 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
 
             CriteriaProgress& progress = m_criteriaProgress[id];
             progress.counter = counter;
-            progress.date    = date;
+            progress.updateDate    = updateDate;
             progress.changed = false;
-            progress.timedCriteriaFailed = false;
+            progress.criteriaFailed = failed;
 
             AchievementEntry const* achievement = sAchievementStore.LookupEntry(criteria->referredAchievement);
             // Checked in LoadAchievementCriteriaList
 
-            // A failed achievement will be removed on next tick - TODO: Possible that timer 2 is reseted
-            if (criteria->timeLimit)
+            // A failed achievement will be removed on next tick
+            if (criteria->timeLimit) // TODO: After a year remove this block
             {
                 // Add not-completed achievements to time map
                 if (!IsCompletedCriteria(criteria, achievement))
                 {
-                    time_t failTime = time_t(progress.date + criteria->timeLimit);
-                    m_criteriaFailTimes[criteria->ID] = failTime;
-                    // A failed Achievement - will be removed by DoFailedTimedAchievementCriterias on next tick for player
-                    if (failTime <= time(nullptr))
-                        progress.timedCriteriaFailed = true;
+                    if (criteria->timeLimit)
+                    {
+                        TimePoint failTime = progress.updateDate + std::chrono::seconds(criteria->timeLimit);
+                        m_criteriaFailTimes[criteria->ID] = failTime;
+                        // A failed Achievement - will be removed by DoFailedTimedAchievementCriterias on next tick for player
+                        if (failTime <= sWorld.GetCurrentClockTime())
+                            progress.criteriaFailed = true;
+                    }
                 }
             }
 
@@ -723,7 +719,7 @@ void AchievementMgr::LoadFromDB(std::unique_ptr<QueryResult> achievementResult, 
     }
 }
 
-void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) const
+void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement, TimePoint time) const
 {
     if (GetPlayer()->GetSession()->PlayerLoading())
         return;
@@ -766,8 +762,8 @@ void AchievementMgr::SendAchievementEarned(AchievementEntry const* achievement) 
     WorldPacket data(SMSG_ACHIEVEMENT_EARNED, 8 + 4 + 8);
     data << GetPlayer()->GetPackGUID();
     data << uint32(achievement->ID);
-    data << uint32(secsToTimeBitFields(time(nullptr)));
-    data << uint32(0);
+    data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(time)));
+    data << uint32(0); // TODO: skip effect?
     GetPlayer()->SendMessageToSetInRange(data, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY), true);
 }
 
@@ -776,15 +772,15 @@ void AchievementMgr::SendCriteriaUpdate(uint32 id, CriteriaProgress const* progr
     WorldPacket data(SMSG_CRITERIA_UPDATE, 8 + 4 + 8);
     data << uint32(id);
 
-    time_t now = time(nullptr);
+    TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
     // the counter is packed like a packed Guid
     data.appendPackGUID(progress->counter);
 
     data << GetPlayer()->GetPackGUID();
-    data << uint32(progress->timedCriteriaFailed ? 1 : 0);
-    data << uint32(secsToTimeBitFields(now));
-    data << uint32(now - progress->date);                   // timer 1
-    data << uint32(now - progress->date);                   // timer 2
+    data << uint32(progress->criteriaFailed ? 1 : 0);
+    data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(now)));
+    data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - progress->updateDate)).count()); // timer 1
+    data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - progress->startDate)).count()); // timer 2
     GetPlayer()->SendDirectMessage(data);
 }
 
@@ -818,18 +814,18 @@ static const uint32 achievIdByRace[MAX_RACES]    = { 0, 1408, 1410, 1407, 1409, 
 /**
  * this function will be called whenever the user might have done a timed-criteria relevant action, or by scripting side?
  */
-void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime /*= 0*/)
+void AchievementMgr::StartTimedAchievementCriteria(CriteriaTimedEvent timedEvent, uint32 timedAsset)
 {
-    DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::StartTimedAchievementCriteria(%u, %u)", type, timedRequirementId);
+    DETAIL_FILTER_LOG(LOG_FILTER_ACHIEVEMENT_UPDATES, "AchievementMgr::StartTimedAchievementCriteria(%u, %u)", timedEvent, timedAsset);
 
     if (!sWorld.getConfig(CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
         return;
 
-    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryVector const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByTimedEvent(timedEvent);
     for (auto achievementCriteria : achievementCriteriaList)
     {
         // only apply to specific timedRequirementId related criteria
-        if (achievementCriteria->timedCriteriaMiscId != timedRequirementId)
+        if (achievementCriteria->timedCriteriaMiscId != timedAsset)
             continue;
 
         if (!achievementCriteria->IsExplicitlyStartedTimedCriteria())
@@ -850,10 +846,6 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
         if (achievementCriteria->requiredType == ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST && GetPlayer()->GetGroup())
             continue;
 
-        // do not start already failed timers
-        if (startTime && time_t(startTime + achievementCriteria->timeLimit) < time(nullptr))
-            continue;
-
         CriteriaProgress* progress;
 
         CriteriaProgressMap::iterator iter = m_criteriaProgress.find(achievementCriteria->ID);
@@ -865,12 +857,14 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
         progress->changed = true;
         progress->counter = 0;
 
+        TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
+
         // Start with given startTime or now
-        progress->date = startTime ? startTime : time(nullptr);
-        progress->timedCriteriaFailed = false;
+        progress->updateDate = now;
+        progress->criteriaFailed = false;
 
         // Add to timer map
-        m_criteriaFailTimes[achievementCriteria->ID] = time_t(progress->date + achievementCriteria->timeLimit);
+        m_criteriaFailTimes[achievementCriteria->ID] = progress->updateDate + std::chrono::seconds(achievementCriteria->timeLimit);
 
         SendCriteriaUpdate(achievementCriteria->ID, progress);
     }
@@ -884,7 +878,7 @@ void AchievementMgr::DoFailedTimedAchievementCriterias()
     if (m_criteriaFailTimes.empty())
         return;
 
-    time_t now = time(nullptr);
+    TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
     for (AchievementCriteriaFailTimeMap::iterator iter = m_criteriaFailTimes.begin(); iter != m_criteriaFailTimes.end();)
     {
         if (iter->second > now)
@@ -909,7 +903,7 @@ void AchievementMgr::DoFailedTimedAchievementCriterias()
             CriteriaProgress* progress = &pro_iter->second;
 
             // Set to failed, and send to client
-            progress->timedCriteriaFailed = true;
+            progress->criteriaFailed = true;
             SendCriteriaUpdate(criteria->ID, progress);
 
             // Remove failed progress
@@ -930,18 +924,32 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
     if (!sWorld.getConfig(CONFIG_BOOL_GM_ALLOW_ACHIEVEMENT_GAINS) && m_player->GetSession()->GetSecurity() > SEC_PLAYER)
         return;
 
-    AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
+    AchievementCriteriaEntryVector const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
     for (auto achievementCriteria : achievementCriteriaList)
     {
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         // Checked in LoadAchievementCriteriaList
 
-        if ((achievement->factionFlag == ACHIEVEMENT_FACTION_FLAG_HORDE    && GetPlayer()->GetTeam() != HORDE) ||
+        if ((achievement->factionFlag == ACHIEVEMENT_FACTION_FLAG_HORDE && GetPlayer()->GetTeam() != HORDE) ||
                 (achievement->factionFlag == ACHIEVEMENT_FACTION_FLAG_ALLIANCE && GetPlayer()->GetTeam() != ALLIANCE))
             continue;
 
         // don't update already completed criteria
         if (IsCompletedCriteria(achievementCriteria, achievement))
+            continue;
+
+        if (achievementCriteria->startEvent) // if has start event, must already exist
+        {
+            auto itr = m_criteriaProgress.find(achievementCriteria->ID);
+            if (itr == m_criteriaProgress.end())
+                continue;
+
+            if (itr->second.criteriaFailed) // started but failed
+                continue;
+        }
+
+        // if has timed event, do not update until started
+        if (achievementCriteria->IsExplicitlyStartedTimedCriteria() && m_criteriaFailTimes.find(achievementCriteria->ID) == m_criteriaFailTimes.end())
             continue;
 
         // init values, real set in switch
@@ -1024,11 +1032,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
                 if (achievementCriteria->kill_creature.creatureID != miscvalue1)
                     continue;
-
-                // check DBC map condition (required for some pvp kills); when this is provided condVal1 = condVal2 so we only check the first one
-                if (achievementCriteria->kill_creature.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                    if (GetPlayer()->GetMapId() != achievementCriteria->kill_creature.condVal1)
-                        continue;
 
                 // ToDo: implement the additional criteria ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT and ACHIEVEMENT_CRITERIA_CONDITION_UNK3
 
@@ -1280,11 +1283,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST:
             {
-                // check the no group condition
-                if (achievementCriteria->complete_quest.condFlag == ACHIEVEMENT_CRITERIA_CONDITION_NO_GROUP)
-                    if (GetPlayer() && GetPlayer()->GetGroup())
-                        continue;
-
                 // if miscvalues != 0, it contains the questID.
                 if (miscvalue1)
                 {
@@ -1332,14 +1330,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!miscvalue1 || miscvalue1 != achievementCriteria->be_spell_target.spellID)
                     continue;
 
-                // check map condition
-                if (achievementCriteria->be_spell_target.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                    if (GetPlayer()->GetMapId() != achievementCriteria->be_spell_target.condVal1)
-                        continue;
-                if (achievementCriteria->be_spell_target.condFlag2 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                    if (GetPlayer()->GetMapId() != achievementCriteria->be_spell_target.condVal2)
-                        continue;
-
                 // ToDo: implement the additional criteria ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT and ACHIEVEMENT_CRITERIA_CONDITION_UNK3
 
                 // those requirements couldn't be found in the dbc
@@ -1359,11 +1349,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             {
                 if (!miscvalue1 || miscvalue1 != achievementCriteria->cast_spell.spellID)
                     continue;
-
-                // check map condition; always condVal1 = condVal2 so we only need to check the first one
-                if (achievementCriteria->cast_spell.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                    if (GetPlayer()->GetMapId() != achievementCriteria->cast_spell.condVal1)
-                        continue;
 
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
@@ -1417,26 +1402,23 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 progressType = PROGRESS_HIGHEST;
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA:
+            {
                 // miscvalue1 contains the personal rating
-                if (!miscvalue1)                            // no update at login
+                if (!miscvalue1) // no update at login
                     continue;
 
-                // additional requirements
-                if (achievementCriteria->win_rated_arena.flag == ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE)
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if (data && !data->Meets(GetPlayer(), unit, miscvalue1))
                 {
-                    // those requirements couldn't be found in the dbc
-                    AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                    if (!data || !data->Meets(GetPlayer(), unit, miscvalue1))
-                    {
-                        // reset the progress as we have a win without the requirement.
-                        SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
-                        continue;
-                    }
+                    // reset the progress as we have a win without the requirement.
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                    continue;
                 }
 
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
+            }
             case ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM:
             {
                 // AchievementMgr::UpdateAchievementCriteria might also be called on login - skip in this case
@@ -1589,16 +1571,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!miscvalue1)
                     continue;
 
-                if (achievementCriteria->healing_done.flag == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                {
-                    if (GetPlayer()->GetMapId() != achievementCriteria->healing_done.mapid)
-                        continue;
-
-                    // map specific case (BG in fact) expected player targeted damage/heal
-                    if (!unit || unit->GetTypeId() != TYPEID_PLAYER)
-                        continue;
-                }
-
                 change = miscvalue1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
@@ -1628,11 +1600,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 // AchievementMgr::UpdateAchievementCriteria might also be called on login - skip in this case
                 if (!miscvalue1)
                     continue;
-
-                // Check map id requirement if provided; In wotlk flag1 = flag2 and map1 = map2, so we only need to check the first one
-                if (achievementCriteria->special_pvp_kill.flag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                    if (GetPlayer()->GetMapId() != achievementCriteria->special_pvp_kill.mapId1)
-                        continue;
 
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
@@ -1800,19 +1767,9 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             {
-                // Check map id requirement if provided; In wotlk flag1 = flag2 and map1 = map2, so we only need to check the first one
-                if (achievementCriteria->honorable_kill_battleground.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                {
-                    if (GetPlayer()->GetMapId() != achievementCriteria->honorable_kill_battleground.condVal1)
-                        continue;
-                }
-                else
-                {
-                    // if no map condition is provided the achiev needs additional conditions
-                    AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                    if (!data || !data->Meets(GetPlayer(), unit))
-                        continue;
-                }
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if (data && !data->Meets(GetPlayer(), unit))
+                    continue;
 
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
@@ -1863,13 +1820,13 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
             {
-                time_t nextDailyResetTime = sWorld.GetNextDailyQuestsResetTime();
+                TimePoint nextDailyResetTime(std::chrono::seconds(sWorld.GetNextDailyQuestsResetTime()));
                 CriteriaProgress const* progress = GetCriteriaProgress(achievementCriteria);
 
                 if (!miscvalue1) // Login case.
                 {
                     // reset if player missed one day.
-                    if (progress && progress->date < (nextDailyResetTime - 2 * DAY))
+                    if (progress && progress->updateDate < (nextDailyResetTime - std::chrono::days(2)))
                         SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                     continue;
                 }
@@ -1878,10 +1835,10 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!progress)
                     // 1st time. Start count.
                     progressType = PROGRESS_SET;
-                else if (progress->date < (nextDailyResetTime - 2 * DAY))
+                else if (progress->updateDate < (nextDailyResetTime - std::chrono::days(2)))
                     // last progress is older than 2 days. Player missed 1 day => Retart count.
                     progressType = PROGRESS_SET;
-                else if (progress->date < (nextDailyResetTime - DAY))
+                else if (progress->updateDate < (nextDailyResetTime - std::chrono::days(1)))
                     // last progress is between 1 and 2 days. => 1st time of the day.
                     progressType = PROGRESS_ACCUMULATE;
                 else
@@ -2157,7 +2114,7 @@ bool AchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
     uint32 achievementForTestId = entry->refAchievement ? entry->refAchievement : entry->ID;
     uint32 achievementForTestCount = entry->count;
 
-    AchievementCriteriaEntryList const* cList = sAchievementMgr.GetAchievementCriteriaByAchievement(achievementForTestId);
+    AchievementCriteriaEntryVector const* cList = sAchievementMgr.GetAchievementCriteriaByAchievement(achievementForTestId);
     if (!cList)
         return false;
     uint32 count = 0;
@@ -2230,13 +2187,14 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 
         progress = &m_criteriaProgress[criteria->ID];
 
-        progress->date = time(nullptr);
-        progress->timedCriteriaFailed = false;
+        progress->startDate = GetPlayer()->GetMap()->GetCurrentClockTime();
+        progress->updateDate = GetPlayer()->GetMap()->GetCurrentClockTime();
+        progress->criteriaFailed = false;
 
         // timed criterias are added to fail-timer map, and send the starting with counter=0
         if (criteria->timeLimit)
         {
-            m_criteriaFailTimes[criteria->ID] = time_t(progress->date + criteria->timeLimit);
+            m_criteriaFailTimes[criteria->ID] = progress->updateDate + std::chrono::seconds(criteria->timeLimit);
             progress->counter = 0;
             SendCriteriaUpdate(criteria->ID, progress);
         }
@@ -2262,10 +2220,14 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
             case PROGRESS_HIGHEST:
                 newValue = progress->counter < changeValue ? changeValue : progress->counter;
                 break;
+            case PROGRESS_FAIL:
+                newValue = changeValue;
+                progress->criteriaFailed = true;
+                break;
         }
 
         // not update (not mark as changed) if counter will have same value
-        if (progress->counter == newValue)
+        if (progress->counter == newValue && ptype != PROGRESS_FAIL)
             return;
     }
 
@@ -2324,10 +2286,11 @@ void AchievementMgr::CompletedAchievement(AchievementEntry const* achievement)
     if (achievement->flags & ACHIEVEMENT_FLAG_COUNTER || m_completedAchievements.find(achievement->ID) != m_completedAchievements.end())
         return;
 
-    SendAchievementEarned(achievement);
     CompletedAchievementData& ca =  m_completedAchievements[achievement->ID];
-    ca.date = time(nullptr);
+    ca.updateDate = GetPlayer()->GetMap()->GetCurrentClockTime();
     ca.changed = true;
+
+    SendAchievementEarned(achievement, ca.updateDate);
 
     // don't insert for ACHIEVEMENT_FLAG_REALM_FIRST_KILL since otherwise only the first group member would reach that achievement
     // TODO: where do set this instead?
@@ -2445,26 +2408,31 @@ void AchievementMgr::SendRespondInspectAchievements(Player* player)
  */
 void AchievementMgr::BuildAllDataPacket(WorldPacket& data)
 {
-    for (CompletedAchievementMap::const_iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+    for (auto& completedAchievement : m_completedAchievements)
     {
-        data << uint32(iter->first);
-        data << uint32(secsToTimeBitFields(iter->second.date));
-    }
-    data << int32(-1);
+        // Skip hidden achievements
+        AchievementEntry const* achievement = sAchievementStore.LookupEntry(completedAchievement.first);
+        if (!achievement || achievement->flags & ACHIEVEMENT_FLAG_HIDDEN)
+            continue;
 
-    time_t now = time(nullptr);
-    for (CriteriaProgressMap::const_iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+        data << uint32(completedAchievement.first);
+        data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(completedAchievement.second.updateDate)));
+    }
+    data << int32(-1); // loop terminator
+
+    TimePoint now = GetPlayer()->GetMap()->GetCurrentClockTime();
+    for (auto& itr : m_criteriaProgress)
     {
-        data << uint32(iter->first);
-        data.appendPackGUID(iter->second.counter);
+        data << uint32(itr.first);
+        data.appendPackGUID(itr.second.counter);
         data << GetPlayer()->GetPackGUID();
-        data << uint32(iter->second.timedCriteriaFailed ? 1 : 0);
-        data << uint32(secsToTimeBitFields(now));
-        data << uint32(now - iter->second.date);
-        data << uint32(now - iter->second.date);
+        data << uint32(itr.second.criteriaFailed ? 1 : 0);
+        data << uint32(secsToTimeBitFields(std::chrono::system_clock::to_time_t(now)));
+        data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - itr.second.updateDate)).count());
+        data << uint32(std::chrono::duration_cast<std::chrono::seconds>((now - itr.second.startDate)).count());
     }
 
-    data << int32(-1);
+    data << int32(-1); // loop terminator
 }
 
 AchievementGlobalMgr::~AchievementGlobalMgr()
@@ -2474,12 +2442,27 @@ AchievementGlobalMgr::~AchievementGlobalMgr()
 }
 
 //==========================================================
-AchievementCriteriaEntryList const& AchievementGlobalMgr::GetAchievementCriteriaByType(AchievementCriteriaTypes type) const
+AchievementCriteriaEntryVector const& AchievementGlobalMgr::GetAchievementCriteriaByType(AchievementCriteriaTypes type) const
 {
     return m_AchievementCriteriasByType[type];
 }
 
-AchievementCriteriaEntryList const* AchievementGlobalMgr::GetAchievementCriteriaByAchievement(uint32 id)
+AchievementCriteriaEntryVector const& AchievementGlobalMgr::GetAchievementCriteriaByFailEvent(CriteriaFailEvent failEvent) const
+{
+    return m_achievementCriteriaByFailEvent[uint8(failEvent)];
+}
+
+AchievementCriteriaEntryVector const& AchievementGlobalMgr::GetAchievementCriteriaByStartEvent(CriteriaStartEvent startEvent) const
+{
+    return m_achievementCriteriaByStartEvent[uint8(startEvent)];
+}
+
+AchievementCriteriaEntryVector const& AchievementGlobalMgr::GetAchievementCriteriaByTimedEvent(CriteriaTimedEvent timedEvent) const
+{
+    return m_achievementCriteriaByTimedEvent[uint8(timedEvent)];
+}
+
+AchievementCriteriaEntryVector const* AchievementGlobalMgr::GetAchievementCriteriaByAchievement(uint32 id)
 {
     AchievementCriteriaListByAchievement::const_iterator itr = m_AchievementCriteriaListByAchievement.find(id);
     return itr != m_AchievementCriteriaListByAchievement.end() ? &itr->second : nullptr;
@@ -2562,6 +2545,12 @@ void AchievementGlobalMgr::LoadAchievementCriteriaList()
 
         m_AchievementCriteriasByType[criteria->requiredType].push_back(criteria);
         m_AchievementCriteriaListByAchievement[criteria->referredAchievement].push_back(criteria);
+        if (criteria->failEvent != 0)
+            m_achievementCriteriaByFailEvent[criteria->failEvent].push_back(criteria);
+        if (criteria->startEvent != 0)
+            m_achievementCriteriaByStartEvent[criteria->startEvent].push_back(criteria);
+        if (criteria->timedCriteriaStartType != 0)
+            m_achievementCriteriaByStartEvent[criteria->timedCriteriaStartType].push_back(criteria);
         ++count;
     }
 
@@ -2681,8 +2670,6 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
         switch (criteria->requiredType)
         {
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
-                if (!criteria->win_bg.additionalRequirement1_type && !criteria->win_bg.additionalRequirement2_type)
-                    continue;
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:
                 break;                                      // any cases
@@ -2710,8 +2697,6 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
             case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL:      // any cases
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA: // need skip generic cases
-                if (criteria->win_rated_arena.flag != ACHIEVEMENT_CRITERIA_CONDITION_NO_LOOSE)
-                    continue;
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_EQUIP_EPIC_ITEM: // any cases
                 break;
@@ -2734,9 +2719,6 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
             default:                                        // type not use DB data, ignore
                 continue;
         }
-
-        if (!GetCriteriaRequirementSet(criteria))
-            sLog.outErrorDb("Table `achievement_criteria_requirement` is missing expected data for `criteria_id` %u (type: %u) for achievement %u.", criteria->ID, criteria->requiredType, criteria->referredAchievement);
     }
 
     sLog.outString();

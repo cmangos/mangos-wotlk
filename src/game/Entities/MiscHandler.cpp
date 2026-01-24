@@ -49,6 +49,7 @@ void WorldSession::HandleRepopRequestOpcode(WorldPacket& recv_data)
     DEBUG_LOG("WORLD: Received opcode CMSG_REPOP_REQUEST");
 
     recv_data.read_skip<uint8>();
+    // TODO: Anticheat - add checking if player teleported to revive loc before repop
 
     if (GetPlayer()->IsAlive() || GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;

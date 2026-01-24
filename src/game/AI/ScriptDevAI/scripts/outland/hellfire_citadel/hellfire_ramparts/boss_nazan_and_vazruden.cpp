@@ -188,7 +188,7 @@ struct boss_vazruden_heraldAI : public CombatAI
                     break;
                 case POINT_ID_LANDING:
                 {
-                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_LANDED, landingPhasePos.x, landingPhasePos.y, landingPhasePos.z);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_LANDED, landedPhasePos.x, landedPhasePos.y, landedPhasePos.z);
                     break;
                 }
                 case POINT_ID_LANDED:
@@ -232,6 +232,7 @@ struct boss_vazruden_heraldAI : public CombatAI
     void DoSplit()
     {
         m_creature->UpdateEntry(NPC_NAZAN);
+        m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
 
         DoCastSpellIfCan(nullptr, SPELL_SUMMON_VAZRUDEN);
 

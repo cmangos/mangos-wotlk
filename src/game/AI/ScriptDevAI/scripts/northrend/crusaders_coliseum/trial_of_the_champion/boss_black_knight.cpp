@@ -353,17 +353,17 @@ UnitAI* GetAI_boss_black_knight(Creature* pCreature)
     return new boss_black_knightAI(pCreature);
 }
 
-bool EffectDummyCreature_black_knight_res(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+// 67693 - Black Knight Res
+struct BlackKnightRes : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_BLACK_KNIGHT_RES && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (target->AI())
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target);
     }
-
-    return false;
-}
+};
 
 /*######
 ## npc_black_knight_ghoul
@@ -460,7 +460,6 @@ void AddSC_boss_black_knight()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_black_knight";
     pNewScript->GetAI = &GetAI_boss_black_knight;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_black_knight_res;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -472,4 +471,6 @@ void AddSC_boss_black_knight()
     pNewScript->Name = "npc_black_knight_gryphon";
     pNewScript->GetAI = &GetAI_npc_black_knight_gryphon;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<BlackKnightRes>("spell_black_knight_res");
 }

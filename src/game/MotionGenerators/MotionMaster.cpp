@@ -439,7 +439,7 @@ void MotionMaster::MovePath(std::vector<G3D::Vector3>& path, float o, ForcedMove
     else
         DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follows a pre-calculated path to X: %f Y: %f Z: %f", m_owner->GetGuidStr().c_str(), x, y, z);
 
-    Mutate(new FixedPathMovementGenerator(path, o, forcedMovement, flying));
+    Mutate(new FixedPathMovementGenerator(path, o != 0.f ? std::make_optional(o) : std::nullopt, forcedMovement, flying));
 }
 
 void MotionMaster::MovePath(int32 pathId, WaypointPathOrigin wpOrigin /*= PATH_NO_PATH*/, ForcedMovement forcedMovement, bool flying, float speed, bool cyclic, ObjectGuid guid/* = ObjectGuid()*/, std::optional<AnimTier> animTier)

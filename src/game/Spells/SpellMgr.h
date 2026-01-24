@@ -1754,7 +1754,7 @@ inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftFo
         return false;
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
-    return (spellInfo->Stances[0] & (1 << (form - 1)) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED));
+    return (spellInfo->CanBeUsedInForm(form) && !spellInfo->HasAttribute(SPELL_ATTR_EX2_ALLOW_WHILE_NOT_SHAPESHIFTED));
 }
 
 inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)

@@ -67,9 +67,6 @@ class ScriptedInstance : public InstanceData
 
         void BanPlayersIfNoGm(const std::string& reason);
 
-        // Starts a timed achievement criteria for all players in instance
-        void DoStartTimedAchievement(AchievementCriteriaTypes criteriaType, uint32 uiTimedCriteriaMiscId);
-
     protected:
         void DespawnGuids(GuidVector& spawns); // despawns all creature guids and clears contents
         void RespawnDbGuids(std::vector<uint32>& spawns, uint32 respawnDelay); // respawns all dbguid creatures

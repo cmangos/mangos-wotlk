@@ -147,7 +147,7 @@ struct boss_kelidan_the_breakerAI : public CombatAI
                     lAdds.push_back(pAdd);
             }
             // Sort them by angle
-            lAdds.sort([=](Creature* left, Creature* right) -> bool {return m_creature->GetAngle(left) < m_creature->GetAngle(right); });
+            lAdds.sort([this](Creature* left, Creature* right) -> bool {return m_creature->GetAngle(left) < m_creature->GetAngle(right); });
             for (std::list<Creature*>::const_iterator itr = lAdds.begin(); itr != lAdds.end(); ++itr)
                 m_vAddGuids.push_back((*itr)->GetObjectGuid());
         }

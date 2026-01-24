@@ -211,31 +211,11 @@ class SqlStatement
             return Execute();
         }
 
-        template<typename ParamType1, typename ParamType2>
-        bool PExecute(ParamType1 param1, ParamType2 param2)
+        template<typename ParamType1, typename... Targs>
+        bool PExecute(ParamType1 param1, Targs... fargs)
         {
             arg(param1);
-            arg(param2);
-            return Execute();
-        }
-
-        template<typename ParamType1, typename ParamType2, typename ParamType3>
-        bool PExecute(ParamType1 param1, ParamType2 param2, ParamType3 param3)
-        {
-            arg(param1);
-            arg(param2);
-            arg(param3);
-            return Execute();
-        }
-
-        template<typename ParamType1, typename ParamType2, typename ParamType3, typename ParamType4>
-        bool PExecute(ParamType1 param1, ParamType2 param2, ParamType3 param3, ParamType4 param4)
-        {
-            arg(param1);
-            arg(param2);
-            arg(param3);
-            arg(param4);
-            return Execute();
+            return PExecute(fargs...);
         }
 
         // bind parameters with specified type

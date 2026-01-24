@@ -135,7 +135,7 @@ void BattleGroundWS::StartingEventOpenDoors()
     SpawnEvent(WS_EVENT_FLAG_H, 0, true);
 
     // Players that join battleground after start are not eligible to get achievement.
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, WS_TIMED_ACHIEV_WARSONG_EXP);
+    GetBgMap()->StartEventForAllPlayersInMap(WS_TIMED_ACHIEV_WARSONG_EXP, nullptr);
 
     // setup graveyards
     GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_ALLIANCE,     BG_WS_ZONE_ID_MAIN, ALLIANCE);
@@ -363,7 +363,7 @@ void BattleGroundWS::ProcessFlagPickUpFromBase(Player* player, Team attackerTeam
     player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_PVP_ACTIVE_CANCELS);
 
     // start timed achiev
-    player->GetAchievementMgr().StartTimedAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, player->GetTeam() == ALLIANCE ? WS_TIMED_ACHIEV_QUICK_CAP_A : WS_TIMED_ACHIEV_QUICK_CAP_H);
+    player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_WS_TIMED_ACHIEV_QUICK_CAP_A : SPELL_WS_TIMED_ACHIEV_QUICK_CAP_H, TRIGGERED_OLD_TRIGGERED);
 }
 
 // Function that handles the click action on the dropped flag

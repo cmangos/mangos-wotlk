@@ -1901,7 +1901,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             if (GameObject* banner = GetSingleGameObjectFromStorage(GO_HALAA_BANNER))
             {
                 Player* player = handler->GetSession()->GetPlayer();
-                StartEvents_Event(banner->GetMap(), player->GetTeam() == ALLIANCE ? banner->GetGOInfo()->capturePoint.winEventID1 : banner->GetGOInfo()->capturePoint.winEventID2, banner, player, true);
+                banner->GetMap()->StartEvent(player->GetTeam() == ALLIANCE ? banner->GetGOInfo()->capturePoint.winEventID1 : banner->GetGOInfo()->capturePoint.winEventID2, banner, player, true);
             }
         }
     }

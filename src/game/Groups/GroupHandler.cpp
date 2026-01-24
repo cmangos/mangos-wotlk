@@ -71,8 +71,9 @@ void WorldSession::SendGroupInvite(Player* player, bool alreadyInGroup /*= false
 void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 {
     std::string membername;
+    uint32 proposedRoles;
     recv_data >> membername;
-    recv_data.read_skip<uint32>();                          // roles mask?
+    recv_data >> proposedRoles; // TODO: Add usage
 
     // attempt add selected player
 
@@ -818,11 +819,13 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     ObjectGuid guid;
     recv_data >> guid;
 
+    bool isArenaOpponent = false;
+
     Player* player = ObjectAccessor::FindPlayer(guid, false);
     if (!player)
     {
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3 + 4 + 2);
-        data << uint8(0);                                   // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
+        data << uint8(isArenaOpponent); // only for SMSG_PARTY_MEMBER_STATS_FULL
         data << guid.WriteAsPacked();
         data << uint32(GROUP_UPDATE_FLAG_STATUS);
         data << uint16(MEMBER_STATUS_OFFLINE);
@@ -833,7 +836,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     Unit* charm = player->GetCharm();
 
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4 + 2 + 2 + 2 + 1 + 2 * 6 + 8 + 1 + 8);
-    data << uint8(0);                                       // only for SMSG_PARTY_MEMBER_STATS_FULL, probably arena/bg related
+    data << uint8(isArenaOpponent); // only for SMSG_PARTY_MEMBER_STATS_FULL
     data << player->GetPackGUID();
 
     uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF

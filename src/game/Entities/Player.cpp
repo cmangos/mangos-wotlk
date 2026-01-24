@@ -2289,6 +2289,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
             SendTeleportPacket(x, y, z, orientation, currentTransport);
+
+        if (Loot* loot = sLootMgr.GetLoot(this))
+            loot->Release(this);
     }
     else
     {
@@ -2363,6 +2366,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 GetSession()->SendPacket(data);
             }
 
+            if (Loot* loot = sLootMgr.GetLoot(this))
+                loot->Release(this);
+
             // remove from old map now
             if (oldmap)
                 oldmap->Remove(this, false);
@@ -2413,6 +2419,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         else                                                // !map->CanEnter(this)
             return false;
     }
+
     return true;
 }
 
@@ -5054,7 +5061,7 @@ void Player::KillPlayer()
     // SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
 
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
-    ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER, !sMapStore.LookupEntry(GetMapId())->Instanceable() && !HasAuraType(SPELL_AURA_PREVENT_RESURRECTION));
+    ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_RELEASE_TIMER, !sMapStore.LookupEntry(GetMapId())->Instanceable() && !HasAuraType(SPELL_AURA_PREVENT_RESURRECTION));
 
     ResetDeathTimer();
 
@@ -7374,7 +7381,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
         return false;
 
     ObjectGuid victim_guid;
-    uint32 victim_rank = 0;
+    int32 victim_rank = 0;
 
     // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
     UpdateHonorFields();
@@ -7386,7 +7393,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
 
         victim_guid = uVictim->GetObjectGuid();
 
-        if (uVictim->GetTypeId() == TYPEID_PLAYER)
+        if (uVictim->IsPlayer())
         {
             Player* pVictim = (Player*)uVictim;
 
@@ -7397,28 +7404,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
             uint32 k_level = GetLevel();
             uint32 v_level = pVictim->GetLevel();
 
-            {
-                // PLAYER_CHOSEN_TITLE VALUES DESCRIPTION
-                //  [0]      Just name
-                //  [1..14]  Alliance honor titles and player name
-                //  [15..28] Horde honor titles and player name
-                //  [29..38] Other title and player name
-                //  [39+]    Nothing
-                uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE);
-                // Get Killer titles, CharTitlesEntry::bit_index
-                // Ranks:
-                //  title[1..14]  -> rank[5..18]
-                //  title[15..28] -> rank[5..18]
-                //  title[other]  -> 0
-                if (victim_title == 0)
-                    victim_guid.Clear();                    // Don't show HK: <rank> message, only log.
-                else if (victim_title < 15)
-                    victim_rank = victim_title + 4;
-                else if (victim_title < 29)
-                    victim_rank = victim_title - 14 + 4;
-                else
-                    victim_guid.Clear();                    // Don't show HK: <rank> message, only log.
-            }
+            victim_rank = pVictim->GetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_LIFETIME_MAX_PVP_RANK); 
 
             uint32 k_grey = MaNGOS::XP::GetGrayLevel(k_level);
 
@@ -7444,13 +7430,36 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
         }
         else
         {
-            Creature* cVictim = (Creature*)uVictim;
+            Creature* honorableCreature = static_cast<Creature*>(uVictim);
 
-            if (!cVictim->IsRacialLeader())
-                return false;
+            if (honorableCreature->IsRacialLeader())
+                victim_rank = 19; // HK: Leader
+            else
+                victim_rank = -1; // Special unranked case for npcs in wotlk
 
-            honor = 100;                                    // ??? need more info
-            victim_rank = 19;                               // HK: Leader
+            switch (honorableCreature->GetEntry()) // currently unknown if like bg xp it scales with level of recipient
+            {
+                case 3057: // Cairne Bloodhoof
+                    honor = 2000;
+                    break;
+                case 10181: // Lady Sylvanas Windrunner
+                    honor = 2700;
+                    break;
+                case 31125: // Archavon
+                case 33993: // Emalon
+                case 35013: // Koralon
+                case 38433: // Toravon
+                    honor = 4200; // WIP
+                    break;
+                default: // TODO: More research
+                    if (honorableCreature->IsRacialLeader())
+                        honor = 2500;
+                    else
+                        return false;
+                    break;
+            }
+
+            honor = std::round(float(honor) / groupsize);
         }
     }
 
@@ -7473,7 +7482,7 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
     WorldPacket data(SMSG_PVP_CREDIT, 4 + 8 + 4);
     data << uint32(honor);
     data << ObjectGuid(victim_guid);
-    data << uint32(victim_rank);
+    data << int32(victim_rank);
     GetSession()->SendPacket(data);
 
     // add honor points
@@ -9979,7 +9988,7 @@ bool Player::HasItemOrGemWithLimitCategoryEquipped(uint32 limitCategory, uint32 
     return false;
 }
 
-InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count, uint32* itemLimitCategory /*= NULL*/) const
+InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count, uint32* itemLimitedByLimitCategory /*= NULL*/) const
 {
     ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(entry);
     if (!pProto)
@@ -10021,8 +10030,8 @@ InventoryResult Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Ite
             {
                 if (no_space_count)
                     *no_space_count = count + curcount - limitEntry->maxCount;
-                if (itemLimitCategory)
-                    *itemLimitCategory = pProto->ItemLimitCategory;
+                if (itemLimitedByLimitCategory)
+                    *itemLimitedByLimitCategory = pProto->ItemId;
                 return EQUIP_ERR_ITEM_MAX_LIMIT_CATEGORY_COUNT_EXCEEDED_IS;
             }
         }
@@ -10680,7 +10689,7 @@ InventoryResult Player::_CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& de
 }
 
 //////////////////////////////////////////////////////////////////////////
-InventoryResult Player::CanStoreItems(Item** pItems, int count, uint32* itemLimitCategory) const
+InventoryResult Player::CanStoreItems(Item** pItems, int count, uint32* itemLimitedByLimitCategory) const
 {
     Item*    pItem2;
 
@@ -10767,7 +10776,7 @@ InventoryResult Player::CanStoreItems(Item** pItems, int count, uint32* itemLimi
         ItemPrototype const* pBagProto;
 
         // item is 'one item only'
-        InventoryResult res = CanTakeMoreSimilarItems(pItem, itemLimitCategory);
+        InventoryResult res = CanTakeMoreSimilarItems(pItem, itemLimitedByLimitCategory);
         if (res != EQUIP_ERR_OK)
             return res;
 
@@ -12776,6 +12785,20 @@ void Player::SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemG
     GetSession()->SendPacket(data);
 }
 
+void Player::SendOpenContainer(ObjectGuid itemGuid)
+{
+    WorldPacket data(SMSG_OPEN_CONTAINER, 8);
+    data << ObjectGuid(itemGuid);
+    GetSession()->SendPacket(data);
+}
+
+void Player::SendResetRangedCombatTimer()
+{
+    WorldPacket data(SMSG_RESET_RANGED_COMBAT_TIMER, 4);
+    data << uint32(GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME));
+    GetSession()->SendPacket(data);
+}
+
 void Player::TradeCancel(bool sendback, TradeStatus status /*= TRADE_STATUS_TRADE_CANCELED*/)
 {
     if (m_trade)
@@ -14616,6 +14639,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         SetDailyQuestStatus(quest_id);
         if (pQuest->IsDaily())
         {
+            GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::CompleteDailyQuest);
             GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST, 1);
             GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY, quest_id);
         }
@@ -15554,6 +15578,7 @@ void Player::KilledMonster(CreatureInfo const* cInfo, Creature const* creature)
 void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid)
 {
     uint32 addkillcount = 1;
+    GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::KillNpc, entry);
     GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, entry, addkillcount);
 
     for (int i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
@@ -17157,7 +17182,7 @@ void Player::LoadCorpse()
     {
         if (Corpse* corpse = GetCorpse())
         {
-            ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER, corpse && !sMapStore.LookupEntry(corpse->GetMapId())->Instanceable());
+            ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_RELEASE_TIMER, corpse && !sMapStore.LookupEntry(corpse->GetMapId())->Instanceable());
 
             // [XFACTION]: Alter values update if detected crossfaction group interaction:
             if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && GetGroup())
@@ -18072,7 +18097,7 @@ void Player::SendSavedInstances()
         }
     }
 
-    // Send opcode 811. true or false means, whether you have current raid/heroic instances
+    // true or false means, whether you own the current instance
     data.Initialize(SMSG_UPDATE_INSTANCE_OWNERSHIP);
     data << uint32(hasBeenSaved);
     GetSession()->SendPacket(data);
@@ -20370,7 +20395,7 @@ void Player::OnTaxiFlightRouteProgress(const TaxiPathNodeEntry* node, const Taxi
         {
             const char* desc = (arrival ? "arrival" : "departure");
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Taxi %s event %u of node %u of path %u for player %s", desc, eventid, node->index, node->path, GetName());
-            StartEvents_Event(GetMap(), eventid, this, this, !arrival);
+            GetMap()->StartEvent(eventid, this, this, !arrival);
         }
     }
 }
@@ -21295,7 +21320,8 @@ void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
     Unit::SetPhaseMask(newPhaseMask, update);
 
     if (Unit* vehicle = const_cast<Unit*>(FindRootVehicle()))
-        vehicle->SetPhaseMask(newPhaseMask, update);
+        if (vehicle != this)
+            vehicle->SetPhaseMask(newPhaseMask, update);
     GetSession()->SendSetPhaseShift(GetPhaseMask());
 
     m_pendingPhaseChange = true;
@@ -21403,7 +21429,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
             if (time_t timeReset = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(GetMap()->GetId(), diff))
             {
                 uint32 timeleft = uint32(timeReset - time(nullptr));
-                SendInstanceResetWarning(GetMap()->GetId(), diff, timeleft);
+                InstancePlayerBind* instanceBind = GetBoundInstance(GetMap()->GetId(), Difficulty(GetMap()->GetDifficulty()), true);
+                SendInstanceResetWarning(GetMap()->GetId(), diff, timeleft, instanceBind, instanceBind ? instanceBind->extendState == EXTEND_STATE_EXTENDED : false);
             }
         }
     }
@@ -21513,6 +21540,8 @@ void Player::SendInitialPacketsAfterAddToMap(bool reconnect)
 
     SendAurasForTarget(this);
 
+    // TODO: add SMSG_RESUME_CAST_BAR
+
     SendEnchantmentDurations();                             // must be after add to map
     SendItemDurations();                                    // must be after add to map
 
@@ -21610,7 +21639,7 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
     }
 }
 
-void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time) const
+void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint32 time, bool locked, bool extended) const
 {
     // type of warning, based on the time remaining until reset
     uint32 type;
@@ -21630,8 +21659,8 @@ void Player::SendInstanceResetWarning(uint32 mapid, Difficulty difficulty, uint3
     data << uint32(time);
     if (type == RAID_INSTANCE_WELCOME)
     {
-        data << uint8(0);                                   // is your (1)
-        data << uint8(0);                                   // is extended (1), ignored if prev field is 0
+        data << uint8(locked);                              // is locked
+        data << uint8(extended);                            // is extended
     }
     GetSession()->SendPacket(data);
 }
@@ -23771,11 +23800,6 @@ void Player::UpdateAchievementCriteria(AchievementCriteriaTypes type, uint32 mis
     GetAchievementMgr().UpdateAchievementCriteria(type, miscvalue1, miscvalue2, unit, time);
 }
 
-void Player::StartTimedAchievementCriteria(AchievementCriteriaTypes type, uint32 timedRequirementId, time_t startTime /*= 0*/)
-{
-    GetAchievementMgr().StartTimedAchievementCriteria(type, timedRequirementId, startTime);
-}
-
 PlayerTalent const* Player::GetKnownTalentById(int32 talentId) const
 {
     PlayerTalentMap::const_iterator itr = m_talents[m_activeSpec].find(talentId);
@@ -25795,4 +25819,33 @@ void Player::UpdateRangedWeaponDependantAmmoHasteAura()
             ApplyAttackTimePercentMod(RANGED_ATTACK, float(highest), true);
         SetHighestAmmoMod(highest);
     }
+}
+
+bool Player::SetStunnedByLogout(bool apply)
+{
+    if (SetStunned(apply, ObjectGuid(), 0, true))
+    {
+        // Sit down when eligible:
+        if (apply)
+        {
+            if (IsStandState())
+            {
+                if (!m_movementInfo.HasMovementFlag(MovementFlags(movementFlagsMask | MOVEFLAG_SWIMMING | MOVEFLAG_SPLINE_ENABLED)))
+                    SetStandState(UNIT_STAND_STATE_SIT);
+            }
+        }
+        // Stand up on cancel
+        else if (getStandState() == UNIT_STAND_STATE_SIT)
+            SetStandState(UNIT_STAND_STATE_STAND);
+
+        ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_LOGGING_OUT, apply);
+        return true;
+    }
+    return false;
+}
+
+void Player::SetPet(Unit* pet)
+{
+    Unit::SetPet(pet);
+    ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_CONTROLLING_PET, pet != nullptr);
 }

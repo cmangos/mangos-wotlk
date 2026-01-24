@@ -433,6 +433,62 @@ struct HealingStreamTotemEffect : public SpellScript
     }
 };
 
+// 8017 - Rockbiter Weapon
+struct RockbiterWeaponSelector : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetEffectChance(0, EFFECT_INDEX_1);
+    }
+
+    void OnCast(Spell* spell) const override
+    {
+        Unit* caster = spell->GetCaster();
+        uint32 spell_id = 0;
+        switch (spell->m_spellInfo->Id) // selection per Elemental Weapons talent
+        {
+            case 8017:  // Rank 1
+                spell_id = 36744;
+                break;
+            case 8018: // Rank 2
+                spell_id = 36753;
+                break;
+            case 8019: // Rank 3
+                spell_id = 36757;
+                break;
+            case 10399: // Rank 4
+                spell_id = 36761;
+                break;
+            default: sLog.outError("Spell::EffectDummy: Spell %u not handled in RW", spell->m_spellInfo->Id); return;
+        }
+
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
+
+        if (!spellInfo)
+        {
+            sLog.outError("WORLD: unknown spell id %i", spell_id);
+            return;
+        }
+
+        if (!caster->IsPlayer())
+            return;
+
+        for (int j = BASE_ATTACK; j <= OFF_ATTACK; ++j)
+        {
+            if (Item* item = static_cast<Player*>(caster)->GetWeaponForAttack(WeaponAttackType(j)))
+            {
+                if (item->IsFitToSpellRequirements(spell->m_spellInfo))
+                {
+                    SpellCastArgs args;
+                    args.SetItemTarget(item);
+
+                    caster->CastSpell(args, spellInfo, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
+        }
+    }
+};
+
 void LoadShamanScripts()
 {
     Script* pNewScript = new Script;
@@ -458,4 +514,5 @@ void LoadShamanScripts()
     RegisterSpellScript<GlyphOfHealingWave>("spell_glyph_of_healing_wave");
     RegisterSpellScript<GlyphOfTotemOfWrath>("spell_glyph_of_totem_of_wrath");
     RegisterSpellScript<HealingStreamTotemEffect>("spell_healing_stream_totem_effect");
+    RegisterSpellScript<RockbiterWeaponSelector>("spell_rockbiter_weapon_selector");
 }

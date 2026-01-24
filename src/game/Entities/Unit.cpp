@@ -1220,6 +1220,9 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
         if (damagetype != INSTAKILL)
             playerVictim->SetPvPDeath(responsiblePlayer != nullptr);
 
+        // reset no death achievements
+        playerVictim->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::Death);
+
         // achievement stuff
         if (responsiblePlayer)
             responsiblePlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL, 1, 0, victim);
@@ -1857,6 +1860,9 @@ SpellCastResult Unit::CastSpell(SpellCastArgs& args, SpellEntry const* spellInfo
 
     if (args.IsDestinationSet())
         targets.setDestination(args.GetDestination());
+
+    if (args.IsItemTargetSet())
+        targets.setItemTarget(args.GetItemTarget());
 
     spell->SetCastItem(castItem);
     return spell->SpellStart(&targets, triggeredByAura);
@@ -6956,18 +6962,20 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             target->SetStandState(UNIT_STAND_STATE_STAND);
 
         // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
-        const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && realCaster->IsVisibleForOrDetect(target, target, false) && realCaster->CanEnterCombat() && target->CanEnterCombat());
+        const bool bypassStealthAndEndIt = spellInfo->HasAttribute(SPELL_ATTR_EX_FAILURE_BREAKS_STEALTH) && !success;
+        const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && realCaster->IsVisibleForOrDetect(target, target, false, false, true, bypassStealthAndEndIt) &&
+                             realCaster->CanEnterCombat() && target->CanEnterCombat());
 
         // Mind soothe confirmed to aggro on resist
         if (attack && (!success || !spellInfo->HasAttribute(SPELL_ATTR_EX_THREAT_ONLY_ON_MISS)) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
         {
-            if (success && !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
+            if (success && !spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION) || bypassStealthAndEndIt)
             {
                 target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_HOSTILE_ACTION);
 
                 // caster can be detected but have stealth aura
-                if (!spellInfo->HasAttribute(SPELL_ATTR_EX_ALLOW_WHILE_STEALTHED))
-                    realCaster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+                if (bypassStealthAndEndIt) // all other cases are handled through AURA_INTERRUPT_FLAG_ACTION
+                    realCaster->RemoveAurasWithDispelType(DISPEL_STEALTH);
             }
 
             target->AttackedBy(realCaster);
@@ -11269,6 +11277,15 @@ void Unit::StopMoving(bool forceSendStop /*=false*/)
     init.Stop(forceSendStop);
 }
 
+void Unit::UpdateMoving()
+{
+    Movement::MoveSplineInit init(*this);
+    Position pos = GetPosition(GetTransport());
+    init.Launch(); // no need to attach to movegen, only sending update to client
+    UpdateSplinePosition();
+    EndSpline();
+}
+
 void Unit::InterruptMoving(bool forceSendStop /*=false*/)
 {
     bool isMoving = false;
@@ -11389,28 +11406,6 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID, bool lo
         SetImmobilizedState(apply, true, logout);
 
         ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED, hasUnitState(UNIT_STAT_STUNNED | UNIT_STAT_LOGOUT_TIMER));
-        return true;
-    }
-    return false;
-}
-
-bool Unit::SetStunnedByLogout(bool apply)
-{
-    if (SetStunned(apply, ObjectGuid(), 0, true))
-    {
-        // Sit down when eligible:
-        if (apply)
-        {
-            if (IsStandState())
-            {
-                if (!m_movementInfo.HasMovementFlag(MovementFlags(movementFlagsMask | MOVEFLAG_SWIMMING | MOVEFLAG_SPLINE_ENABLED)))
-                    SetStandState(UNIT_STAND_STATE_SIT);
-            }
-        }
-        // Stand up on cancel
-        else if (getStandState() == UNIT_STAND_STATE_SIT)
-            SetStandState(UNIT_STAND_STATE_STAND);
-
         return true;
     }
     return false;

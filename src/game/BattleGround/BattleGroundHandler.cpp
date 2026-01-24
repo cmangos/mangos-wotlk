@@ -378,6 +378,8 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode(WorldPacket& /*recv_d
             SendPacket(data);
             break;
         }
+        case BATTLEGROUND_SA: // TODO: Add and check IoC too
+            break;
         default:
             // maybe it is sent also in arena - do nothing
             break;
@@ -450,6 +452,12 @@ void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
 
     recv_data >> type >> unk2 >> receivedBgTypeId >> unk >> action;
 
+    if (action != 0 && action != 1)
+    {
+        sLog.outError("BattlegroundHandler: invalid action (%u) received.", action);
+        return;
+    }
+
     if (!sBattlemasterListStore.LookupEntry(receivedBgTypeId))
     {
         sLog.outError("BattlegroundHandler: invalid bgtype (%u) received.", receivedBgTypeId);
@@ -473,6 +481,9 @@ void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
     BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BgQueueTypeId(bgTypeId, ArenaType(type));
     bool canJoinToBg = _player->CanJoinToBattleground();
     uint32 queueSlot = _player->GetBattleGroundQueueIndex(bgQueueTypeId);
+
+    if (queueSlot == PLAYER_MAX_BATTLEGROUND_QUEUES) // tried to join a bg not in queue for
+        return;
 
     sWorld.GetBGQueue().GetMessager().AddMessage([bgQueueTypeId, playerGuid = _player->GetObjectGuid(), actionTemp = action, canJoinToBg, bgTypeId, playerLevel = _player->GetLevel(), queueSlot](BattleGroundQueue* queue)
     {
@@ -598,9 +609,6 @@ void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
 
                 if (queueInfo.arenaType == ARENA_TYPE_NONE)
                     queue->ScheduleQueueUpdate(queueInfo.arenaTeamRating, queueInfo.arenaType, bgQueueTypeId, bgTypeId, queueInfo.bgBracketId);
-                break;
-            default:
-                sLog.outError("Battleground port: unknown action %u", action);
                 break;
         }
     });

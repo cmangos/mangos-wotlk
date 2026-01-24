@@ -211,15 +211,6 @@ UPDATE creature_template SET ScriptName='npc_gossip_npc' WHERE entry IN (18927,1
 UPDATE creature_template SET ScriptName='npc_quest_attunement' WHERE entry IN(22421,18528,19935);
 
 /* SPELL */
-UPDATE creature_template SET ScriptName='spell_dummy_npc' WHERE entry IN (
--- eastern kingdoms
-8888,13016,
--- kalimdor
-9299,
--- outland
-16880,16518,16847,17157,17326,17654,18879,21729,24918,24922,25084,25085,
--- northrend
-23678,25752,25753,25758,25792,25793,26268,26270,26421,26616,26643,26841,27122,27808,28053,28054,28068,28093,28465,28600,29319,29327,30169);
 
 /* WORLD MAP SCRIPTS */
 DELETE FROM world_template WHERE map IN (0, 1, 530, 571, 609);
@@ -496,7 +487,6 @@ UPDATE creature_template SET ScriptName='boss_general_angerforge' WHERE entry=90
 UPDATE creature_template SET ScriptName='boss_high_interrogator_gerstahn' WHERE entry=9018;
 UPDATE creature_template SET ScriptName='boss_coren_direbrew' WHERE entry=23872;
 UPDATE creature_template SET ScriptName='npc_grimstone' WHERE entry=10096;
-UPDATE creature_template SET ScriptName='npc_theldren_trigger' WHERE entry=16079;
 UPDATE creature_template SET ScriptName='npc_phalanx' WHERE entry=9502;
 UPDATE creature_template SET ScriptName='npc_mistress_nagmara' WHERE entry=9500;
 UPDATE creature_template SET ScriptName='npc_rocknot' WHERE entry=9503;
@@ -672,7 +662,6 @@ INSERT INTO scripted_areatrigger VALUES
 /* THE CULLING OF STRATHOLME */
 UPDATE instance_template SET ScriptName='instance_culling_of_stratholme' WHERE map=595;
 UPDATE creature_template SET ScriptName='npc_chromie' WHERE entry IN (26527, 27915);
-UPDATE creature_template SET ScriptName='npc_spell_dummy_crusader_strike' WHERE entry IN (28167,28169);
 UPDATE creature_template SET ScriptName='npc_arthas' WHERE entry=26499;
 INSERT INTO scripted_areatrigger VALUES
 (5291,'at_culling_of_stratholme');
@@ -837,7 +826,6 @@ UPDATE creature_template SET ScriptName='npc_magrami_spectre' WHERE entry=11560;
 /* DIRE MAUL */
 UPDATE instance_template SET ScriptName='instance_dire_maul' WHERE map=429;
 UPDATE gameobject_template SET ScriptName='go_fixed_trap' WHERE entry=179512;
-UPDATE creature_template SET ScriptName='npc_mizzle_crafty' WHERE entry=14353;
 UPDATE creature_template SET ScriptName='npc_warlock_mount_ritual' WHERE entry=14501;
 UPDATE gameobject_template SET ScriptName='go_dreadsteed_quest_objects' WHERE entry IN(179672,179673,179674);
 INSERT INTO scripted_event_id VALUES
@@ -1104,7 +1092,6 @@ UPDATE instance_template SET ScriptName='instance_forge_of_souls' WHERE map=632;
 
 /* HALLS OF REFLECTION */
 UPDATE instance_template SET ScriptName='instance_halls_of_reflection' WHERE map=668;
-UPDATE creature_template SET ScriptName='npc_spell_summon_reflections' WHERE entry=36723;
 UPDATE creature_template SET ScriptName='boss_lich_king_hor' WHERE entry=36954;
 UPDATE creature_template SET ScriptName='npc_jaina_sylvanas_hor' WHERE entry IN (36955,37554);
 INSERT INTO scripted_areatrigger VALUES
@@ -1694,7 +1681,6 @@ INSERT INTO scripted_event_id VALUES
 (2228,'event_spell_altar_boss_aggro'),
 (2268,'event_spell_altar_boss_aggro');
 UPDATE creature_template SET ScriptName='boss_archaedas' WHERE entry=2748;
-UPDATE creature_template SET ScriptName='mob_archaeras_add' WHERE entry IN (7309,7076,7077,10120);
 UPDATE instance_template SET ScriptName='instance_uldaman' WHERE map=70;
 
 /*  */
@@ -1707,7 +1693,6 @@ UPDATE creature_template SET ScriptName='boss_bjarngrim' WHERE entry=28586;
 UPDATE creature_template SET ScriptName='mob_stormforged_lieutenant' WHERE entry=29240;
 UPDATE creature_template SET ScriptName='boss_volkhan' WHERE entry=28587;
 UPDATE creature_template SET ScriptName='mob_molten_golem' WHERE entry=28695;
-UPDATE creature_template SET ScriptName='npc_volkhan_anvil' WHERE entry=28823;
 UPDATE creature_template SET ScriptName='boss_ionar' WHERE entry=28546;
 UPDATE creature_template SET ScriptName='mob_spark_of_ionar' WHERE entry=28926;
 UPDATE creature_template SET ScriptName='boss_loken' WHERE entry=28923;
@@ -1865,7 +1850,6 @@ INSERT INTO scripted_event_id VALUES
 
 /* VIOLET HOLD */
 UPDATE instance_template SET ScriptName='instance_violet_hold' WHERE map=608;
-UPDATE creature_template SET ScriptName='npc_door_seal' WHERE entry=30896;
 UPDATE creature_template SET ScriptName='npc_sinclari' WHERE entry=30658;
 UPDATE creature_template SET ScriptName='npc_prison_event_controller' WHERE entry=30883;
 UPDATE creature_template SET ScriptName='npc_teleportation_portal' WHERE entry IN (30679,32174);

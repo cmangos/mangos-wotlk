@@ -370,7 +370,7 @@ void instance_blood_furnace::Update(uint32 uiDiff)
     {
         if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
         {
-            DoScriptText(aRandomTaunt[urand(0, 5)], pMagtheridon);
+            DoBroadcastText(aRandomTaunt[urand(0, 5)], pMagtheridon);
             m_uiRandYellTimer = 90000;
         }
     }

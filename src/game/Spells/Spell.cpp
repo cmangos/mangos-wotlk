@@ -1524,6 +1524,9 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
 
     if (unit->IsPlayer())
     {
+        static_cast<Player*>(unit)->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::BeSpellTarget, m_spellInfo->Id);
+        static_cast<Player*>(unit)->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::BeSpellTarget, m_spellInfo->Id); // unused but implemented
+        static_cast<Player*>(unit)->GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::BeSpellTarget, m_spellInfo->Id);
         static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, m_spellInfo->Id);
         static_cast<Player*>(unit)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET2, m_spellInfo->Id);
     }
@@ -1720,7 +1723,7 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo* target)
 
     // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-    if (!IsAutoRepeat() && !IsNextMeleeSwingSpell(m_spellInfo) && !IsChannelActive() && m_caster)
+    if (!IsAutoRepeat() && !IsNextMeleeSwingSpell(m_spellInfo) && !IsChannelActive())
     {
         if (Player* p = m_caster->GetBeneficiaryPlayer())
             p->RewardPlayerAndGroupAtCast(go, m_spellInfo->Id);
@@ -3385,10 +3388,11 @@ void Spell::Prepare()
             m_caster->AI()->OnSpellCastStateChange(this, true, m_targets.getUnitTarget());
     }
 
-    m_castPositionX = m_trueCaster->GetPositionX();
-    m_castPositionY = m_trueCaster->GetPositionY();
-    m_castPositionZ = m_trueCaster->GetPositionZ();
-    m_castOrientation = m_trueCaster->GetOrientation();
+    Position pos = m_trueCaster->GetPosition(m_trueCaster->GetTransport());
+    m_castPositionX = pos.GetPositionX();
+    m_castPositionY = pos.GetPositionY();
+    m_castPositionZ = pos.GetPositionZ();
+    m_castOrientation = pos.GetPositionO();
 
     OnSuccessfulStart();
 
@@ -3715,13 +3719,6 @@ SpellCastResult Spell::cast(bool skipCheck)
     m_targets.updateTradeSlotItem();
 
     m_duration = CalculateSpellDuration(m_spellInfo, m_caster, nullptr, m_auraScript);
-    if (m_trueCaster->IsPlayer())
-    {
-        if (!m_IsTriggeredSpell && m_CastItem)
-            static_cast<Player*>(m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
-
-        static_cast<Player*>(m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
-    }
 
     FillTargetMap();
 
@@ -3754,6 +3751,20 @@ SpellCastResult Spell::cast(bool skipCheck)
     InitializeDamageMultipliers();
 
     OnCast();
+
+    if (m_trueCaster->IsPlayer())
+    {
+        if (!m_IsTriggeredSpell && m_CastItem)
+        {
+            static_cast<Player*>(m_trueCaster)->GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::UseItem, m_CastItem->GetEntry());
+            static_cast<Player*>(m_trueCaster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
+        }
+
+        // static_cast<Player*>(m_trueCaster)->GetAchievementMgr().FailAchievementCriteria(CriteriaFailEvent::CastSpell, m_spellInfo->Id); // unused
+        // static_cast<Player*>(m_trueCaster)->GetAchievementMgr().StartAchievementCriteria(CriteriaStartEvent::CastSpell, m_spellInfo->Id); // unused
+        static_cast<Player*>(m_trueCaster)->GetAchievementMgr().StartTimedAchievementCriteria(CriteriaTimedEvent::CastSpell, m_spellInfo->Id);
+        static_cast<Player*>(m_trueCaster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
+    }
 
     if (!m_IsTriggeredSpell && !m_trueCaster->IsGameObject() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_AN_ACTION))
         m_caster->RemoveAurasOnCast(AURA_INTERRUPT_FLAG_ACTION_LATE, m_spellInfo);
@@ -4074,9 +4085,10 @@ void Spell::update(uint32 difftime)
         return;
     }
 
+    Position pos = m_trueCaster->GetPosition(m_trueCaster->GetTransport());
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if ((m_trueCaster->IsUnit() && m_timer != 0) &&
-            (m_castPositionX != m_trueCaster->GetPositionX() || m_castPositionY != m_trueCaster->GetPositionY() || m_castPositionZ != m_trueCaster->GetPositionZ()) &&
+        (m_castPositionX != pos.GetPositionX() || m_castPositionY != pos.GetPositionY() || m_castPositionZ != pos.GetPositionZ()) &&
             (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
     {
         // always cancel for channeled spells
@@ -5012,26 +5024,30 @@ void Spell::SendChannelStart(uint32 duration)
 
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_IS_CHANNELED))
     {
-        data.Initialize(SMSG_SPELL_UPDATE_CHAIN_TARGETS);
-        data << m_caster->GetObjectGuid();
-        data << uint32(m_spellInfo->Id);
-        size_t count_pos = data.wpos();
-        data << uint32(0);
-        uint32 hit = 0;
-        for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
+        if (target)
         {
-            if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
-                m_CastItem) || itr->targetGUID != m_caster->GetObjectGuid())
+            data.Initialize(SMSG_SPELL_UPDATE_CHAIN_TARGETS);
+            data << m_caster->GetObjectGuid();
+            data << uint32(m_spellInfo->Id);
+            size_t count_pos = data.wpos();
+            data << uint32(0);
+            uint32 hit = 1;
+            data << target->GetObjectGuid(); // must be first
+
+            for (TargetList::const_iterator itr = m_UniqueTargetInfo.begin(); itr != m_UniqueTargetInfo.end(); ++itr)
             {
-                if (Unit* target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID))
+                if (itr->targetGUID == target->GetObjectGuid()) // already set as first
+                    continue;
+
+                if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE) || itr->targetGUID != m_caster->GetObjectGuid())
                 {
                     ++hit;
-                    data << target->GetObjectGuid();
+                    data << itr->targetGUID;
+                    if (hit >= 32)
+                        break;
                 }
             }
-        }
-        if (hit)
-        {
+
             data.put<uint32>(count_pos, hit);
             m_caster->SendMessageToSet(data, true);
         }
@@ -7021,17 +7037,20 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!expectedTarget->IsVehicle())
                         return SPELL_FAILED_BAD_TARGETS;
 
-                    // It is possible to change between vehicles that are boarded on each other
-                    if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS))
                     {
-                        // Check if trying to board a vehicle that is boarded on current transport
-                        bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(expectedTarget);
-                        // Check if trying to board a vehicle that has the current transport on board
-                        if (!boardedOnEachOther)
-                            boardedOnEachOther = expectedTarget->GetVehicleInfo()->HasOnBoard(m_caster);
+                        // It is possible to change between vehicles that are boarded on each other
+                        if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                        {
+                            // Check if trying to board a vehicle that is boarded on current transport
+                            bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(expectedTarget);
+                            // Check if trying to board a vehicle that has the current transport on board
+                            if (!boardedOnEachOther)
+                                boardedOnEachOther = expectedTarget->GetVehicleInfo()->HasOnBoard(m_caster);
 
-                        if (!boardedOnEachOther)
-                            return SPELL_FAILED_NOT_ON_TRANSPORT;
+                            if (!boardedOnEachOther)
+                                return SPELL_FAILED_NOT_ON_TRANSPORT;
+                        }
                     }
 
                     if (!expectedTarget->GetVehicleInfo()->CanBoard(m_caster))

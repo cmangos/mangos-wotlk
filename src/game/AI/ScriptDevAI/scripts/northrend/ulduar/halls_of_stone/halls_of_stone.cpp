@@ -293,7 +293,7 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
         case TYPE_MAIDEN:
             m_auiEncounter[uiType] = uiData;
             if (uiData == IN_PROGRESS)
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MAIDEN_ID);
+                instance->StartEventForAllPlayersInMap(ACHIEV_START_MAIDEN_ID, nullptr);
             break;
         case TYPE_KRYSTALLUS:
             m_auiEncounter[uiType] = uiData;

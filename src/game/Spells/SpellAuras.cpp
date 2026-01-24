@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "SpellAuras.h"
 #include "Common.h"
+#include "SpellAuras.h"
 #include "Database/DatabaseEnv.h"
 #include "Server/WorldPacket.h"
 #include "Server/WorldSession.h"
@@ -1605,7 +1605,7 @@ void Aura::TriggerSpell()
 //                    // Professor Dabiri Talks
 //                    case 36064: break;
 //                    // They Must Burn Bomb Aura
-//                    case 36344: break;        
+//                    case 36344: break;
                     case 36350:                             // They Must Burn Bomb Aura (self)
                         trigger_spell_id = 36325;           // They Must Burn Bomb Drop (DND)
                         break;
@@ -2091,7 +2091,7 @@ void Aura::TriggerSpell()
         // Reget trigger spell proto
         triggeredSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(trigger_spell_id);
     }
-    else 
+    else
     {
         // for channeled spell cast applied from aura owner to channel target (persistent aura affects already applied to true target)
         // come periodic casts applied to targets, so need select proper caster (ex. 15790)
@@ -2321,14 +2321,6 @@ void Aura::TriggerSpell()
     if (data.spellInfo)
     {
         CastTriggeredSpell(data);
-    }
-    else if (!GetAuraScript()) // if scripter scripted spell, it is handled somehow
-    {
-        if (Unit* caster = GetCaster())
-        {
-            if (triggerTarget->GetTypeId() != TYPEID_UNIT || !sScriptDevAIMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)triggerTarget, ObjectGuid()))
-                sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?", GetId(), GetEffIndex());
-        }
     }
 }
 
@@ -3411,6 +3403,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     else
                         target->RemoveAurasDueToSpell(37284);
+                    return;
                 }
                 case 40133:                                 // Summon Fire Elemental
                 {
@@ -4569,7 +4562,7 @@ void Aura::HandleAuraTrackStealthed(bool apply, bool /*Real*/)
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_TRACK_STEALTHED, apply);
+    GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_TRACK_STEALTHED, apply);
 }
 
 void Aura::HandleAuraModScale(bool /*apply*/, bool /*Real*/)
@@ -7616,7 +7609,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             if (((Player*)target)->HasSpell(17007))
             {
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(24932);
-                if (spellInfo && spellInfo->Stances[0] & (1 << (form - 1)))
+                if (spellInfo && spellInfo->CanBeUsedInForm(form))
                     target->CastSpell(nullptr, 24932, TRIGGERED_OLD_TRIGGERED, nullptr, this);
             }
 
@@ -7944,7 +7937,7 @@ void Aura::HandleSpiritOfRedemption(bool apply, bool Real)
         if (target->IsNonMeleeSpellCasted(false))
             target->InterruptNonMeleeSpells(false);
 
-        // set health and mana to maximum        
+        // set health and mana to maximum
         target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
     }
     // die at aura end
@@ -8140,7 +8133,7 @@ void Aura::PeriodicTick()
             }
 
             // Check for immune (not use charges)
-            // Aura of anger - video evidence confirms this, but attribute is legit because aura is still applied during 
+            // Aura of anger - video evidence confirms this, but attribute is legit because aura is still applied during
             if (!spellProto->HasAttribute(SPELL_ATTR_NO_IMMUNITIES) || overrideImmune) // confirmed Impaling spine goes through immunity
             {
                 if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
@@ -8231,18 +8224,26 @@ void Aura::PeriodicTick()
             if (!target->IsAlive())
                 break;
 
-            Unit* pCaster = GetCaster();
-            if (!pCaster)
+            Unit* caster = GetCaster();
+            if (!caster)
                 break;
 
-            if (!pCaster->IsAlive())
+            if (!caster->IsAlive())
                 break;
+
+            Unit* victim = target;
+            Unit* beneficiary = caster;
+            if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_HEALTH_FUNNEL)
+            {
+                victim = caster;
+                beneficiary = target;
+            }
 
             uint32 pdamage = (m_modifier.m_amount > 0 ? uint32(m_modifier.m_amount) : 0);
             OnPeriodicCalculateAmount(pdamage);
 
             if (spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA &&
-                    Unit::SpellHitResult(pCaster, target, spellProto, (1 << GetEffIndex()), false) != SPELL_MISS_NONE)
+                    Unit::SpellHitResult(caster, target, spellProto, (1 << GetEffIndex()), false) != SPELL_MISS_NONE)
                 break;
 
             // Check for immune
@@ -8258,9 +8259,9 @@ void Aura::PeriodicTick()
             uint32 absorb = 0;
             int32 resist = 0;
 
-            pdamage = target->SpellDamageBonusTaken(pCaster, SpellSchoolMask(spellProto->SchoolMask), spellProto, GetEffIndex(), pdamage, DOT, GetStackAmount());
+            pdamage = victim->SpellDamageBonusTaken(caster, SpellSchoolMask(spellProto->SchoolMask), spellProto, GetEffIndex(), pdamage, DOT, GetStackAmount());
 
-            bool isCrit = IsCritFromAbilityAura(pCaster, pdamage);
+            bool isCrit = IsCritFromAbilityAura(caster, pdamage);
 
             // only from players
             // FIXME: need use SpellDamageBonus instead?
@@ -8268,11 +8269,11 @@ void Aura::PeriodicTick()
                 pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
-                              GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId(), absorb);
+                              GetCasterGuid().GetString().c_str(), victim->GetGuidStr().c_str(), pdamage, GetId(), absorb);
 
-            Unit::DealDamageMods(pCaster, target, pdamage, &absorb, DOT, spellProto);
+            Unit::DealDamageMods(caster, victim, pdamage, &absorb, DOT, spellProto);
 
-            Unit::SendSpellNonMeleeDamageLog(pCaster, target, GetId(), pdamage, GetSpellSchoolMask(spellProto), absorb, resist, true, 0, isCrit);
+            Unit::SendSpellNonMeleeDamageLog(caster, victim, GetId(), pdamage, GetSpellSchoolMask(spellProto), absorb, resist, true, 0, isCrit);
 
             float multiplier = spellProto->EffectMultipleValue[GetEffIndex()] > 0 ? spellProto->EffectMultipleValue[GetEffIndex()] : 1;
 
@@ -8286,7 +8287,7 @@ void Aura::PeriodicTick()
             const uint32 malus = (resist > 0 ? (absorb + uint32(resist)) : absorb);
             pdamage = (pdamage <= malus ? 0 : (pdamage - malus));
 
-            pdamage = std::min(pdamage, target->GetHealth());
+            pdamage = std::min(pdamage, victim->GetHealth());
 
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
@@ -8295,31 +8296,31 @@ void Aura::PeriodicTick()
             // send critical in hit info for threat calculation
             if (isCrit)
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
-            int32 new_damage = Unit::DealDamage(pCaster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
-            Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, absorb, BASE_ATTACK, spellProto));
+            int32 new_damage = Unit::DealDamage(caster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
+            Unit::ProcDamageAndSpell(ProcSystemArguments(caster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, absorb, BASE_ATTACK, spellProto));
 
-            if (!target->IsAlive() && pCaster->IsNonMeleeSpellCasted(false))
+            if (!target->IsAlive() && caster->IsNonMeleeSpellCasted(false))
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; ++i)
-                    if (Spell* spell = pCaster->GetCurrentSpell(CurrentSpellTypes(i)))
+                    if (Spell* spell = caster->GetCurrentSpell(CurrentSpellTypes(i)))
                         if (spell->m_spellInfo->Id == GetId())
                             spell->cancel();
 
-            if (Player* modOwner = pCaster->GetSpellModOwner())
+            if (Player* modOwner = caster->GetSpellModOwner())
             {
                 modOwner->ApplySpellMod(GetId(), SPELLMOD_ALL_EFFECTS, new_damage);
                 modOwner->ApplySpellMod(GetId(), SPELLMOD_MULTIPLE_VALUE, multiplier);
             }
 
-            int32 heal = pCaster->SpellHealingBonusTaken(pCaster, spellProto, GetEffIndex(), int32(new_damage * multiplier), DOT, GetStackAmount());
+            int32 heal = caster->SpellHealingBonusTaken(caster, spellProto, GetEffIndex(), int32(new_damage * multiplier), DOT, GetStackAmount());
 
             uint32 absorbHeal = 0;
-            pCaster->CalculateHealAbsorb(heal, &absorbHeal);
+            caster->CalculateHealAbsorb(heal, &absorbHeal);
 
-            int32 gain = pCaster->DealHeal(pCaster, heal - absorbHeal, spellProto, false, absorbHeal);
+            int32 gain = caster->DealHeal(caster, heal - absorbHeal, spellProto, false, absorbHeal);
             // Health Leech effects do not generate healing aggro
             if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_LEECH)
                 break;
-            pCaster->getHostileRefManager().threatAssist(pCaster, gain * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
+            caster->getHostileRefManager().threatAssist(caster, gain * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto, false, true);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
@@ -9184,12 +9185,6 @@ void Aura::PeriodicDummyTick()
     }
 
     OnPeriodicDummy();
-
-    if (Unit* caster = GetCaster())
-    {
-        if (target && target->GetTypeId() == TYPEID_UNIT)
-            sScriptDevAIMgr.OnEffectDummy(caster, GetId(), GetEffIndex(), (Creature*)target, ObjectGuid());
-    }
 }
 
 void Aura::HandlePreventFleeing(bool apply, bool Real)
@@ -9586,9 +9581,9 @@ void Aura::HandlePreventResurrection(bool apply, bool Real)
         return;
 
     if (apply)
-        target->RemoveByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+        target->RemoveByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_RELEASE_TIMER);
     else if (!target->GetMap()->Instanceable())
-        target->SetByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_RELEASE_TIMER);
+        target->SetByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_FLAGS, PLAYER_FIELD_BYTE_RELEASE_TIMER);
 }
 
 void Aura::HandleFactionOverride(bool apply, bool Real)
@@ -11248,7 +11243,7 @@ GameObjectAura::GameObjectAura(SpellEntry const* spellproto, SpellEffectIndex ef
 }
 
 GameObjectAura::~GameObjectAura()
-{    
+{
 }
 
 void GameObjectAura::Update(uint32 diff)

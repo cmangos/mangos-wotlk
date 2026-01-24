@@ -834,7 +834,7 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
             data << float(0);                            // delay hiding the sender (hide sender when hovering mail icon)
 
             ++count;
-            if (count == 2)                              // do not display more than 2 mails
+            if (count == 3)                              // do not display more than 3 mails
                 break;
         }
         data.put<uint32>(4, count);

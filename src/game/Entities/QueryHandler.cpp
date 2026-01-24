@@ -250,7 +250,8 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
     {
         std::string Name = info->name;
         std::string IconName = info->IconName;
-        std::string CastBarCaption = info->castBarCaption;
+        std::string openingText = info->OpeningText;
+        std::string closingText = info->ClosingText;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
@@ -260,8 +261,10 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
             {
                 if (gl->Name.size() > size_t(loc_idx) && !gl->Name[loc_idx].empty())
                     Name = gl->Name[loc_idx];
-                if (gl->CastBarCaption.size() > size_t(loc_idx) && !gl->CastBarCaption[loc_idx].empty())
-                    CastBarCaption = gl->CastBarCaption[loc_idx];
+                if (gl->OpeningText.size() > size_t(loc_idx) && !gl->OpeningText[loc_idx].empty())
+                    openingText = gl->OpeningText[loc_idx];
+                if (gl->ClosingText.size() > size_t(loc_idx) && !gl->ClosingText[loc_idx].empty())
+                    closingText = gl->ClosingText[loc_idx];
             }
         }
         DETAIL_LOG("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
@@ -272,8 +275,8 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
         data << Name;
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
         data << IconName;                                   // 2.0.3, string. Icon name to use instead of default icon for go's (ex: "Attack" makes sword)
-        data << CastBarCaption;                             // 2.0.3, string. Text will appear in Cast Bar when using GO (ex: "Collecting")
-        data << info->unk1;                                 // 2.0.3, string
+        data << openingText;                                // 2.0.3, string - when lock specifies action 0 or 1
+        data << closingText;                                // 2.0.3, string - when lock specifies action 2
         data.append(info->raw.data, 24);
         data << float(info->size);                          // go size
         for (unsigned int questItem : info->questItems)

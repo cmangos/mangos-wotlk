@@ -137,6 +137,9 @@ void WorldSession::HandleSwapItem(WorldPacket& recv_data)
     }
 
     _player->SwapItem(src, dst);
+
+    if (dst == EQUIPMENT_SLOT_MAINHAND || dst == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+        _player->SendResetRangedCombatTimer();
 }
 
 void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
@@ -231,6 +234,11 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
 
         _player->AutoUnequipOffhandIfNeed(srcbag);
     }
+
+    if (Player::IsBagPos(dest))
+        _player->SendOpenContainer(pSrcItem->GetObjectGuid());
+    else if (dest == EQUIPMENT_SLOT_MAINHAND || dest == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+        _player->SendResetRangedCombatTimer();
 }
 
 void WorldSession::HandleDestroyItemOpcode(WorldPacket& recv_data)
@@ -456,6 +464,8 @@ void WorldSession::HandleReadItemOpcode(WorldPacket& recv_data)
         else
         {
             data.Initialize(SMSG_READ_ITEM_FAILED, 8);
+            // data << uint8(0); // hasTranslationProgress
+            // data << uint32(0); // translationProgressDuration
             DETAIL_LOG("STORAGE: Unable to read item");
             _player->SendEquipError(msg, pItem, nullptr);
         }
@@ -933,6 +943,8 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     ++slot;
 
     DETAIL_LOG("PLAYER: Buy bank bag slot, slot number = %u", slot);
+    if (slot > (BANK_SLOT_BAG_END - BANK_SLOT_BAG_START))
+        return;
 
     BankBagSlotPricesEntry const* slotEntry = sBankBagSlotPricesStore.LookupEntry(slot);
 
