@@ -2144,6 +2144,19 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 target = this;
                 break;
             }
+            // Improved Mend Pet
+            if (dummySpell->Id == 19572 || dummySpell->Id == 19573)
+            {
+                bool mendPetTick = data.spellInfo->SpellFamilyFlags & uint64(0x0000000000800000) && data.procExtra & PROC_EX_INTERNAL_HOT;
+
+                if (!mendPetTick || !roll_chance_i(triggerAmount))
+                    return SPELL_AURA_PROC_FAILED;
+
+                triggered_spell_id = 24406;
+                target = pVictim;
+                break;
+            }
+
             break;
         }
         case SPELLFAMILY_PALADIN:
@@ -3899,15 +3912,6 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
             // Check that only priest class can proc it is done in Spell::CheckTargetScript() for aura 23401
             if (IsSpellHaveEffect(spellInfo, SPELL_EFFECT_HEAL))
                 triggered_spell_id = 23402;
-            break;
-        }
-        case 4086:                                          // Improved Mend Pet (Rank 1)
-        case 4087:                                          // Improved Mend Pet (Rank 2)
-        {
-            if (!roll_chance_i(triggerAmount))
-                return SPELL_AURA_PROC_FAILED;
-
-            triggered_spell_id = 24406;
             break;
         }
         case 4533:                                          // Dreamwalker Raiment 2 pieces bonus

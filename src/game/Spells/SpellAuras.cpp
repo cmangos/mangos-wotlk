@@ -8330,13 +8330,30 @@ void Aura::PeriodicTick()
             if (!pCaster)
                 break;
 
-            // don't heal target if max health or if not alive, mostly death persistent effects from items
-            if (!target->IsAlive() || (target->GetHealth() == target->GetMaxHealth()))
+            // don't heal target if not alive, mostly death persistent effects from items
+            if (!target->IsAlive())
                 break;
 
             // heal for caster damage (must be alive)
             if (target != pCaster && spellProto->SpellVisual[0] == 163 && !pCaster->IsAlive())
                 break;
+
+            if (target->GetHealth() == target->GetMaxHealth())
+            {
+                // Mend Pet:
+                // trigger auras even without healing, required for Improved Mend Pet to proc when the pet is at full hp:
+                if (spellProto->SpellFamilyName == SPELLFAMILY_HUNTER && spellProto->SpellFamilyFlags & uint64(0x0000000000800000))
+                {
+                    uint32 procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC;
+                    uint32 procVictim = PROC_FLAG_TAKE_HARMFUL_PERIODIC;
+                    uint32 procEx = PROC_EX_INTERNAL_HOT | PROC_EX_NORMAL_HIT;
+                    int32 gain = 0;
+
+                    Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, procEx, gain, 0, BASE_ATTACK, spellProto, nullptr, gain, true));
+                }
+                
+                break;
+            }
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
@@ -8382,8 +8399,7 @@ void Aura::PeriodicTick()
             pCaster->CalculateHealAbsorb(pdamage, &absorbHeal);
             pdamage -= absorbHeal;
 
-            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health  (absorbed %u) inflicted by %u",
-                GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, absorbHeal, GetId());
+            DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s heal of %s for %u health  (absorbed %u) inflicted by %u", GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, absorbHeal, GetId());
 
             int32 gain = target->ModifyHealth(pdamage);
             SpellPeriodicAuraLogInfo pInfo(this, pdamage, (pdamage - uint32(gain)), absorbHeal, 0, 0.0f, isCrit);
