@@ -2401,6 +2401,8 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         }
         case SCRIPT_COMMAND_SET_ACTIVEOBJECT:               // 21
         {
+            if (LogIfNotPlayer(pSource))
+                break;
             if (pSource->GetTypeId() == TYPEID_PLAYER)
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for player, skipping.", m_table, m_script->id, m_script->command);
