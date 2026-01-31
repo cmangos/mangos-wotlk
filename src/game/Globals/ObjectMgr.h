@@ -815,7 +815,7 @@ class ObjectMgr
         void LoadSQLDBCs();
 
         void LoadVendorTemplates();
-        void LoadVendors() { LoadVendors("npc_vendor", false); }
+        void LoadVendors();
         void LoadTrainerTemplates();
         void LoadTrainers() { LoadTrainers("npc_trainer", false); }
 
