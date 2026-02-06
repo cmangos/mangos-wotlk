@@ -144,7 +144,7 @@ enum LfgJoinResult
     LFG_JOIN_OK                                  = 0,      // Joined (no client msg)
     LFG_JOIN_FAILED                              = 1,      // RoleCheck Failed
     LFG_JOIN_GROUPFULL                           = 2,      // Your group is full
-    LFG_JOIN_INTERNAL_ERROR                      = 4,      // Internal LFG Error
+    LFG_JOIN_FAILED_TIMEOUT                      = 4,      // Timeout - TODO: implement
     LFG_JOIN_NOT_MEET_REQS                       = 5,      // You do not meet the requirements for the chosen dungeons
     LFG_JOIN_PARTY_NOT_MEET_REQS                 = 6,      // One or more party members do not meet the requirements for the chosen dungeons
     LFG_JOIN_MIXED_RAID_DUNGEON                  = 7,      // You cannot mix dungeons, raids, and random when picking dungeons
