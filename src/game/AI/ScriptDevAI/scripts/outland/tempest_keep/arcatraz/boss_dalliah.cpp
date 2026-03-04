@@ -156,7 +156,7 @@ struct WhirlwindDaliah : public AuraScript
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply && aura->GetTarget()->AI())
-            aura->GetTarget()->AI()->DoCastSpellIfCan(nullptr, aura->GetTarget()->GetMap()->IsRegularDifficulty() ? SPELL_HEAL : SPELL_HEAL_H);
+            aura->GetTarget()->AI()->DoCastSpellIfCan(nullptr, aura->GetTarget()->GetMap()->IsRegularDifficulty() ? SPELL_HEAL : SPELL_HEAL_H, CAST_INTERRUPT_PREVIOUS);
     }
 };
 
