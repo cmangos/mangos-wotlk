@@ -436,6 +436,8 @@ struct PriestPetScaling2 : public AuraScript
                     value = float(owner->GetStat(STAT_STAMINA)) * 0.3f;
                 break;
             case EFFECT_INDEX_1: // armor
+                if (Unit* owner = data.caster->GetOwner())
+                    value = owner->GetArmor() * 0.35f;
                 break;
             case EFFECT_INDEX_2: // resistance
                 if (Unit* owner = data.caster->GetOwner())
