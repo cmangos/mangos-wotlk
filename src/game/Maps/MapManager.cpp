@@ -90,6 +90,7 @@ void MapManager::InitializeVisibilityDistanceInfo()
 
 void MapManager::CreateContinents()
 {
+    std::mutex mmapMutex; // all of initialize can be in parallel but mmap creation
     std::vector<std::future<void>> futures;
     uint32 continents[] = { 0, 1, 530, 571};
     for (auto id : continents)
@@ -101,7 +102,7 @@ void MapManager::CreateContinents()
         m->SetWeakPtr(ptr);
 
         // non-instanceable maps always expected have saved state
-        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, true)));
+        futures.push_back(std::async(std::launch::async, std::bind(&Map::Initialize, m, &mmapMutex, true)));
     }
 
     for (auto& futurItr : futures)
@@ -142,7 +143,7 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
             m->SetWeakPtr(ptr);
 
             // non-instanceable maps always expected have saved state
-            m->Initialize();
+            m->Initialize(nullptr); // can be nullptr because already safeguarded by guard
         }
     }
 
@@ -369,7 +370,7 @@ DungeonMap* MapManager::CreateDungeonMap(uint32 id, uint32 InstanceId, Difficult
 
     // Dungeons can have saved instance data
     bool load_data = save != nullptr;
-    map->Initialize(load_data);
+    map->Initialize(nullptr, load_data); // can be nullptr because already safeguarded by guard one function up
 
     return map;
 }
@@ -392,7 +393,7 @@ BattleGroundMap* MapManager::CreateBattleGroundMap(uint32 id, uint32 InstanceId,
     map->SetWeakPtr(ptr);
 
     // BGs/Arenas not have saved instance data
-    map->Initialize(false);
+    map->Initialize(nullptr, false);
 
     return map;
 }

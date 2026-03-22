@@ -925,7 +925,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
     for (int i = 0; i <= MAX_EXPANSION; ++i)
     {
         std::ostringstream str;
-        str << ", BaseHealthExp" << i << ", BaseDamageExp" << i;
+        str << ", BaseHealthExp" << i << ", BaseDamageExp" << i << ", BaseDamageExp" << i << "OLD";
         expData += str.str();
     }
 
@@ -989,8 +989,9 @@ void ObjectMgr::LoadCreatureClassLvlStats()
             cCLS.Intellect                  = intellect;
             cCLS.Spirit                     = spirit;
 
-            cCLS.BaseHealth = fields[11 + (i * 2)].GetUInt32();
-            cCLS.BaseDamage = fields[12 + (i * 2)].GetFloat();
+            cCLS.BaseHealth = fields[11 + (i * 3)].GetUInt32();
+            cCLS.BaseDamage = fields[12 + (i * 3)].GetFloat();
+            cCLS.BaseDamageOLD = fields[13 + (i * 3)].GetFloat();
 
             uint32 apCoeffStr = 2;
             uint32 apCoeffAgi = 0;
@@ -1011,7 +1012,7 @@ void ObjectMgr::LoadCreatureClassLvlStats()
             // stamina seems to have scaling formula for npcs - so for now does not impact base health
             // cCLS.BaseHealth -= std::min(cCLS.BaseHealth, std::max(0u, (uint32)Unit::GetHealthBonusFromStamina(cCLS.Stamina)));
             cCLS.BaseMana -= std::min(cCLS.BaseMana, std::max(0u, (uint32)Unit::GetManaBonusFromIntellect(cCLS.Intellect)));
-            cCLS.BaseMeleeAttackPower -= std::min(cCLS.BaseMeleeAttackPower, std::max(0.f, float(((std::max(cCLS.Strength, 10u) - 10) * apCoeffStr + (std::max(cCLS.Agility, 10u) - 10) * apCoeffAgi))));
+            // cCLS.BaseMeleeAttackPower -= std::min(cCLS.BaseMeleeAttackPower, std::max(0.f, float(cCLS.Strength >= 10 ? (cCLS.Strength - 10) * 2 : 0)));
             cCLS.BaseRangedAttackPower -= std::min(cCLS.BaseRangedAttackPower, std::max(0.f, float(cCLS.Agility >= 10 ? (cCLS.Agility - 10) : 0)));
             cCLS.BaseArmor -= std::min(cCLS.BaseArmor, std::max(0u, cCLS.Agility * 2));
         }

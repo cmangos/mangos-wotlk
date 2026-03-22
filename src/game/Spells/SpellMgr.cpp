@@ -2807,7 +2807,7 @@ void SpellMgr::CheckUsedSpells(char const* table) const
         }
 
         // TODO: for spellCategory better check need dbc loading
-        if (category < -1 || (category >= 0 && sSpellCategoryStore.LookupEntry(category)))
+        if (category < -1 || (category >= 0 && sSpellCategory.LookupEntry(category)))
         {
             sLog.outError("Table '%s' for spell %u have wrong SpellCategory value(%u), skipped.", table, spell, category);
             continue;

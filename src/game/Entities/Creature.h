@@ -184,6 +184,8 @@ struct CreatureInfo
     uint32  StringID2;
     char const* AIName;
     uint32  ScriptID;
+    float DamageMultiplierOLD;
+    float DamageVarianceOLD;
 
     // helpers
     HighGuid GetHighGuid() const
@@ -349,6 +351,7 @@ struct CreatureClassLvlStats
     uint32  BaseHealth;
     uint32  BaseMana;
     float   BaseDamage;
+    float   BaseDamageOLD;
     float   BaseMeleeAttackPower;
     float   BaseRangedAttackPower;
     uint32  BaseArmor;
@@ -1059,6 +1062,7 @@ class Creature : public Unit
         int32 m_delayedBoardingSeat;
 
         float m_healthMultiplier;
+        float m_damageMultiplier;
 
     private:
         GridReference<Creature> m_gridRef;

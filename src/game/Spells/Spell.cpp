@@ -4045,9 +4045,9 @@ void Spell::SendSpellCooldown()
         }
         if (category)
         {
-            if (SpellCategoryEntry const* categoryEntry = sSpellCategoryStore.LookupEntry(category))
+            if (SpellCategoryEntry const* categoryEntry = sSpellCategory.LookupEntry(category))
             {
-                if (categoryEntry->Flags & SPELL_CATEGORY_FLAG_EVENT_ON_LEAVE_COMBAT)
+                if (categoryEntry->flags & uint32(SpellCategoryFlags::CooldownEventOnLeaveCombat))
                 {
                     // need in some way provided data for Spell::finish SendCooldownEvent
                     if (m_CastItem && m_CastItem->IsPotion())

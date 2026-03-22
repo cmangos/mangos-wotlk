@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14101_01_mangos_quest_template_mistake_rename` bit(1) DEFAULT NULL
+  `required_14102_01_mangos_cls_rework` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1551,7 +1551,7 @@ CREATE TABLE `creature_template` (
   `HealthMultiplier` float NOT NULL DEFAULT '1',
   `PowerMultiplier` float NOT NULL DEFAULT '1',
   `DamageMultiplier` float NOT NULL DEFAULT '1',
-  `DamageVariance` float NOT NULL DEFAULT '1',
+  `DamageVariance` float NOT NULL DEFAULT '0.4',
   `ArmorMultiplier` float NOT NULL DEFAULT '1',
   `ExperienceMultiplier` float NOT NULL DEFAULT '1',
   `StrengthMultiplier` float NOT NULL DEFAULT '1',
@@ -1614,6 +1614,8 @@ CREATE TABLE `creature_template` (
   `StringId2` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   `AIName` char(64) NOT NULL DEFAULT '',
   `ScriptName` char(64) NOT NULL DEFAULT '',
+  `DamageMultiplierOLD` float NOT NULL DEFAULT '1',
+  `DamageVarianceOLD` float NOT NULL DEFAULT '1',
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System';
 
@@ -1624,7 +1626,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,0,0,10045,0,0,0,100,0,0,0,35,1,0,8,7,1,0,0,4096,0,0,130,5242886,0,0,0,0,0.91,1.14286,1,20,0,0,0,0,8,0,-1,1,1,1,1,1,1,1,1,1,1,1,64,64,0,0,2,3,1,2,5,10,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','');
+(1,'Waypoint (Only GM can see it)','Visual',NULL,1,1,0,0,0,10045,0,0,0,100,0,0,0,35,1,0,8,7,1,0,0,4096,0,0,130,5242886,0,0,0,0,0.91,1.14286,1,20,0,0,0,0,8,0,-1,1,1,1,1,1,1,1,1,1,1,1,64,64,0,0,2,3,1,2,5,10,100,2000,2200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'','',1,1);
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
