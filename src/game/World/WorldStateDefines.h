@@ -375,30 +375,17 @@ enum WorldStateID : int32
     WORLD_STATE_NATURALIST_BITE    = 5470044,              // Spawns Coilfang Group after freeing Naturalist Bite
 
     // Shadow Labyrinth
-    WORLD_STATE_SHADOW_LAB_GROUP_01 = 5550001,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_05 = 5550002,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_12 = 5550003,              // 3 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_13 = 5550004,              // 3 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_23 = 5550005,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_24 = 5550006,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_25 = 5550007,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_33 = 5550008,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_34 = 5550009,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_35 = 5550010,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_40 = 5550011,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_41 = 5550012,              // 2 Possible group versions
-    WORLD_STATE_SHADOW_LAB_GROUP_42 = 5550013,              // 2 Possible group versions   
     // The Screaming Hall 
     // Worldstates that handle the respawn of runners between the groups in Murmur room
     // Activated via database when door opens, deactivated when spawn_group died
-    WORLD_STATE_SHADOW_LAB_GROUP_48 = 5550014,              // 2 Runners that instantly die after reaching last waypoint
-    WORLD_STATE_SHADOW_LAB_GROUP_49 = 5550015,              // First runner
-    WORLD_STATE_SHADOW_LAB_GROUP_50 = 5550016,              // 2nd runner
-    WORLD_STATE_SHADOW_LAB_GROUP_51 = 5550017,              // 3rd runner
-    WORLD_STATE_SHADOW_LAB_GROUP_52 = 5550018,              // 4th and 5th runner
+    WORLD_STATE_SHADOW_LAB_GROUP_48 = 5550001,              // 2 Runners that instantly die after reaching last waypoint
+    WORLD_STATE_SHADOW_LAB_GROUP_49 = 5550002,              // First runner
+    WORLD_STATE_SHADOW_LAB_GROUP_50 = 5550003,              // 2nd runner
+    WORLD_STATE_SHADOW_LAB_GROUP_51 = 5550004,              // 3rd runner
+    WORLD_STATE_SHADOW_LAB_GROUP_52 = 5550005,              // 4th and 5th runner
     // Cabal Assasins
-    WORLD_STATE_SHADOW_LAB_ASSASIN_01 = 5550019,
-    WORLD_STATE_SHADOW_LAB_ASSASIN_02 = 5550020,
+    WORLD_STATE_SHADOW_LAB_ASSASIN_01 = 5550006,
+    WORLD_STATE_SHADOW_LAB_ASSASIN_02 = 5550007,
 
     // Sethekk Halls
     WORLD_STATE_SETHEKK_GROUP_12    = 5560001,              // 2 Possible group versions

@@ -34,25 +34,22 @@ enum
     SPELL_SHAPE_OF_BEAST    = 33949,
 
     // Blackheart the Inciter
-    SL_BLACKHEAT_GROUP_01   = 5550030,
-    SL_BLACKHEAT_GROUP_02   = 5550031,
-    SL_BLACKHEAT_GROUP_03   = 5550032,
-    SL_BLACKHEAT_GROUP_04   = 5550033,
-    SL_BLACKHEAT_GROUP_05   = 5550034,
-    SL_BLACKHEAT_GROUP_06   = 5550035,
-    SL_BLACKHEAT_GROUP_07   = 5550036,
-    SL_BLACKHEAT_GROUP_08   = 5550037,
-    SL_BLACKHEAT_GROUP_09   = 5550038,
-    SL_BLACKHEAT_GROUP_10   = 5550039,
-    SL_BLACKHEAT_GROUP_11   = 5550040,
-    SL_BLACKHEAT_GROUP_12   = 5550041,
-    SL_BLACKHEAT_GROUP_13   = 5550042,
+    SL_BLACKHEAT_GROUP_01   = 5550024,
+    SL_BLACKHEAT_GROUP_02   = 5550025,
+    SL_BLACKHEAT_GROUP_03   = 5550026,
+    SL_BLACKHEAT_GROUP_04   = 5550027,
+    SL_BLACKHEAT_GROUP_05   = 5550028,
+    SL_BLACKHEAT_GROUP_06   = 5550029,
+    SL_BLACKHEAT_GROUP_07   = 5550030,
+    SL_BLACKHEAT_GROUP_08   = 5550031,
+    SL_BLACKHEAT_GROUP_09   = 5550032,
+    SL_BLACKHEAT_GROUP_10   = 5550033,
 
 
-    SL_SPAWN_GROUP_043      = 5550064,                      // SpawnGroup that stops respawning of first runner
-    SL_SPAWN_GROUP_044      = 5550065,                      // SpawnGroup that stops respawning of 2nd runner
-    SL_SPAWN_GROUP_045      = 5550066,                      // SpawnGroup that stops respawning of third runner
-    SL_SPAWN_GROUP_046      = 5550067,                      // SpawnGroup that stops respawning of third runner
+    SL_SPAWN_GROUP_043      = 5550048,                      // SpawnGroup that stops respawning of first runner
+    SL_SPAWN_GROUP_044      = 5550049,                      // SpawnGroup that stops respawning of 2nd runner
+    SL_SPAWN_GROUP_045      = 5550050,                      // SpawnGroup that stops respawning of 3rd runner
+    SL_SPAWN_GROUP_046      = 5550051,                      // SpawnGroup that stops respawning of 4th runner
 };
 
 const std::string MURMURS_WRATH_TARGETS_01 = "SL_MURMUR_WRATH_TARGET_01";

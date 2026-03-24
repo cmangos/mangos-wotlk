@@ -41,21 +41,6 @@ instance_shadow_labyrinth::instance_shadow_labyrinth(Map* pMap) : ScriptedInstan
 void instance_shadow_labyrinth::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
-
-    // Worldstates for correct grouping
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_01, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_05, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_12, urand(0, 2));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_13, urand(0, 2));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_23, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_24, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_25, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_33, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_34, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_35, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_40, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_41, urand(0, 1));
-    instance->GetVariableManager().SetVariable(WORLD_STATE_SHADOW_LAB_GROUP_42, urand(0, 1));
 }
 
 void instance_shadow_labyrinth::OnObjectCreate(GameObject* pGo)
@@ -208,8 +193,6 @@ void instance_shadow_labyrinth::OnCreatureGroupDespawn(CreatureGroup* group, Cre
         case SL_BLACKHEAT_GROUP_08:
         case SL_BLACKHEAT_GROUP_09:
         case SL_BLACKHEAT_GROUP_10:
-        case SL_BLACKHEAT_GROUP_11:
-        case SL_BLACKHEAT_GROUP_12:
         {
             switch (urand(0, 5))
             {
