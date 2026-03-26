@@ -32,7 +32,7 @@ Pet::Pet(PetType type) :
     m_resetTalentsCost(0), m_resetTalentsTime(0), m_usedTalentCount(0),
     m_removed(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
     m_loading(false),
-    m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false), m_dismissDisabled(false),
+    m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false), m_scaleWithCls(false), m_dismissDisabled(false),
     m_controllableGuardian(false), m_doNotFollowMounted(false), m_glyphedStat(false)
 {
     m_name = "Pet";
@@ -1090,8 +1090,6 @@ void Pet::InitStatsForLevel(uint32 petlevel)
                 SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, 1);
             }
 
-
-
             break;
         }
         case SUMMON_PET:
@@ -1154,6 +1152,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         case PROTECTOR_PET:
         case GUARDIAN_PET:
         {
+            m_scaleWithCls = true;
             SelectLevel(petlevel);  // guardians reuse CLS function SelectLevel, so we stop here
             InitPetScalingAuras();
             return;

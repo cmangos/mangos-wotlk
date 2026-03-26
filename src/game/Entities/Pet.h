@@ -314,6 +314,7 @@ class Pet : public Creature
         PetModeFlags m_petModeFlags;
         CharmInfo*   m_originalCharminfo;
         bool m_inStatsUpdate;
+        bool m_scaleWithCls;
         bool m_dismissDisabled;
         bool m_controllableGuardian;
         bool m_doNotFollowMounted;
