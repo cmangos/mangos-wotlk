@@ -33,6 +33,7 @@
 #include "Server/DBCStores.h"
 #include "Util/CommonDefines.h"
 #include "Anticheat/Anticheat.hpp"
+#include "Config/Config.h"
 
 #include <chrono>
 #include <functional>
@@ -165,6 +166,12 @@ void WorldSocket::SendPacket(const WorldPacket& pct)
 
 bool WorldSocket::OnOpen()
 {
+    if (sConfig.GetBoolDefault("Network.TcpNodelay", true))
+    {
+        boost::system::error_code ec;
+        GetAsioSocket().set_option(boost::asio::ip::tcp::no_delay(true), ec);
+    }
+
     // Send startup packet.
     WorldPacket packet(SMSG_AUTH_CHALLENGE, 40);
     packet << uint32(1);                                    // 1...31
