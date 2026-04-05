@@ -2226,6 +2226,30 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- World Events
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+-- PTR
+(47327,'spell_summon_pedestal_npc'),
+(47347,'spell_summon_pedestal_npc'),
+(47348,'spell_summon_pedestal_npc'),
+(47349,'spell_summon_pedestal_npc'),
+(47350,'spell_summon_pedestal_npc'),
+(47351,'spell_summon_pedestal_npc'),
+(47352,'spell_summon_pedestal_npc'),
+(47353,'spell_summon_pedestal_npc'),
+(47354,'spell_summon_pedestal_npc'),
+(47355,'spell_summon_pedestal_npc'),
+(47356,'spell_summon_pedestal_npc'),
+(47357,'spell_summon_pedestal_npc'),
+(47358,'spell_summon_pedestal_npc'),
+(47359,'spell_summon_pedestal_npc'),
+(47360,'spell_summon_pedestal_npc'),
+(47361,'spell_summon_pedestal_npc'),
+(47362,'spell_summon_pedestal_npc'),
+(47363,'spell_summon_pedestal_npc'),
+(47364,'spell_summon_pedestal_npc'),
+(47365,'spell_summon_pedestal_npc'),
+(47366,'spell_summon_pedestal_npc'),
+(47367,'spell_summon_pedestal_npc'),
+(47368,'spell_summon_pedestal_npc'),
 -- Lunar Festival
 (26286, 'spell_lunar_festival_firework'),
 (26291, 'spell_lunar_festival_firework'),

@@ -1044,6 +1044,15 @@ struct SummonWaterElemental : public SpellScript
     }
 };
 
+// 47327,47347,47348,47349,47350,47351,47352,47353,47354,47355,47356,47357,47358,47359,47360,47361,47362,47363,47364,47365,47366,47367,47368 - TAR Pedestal
+struct SummonPedestalNpc : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 3.68333f;
+    }
+};
+
 void AddSC_spell_scripts()
 {
     RegisterSpellScript<CastFishingNet>("spell_cast_fishing_net");
@@ -1097,4 +1106,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<RandomAggro1000000>("spell_random_aggro_1000000");
     RegisterSpellScript<InvisibleForAlive>("spell_shroud_of_death");
     RegisterSpellScript<SummonWaterElemental>("spell_summon_water_elemental");
+    RegisterSpellScript<SummonPedestalNpc>("spell_summon_pedestal_npc");
 }
