@@ -4119,18 +4119,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 532 000 KARAZHAN
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1532000','Well done Midnight!','9173','1','0','0','15334','attumen SAY_MIDNIGHT_KILL'),
-('-1532001','Cowards! Wretches!','9167','1','0','0','13459','attumen SAY_APPEAR1'),
-('-1532002','Who dares attack the steed of the Huntsman?','9298','1','0','0','15378','attumen SAY_APPEAR2'),
-('-1532003','Perhaps you would rather test yourselves against a more formidable opponent?!','9299','1','0','0','15379','attumen SAY_APPEAR3'),
-('-1532004','Come Midnight, let''s disperse this petty rabble!','9168','1','0','0','13456','attumen SAY_MOUNT'),
-('-1532005','It was... inevitable.','9169','1','0','0','13460','attumen SAY_KILL1'),
-('-1532006','Another trophy to add to my collection!','9300','1','0','0','15333','attumen SAY_KILL2'),
-('-1532007','Weapons are merely a convenience for a warrior of my skill!','9166','1','0','0','13490','attumen SAY_DISARMED'),
-('-1532008','Always knew... someday I would become... the hunted.','9165','1','0','0','13462','attumen SAY_DEATH'),
-('-1532009','Such easy sport.','9170','1','0','0','0','attumen SAY_RANDOM1'),
-('-1532010','Amateurs! Do not think you can best me! I kill for a living.','9304','1','0','0','0','attumen SAY_RANDOM2'),
-
 ('-1532011','Hm, unannounced visitors. Preparations must be made...','9211','1','0','0','15021','moroes SAY_AGGRO'),
 ('-1532012','Now, where was I? Oh, yes...','9215','1','0','0','15339','moroes SAY_SPECIAL_1'),
 ('-1532013','You rang?','9316','1','0','0','15340','moroes SAY_SPECIAL_2'),
@@ -4268,7 +4256,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1532134','%s howls through the halls...','0','7','0','0','12323','rokad_the_ravager EMOTE_DOG_SPAWN'),
 ('-1532135','%s emerges from the shadows...','0','7','0','0','22783','hyakiss_the_lurker EMOTE_SPIDER_SPAWN'),
 ('-1532136','%s shrieks in pain and points at his master.','0','3','0','0','13582','Kil''Rek EMOTE_DEATH'),
-('-1532137','%s calls for her master!','0','3','0','0','13439','Midnight EMOTE_CALL'),
 ('-1532138','%s skitters out from the shadows...','0','7','0','0','12324','hyakiss_the_lurker EMOTE_SPIDER_SPAWN2'),
 ('-1532139','%s begins channelling his mana into a powerful arcane spell.','0','3','0','0','13515','aran EMOTE_ARCANE_SPELL');
 
