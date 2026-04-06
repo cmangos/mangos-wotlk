@@ -888,7 +888,7 @@ class CreatureEventAI : public CreatureAI
 {
     public:
         explicit CreatureEventAI(Creature* creature);
-        ~CreatureEventAI()
+        ~CreatureEventAI() override
         {
             m_CreatureEventAIList.clear();
         }

@@ -27,6 +27,7 @@
 #include <Detour/Include/DetourMath.h>
 #ifdef ENABLE_PLAYERBOTS
 #include "Server/DBCStores.h"
+#include "Entities/Player.h"
 #endif
 
 #ifdef BUILD_METRICS

@@ -146,7 +146,7 @@ enum DelrissaActions
 
 struct boss_priestess_delrissaAI : public priestess_commonAI
 {
-    boss_priestess_delrissaAI(Creature* creature) : priestess_commonAI(creature, DELRISSA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_priestess_delrissaAI(Creature* creature) : priestess_commonAI(creature, DELRISSA_ACTION_MAX)
     {
         AddCombatAction(DELRISSA_HEAL, 0u);
         AddCombatAction(DELRISSA_RENEW, 0u);
@@ -155,9 +155,6 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
         AddCombatAction(DELRISSA_DISPEL, 0, 1000);
         AddCombatAction(DELRISSA_SCREAM, 30000, 32000);
     }
-
-    ScriptedInstance* m_instance;
-    bool m_isRegularMode;
 
     std::vector<uint32> m_vuiLackeyEnties;
 

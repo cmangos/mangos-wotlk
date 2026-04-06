@@ -345,10 +345,9 @@ class BattleGroundSAScore : public BattleGroundScore
 {
     public:
         BattleGroundSAScore(): demolishersDestroyed(0), gatesDestroyed(0) {};
-        virtual ~BattleGroundSAScore() {};
 
-        uint32 GetAttr1() const { return demolishersDestroyed; }
-        uint32 GetAttr2() const { return gatesDestroyed; }
+        uint32 GetAttr1() const override { return demolishersDestroyed; }
+        uint32 GetAttr2() const override { return gatesDestroyed; }
 
         uint32 demolishersDestroyed;
         uint32 gatesDestroyed;

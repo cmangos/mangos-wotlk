@@ -84,25 +84,25 @@ class PlayerbotDeathKnightAI : PlayerbotClassAI
 {
     public:
         PlayerbotDeathKnightAI(Player& master, Player& bot, PlayerbotAI& ai);
-        virtual ~PlayerbotDeathKnightAI();
+        virtual ~PlayerbotDeathKnightAI() override;
 
         // all combat actions go here
-        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
-        bool CanPull();
-        bool Pull();
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget) override;
+        bool CanPull() override;
+        bool Pull() override;
 
         // all non combat actions go here, ex buffs, heals, rezzes
-        void DoNonCombatActions();
+        void DoNonCombatActions() override;
 
         // buff a specific player, usually a real PC who is not in group
         //void BuffPlayer(Player *target);
 
     private:
-        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget) override;
 
         // Unholy
         uint32 BONE_SHIELD,
