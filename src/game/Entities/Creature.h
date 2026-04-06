@@ -849,7 +849,7 @@ class Creature : public Unit
 
         void SendAreaSpiritHealerQueryOpcode(Player* pl) const;
 
-        void SetVirtualItem(VirtualItemSlot slot, uint32 item_id) { SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot, item_id); }
+        void SetVirtualItem(VirtualItemSlot slot, uint32 item_id) { SetUInt32Value(static_cast<uint16>(UNIT_VIRTUAL_ITEM_SLOT_ID) + static_cast<uint16>(slot), item_id); }
 
         bool hasWeapon(WeaponAttackType type) const override;
         bool hasWeaponForAttack(WeaponAttackType type) const override { return (Unit::hasWeaponForAttack(type) && hasWeapon(type)); }

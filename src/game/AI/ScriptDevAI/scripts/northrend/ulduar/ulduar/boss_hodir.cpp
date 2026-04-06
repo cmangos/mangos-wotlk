@@ -470,7 +470,7 @@ struct BitingColdDamage : public AuraScript
         Unit* target = aura->GetTarget();
         if (!target)
             return;
-        int32 damage = VALUE_BITING_COLD_BASE_DAMAGE * std::pow(2, aura->GetStackAmount() - 1);
+        int32 damage = static_cast<int32>(VALUE_BITING_COLD_BASE_DAMAGE) * static_cast<int32>(std::pow(2, aura->GetStackAmount() - 1));
         target->CastCustomSpell(target, SPELL_BITING_COLD_STACK, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 };

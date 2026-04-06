@@ -710,7 +710,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     // Add main hand dps * effect[2] amount
                     float average = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;
                     int32 count = m_caster->CalculateSpellEffectValue(unitTarget, m_spellInfo, EFFECT_INDEX_2);
-                    damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
+                    damage += count * int32(average * static_cast<uint32>(IN_MILLISECONDS)) / m_caster->GetAttackTime(BASE_ATTACK);
                 }
                 // Shield of Righteousness
                 else if (m_spellInfo->SpellFamilyFlags & uint64(0x0010000000000000))
