@@ -1153,7 +1153,6 @@ UPDATE creature_template SET ScriptName='boss_netherspite' WHERE entry=15689;
 UPDATE creature_template SET ScriptName='boss_malchezaar' WHERE entry=15690;
 UPDATE creature_template SET ScriptName='boss_nightbane' WHERE entry=17225;
 UPDATE creature_template SET ScriptName='boss_bigbadwolf' WHERE entry=17521;
-UPDATE creature_template SET ScriptName='npc_fiendish_portal' WHERE entry=17265;
 UPDATE creature_template SET ScriptName='npc_netherspite_portal' WHERE entry IN (17367,17368,17369);
 UPDATE creature_template SET ScriptName='npc_barnes' WHERE entry=16812;
 UPDATE creature_template SET ScriptName='npc_grandmother' WHERE entry=17603;
@@ -4176,16 +4175,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1532063','You are not a guest.','9308','1','0','0','15336','curator SAY_KILL2'),
 ('-1532064','Curator is no longer operation-a-l.','9184','1','0','0','15057','curator SAY_DEATH'),
 
-('-1532065','Your blood will anoint my circle.','9264','1','0','0','15145','terestian SAY_SLAY1'),
-('-1532066','The great one will be pleased.','9329','1','0','0','15146','terestian SAY_SLAY2'),
-('-1532067','My life is yours, oh great one...','9262','1','0','0','15137','terestian SAY_DEATH'),
-('-1532068','Ah, you''re just in time. The rituals are about to begin!','9260','1','0','0','15141','terestian SAY_AGGRO'),
-('-1532069','Please accept this humble offering, oh great one...','9263','1','0','0','15147','terestian SAY_SACRIFICE1'),
-('-1532070','Let the sacrifice serve his testament to my fealty.','9330','1','0','0','0','terestian SAY_SACRIFICE2'),
-('-1532071','Come, you dwellers in the dark! Rally to my call!','9265','1','0','0','15150','terestian SAY_SUMMON1'),
-('-1532072','Gather, my pets. There is plenty for all.','9331','1','0','0','15151','terestian SAY_SUMMON2'),
-
-('-1532073','Please, no more. My son... he''s gone mad!','9241','1','0','0','13529','aran SAY_AGGRO1'),
+('-1532073','Please, no more! My son... he''s gone mad!','9241','1','0','0','13529','aran SAY_AGGRO1'),
 ('-1532074','I''ll not be tortured again!','9323','1','0','0','15353','aran SAY_AGGRO2'),
 ('-1532075','Who are you? What do you want? Stay away from me!','9324','1','0','0','13530','aran SAY_AGGRO3'),
 ('-1532076','I''ll show you: this beaten dog still has some teeth!','9245','1','0','0','13519','aran SAY_FLAMEWREATH1'),
@@ -4254,8 +4244,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1532133','%s flaps down from the ceiling...','0','7','0','0','12322','shadikith_the_glider EMOTE_BAT_SPAWN'),
 ('-1532134','%s howls through the halls...','0','7','0','0','12323','rokad_the_ravager EMOTE_DOG_SPAWN'),
+<<<<<<< HEAD
 ('-1532135','%s emerges from the shadows...','0','7','0','0','22783','hyakiss_the_lurker EMOTE_SPIDER_SPAWN'),
 ('-1532136','%s shrieks in pain and points at his master.','0','3','0','0','13582','Kil''Rek EMOTE_DEATH'),
+=======
+('-1532135','%s skitters out from the shadows...','0','7','0','0','12324','hyakiss_the_lurker EMOTE_SPIDER_SPAWN'),
+('-1532137','%s calls for her master!','0','3','0','0','13439','Midnight EMOTE_CALL'),
+>>>>>>> 701f236654 ([Karazhan] modernize Terestian illhoof script)
 ('-1532138','%s skitters out from the shadows...','0','7','0','0','12324','hyakiss_the_lurker EMOTE_SPIDER_SPAWN2'),
 ('-1532139','%s begins channelling his mana into a powerful arcane spell.','0','3','0','0','13515','aran EMOTE_ARCANE_SPELL');
 

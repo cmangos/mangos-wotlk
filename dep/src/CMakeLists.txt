@@ -18,7 +18,7 @@
 
 include(FetchContent)
 # avoid online check when already downloaded (little speed up)
-set(FETCHCONTENT_UPDATES_DISCONNECTED FALSE)
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 
 if(BUILD_EXTRACTORS AND NOT (BZip2_FOUND OR BZIP2_FOUND))
   add_subdirectory(bzip2)

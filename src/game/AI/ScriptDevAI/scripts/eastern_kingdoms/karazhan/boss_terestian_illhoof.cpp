@@ -33,13 +33,13 @@ enum
 {
     SAY_SLAY1                   = 15145,
     SAY_SLAY2                   = 15146,
-    SAY_DEATH                   = -1532067,
-    SAY_AGGRO                   = -1532068,
-    SAY_SACRIFICE1              = -1532069,
-    SAY_SACRIFICE2              = -1532070,
-    SAY_SUMMON1                 = -1532071,
-    SAY_SUMMON2                 = -1532072,
-    SAY_KILREK_DEATH            = -1532136,
+    SAY_DEATH                   = 15137,
+    SAY_AGGRO                   = 15141,
+    SAY_SACRIFICE1              = 15147,
+    SAY_SACRIFICE2              = 15148,
+    SAY_SUMMON1                 = 15150,
+    SAY_SUMMON2                 = 15151,
+    SAY_KILREK_DEATH            = 13582,
 
     // spells
     SPELL_SUMMON_DEMONCHAINS    = 30120,                    // Summons demonic chains that maintain the ritual of sacrifice.
@@ -69,8 +69,6 @@ enum
 enum IllhoofActions
 {
     ILLHOOF_ACTION_SUMMON_KILREK,
-    ILLHOOF_ACTION_SACRIFICE,
-    ILLHOOF_ACTION_SHADOWBOLT,
     ILLHOOF_ACTION_SUMMON,
     ILLHOOF_ACTION_BERSERK,
     ILLHOOF_ACTION_MAX,
@@ -80,11 +78,9 @@ struct boss_terestianAI : public CombatAI
 {
     boss_terestianAI(Creature* creature) : CombatAI(creature, ILLHOOF_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        AddCombatAction(ILLHOOF_ACTION_SUMMON_KILREK, true);
-        AddCombatAction(ILLHOOF_ACTION_SACRIFICE, 30000, 35000);
-        AddCombatAction(ILLHOOF_ACTION_SHADOWBOLT, 5000, 7000);
-        AddCombatAction(ILLHOOF_ACTION_SUMMON, 10000u);
-        AddCombatAction(ILLHOOF_ACTION_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddCustomAction(ILLHOOF_ACTION_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS), [&]() { HandleBerserk(); }, TIMER_COMBAT_COMBAT);
+        AddCustomAction(ILLHOOF_ACTION_SUMMON_KILREK, true, [&]() { HandleSummonKilrek(); });
+        AddCustomAction(ILLHOOF_ACTION_SUMMON, 10000u, [&]() { HandleSummonPortal(); }, TIMER_COMBAT_COMBAT);
         AddOnKillText(SAY_SLAY1, SAY_SLAY2);
     }
 
@@ -112,65 +108,44 @@ struct boss_terestianAI : public CombatAI
 #else
             case ILLHOOF_ACTION_SUMMON_KILREK: return 45000;
 #endif
-            case ILLHOOF_ACTION_SACRIFICE: return urand(40000, 50000);
-            case ILLHOOF_ACTION_SHADOWBOLT: return urand(6000, 16000);
             default: return 0; // never occurs but for compiler
         }
     }
 
-    void ExecuteAction(uint32 action) override
+     void OnSpellCast(SpellEntry const* spellInfo, Unit* target) override
     {
-        switch (action)
+        switch (spellInfo->Id)
         {
-            case ILLHOOF_ACTION_SUMMON_KILREK:
-            {
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
-                DisableCombatAction(action);
-                return;
-            }
-            case ILLHOOF_ACTION_SACRIFICE:
-            {
-#ifdef PRENERF_2_0_3
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
-#else
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
-#endif
-                {
-                    if (DoCastSpellIfCan(target, SPELL_SACRIFICE) == CAST_OK)
-                    {
-                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_DEMONCHAINS, CAST_TRIGGERED);
-                        DoScriptText(urand(0, 1) ? SAY_SACRIFICE1 : SAY_SACRIFICE2, m_creature);
-                        m_sacrificeGuid = target->GetObjectGuid();
-                    }
-                }
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
-                return;
-            }
-            case ILLHOOF_ACTION_SHADOWBOLT:
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT);
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
-                return;
-            }
-            case ILLHOOF_ACTION_SUMMON:
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_FIENDISH_PORTAL) == CAST_OK)
-                    DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
-                DisableCombatAction(action);
-                return;
-            }
-            case ILLHOOF_ACTION_BERSERK:
-            {
-                DoCastSpellIfCan(nullptr, SPELL_BERSERK);
-                DisableCombatAction(action);
-                return;
-            }
+            case SPELL_SACRIFICE:
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_DEMONCHAINS, CAST_TRIGGERED);
+                DoBroadcastText(urand(0, 1) ? SAY_SACRIFICE1 : SAY_SACRIFICE2, m_creature);
+                m_sacrificeGuid = target->GetObjectGuid();
+                break;
         }
+    }
+
+    void HandleSummonPortal()
+    {
+        if (DoCastSpellIfCan(nullptr, SPELL_FIENDISH_PORTAL) == CAST_OK)
+            DoBroadcastText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
+        DisableCombatAction(ILLHOOF_ACTION_SUMMON);
+    }
+
+    void HandleSummonKilrek()
+    {
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
+        DisableCombatAction(ILLHOOF_ACTION_SUMMON_KILREK);
+    }
+
+    void HandleBerserk()
+    {
+        DoCastSpellIfCan(nullptr, SPELL_BERSERK);
+        DisableCombatAction(ILLHOOF_ACTION_BERSERK);
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_TERESTIAN, IN_PROGRESS);
@@ -197,6 +172,8 @@ struct boss_terestianAI : public CombatAI
         switch (summoned->GetEntry())
         {
             case NPC_PORTAL:
+                if (m_creature->IsInCombat())
+                    summoned->SetInCombatWithZone();
                 if (!m_bSummonedPortals)
                 {
                     m_bSummonedPortals = true;
@@ -225,7 +202,7 @@ struct boss_terestianAI : public CombatAI
         switch (summoned->GetEntry())
         {
             case NPC_KILREK:
-                DoScriptText(SAY_KILREK_DEATH, summoned, summoned);
+                DoBroadcastText(SAY_KILREK_DEATH, summoned, summoned);
                 summoned->CastSpell(m_creature, SPELL_BROKEN_PACT, TRIGGERED_OLD_TRIGGERED);
                 ResetTimer(ILLHOOF_ACTION_SUMMON_KILREK, GetSubsequentActionTimer(ILLHOOF_ACTION_SUMMON_KILREK));
                 break;
@@ -238,38 +215,10 @@ struct boss_terestianAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_TERESTIAN, DONE);
-    }
-};
-
-struct npc_fiendish_portalAI : public ScriptedAI
-{
-    npc_fiendish_portalAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
-
-    uint32 m_uiSummonTimer;
-
-    void Reset() override
-    {
-        m_uiSummonTimer = 5000;
-    }
-
-    void JustSummoned(Creature* summoned) override
-    {
-        summoned->SetInCombatWithZone();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiSummonTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIENDISH_IMP) == CAST_OK)
-                m_uiSummonTimer = 5000;
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
     }
 };
 
@@ -298,11 +247,6 @@ void AddSC_boss_terestian_illhoof()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_terestian_illhoof";
     pNewScript->GetAI = &GetNewAIInstance<boss_terestianAI>;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_fiendish_portal";
-    pNewScript->GetAI = &GetNewAIInstance<npc_fiendish_portalAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<Sacrifice>("spell_sacrifice");
