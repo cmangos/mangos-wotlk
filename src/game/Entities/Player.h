@@ -1642,11 +1642,12 @@ class Player : public Unit
             if (GetMoney() >= MAX_MONEY_AMOUNT)
                 SendEquipError(EQUIP_ERR_TOO_MUCH_GOLD, nullptr, nullptr);
         }
-        void SetMoney(uint32 value)
+        void SetMoney(uint32 value, bool loading = false)
         {
             SetUInt32Value(PLAYER_FIELD_COINAGE, value);
             MoneyChanged(value);
-            UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
+            if (!loading)
+                UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_GOLD_VALUE_OWNED);
         }
 
         QuestStatusMap& getQuestStatusMap() { return mQuestStatus; };
