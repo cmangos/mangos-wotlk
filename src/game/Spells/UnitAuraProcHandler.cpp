@@ -3901,15 +3901,6 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
                 triggered_spell_id = 23402;
             break;
         }
-        case 4086:                                          // Improved Mend Pet (Rank 1)
-        case 4087:                                          // Improved Mend Pet (Rank 2)
-        {
-            if (!roll_chance_i(triggerAmount))
-                return SPELL_AURA_PROC_FAILED;
-
-            triggered_spell_id = 24406;
-            break;
-        }
         case 4533:                                          // Dreamwalker Raiment 2 pieces bonus
         {
             // Chance 50%

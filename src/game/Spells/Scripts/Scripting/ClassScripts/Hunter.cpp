@@ -280,6 +280,20 @@ struct RandomAggroSnakeTrap : public SpellScript
     }
 };
 
+// 19572, 19573 - Improved Mend Pet
+struct ImprovedMendPet : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!roll_chance_i(aura->GetModifier()->m_amount))
+            return SPELL_AURA_PROC_FAILED;
+
+        procData.triggeredSpellId = 24406;
+        procData.triggerTarget = procData.target;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
 // TODO: some evidence tbc pet growl scales with hunter AP
 
 void LoadHunterScripts()
@@ -301,4 +315,5 @@ void LoadHunterScripts()
     RegisterSpellScript<GlyphOfTrueshotAura>("spell_glyph_of_trueshot_aura");
     RegisterSpellScript<ArcaneShotHunter>("spell_arcane_shot_hunter");
     RegisterSpellScript<RandomAggroSnakeTrap>("spell_random_aggro_snake_trap");
+    RegisterSpellScript<ImprovedMendPet>("spell_improved_mend_pet");
 }
