@@ -355,7 +355,7 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     SetModifierValue(unitMod, BASE_VALUE, val2);
 
     float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
-    float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
+    float statBonus = 0.f;
 
     // add dynamic flat mods
     if (ranged)
@@ -364,26 +364,25 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         {
             AuraList const& mRAPbyStat = GetAurasByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT);
             for (auto i : mRAPbyStat)
-                attPowerMod += int32(GetStat(Stats(i->GetModifier()->m_miscvalue)) * i->GetModifier()->m_amount / 100.0f);
+                statBonus += int32(GetStat(Stats(i->GetModifier()->m_miscvalue)) * i->GetModifier()->m_amount / 100.0f);
         }
     }
     else
     {
         AuraList const& mAPbyStat = GetAurasByType(SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT);
         for (auto i : mAPbyStat)
-            attPowerMod += int32(GetStat(Stats(i->GetModifier()->m_miscvalue)) * i->GetModifier()->m_amount / 100.0f);
+            statBonus += int32(GetStat(Stats(i->GetModifier()->m_miscvalue)) * i->GetModifier()->m_amount / 100.0f);
 
         AuraList const& mAPbyArmor = GetAurasByType(SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR);
         for (auto iter : mAPbyArmor)
             // always: ((*i)->GetModifier()->m_miscvalue == 1 == SPELL_SCHOOL_MASK_NORMAL)
-            attPowerMod += int32(GetArmor() / iter->GetModifier()->m_amount);
+            statBonus += int32(GetArmor() / iter->GetModifier()->m_amount);
     }
 
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
-    int32 statBonus = int32(attPowerMod) - int32(GetModifierValue(unitMod, TOTAL_VALUE));
 
     SetInt32Value(index, (uint32)base_attPower);            // UNIT_FIELD_(RANGED)_ATTACK_POWER field
-    SetInt16Value(index_mod, 0, int32(m_attackPowerMod[size_t(mod)][size_t(AttackPowerModSign::MOD_SIGN_POS)]) + statBonus);
+    SetInt16Value(index_mod, 0, int32(m_attackPowerMod[size_t(mod)][size_t(AttackPowerModSign::MOD_SIGN_POS)] + statBonus));
     SetInt16Value(index_mod, 1, m_attackPowerMod[size_t(mod)][size_t(AttackPowerModSign::MOD_SIGN_NEG)]);
     SetFloatValue(index_mult, attPowerMultiplier);          // UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
