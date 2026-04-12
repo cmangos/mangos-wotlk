@@ -1412,7 +1412,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27019,'spell_arcane_shot_hunter'),
 (49044,'spell_arcane_shot_hunter'),
 (49045,'spell_arcane_shot_hunter'),
-(781,'spell_disengage');
+(781,'spell_disengage'),
+(19572,'spell_improved_mend_pet'),
+(19573,'spell_improved_mend_pet');
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
