@@ -29,7 +29,13 @@ enum
 {
     SAY_AGGRO                       = 14259,
 
-    SAY_FEL_ORC_AGGRO               = 11999,
+    SAY_FEL_ORC_AGGRO_01            = 16703,
+    SAY_FEL_ORC_AGGRO_02            = 16702,
+    SAY_FEL_ORC_AGGRO_03            = 16701,
+    SAY_FEL_ORC_AGGRO_04            = 16700,
+    SAY_FEL_ORC_AGGRO_05            = 16699,
+    SAY_FEL_ORC_AGGRO_06            = 16698,
+    SAY_FEL_ORC_AGGRO_07            = 16697,
 
     SPELL_SUMMON_INCOMBAT_TRIGGER   = 26837,    // TODO: probably cast on spawn not sure what c.16006 does
     SPELL_SLIME_SPRAY               = 30913,
@@ -125,8 +131,19 @@ struct npc_fel_orc : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        if (urand(0, 4) > 2)
-            DoBroadcastText(SAY_FEL_ORC_AGGRO, m_creature);
+        if (urand(0, 4) == 0)
+        {
+            switch (urand(0, 6))
+            {
+                case 0: DoBroadcastText(SAY_FEL_ORC_AGGRO_01, m_creature); break;
+                case 1: DoBroadcastText(SAY_FEL_ORC_AGGRO_02, m_creature); break;
+                case 2: DoBroadcastText(SAY_FEL_ORC_AGGRO_03, m_creature); break;
+                case 3: DoBroadcastText(SAY_FEL_ORC_AGGRO_04, m_creature); break;
+                case 4: DoBroadcastText(SAY_FEL_ORC_AGGRO_05, m_creature); break;
+                case 5: DoBroadcastText(SAY_FEL_ORC_AGGRO_06, m_creature); break;
+                case 6: DoBroadcastText(SAY_FEL_ORC_AGGRO_07, m_creature); break;   
+            }
+        }
     }
 
     void JustReachedHome() override
