@@ -4198,7 +4198,7 @@ void Player::_SaveSpellCooldowns()
 
     static SqlStatementID insertSpellCooldown;
 
-    uint64 nowUnix = static_cast<uint64>(Clock::to_time_t(GetMap()->GetCurrentClockTime()));
+    TimePoint now = GetMap()->GetCurrentClockTime();
     for (auto& cdItr : m_cooldownMap)
     {
         auto& cdData = cdItr.second;
@@ -4208,12 +4208,13 @@ void Player::_SaveSpellCooldowns()
             TimePoint cTime = TimePoint::min();
             cdData->GetSpellCDExpireTime(sTime);
             cdData->GetCatCDExpireTime(cTime);
-            uint64 spellExpireTime = uint64(Clock::to_time_t(sTime));
-            uint64 catExpireTime = uint64(Clock::to_time_t(cTime));
 
             // Skip entries where both cooldowns have already expired - no point persisting them
-            if (spellExpireTime <= nowUnix && catExpireTime <= nowUnix)
+            if (sTime <= now && cTime <= now)
                 continue;
+
+            uint64 spellExpireTime = uint64(Clock::to_time_t(sTime));
+            uint64 catExpireTime = uint64(Clock::to_time_t(cTime));
 
             stmt = CharacterDatabase.CreateStatement(insertSpellCooldown, "INSERT INTO character_spell_cooldown (guid, SpellId, SpellExpireTime, Category, CategoryExpireTime, ItemId) VALUES( ?, ?, ?, ?, ?, ?)");
             stmt.addUInt32(GetGUIDLow());
