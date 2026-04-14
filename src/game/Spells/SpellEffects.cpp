@@ -5431,6 +5431,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType, Play
                         {
                             case LOCKTYPE_NONE:
                             case LOCKTYPE_DISARM_TRAP:
+                            case LOCKTYPE_OPEN: // lock id 99 which in tbc is changed to open, rather open_attacking for unknown reason, but confirmed (kw)
                             case LOCKTYPE_OPEN_ATTACKING:
                                 gameObjTarget->SetLootState(GO_ACTIVATED);
                                 return;
