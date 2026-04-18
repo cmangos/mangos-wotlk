@@ -208,6 +208,8 @@ struct GreaterInvisibilityMob : public AuraScript
     }
 };
 
+// 29690 - Drunken Skull Crack
+// 37591 - Drunken Haze
 struct InebriateRemoval : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -230,6 +232,7 @@ struct InebriateRemoval : public AuraScript
     }
 };
 
+// 29907 - Astral Bite
 struct AstralBite : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -239,6 +242,7 @@ struct AstralBite : public SpellScript
     }
 };
 
+// 30659 - Fel Infusion
 struct FelInfusion : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -263,6 +267,7 @@ enum
     SPELL_KNOCKDOWN     = 13360,
 };
 
+// 32830 - Possess
 struct AuchenaiPossess : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -292,6 +297,8 @@ struct AuchenaiPossess : public AuraScript
     }
 };
 
+// 34800 - Impending Coma
+// 43364 - Tranquilizing Poison
 struct GettingSleepyAura : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -301,6 +308,7 @@ struct GettingSleepyAura : public AuraScript
     }
 };
 
+// 31427 - Allergies
 struct AllergiesAura : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -321,6 +329,7 @@ enum
     SPELL_USE_CORPSE = 33985,
 };
 
+// 34011, 34012, 34019, 41071 - Raise Dead
 struct RaiseDead : public SpellScript
 {
     void OnInit(Spell* spell) const override
@@ -337,6 +346,7 @@ struct RaiseDead : public SpellScript
     }
 };
 
+// 33985 - Use Corpse
 struct UseCorpse : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -349,6 +359,7 @@ struct UseCorpse : public SpellScript
     }
 };
 
+// 45150 - Meteor Slash
 struct SplitDamage : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -366,6 +377,7 @@ struct SplitDamage : public SpellScript
     }
 };
 
+// 37156 - Dive
 struct TKDive : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -378,6 +390,7 @@ struct TKDive : public SpellScript
     }
 };
 
+// 38048 - Curse of Pain
 struct CurseOfPain : public AuraScript
 {
     void OnPeriodicTickEnd(Aura* aura) const override
@@ -387,14 +400,15 @@ struct CurseOfPain : public AuraScript
     }
 };
 
-enum SeedOfCorruptionNpc
+enum SeedOfCorruptionNpcData
 {
     SPELL_SEED_OF_CORRUPTION_PROC_DEFAULT   = 32865,
     SPELL_SEED_OF_CORRUPTION_NPC_24558      = 44141,
     SPELL_SEED_OF_CORRUPTION_PROC_NPC_24558 = 43991,
 };
 
-struct spell_seed_of_corruption_npc : public AuraScript
+// 32863, 36123, 38252, 39367, 44141 - Seed of Corruption
+struct SeedOfCorruptionNpc : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
@@ -431,7 +445,7 @@ struct spell_seed_of_corruption_npc : public AuraScript
     }
 };
 
-// PX-238 Winter Wondervolt TRAP
+// 26275 - PX-238 Winter Wondervolt TRAP
 struct WondervoltTrap : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -591,7 +605,10 @@ struct Drink : public DrinkAnimation
     }
 };
 
-struct spell_effect_summon_no_follow_movement : public SpellScript
+// 36577 - Warp Storm
+// 38876 - Demon Portal
+// 46875 - Felfire Portal
+struct SummonNoFollowMovement : public SpellScript
 {
     void OnSummon(Spell* /*spell*/, Creature* summon) const override
     {
@@ -599,6 +616,7 @@ struct spell_effect_summon_no_follow_movement : public SpellScript
     }
 };
 
+// 33953 - Spell Haste Healer Trinket
 struct SpellHasteHealerTrinket : public AuraScript
 {
     bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
@@ -611,6 +629,8 @@ struct SpellHasteHealerTrinket : public AuraScript
     }
 };
 
+// 27855, 28856 - Increased Lesser Healing Wave
+// 28851, 28853 - Increased Flash of Light Healing
 struct IncreasedHealingDoneDummy : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -624,6 +644,8 @@ struct IncreasedHealingDoneDummy : public AuraScript
     }
 };
 
+// 27859 - Increased Shock Damage
+// 28857 - Increased Lightning Damage
 struct IncreasedSpellDamageDoneDummy : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -637,7 +659,8 @@ struct IncreasedSpellDamageDoneDummy : public AuraScript
     }
 };
 
-struct spell_scourge_strike : public SpellScript
+// 28265 - Scourge Strike
+struct ScourgeStrikeCreature : public SpellScript
 {
     bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
     {
@@ -658,6 +681,10 @@ enum
     SAY_RAGE_FALLEN        = 1151,
 };
 
+// 8603 - Thistlefur Death
+// 8655 - Riverpaw Death
+// 8894 - Stromgarde Death
+// 9144 - Crushridge Death
 struct TribalDeath : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
@@ -697,6 +724,7 @@ struct TribalDeath : public SpellScript
     }
 };
 
+// 22858 - Retaliation
 struct RetaliationCreature : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -720,6 +748,7 @@ struct NetGuard : public SpellScript
     }
 };
 
+// 19707 - Hate to 50%
 struct HateToHalf : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -731,6 +760,7 @@ struct HateToHalf : public SpellScript
     }
 };
 
+// 9204, 20538, 26569, 26637 - Hate to Zero
 struct HateToZero : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -742,6 +772,8 @@ struct HateToZero : public SpellScript
     }
 };
 
+// 34877 - Custodian of Time
+// 35679 - Protectorate Demolitionist
 struct PreventSpellIfSameAuraOnCaster : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -753,6 +785,7 @@ struct PreventSpellIfSameAuraOnCaster : public SpellScript
     }
 };
 
+// 27360 - Instill Lord Valthalak's Spirit DND
 struct InstillLordValthalaksSpirit : public SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
@@ -761,6 +794,7 @@ struct InstillLordValthalaksSpirit : public SpellScript
     }
 };
 
+// 10255 - Stoned
 struct Stoned : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -791,6 +825,7 @@ struct Stoned : public AuraScript
     }
 };
 
+// 40031 - Birth - No Visual (Instant Spawn)
 struct BirthNoVisualInstantSpawn : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -799,6 +834,7 @@ struct BirthNoVisualInstantSpawn : public SpellScript
     }
 };
 
+// 34664 - Sleep Visual - Flavor
 struct SleepVisualFlavor : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -819,6 +855,7 @@ enum spell_call_of_the_falcon
     SPELL_CALL_OF_THE_FALCON    = 34853,
 };
 
+// 34852 - Call of the Falcon
 struct CallOfTheFalcon : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -1070,18 +1107,18 @@ void AddSC_spell_scripts()
     RegisterSpellScript<SplitDamage>("spell_split_damage");
     RegisterSpellScript<TKDive>("spell_tk_dive");
     RegisterSpellScript<CurseOfPain>("spell_curse_of_pain");
-    RegisterSpellScript<spell_seed_of_corruption_npc>("spell_seed_of_corruption_npc");
+    RegisterSpellScript<SeedOfCorruptionNpc>("spell_seed_of_corruption_npc");
     RegisterSpellScript<deflection>("spell_deflection");
     RegisterSpellScript<spell_eject_all_passengers>("spell_eject_all_passengers");
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
     RegisterSpellScript<FoodAnimation>("spell_food_animation");
     RegisterSpellScript<DrinkAnimation>("spell_drink_animation");
     RegisterSpellScript<Drink>("spell_drink");
-    RegisterSpellScript<spell_effect_summon_no_follow_movement>("spell_effect_summon_no_follow_movement");
+    RegisterSpellScript<SummonNoFollowMovement>("spell_effect_summon_no_follow_movement");
     RegisterSpellScript<SpellHasteHealerTrinket>("spell_spell_haste_healer_trinket");
     RegisterSpellScript<IncreasedHealingDoneDummy>("spell_increased_healing_done_dummy");
     RegisterSpellScript<IncreasedSpellDamageDoneDummy>("spell_increased_spell_damage_done_dummy");
-    RegisterSpellScript<spell_scourge_strike>("spell_scourge_strike");
+    RegisterSpellScript<ScourgeStrikeCreature>("spell_scourge_strike");
     RegisterSpellScript<TribalDeath>("spell_tribal_death");
     RegisterSpellScript<PreventSpellIfSameAuraOnCaster>("spell_prevent_spell_if_same_aura_on_caster");
     RegisterSpellScript<InstillLordValthalaksSpirit>("spell_instill_lord_valthalaks_spirit");
