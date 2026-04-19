@@ -41,6 +41,8 @@ if (NOT ZLIB_FOUND OR ZLIB_VERSION_STRING VERSION_LESS 1.3.1)
     set(BUILD_SHARED false)
     set(ZLIB_BUILD_STATIC true)
     set(BUILD_STATIC true)
+    set(BUILD_SHARED_LIBS false)
+    set(ZLIB_BUILD_TESTS false)
     # patch provided cmake to avoid unneeded target install and deprecation warning.
     #file(COPY_FILE "patch-zlib-CMakeLists.txt" "${zlib_SOURCE_DIR}/CMakeLists.txt" ONLY_IF_DIFFERENT) #not working on cmake < 3.21 so replaced with 3 next lines
     file(COPY "patch-zlib-CMakeLists.txt" DESTINATION "${zlib_SOURCE_DIR}")
