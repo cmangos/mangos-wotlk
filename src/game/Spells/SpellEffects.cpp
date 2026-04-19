@@ -8379,17 +8379,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 30629:                                 // Debris - Magtheridon
                 {
                     unitTarget->CastSpell(nullptr, 30630, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 30769:                                 // Pick Red Riding Hood
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // cast Little Red Riding Hood
-                    m_caster->CastSpell(unitTarget, 30768, TRIGGERED_OLD_TRIGGERED);
-                    break;
-                }
+                }               
                 case 30834:                                 // Infernal Relay
                 {
                     if (!unitTarget)

@@ -4126,46 +4126,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1532016','I''ve gone and made a mess.','9315','1','0','0','0','moroes SAY_KILL_3'),
 ('-1532017','How terribly clumsy of me.','9213','1','0','0','15022','moroes SAY_DEATH'),
 
-('-1532025','Oh at last, at last I can go home!','9190','1','0','0','15068','dorothee SAY_DOROTHEE_DEATH'),
-('-1532026','Don''t let them hurt us Tito! Oh, you won''t, will you?','9191','1','0','0','15066','dorothee SAY_DOROTHEE_SUMMON'),
-('-1532027','Tito! Oh Tito, no!','9192','1','0','0','15069','dorothee SAY_DOROTHEE_TITO_DEATH'),
-('-1532028','Oh Tito, we simply must find a way home! The old wizard could be our only hope! Strawman, Roar, Tinhead, will you - wait... oh golly, look we have visitors!','9195','1','0','0','15067','dorothee SAY_DOROTHEE_AGGRO'),
-
-('-1532029','I''m not afraid a'' you! Do you wanna'' fight? Huh, do ya''? C''mon! I''ll fight ya'' with both paws behind my back!','9227','1','0','0','19276','roar SAY_ROAR_AGGRO'),
-('-1532030','You didn''t have to go and do that!','9229','1','0','0','15133','roar SAY_ROAR_DEATH'),
-('-1532031','I think I''m going to go take fourty winks.','9230','1','0','0','0','roar SAY_ROAR_SLAY'),
-
-('-1532032','Now what should I do with you? I simply can''t make up my mind.','9254','1','0','0','19277','strawman SAY_STRAWMAN_AGGRO'),
-('-1532033','Don''t let them make... a mattress outta'' me.','9256','1','0','0','15135','strawman SAY_STRAWMAN_DEATH'),
-('-1532034','I guess I''m not a failure after all.','9257','1','0','0','15136','strawman SAY_STRAWMAN_SLAY'),
-
-('-1532035','I could really use a heart. Say, can I have yours?','9268','1','0','0','19278','tinhead SAY_TINHEAD_AGGRO'),
-('-1532036','Back to being an old rust bucket.','9270','1','0','0','15155','tinhead SAY_TINHEAD_DEATH'),
-('-1532037','Guess I''m not so rusty, after all.','9271','1','0','0','15156','tinhead SAY_TINHEAD_SLAY'),
-('-1532038','%s begins to rust!','0','2','0','0','14361','tinhead EMOTE_RUST'),
-
-('-1532039','Woe to each and every one of you, my pretties!','9179','1','0','25','15050','crone SAY_CRONE_INTRO'),
-('-1532040','It will all be over soon!','9307','1','0','25','15332','crone SAY_CRONE_INTRO2'),
-('-1532041','How could you? What a cruel, cruel world...','9178','1','0','0','15052','crone SAY_CRONE_DEATH'),
-('-1532042','Fixed you, didn''t I?','9180','1','0','0','15051','crone SAY_CRONE_SLAY'),
-
-('-1532043','The better to own you with!','9276','1','0','0','14212','wolf SAY_WOLF_AGGRO'),
-('-1532044','Mmmm... delicious.','9277','1','0','0','15153','wolf SAY_WOLF_SLAY'),
-('-1532045','Run away little girl, run away!','9278','1','0','0','14213','wolf SAY_WOLF_HOOD'),
-
-('-1532046','What devil art thou, that dost torment me thus?','9196','1','0','0','15070','julianne SAY_JULIANNE_AGGRO'),
-('-1532047','Where is my lord? Where is my Romulo?','9199','1','0','0','0','julianne SAY_JULIANNE_ENTER'),
-('-1532048','Romulo, I come! Oh... this do I drink to thee!','9198','1','0','0','15072','julianne SAY_JULIANNE_DEATH01'),
-('-1532049','O happy dagger! This is thy sheath; there rust, and let me die!','9310','1','0','0','15074','julianne SAY_JULIANNE_DEATH02'),
-('-1532050','Come, gentle night; and give me back my Romulo!','9200','1','0','0','15073','julianne SAY_JULIANNE_RESURRECT'),
-('-1532051','Parting is such sweet sorrow.','9201','1','0','0','15071','julianne SAY_JULIANNE_SLAY'),
-
-('-1532052','Wilt thou provoke me? Then have at thee, boy!','9233','1','0','0','15075','romulo SAY_ROMULO_AGGRO'),
-('-1532053','Thou smilest... upon the stroke that... murders me.','9235','1','0','0','15078','romulo SAY_ROMULO_DEATH'),
-('-1532054','This day''s black fate on more days doth depend. This but begins the woe. Others must end.','9236','1','0','0','0','romulo SAY_ROMULO_ENTER'),
-('-1532055','Thou detestable maw, thou womb of death; I enforce thy rotten jaws to open!','9237','1','0','0','15077','romulo SAY_ROMULO_RESURRECT'),
-('-1532056','How well my comfort is revived by this!','9238','1','0','0','15076','romulo SAY_ROMULO_SLAY'),
-
 ('-1532057','The Menagerie is for guests only.','9183','1','0','0','15055','curator SAY_AGGRO'),
 ('-1532058','Gallery rules will be strictly enforced.','9188','1','0','0','15337','curator SAY_SUMMON1'),
 ('-1532059','This Curator is equipped for gallery protection.','9309','1','0','0','15338','curator SAY_SUMMON2'),

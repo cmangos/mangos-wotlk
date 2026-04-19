@@ -32,28 +32,28 @@ EndScriptData */
 
 enum
 {
-    SAY_DOROTHEE_DEATH          = -1532025,
-    SAY_DOROTHEE_SUMMON         = -1532026,
-    SAY_DOROTHEE_TITO_DEATH     = -1532027,
-    SAY_DOROTHEE_AGGRO          = -1532028,
+    SAY_DOROTHEE_DEATH          = 15068,
+    SAY_DOROTHEE_SUMMON         = 15066,
+    SAY_DOROTHEE_TITO_DEATH     = 15069,
+    SAY_DOROTHEE_AGGRO          = 15067,
 
-    SAY_ROAR_AGGRO              = -1532029,
-    SAY_ROAR_DEATH              = -1532030,
-    SAY_ROAR_SLAY               = -1532031,
+    SAY_ROAR_AGGRO              = 19276,
+    SAY_ROAR_DEATH              = 15133,
+    SAY_ROAR_SLAY               = 15131,
 
-    SAY_STRAWMAN_AGGRO          = -1532032,
-    SAY_STRAWMAN_DEATH          = -1532033,
-    SAY_STRAWMAN_SLAY           = -1532034,
+    SAY_STRAWMAN_AGGRO          = 19277,
+    SAY_STRAWMAN_DEATH          = 15135,
+    SAY_STRAWMAN_SLAY           = 15136,
 
-    SAY_TINHEAD_AGGRO           = -1532035,
-    SAY_TINHEAD_DEATH           = -1532036,
-    SAY_TINHEAD_SLAY            = -1532037,
-    EMOTE_RUST                  = -1532038,
+    SAY_TINHEAD_AGGRO           = 19278,
+    SAY_TINHEAD_DEATH           = 15155,
+    SAY_TINHEAD_SLAY            = 15156,
+    EMOTE_RUST                  = 14361,
 
-    SAY_CRONE_INTRO             = -1532039,
-    SAY_CRONE_INTRO2            = -1532040,
-    SAY_CRONE_DEATH             = -1532041,
-    SAY_CRONE_SLAY              = -1532042,
+    SAY_CRONE_INTRO             = 15050,
+    SAY_CRONE_INTRO2            = 15332,
+    SAY_CRONE_DEATH             = 15052,
+    SAY_CRONE_SLAY              = 15051,
 
     /**** Spells ****/
     // Dorothee
@@ -90,11 +90,9 @@ enum
 
 enum DorotheeActions // order based on priority
 {
-    DOROTHEE_ACTION_SUMMONTITO,
-    DOROTHEE_ACTION_FRIGHTENEDSCREAM,
-    DOROTHEE_ACTION_WATERBOLT,
     DOROTHEE_ACTION_MAX,
     DOROTHEE_INTRO,
+    DOROTHEE_ACTION_SUMMON_TITO,
     DOROTHEE_AGGRO,
 };
 
@@ -103,11 +101,9 @@ struct boss_dorotheeAI : public CombatAI
     boss_dorotheeAI(Creature* creature) : CombatAI(creature, DOROTHEE_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         SetReactState(REACT_PASSIVE);
-        AddCombatAction(DOROTHEE_ACTION_SUMMONTITO, GetInitialActionTimer(DOROTHEE_ACTION_SUMMONTITO));
-        AddCombatAction(DOROTHEE_ACTION_FRIGHTENEDSCREAM, GetInitialActionTimer(DOROTHEE_ACTION_FRIGHTENEDSCREAM));
-        AddCombatAction(DOROTHEE_ACTION_WATERBOLT, GetInitialActionTimer(DOROTHEE_ACTION_WATERBOLT));
         AddCustomAction(DOROTHEE_INTRO, 2000u, [&]() { HandleIntro(); });
         AddCustomAction(DOROTHEE_AGGRO, 12000u, [&]() { HandleAggro(); });
+        AddCustomAction(DOROTHEE_ACTION_SUMMON_TITO, 36500u, [&]() { HandleSummonTito(); }, TIMER_COMBAT_COMBAT);
         SetRangedMode(true, 40.f, TYPE_FULL_CASTER);
     }
 
@@ -121,27 +117,6 @@ struct boss_dorotheeAI : public CombatAI
         SetCombatScriptStatus(false);
     }
 
-    uint32 GetInitialActionTimer(DorotheeActions id)
-    {
-        switch (id)
-        {
-            case DOROTHEE_ACTION_SUMMONTITO: return 36500;
-            case DOROTHEE_ACTION_FRIGHTENEDSCREAM: return urand(12000, 15000);
-            case DOROTHEE_ACTION_WATERBOLT: return 0;
-            default: return 0;
-        }
-    }
-
-    uint32 GetSubsequentActionTimer(DorotheeActions id)
-    {
-        switch (id)
-        {
-            case DOROTHEE_ACTION_FRIGHTENEDSCREAM: return urand(18000, 30000);
-            case DOROTHEE_ACTION_WATERBOLT: return 2400;
-            default: return 0;
-        }
-    }
-
     void JustReachedHome() override
     {
         if (m_instance)
@@ -152,7 +127,7 @@ struct boss_dorotheeAI : public CombatAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DOROTHEE_DEATH, m_creature);
+        DoBroadcastText(SAY_DOROTHEE_DEATH, m_creature);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -164,41 +139,18 @@ struct boss_dorotheeAI : public CombatAI
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_TITO)
-            DoScriptText(SAY_DOROTHEE_TITO_DEATH, m_creature);
+            DoBroadcastText(SAY_DOROTHEE_TITO_DEATH, m_creature);
     }
 
-    void ExecuteAction(uint32 action) override
+    void HandleSummonTito()
     {
-        switch (action)
-        {
-            case DOROTHEE_ACTION_WATERBOLT:
-            {
-                if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER), SPELL_WATERBOLT) == CAST_OK)
-                    ResetCombatAction(action, GetSubsequentActionTimer(DorotheeActions(action)));
-                break;
-            }
-            case DOROTHEE_ACTION_FRIGHTENEDSCREAM:
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_FRIGHTENEDSCREAM, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
-                    if (DoCastSpellIfCan(nullptr, SPELL_FRIGHTENEDSCREAM) == CAST_OK)
-                        ResetCombatAction(action, GetSubsequentActionTimer(DorotheeActions(action)));
-                break;
-            }
-            case DOROTHEE_ACTION_SUMMONTITO:
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMONTITO) == CAST_OK)
-                {
-                    DoScriptText(SAY_DOROTHEE_SUMMON, m_creature);
-                    DisableCombatAction(action);
-                }
-                break;
-            }
-        }
-    };
+        if (DoCastSpellIfCan(m_creature, SPELL_SUMMONTITO) == CAST_OK)        
+            DoBroadcastText(SAY_DOROTHEE_SUMMON, m_creature);
+    }
 
     void HandleIntro()
     {
-        DoScriptText(SAY_DOROTHEE_AGGRO, m_creature);
+        DoBroadcastText(SAY_DOROTHEE_AGGRO, m_creature);
     }
 
     void HandleAggro()
@@ -212,31 +164,28 @@ struct boss_dorotheeAI : public CombatAI
     }
 };
 
-struct boss_strawmanAI : public ScriptedAI
+
+enum StrawmanActions
 {
-    boss_strawmanAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    STRAWMAN_ACTION_AGGRO,
+    STRAWMAN_ACTION_MAX,
+};
+
+struct boss_strawmanAI : public CombatAI
+{
+    boss_strawmanAI(Creature* creature) : CombatAI(creature, STRAWMAN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddCustomAction(STRAWMAN_ACTION_AGGRO, 27000u, [&]() { HandleAggro(); });
         SetReactState(REACT_PASSIVE);
         Reset();
     }
 
     ScriptedInstance* m_instance;
-
-    uint32 m_uiAggroTimer;
-    uint32 m_uiBrainBashTimer;
-    uint32 m_uiBrainWipeTimer;
-
-    void Reset() override
-    {
-        m_uiAggroTimer     = 27000;
-        m_uiBrainBashTimer = 5000;
-        m_uiBrainWipeTimer = 7000;
-    }
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_CONFLAG_PROC);
-        DoScriptText(SAY_STRAWMAN_AGGRO, m_creature);
+        DoBroadcastText(SAY_STRAWMAN_AGGRO, m_creature);
     }
 
     void JustReachedHome() override
@@ -249,82 +198,45 @@ struct boss_strawmanAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_STRAWMAN_DEATH, m_creature);
+        DoBroadcastText(SAY_STRAWMAN_DEATH, m_creature);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(SAY_STRAWMAN_SLAY, m_creature);
+        DoBroadcastText(SAY_STRAWMAN_SLAY, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleAggro()
     {
-        if (m_uiAggroTimer)
-        {
-            if (m_uiAggroTimer <= uiDiff)
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                SetReactState(REACT_AGGRESSIVE);
-                m_creature->SetInCombatWithZone();
-                AttackClosestEnemy();
-                if (!m_creature->IsInCombat())
-                    JustReachedHome();
-                m_uiAggroTimer = 0;
-            }
-            else
-                m_uiAggroTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiBrainBashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BRAIN_BASH) == CAST_OK)
-                m_uiBrainBashTimer = 15000;
-        }
-        else
-            m_uiBrainBashTimer -= uiDiff;
-
-        if (m_uiBrainWipeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_BRAIN_WIPE) == CAST_OK)
-                    m_uiBrainWipeTimer = 20000;
-            }
-        }
-        else
-            m_uiBrainWipeTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+        if (!m_creature->IsInCombat())
+            JustReachedHome();
     }
 };
 
-struct boss_tinheadAI : public ScriptedAI
+enum TinheadActions
 {
-    boss_tinheadAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    TINHEAD_ACTION_AGGRO,
+    TINHEAD_ACTION_MAX,
+};
+
+struct boss_tinheadAI : public CombatAI
+{
+    boss_tinheadAI(Creature* creature) : CombatAI(creature, TINHEAD_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddCustomAction(TINHEAD_ACTION_AGGRO, 37000u, [&]() { HandleAggro(); });
         SetReactState(REACT_PASSIVE);
         Reset();
     }
 
     ScriptedInstance* m_instance;
 
-    uint32 m_uiAggroTimer;
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiRustTimer;
-
-    void Reset() override
-    {
-        m_uiAggroTimer  = 37000;
-        m_uiCleaveTimer = 5000;
-        m_uiRustTimer   = 6000;
-    }
-
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_TINHEAD_AGGRO, m_creature);
+        DoBroadcastText(SAY_TINHEAD_AGGRO, m_creature);
     }
 
     void JustReachedHome() override
@@ -337,84 +249,55 @@ struct boss_tinheadAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_TINHEAD_DEATH, m_creature);
+        DoBroadcastText(SAY_TINHEAD_DEATH, m_creature);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(SAY_TINHEAD_SLAY, m_creature);
+        DoBroadcastText(SAY_TINHEAD_SLAY, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
     {
-        if (m_uiAggroTimer)
+        switch (spellInfo->Id)
         {
-            if (m_uiAggroTimer <= uiDiff)
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                SetReactState(REACT_AGGRESSIVE);
-                m_creature->SetInCombatWithZone();
-                AttackClosestEnemy();
-                if (!m_creature->IsInCombat())
-                    JustReachedHome();
-                m_uiAggroTimer = 0;
-            }
-            else
-                m_uiAggroTimer -= uiDiff;
+            case SPELL_RUST:
+                DoBroadcastText(EMOTE_RUST, m_creature);
+                break;
         }
+    }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiCleaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
-                m_uiCleaveTimer = 5000;
-        }
-        else
-            m_uiCleaveTimer -= uiDiff;
-
-        if (m_uiRustTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_RUST) == CAST_OK)
-            {
-                DoScriptText(EMOTE_RUST, m_creature);
-                m_uiRustTimer = 6000;
-            }
-        }
-        else
-            m_uiRustTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+    void HandleAggro()
+    {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+        if (!m_creature->IsInCombat())
+            JustReachedHome();
     }
 };
 
-struct boss_roarAI : public ScriptedAI
+enum RoadActions
 {
-    boss_roarAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    ROAR_ACTION_AGGRO,
+    ROAR_ACTION_MAX,
+};
+
+struct boss_roarAI : public CombatAI
+{
+    boss_roarAI(Creature* creature) : CombatAI(creature, ROAR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddCustomAction(ROAR_ACTION_AGGRO, 17000u, [&]() { HandleAggro(); });
         SetReactState(REACT_PASSIVE);
         Reset();
     }
 
     ScriptedInstance* m_instance;
 
-    uint32 m_uiAggroTimer;
-    uint32 m_uiMangleTimer;
-    uint32 m_uiShredTimer;
-    uint32 m_uiScreamTimer;
-
-    void Reset() override
-    {
-        m_uiAggroTimer  = 17000;
-        m_uiMangleTimer = 5000;
-        m_uiShredTimer  = 10000;
-        m_uiScreamTimer = 15000;
-    }
-
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_ROAR_AGGRO, m_creature);
+        DoBroadcastText(SAY_ROAR_AGGRO, m_creature);
     }
 
     void JustReachedHome() override
@@ -427,60 +310,22 @@ struct boss_roarAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_ROAR_DEATH, m_creature);
+        DoBroadcastText(SAY_ROAR_DEATH, m_creature);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(SAY_ROAR_SLAY, m_creature);
+        DoBroadcastText(SAY_ROAR_SLAY, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleAggro()
     {
-        if (m_uiAggroTimer)
-        {
-            if (m_uiAggroTimer <= uiDiff)
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                SetReactState(REACT_AGGRESSIVE);
-                m_creature->SetInCombatWithZone();
-                AttackClosestEnemy();
-                if (!m_creature->IsInCombat())
-                    JustReachedHome();
-                m_uiAggroTimer = 0;
-            }
-            else
-                m_uiAggroTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiMangleTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MANGLE) == CAST_OK)
-                m_uiMangleTimer = urand(5000, 8000);
-        }
-        else
-            m_uiMangleTimer -= uiDiff;
-
-        if (m_uiShredTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHRED) == CAST_OK)
-                m_uiShredTimer = urand(10000, 15000);
-        }
-        else
-            m_uiShredTimer -= uiDiff;
-
-        if (m_uiScreamTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRIGHTENED_SCREAM) == CAST_OK)
-                m_uiScreamTimer = urand(20000, 30000);
-        }
-        else
-            m_uiScreamTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+        if (!m_creature->IsInCombat())
+            JustReachedHome();
     }
 };
 
@@ -488,10 +333,19 @@ static const float afCycloneSpawnLoc1[4] = { -10908.86f, -1773.627f, 90.55865f, 
 static const float afCycloneSpawnLoc2[4] = { -10910.79f, -1771.201f, 90.56122f, 0.3642556f };
 static const float afCycloneSpawnLoc3[4] = { -10907.68f, -1778.651f, 90.56018f, 2.44127f };
 
-struct boss_croneAI : public ScriptedAI
+enum CroneActions
 {
-    boss_croneAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    CRONE_ACTION_INTRO,
+    CRONE_ACTION_AGGRO,
+    CRONE_ACTION_MAX,
+};
+
+struct boss_croneAI : public CombatAI
+{
+    boss_croneAI(Creature* creature) : CombatAI(creature, CRONE_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddCustomAction(CRONE_ACTION_INTRO, 6000u, [&]() { HandleIntro(); });
+        AddCustomAction(CRONE_ACTION_AGGRO, 9000u, [&]() { HandleAggro(); });
         m_creature->CastSpell(m_creature, SPELL_FIERY_BROOM_PROC, TRIGGERED_OLD_TRIGGERED);
         SetReactState(REACT_PASSIVE);
         Reset();
@@ -499,15 +353,9 @@ struct boss_croneAI : public ScriptedAI
 
     ScriptedInstance* m_instance;
 
-    uint32 m_uiIntroTimer;
-    uint32 m_uiChainLightningTimer;
-    uint32 m_uiAggroTimer;
-
     void Reset() override
     {
-        m_uiIntroTimer = 6000;
-        m_uiChainLightningTimer = 10000;
-        m_uiAggroTimer = 9000;
+        CombatAI::Reset();
     }
 
     void JustReachedHome() override
@@ -532,7 +380,7 @@ struct boss_croneAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_CRONE_DEATH, m_creature);
+        DoBroadcastText(SAY_CRONE_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_OPERA, DONE);
@@ -544,50 +392,19 @@ struct boss_croneAI : public ScriptedAI
         pSummoned->CastSpell(pSummoned, SPELL_CYCLONE_VISUAL, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleIntro()
     {
-        if (m_uiIntroTimer)
-        {
-            if (m_uiIntroTimer <= uiDiff)
-            {
-                DoScriptText(urand(0, 1) ? SAY_CRONE_INTRO : SAY_CRONE_INTRO2, m_creature); // TODO: should be said at player who started event
-                m_uiIntroTimer = 0;
-            }
-            else
-                m_uiIntroTimer -= uiDiff;
-        }
-
-        if (m_uiAggroTimer)
-        {
-            if (m_uiAggroTimer <= uiDiff)
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                SetReactState(REACT_AGGRESSIVE);
-                m_creature->SetInCombatWithZone();
-                AttackClosestEnemy();
-                if (!m_creature->IsInCombat())
-                    JustReachedHome();
-                m_uiAggroTimer = 0;
-            }
-            else
-                m_uiAggroTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiChainLightningTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_CHAIN_LIGHTNING) == CAST_OK)
-                    m_uiChainLightningTimer = 15000;
-            }
-        }
-        else
-            m_uiChainLightningTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        DoBroadcastText(urand(0, 1) ? SAY_CRONE_INTRO : SAY_CRONE_INTRO2, m_creature);
+    }
+                
+    void HandleAggro()
+    {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+        if (!m_creature->IsInCombat())
+            JustReachedHome();
     }
 };
 
@@ -598,13 +415,14 @@ struct boss_croneAI : public ScriptedAI
 enum
 {
     /**** Yells for the Wolf ****/
-    SAY_WOLF_AGGRO                  = -1532043,
-    SAY_WOLF_SLAY                   = -1532044,
-    SAY_WOLF_HOOD                   = -1532045,
+    SAY_WOLF_SPAWN                  = 14212,
+    SAY_WOLF_SLAY                   = 15153,
+    SAY_WOLF_RED_RIDING_HOOD        = 14213,
     SOUND_WOLF_DEATH                = 9275,                // Only sound on death, no text.
 
     /**** Spells For The Wolf ****/
     SPELL_PICK_RED_RIDING_HOOD      = 30769,               // targeting spell - triggers 30768
+    SPELL_LITTLE_RED_RIDING_HOOD    = 30768,               // Little Red Riding Hood - triggers 30753
     SPELL_RED_RIDING_HOOD           = 30756,
     SPELL_TERRIFYING_HOWL           = 30752,
     SPELL_WIDE_SWIPE                = 30761,
@@ -652,7 +470,6 @@ bool GossipSelect_npc_grandmother(Player* pPlayer, Creature* creature, uint32 /*
             break;
         case GOSSIP_ACTION_INFO_DEF + 2:
             if (Creature* bigBadWolf = creature->SummonCreature(NPC_BIG_BAD_WOLF, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
-                bigBadWolf->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, bigBadWolf);
             creature->ForcedDespawn();
             break;
     }
@@ -689,41 +506,24 @@ struct npc_grandmotherAI : public ScriptedAI
     }
 };
 
-struct boss_bigbadwolfAI : public ScriptedAI
+enum BigBadWolfActions // order based on priority
 {
-    boss_bigbadwolfAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    BIG_BAD_WOLF_MAX,
+    BIG_BAD_WOLF_ATTACK_DELAY
+};
+
+struct boss_bigbadwolfAI : public CombatAI
+{
+    boss_bigbadwolfAI(Creature* creature) : CombatAI(creature, BIG_BAD_WOLF_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        Reset();
+        AddCustomAction(BIG_BAD_WOLF_ATTACK_DELAY, 2000u, [&]() { HandleAttackDelay(); });
     }
 
     ScriptedInstance* m_instance;
 
-    uint32 m_uiRedRidingHoodTimer;
-    uint32 m_uiFearTimer;
-    uint32 m_uiSwipeTimer;
-
-    Player* m_originalTarget;
-    float m_originalThreat;
-
-    bool m_isFixating;
-    bool m_startFixate;
-
     void Reset() override
     {
-        m_uiRedRidingHoodTimer = 4000;
-        m_uiFearTimer          = urand(25000, 35000);
-        m_uiSwipeTimer         = 5000;
-
-        m_originalTarget = nullptr;
-        m_originalThreat = 0;
-
-        m_isFixating = false;
-        m_startFixate = false;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_WOLF_AGGRO, m_creature);
+        CombatAI::Reset();
     }
 
     void JustReachedHome() override
@@ -734,88 +534,34 @@ struct boss_bigbadwolfAI : public ScriptedAI
         m_creature->ForcedDespawn();
     }
 
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        DoBroadcastText(SAY_WOLF_SPAWN, m_creature);
+        SetReactState(REACT_DEFENSIVE);
+    }
+
+    void HandleAttackDelay()
+    {
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+    }
+
+    void KilledUnit(Unit* victim) override // Move to AddOnKillText with BroadcastText
+    {
+        if (victim->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        DoBroadcastText(SAY_WOLF_SLAY, m_creature);
+    }
+
     void JustDied(Unit* /*pKiller*/) override
     {
         DoPlaySoundToSet(m_creature, SOUND_WOLF_DEATH);
 
         if (m_instance)
             m_instance->SetData(TYPE_OPERA, DONE);
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A)
-        {
-            AttackStart(invoker);
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_isFixating && !m_startFixate)
-        {
-            Map::PlayerList const& pPlayers = m_creature->GetMap()->GetPlayers();
-
-            for (Map::PlayerList::const_iterator itr = pPlayers.begin(); itr != pPlayers.end(); ++itr)
-            {
-                if (Player* pPlayer = itr->getSource())
-                {
-                    if (pPlayer->HasAura(SPELL_RED_RIDING_HOOD) || pPlayer->HasAura(30753))
-                    {
-                        m_creature->FixateTarget(pPlayer);
-                        DoScriptText(SAY_WOLF_HOOD, m_creature);
-                        m_startFixate = true;
-
-                        // Apply chasing timer
-                        m_uiRedRidingHoodTimer = 20000;
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (m_uiRedRidingHoodTimer < uiDiff)
-        {
-            if (!m_isFixating || (m_isFixating && !m_startFixate))
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_PICK_RED_RIDING_HOOD) == CAST_OK)
-                {
-                    // Apply fixate
-                    m_isFixating = true;
-                }
-            }
-            else
-            {
-                m_creature->FixateTarget(nullptr);
-
-                m_uiRedRidingHoodTimer = 30000;
-                m_isFixating = false;
-                m_startFixate = false;
-            }
-        }
-        else
-            m_uiRedRidingHoodTimer -= uiDiff;
-
-        if (m_uiFearTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_TERRIFYING_HOWL) == CAST_OK)
-                m_uiFearTimer = 24000;
-        }
-        else
-            m_uiFearTimer -= uiDiff;
-
-        if (m_uiSwipeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WIDE_SWIPE) == CAST_OK)
-                m_uiSwipeTimer = urand(25000, 30000);
-        }
-        else
-            m_uiSwipeTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -826,18 +572,16 @@ struct boss_bigbadwolfAI : public ScriptedAI
 enum
 {
     /**** Speech *****/
-    SAY_JULIANNE_AGGRO              = -1532046,
-    SAY_JULIANNE_ENTER              = -1532047,
-    SAY_JULIANNE_DEATH01            = -1532048,
-    SAY_JULIANNE_DEATH02            = -1532049,
-    SAY_JULIANNE_RESURRECT          = -1532050,
-    SAY_JULIANNE_SLAY               = -1532051,
+    SAY_JULIANNE_AGGRO              = 15070,
+    SAY_JULIANNE_DEATH01            = 15072,
+    SAY_JULIANNE_DEATH02            = 15074,
+    SAY_JULIANNE_RESURRECT          = 15073,
+    SAY_JULIANNE_SLAY               = 15071,
 
-    SAY_ROMULO_AGGRO                = -1532052,
-    SAY_ROMULO_DEATH                = -1532053,
-    SAY_ROMULO_ENTER                = -1532054,
-    SAY_ROMULO_RESURRECT            = -1532055,
-    SAY_ROMULO_SLAY                 = -1532056,
+    SAY_ROMULO_AGGRO                = 15075,
+    SAY_ROMULO_DEATH                = 15078,
+    SAY_ROMULO_RESURRECT            = 15077,
+    SAY_ROMULO_SLAY                 = 15076,
 
     /***** Spells For Julianne *****/
     SPELL_BLINDING_PASSION          = 30890,
@@ -865,12 +609,23 @@ enum OperaPhase
     PHASE_BOTH          = 2,
 };
 
+enum JulianneActions
+{
+    JULIANNE_ATTACK_DELAY,
+    JULIANNE_SUMMON_ROMULO,
+    JULIANNE_RESURECT_SELF,
+    JULIANNE_MAX
+};
+
 static const float afRomuloSpawnLoc[4] = { -10893.62f, -1760.78f, 90.55f, 4.76f};
 
-struct boss_julianneAI : public ScriptedAI
+struct boss_julianneAI : public CombatAI
 {
-    boss_julianneAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_julianneAI(Creature* creature) : CombatAI(creature, JULIANNE_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddCustomAction(JULIANNE_ATTACK_DELAY, 9000u, [&]() { HandleAttackDelay(); });
+        AddCustomAction(JULIANNE_SUMMON_ROMULO, true, [&]() { DoSummonRomulo(); });
+        AddCustomAction(JULIANNE_RESURECT_SELF, true, [&]() { HandleResurectSelf(); });
         Reset();
     }
 
@@ -878,37 +633,21 @@ struct boss_julianneAI : public ScriptedAI
 
     OperaPhase m_Phase;
 
-    uint32 m_uiBlindingPassionTimer;
-    uint32 m_uiDevotionTimer;
-    uint32 m_uiEternalAffectionTimer;
-    uint32 m_uiPowerfulAttractionTimer;
-    uint32 m_uiSummonRomuloTimer;
-    uint32 m_uiResurrectSelfTimer;
-    uint32 m_uiAggroTimer;
-
     bool m_bIsFakingDeath;
 
     void Reset() override
     {
+        CombatAI::Reset();
+
         m_Phase                     = PHASE_JULIANNE;
-
-        m_uiBlindingPassionTimer    = 30000;
-        m_uiDevotionTimer           = 15000;
-        m_uiEternalAffectionTimer   = 25000;
-        m_uiPowerfulAttractionTimer = 5000;
-        m_uiSummonRomuloTimer       = 0;
-        m_uiResurrectSelfTimer      = 0;
-
         m_bIsFakingDeath            = false;
-
-        m_uiAggroTimer = 9000;
-
+        m_creature->SetSpellList(m_creature->GetCreatureInfo()->SpellList);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_JULIANNE_AGGRO, m_creature);
+        DoBroadcastText(SAY_JULIANNE_AGGRO, m_creature);
     }
 
     void JustReachedHome() override
@@ -936,15 +675,15 @@ struct boss_julianneAI : public ScriptedAI
             {
                 m_Phase               = PHASE_BOTH;
                 m_bIsFakingDeath      = true;
-                m_uiSummonRomuloTimer = 12000;
+                ResetTimer(JULIANNE_SUMMON_ROMULO, 12000);
             }
         }
         else if (m_Phase == PHASE_BOTH)
         {
             // set fake death and allow 10 sec timer to kill Romulos
-            DoScriptText(SAY_JULIANNE_DEATH02, m_creature);
+            DoBroadcastText(SAY_JULIANNE_DEATH02, m_creature);
             DoSetFakeDeath();
-            m_uiResurrectSelfTimer = 10000;
+            ResetTimer(JULIANNE_RESURECT_SELF, 10000);
         }
     }
 
@@ -961,7 +700,7 @@ struct boss_julianneAI : public ScriptedAI
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
             return;
 
-        DoScriptText(SAY_JULIANNE_SLAY, m_creature);
+        DoBroadcastText(SAY_JULIANNE_SLAY, m_creature);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -985,6 +724,7 @@ struct boss_julianneAI : public ScriptedAI
         m_creature->ClearAllReactives();
         m_creature->SetTarget(nullptr);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
     }
 
@@ -998,6 +738,7 @@ struct boss_julianneAI : public ScriptedAI
         DoResetThreat();
         SetCombatMovement(true);
         DoStartMovement(m_creature->GetVictim());
+        SetCombatScriptStatus(false);
     }
 
     // Wrapper to start phase 3
@@ -1006,115 +747,44 @@ struct boss_julianneAI : public ScriptedAI
         m_creature->CastSpell(nullptr, SPELL_FULL_HEALTH, TRIGGERED_NONE);
         DoRemoveFakeDeath();
         DoCastSpellIfCan(m_creature, SPELL_UNDYING_LOVE);
-        DoScriptText(SAY_JULIANNE_RESURRECT, m_creature);
+        DoBroadcastText(SAY_JULIANNE_RESURRECT, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void DoSummonRomulo()
     {
-        // spawn Romulo on timer after fake death
-        if (m_uiSummonRomuloTimer)
-        {
-            if (m_uiSummonRomuloTimer <= uiDiff)
-            {
-                m_creature->SummonCreature(NPC_ROMULO, afRomuloSpawnLoc[0], afRomuloSpawnLoc[1], afRomuloSpawnLoc[2], afRomuloSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-                m_uiSummonRomuloTimer = 0;
-            }
-            else
-                m_uiSummonRomuloTimer -= uiDiff;
-        }
+        m_creature->SummonCreature(NPC_ROMULO, afRomuloSpawnLoc[0], afRomuloSpawnLoc[1], afRomuloSpawnLoc[2], afRomuloSpawnLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+        DisableTimer(JULIANNE_SUMMON_ROMULO);
+    }
 
-        if (m_uiResurrectSelfTimer)
+    void HandleResurectSelf()
+    {
+        if (m_instance)
         {
-            if (m_uiResurrectSelfTimer <= uiDiff)
+            if (Creature* pRomulo = m_instance->GetSingleCreatureFromStorage(NPC_ROMULO))
             {
-                if (m_instance)
+                // if Romulos is dead, then self kill
+                if (pRomulo->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                 {
-                    if (Creature* pRomulo = m_instance->GetSingleCreatureFromStorage(NPC_ROMULO))
-                    {
-                        // if Romulos is dead, then self kill
-                        if (pRomulo->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
-                        {
-                            m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
-                            pRomulo->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
-                        }
-                        else
-                        {
-                            DoRemoveFakeDeath();
-                            DoCastSpellIfCan(m_creature, SPELL_FULL_HEALTH, CAST_TRIGGERED);
-                        }
-                    }
+                    m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
+                    pRomulo->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
                 }
-                m_uiResurrectSelfTimer = 0;
-            }
-            else
-                m_uiResurrectSelfTimer -= uiDiff;
-        }
-
-        if (m_uiAggroTimer)
-        {
-            if (m_uiAggroTimer <= uiDiff)
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                SetReactState(REACT_AGGRESSIVE);
-                m_creature->SetInCombatWithZone();
-                AttackClosestEnemy();
-                if (!m_creature->IsInCombat())
-                    JustReachedHome();
-                m_uiAggroTimer = 0;
-            }
-            else
-                m_uiAggroTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // don't use spells during transition
-        if (m_bIsFakingDeath)
-            return;
-
-        if (m_uiBlindingPassionTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_BLINDING_PASSION) == CAST_OK)
-                    m_uiBlindingPassionTimer = urand(30000, 45000);
+                else
+                {
+                    DoRemoveFakeDeath();
+                    DoCastSpellIfCan(m_creature, SPELL_FULL_HEALTH, CAST_TRIGGERED);
+                }
             }
         }
-        else
-            m_uiBlindingPassionTimer -= uiDiff;
+    }
 
-        if (m_uiDevotionTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DEVOTION) == CAST_OK)
-                m_uiDevotionTimer = urand(15000, 45000);
-        }
-        else
-            m_uiDevotionTimer -= uiDiff;
-
-        if (m_uiPowerfulAttractionTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_POWERFUL_ATTRACTION) == CAST_OK)
-                    m_uiPowerfulAttractionTimer = urand(5000, 30000);
-            }
-        }
-        else
-            m_uiPowerfulAttractionTimer -= uiDiff;
-
-        if (m_uiEternalAffectionTimer < uiDiff)
-        {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(30.0f))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_ETERNAL_AFFECTION) == CAST_OK)
-                    m_uiEternalAffectionTimer = urand(45000, 60000);
-            }
-        }
-        else
-            m_uiEternalAffectionTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+    void HandleAttackDelay()
+    {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+        if (!m_creature->IsInCombat())
+            JustReachedHome();
     }
 };
 
@@ -1128,14 +798,23 @@ struct DrinkPoisonJulianne : public SpellScript
         if (boss_julianneAI* julianneAI = dynamic_cast<boss_julianneAI*>(target->AI()))
             julianneAI->DoSetFakeDeath();
 
-        DoScriptText(SAY_JULIANNE_DEATH01, target);
+        DoBroadcastText(SAY_JULIANNE_DEATH01, target);
     }
 };
 
-struct boss_romuloAI : public ScriptedAI
+enum RomuloActions
 {
-    boss_romuloAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    ROMULO_RESURECT,
+    ROMULO_RESURECT_SELF,
+    ROMULO_MAX
+};
+
+struct boss_romuloAI : public CombatAI
+{
+    boss_romuloAI(Creature* creature) : CombatAI(creature, ROMULO_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
+        AddCustomAction(ROMULO_RESURECT, true, [&]() { HandleResurect(); });
+        AddCustomAction(ROMULO_RESURECT_SELF, true, [&]() { HandleResurectSelf(); });
         Reset();
     }
 
@@ -1143,26 +822,12 @@ struct boss_romuloAI : public ScriptedAI
 
     OperaPhase m_Phase;
 
-    uint32 m_uiBackwardLungeTimer;
-    uint32 m_uiDaringTimer;
-    uint32 m_uiDeadlySwatheTimer;
-    uint32 m_uiPoisonThrustTimer;
-    uint32 m_uiResurrectTimer;
-    uint32 m_uiResurrectSelfTimer;
-
     bool m_bIsFakingDeath;
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_Phase                 = PHASE_ROMULO;
-
-        m_uiBackwardLungeTimer  = 15000;
-        m_uiDaringTimer         = 20000;
-        m_uiDeadlySwatheTimer   = 25000;
-        m_uiPoisonThrustTimer   = 10000;
-        m_uiResurrectTimer      = 0;
-        m_uiResurrectSelfTimer  = 0;
-
         m_bIsFakingDeath        = false;
     }
 
@@ -1186,22 +851,22 @@ struct boss_romuloAI : public ScriptedAI
 
         if (m_Phase == PHASE_ROMULO)
         {
-            DoScriptText(SAY_ROMULO_DEATH, m_creature);
+            DoBroadcastText(SAY_ROMULO_DEATH, m_creature);
             DoSetFakeDeath();
             m_Phase             = PHASE_BOTH;
-            m_uiResurrectTimer  = 10000;
+            ResetTimer(ROMULO_RESURECT, 10000);
         }
         else if (m_Phase == PHASE_BOTH)
         {
             // set fake death and allow 10 sec timer to kill Julianne
             DoSetFakeDeath();
-            m_uiResurrectSelfTimer = 10000;
+            ResetTimer(ROMULO_RESURECT_SELF, 10000);
         }
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_ROMULO_AGGRO, m_creature);
+        DoBroadcastText(SAY_ROMULO_AGGRO, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -1217,7 +882,7 @@ struct boss_romuloAI : public ScriptedAI
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
             return;
 
-        DoScriptText(SAY_ROMULO_SLAY, m_creature);
+        DoBroadcastText(SAY_ROMULO_SLAY, m_creature);
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
@@ -1242,6 +907,7 @@ struct boss_romuloAI : public ScriptedAI
         m_creature->ClearAllReactives();
         m_creature->SetTarget(nullptr);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
     }
 
@@ -1254,102 +920,80 @@ struct boss_romuloAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
         DoResetThreat();
         SetCombatMovement(true);
+        SetCombatScriptStatus(false);
         DoStartMovement(m_creature->GetVictim());
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleResurectSelf()
     {
-        // Resurrect both of them at the beginning of phase 3
-        if (m_uiResurrectTimer)
+        if (m_instance)
         {
-            if (m_uiResurrectTimer <= uiDiff)
+            if (Creature* julianne = m_instance->GetSingleCreatureFromStorage(NPC_JULIANNE))
             {
-                if (m_instance)
+                // if Julianne is dead, then self kill
+                if (julianne->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
                 {
-                    if (Creature* pJulianne = m_instance->GetSingleCreatureFromStorage(NPC_JULIANNE))
-                    {
-                        if (boss_julianneAI* pJulianneAI = dynamic_cast<boss_julianneAI*>(pJulianne->AI()))
-                            pJulianneAI->DoHandleRomuloResurrect();
-                    }
+                    m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
+                    julianne->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
                 }
-                m_uiResurrectTimer = 0;
+                else
+                {
+                    DoRemoveFakeDeath();
+                    DoBroadcastText(SAY_ROMULO_RESURRECT, m_creature);
+                    DoCastSpellIfCan(m_creature, SPELL_FULL_HEALTH, CAST_TRIGGERED);
+                }
             }
-            else
-                m_uiResurrectTimer -= uiDiff;
         }
-
-        if (m_uiResurrectSelfTimer)
+    }
+    
+    void HandleResurect()
+    {
+        if (m_instance)
         {
-            if (m_uiResurrectSelfTimer <= uiDiff)
+            if (Creature* julianne = m_instance->GetSingleCreatureFromStorage(NPC_JULIANNE))
             {
-                if (m_instance)
-                {
-                    if (Creature* pJulianne = m_instance->GetSingleCreatureFromStorage(NPC_JULIANNE))
-                    {
-                        // if Julianne is dead, then self kill
-                        if (pJulianne->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
-                        {
-                            m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
-                            pJulianne->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
-                        }
-                        else
-                        {
-                            DoRemoveFakeDeath();
-                            DoScriptText(SAY_ROMULO_RESURRECT, m_creature);
-                            DoCastSpellIfCan(m_creature, SPELL_FULL_HEALTH, CAST_TRIGGERED);
-                        }
-                    }
-                }
-                m_uiResurrectSelfTimer = 0;
+                if (boss_julianneAI* julianneAI = dynamic_cast<boss_julianneAI*>(julianne->AI()))
+                    julianneAI->DoHandleRomuloResurrect();
             }
-            else
-                m_uiResurrectSelfTimer -= uiDiff;
         }
+    }    
+};
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+// 30753 - Red Riding Hood 
+struct RedRidingHoodFixate : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster || !caster->AI())
+            return;
+        if (apply)
+        {
+            caster->FixateTarget(aura->GetTarget());
+            //caster->AI()->AttackStart(aura->GetTarget()); // visual change for immediate crosshair update - only safe with fixate
+        }
+        else
+            caster->FixateTarget(nullptr);
+    }
+};
+
+// 30769 - Pick Red Riding Hood
+struct PickRedRidingHood : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster || !caster->AI())
             return;
 
-        // don't use spells on fake death
-        if (m_bIsFakingDeath)
+        Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER);
+
+        if (!target || target->GetTypeId() != TYPEID_PLAYER)
             return;
 
-        if (m_uiBackwardLungeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BACKWARD_LUNGE) == CAST_OK)
-                m_uiBackwardLungeTimer = urand(15000, 30000);
-        }
-        else
-            m_uiBackwardLungeTimer -= uiDiff;
-
-        if (m_uiDaringTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DARING) == CAST_OK)
-                m_uiDaringTimer = urand(20000, 40000);
-        }
-        else
-            m_uiDaringTimer -= uiDiff;
-
-        if (m_uiDeadlySwatheTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEADLY_SWATHE) == CAST_OK)
-                m_uiDeadlySwatheTimer = urand(15000, 25000);
-        }
-        else
-            m_uiDeadlySwatheTimer -= uiDiff;
-
-        if (m_uiPoisonThrustTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_POISON_THRUST) == CAST_OK)
-#ifdef PRENERF_2_0_3
-                m_uiPoisonThrustTimer = urand(8000, 16000);
-#else
-                m_uiPoisonThrustTimer = urand(10000, 20000);
-#endif
-        }
-        else
-            m_uiPoisonThrustTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        // cast Little Red Riding Hood
+        caster->CastSpell(target, SPELL_LITTLE_RED_RIDING_HOOD, TRIGGERED_OLD_TRIGGERED);
+        DoBroadcastText(SAY_WOLF_RED_RIDING_HOOD, caster);
     }
 };
 
@@ -1393,6 +1037,9 @@ void AddSC_bosses_opera()
     pNewScript->Name = "boss_bigbadwolf";
     pNewScript->GetAI = &GetNewAIInstance<boss_bigbadwolfAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<RedRidingHoodFixate>("spell_red_riding_hood_fixate");
+    RegisterSpellScript<PickRedRidingHood>("spell_pick_red_ridding_hood");
 
     // Romeo And Juliet
     pNewScript = new Script;
