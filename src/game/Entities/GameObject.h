@@ -587,6 +587,15 @@ struct GameObjectInfo
         }
     }
 
+    bool IsUsableInCombat() const
+    {
+        switch (type)
+        {
+            case GAMEOBJECT_TYPE_CHEST: return chest.notInCombat == 0;
+            default: return true;
+        }
+    }
+
     bool IsInfiniteGameObject() const
     {
         switch (type)

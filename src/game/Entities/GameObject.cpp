@@ -1512,6 +1512,40 @@ bool GameObject::CanUseNow(Player const* player) const
         }
     }
 
+    if (!GetGOInfo()->GetLockId())
+    {
+        // ignore for remote control state
+        if (!player->IsSelfMover())
+        {
+            // check player on vehicle
+            if (!player->GetTransportInfo() || !player->GetTransportInfo()->IsOnVehicle() || !GetGOInfo()->IsUsableMounted())
+                return false;
+        }
+
+        // We can't interact with anyone while being shapeshifted, unless form flags allow us to do so
+        if (player->IsShapeShifted())
+        {
+            if (SpellShapeshiftFormEntry const* formEntry = sSpellShapeshiftFormStore.LookupEntry(player->GetShapeshiftForm()))
+            {
+                if (!(formEntry->flags1 & SHAPESHIFT_FLAG_CAN_NPC_INTERACT) && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_TAXI_FLIGHT)) // meant to have an can unshift check here
+                    return false;
+            }
+            else
+                return false;
+        }
+    }
+
+    // client checks this but needs recheck
+    if (GetGOInfo()->IsUsableInCombat() && player->IsInCombat())
+        return false;
+
+    // client checks this but needs recheck
+    if (GetGOInfo()->CannotBeUsedUnderImmunity() && player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
+        return false;
+
+    if (HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED) && !GetSpellForLock(player)) // we should not allow use of a locked GO
+        return false;
+
     return true;
 }
 
@@ -2947,10 +2981,17 @@ SpellEntry const* GameObject::GetSpellForLock(Player const* player) const
 
         for (auto&& playerSpell : player->GetSpellMap())
             if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(playerSpell.first))
-                for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                    if (spellInfo->Effect[i] == SPELL_EFFECT_OPEN_LOCK && ((uint32)spellInfo->EffectMiscValue[i]) == lock->Index[i])
-                        if (player->CalculateSpellEffectValue(nullptr, spellInfo, SpellEffectIndex(i), nullptr) >= int32(lock->Skill[i]))
+                for (uint32 effIdx = 0; effIdx < MAX_EFFECT_INDEX; ++effIdx)
+                    if (spellInfo->Effect[effIdx] == SPELL_EFFECT_OPEN_LOCK && ((uint32)spellInfo->EffectMiscValue[effIdx]) == lock->Index[i])
+                    {
+                        uint32 minRequiredSkill;
+                        if (lock->Skill[i])
+                            minRequiredSkill = lock->Skill[i];
+                        else
+                            minRequiredSkill = GetLevel() * 5;
+                        if (player->CalculateSpellEffectValue(nullptr, spellInfo, SpellEffectIndex(effIdx), nullptr) >= int32(minRequiredSkill))
                             return spellInfo;
+                    }
     }
 
     return nullptr;
