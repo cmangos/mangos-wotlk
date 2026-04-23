@@ -21,7 +21,6 @@ SDComment:
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 #include "Entities/Transports.h"
 
@@ -383,8 +382,10 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
         case GO_IRON_ENTRANCE_DOOR:
             break;
         case GO_ARCHIVUM_DOOR:
-            if (m_auiEncounter[TYPE_ASSEMBLY])
+            if (m_auiEncounter[TYPE_ASSEMBLY] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
+            else
+                pGo->SetGoState(GO_STATE_READY);
             break;
         // Celestial Planetarium
         case GO_CELESTIAL_ACCES:
@@ -647,7 +648,10 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_IRON_ENTRANCE_DOOR);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_ARCHIVUM_DOOR);
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_ARCHIVUM_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
 
                 if (Player* pPlayer = GetPlayerInMap())
                 {
@@ -657,11 +661,21 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             }
             else if (uiData == IN_PROGRESS)
             {
+                switch (urand(0,2))
+                {
+                    case 0: if(Unit* brundir = GetSingleCreatureFromStorage(NPC_BRUNDIR)) DoBroadcastText(SAY_BRUNDIR_AGGRO, brundir); break;
+                    case 1: if(Unit* molgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM)) DoBroadcastText(SAY_MOLGEIM_AGGRO, molgeim); break;
+                    case 2: if(Unit* steel = GetSingleCreatureFromStorage(NPC_STEELBREAKER)) DoBroadcastText(SAY_STEEL_AGGRO, steel); break;
+                }
+
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_BRUNDIR, true);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_MOLGEIM, true);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_STEELBREAKER, true);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_STUNNED, true);
             }
+            else if (uiData == FAIL)
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_IRON_ENTRANCE_DOOR))
+                    door->SetGoState(GO_STATE_ACTIVE);
             break;
         case TYPE_KOLOGARN:
             m_auiEncounter[uiType] = uiData;
@@ -1218,6 +1232,26 @@ void instance_ulduar::SpawnFriendlyKeeper(uint32 uiWho)
     }
 }
 
+void instance_ulduar::CheckLastCouncilStanding(uint32 entry)
+{
+    auto* molgeim = GetSingleCreatureFromStorage(NPC_MOLGEIM);
+    auto* brundir = GetSingleCreatureFromStorage(NPC_BRUNDIR);
+    auto* steelbreaker = GetSingleCreatureFromStorage(NPC_STEELBREAKER);
+    uint8 molgeimAlive = molgeim->IsAlive() && entry != NPC_MOLGEIM ? 1 : 0;
+    uint8 brundirAlive = brundir->IsAlive() && entry != NPC_BRUNDIR ? 1 : 0;
+    uint8 steelbreakerAlive = steelbreaker->IsAlive() && entry != NPC_STEELBREAKER ? 1 : 0;
+
+    if (molgeimAlive + brundirAlive + steelbreakerAlive > 1)
+        return;
+
+    if (auto* molgeimAI = static_cast<ScriptedAI*>(molgeim->AI()))
+        molgeimAI->SetDeathPrevention(false);
+    if (auto* brundirAI = static_cast<ScriptedAI*>(brundir->AI()))
+        brundirAI->SetDeathPrevention(false);
+    if (auto* steelbreakerAI = static_cast<ScriptedAI*>(steelbreaker->AI()))
+        steelbreakerAI->SetDeathPrevention(false);
+}
+
 // Spawn the keeper helpers for Yogg-Saron
 void instance_ulduar::SpawnKeeperHelper(uint32 uiWho)
 {
@@ -1413,15 +1447,12 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
             return m_abAchievCriteria[TYPE_ACHIEV_NINE_LIVES];
         case ACHIEV_CRIT_BRUNDIR_N:
         case ACHIEV_CRIT_BRUNDIR_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_BRUNDIR];
         case ACHIEV_CRIT_MOLGEIM_N:
         case ACHIEV_CRIT_MOLGEIM_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_MOLGEIM];
         case ACHIEV_CRIT_STEELBREAKER_N:
         case ACHIEV_CRIT_STEELBREAKER_H:
-            if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_STEELBREAKER];
         case ACHIEV_CRIT_STUNNED_BRUND_N:
         case ACHIEV_CRIT_STUNNED_STEEL_N:
