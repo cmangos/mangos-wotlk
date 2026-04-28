@@ -1760,7 +1760,8 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
                 continue;
 
             ItemPosCountVec sDest;
-            InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, sDest, uItem, false);
+            uint8 bagSlot = 0;
+            InventoryResult msg = _player->CanStoreItem(NULL_BAG, NULL_SLOT, sDest, uItem, bagSlot, false);
             if (msg == EQUIP_ERR_OK)
             {
                 _player->RemoveItem(INVENTORY_SLOT_BAG_0, i, true);
@@ -1768,7 +1769,7 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
             }
             else
             {
-                _player->SendEquipError(msg, uItem, nullptr);
+                _player->SendEquipError(msg, uItem, nullptr, bagSlot);
                 if (msg == EQUIP_ERR_BAG_FULL)
                     bagsFull = true;
                 else

@@ -1308,14 +1308,15 @@ class Player : public Unit
         InventoryResult CanTakeMoreSimilarItems(uint32 entry, uint32 count, uint32* itemLimitedByLimitCategory = nullptr) const { return _CanTakeMoreSimilarItems(entry, count, nullptr, itemLimitedByLimitCategory); }
         InventoryResult CanStoreNewItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 item, uint32 count, uint32* no_space_count = nullptr) const
         {
-            return _CanStoreItem(bag, slot, dest, item, count, nullptr, false, no_space_count);
+            uint8 bagSlot = 0;
+            return _CanStoreItem(bag, slot, dest, item, count, bagSlot, nullptr, false, no_space_count);
         }
-        InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap = false) const
+        InventoryResult CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, uint8& bagSlot, bool swap = false) const
         {
             if (!pItem)
                 return EQUIP_ERR_ITEM_NOT_FOUND;
             uint32 count = pItem->GetCount();
-            return _CanStoreItem(bag, slot, dest, pItem->GetEntry(), count, pItem, swap, nullptr);
+            return _CanStoreItem(bag, slot, dest, pItem->GetEntry(), count, bagSlot, pItem, swap, nullptr);
         }
         InventoryResult CanStoreItems(Item** pItems, int count, uint32* itemLimitedByLimitCategory) const;
         InventoryResult CanEquipNewItem(uint8 slot, uint16& dest, uint32 item, bool swap) const;
@@ -1325,7 +1326,7 @@ class Player : public Unit
         InventoryResult CanEquipUniqueItem(ItemPrototype const* itemProto, uint8 except_slot = NULL_SLOT, uint32 limit_count = 1) const;
         InventoryResult CanUnequipItems(uint32 item, uint32 count) const;
         InventoryResult CanUnequipItem(uint16 pos, bool swap) const;
-        InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, bool not_loading = true) const;
+        InventoryResult CanBankItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, Item* pItem, bool swap, uint8& bagSlot, bool not_loading = true) const;
         InventoryResult CanUseItem(Item* pItem, bool direct_action = true) const;
         bool HasItemTotemCategory(uint32 TotemCategory) const;
         InventoryResult CanUseItem(ItemPrototype const* pProto) const;
@@ -1344,7 +1345,7 @@ class Player : public Unit
         Item* ConvertItem(Item* item, uint32 newItemId);
 
         InventoryResult _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = nullptr, uint32* itemLimitedByLimitCategory = nullptr) const;
-        InventoryResult _CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item* pItem = nullptr, bool swap = false, uint32* no_space_count = nullptr) const;
+        InventoryResult _CanStoreItem(uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, uint8& bagSlot, Item* pItem = nullptr, bool swap = false, uint32* no_space_count = nullptr) const;
 
         void ApplyEquipCooldown(Item* pItem);
         void SetAmmo(uint32 item);
@@ -1378,7 +1379,7 @@ class Player : public Unit
         void TakeExtendedCost(uint32 extendedCostId, uint32 count);
 
         uint32 GetMaxKeyringSize() const { return KEYRING_SLOT_END - KEYRING_SLOT_START; }
-        void SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2 = nullptr, uint32 itemid = 0) const;
+        void SendEquipError(InventoryResult msg, Item* pItem = nullptr, Item* pItem2 = nullptr, uint8 slot = 0, uint32 itemid = 0) const;
         void SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint32 param) const;
         void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid, uint32 param) const;
         void SendOpenContainer(ObjectGuid itemGuid);
@@ -2884,8 +2885,8 @@ class Player : public Unit
     private:
         void _HandleDeadlyPoison(Unit* Target, WeaponAttackType attType, SpellEntry const* spellInfo);
         // internal common parts for CanStore/StoreItem functions
-        InventoryResult _CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool swap, Item* pSrcItem) const;
-        InventoryResult _CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
+        InventoryResult _CanStoreItem_InSpecificSlot(uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool swap, Item* pSrcItem, uint8& bagSlot) const;
+        InventoryResult _CanStoreItem_InBag(uint8 bag, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool merge, bool non_specialized, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot, uint8& bagSlot) const;
         InventoryResult _CanStoreItem_InInventorySlots(uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemPrototype const* pProto, uint32& count, bool merge, Item* pSrcItem, uint8 skip_bag, uint8 skip_slot) const;
         Item* _StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool update);
 
