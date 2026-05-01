@@ -79,7 +79,8 @@ void WorldRunnable::run()
     ///- While we have not World::m_stopEvent, update the world
     while (!World::IsStopped())
     {
-        ++World::m_worldLoopCounter;
+//        ++World::m_worldLoopCounter;
+        World::m_worldLoopCounter = World::m_worldLoopCounter + 1;
 
         diffTick = WorldTimer::tick();
         sWorld.Update(diffTick);
