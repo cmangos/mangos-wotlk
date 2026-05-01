@@ -47,7 +47,7 @@ void instance_mechanar::OnPlayerEnter(Player* player)
     if (GetSingleCreatureFromStorage(NPC_PATHALEON, true))
         return;
 
-    player->SummonCreature(aBridgeEventLocs[6][0].m_spawnEntry, aBridgeEventLocs[6][0].m_x, aBridgeEventLocs[6][0].m_y, aBridgeEventLocs[6][0].m_z, aBridgeEventLocs[6][0].m_o, TEMPSPAWN_DEAD_DESPAWN, 0);
+    player->SummonCreature(aBridgeEventLocs[6][0].m_spawnEntry, aBridgeEventLocs[6][0].m_fx, aBridgeEventLocs[6][0].m_fy, aBridgeEventLocs[6][0].m_fz, aBridgeEventLocs[6][0].m_fo, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_mechanar::OnCreatureCreate(Creature* creature)
@@ -215,7 +215,7 @@ void instance_mechanar::DoSpawnBridgeWave()
             if (aBridgeEventLocs[m_bridgeEventPhase][i].m_spawnEntry == 0)
                 break;
 
-            if (Creature* temp = player->SummonCreature(aBridgeEventLocs[m_bridgeEventPhase][i].m_spawnEntry, aBridgeEventLocs[m_bridgeEventPhase][i].m_x, aBridgeEventLocs[m_bridgeEventPhase][i].m_y, aBridgeEventLocs[m_bridgeEventPhase][i].m_z, aBridgeEventLocs[m_bridgeEventPhase][i].m_o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            if (Creature* temp = player->SummonCreature(aBridgeEventLocs[m_bridgeEventPhase][i].m_spawnEntry, aBridgeEventLocs[m_bridgeEventPhase][i].m_fx, aBridgeEventLocs[m_bridgeEventPhase][i].m_fy, aBridgeEventLocs[m_bridgeEventPhase][i].m_fz, aBridgeEventLocs[m_bridgeEventPhase][i].m_fo, TEMPSPAWN_DEAD_DESPAWN, 0))
             {
                 temp->CastSpell(nullptr, SPELL_ETHEREAL_TELEPORT, TRIGGERED_NONE);
 

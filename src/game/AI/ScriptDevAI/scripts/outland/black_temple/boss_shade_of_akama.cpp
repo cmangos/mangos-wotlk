@@ -108,19 +108,14 @@ static const DialogueEntry aOutroDialogue[] =
     { 0, 0, 0 },
 };
 
-struct Location
-{
-    float x, y, z;
-};
-
-static const Location akamaWaypoints[] =
+static const Position akamaWaypoints[] =
 {
     { 517.4877f,   400.7993f,   112.7837f }, // Akama point
     { 512.4877f,   400.8283f,   112.7837f }, // Shade point
     { 469.597443f, 402.264404f, 118.537f } // Akama outro
 };
 
-static const Location brokenSpawnLocations[] =
+static const Position brokenSpawnLocations[] =
 {
     // Broken 
     {501.5699f, 337.8271f, 112.8673f},
@@ -139,7 +134,7 @@ static const Location brokenSpawnLocations[] =
     {498.3421f, 463.8384f, 112.8673f},
 };
 
-static const Location brokenDestinationLocations[] = 
+static const Position brokenDestinationLocations[] = 
 {
     {476.2499f, 369.0865f, 112.7838f},
     {473.3224f, 368.4310f, 112.7838f},

@@ -105,21 +105,15 @@ const std::string DUMMY_REINF_STRING_2            = "SHH_DUMMY_REINF_02";     //
 const std::string STRING_ID_ENTRANCE_GROUP        = "SHH_ENTRANCE_GROUP";     // StringID assigned to entrance group to prevent rep/xp farm abuse
 const std::string STRING_ID_FEL_ORC               = "SHH_FEL_ORC_CONVERT";    // StringID assigned to FelOrcConvert npcs that can call legionnaire for reinf
 
-struct SpawnLocation
-{
-    uint32 m_uiAllianceEntry, m_uiHordeEntry;
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
 const float afExecutionerLoc[4] = {151.443f, -84.439f, 1.938f, 6.283f};
 
 static SpawnLocation aSoldiersLocs[] =
 {
-    {0,                      NPC_SOLDIER_HORDE_1, 119.609f, 256.127f, -45.254f, 5.133f},
-    {NPC_SOLDIER_ALLIANCE_1, 0,                   131.106f, 254.520f, -45.236f, 3.951f},
-    {NPC_SOLDIER_ALLIANCE_3, NPC_SOLDIER_HORDE_3, 151.040f, -91.558f, 1.936f, 1.559f},
-    {NPC_SOLDIER_ALLIANCE_2, NPC_SOLDIER_HORDE_2, 150.669f, -77.015f, 1.933f, 4.705f},
-    {NPC_OFFICER_ALLIANCE,   NPC_OFFICER_HORDE,   138.241f, -84.198f, 1.907f, 0.055f}
+    {0, 119.609f, 256.127f, -45.254f, 5.133f, 0,                       NPC_SOLDIER_HORDE_1},
+    {0, 131.106f, 254.520f, -45.236f, 3.951f, NPC_SOLDIER_ALLIANCE_1,                    0},
+    {0, 151.040f, -91.558f,   1.936f, 1.559f, NPC_SOLDIER_ALLIANCE_3,  NPC_SOLDIER_HORDE_3},
+    {0, 150.669f, -77.015f,   1.933f, 4.705f, NPC_SOLDIER_ALLIANCE_2,  NPC_SOLDIER_HORDE_2},
+    {0, 138.241f, -84.198f,   1.907f, 0.055f, NPC_OFFICER_ALLIANCE,      NPC_OFFICER_HORDE}
 };
 
 class instance_shattered_halls : public ScriptedInstance, public TimerManager

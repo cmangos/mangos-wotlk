@@ -64,12 +64,7 @@ enum
 
 const std::string STRING_ID_ENTRANCE_GROUP = "ARCATRAZ_ENTRANCE_GROUP";     // StringID assigned to entrance group to prevent rep/xp farm abuse
 
-struct SpawnLocation
-{
-    float m_fX, m_fY, m_fZ, m_fO;
-};
-
-static const SpawnLocation aSummonPosition[5] =
+static const Position aSummonPosition[5] =
 {
     {478.326f, -148.505f, 42.56f, 3.19f},                   // Trickster or Phase Hunter
     {413.292f, -148.378f, 42.56f, 6.27f},                   // Millhouse

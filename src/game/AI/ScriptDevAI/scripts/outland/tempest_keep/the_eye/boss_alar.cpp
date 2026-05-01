@@ -80,29 +80,24 @@ enum
     SPELL_ASHTONGUE_RUSE    = 42090,        // Player can complete 10946 quest, only if has aura 42090. If kill Alar without this aura - quest not completed.
 };
 
-struct EventLocation
-{
-    float m_fX, m_fY, m_fZ;
-};
-
 // Platform locations from left to right (as standing at the entrance)
-static const EventLocation aPlatformLocation[MAX_PLATFORMS] =
+static const Position aPlatformLocation[MAX_PLATFORMS] =
 {
-    {335.5587f, 58.56138f, 18.30103f},
-    {387.8628f, 32.18992f, 20.23814f},
-    {388.777f, -32.10653f, 20.26319f},
-    {333.6099f,-60.69928f, 18.01521f},
+    {335.5587f, 58.56138f, 18.30103f, 0.0},
+    {387.8628f, 32.18992f, 20.23814f, 0.0},
+    {388.777f, -32.10653f, 20.26319f, 0.0},
+    {333.6099f,-60.69928f, 18.01521f, 0.0},
 #ifdef PRENERF_2_0_3
-    {264.36f, 40.78f, 20.21f},
-    {268.38f,-49.80f, 20.38f}
+    {264.36f, 40.78f, 20.21f, 0.0},
+    {268.38f,-49.80f, 20.38f, 0.0}
 #endif
 };
 
-static const EventLocation aCenterLocation[] =
+static const Position aCenterLocation[] =
 {
-    {330.3943f, -2.02203f,  42.4762f},
-    {333.589f,  -0.768249f, -2.38949f},
-    {329.9976f, -0.2719078f, 42.42101f}
+    {330.3943f, -2.02203f,  42.4762f, 0.0},
+    {333.589f,  -0.768249f, -2.38949f, 0.0},
+    {329.9976f, -0.2719078f, 42.42101f, 0.0}
 };
 
 enum AlarActions
@@ -197,7 +192,7 @@ struct boss_alarAI : public CombatAI
 
         // The boss will always move to the first platform from the left side; also set the movement to idle to stop the DB movement
         m_creature->GetMotionMaster()->MoveIdle();
-        m_creature->GetMotionMaster()->MovePoint(POINT_ID_PLATFORM, aPlatformLocation[m_uiCurrentPlatformId].m_fX, aPlatformLocation[m_uiCurrentPlatformId].m_fY, aPlatformLocation[m_uiCurrentPlatformId].m_fZ);
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_PLATFORM, aPlatformLocation[m_uiCurrentPlatformId].x, aPlatformLocation[m_uiCurrentPlatformId].y, aPlatformLocation[m_uiCurrentPlatformId].z);
     }
 
     void JustReachedHome() override
@@ -257,7 +252,7 @@ struct boss_alarAI : public CombatAI
     void DoFlameQuills()
     {
         // Move to Flame Quills position; stop range check, platform moving and ember summoning
-        m_creature->GetMotionMaster()->MovePoint(POINT_ID_QUILLS, aCenterLocation[0].m_fX, aCenterLocation[0].m_fY, aCenterLocation[0].m_fZ);
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_QUILLS, aCenterLocation[0].x, aCenterLocation[0].y, aCenterLocation[0].z);
         SetCombatScriptStatus(true);
         m_creature->SetTarget(nullptr);
         m_creature->SetHover(true);
@@ -278,7 +273,7 @@ struct boss_alarAI : public CombatAI
 #endif
         }
         m_firstPlatform = false;
-        m_creature->GetMotionMaster()->MovePoint(POINT_ID_PLATFORM, aPlatformLocation[m_uiFuturePlatformId].m_fX, aPlatformLocation[m_uiFuturePlatformId].m_fY, aPlatformLocation[m_uiFuturePlatformId].m_fZ);
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_PLATFORM, aPlatformLocation[m_uiFuturePlatformId].x, aPlatformLocation[m_uiFuturePlatformId].y, aPlatformLocation[m_uiFuturePlatformId].z);
 
 #ifdef PRENERF_2_0_3
         // plan next platform
@@ -367,7 +362,7 @@ struct boss_alarAI : public CombatAI
         if (DoCastSpellIfCan(nullptr, SPELL_EMBER_BLAST) == CAST_OK)
         {
             // Move to the center of the hall and ressurrect
-            m_creature->GetMotionMaster()->MovePoint(POINT_ID_RESSURRECT, aCenterLocation[1].m_fX, aCenterLocation[1].m_fY, aCenterLocation[1].m_fZ, FORCED_MOVEMENT_RUN);
+            m_creature->GetMotionMaster()->MovePoint(POINT_ID_RESSURRECT, aCenterLocation[1].x, aCenterLocation[1].y, aCenterLocation[1].z, FORCED_MOVEMENT_RUN);
         }
     }
 
@@ -516,7 +511,7 @@ struct boss_alarAI : public CombatAI
                 m_creature->SetTarget(nullptr);
                 m_creature->SetHover(true);
                 m_creature->SetLevitate(true);
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_DIVE_BOMB, aCenterLocation[2].m_fX, aCenterLocation[2].m_fY, aCenterLocation[2].m_fZ);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_DIVE_BOMB, aCenterLocation[2].x, aCenterLocation[2].y, aCenterLocation[2].z);
                 SetDeathPrevention(true);
                 ResetCombatAction(action, urand(50000, 60000));
                 break;

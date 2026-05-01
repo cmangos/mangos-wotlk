@@ -70,9 +70,9 @@ void instance_shattered_halls::OnPlayerEnter(Player* pPlayer)
     m_team = pPlayer->GetTeam();
 
     if (m_team == ALLIANCE)
-        pPlayer->SummonCreature(aSoldiersLocs[1].m_uiAllianceEntry, aSoldiersLocs[1].m_fX, aSoldiersLocs[1].m_fY, aSoldiersLocs[1].m_fZ, aSoldiersLocs[1].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(aSoldiersLocs[1].m_uiAllianceEntry, aSoldiersLocs[1].m_fx, aSoldiersLocs[1].m_fy, aSoldiersLocs[1].m_fz, aSoldiersLocs[1].m_fo, TEMPSPAWN_DEAD_DESPAWN, 0);
     else
-        pPlayer->SummonCreature(aSoldiersLocs[0].m_uiHordeEntry, aSoldiersLocs[0].m_fX, aSoldiersLocs[0].m_fY, aSoldiersLocs[0].m_fZ, aSoldiersLocs[0].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+        pPlayer->SummonCreature(aSoldiersLocs[0].m_uiHordeEntry, aSoldiersLocs[0].m_fx, aSoldiersLocs[0].m_fy, aSoldiersLocs[0].m_fz, aSoldiersLocs[0].m_fo, TEMPSPAWN_DEAD_DESPAWN, 0);
 }
 
 void instance_shattered_halls::OnObjectCreate(GameObject* pGo)
@@ -197,7 +197,7 @@ void instance_shattered_halls::SetData(uint32 type, uint32 data)
                 {
                     // summon the 3 npcs for execution
                     for (uint8 i = 2; i < 5; ++i)
-                        player->SummonCreature(m_team == ALLIANCE ? aSoldiersLocs[i].m_uiAllianceEntry : aSoldiersLocs[i].m_uiHordeEntry, aSoldiersLocs[i].m_fX, aSoldiersLocs[i].m_fY, aSoldiersLocs[i].m_fZ, aSoldiersLocs[i].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+                        player->SummonCreature(m_team == ALLIANCE ? aSoldiersLocs[i].m_uiAllianceEntry : aSoldiersLocs[i].m_uiHordeEntry, aSoldiersLocs[i].m_fx, aSoldiersLocs[i].m_fy, aSoldiersLocs[i].m_fz, aSoldiersLocs[i].m_fo, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                     // Summon the executioner; Note: according to wowhead he shouldn't be targetable until Kargath encounter is finished
                     if (Creature* pExecutioner = player->SummonCreature(NPC_EXECUTIONER, afExecutionerLoc[0], afExecutionerLoc[1], afExecutionerLoc[2], afExecutionerLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true))

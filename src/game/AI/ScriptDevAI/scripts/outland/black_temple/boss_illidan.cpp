@@ -334,45 +334,40 @@ enum PhaseTransition
     PHASETRANSITION_MAIEV,
 };
 
-struct Locations
+static const Position aCenterLoc[] =
 {
-    float fX, fY, fZ;
+    {676.648f, 304.7607f, 354.1909f, 0.0},           // Landing location
 };
 
-static const Locations aCenterLoc[] =
+static const Position aIllidariElitesPos[MAX_ILLIDARI_ELITES] =
 {
-    {676.648f, 304.7607f, 354.1909f},           // Landing location
+    {743.9686f, 289.6447f, 311.1807f, 0.0},
+    {753.8425f, 286.562f, 310.9353f, 0.0},
+    {745.2552f, 322.1574f, 310.4596f, 0.0},
+    {745.3237f, 283.986f, 309.2765f, 0.0},
+    {750.0472f, 282.3274f, 309.4353f, 0.0},
+    {747.0576f, 326.4268f, 309.0688f, 0.0},
+    {751.0878f, 327.6505f, 309.4576f, 0.0},
+    {748.8422f, 288.062f, 310.9782f, 0.0},
+    {750.0322f, 323.6064f, 310.2757f, 0.0},
+    {754.0332f, 325.8136f, 310.3195f, 0.0},
 };
 
-static const Locations aIllidariElitesPos[MAX_ILLIDARI_ELITES] =
+static const Position illidanFlightPos[] =
 {
-    {743.9686f, 289.6447f, 311.1807f},
-    {753.8425f, 286.562f, 310.9353f},
-    {745.2552f, 322.1574f, 310.4596f},
-    {745.3237f, 283.986f, 309.2765f},
-    {750.0472f, 282.3274f, 309.4353f},
-    {747.0576f, 326.4268f, 309.0688f},
-    {751.0878f, 327.6505f, 309.4576f},
-    {748.8422f, 288.062f, 310.9782f},
-    {750.0322f, 323.6064f, 310.2757f},
-    {754.0332f, 325.8136f, 310.3195f},
+    { 658.8175f, 266.0992f, 370.0833f, 0.0},
+    { 705.2382f, 273.1146f, 370.0833f, 0.0},
+    { 657.8459f, 343.9125f, 370.0833f, 0.0},
+    { 705.9218f, 336.1461f, 370.0815f, 0.0},
 };
 
-static const Locations illidanFlightPos[] =
-{
-    { 658.8175f, 266.0992f, 370.0833f},
-    { 705.2382f, 273.1146f, 370.0833f},
-    { 657.8459f, 343.9125f, 370.0833f},
-    { 705.9218f, 336.1461f, 370.0815f},
-};
-
-static const Locations aEyeBlastPos[] =
+static const Position aEyeBlastPos[] =
 {
     // spawn
-    {642.7164f, 305.2436f, 353.5596f},
-    {652.105f,  259.5127f, 353.0794f},
-    {710.8815f, 306.4028f, 353.5962f},
-    {708.8524f, 342.2623f, 353.0794f},
+    {642.7164f, 305.2436f, 353.5596f, 0.0},
+    {652.105f,  259.5127f, 353.0794f, 0.0},
+    {710.8815f, 306.4028f, 353.5962f, 0.0},
+    {708.8524f, 342.2623f, 353.0794f, 0.0},
 };
 
 enum IllidanActions
@@ -630,7 +625,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 randVal = -1;
             m_curEyeBlastLoc = (m_curEyeBlastLoc + randVal + 4) % 4; // make sure he only goes left or right
             SetCombatScriptStatus(true);
-            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].fX, illidanFlightPos[m_curEyeBlastLoc].fY, illidanFlightPos[m_curEyeBlastLoc].fZ, FORCED_MOVEMENT_RUN);
+            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].x, illidanFlightPos[m_curEyeBlastLoc].y, illidanFlightPos[m_curEyeBlastLoc].z, FORCED_MOVEMENT_RUN);
         }
         else if (eventType == AI_EVENT_CUSTOM_F)
         {
@@ -1003,25 +998,25 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                             //uint32 secondEyeBlastPos = 0;
                             //for (uint32 i = 1; i < 4; ++i)
                             //{
-                            //    if (m_creature->GetDistance(illidanFlightPos[firstEyeBlastPos].fX, illidanFlightPos[firstEyeBlastPos].fY, illidanFlightPos[firstEyeBlastPos].fZ, DIST_CALC_NONE)
-                            //        > m_creature->GetDistance(illidanFlightPos[i].fX, illidanFlightPos[i].fY, illidanFlightPos[i].fZ, DIST_CALC_NONE))
+                            //    if (m_creature->GetDistance(illidanFlightPos[firstEyeBlastPos].x, illidanFlightPos[firstEyeBlastPos].y, illidanFlightPos[firstEyeBlastPos].z, DIST_CALC_NONE)
+                            //        > m_creature->GetDistance(illidanFlightPos[i].x, illidanFlightPos[i].y, illidanFlightPos[i].z, DIST_CALC_NONE))
                             //    {
-                            //        if (m_creature->GetDistance(illidanFlightPos[secondEyeBlastPos].fX, illidanFlightPos[secondEyeBlastPos].fY, illidanFlightPos[secondEyeBlastPos].fZ, DIST_CALC_NONE)
-                            //            > m_creature->GetDistance(illidanFlightPos[firstEyeBlastPos].fX, illidanFlightPos[firstEyeBlastPos].fY, illidanFlightPos[firstEyeBlastPos].fZ, DIST_CALC_NONE))
+                            //        if (m_creature->GetDistance(illidanFlightPos[secondEyeBlastPos].x, illidanFlightPos[secondEyeBlastPos].y, illidanFlightPos[secondEyeBlastPos].z, DIST_CALC_NONE)
+                            //            > m_creature->GetDistance(illidanFlightPos[firstEyeBlastPos].x, illidanFlightPos[firstEyeBlastPos].y, illidanFlightPos[firstEyeBlastPos].z, DIST_CALC_NONE))
                             //        {
                             //            secondEyeBlastPos = firstEyeBlastPos;
                             //        }
                             //        firstEyeBlastPos = i;
                             //    }
-                            //    else if (m_creature->GetDistance(illidanFlightPos[secondEyeBlastPos].fX, illidanFlightPos[secondEyeBlastPos].fY, illidanFlightPos[secondEyeBlastPos].fZ, DIST_CALC_NONE)
-                            //        > m_creature->GetDistance(illidanFlightPos[i].fX, illidanFlightPos[i].fY, illidanFlightPos[i].fZ, DIST_CALC_NONE))
+                            //    else if (m_creature->GetDistance(illidanFlightPos[secondEyeBlastPos].x, illidanFlightPos[secondEyeBlastPos].y, illidanFlightPos[secondEyeBlastPos].z, DIST_CALC_NONE)
+                            //        > m_creature->GetDistance(illidanFlightPos[i].x, illidanFlightPos[i].y, illidanFlightPos[i].z, DIST_CALC_NONE))
                             //    {
                             //        secondEyeBlastPos = i;
                             //    }
                             //}
                             // m_curEyeBlastLoc = urand(0, 1) ? firstEyeBlastPos : secondEyeBlastPos;
                             m_curEyeBlastLoc = urand(0, 3);
-                            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].fX, illidanFlightPos[m_curEyeBlastLoc].fY, illidanFlightPos[m_curEyeBlastLoc].fZ, FORCED_MOVEMENT_RUN);
+                            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].x, illidanFlightPos[m_curEyeBlastLoc].y, illidanFlightPos[m_curEyeBlastLoc].z, FORCED_MOVEMENT_RUN);
                             PreparePhaseTimers();
                         }
                         break;
@@ -1038,7 +1033,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                     {
                         m_creature->SetImmobilizedState(false);
                         m_creature->SetTarget(nullptr);
-                        m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_LANDING, aCenterLoc[0].fX, aCenterLoc[0].fY, aCenterLoc[0].fZ, FORCED_MOVEMENT_RUN);
+                        m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_LANDING, aCenterLoc[0].x, aCenterLoc[0].y, aCenterLoc[0].z, FORCED_MOVEMENT_RUN);
                         break;
                     }
                     case 1:
@@ -1173,7 +1168,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
         DoScriptText(SAY_EYE_BLAST, m_creature);
 
         // Set spawn and target loc
-        m_creature->SummonCreature(NPC_ILLIDAN_TARGET, aEyeBlastPos[m_curEyeBlastLoc].fX, aEyeBlastPos[m_curEyeBlastLoc].fY, aEyeBlastPos[m_curEyeBlastLoc].fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 15000, true, true, m_curEyeBlastLoc + 1);
+        m_creature->SummonCreature(NPC_ILLIDAN_TARGET, aEyeBlastPos[m_curEyeBlastLoc].x, aEyeBlastPos[m_curEyeBlastLoc].y, aEyeBlastPos[m_curEyeBlastLoc].z, 0, TEMPSPAWN_TIMED_DESPAWN, 15000, true, true, m_curEyeBlastLoc + 1);
         return true;
     }
 
@@ -1383,8 +1378,8 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         AddCombatAction(AKAMA_ACTION_HEAL, 0u);
         AddCustomAction(AKAMA_SUMMON_ILLIDARI, true, [&]()
         {
-            for (const Locations& aIllidariElitesPo : aIllidariElitesPos)
-                m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPo.fX, aIllidariElitesPo.fY, aIllidariElitesPo.fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            for (const Position &aIllidariElitesPo : aIllidariElitesPos)
+                m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPo.x, aIllidariElitesPo.y, aIllidariElitesPo.z, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
             ResetTimer(AKAMA_SUMMON_ILLIDARI, urand(35000, 50000));
         });
