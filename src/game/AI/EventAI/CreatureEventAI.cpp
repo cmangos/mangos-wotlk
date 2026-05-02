@@ -137,9 +137,7 @@ void CreatureEventAI::InitAI()
                 ++events_count;
         }
         // EventMap had events but they were not added because they must be for instance
-        if (events_count == 0)
-            sLog.outErrorEventAI("Creature %u has events but no events added to list because of instance flags (spawned in map %u, difficulty %u).", m_creature->GetEntry(), m_creature->GetMapId(), m_creature->GetMap()->GetDifficulty());
-        else
+        if (events_count != 0)
         {
             m_CreatureEventAIList.reserve(events_count);
             for (const auto& aiEvent : creatureEvent)
