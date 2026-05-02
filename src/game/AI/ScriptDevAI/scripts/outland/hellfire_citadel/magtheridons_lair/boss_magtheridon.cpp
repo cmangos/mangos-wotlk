@@ -266,6 +266,12 @@ struct boss_magtheridonAI : public CombatAI
         }
     }
 
+    void OnSpellInterrupt(SpellEntry const* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_BLASTNOVA)
+            m_creature->AddCooldown(*sSpellTemplate.LookupEntry<SpellEntry>(SPELL_BLASTNOVA)); // will use spell list cooldown
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
