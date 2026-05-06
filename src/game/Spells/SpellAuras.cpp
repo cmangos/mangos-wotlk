@@ -4025,7 +4025,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         target->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT, GetHolder());
 
         if (displayId > 0)
+        {
+            GetModifier()->m_amount = displayId;
             target->SetDisplayId(displayId);
+        }
 
         // now only powertype must be set
         switch (form)
