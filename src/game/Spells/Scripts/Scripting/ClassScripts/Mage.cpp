@@ -19,34 +19,6 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellMgr.h"
 
-// 11213 - Arcane Concentration
-struct ArcaneConcentration : public AuraScript
-{
-    bool OnCheckProc(Aura* aura, ProcExecutionData& procData) const override
-    {
-        if (Spell* spell = procData.spell)
-        {
-            if (IsChanneledSpell(spell->m_spellInfo))
-                return false; // these never proc
-            if (SpellEntry const* spellInfo = spell->GetTriggeredByAuraSpellInfo())
-            {
-                if (IsChanneledSpell(spellInfo))
-                {
-                    if (Spell* channeledSpell = spell->GetCaster()->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-                    {
-                        if (channeledSpell->IsAuraProcced(aura))
-                            return false;
-
-                        channeledSpell->RegisterAuraProc(aura);
-                    }
-                }
-            }
-            spell->RegisterAuraProc(aura);
-        }
-        return true;
-    }
-};
-
 // 11170 - Shatter
 struct ShatterMage : public AuraScript
 {
@@ -292,7 +264,6 @@ struct BlastWaveMage : public SpellScript
 
 void LoadMageScripts()
 {
-    RegisterSpellScript<ArcaneConcentration>("spell_arcane_concentration");
     RegisterSpellScript<ShatterMage>("spell_shatter_mage");
     RegisterSpellScript<Blizzard>("spell_blizzard");
     RegisterSpellScript<MoltenFury>("spell_molten_fury");
