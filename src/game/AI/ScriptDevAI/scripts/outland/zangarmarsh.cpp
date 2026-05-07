@@ -399,7 +399,9 @@ struct npc_frostbiteAI : public ScriptedAI
 
     void Reset() override
     {
-        m_creature->CastSpell(m_creature, SPELL_FROSTBITE_ROTATE, TRIGGERED_NONE);
+        m_creature->CastSpell(nullptr, SPELL_FROSTBITE_ROTATE, TRIGGERED_NONE);
+        SetReactState(REACT_PASSIVE);
+        SetCombatMovement(false);
     }
     
     void SpellHit(Unit* caster, const SpellEntry* spell) override
@@ -440,16 +442,7 @@ struct npc_frostbiteAI : public ScriptedAI
                 break;
         }
     }
-
-    void UpdateAI(const uint32 /*diff*/) override
-    {
-    }
 };
-
-UnitAI* GetAI_npc_frostbite(Creature* creature)
-{
-    return new npc_frostbiteAI(creature);
-}
 
 void AddSC_zangarmarsh()
 {
@@ -479,6 +472,6 @@ void AddSC_zangarmarsh()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_frostbite";
-    pNewScript->GetAI = &GetAI_npc_frostbite;
+    pNewScript->GetAI = &GetNewAIInstance<npc_frostbiteAI>;
     pNewScript->RegisterSelf();
 }
