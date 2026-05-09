@@ -76,6 +76,7 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
 
     void Reset() override
     {
+        SetReactState(REACT_DEFENSIVE);
         m_playerGuid.Clear();
 
         m_uiEatTimer    = 0;
@@ -92,7 +93,7 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
         if (pCaster->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_PLACE_CARCASS && !m_creature->HasAura(SPELL_JUST_EATEN))
         {
             m_playerGuid = pCaster->GetObjectGuid();
-            m_uiEatTimer = 5000;
+            m_uiEatTimer = 1000;
         }
     }
 
@@ -107,6 +108,10 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
             m_creature->SetLevitate(false);
             m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
             m_creature->SetAnimTier(AnimTier::Ground);
+
+            // Despawn current carcass
+            if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_FLAYER_CARCASS, 3.0f))
+                pGo->SetLootState(GO_JUST_DEACTIVATED);
         }
     }
 
@@ -121,7 +126,7 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
         {
             if (m_uiEatTimer <= uiDiff)
             {
-                if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_FLAYER_CARCASS, 80.0f))
+                if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_FLAYER_CARCASS, 100.0f))
                 {
                     if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
                         m_creature->GetMotionMaster()->MovementExpired();
@@ -149,7 +154,10 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
                 DoScriptText(SAY_JUST_EATEN, m_creature);
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                {
+                    m_creature->SetFacingToObject(pPlayer);
                     pPlayer->KilledMonsterCredit(NPC_EVENT_PINGER, m_creature->GetObjectGuid());
+                }
 
                 Reset();
                 m_creature->SetLevitate(true);
