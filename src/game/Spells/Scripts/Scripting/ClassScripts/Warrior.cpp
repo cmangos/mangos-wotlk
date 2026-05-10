@@ -20,7 +20,7 @@
 #include "Spells/SpellAuras.h"
 
 // 5246 - Intimidating Shout
-struct IntimidatingShould : public SpellScript
+struct IntimidatingShout : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
@@ -341,7 +341,7 @@ struct GlyphOfVictoryRush : public AuraScript
 
 void LoadWarriorScripts()
 {
-    RegisterSpellScript<IntimidatingShould>("spell_intimidating_shout");
+    RegisterSpellScript<IntimidatingShout>("spell_intimidating_shout");
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
     RegisterSpellScript<WarriorExecuteDamage>("spell_warrior_execute_damage");
     RegisterSpellScript<VictoryRush>("spell_warrior_victory_rush");
