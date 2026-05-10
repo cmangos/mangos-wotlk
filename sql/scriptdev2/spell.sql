@@ -76,6 +76,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (17536,'spell_awaken_kerlonian'),
 (18153,'spell_kodo_kombobulator'),
 (18969,'spell_taelan_death'),
+(19134,'spell_intimidating_shout'),
 (19707,'spell_hate_to_half'),
 (19832,'spell_possess_razorgore'),
 (19872,'spell_calm_dragonkin'),
@@ -304,6 +305,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (32325,'spell_void_blast'),
 (38760,'spell_void_blast'),
 (33558,'spell_draw_shadows_trigger'),
+(33789,'spell_intimidating_shout'),
+(38945,'spell_intimidating_shout'),
 (34662,'spell_bear_command'),
 (34665,'spell_administer_antidote'),
 (37689,'spell_tell_dog_i_just_died'),
@@ -1729,6 +1732,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Warrior
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(5246,'spell_intimidating_shout'),
 (5308,'spell_warrior_execute'),
 (20658,'spell_warrior_execute'),
 (20660,'spell_warrior_execute'),
