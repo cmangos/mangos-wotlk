@@ -2640,6 +2640,8 @@ class Player : public Unit
 
         bool IsExpectingChangeTransport() const { return m_expectingChangeTransport; }
         void SetExpectingChangeTransport(bool state) { m_expectingChangeTransport = state; }
+
+        uint32 GetPendingMountId() const { return m_pendingMountId; }
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

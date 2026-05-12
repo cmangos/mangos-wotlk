@@ -319,22 +319,30 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     if (m_owner->IsCreature())
         displayId = static_cast<Creature*>(m_owner)->GetNativeDisplayId();
     else if (m_owner->IsPlayer())
-        displayId = static_cast<Player*>(m_owner)->GetMountID();
+    {
+        Player* player = static_cast<Player*>(m_owner);
+        displayId = player->GetMountID();
+        if (displayId == 0)
+            displayId = player->GetPendingMountId();
+    }
     auto* creatureDisplayInfo = sCreatureDisplayInfoStore.LookupEntry(displayId);
-    float scale = creatureDisplayInfo->scale;
-    scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
-    auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
-    if (attachmentItr != sModelAttachmentStore.end())
-        for (auto& attachment : attachmentItr->second)
-        {
-            if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+    if (creatureDisplayInfo != nullptr)
+    {
+        float scale = creatureDisplayInfo->scale;
+        scale *= sCreatureModelDataStore.LookupEntry(creatureDisplayInfo->ModelId)->Scale;
+        auto attachmentItr = sModelAttachmentStore.find(creatureDisplayInfo->ModelId);
+        if (attachmentItr != sModelAttachmentStore.end())
+            for (auto& attachment : attachmentItr->second)
             {
-                lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
-                ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
-                lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
-                break;
+                if (attachment.id == attachmentLookup(seatEntry->m_attachmentID))
+                {
+                    lx = (attachment.position.x + seatEntry->m_attachmentOffsetX) * scale;
+                    ly = (attachment.position.y + seatEntry->m_attachmentOffsetY) * scale;
+                    lz = (attachment.position.z + seatEntry->m_attachmentOffsetZ) * scale;
+                    break;
+                }
             }
-        }
+    }
 
     BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
     if (auto* rootVehicle = static_cast<Unit*>(m_owner)->FindRootVehicle())
