@@ -383,6 +383,7 @@ bool GOUse_go_manticron_cube(Player* player, GameObject* go)
     return true;
 }
 
+// 30410 - Shadow Grasp
 struct ShadowGraspCube : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -402,6 +403,7 @@ struct ShadowGraspCube : public AuraScript
     }
 };
 
+// 30166 - Shadow Grasp
 struct ShadowGraspMagth : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -423,6 +425,7 @@ struct ShadowGraspMagth : public AuraScript
     }
 };
 
+// 30658 - Quake
 struct QuakeMagth : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
@@ -432,6 +435,7 @@ struct QuakeMagth : public SpellScript
     }
 };
 
+// 30632 - Debris
 struct DebrisMagtheridon : public AuraScript
 {
     void OnPersistentAreaAuraEnd(DynamicObject* dynGo) const override
