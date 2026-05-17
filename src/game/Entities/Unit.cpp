@@ -9754,7 +9754,7 @@ void Unit::SetSpeedRate(UnitMoveType mtype, float rate, bool forced)
             data << GetPackGUID();
             data << counter;
             if (mtype == MOVE_RUN)
-                data << uint8(0);                           // new 2.1.0
+                data << uint8(0); // new 2.1.0 - update tracking run speed
             data << GetSpeed(mtype);
             player->GetSession()->SendPacket(data);
             player->GetSession()->GetAnticheat()->OrderSent(data.GetOpcode(), counter);
