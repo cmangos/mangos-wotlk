@@ -154,6 +154,10 @@ Quest::Quest(Field* questRecord)
     RequiredCondition = questRecord[148].GetUInt32();
     ReputationSpilloverMask = questRecord[151].GetUInt32();
 
+    RewFactionFlags = questRecord[152].GetUInt32();
+    RewReputationMask = questRecord[153].GetUInt32();
+    RewArenaPoints = questRecord[154].GetUInt32();
+
     m_isActive = true;
 
     m_reqitemscount = 0;

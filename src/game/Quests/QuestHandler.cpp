@@ -300,8 +300,8 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
         data << uint32(pQuest->GetCharTitleId());               // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
         data << uint32(pQuest->GetPlayersSlain());              // players slain
         data << uint32(pQuest->GetBonusTalents());              // bonus talents
-        data << uint32(0);                                      // bonus arena points
-        data << uint32(0);                                      // rew rep show mask?
+        data << int32(pQuest->GetRewArenaPoints());             // bonus arena points
+        data << uint32(pQuest->GetRewFactionFlags());           // rep reward faction flags
 
         int iI;
 
@@ -333,8 +333,7 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
             data << int32(i);
 
         for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
-            data << int32(0);
-        // data << int32(pQuest->RewRepValue[i]);            // current field for store of rep value, can be reused to implement "override value"
+            data << int32(pQuest->RewRepValue[i]);            // current field for store of rep value, can be reused to implement "override value"
 
         data << pQuest->GetPointMapId();
         data << pQuest->GetPointX();
