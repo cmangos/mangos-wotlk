@@ -567,7 +567,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(10 * MaNGOS::Honor::hk_honor_at_level(GetMenuSession()->GetPlayer()->GetLevel(), pQuest->GetRewHonorAddition()));
     data << float(pQuest->GetRewHonorMultiplier());
 
-    data << uint32(pQuest->GetRewReputationMask());         // reward reputation mask
+    data << uint32(pQuest->GetRewUnkField());               // reward unk
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
     data << uint32(pQuest->GetRewSpellCast());              // casted spell
     data << uint32(pQuest->GetCharTitleId());               // character title

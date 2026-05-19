@@ -154,7 +154,7 @@ Quest::Quest(Field* questRecord)
     RequiredCondition = questRecord[148].GetUInt32();
 
     RewFactionFlags = questRecord[151].GetUInt32();
-    RewReputationMask = questRecord[152].GetUInt32();
+    RewUnkField = questRecord[152].GetUInt32();
     RewArenaPoints = questRecord[153].GetUInt32();
 
     m_isActive = true;

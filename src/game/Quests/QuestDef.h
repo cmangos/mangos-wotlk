@@ -259,7 +259,7 @@ class Quest
         uint32 GetRewMoneyMaxLevel() const;
         int32 GetRewArenaPoints() const { return RewArenaPoints; }
         uint32 GetRewFactionFlags() const { return RewFactionFlags; }
-        uint32 GetRewReputationMask() const { return RewReputationMask; }
+        uint32 GetRewUnkField() const { return RewUnkField; }
         // use in XP calculation at client
         uint32 GetRewSpell() const { return RewSpell; }
         uint32 GetRewSpellCast() const { return RewSpellCast; }
@@ -390,7 +390,7 @@ class Quest
         uint32 RewMoneyMaxLevel;
         int32 RewArenaPoints;
         uint32 RewFactionFlags;
-        uint32 RewReputationMask;
+        uint32 RewUnkField;
         uint32 RewSpell;
         uint32 RewSpellCast;
         uint32 RewMailTemplateId;
