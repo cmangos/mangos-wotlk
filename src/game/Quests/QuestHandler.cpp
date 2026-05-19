@@ -349,17 +349,13 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
         for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; ++iI)
         {
             if (pQuest->ReqCreatureOrGOId[iI] < 0)
-            {
-                // client expected gameobject template id in form (id|0x80000000)
-                data << uint32((pQuest->ReqCreatureOrGOId[iI] * (-1)) | 0x80000000);
-            }
+                data << uint32((-pQuest->ReqCreatureOrGOId[iI]) | 0x80000000); // client expects gameobject template id in form (id|0x80000000)
             else
-            {
                 data << uint32(pQuest->ReqCreatureOrGOId[iI]);
-            }
+
             data << uint32(pQuest->ReqCreatureOrGOCount[iI]);
             data << uint32(pQuest->ReqSourceId[iI]);
-            data << uint32(0);                                  // req source count?
+            data << uint32(pQuest->ReqSourceCount[iI]);
         }
 
         for (iI = 0; iI < QUEST_ITEM_OBJECTIVES_COUNT; ++iI)
