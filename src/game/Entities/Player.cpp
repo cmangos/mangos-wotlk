@@ -7283,7 +7283,7 @@ void Player::RewardReputation(Quest const* pQuest)
         {
             int32 rep = CalculateReputationGain(REPUTATION_SOURCE_QUEST, pQuest->RewRepValue[i] / 100, pQuest->RewMaxRepValue[i], pQuest->RewRepFaction[i], GetQuestLevelForPlayer(pQuest), true);
 
-            bool noSpillover = (pQuest->GetReputationSpilloverMask() & (1 << i)) != 0;
+            bool noSpillover = (pQuest->GetRewFactionFlags() & (1 << i)) != 0;
             if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]))
                 GetReputationMgr().ModifyReputation(factionEntry, rep, noSpillover);
         }

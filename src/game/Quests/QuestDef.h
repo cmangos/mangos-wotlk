@@ -276,7 +276,6 @@ class Quest
         uint32 GetDetailsEmoteCount() const { return m_detailsemotecount; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
-        uint32 GetReputationSpilloverMask() const { return ReputationSpilloverMask; }
 
         bool   IsRepeatable() const { return (m_SpecialFlags & QUEST_SPECIAL_FLAG_REPEATABLE) != 0; }
         bool   IsAutoComplete() const { return !QuestMethod; }
@@ -406,7 +405,6 @@ class Quest
         uint32 CompleteEmoteDelay;
         uint32 QuestStartScript;
         uint32 QuestCompleteScript;
-        uint32 ReputationSpilloverMask;
 
         MaNGOS::unique_weak_ptr<Quest> m_weakRef;
 };
