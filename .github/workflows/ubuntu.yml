@@ -5,7 +5,7 @@ on: [push]
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  REPO_DIR : ${{github.workspace}}
+  REPO_DIR: ${{github.workspace}}
   BUILD_DIR: ${{github.workspace}}/bin/builddir
   BOOST_VERSION: "1.83.0"
   BOOST_PLATFORM_VERSION: "22.04"
@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-       include:
+        include:
           - os: ubuntu-22.04
             COMPILER_CC: gcc-12
             COMPILER_PP: g++-12
@@ -75,17 +75,16 @@ jobs:
           BOOST_ROOT: ${{ steps.install-boost.outputs.BOOST_ROOT }}
         run: cmake -DBoost_ARCHITECTURE=-x64 -DPCH=${{env.USE_PCH}} -DCMAKE_INSTALL_PREFIX=/home/runner/work ${{env.EXTRA_BUILD}}-B ${{env.BUILD_DIR}} -S ${{env.REPO_DIR}}
 
-
       - name: Build
         env:
           MAKEFLAGS: "-j8"
         run: |
-            cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
-            cmake --install ${{env.BUILD_DIR}}
+          cmake --build ${{env.BUILD_DIR}} --config ${{env.BUILD_TYPE}}
+          cmake --install ${{env.BUILD_DIR}}
 
   notify:
     name: Send Notification to Discord on Failure
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     permissions:
       contents: none
     needs: # make sure the notification is sent AFTER the jobs you want included have completed
