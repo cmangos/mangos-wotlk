@@ -14,10 +14,16 @@ enum
     NPC_BLACK_STALKER     = 17882,
 
     NPC_UNDERBOG_FRENZY   = 20465,
+    NPC_EARTHBINDER_RAYGE = 17885,
+
+    SAY_RAYGE_WHISPER = 14618,
 
     SPELL_PERMANENT_FEIGH_DEATH = 31261,
 
+    QUEST_LOST_IN_ACTION = 9738,
+
     DATA_GHAZAN_SURFACE   = 0,
+    DATA_EARTHBINDER_RAYGE_WHISPER = 1,
 };
 
 class instance_underbog : public ScriptedInstance
@@ -34,6 +40,7 @@ class instance_underbog : public ScriptedInstance
 
     private:
         bool m_bGhazanSurfaced;
+        bool m_raygeWhispered;
 };
 
 #endif

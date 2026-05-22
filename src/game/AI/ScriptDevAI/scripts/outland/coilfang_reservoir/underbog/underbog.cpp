@@ -25,7 +25,7 @@ EndScriptData */
 #include "underbog.h"
 #include "World/WorldStateDefines.h"
 
-instance_underbog::instance_underbog(Map* map) : ScriptedInstance(map), m_bGhazanSurfaced(false)
+instance_underbog::instance_underbog(Map* map) : ScriptedInstance(map), m_bGhazanSurfaced(false), m_raygeWhispered(false)
 {
     Initialize();
 }
@@ -36,12 +36,16 @@ void instance_underbog::SetData(uint32 type, uint32 data)
 {
     if (type == DATA_GHAZAN_SURFACE)
         m_bGhazanSurfaced = data != 0;
+    else if (type == DATA_EARTHBINDER_RAYGE_WHISPER)
+        m_raygeWhispered = data != 0;
 }
 
 uint32 instance_underbog::GetData(uint32 type) const
 {
     if (type == DATA_GHAZAN_SURFACE)
         return uint32(m_bGhazanSurfaced);
+    else if (type == DATA_EARTHBINDER_RAYGE_WHISPER)
+        return uint32(m_raygeWhispered);
 
     return 0;
 }
@@ -80,10 +84,7 @@ void instance_underbog::OnCreatureDeath(Creature* creature)
     }
 }
 
-/*######
-## at_ghazan_surface
-######*/
-
+// at_ghazan_surface - 4302
 bool AreaTrigger_at_ghazan_surface(Player* player, AreaTriggerEntry const* /*pAt*/)
 {
     ScriptedInstance* instance = (ScriptedInstance*)player->GetMap()->GetInstanceData();
@@ -99,6 +100,26 @@ bool AreaTrigger_at_ghazan_surface(Player* player, AreaTriggerEntry const* /*pAt
     return true;
 }
 
+// at_earthbinder_rayge - 4292
+bool AreaTrigger_at_earthbinder_rayge(Player* player, AreaTriggerEntry const* /*at*/)
+{
+    ScriptedInstance* instance = (ScriptedInstance*)player->GetMap()->GetInstanceData();
+    if (instance->GetData(DATA_EARTHBINDER_RAYGE_WHISPER) == 0 && player->IsCurrentQuest(QUEST_LOST_IN_ACTION))
+    {
+        if (Unit* earthbinder = instance->GetSingleCreatureFromStorage(NPC_EARTHBINDER_RAYGE))
+        {
+            for (auto& instancePlayerRef : instance->instance->GetPlayers())
+            {
+                Player* instancePlayer = instancePlayerRef.getSource();
+                if (instancePlayer->IsCurrentQuest(QUEST_LOST_IN_ACTION))
+                    DoBroadcastText(SAY_RAYGE_WHISPER, earthbinder, instancePlayer);
+            }
+        }
+        instance->SetData(DATA_EARTHBINDER_RAYGE_WHISPER, 1);
+    }
+    return true;
+}
+
 void AddSC_instance_underbog()
 {
     Script* pNewScript = new Script;
@@ -109,6 +130,11 @@ void AddSC_instance_underbog()
     pNewScript = new Script;
     pNewScript->Name = "at_ghazan_surface";
     pNewScript->pAreaTrigger = &AreaTrigger_at_ghazan_surface;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_earthbinder_rayge";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_earthbinder_rayge;
     pNewScript->RegisterSelf();
 }
 
