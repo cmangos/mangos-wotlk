@@ -31,6 +31,27 @@ struct Entrapment : public AuraScript
     }
 };
 
+// 1515 - Tame Beast
+struct TameBeast : public SpellScript, public AuraScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target)
+            return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+        if (target->GetLevel() > spell->GetCaster()->GetLevel())
+            return SPELL_FAILED_HIGHLEVEL;
+        return SPELL_CAST_OK;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0 && apply)
+            if (Unit* caster = aura->GetCaster()) // Wotlk - sniff - adds 1000 threat
+                aura->GetTarget()->AddThreat(caster, 1000.0f, false, GetSpellSchoolMask(aura->GetSpellProto()), aura->GetSpellProto());
+    }
+};
+
 // 34026 - Kill Command
 struct KillCommand : public SpellScript
 {
@@ -329,6 +350,7 @@ struct TamingPetRodAura : public AuraScript
 void LoadHunterScripts()
 {
     RegisterSpellScript<Entrapment>("spell_entrapment");
+    RegisterSpellScript<TameBeast>("spell_tame_beast");
     RegisterSpellScript<KillCommand>("spell_kill_command");
     RegisterSpellScript<Misdirection>("spell_misdirection");
     RegisterSpellScript<ExposeWeakness>("spell_expose_weakness");

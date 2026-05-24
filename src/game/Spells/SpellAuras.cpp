@@ -2379,10 +2379,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 switch (GetId())
                 {
-                    case 1515:                              // Tame beast
-                        if (Unit* caster = GetCaster()) // Wotlk - sniff - adds 1000 threat
-                            target->AddThreat(caster, 1000.0f, false, GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
-                        return;
                     case 6946:                              // Curse of the Bleakheart
                     case 41170:
                         m_isPeriodic = true;
