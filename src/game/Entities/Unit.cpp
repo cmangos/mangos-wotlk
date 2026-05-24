@@ -1302,7 +1302,7 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellInfo);
             victim->AddThreat(dealer, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellInfo);
-            if (damagetype != DOT && damagetype != SPELL_DAMAGE_SHIELD) // DOTs dont put in combat but still cause threat
+            if (damagetype != DOT && damagetype != SPELL_DAMAGE_SHIELD && (!spellInfo || !spellInfo->HasAttribute(SPELL_ATTR_EX4_REACTIVE_DAMAGE_PROC))) // DOTs dont put in combat but still cause threat
             {
                 dealer->SetInCombatWith(victim);
                 victim->SetInCombatWith(dealer);
