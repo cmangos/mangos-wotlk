@@ -71,6 +71,8 @@ enum
     GO_HALAA_BANNER = 182210,
 
     GO_MAGTHERIDONS_HEAD = 184640,
+
+    NPC_VINDICATOR_VUULEEN = 21277,
 };
 
 enum Shartuul

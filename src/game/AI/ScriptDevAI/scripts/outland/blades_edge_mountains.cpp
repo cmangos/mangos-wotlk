@@ -3363,6 +3363,26 @@ struct ProtovoltaicMagnetoCollector : public AuraScript
     }
 };
 
+enum
+{
+    QUEST_THE_TRAPPINGS_OF_A_VINDICATOR = 10516,
+    SAY_VINDICATOR_WHISPER = 18922,
+};
+
+// at_vindicator_vuuleen - 4542
+bool AreaTrigger_at_vindicator_vuuleen(Player* player, AreaTriggerEntry const* /*at*/)
+{
+    ScriptedInstance* instance = static_cast<ScriptedInstance*>(player->GetMap()->GetInstanceData());
+    if (!player->IsActiveQuest(QUEST_THE_TRAPPINGS_OF_A_VINDICATOR))
+    {
+        if (Unit* vindicator = instance->GetSingleCreatureFromStorage(NPC_VINDICATOR_VUULEEN))
+        {
+            DoBroadcastText(SAY_VINDICATOR_WHISPER, vindicator, player); // TODO: Confirm if there is a cooldown
+        }
+    }
+    return true;
+}
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript = new Script;
@@ -3489,6 +3509,11 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "go_nether_drake_egg_trap";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_nether_drake_egg_trapAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_vindicator_vuuleen";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_vindicator_vuuleen;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SimonGamePreGameTimer>("spell_simon_game_pre_game_timer");

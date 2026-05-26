@@ -596,6 +596,8 @@ UPDATE creature_template SET ScriptName='npc_stun_field' WHERE entry IN(23312);
 INSERT INTO scripted_event_id VALUES
 (14913,'event_doomguard_punisher'),
 (14942,'event_shivan_assassin');
+INSERT INTO scripted_areatrigger VALUES
+(4542,'at_vindicator_vuuleen');
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
