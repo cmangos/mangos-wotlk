@@ -1810,6 +1810,9 @@ struct npc_drijyaAI : public npc_escortAI
 
     void WaypointReached(uint32 uiPointId) override
     {
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+            return;
+
         switch (uiPointId)
         {
             case 1:
@@ -1890,6 +1893,10 @@ struct npc_drijyaAI : public npc_escortAI
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_WARP_GATE, m_creature);
                 }
                 m_creature->ClearTemporaryFaction();
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+                End();
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 break;
         }
     }
