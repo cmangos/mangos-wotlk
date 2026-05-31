@@ -3969,6 +3969,8 @@ enum PhaseHunterData
     NPC_PHASE_HUNTER_ENTRY = 18879,
     NPC_DRAINED_PHASE_HUNTER_ENTRY = 19595
 };
+
+// 34219 - Recharging Battery
 struct RechargingBatterySpellScript : public SpellScript, public AuraScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
@@ -3985,6 +3987,25 @@ struct RechargingBatterySpellScript : public SpellScript, public AuraScript
         if (!apply)
             if (aura->GetTarget()->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
                 static_cast<Creature*>(aura->GetTarget())->UpdateEntry(NPC_DRAINED_PHASE_HUNTER_ENTRY);
+    }
+};
+
+enum
+{
+    NPC_SUNDERED_RUMBLER = 18881,
+    NPC_WARP_ABERRATION = 18865,
+};
+
+// 34520 - Elemental Power Extractor
+struct ElementalPowerExtractor : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // Recharging Battery can only be cast on Phase Hunter under 35% health
+        if (!target || (target->GetEntry() != NPC_PHASE_HUNTER_ENTRY && target->GetEntry() != NPC_WARP_ABERRATION))
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
     }
 };
 
@@ -4110,4 +4131,5 @@ void AddSC_netherstorm()
     RegisterSpellScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
     RegisterSpellScript<MentalInterferenceSpellScript>("spell_mental_interference");
     RegisterSpellScript<RechargingBatterySpellScript>("spell_recharging_battery");    
+    RegisterSpellScript<ElementalPowerExtractor>("spell_elemental_power_extractor");
 }

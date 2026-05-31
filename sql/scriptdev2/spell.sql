@@ -711,7 +711,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (42919,'spell_tricky_treat'),
 (34799,'spell_arcane_devastation'),
 (34219,'spell_recharging_battery'),
-(32173,'spell_entangling_roots');
+(32173,'spell_entangling_roots'),
+(34520,'spell_elemental_power_extractor');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
