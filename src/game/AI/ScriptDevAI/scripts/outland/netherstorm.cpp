@@ -4002,8 +4002,7 @@ struct ElementalPowerExtractor : public SpellScript
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
         Unit* target = spell->m_targets.getUnitTarget();
-        // Recharging Battery can only be cast on Phase Hunter under 35% health
-        if (!target || (target->GetEntry() != NPC_PHASE_HUNTER_ENTRY && target->GetEntry() != NPC_WARP_ABERRATION))
+        if (!target || (target->GetEntry() != NPC_SUNDERED_RUMBLER && target->GetEntry() != NPC_WARP_ABERRATION))
             return SPELL_FAILED_BAD_TARGETS;
         return SPELL_CAST_OK;
     }
