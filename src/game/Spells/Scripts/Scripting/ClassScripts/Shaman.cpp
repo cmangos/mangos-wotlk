@@ -91,20 +91,23 @@ struct EarthShield : public AuraScript
 
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
-        procData.basepoints[0] = aura->GetAmount();
-        procData.triggerTarget = aura->GetTarget();
-        procData.triggeredSpellId = 379;
-        procData.triggerOriginalCaster = aura->GetCasterGuid();
+        if (!aura->GetHolder()->IsProcReady(aura->GetTarget()->GetMap()->GetCurrentClockTime()))
+            return SPELL_AURA_PROC_FAILED;
+
+        int32 basepoints0 = aura->GetAmount();
         // Glyph of Earth Shield
         if (Unit* caster = aura->GetCaster())
         {
             if (Aura* aur = caster->GetDummyAura(63279))
             {
                 int32 aur_mod = aur->GetModifier()->m_amount;
-                procData.basepoints[0] = int32(procData.basepoints[0] * (aur_mod + 100.0f) / 100.0f);
+                basepoints0 = int32(basepoints0 * (aur_mod + 100.0f) / 100.0f);
             }
         }
 
+        aura->GetTarget()->CastCustomSpell(nullptr, 379, &basepoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST | TRIGGERED_DO_NOT_RESET_LEASH);
+
+        aura->GetHolder()->SetProcCooldown(std::chrono::milliseconds(procData.cooldown), aura->GetTarget()->GetMap()->GetCurrentClockTime());
         return SPELL_AURA_PROC_OK;
     }
 };
