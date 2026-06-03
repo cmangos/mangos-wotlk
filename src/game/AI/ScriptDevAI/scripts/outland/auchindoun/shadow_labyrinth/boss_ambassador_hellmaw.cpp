@@ -97,6 +97,7 @@ struct boss_ambassador_hellmawAI : public CombatAI
     {
         // yell intro and remove banish aura
         m_creature->PlayDirectSound(10473, PlayPacketSettings::ZONE);
+        m_creature->GetMotionMaster()->Clear(false, true);
         m_creature->GetMotionMaster()->MoveWaypoint();
         m_creature->RemoveAurasDueToSpell(SPELL_BANISH);
         m_creature->SetCanEnterCombat(true);
