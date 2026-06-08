@@ -1807,8 +1807,6 @@ void Player::SetDeathState(DeathState s)
         if (!ressSpellId)
             ressSpellId = GetResurrectionSpellId();
 
-        FailQuestsOnDeath(); // TODO: Order needs to be verified
-
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DEATH_AT_MAP, 1);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DEATH, 1);
         GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_DEATH_IN_DUNGEON, 1);
@@ -4920,6 +4918,8 @@ void Player::BuildPlayerRepop()
 
     // set and clear other
     SetAnimTier(AnimTier::Ground);
+
+    FailQuestsOnDeath(); // confirmed to be on release
 }
 
 void Player::ResurrectPlayer(float restore_percent, bool applySickness)
