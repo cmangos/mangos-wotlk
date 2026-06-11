@@ -41,7 +41,7 @@ EndContentData */
 // 58040 - Destroy Door Seal
 struct DestroyDoorSeal : public AuraScript
 {
-    void OnPeriodicDummy(Aura* aura) const override
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
     {
         if (instance_violet_hold* instance = dynamic_cast<instance_violet_hold*>(aura->GetTarget()->GetInstanceData()))
             instance->SetData(TYPE_SEAL, SPECIAL);
@@ -376,7 +376,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
 // 58008 - Portal Periodic
 struct PortalPeriodicVioletHold : public AuraScript
 {
-    void OnPeriodicDummy(Aura* aura) const override
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
     {
         aura->GetTarget()->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, aura->GetTarget(), aura->GetTarget());
     }
