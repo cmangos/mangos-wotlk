@@ -949,7 +949,7 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
             actionInterruptFlags = (actionInterruptFlags | AURA_INTERRUPT_FLAG_NON_PERIODIC_DAMAGE);
 
         SpellAuraHolderMap& vInterrupts = victim->GetSpellAuraHolderMap();
-        std::vector<uint32> cleanupHolder;
+        std::vector<std::pair<uint32, bool>> cleanupHolder;
 
         for (auto& aura : vInterrupts)
         {
@@ -967,11 +967,30 @@ uint32 Unit::DealDamage(Unit* dealer, Unit* victim, uint32 damage, CleanDamage c
                     continue;
 
             if (se->AuraInterruptFlags & actionInterruptFlags)
-                cleanupHolder.push_back(aura.second->GetId());
+                cleanupHolder.emplace_back(aura.second->GetId(), aura.second->IsPositive());
         }
 
-        for (auto aura : cleanupHolder)
-            victim->RemoveAurasDueToSpell(aura);
+        if (!cleanupHolder.empty())
+        {
+            WorldPacket data(SMSG_SPELLBREAKLOG, 8 + 8 + 4 + 1 + 4 + 1 * 5);
+            data << victim->GetPackGUID();          // Victim GUID
+            if (dealer)                             // Caster GUID
+                data << dealer->GetPackGUID();
+            else
+                data << PackedGuid();
+            data << uint32(spellInfo != nullptr ? spellInfo->Id : 0); // breaking spell id
+            data << uint8(0);                       // not used
+            data << uint32(cleanupHolder.size());   // count
+
+            for (std::pair<uint32, uint32> aura : cleanupHolder)
+            {
+                data << uint32(aura.first); // Spell Id
+                data << uint8(!aura.second); // buff / debuff
+                victim->RemoveAurasDueToSpell(aura.first);
+            }
+
+            victim->SendMessageToSet(data, true);
+        }
 
         if (Spell* spell = victim->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
             if (spell->m_spellInfo->ChannelInterruptFlags & actionInterruptFlags)
