@@ -209,6 +209,8 @@ namespace Movement
 
     bool MoveSplineInitArgs::Validate(Unit* unit) const
     {
+        if (!unit)
+            return false;
 #define CHECK(exp) \
     if (!(exp))\
     {\
