@@ -321,6 +321,9 @@ std::vector<std::tuple<SpellEntry const*, Unit*, bool>> PetAI::PickSpellWithTarg
             if (!result)
                 continue;
 
+            if (!CanAutoCastAreaAura(spellInfo, target)) // prevent area aura spam
+                continue;
+
             nonblockingSpells.emplace_back(spellInfo, target, false);
             continue;
         }
@@ -421,8 +424,24 @@ bool PetAI::ShouldCast(SpellEntry const* spellInfo, Unit* victim) // essentially
     return true;
 }
 
+bool PetAI::CanAutoCastAreaAura(SpellEntry const* spellInfo, Unit* target) const
+{
+    for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+    {
+        if (IsAreaAuraEffect(spellInfo->Effect[j]))
+        {
+            if (target->HasAura(spellInfo->Id, SpellEffectIndex(j)))
+                return false;
+        }
+    }
+    return true;
+}
+
 bool PetAI::CanAutoCast(SpellEntry const* spellInfo, Unit* target) const
 {
+    if (!CanAutoCastAreaAura(spellInfo, target))
+        return false;
+
     for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
     {
         if (spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA)
@@ -438,11 +457,6 @@ bool PetAI::CanAutoCast(SpellEntry const* spellInfo, Unit* target) const
                     if (aura->GetStackAmount() >= spellInfo->StackAmount)
                         return false;
             }
-        }
-        else if (IsAreaAuraEffect(spellInfo->Effect[j]))
-        {
-            if (target->HasAura(spellInfo->Id, SpellEffectIndex(j)))
-                return false;
         }
     }
 
