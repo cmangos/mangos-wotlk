@@ -117,16 +117,21 @@ void UnitAI::EnterEvadeMode()
     m_unit->RemoveAllAurasOnEvade();
     m_unit->CombatStopWithPets(true);
 
+    bool triggerHome = false;
+
     // only alive creatures that are not on transport can return to home position
     if (GetReactState() != REACT_PASSIVE && m_unit->IsAlive() && !m_unit->IsBoarded())
     {
         if (!m_unit->IsImmobilizedState()) // if still rooted after aura removal - permarooted
             m_unit->GetMotionMaster()->MoveTargetedHome();
         else
-            m_unit->TriggerHomeEvents();
+            triggerHome = true;
     }
 
     m_unit->TriggerEvadeEvents();
+
+    if (triggerHome)
+        m_unit->TriggerHomeEvents();
 }
 
 void UnitAI::JustDied(Unit* /*killer*/)
