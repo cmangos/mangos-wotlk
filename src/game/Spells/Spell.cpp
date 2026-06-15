@@ -4173,7 +4173,6 @@ void Spell::update(uint32 difftime)
                                 if (!m_caster->IsClientControlled())
                                 {
                                     m_caster->SetOrientation(orientation);
-                                    m_caster->SetFacingTo(orientation);
                                 }
                                 m_castOrientation = orientation; // need to update cast orientation due to the attribute
                             }
