@@ -132,24 +132,19 @@ struct boss_blackheart_the_inciterAI : public CombatAI
         DoBroadcastText(SAY_INCITE, m_creature);
         SetCombatScriptStatus(true);
         SetCombatMovement(false);
-        m_meleeEnabled = false;
-        m_creature->MeleeAttackStop(m_creature->GetVictim());
-        m_creature->SetTarget(nullptr);
+        SetMeleeEnabled(false);
         m_creature->CastSpell(nullptr, SPELL_LAUGH_PERIODIC, TRIGGERED_NONE);
         ResetTimer(BLACKHEART_INCITE_TIMER, 19000);
     }
 
     void HandleInciteEnd()
     {
-        SetCombatScriptStatus(false);
-        SetCombatMovement(true);
-        m_meleeEnabled = true;
         DoResetThreat();
-        if (m_creature->GetVictim())
-        {
-            m_creature->MeleeAttackStart(m_creature->GetVictim());
-            m_creature->SetTarget(m_creature->GetVictim());
-        }
+        SetCombatMovement(true);
+        SetMeleeEnabled(true);
+        SetCombatScriptStatus(false);
+        m_creature->SetInCombatWithZone(false);
+        AttackClosestEnemy();
     }
 };
 
