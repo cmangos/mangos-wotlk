@@ -9777,6 +9777,7 @@ void Unit::SetDeathState(DeathState s)
     if (s == JUST_DIED)
     {
         RemoveAllAurasOnDeath();
+        ExitVehicle(); // special type of charm in need of different handling
         BreakCharmOutgoing();
         BreakCharmIncoming();
         RemoveMiniPet();
@@ -9790,10 +9791,6 @@ void Unit::SetDeathState(DeathState s)
         // Unsummon vehicle accessories
         if (IsVehicle())
             m_vehicleInfo->RemoveAccessoriesFromMap();
-
-        // Unboard from transport
-        if (GetTransportInfo() && ((Unit*)GetTransportInfo()->GetTransport())->IsVehicle())
-            ((Unit*)GetTransportInfo()->GetTransport())->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, GetObjectGuid());
 
         GetCombatManager().StopEvade();
 
@@ -12591,6 +12588,13 @@ Unit const* Unit::FindRootVehicle(const Unit* whichVehicle /*= nullptr*/) const
         }
     }
     return nullptr;
+}
+
+void Unit::ExitVehicle()
+{
+    // Unboard from transport
+    if (GetTransportInfo() && static_cast<Unit*>(GetTransportInfo()->GetTransport())->IsVehicle())
+        static_cast<Unit*>(GetTransportInfo()->GetTransport())->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, GetObjectGuid());
 }
 
 void Unit::UpdateSplineMovement(uint32 t_diff)
