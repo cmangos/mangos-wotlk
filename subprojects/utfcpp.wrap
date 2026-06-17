@@ -1,0 +1,13 @@
+[wrap-file]
+directory = utfcpp-4.0.8
+source_url = https://github.com/nemtrif/utfcpp/archive/refs/tags/v4.0.8.tar.gz
+source_filename = utfcpp-4.0.8.tar.gz
+source_hash = f808b26d8c3a59def27fea207182ece77a8930bd121a69f80d328ecf3cfef925
+source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/utfcpp_4.0.8-1/utfcpp-4.0.8.tar.gz
+patch_filename = utfcpp_4.0.8-1_patch.zip
+patch_url = https://wrapdb.mesonbuild.com/v2/utfcpp_4.0.8-1/get_patch
+patch_hash = 83888527bbd2ee13f49f3d791ecdc698b95c614da3e23c44b87c185bd5c19989
+wrapdb_version = 4.0.8-1
+
+[provide]
+dependency_names = utf8cpp
