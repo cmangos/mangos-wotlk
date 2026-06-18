@@ -8713,7 +8713,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
             for (auto i : mModDamagePercentDone)
             {
                 if (i->GetModifier()->m_miscvalue & schoolMask &&                         // schoolmask has to fit with the intrinsic spell school
-                    i->GetModifier()->m_miscvalue & GetMeleeDamageSchoolMask(attType == BASE_ATTACK) &&         // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
+                    i->GetModifier()->m_miscvalue & spellInfo->SchoolMask &&              // AND schoolmask has to fit with weapon damage school (essential for non-physical spells)
                     ((i->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
                         (pWeapon && pWeapon->IsFitToSpellRequirements(i->GetSpellProto()))))  // OR used weapon fits aura requirements
                 {
