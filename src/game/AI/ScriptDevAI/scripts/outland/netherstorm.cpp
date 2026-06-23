@@ -4008,6 +4008,25 @@ struct ElementalPowerExtractor : public SpellScript
     }
 };
 
+enum
+{
+    EMOTE_DETONATE = 19414,
+    SPELL_MANA_BURN_SUICIDE = 36484,
+};
+
+// 36485 - Avenger Trigger Death
+struct AvengerTriggerDetonation : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (!spell->GetUnitTarget())
+            return;
+
+        DoBroadcastText(EMOTE_DETONATE, spell->GetUnitTarget(), spell->GetCaster());
+        spell->GetUnitTarget()->CastSpell(nullptr, SPELL_MANA_BURN_SUICIDE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_netherstorm()
 {
     Script* pNewScript = new Script;
@@ -4131,4 +4150,5 @@ void AddSC_netherstorm()
     RegisterSpellScript<MentalInterferenceSpellScript>("spell_mental_interference");
     RegisterSpellScript<RechargingBatterySpellScript>("spell_recharging_battery");    
     RegisterSpellScript<ElementalPowerExtractor>("spell_elemental_power_extractor");
+    RegisterSpellScript<AvengerTriggerDetonation>("spell_avenger_trigger_detonation");
 }
