@@ -347,14 +347,8 @@ void UnitAI::HandleMovementOnAttackStart(Unit* victim, bool targetChange) const
 
         MotionMaster* creatureMotion = m_unit->GetMotionMaster();
 
-        if (!m_unit->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT) && !m_unit->hasUnitState(UNIT_STAT_PROPELLED))
+        if (!m_unit->hasUnitState(UNIT_STAT_PROPELLED))
             creatureMotion->MoveChase(victim, m_attackDistance, m_attackAngle, m_moveFurther, false, true, targetChange);
-        // TODO - adapt this to only stop OOC-MMGens when MotionMaster rewrite is finished
-        else if (creatureMotion->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE || creatureMotion->GetCurrentMovementGeneratorType() == RANDOM_MOTION_TYPE)
-        {
-            creatureMotion->MoveIdle();
-            m_unit->InterruptMoving();
-        }
     }
 }
 
@@ -931,6 +925,7 @@ void UnitAI::ClearCombatOnlyRoot()
 {
     if (m_combatOnlyRoot)
     {
+        m_unit->clearUnitState(UNIT_STAT_AI_ROOT);
         m_unit->SetImmobilizedState(false);
         m_combatOnlyRoot = false;
     }
