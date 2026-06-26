@@ -102,6 +102,7 @@ struct boss_nethermancer_sepethreaAI : public CombatAI
 
 enum
 {
+    SPELL_INVIS_AND_STEALTH_DETECT = 18950,
     SPELL_RAGING_FLAMES = 35281,
     SPELL_INFERNO       = 35268,
     SPELL_INFERNO_H     = 39346,
@@ -125,6 +126,7 @@ struct npc_raging_flamesAI : public CombatAI
     {
         CombatAI::Reset();
         DoCastSpellIfCan(nullptr, SPELL_RAGING_FLAMES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_INVIS_AND_STEALTH_DETECT, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -137,8 +139,20 @@ struct npc_raging_flamesAI : public CombatAI
         DoResetThreat();
 
         if (Creature* summoner = m_creature->GetMap()->GetCreature(m_summonerGuid))
-            if (Unit* newTarget = summoner->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-                m_creature->AddThreat(newTarget, 10000000.0f);
+            if (Unit* newTarget = summoner->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                m_creature->AddThreat(newTarget, 1000000.0f);
+    }
+};
+
+// 35268,39346 - Inferno
+struct RagingFlamesInferno : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            if (Unit* caster = aura->GetCaster())
+                if (Unit* newTarget = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    caster->AddThreat(newTarget, 1000000.0f);
     }
 };
 
@@ -153,4 +167,6 @@ void AddSC_boss_nethermancer_sepethrea()
     pNewScript->Name = "npc_raging_flames";
     pNewScript->GetAI = &GetNewAIInstance<npc_raging_flamesAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<RagingFlamesInferno>("spell_raging_flames_inferno");
 }
