@@ -548,10 +548,12 @@ void Unit::TriggerAggroLinkingEvent(Unit* enemy)
     if (!IsCreature() || !enemy)
         return;
 
-    m_events.AddEvent(new UnitLambdaEvent(*this, [enemyGuid = enemy->GetObjectGuid(), creatureGroup = static_cast<Creature*>(this)->GetCreatureGroup()](Unit& unit)
+    bool callAssistance = static_cast<Creature*>(this)->MarkCallAssistanceOnPull();
+
+    m_events.AddEvent(new UnitLambdaEvent(*this, [enemyGuid = enemy->GetObjectGuid(), creatureGroup = static_cast<Creature*>(this)->GetCreatureGroup(), callAssistance](Unit& unit)
     {
         Unit* enemy = unit.GetMap()->GetUnit(enemyGuid);
-        if (!enemy)
+        if (!enemy || !unit.IsInCombat())
             return;
 
         if (unit.IsLinkingEventTrigger())
@@ -559,6 +561,9 @@ void Unit::TriggerAggroLinkingEvent(Unit* enemy)
 
         if (creatureGroup) // if npc dies before event execution, group will be removed from him, however groups are persistent and safe to access like this
             creatureGroup->TriggerLinkingEvent(CREATURE_GROUP_EVENT_AGGRO, enemy);
+
+        if (callAssistance)
+            static_cast<Creature&>(unit).CallAssistanceOnPull(enemy);
     }), m_events.CalculateTime(sWorld.getConfig(CONFIG_UINT32_CREATURE_CHECK_FOR_HELP_AGGRO_DELAY)));
 }
 
@@ -9226,8 +9231,6 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
         if (InstanceData* mapInstance = GetInstanceData())
             mapInstance->OnCreatureEnterCombat(creature);
-
-        creature->CallAssistance(enemy);
 
         creature->SetCanCheckForHelp(false);
         creature->m_events.AddEvent(new UnitLambdaEvent(*creature, [](Unit& unit)
