@@ -466,3 +466,6 @@ Defining a buddy could be done in several way:
 57 SCRIPT_COMMAND_SET_ANIM_TIER             Sets anim tier (UNIT_FIELD_BYTES_1, offset 3) - either set on spawn or through movement with animtier
                                             * datalong = enum AnimTier
 
+58 SCRIPT_COMMAND_SPAWN_SPAWN_GROUP	    Spawns the spawn_group
+                                            * datalong = spawn_group.id
+                                            * datalong2 = despawn-delay - Time to despawn group
