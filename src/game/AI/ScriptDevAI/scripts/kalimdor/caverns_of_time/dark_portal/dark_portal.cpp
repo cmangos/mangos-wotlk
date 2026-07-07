@@ -504,7 +504,7 @@ void instance_dark_portal::Update(uint32 uiDiff)
 
     if (m_uiNextPortalTimer)
     {
-        if (m_uiNextPortalTimer <= uiDiff)
+        if (m_uiNextPortalTimer <= uiDiff && m_uiWorldStateRiftCount < 18)
         {
             DoUpdateWorldState(WORLD_STATE_OPENING_THE_DARK_PORTAL_RIFT_STATE, ++m_uiWorldStateRiftCount);
 
