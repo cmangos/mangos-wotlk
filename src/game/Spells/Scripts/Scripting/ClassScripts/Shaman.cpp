@@ -91,6 +91,9 @@ struct EarthShield : public AuraScript
 
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return SPELL_AURA_PROC_OK;
+
         if (!aura->GetHolder()->IsProcReady(aura->GetTarget()->GetMap()->GetCurrentClockTime()))
             return SPELL_AURA_PROC_FAILED;
 
