@@ -1068,26 +1068,30 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                         m_creature->SetLevitate(false);
                         m_creature->SetHover(false);
                         m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
-                        nextTimer = 3000;
+                        nextTimer = 1400;
                         break;
                     }
                     case 5:
                     {
-                        // Start phase 3
                         DoResetThreat();
+                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                        nextTimer = 1400;
+                        break;
+                    }
+                    case 6:
+                    {
+                        // Start phase 3
                         m_phase = PHASE_3_NORMAL;
                         m_currentTransition = PHASETRANSITION_NONE;
 
                         SetCombatScriptStatus(false);
                         SetCombatMovement(true);
                         SetMeleeEnabled(true);
-                        m_creature->SetImmobilizedState(false);
                         if (m_creature->GetVictim())
                         {
                             m_creature->SetTarget(m_creature->GetVictim());
                             DoStartMovement(m_creature->GetVictim());
                         }
-                        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
                         nextTimer = 0;
                         PreparePhaseTimers();
                         break;
