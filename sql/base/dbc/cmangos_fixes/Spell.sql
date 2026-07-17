@@ -3040,6 +3040,9 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 5 WHERE `Id` IN (
 46008 -- Muru - Negative energy - should only hit 5 targets
 );
 
+-- Serpentshrine Lurker - Poison Bolt Volley
+UPDATE `spell_template` SET `MaxAffectedTargets` = 10 WHERE `Id` = 38655; 
+
 UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 45740; -- KJ - Flame dart - each subsequent spell hits fewer targets
 -- MaxAffectedTargets
 -- ==================
