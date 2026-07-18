@@ -89,7 +89,10 @@ void instance_magisters_terrace::OnObjectCreate(GameObject* pGo)
             break;
         case GO_ESCAPE_QUEL_DANAS:
             if (m_auiEncounter[TYPE_KAELTHAS] == DONE)
+            {
                 pGo->SetGoState(GO_STATE_ACTIVE);
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
             break;
 
         default:
