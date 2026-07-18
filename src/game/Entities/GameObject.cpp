@@ -2011,6 +2011,8 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             spellId = info->spellcaster.spellId;
             spellCaster = this;
+            if (spellId == 46841) // sends only spell GO
+                triggeredFlags |= TRIGGERED_OLD_TRIGGERED;
 
             onSuccess = [&]()
             {
