@@ -182,8 +182,6 @@ struct boss_brundirAI : public BossAI
     instance_ulduar* m_instance;
     bool m_isRegularMode;
 
-    ObjectGuid m_followTargetGuid;
-
     void Reset() override
     {
         BossAI::Reset();
@@ -252,7 +250,8 @@ struct boss_brundirAI : public BossAI
     {
         m_creature->CastSpell(nullptr, SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED);
         m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
-        m_instance->CheckLastCouncilStanding(NPC_BRUNDIR);
+        if (m_instance)
+            m_instance->CheckLastCouncilStanding(NPC_BRUNDIR);
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override
@@ -400,7 +399,8 @@ struct boss_molgeimAI : public BossAI
     {
         m_creature->CastSpell(nullptr, SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED);
         m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
-        m_instance->CheckLastCouncilStanding(NPC_MOLGEIM);
+        if (m_instance)
+            m_instance->CheckLastCouncilStanding(NPC_MOLGEIM);
     }
 
     void ExecuteAction(uint32 action) override
@@ -485,7 +485,8 @@ struct boss_steelbreakerAI : public BossAI
     {
         m_creature->CastSpell(nullptr, SPELL_SUPERCHARGE, TRIGGERED_OLD_TRIGGERED);
         m_creature->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
-        m_instance->CheckLastCouncilStanding(NPC_STEELBREAKER);
+        if (m_instance)
+            m_instance->CheckLastCouncilStanding(NPC_STEELBREAKER);
     }
 
     void ExecuteAction(uint32 action) override
@@ -775,7 +776,7 @@ struct LightningWhirlTrigger : public SpellScript
         return SPELL_CAST_OK;
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* caster = spell->GetCaster();
         if (!caster || effIdx != EFFECT_INDEX_0)
