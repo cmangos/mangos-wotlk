@@ -80,7 +80,6 @@ class VehicleInfo : public TransportBase
 {
     public:
         explicit VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 overwriteNpcEntry);
-        void RepopulateSeat(uint8 seatId);
         void Initialize();                                  ///< Initializes the accessories
         void Cleanup();
         bool IsInitialized() const { return m_isInitialized; }
@@ -115,6 +114,8 @@ class VehicleInfo : public TransportBase
     private:
         // Internal use to calculate the boarding position
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;
+        // Internal use to calculate the coordinates of the seat
+        void GetSeatCoordinates(const VehicleSeatEntry* seatEntry, float& lx, float& ly, float& lz) const;
 
         // Seat information
         bool GetUsableSeatFor(Unit* passenger, uint8& seat, bool reset, bool next) const;
