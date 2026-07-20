@@ -153,7 +153,7 @@ void ObjectMgr::LoadVehicleSeatParameters()
         }
 
         m_seatParameters.emplace(params.seatEntry, params);
-        
+
         ++count;
     } while (result->NextRow());
 
@@ -204,7 +204,30 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
 
 VehicleInfo::~VehicleInfo()
 {
+    ((Unit*)m_owner)->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+
+    RemoveAccessoriesFromMap();
     MANGOS_ASSERT(m_cleanedUp);
+}
+
+void VehicleInfo::RepopulateSeat(uint8 seatId)
+{
+    // Loading passengers (rough version only!)
+    SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
+    for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
+    {
+        auto* seatEntry = GetSeatEntry(itr->seatId);
+        if (seatId == itr->seatId && seatEntry && seatEntry->m_ID && !GetPassenger(seatId))
+        {
+            if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+            {
+                DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
+                m_accessoryGuids.insert(summoned->GetObjectGuid());
+                int32 basepoint0 = itr->seatId + 1;
+                summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
 }
 
 void VehicleInfo::Initialize()
@@ -221,6 +244,17 @@ void VehicleInfo::Initialize()
             Position pos = m_owner->GetPosition();
             pos.o *= 2;
             SummonPassenger(itr->passengerEntry, pos, itr->seatId, itr->rideSpellId);
+            auto* seatEntry = GetSeatEntry(itr->seatId);
+            if (seatEntry && seatEntry->m_ID)
+            {
+                if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+                {
+                    DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
+                    m_accessoryGuids.insert(summoned->GetObjectGuid());
+                    int32 basepoint0 = itr->seatId + 1;
+                    summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
         }
     }
 
@@ -500,6 +534,13 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 {
     MANGOS_ASSERT(passenger);
 
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
+        {
+            static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->UnBoard(passenger, changeVehicle);
+        }
+    }
     PassengerMap::const_iterator itr = m_passengers.find(passenger);
     if (itr == m_passengers.end())
         return;
@@ -803,9 +844,27 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
     uint8 takenSeatsMask = 0;
 
     for (const auto& m_passenger : m_passengers)
+    {
+        if (m_passenger.first->IsUnit())
+            if (static_cast<Unit*>(m_passenger.first)->IsVehicle() && static_cast<Unit*>(m_passenger.first)->GetVehicleInfo()->GetEmptySeats() > 0)
+                continue;
         takenSeatsMask |= 1 << m_passenger.second->GetTransportSeat();
+    }
 
     return takenSeatsMask;
+}
+
+uint8 VehicleInfo::GetEmptySeats() const
+{
+    int size = 0;
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (m_passenger.first->IsUnit())
+            if (static_cast<const Unit*>(m_passenger.first)->IsVehicle() && static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->GetEmptySeats() > 0)
+                continue;
+        size++;
+    }
+    return m_vehicleSeats.size() - size;
 }
 
 bool VehicleInfo::IsUsableSeatForPlayer(uint32 seatFlags, uint32 seatFlagsB) const
@@ -843,7 +902,9 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
             pPlayer->SetCharm(pVehicle);
             pVehicle->SetCharmer(pPlayer);
-            
+
+            pVehicle->SetCanEnterCombat(true);
+
             charmInfo = pVehicle->InitCharmInfo(pVehicle);
             charmInfo->SetCharmState((pVehicle->IsCreature() && static_cast<Creature*>(pVehicle)->GetSettings().HasFlag(CreatureStaticFlags2::ACTION_TRIGGERS_WHILE_CHARMED)) ? "" : "PossessedAI", false);
 
@@ -961,8 +1022,8 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
 
             charmInfo->ResetCharmState();
 
-            // must be called after movement control unapplying
-            pPlayer->GetCamera().ResetView();
+            // // must be called after movement control unapplying
+            // pPlayer->GetCamera().ResetView();
 
             if (pVehicle->GetTypeId() == TYPEID_UNIT)
             {
@@ -972,6 +1033,9 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
                 pVehicle->AI()->SetReactState(REACT_AGGRESSIVE);
             }
         }
+
+        // must be called after movement control unapplying
+        pPlayer->GetCamera().ResetView();
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
             pPlayer->RemovePetActionBar();
