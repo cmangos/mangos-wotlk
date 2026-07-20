@@ -6188,7 +6188,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
                 spawnCreature->SetSpellList(cInfo->Entry * 100 + 0);
 
             spawnCreature->InitializeSpellsForControllableGuardian(prop->Flags & SUMMON_PROP_FLAG_SAVE_PET_AUTOCAST);
-            
+
             m_caster->SetPet(spawnCreature); // last guardian will be left in field
             spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
 
@@ -10635,7 +10635,7 @@ void Spell::EffectStuck(SpellEffectIndex /*eff_idx*/)
         }
         else
         {
-            // If the player is alive, but their hearthstone is either not in their inventory (e.g. in the bank) or 
+            // If the player is alive, but their hearthstone is either not in their inventory (e.g. in the bank) or
             // their hearthstone is on cooldown, then the game will try to "nudge" the player in a seemingly random direction.
             // @todo This check could possibly more accurately find a safe position to port to, has the potential for porting underground.
             float x, y, z;
@@ -11330,6 +11330,24 @@ void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
 {
     if (!unitTarget)
         return;
+
+    if (Creature* creatureTarget = dynamic_cast<Creature*>(unitTarget))
+        if (creatureTarget->GetCreatureInfo()->Rank == 3)
+            return;
+
+    switch (m_spellInfo->Id)
+    {
+        case 36812:                                     // Soaring - Test Flight quests
+        case 37910:
+        case 37962:
+        case 37968:
+            unitTarget->RemoveAurasDueToSpell(36801); // Remove Cannon Channel to prevent root affecting knockback
+            break;
+        case 37852:                                     // Watery Grave Explosion
+            if (m_triggeredByAuraSpell)
+                unitTarget->RemoveAurasDueToSpell(m_triggeredByAuraSpell->Id); // Remove Watery Grave to prevent root affecting knockback
+            break;
+    }
 
     if (unitTarget->hasUnitState(UNIT_STAT_ROOT))
         return;

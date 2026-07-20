@@ -181,6 +181,7 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_LEVIATHAN:
         case NPC_EXPLORER_DELLORAH:
         case NPC_BRANN_BRONZEBEARD:
+        case NPC_PROJECTION_UNIT:
         case NPC_ORBITAL_SUPPORT:
         case NPC_IGNIS:
         case NPC_RAZORSCALE:
@@ -317,7 +318,9 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_PRIEST_ALLIANCE_H:
             pCreature->SetImmuneToNPC(false);
             return;
-
+        case NPC_LEVIATHAN_SEAT:
+            m_leviathanSeatGuids.insert(pCreature->GetObjectGuid());
+            return;
         default:
             return;
     }
@@ -533,50 +536,24 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
         // Siege of Ulduar
         case TYPE_LEVIATHAN:
             m_auiEncounter[uiType] = uiData;
-            if (uiData != SPECIAL)
-            {
-                if (GameObject* door = GetSingleGameObjectFromStorage(GO_SHIELD_WALL))
-                {
-                    switch (uiData)
-                    {
-                        case IN_PROGRESS:
-                        {
-                            sLog.outError("Close the door!");
-                            if (door->GetGoState() != GO_STATE_READY)
-                                door->SetGoState(GO_STATE_READY);
-                            break;
-                        }
-                        case DONE:
-                        case FAIL:
-                        {
-                            sLog.outError("Open the door!");
-                            if (door->GetGoState() == GO_STATE_READY)
-                                door->SetGoState(GO_STATE_ACTIVE);
-                            break;
-                        }
-
-                    }
-                }
-            }
             if (uiData == IN_PROGRESS)
             {
                 // make sure that the Lightning door is closed when engaged in combat
-                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_LIGHTNING_DOOR))
-                {
-                    if (pDoor->GetGoState() != GO_STATE_READY)
-                        pDoor->SetGoState(GO_STATE_READY);
-                        //DoUseDoorOrButton(GO_LIGHTNING_DOOR);
-                }
-
+                DoUseOpenableObject(GO_LIGHTNING_DOOR, false);
+                DoUseOpenableObject(GO_SHIELD_WALL, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_SHUTOUT, true);
             }
             else if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_XT002_GATE);
-                DoUseDoorOrButton(GO_LIGHTNING_DOOR);
+                DoUseOpenableObject(GO_XT002_GATE, true);
+                DoUseOpenableObject(GO_LIGHTNING_DOOR, true);
+                DoUseOpenableObject(GO_SHIELD_WALL, true);
             }
             else if (uiData == FAIL)
+            {
+                DoUseOpenableObject(GO_SHIELD_WALL, true);
                 DoCallLeviathanHelp();
+            }
             break;
         case TYPE_IGNIS:
             m_auiEncounter[uiType] = uiData;
@@ -1147,7 +1124,7 @@ bool instance_ulduar::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 u
                 break;
 
             // handle vehicle spell clicks - are available only after the gauntlet was started by gossip or when Leviathan is active
-            return GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL;
+            return GetData(TYPE_LEVIATHAN_GAUNTLET) == IN_PROGRESS || GetData(TYPE_LEVIATHAN) == SPECIAL || GetData(TYPE_LEVIATHAN) == FAIL || GetData(TYPE_LEVIATHAN) == IN_PROGRESS;
         }
     }
 
@@ -1420,6 +1397,9 @@ void instance_ulduar::OnCreatureDeath(Creature* pCreature)
             SetData(TYPE_FREYA_CONSPEEDATORY, DONE);
         }
         break;
+        case NPC_LEVIATHAN_SEAT:
+            m_leviathanSeatGuids.erase(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -1779,6 +1759,26 @@ void instance_ulduar::Update(uint32 uiDiff)
     }
 }
 
+bool AreaTrigger_repair_station(Player* player, AreaTriggerEntry const* at)
+{
+    switch (at->id)
+    {
+        case AREATRIGGER_ID_REPAIR_1:
+        case AREATRIGGER_ID_REPAIR_2:
+        {
+            const Creature* vehicle = dynamic_cast<const Creature*>(player->FindRootVehicle());
+            Creature* vehiclePtr = const_cast<Creature*>(vehicle);
+            if (!vehiclePtr)
+                return false;
+            if (!vehiclePtr->HasAura(62705))
+                player->CastSpell(vehiclePtr, 62705, TRIGGERED_NONE);
+            return false;
+        }
+        default:
+            return false;
+    }
+}
+
 InstanceData* GetInstanceData_instance_ulduar(Map* pMap)
 {
     return new instance_ulduar(pMap);
@@ -1844,5 +1844,10 @@ void AddSC_instance_ulduar()
     pNewScript = new Script;
     pNewScript->Name = "event_ulduar";
     pNewScript->pProcessEventId = &ProcessEventId_event_ulduar;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_ulduar";
+    pNewScript->pAreaTrigger = &AreaTrigger_repair_station;
     pNewScript->RegisterSelf();
 }
