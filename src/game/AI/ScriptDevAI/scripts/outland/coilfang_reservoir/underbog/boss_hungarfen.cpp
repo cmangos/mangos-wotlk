@@ -69,6 +69,12 @@ struct boss_hungarfenAI : public CombatAI
         DoCastSpellIfCan(nullptr, SPELL_DESPAWN_MUSHROOMS, CAST_TRIGGERED);
     }
 
+    void EnterEvadeMode() override
+    {
+        DoCastSpellIfCan(nullptr, SPELL_DESPAWN_MUSHROOMS, CAST_TRIGGERED);
+        CombatAI::EnterEvadeMode();
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -132,7 +138,7 @@ struct mob_underbog_mushroomAI : public ScriptedAI
         {
             if (m_uiSporeTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_SPORE_CLOUD) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature, SPELL_SPORE_CLOUD, CAST_INTERRUPT_PREVIOUS | CAST_TRIGGERED | CAST_FORCE_CAST) == CAST_OK)
                 {
                     m_uiGrowTimer = 0;
                     m_uiSporeTimer = 0;
@@ -158,7 +164,8 @@ struct mob_underbog_mushroomAI : public ScriptedAI
             if (m_uiShrinkTimer <= uiDiff)
             {
                 m_creature->RemoveAurasDueToSpell(SPELL_GROW);
-                m_uiShrinkTimer = 0;
+                if (DoCastSpellIfCan(nullptr, SPELL_SHRINK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT) == CAST_OK)
+                    m_uiShrinkTimer = 0;
             }
             else
                 m_uiShrinkTimer -= uiDiff;
@@ -178,6 +185,16 @@ struct DespawnMushrooms : public SpellScript
     }
 };
 
+// 34168 - Spore Cloud (Underbog)   
+struct SporeCloud : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        data.target = aura->GetTarget();
+    }
+};
+
 void AddSC_boss_hungarfen()
 {
     Script* pNewScript = new Script;
@@ -191,4 +208,5 @@ void AddSC_boss_hungarfen()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<DespawnMushrooms>("spell_despawn_underbog_mushrooms");
+    RegisterSpellScript<SporeCloud>("spell_spore_cloud_underbog");
 }

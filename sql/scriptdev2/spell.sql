@@ -716,7 +716,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (32173,'spell_entangling_roots'),
 (34520,'spell_elemental_power_extractor'),
 (35268,'spell_raging_flames_inferno'),
-(39346,'spell_raging_flames_inferno');
+(39346,'spell_raging_flames_inferno'),
+(34168,'spell_spore_cloud_underbog');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
