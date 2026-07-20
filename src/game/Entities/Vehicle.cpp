@@ -931,7 +931,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
             charmInfo = vehicle->InitCharmInfo(vehicle);
             charmInfo->SetCharmState((vehicle->IsCreature() && static_cast<Creature*>(vehicle)->GetSettings().HasFlag(CreatureStaticFlags2::ACTION_TRIGGERS_WHILE_CHARMED)) ? "" : "PossessedAI", false);
 
-            if (pVehicle->movespline->Finalized()) // let spline finalization do the rest otherwise
+            if (vehicle->movespline->Finalized()) // let spline finalization do the rest otherwise
             {
                 vehicle->GetMotionMaster()->Clear();
                 vehicle->GetMotionMaster()->MoveIdle();
