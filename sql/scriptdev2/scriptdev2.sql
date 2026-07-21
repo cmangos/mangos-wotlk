@@ -1483,6 +1483,11 @@ UPDATE creature_template SET ScriptName='npc_floating_spirit' WHERE entry IN (30
 UPDATE creature_template SET ScriptName='npc_injured_miner' WHERE entry=29434;
 UPDATE creature_template SET ScriptName='npc_ethereal_frostworg' WHERE entry=30219;
 UPDATE gameobject_template SET ScriptName = 'go_falling_rocks' WHERE entry=191794;
+UPDATE gameobject_template SET ScriptName = 'go_fjorns_anvil' WHERE entry IN (192071,192077);
+UPDATE gameobject_template SET ScriptName = 'go_hodirs_helm' WHERE entry=192080;
+UPDATE gameobject_template SET ScriptName = 'go_hodirs_horn' WHERE entry=192078;
+UPDATE gameobject_template SET ScriptName = 'go_hodirs_spear' WHERE entry=192079;	
+UPDATE gameobject_template SET ScriptName = 'go_krolmir' WHERE entry=192492;
 
 /* STORMWIND CITY */
 UPDATE creature_template SET ScriptName='npc_bartleby' WHERE entry=6090;

@@ -370,6 +370,71 @@ struct npc_ethereal_frostworgAI : public ScriptedAI
 };
 
 /*######
+## go_fjorns_anvil
+######*/
+
+struct go_fjorns_anvil : public GameObjectAI
+{
+    go_fjorns_anvil(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(7, true);
+        go->GetVisibilityData().AddInvisibilityValue(7, 50);
+    }
+};
+
+/*######
+## go_hodirs_helm
+######*/
+
+struct go_hodirs_helm : public GameObjectAI
+{
+    go_hodirs_helm(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(9, true);
+        go->GetVisibilityData().AddInvisibilityValue(9, 1000);
+    }
+};
+
+/*######
+## go_hodirs_horn
+######*/
+
+struct go_hodirs_horn : public GameObjectAI
+{
+    go_hodirs_horn(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(8, true);
+        go->GetVisibilityData().AddInvisibilityValue(8, 1000);
+    }
+};
+
+/*######
+## go_krolmir
+######*/
+
+struct go_krolmir : public GameObjectAI
+{
+    go_krolmir(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(7, true);
+        go->GetVisibilityData().AddInvisibilityValue(7, 100);
+    }
+};
+
+/*######
+## go_hodirs_spear
+######*/
+
+struct go_hodirs_spear : public GameObjectAI
+{
+    go_hodirs_spear(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(5, true);
+        go->GetVisibilityData().AddInvisibilityValue(5, 1000);
+    }
+};
+
+/*######
 ## go_falling_rocks
 ######*/
 
@@ -451,6 +516,16 @@ struct FArrowTEff : public AuraScript
     }
 };
 
+// 54952 - Initial Proto-Drake
+struct InitialProtoDrake : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Unit* caster = spell->GetCaster();
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
 // 55028 - Summon Freed Proto-Drake
 struct SummonFreedProtoDrake : public SpellScript
 {
@@ -459,6 +534,251 @@ struct SummonFreedProtoDrake : public SpellScript
         spell->GetCaster()->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
 };
+
+// 56750 - Gather Snow
+struct GatherSnow : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+
+        if (GameObject* snow = GetClosestGameObjectWithEntry(target, 192075, 10.0f))
+        {
+            if (snow->GetRespawnTime() != 0)
+                return;
+
+            snow->SetLootState(GO_JUST_DEACTIVATED);
+        }
+    }
+};
+
+// 56753 - Throw Snowball
+struct ThrowSnowball : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // Throw Snowball can be cast only on this target
+        if (!target || target->GetEntry() != 30120)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+// 56278 - Read Pronouncement
+struct ReadPronouncement : public AuraScript
+{
+    enum
+    {
+        SPELL_SEE_INVIS_TIER_3  = 56773,
+
+        SAY_1                   = 30906,
+        SAY_2                   = 30907,
+    };
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+
+        if (caster->HasAura(SPELL_SEE_INVIS_TIER_3))
+            return;
+        else
+        {
+            static_cast<Player*>(caster)->KilledMonsterCredit(30210);
+            DoBroadcastText(SAY_1, caster, caster);
+            DoBroadcastText(SAY_2, caster, caster);
+            caster->CastSpell(caster, SPELL_SEE_INVIS_TIER_3, TRIGGERED_OLD_TRIGGERED); // 56773 See Invis Tier 3
+        }
+    }
+};
+
+// 56671 - Spear of Hodir
+struct SpearOfHodir : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // Throw Snowball can be cast only on this target
+        if (!target || target->GetEntry() != 30275)
+            return SPELL_FAILED_BAD_TARGETS;
+        if (target->IsInCombat())
+            return SPELL_FAILED_TARGET_IN_COMBAT;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+// 56689 - Grip
+struct Grip : public AuraScript
+{
+    enum
+    {
+        SPELL_FIGHT_WYRM            = 56673,
+        SPELL_LOW_HEALTH_TRIGGER    = 60596,
+    };
+
+    void OnHolderInit(SpellAuraHolder* holder, WorldObject* /*caster*/) const override
+    {
+        holder->PresetAuraStacks(50);
+    }
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (!aura)
+            return;
+
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+
+        SpellAuraHolder* auraHolder = caster->GetSpellAuraHolder(56689);
+        if (!auraHolder)
+            return;
+
+        uint8 stacks = auraHolder->GetStackAmount();
+
+        if (stacks > 1)
+        {
+            caster->RemoveAuraStack(56689, -1);
+        }
+
+        if (stacks <= 1)
+        {
+            caster->RemoveAurasDueToSpell(SPELL_FIGHT_WYRM);
+        }
+
+        // Phase 2 switch
+        if (caster->GetHealthPercent() <= 25.0f)
+        {
+            // caster->RemoveAurasDueToSpell(SPELL_FIGHT_WYRM);
+            caster->AI()->SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_A, caster,0,5);
+        }
+    }
+};
+
+// 60533 - Grab On
+struct GrabOn : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+
+        // adds 10 stacks
+        target->RemoveAuraStack(56689, 10);
+    }
+};
+
+// 60776 - Claw Swipe
+struct ClawSwipe : public SpellScript
+{
+    enum
+    {
+        SPELL_GRIP          = 56689,
+        SPELL_DODGW_CLAWS   = 56704,
+
+        SAY_1               = 32763,
+        SAY_2               = 32794,
+        SAY_3               = 32784,
+    };
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+
+        if (target->HasAura(SPELL_DODGW_CLAWS))
+        {
+            DoBroadcastText(SAY_2, caster, target, 5);
+        }
+        else
+        {
+            // removes 5 stacks
+            DoBroadcastText(SAY_1, caster, target, 5);
+            caster->RemoveAuraStack(SPELL_GRIP, -5);
+        }
+
+        SpellAuraHolder* auraHolder = caster->GetSpellAuraHolder(SPELL_GRIP);
+        
+        if (!auraHolder)
+            return;
+
+        uint8 stacks = auraHolder->GetStackAmount();
+
+        if (stacks <= 20)
+        {
+            DoBroadcastText(SAY_3, caster, target, 5);
+        }
+    }
+};
+
+// 60587 - Fatal Strike
+struct FatalStrike : public SpellScript
+{
+    enum
+    {
+        SPELL_PRY_JAWS_OPEN     = 56706,
+        SPELL_FSTRIKE           = 60881,
+
+        SAY_MISS                = 32795,
+    };
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+
+        Unit* master = caster->GetMaster();
+        if (!master)
+            return;
+
+        if (SpellAuraHolder* holder = caster->GetSpellAuraHolder(SPELL_PRY_JAWS_OPEN))
+        {
+            if (roll_chance_i(holder->GetStackAmount() * 5))
+            {
+                caster->CastSpell(caster, SPELL_FSTRIKE, TRIGGERED_OLD_TRIGGERED);
+            }
+            else
+            {
+                DoBroadcastText(SAY_MISS, caster, master, 5);
+            }
+        }
+    }
+};
+
+// 60864 - Jaws of Death
+struct JawsOfDeath : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        spell->SetDamage(target->GetMaxHealth() * 0.03f); // damage = 3% master HP instead of flat 3
+    }
+};
+
+// 61319 - Jokkum Scriptcast
+struct JokkumScriptcast : public SpellScript, public AuraScript
+{
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& radius) const override
+    {
+        radius = 50.f;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+
+            target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+            target->Unmount();
+    }
+};
+
 
 void AddSC_storm_peaks()
 {
@@ -485,9 +805,45 @@ void AddSC_storm_peaks()
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_falling_rocks>;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "go_fjorns_anvil";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_fjorns_anvil>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_hodirs_helm";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_hodirs_helm>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_hodirs_horn";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_hodirs_horn>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_hodirs_spear";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_hodirs_spear>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_krolmir";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_krolmir>;
+    pNewScript->RegisterSelf();
+    
     RegisterSpellScript<BlowHodirsHorn>("spell_blow_hodirs_horn");
     RegisterSpellScript<CastNetStormforgedPursuer>("spell_cast_net_stormforged_pursuer");
     RegisterSpellScript<ThrowIce>("spell_throw_ice");
     RegisterSpellScript<FArrowTEff>("spell_flaming_arrow_triggered_effect");
     RegisterSpellScript<SummonFreedProtoDrake>("spell_summon_freed_protodrake");
+    RegisterSpellScript<GatherSnow>("spell_gather_snow");
+    RegisterSpellScript<ThrowSnowball>("spell_throw_snowball");
+    RegisterSpellScript<ReadPronouncement>("spell_read_pronouncement");
+    RegisterSpellScript<Grip>("spell_grip");
+    RegisterSpellScript<GrabOn>("spell_grab_on");
+    RegisterSpellScript<ClawSwipe>("spell_claw_swipe");
+    RegisterSpellScript<SpearOfHodir>("spell_spear_of_hodir");
+    RegisterSpellScript<FatalStrike>("spell_fatal_strike");
+    RegisterSpellScript<JawsOfDeath>("spell_jaws_of_death");
+    RegisterSpellScript<JokkumScriptcast>("spell_jokkum_scriptcast");
+    RegisterSpellScript<InitialProtoDrake>("spell_initial_proto_drake");
 }
