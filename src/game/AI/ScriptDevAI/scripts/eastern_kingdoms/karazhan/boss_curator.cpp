@@ -178,7 +178,7 @@ struct boss_curatorAI : public CombatAI
 
                 summoned->SetInCombatWithZone();
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    summoned->AddThreat(pTarget, 100001.f);
+                    summoned->AddThreat(pTarget, 1000.f);
                 m_sparkGuids.push_back(summoned->GetObjectGuid());
                 break;
             }
