@@ -1133,7 +1133,7 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
                 if ((enemyCount = instance->GetVariableManager().GetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT)))
                 {
                     m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
-                    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, enemyCount - 1);
+                    instance->GetVariableManager().SetVariable(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, --enemyCount);
                 }
                 if (m_nextWaveTimer && enemyCount == 0)
                     SpawnNextWave();
