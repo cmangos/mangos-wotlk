@@ -2544,6 +2544,8 @@ class Unit : public WorldObject
             return GetFloatValue(UNIT_FIELD_HOVERHEIGHT);
         }
 
+        void SendMessageToAllWhoSeeMeMove(WorldPacket const& data, ObjectGuid mover) const;
+
         // Take possession of an unit (pet, creature, ...)
         bool TakePossessOf(Unit* possessed);
 

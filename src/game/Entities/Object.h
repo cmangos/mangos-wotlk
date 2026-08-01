@@ -1252,6 +1252,7 @@ class WorldObject : public Object
 
         void AddClientIAmAt(Player const* player);
         void RemoveClientIAmAt(Player const* player);
+        GuidSet const& GetClientGuidsIAmAt() const { return m_clientGUIDsIAmAt; }
         GuidSet& GetClientGuidsIAmAt() { return m_clientGUIDsIAmAt; }
 
         void DestroyOnClientsIAmAt();
