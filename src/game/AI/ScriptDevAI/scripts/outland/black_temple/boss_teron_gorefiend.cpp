@@ -373,6 +373,7 @@ bool AreaTrigger_at_teron_gorefiend(Player* player, AreaTriggerEntry const* /*at
     return false;
 }
 
+// 40251 - Shadow of Death
 struct ShadowOfDeath : public AuraScript
 {
     void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& /*remainingDamage*/, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& preventedDeath, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
@@ -410,6 +411,7 @@ struct ShadowOfDeath : public AuraScript
     }
 };
 
+// 41999 - Shadow of Death Remove
 struct ShadowOfDeathRemove : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -418,6 +420,7 @@ struct ShadowOfDeathRemove : public AuraScript
     }
 };
 
+// 40186 - Summon Blossom Move Target
 struct SummonBlossomMoveTarget : public SpellScript
 {
     void OnDestTarget(Spell* spell) const override
