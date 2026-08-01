@@ -750,6 +750,17 @@ struct npc_reliquary_combat_triggerAI : public ScriptedAI
     }
 };
 
+// 41545 - Soul Scream
+struct SoulScream : public SpellScript
+{
+    void OnAfterHit(Spell* spell) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (target && target->GetPowerType() == POWER_RAGE)
+            target->SetPower(POWER_RAGE, 0); // workaround for likely wrong order of operations
+    }
+};
+
 void AddSC_boss_reliquary_of_souls()
 {
     Script* pNewScript = new Script;
@@ -786,4 +797,6 @@ void AddSC_boss_reliquary_of_souls()
     pNewScript->Name = "npc_reliquary_combat_trigger";
     pNewScript->GetAI = &GetNewAIInstance<npc_reliquary_combat_triggerAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SoulScream>("spell_soul_scream");
 }

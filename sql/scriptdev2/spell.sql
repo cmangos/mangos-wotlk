@@ -505,6 +505,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (41611,'spell_ogrila_flasks'),
 (46837,'spell_ogrila_flasks'),
 (46839,'spell_ogrila_flasks'),
+(41545,'spell_soul_scream'),
 (40887,'spell_assist_bt'),
 (40892,'spell_fixate_bt'),
 (30745,'spell_target_fissures'),
