@@ -739,6 +739,30 @@ struct ReflectiveShieldMalande : public AuraScript
     }
 };
 
+// 41467 - Judgement
+struct JudgementGathios : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget || !unitTarget->IsAlive())
+            return;
+
+        Unit* caster = spell->GetCaster();
+        uint32 spellId = 0;
+
+        if (Aura* aura = caster->GetAura(SPELL_SEAL_OF_COMMAND, EFFECT_INDEX_2))
+            spellId = aura->GetAmount();
+
+        if (spellId == 0)
+            if (Aura* aura = caster->GetAura(SPELL_SEAL_OF_BLOOD, EFFECT_INDEX_2))
+                spellId = aura->GetAmount();
+
+        if (spellId)
+            caster->CastSpell(unitTarget, spellId, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+    }
+};
+
 void AddSC_boss_illidari_council()
 {
     Script* pNewScript = new Script;
@@ -776,4 +800,5 @@ void AddSC_boss_illidari_council()
     RegisterSpellScript<VerasDeadlyPoisonTick>("spell_veras_deadly_poison_tick");
     RegisterSpellScript<BalanceOfPower>("spell_balance_of_power");
     RegisterSpellScript<ReflectiveShieldMalande>("spell_reflective_shield_malande");
+    RegisterSpellScript<JudgementGathios>("spell_judgement_gathios");
 }

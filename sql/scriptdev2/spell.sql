@@ -343,6 +343,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (39228,'spell_argussian_compass'),
 (41341,'spell_balance_of_power'),
 (41475,'spell_reflective_shield_malande'),
+(41467,'spell_judgement_gathios'),
 (41624,'spell_enfeeble_removal'),
 (32264,'spell_shirrak_inhibit_magic'),
 (33332,'spell_suppression_blast'),
