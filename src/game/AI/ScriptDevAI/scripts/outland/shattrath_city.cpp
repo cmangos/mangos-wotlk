@@ -704,6 +704,7 @@ enum
     SPELL_DEMON_BROILED_SURPRISE    = 43753,
 };
 
+// 43723 - Demon Broiled Surprise
 struct DemonBroiledSurprise : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool strict) const override

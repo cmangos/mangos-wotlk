@@ -297,6 +297,7 @@ struct npc_tyrande_whisperwindAI : public hyjalAI
     }
 };
 
+// 31617, 31624, 31625 - Raise Dead
 struct RaiseDeadHyjal : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
