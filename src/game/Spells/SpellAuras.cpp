@@ -1544,8 +1544,8 @@ void Aura::TriggerSpell()
                         return;
                     case 31944:                             // Doomfire
                     {
-                        int32 damage = m_modifier.m_amount * ((GetAuraDuration() + m_modifier.periodictime) / GetAuraMaxDuration());
-                        triggerTarget->CastCustomSpell(triggerTarget, 31969, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
+                        int32 damage = m_modifier.m_amount - (m_modifier.m_amount / GetAuraMaxTicks() * (GetAuraTicks() - 1));
+                        triggerTarget->CastCustomSpell(nullptr, 31969, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                         return;
                     }
 //                    // Teleport Test
