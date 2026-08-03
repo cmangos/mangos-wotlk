@@ -752,11 +752,19 @@ struct JudgementGathios : public SpellScript
         uint32 spellId = 0;
 
         if (Aura* aura = caster->GetAura(SPELL_SEAL_OF_COMMAND, EFFECT_INDEX_2))
+        {
             spellId = aura->GetAmount();
+            caster->RemoveSpellAuraHolder(aura->GetHolder());
+        }
 
         if (spellId == 0)
+        {
             if (Aura* aura = caster->GetAura(SPELL_SEAL_OF_BLOOD, EFFECT_INDEX_2))
+            {
                 spellId = aura->GetAmount();
+                caster->RemoveSpellAuraHolder(aura->GetHolder());
+            }
+        }
 
         if (spellId)
             caster->CastSpell(unitTarget, spellId, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
