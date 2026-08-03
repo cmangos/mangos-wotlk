@@ -3117,6 +3117,7 @@ UPDATE `spell_template` SET `EffectMiscValueB1`=64 WHERE `Id` IN(38107);
 -- SPELL_ATTR_SS_IGNORE_EVADE - IsSpellRemovedOnEvade()
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
+31304, -- Immolation
 32008, -- Fel Fire - c.17152,18944,19298
 32732, -- Flay
 36630, -- Resistances (c.22000)

@@ -68,9 +68,9 @@ struct boss_anetheronAI : public CombatAI
             if (Creature* infernal = m_creature->GetMap()->GetCreature(m_infernals[m_infernals.size() - 1]))
             {
                 UnitAI* ai = infernal->AI();
+                ai->SetCombatScriptStatus(false);
                 ai->SetReactState(REACT_AGGRESSIVE);
                 ai->DoCastSpellIfCan(nullptr, SPELL_INFERNAL_STUN);
-                infernal->SetInCombatWithZone();
             }
         });
         AddOnKillText(SAY_KILL1, SAY_KILL2, SAY_KILL3);
@@ -131,6 +131,8 @@ struct boss_anetheronAI : public CombatAI
     void JustSummoned(Creature* summoned) override
     {
         UnitAI* ai = summoned->AI();
+        summoned->SetInCombatWithZone();
+        ai->SetCombatScriptStatus(true);
         ai->DoCastSpellIfCan(nullptr, SPELL_INFERNAL_IMMOLATION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         ai->SetReactState(REACT_PASSIVE);
         ResetTimer(ANETHERON_ACTION_INFERNAL_STUN, 1500);
