@@ -380,11 +380,13 @@ struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
     }
 
     bool m_seal;
+    bool m_aura;
 
     void Reset() override
     {
         boss_illidari_councilAI::Reset();
-        m_seal = false;
+        m_seal = bool(urand(0, 1)); // first seal random
+        m_aura = bool(urand(0, 1)); // first aura random
     }
 
     void JustDied(Unit* killer) override
@@ -438,8 +440,11 @@ struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
             }
             case GATHIOS_ACTION_AURA:
             {
-                if (DoCastSpellIfCan(nullptr, urand(0, 1) ? SPELL_DEVOTION_AURA : SPELL_CHROMATIC_AURA) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, m_aura ? SPELL_CHROMATIC_AURA : SPELL_DEVOTION_AURA) == CAST_OK)
+                {
                     ResetCombatAction(action, 60000);
+                    m_aura = !m_aura; // should this be ported to spell lists, auras have category cooldown, so two entries will do, this is easier here
+                }
                 return;
             }
             case GATHIOS_ACTION_BLESSING:
