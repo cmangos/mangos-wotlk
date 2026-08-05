@@ -45,7 +45,7 @@ enum
     // Phase 2
     SPELL_CHARGE                    = 41581, // used when fixate target is too far in second phase
     SPELL_VOLCANIC_ERUPTION         = 40276,
-    SPELL_SLOW_SELF                 = 41922,
+    SPELL_SNARE_SELF                = 41922,
     SPELL_RANDOM_TARGET             = 41951, // Serverside in tbc/wotlk - sometime later changed to Fixate and visible in client
 
     // NPC Volcano Spells
@@ -102,8 +102,8 @@ struct boss_supremusAI : public CombatAI
             SetCombatScriptStatus(false);
             SetCombatMovement(true);
             if (!m_bTankPhase)
-                ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, 0); // switch target immediately
-            DoStartMovement(m_creature->GetVictim());
+                ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, GetInitialActionTimer(SUPREMUS_ACTION_SWITCH_TARGET)); // switch target immediately
+            AttackStart(m_creature->GetVictim());
         });
         Reset();
     }
@@ -129,7 +129,7 @@ struct boss_supremusAI : public CombatAI
             case SUPREMUS_ACTION_BERSERK: return 900000;
             case SUPREMUS_ACTION_MOLTEN_PUNCH: return urand(11000, 14700);
             case SUPREMUS_ACTION_VOLCANIC_ERUPTION: return 6000;
-            case SUPREMUS_ACTION_SWITCH_TARGET: return 0;
+            case SUPREMUS_ACTION_SWITCH_TARGET: return 8000;
             case SUPREMUS_ACTION_HATEFUL_STRIKE: return 5000;
             default: return 0;
         }
@@ -214,12 +214,11 @@ struct boss_supremusAI : public CombatAI
             {
                 if (m_bTankPhase)
                 {
-                    m_creature->CastSpell(nullptr, SPELL_SLOW_SELF, TRIGGERED_OLD_TRIGGERED);
+                    m_creature->CastSpell(nullptr, SPELL_SNARE_SELF, TRIGGERED_OLD_TRIGGERED);
                     DoScriptText(EMOTE_GROUND_CRACK, m_creature);
                     m_bTankPhase = false;
                     DoResetThreat();
-                    DisableTimer(SUPREMUS_ACTION_HATEFUL_STRIKE);
-                    SetActionReadyStatus(SUPREMUS_ACTION_HATEFUL_STRIKE, false);
+                    DisableCombatAction(SUPREMUS_ACTION_HATEFUL_STRIKE);
                     ResetTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION, GetInitialActionTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION));
                     SetCombatScriptStatus(true);
                     SetCombatMovement(false, true);
@@ -229,8 +228,8 @@ struct boss_supremusAI : public CombatAI
                 }
                 else
                 {
-                    if (m_creature->HasAura(SPELL_SLOW_SELF))
-                        m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
+                    if (m_creature->HasAura(SPELL_SNARE_SELF))
+                        m_creature->RemoveAurasDueToSpell(SPELL_SNARE_SELF);
 
                     m_creature->FixateTarget(nullptr); // fixate aura runs a tad longer
                     m_bTankPhase = true;
@@ -279,6 +278,7 @@ struct boss_supremusAI : public CombatAI
     }
 };
 
+// 41951 - Random Target
 struct SupremusRandomTarget : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -297,6 +297,7 @@ struct SupremusRandomTarget : public AuraScript
     }
 };
 
+// 41925 - Hateful Strike Primer
 struct SupremusHatefulStrikePrimer : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
