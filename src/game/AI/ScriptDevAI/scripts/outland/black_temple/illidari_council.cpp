@@ -442,7 +442,7 @@ struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
             {
                 if (DoCastSpellIfCan(nullptr, m_aura ? SPELL_CHROMATIC_AURA : SPELL_DEVOTION_AURA) == CAST_OK)
                 {
-                    ResetCombatAction(action, 60000);
+                    ResetCombatAction(action, 30000);
                     m_aura = !m_aura; // should this be ported to spell lists, auras have category cooldown, so two entries will do, this is easier here
                 }
                 return;
