@@ -12230,8 +12230,11 @@ void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float vertical
     {
         if (Player const* player = GetControllingPlayer())
         {
-            player->GetSession()->SendKnockBack(this, angle, horizontalSpeed, verticalSpeed);
-            return;
+            if (player->GetMover() == this)
+            {
+                player->GetSession()->SendKnockBack(this, angle, horizontalSpeed, verticalSpeed);
+                return;
+            }
         }
     }
 
