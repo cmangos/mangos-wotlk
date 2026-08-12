@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_festergut
 SD%Complete: 90%
-SDComment: Achievement NYI.
+SDComment: Encounter and Flu Shot Shortage achievement implemented.
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -32,9 +32,10 @@ enum
     SPELL_REMOVE_INOCULENT      = 69298,
 
     SPELL_GASTRIC_BLOAT         = 72214,            // procs 72219 on damage done
+    SPELL_GASTRIC_EXPLOSION     = 72227,
     SPELL_GAS_SPORE             = 69278,            // should trigger 69291 on surviving targets
     SPELL_VILE_GAS              = 71307,            // triggers 69240
-    //SPELL_INOCULATED            = 69291,            // spell cast on players when they survive the gas spore. Requires core support
+    SPELL_INOCULATED            = 69291,
 
     // Blight spells
     SPELL_INHALE_BLIGHT         = 69165,
@@ -124,6 +125,7 @@ struct boss_festergutAI : public ScriptedAI
         // set encounter in progress and get professor to the balcony
         if (m_pInstance)
         {
+            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_FLU_SHOT_SHORTAGE, true);
             m_pInstance->SetData(TYPE_FESTERGUT, IN_PROGRESS);
 
             if (Creature* pPutricide = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
@@ -188,6 +190,21 @@ struct boss_festergutAI : public ScriptedAI
 
             if (Creature* pPutricide = m_pInstance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
                 pPutricide->CastSpell(pSummoned, SPELL_MALLEABLE_GOO, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+
+    void SpellHitTarget(Unit* target, SpellEntry const* spellInfo) override
+    {
+        if (!target || !spellInfo)
+            return;
+
+        // Pungent Blight consumes every difficulty version of Inoculated.
+        if (spellInfo->Id == 69195 || spellInfo->Id == 71219 || spellInfo->Id == 73031 || spellInfo->Id == 73032)
+        {
+            target->RemoveAurasDueToSpell(69291);
+            target->RemoveAurasDueToSpell(72101);
+            target->RemoveAurasDueToSpell(72102);
+            target->RemoveAurasDueToSpell(72103);
         }
     }
 
@@ -339,6 +356,58 @@ struct InhaleBlight : public SpellScript
     }
 };
 
+// 69290, 71222, 73033, 73034 - Blighted Spores. A player who survives
+// the full aura receives the matching Inoculated stack.
+struct spell_festergut_blighted_spores : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply || aura->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+            return;
+
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsAlive())
+            return;
+
+        uint32 inoculated = SPELL_INOCULATED;
+        switch (aura->GetId())
+        {
+            case 71222: inoculated = 72101; break;
+            case 73033: inoculated = 72102; break;
+            case 73034: inoculated = 72103; break;
+        }
+
+        if (SpellAuraHolder* holder = target->GetSpellAuraHolder(inoculated))
+            if (holder->GetStackAmount() >= 2)
+                if (instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(target->GetInstanceData()))
+                    instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_FLU_SHOT_SHORTAGE, false);
+
+        target->CastSpell(target, inoculated, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 72219, 72551, 72552, 72553 - the tenth stack detonates and clears.
+struct spell_festergut_gastric_bloat : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_2)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        if (SpellAuraHolder* holder = target->GetSpellAuraHolder(spell->m_spellInfo->Id))
+        {
+            if (holder->GetStackAmount() < 10)
+                return;
+            target->RemoveAurasDueToSpell(spell->m_spellInfo->Id);
+            target->CastSpell(target, SPELL_GASTRIC_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 /*######
 ## npc_orange_gas_stalker
 ######*/
@@ -372,4 +441,6 @@ void AddSC_boss_festergut()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<InhaleBlight>("spell_inhale_blight");
+    RegisterSpellScript<spell_festergut_blighted_spores>("spell_festergut_blighted_spores");
+    RegisterSpellScript<spell_festergut_gastric_bloat>("spell_festergut_gastric_bloat");
 }

@@ -1144,6 +1144,11 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         case ACHIEV_CRIT_NAUSEA_10H:
         case ACHIEV_CRIT_NAUSEA_25H:
             return m_abAchievCriteria[TYPE_ACHIEV_NAUSEA];
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_10N:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_25N:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_10H:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_FLU_SHOT_SHORTAGE];
     }
 
     return false;

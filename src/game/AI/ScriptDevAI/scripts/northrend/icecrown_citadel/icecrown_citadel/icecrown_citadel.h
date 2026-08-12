@@ -120,12 +120,13 @@ enum
     NPC_EMPOWERING_ORB_STALKER      = 36934,
 
     // achievement types
-    MAX_SPECIAL_ACHIEV_CRITS        = 4,
+    MAX_SPECIAL_ACHIEV_CRITS        = 5,
 
     TYPE_ACHIEV_BONED               = 0,
     TYPE_ACHIEV_MADE_A_MESS         = 1,
     TYPE_ACHIEV_DANCES_OOZES        = 2,
     TYPE_ACHIEV_NAUSEA              = 3,
+    TYPE_ACHIEV_FLU_SHOT_SHORTAGE   = 4,
 
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
