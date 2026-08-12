@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: blood_prince_council
-SD%Complete: 80%
-SDComment: Timers; Some details are not very clear about this encounter: spells 72087 and 73001 require additional research.
+SD%Complete: 90%
+SDComment: Four-mode mechanics implemented; remaining work is live encounter tuning.
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -90,7 +90,9 @@ enum
     SPELL_SHADOW_LANCE          = 71405,
     SPELL_EMP_SHADOW_LANCE      = 71815,
     SPELL_SHADOW_RESONANCE      = 71943,            // summons 38369
-    // SPELL_SHADOW_PRISON       = 73001,            // on heroic - not sure how to use
+    SPELL_SHADOW_PRISON         = 72998,
+    SPELL_SHADOW_PRISON_DAMAGE  = 72999,
+    SPELL_SHADOW_PRISON_DUMMY   = 73001,
 
     // dark nucleus spells
     SPELL_SHADOW_RESONANCE_AURA = 71911,            // purpose unk - maybe range check
@@ -303,6 +305,8 @@ struct npc_kinetic_bombAI : public ScriptedAI
             return;
 
         DoCastSpellIfCan(m_creature, SPELL_KINETIC_BOMB_DMG);
+        if (instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(m_creature->GetInstanceData()))
+            instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_ORB_WHISPERER, false);
         m_creature->ForcedDespawn(1000);
     }
 
@@ -316,6 +320,16 @@ struct npc_kinetic_bombAI : public ScriptedAI
 UnitAI* GetAI_npc_kinetic_bomb(Creature* pCreature)
 {
     return new npc_kinetic_bombAI(pCreature);
+};
+
+struct spell_blood_council_shadow_prison : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (target && target->IsMoving())
+            target->CastSpell(target, SPELL_SHADOW_PRISON_DAMAGE, TRIGGERED_OLD_TRIGGERED);
+    }
 };
 
 /*######
@@ -395,7 +409,18 @@ struct npc_blood_orb_controlAI : public Scripted_NoMovementAI
     void Aggro(Unit* /*pWho*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
+            if (instance_icecrown_citadel* instance = dynamic_cast<instance_icecrown_citadel*>(m_pInstance))
+            {
+                instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_ORB_WHISPERER, true);
+                if (instance->IsHeroicDifficulty())
+                    for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+                        if (Player* player = playerRef.getSource())
+                            if (player->IsAlive() && !player->IsGameMaster())
+                                player->CastSpell(player, SPELL_SHADOW_PRISON, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -881,4 +906,6 @@ void AddSC_blood_prince_council()
     pNewScript->Name = "boss_valanar_icc";
     pNewScript->GetAI = &GetAI_boss_valanar_icc;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_blood_council_shadow_prison>("spell_blood_council_shadow_prison");
 }
