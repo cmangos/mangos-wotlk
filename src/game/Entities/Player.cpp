@@ -12272,24 +12272,24 @@ void Player::DestroyConjuredItems(bool update)
                 DestroyItem(INVENTORY_SLOT_BAG_0, i, update);
 }
 
-void Player::DestroyItemCount(Item& pItem, uint32& count, bool update)
+void Player::DestroyItemCount(Item& item, uint32& count, bool update)
 {
-    DEBUG_LOG("STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", pItem.GetGUIDLow(), pItem.GetEntry(), count);
+    DEBUG_LOG("STORAGE: DestroyItemCount item (GUID: %u, Entry: %u) count = %u", item.GetGUIDLow(), item.GetEntry(), count);
 
-    if (pItem.GetCount() <= count)
+    if (item.GetCount() <= count)
     {
-        count -= pItem.GetCount();
+        count -= item.GetCount();
 
-        DestroyItem(pItem.GetBagSlot(), pItem.GetSlot(), update);
+        DestroyItem(item.GetBagSlot(), item.GetSlot(), update);
     }
     else
     {
-        ItemRemovedQuestCheck(pItem.GetEntry(), count);
-        pItem.SetCount(pItem.GetCount() - count);
+        ItemRemovedQuestCheck(item.GetEntry(), count);
+        item.SetCount(item.GetCount() - count);
         count = 0;
         if (IsInWorld() && update)
-            GetMap()->AddUpdateObject(&pItem);
-        pItem.SetState(ITEM_CHANGED, this);
+            GetMap()->AddUpdateObject(&item);
+        item.SetState(ITEM_CHANGED, this);
     }
 }
 
