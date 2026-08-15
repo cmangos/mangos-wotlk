@@ -66,8 +66,8 @@ class instance_nexus : public ScriptedInstance
 
         void Load(const char* chrIn) override;
 
-        void ShowChatCommands(ChatHandler* handler);
-        void ExecuteChatCommand(ChatHandler* handler, char* args);
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 
         void ReleaseKeristrasza();
 
