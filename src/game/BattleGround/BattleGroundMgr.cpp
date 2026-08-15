@@ -283,6 +283,9 @@ void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket& data, Batt
         case BG_GROUP_JOIN_STATUS_JOIN_FAILED:
             data << uint64(0); // player guid
             break;
+
+        default:
+            break;
     }
 }
 
