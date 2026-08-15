@@ -600,8 +600,10 @@ struct GameObjectInfo
     {
         switch (type)
         {
-            case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING: return true;
-            case GAMEOBJECT_TYPE_TRAPDOOR:              return true;
+            case GAMEOBJECT_TYPE_MO_TRANSPORT:
+            case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
+            case GAMEOBJECT_TYPE_TRAPDOOR:
+                return true;
             default: return false;
         }
     }
