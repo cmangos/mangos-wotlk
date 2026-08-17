@@ -1156,16 +1156,6 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         case ACHIEV_CRIT_ORB_WHISPERER_10H:
         case ACHIEV_CRIT_ORB_WHISPERER_25H:
             return m_abAchievCriteria[TYPE_ACHIEV_ORB_WHISPERER];
-        case ACHIEV_CRIT_PORTAL_JOCKEY_10N:
-        case ACHIEV_CRIT_PORTAL_JOCKEY_25N:
-        case ACHIEV_CRIT_PORTAL_JOCKEY_10H:
-        case ACHIEV_CRIT_PORTAL_JOCKEY_25H:
-            return m_abAchievCriteria[TYPE_ACHIEV_PORTAL_JOCKEY];
-        case ACHIEV_CRIT_ALL_YOU_CAN_EAT_10N:
-        case ACHIEV_CRIT_ALL_YOU_CAN_EAT_25N:
-        case ACHIEV_CRIT_ALL_YOU_CAN_EAT_10V:
-        case ACHIEV_CRIT_ALL_YOU_CAN_EAT_25V:
-            return m_abAchievCriteria[TYPE_ACHIEV_ALL_YOU_CAN_EAT];
     }
 
     return false;
