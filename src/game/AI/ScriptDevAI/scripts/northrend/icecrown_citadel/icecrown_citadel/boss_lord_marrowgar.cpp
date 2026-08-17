@@ -56,14 +56,14 @@ enum
     NPC_BONE_SPIKE_2            = 38711,                    // summoned by spell 72670
     NPC_BONE_SPIKE_3            = 38712,                    // summoned by spell 72669
 
-    // phases and max cold flame charges
+    // phases and max Bone Storm charges
     PHASE_NORMAL                = 1,
     PHASE_BONE_STORM_CHARGE     = 2,
     PHASE_BONE_STORM_CHARGING   = 3,
     PHASE_BONE_STORM_COLDFLAME  = 4,
 
-    MAX_CHARGES_NORMAL          = 4,
-    MAX_CHARGES_HEROIC          = 5,
+    MAX_CHARGES_10_PLAYER       = 4,
+    MAX_CHARGES_25_PLAYER       = 6,
 };
 
 struct boss_lord_marrowgarAI : public ScriptedAI
@@ -71,8 +71,8 @@ struct boss_lord_marrowgarAI : public ScriptedAI
     boss_lord_marrowgarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = static_cast<instance_icecrown_citadel*>(pCreature->GetInstanceData());
-        // on heroic, there is 1 more Bone Storm charge
-        m_uiMaxCharges = m_pInstance && m_pInstance->IsHeroicDifficulty() ? MAX_CHARGES_HEROIC : MAX_CHARGES_NORMAL;
+        // Bone Storm lasts 20 seconds in 10 player and 30 seconds in 25 player.
+        m_uiMaxCharges = m_pInstance && m_pInstance->Is25ManDifficulty() ? MAX_CHARGES_25_PLAYER : MAX_CHARGES_10_PLAYER;
         m_bIsHeroicMode = m_pInstance && m_pInstance->IsHeroicDifficulty();
         Reset();
     }
@@ -287,7 +287,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
         {
             if (m_uiBerserkTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK))
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(SAY_BERSERK, m_creature);
                     m_uiBerserkTimer = 0;
