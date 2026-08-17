@@ -34,6 +34,7 @@ class GenericTransport : public GameObject
         bool AddPassenger(WorldObject* passenger, bool adjustCoords = true);
         bool RemovePassenger(WorldObject* passenger);
         bool AddPetToTransport(Unit* passenger, Pet* pet);
+        bool HasPassenger(WorldObject const* passenger) const;
 
         void UpdatePosition(float x, float y, float z, float o);
         void UpdatePassengerPosition(WorldObject* object);
@@ -87,6 +88,7 @@ class ElevatorTransport : public GenericTransport
         void Update(const uint32 diff) override;
 
         void SetGoState(GOState state) override;
+        void StopMovement();
 
         bool IsCrossMapTransport() const override { return false; }
     private:
@@ -113,6 +115,8 @@ class Transport : public GenericTransport
         void SpawnPassengers() override;
         void SpawnPassengersIfDespawned() override;
         void DespawnPassengers() override;
+        void RemoveFromMap();
+        void StartMovementNow();
 
         bool IsCrossMapTransport() const override;
     private:
