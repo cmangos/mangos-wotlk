@@ -464,6 +464,7 @@ enum
     // NOTE: these numbers are quesswork
     MAX_INSECT_PER_ROUND            = 8,
     TOTAL_INSECTS_PER_EVENT         = 100,
+    PUTRICIDE_TRAP_DURATION         = MINUTE * IN_MILLISECONDS,
 };
 
 /*#####
@@ -513,11 +514,17 @@ struct npc_putricides_trapAI : public ScriptedAI
     uint32 m_uiEventTimer;
     uint32 m_uiSummonTimer;
 
+    void StopSwarm()
+    {
+        m_creature->RemoveAurasDueToSpell(SPELL_GIANT_INSECT_SWARM);
+        m_creature->RemoveAllDynObjects();
+    }
+
     void Reset() override
     {
         m_uiInsectCounter = 0;
         m_uiSummonTimer = 1000;
-        m_uiEventTimer = 5 * MINUTE * IN_MILLISECONDS;
+        m_uiEventTimer = PUTRICIDE_TRAP_DURATION;
     }
 
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
@@ -560,6 +567,7 @@ struct npc_putricides_trapAI : public ScriptedAI
                 m_uiSummonTimer = 0;
                 m_uiEventTimer = 0;
 
+                StopSwarm();
                 m_pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, DONE);
                 m_creature->ForcedDespawn();
             }
@@ -615,6 +623,7 @@ struct npc_putricides_trapAI : public ScriptedAI
                 }
 
                 // set event as done if there are still players around
+                StopSwarm();
                 m_pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, bEventFailed ? FAIL : DONE);
                 m_uiSummonTimer = 0;
                 m_uiEventTimer = 0;
@@ -699,6 +708,114 @@ struct RocketPackPeriodic : public AuraScript
     }
 };
 
+/*#####
+## npc_icc_vengeful_fleshreaper
+#####*/
+
+enum VengefulFleshreaperActions
+{
+    SPELL_LEAPING_FACE_MAUL        = 71164,
+    SPELL_LEAPING_FACE_MAUL_AURA   = 71163,
+    POINT_PIPE_JUMP                = 3703801,
+};
+
+// The two permanent Fleshreapers above the Plagueworks corridor patrol on
+// pipes roughly twenty yards above the floor. Generic chase movement cannot
+// build a path from that geometry, so leap down to the detected player first.
+struct npc_icc_vengeful_fleshreaperAI : public ScriptedAI
+{
+    npc_icc_vengeful_fleshreaperAI(Creature* creature) : ScriptedAI(creature)
+    {
+        m_bPipeSpawn = creature->GetRespawnPosition().z > 365.0f;
+        Reset();
+    }
+
+    bool m_bPipeSpawn;
+    bool m_bJumping;
+    ObjectGuid m_jumpTargetGuid;
+    uint32 m_uiFaceMaulTimer;
+
+    void Reset() override
+    {
+        m_bJumping = false;
+        m_jumpTargetGuid.Clear();
+        m_uiFaceMaulTimer = urand(3000, 6000);
+        m_creature->SetWalk(false);
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (!m_bPipeSpawn)
+        {
+            ScriptedAI::MoveInLineOfSight(who);
+            return;
+        }
+
+        if (!m_bJumping && !m_creature->IsInCombat() && who->IsPlayer() && who->IsAlive() &&
+                m_creature->CanAttack(who) && m_creature->IsWithinDistInMap(who, 25.0f))
+            AttackStart(who);
+    }
+
+    void AttackStart(Unit* who) override
+    {
+        if (!who)
+            return;
+
+        ScriptedAI::AttackStart(who);
+
+        if (!m_bPipeSpawn || m_bJumping || m_creature->GetPositionZ() < 365.0f)
+            return;
+
+        float angle = who->GetAngle(m_creature);
+        float x = who->GetPositionX() + std::cos(angle) * 3.0f;
+        float y = who->GetPositionY() + std::sin(angle) * 3.0f;
+        m_bJumping = true;
+        m_jumpTargetGuid = who->GetObjectGuid();
+        m_creature->GetMotionMaster()->MoveJump(x, y, who->GetPositionZ(), 10.0f, 6.0f, POINT_PIPE_JUMP);
+    }
+
+    void MovementInform(uint32 movementType, uint32 pointId) override
+    {
+        if (movementType != EFFECT_MOTION_TYPE || pointId != POINT_PIPE_JUMP)
+            return;
+
+        m_bJumping = false;
+        if (Unit* target = m_creature->GetMap()->GetUnit(m_jumpTargetGuid))
+        {
+            if (target->IsAlive() && m_creature->CanAttack(target))
+                ScriptedAI::AttackStart(target);
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_bJumping || !m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        if (m_uiFaceMaulTimer <= diff)
+        {
+            Unit* victim = m_creature->GetVictim();
+            float distance = m_creature->GetDistance(victim);
+            if (!victim->HasAura(SPELL_LEAPING_FACE_MAUL_AURA) && distance > 5.0f && distance < 30.0f)
+            {
+                if (DoCastSpellIfCan(victim, SPELL_LEAPING_FACE_MAUL) == CAST_OK)
+                    m_uiFaceMaulTimer = urand(15000, 20000);
+            }
+            else
+                m_uiFaceMaulTimer = 3000;
+        }
+        else
+            m_uiFaceMaulTimer -= diff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_npc_icc_vengeful_fleshreaper(Creature* creature)
+{
+    return new npc_icc_vengeful_fleshreaperAI(creature);
+}
+
 void AddSC_icecrown_citadel()
 {
     Script* pNewScript = new Script;
@@ -720,6 +837,11 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "at_rampart_skull";
     pNewScript->pAreaTrigger = &AreaTrigger_at_rampart_skull;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_icc_vengeful_fleshreaper";
+    pNewScript->GetAI = &GetAI_npc_icc_vengeful_fleshreaper;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

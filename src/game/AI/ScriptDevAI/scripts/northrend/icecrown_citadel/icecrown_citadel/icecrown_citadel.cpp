@@ -463,6 +463,8 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_ORANGE_VALVE:
         case GO_GREEN_VALVE:
         case GO_DRINK_ME:
+            DoToggleGameObjectFlags(pGo->GetObjectGuid(), GO_FLAG_NO_INTERACT,
+                m_auiEncounter[TYPE_PROFESSOR_PUTRICIDE] != IN_PROGRESS);
             break;
         case GO_MARROWGAR_DOOR:
             if (m_auiEncounter[TYPE_MARROWGAR] != IN_PROGRESS)
@@ -889,7 +891,8 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_PROFESSOR_PUTRICIDE:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_SCIENTIST_DOOR);
+            DoUseOpenableObject(GO_SCIENTIST_DOOR,
+                uiData != IN_PROGRESS && m_auiEncounter[TYPE_PLAGUE_WING_ENTRANCE] == DONE);
             if (uiData == DONE)
             {
                 // deactivate the sigil and enable the teleporter if possible
@@ -1012,8 +1015,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_PLAGUE_WING_ENTRANCE:
             m_auiEncounter[uiType] = uiData;
-            // combat door
-            DoUseDoorOrButton(GO_SCIENTIST_DOOR_COLLISION);
+            DoUseOpenableObject(GO_SCIENTIST_DOOR_COLLISION, uiData != IN_PROGRESS);
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_SCIENTIST_DOOR);
             // combat doors with custom anim
