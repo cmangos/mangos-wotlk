@@ -285,6 +285,57 @@ void Transport::DespawnPassengers()
     m_staticPassengers.clear();
 }
 
+void Transport::RemoveFromMap()
+{
+    Map* map = GetMap();
+
+    // Never delete a moving transport from underneath a player. Encounter
+    // scripts must relocate every player passenger before requesting removal.
+    for (auto& playerRef : map->GetPlayers())
+        if (Player* player = playerRef.getSource())
+            if (HasPassenger(player))
+            {
+                sLog.outError("Transport::RemoveFromMap: refusing to remove transport %u while player %s is aboard",
+                    GetEntry(), player->GetGuidStr().c_str());
+                return;
+            }
+
+    // Dynamic encounter passengers are not part of m_staticPassengers, so
+    // detach and remove them before deleting the ship.
+    auto passengers = m_passengers;
+    for (WorldObject* passenger : passengers)
+    {
+        RemovePassenger(passenger);
+        passenger->AddObjectToRemoveList();
+    }
+    m_staticPassengers.clear();
+
+    RemoveModelFromMap();
+    UpdateForMap(map, false);
+    map->RemoveTransport(this);
+    CleanupsBeforeDelete();
+    ResetMap();
+    delete this;
+}
+
+void Transport::StartMovementNow()
+{
+    SetGoState(GO_STATE_ACTIVE);
+
+    if (!GetGOInfo()->moTransport.canBeStopped || !m_currentFrame->IsStopFrame())
+        return;
+
+    // SetGoState clears the manual stop flag, but the normal update still
+    // waits out the DBC stop-frame dwell time. Script-started encounters need
+    // to depart when their RP asks them to, not minutes later.
+    uint32 cycleStart = (m_pathProgress / GetPeriod()) * GetPeriod();
+    m_pathProgress = cycleStart + m_currentFrame->DepartureTime;
+    m_lastStopIndex = m_currentFrame->Index;
+    SetMoving(true);
+    SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, 0);
+    SetUInt16Value(GAMEOBJECT_DYNAMIC, 1, m_pathProgress % GetPeriod());
+}
+
 bool Transport::IsCrossMapTransport() const
 {
     return m_transportTemplate.mapsUsed.size() > 1;
@@ -459,6 +510,26 @@ bool GenericTransport::RemovePassenger(WorldObject* passenger)
             m_staticPassengers.erase(passenger->GetObjectGuid());
     }
     return true;
+}
+
+bool GenericTransport::HasPassenger(WorldObject const* passenger) const
+{
+    if (!passenger)
+        return false;
+
+    // Vehicle boarding removes a player from the MO transport's direct
+    // passenger set. Follow the vehicle chain back to its root carrier so a
+    // player seated in a cannon still counts as being aboard the gunship.
+    WorldObject const* carrier = passenger;
+    while (carrier->IsBoarded())
+    {
+        TransportInfo const* transportInfo = carrier->GetTransportInfo();
+        if (!transportInfo || !transportInfo->GetTransport())
+            return false;
+        carrier = transportInfo->GetTransport();
+    }
+
+    return carrier->GetTransport() == this;
 }
 
 bool GenericTransport::AddPetToTransport(Unit* passenger, Pet* pet)
@@ -755,6 +826,15 @@ void ElevatorTransport::SetGoState(GOState state)
 {
     GenericTransport::SetGoState(state);
     m_eventTriggered = false;
+}
+
+void ElevatorTransport::StopMovement()
+{
+    if (!GetGOInfo()->transport.pause)
+        return;
+
+    m_stopped = true;
+    SetInt16Value(GAMEOBJECT_DYNAMIC, 1, -1);
 }
 
 void GenericTransport::UpdatePassengerPositions(PassengerSet& passengers)
