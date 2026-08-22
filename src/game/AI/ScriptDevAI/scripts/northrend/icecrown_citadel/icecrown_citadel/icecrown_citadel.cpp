@@ -73,7 +73,7 @@ enum
     SAY_SAURFANG_AGGRO              = -1631061,
 
     // Festergut
-    SAY_STINKY_DIES                 = -1631081,
+    SAY_STINKY_DIES                 = 37830,
     // Rotface
     SAY_PRECIOUS_DIES               = -1631070,
 
@@ -327,6 +327,10 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_FESTERGUT] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
+        case GO_ORANGE_VALVE:
+            if (m_auiEncounter[TYPE_FESTERGUT] == DONE)
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
         case GO_GREEN_TUBE:
             if (m_auiEncounter[TYPE_ROTFACE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
@@ -403,7 +407,6 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_SINDRAGOSA_SHORTCUT_EXIT:
         case GO_ORANGE_PLAGUE:
         case GO_GREEN_PLAGUE:
-        case GO_ORANGE_VALVE:
         case GO_GREEN_VALVE:
         case GO_DRINK_ME:
             break;
@@ -489,7 +492,7 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
             if (Creature* pFestergut = GetSingleCreatureFromStorage(NPC_FESTERGUT))
             {
                 if (pFestergut->IsAlive())
-                    DoScriptText(SAY_STINKY_DIES, pFestergut);
+                    DoBroadcastText(SAY_STINKY_DIES, pFestergut);
             }
             break;
         case NPC_PRECIOUS:
@@ -1014,6 +1017,11 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         case ACHIEV_CRIT_NAUSEA_10H:
         case ACHIEV_CRIT_NAUSEA_25H:
             return m_abAchievCriteria[TYPE_ACHIEV_NAUSEA];
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_10N:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_25N:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_10H:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_FLU_SHOT_SHORTAGE];
     }
 
     return false;
