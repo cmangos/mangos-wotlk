@@ -28,15 +28,15 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1631002,
-    SAY_BONE_STORM              = -1631003,
-    SAY_BONE_SPIKE_1            = -1631004,
-    SAY_BONE_SPIKE_2            = -1631005,
-    SAY_BONE_SPIKE_3            = -1631006,
-    SAY_SLAY_1                  = -1631007,
-    SAY_SLAY_2                  = -1631008,
-    SAY_DEATH                   = -1631009,
-    SAY_BERSERK                 = -1631010,
+    SAY_AGGRO                   = 37684,
+    SAY_BONE_STORM              = 36554,
+    SAY_BONE_SPIKE_1            = 37695,
+    SAY_BONE_SPIKE_2            = 37696,
+    SAY_BONE_SPIKE_3            = 37693,
+    SAY_SLAY_1                  = 37686,
+    SAY_SLAY_2                  = 37687,
+    SAY_DEATH                   = 37688,
+    SAY_BERSERK                 = 37690,
 
     // spells
     SPELL_BERSERK               = 26662,
@@ -108,7 +108,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MARROWGAR, IN_PROGRESS);
@@ -120,12 +120,12 @@ struct boss_lord_marrowgarAI : public ScriptedAI
             return;
 
         if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MARROWGAR, DONE);
@@ -187,7 +187,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
                     if (DoCastSpellIfCan(m_creature, SPELL_BONE_STORM) == CAST_OK)
                     {
                         // ToDo: research if we need to increase the speed here
-                        DoScriptText(SAY_BONE_STORM, m_creature);
+                        DoBroadcastText(SAY_BONE_STORM, m_creature);
                         m_uiPhase = PHASE_BONE_STORM_CHARGE;
                         SetCombatMovement(false);
                         m_creature->GetMotionMaster()->MoveIdle();
@@ -271,9 +271,9 @@ struct boss_lord_marrowgarAI : public ScriptedAI
                 {
                     switch (urand(0, 2))
                     {
-                        case 0: DoScriptText(SAY_BONE_SPIKE_1, m_creature); break;
-                        case 1: DoScriptText(SAY_BONE_SPIKE_2, m_creature); break;
-                        case 2: DoScriptText(SAY_BONE_SPIKE_3, m_creature); break;
+                        case 0: DoBroadcastText(SAY_BONE_SPIKE_1, m_creature); break;
+                        case 1: DoBroadcastText(SAY_BONE_SPIKE_2, m_creature); break;
+                        case 2: DoBroadcastText(SAY_BONE_SPIKE_3, m_creature); break;
                     }
                     m_uiBoneSpikeTimer = 18000;
                 }
@@ -289,7 +289,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
+                    DoBroadcastText(SAY_BERSERK, m_creature);
                     m_uiBerserkTimer = 0;
                 }
             }
