@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: blood_prince_council
-SD%Complete: 80%
-SDComment: Timers; Some details are not very clear about this encounter: spells 72087 and 73001 require additional research.
+SD%Complete: 90%
+SDComment: Four-mode mechanics implemented; remaining work is live encounter tuning.
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -74,6 +74,7 @@ enum
 
     NPC_KINETIC_BOMB            = 38454,
     NPC_KINETIC_BOMB_TARGET     = 38458,
+    NPC_SHOCK_VORTEX            = 38422,
 
     // shock vortex spells - in eventAI
     // SPELL_SHOCK_VORTEX_AURA   = 71945,
@@ -90,7 +91,10 @@ enum
     SPELL_SHADOW_LANCE          = 71405,
     SPELL_EMP_SHADOW_LANCE      = 71815,
     SPELL_SHADOW_RESONANCE      = 71943,            // summons 38369
-    // SPELL_SHADOW_PRISON       = 73001,            // on heroic - not sure how to use
+    NPC_DARK_NUCLEUS            = 38369,
+    SPELL_SHADOW_PRISON         = 72998,
+    SPELL_SHADOW_PRISON_DAMAGE  = 72999,
+    SPELL_SHADOW_PRISON_DUMMY   = 73001,
 
     // dark nucleus spells
     SPELL_SHADOW_RESONANCE_AURA = 71911,            // purpose unk - maybe range check
@@ -303,6 +307,8 @@ struct npc_kinetic_bombAI : public ScriptedAI
             return;
 
         DoCastSpellIfCan(m_creature, SPELL_KINETIC_BOMB_DMG);
+        if (instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(m_creature->GetInstanceData()))
+            instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_ORB_WHISPERER, false);
         m_creature->ForcedDespawn(1000);
     }
 
@@ -316,6 +322,16 @@ struct npc_kinetic_bombAI : public ScriptedAI
 UnitAI* GetAI_npc_kinetic_bomb(Creature* pCreature)
 {
     return new npc_kinetic_bombAI(pCreature);
+};
+
+struct spell_blood_council_shadow_prison : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (target && target->IsMoving())
+            target->CastSpell(target, SPELL_SHADOW_PRISON_DAMAGE, TRIGGERED_OLD_TRIGGERED);
+    }
 };
 
 /*######
@@ -379,6 +395,10 @@ struct npc_blood_orb_controlAI : public Scripted_NoMovementAI
     npc_blood_orb_controlAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        // This is the shared-health controller, not a visible encounter NPC.
+        // Leaving its display selection to the database can expose the green
+        // golem model seen behind the princes.
+        m_creature->SetVisibility(VISIBILITY_OFF);
         Reset();
     }
 
@@ -386,44 +406,201 @@ struct npc_blood_orb_controlAI : public Scripted_NoMovementAI
 
     uint8 m_uiLastResult;
     uint32 m_uiInvocationTimer;
+    uint32 m_uiFinishTimer;
+    bool m_bFinishingEncounter;
+    bool m_bCompletionProcessed;
+    ObjectGuid m_lootRecipientGuid;
 
     void Reset() override
     {
+        m_uiLastResult = MAX_PRINCES;
         m_uiInvocationTimer = 30000;
+        m_uiFinishTimer = 0;
+        m_bFinishingEncounter = false;
+        m_bCompletionProcessed = false;
+        m_lootRecipientGuid.Clear();
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* pWho) override
     {
+        if (pWho)
+            if (Player* player = pWho->GetBeneficiaryPlayer())
+                m_lootRecipientGuid = player->GetObjectGuid();
+
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_BLOOD_PRINCE_COUNCIL, IN_PROGRESS);
+            if (instance_icecrown_citadel* instance = dynamic_cast<instance_icecrown_citadel*>(m_pInstance))
+            {
+                instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_ORB_WHISPERER, true);
+                if (instance->IsHeroicDifficulty())
+                    for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+                        if (Player* player = playerRef.getSource())
+                            if (player->IsAlive() && !player->IsGameMaster())
+                                player->CastSpell(player, SPELL_SHADOW_PRISON, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+
+    void CompleteEncounter()
+    {
+        if (m_bCompletionProcessed)
+            return;
+
+        m_bCompletionProcessed = true;
+        m_uiFinishTimer = 0;
+
+        // Nuclei, flame orbs, vortexes, and kinetic bombs are temporary
+        // encounter actors.  Remove them before completing the instance so
+        // they cannot retain combat or remain visible after the princes die.
+        uint32 const summonEntries[] =
+        {
+            NPC_DARK_NUCLEUS, NPC_BALL_OF_FLAME,
+            NPC_BALL_OF_INFERNO_FLAME, NPC_KINETIC_BOMB,
+            NPC_KINETIC_BOMB_TARGET, NPC_SHOCK_VORTEX
+        };
+        for (uint32 entry : summonEntries)
+        {
+            CreatureList summons;
+            GetCreatureListWithEntryInGrid(summons, m_creature, entry, 150.0f);
+            for (Creature* summon : summons)
+                if (summon->IsTemporarySummon())
+                    summon->ForcedDespawn();
+        }
+
+        if (m_pInstance)
+        {
+            Player* recipient = m_lootRecipientGuid ?
+                m_creature->GetMap()->GetPlayer(m_lootRecipientGuid) : nullptr;
+
+            // GM damage commands and a few indirect-damage paths do not
+            // provide the controller with a dealer. In that case preserve
+            // normal raid loot ownership by selecting a participating player
+            // before the scripted synchronized deaths are executed.
+            if (!recipient)
+            {
+                for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+                {
+                    Player* player = playerRef.getSource();
+                    if (player && player->IsAlive() && !player->IsGameMaster())
+                    {
+                        recipient = player;
+                        break;
+                    }
+                }
+            }
+
+            if (!recipient)
+                for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+                    if ((recipient = playerRef.getSource()))
+                        break;
+
+            // Preserve the player's tap on every prince before the controller
+            // performs the synchronized deaths. The world DB assigns the
+            // actual item loot only to Valanar, while this also keeps the
+            // encounter robust if difficulty templates inherit differently.
+            if (Creature* pValanar = m_pInstance->GetSingleCreatureFromStorage(NPC_VALANAR))
+            {
+                if (recipient)
+                    pValanar->SetLootRecipient(recipient);
+                if (pValanar->IsAlive())
+                    pValanar->Suicide();
+            }
+
+            if (Creature* pKeleseth = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
+            {
+                if (recipient)
+                    pKeleseth->SetLootRecipient(recipient);
+                if (pKeleseth->IsAlive())
+                    pKeleseth->Suicide();
+            }
+
+            if (Creature* pTaldaram = m_pInstance->GetSingleCreatureFromStorage(NPC_TALDARAM))
+            {
+                if (recipient)
+                    pTaldaram->SetLootRecipient(recipient);
+                if (pTaldaram->IsAlive())
+                    pTaldaram->Suicide();
+            }
+
+            // Record DONE only after the loot-owning corpse exists. This
+            // avoids instance-state cleanup racing the scripted death path.
+            m_pInstance->SetData(TYPE_BLOOD_PRINCE_COUNCIL, DONE);
+        }
+    }
+
+    void RegisterLootRecipient(Unit* dealer)
+    {
+        if (!m_lootRecipientGuid && dealer)
+            if (Player* player = dealer->GetBeneficiaryPlayer())
+                m_lootRecipientGuid = player->GetObjectGuid();
+    }
+
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damageType*/, SpellEntry const* /*spellInfo*/) override
+    {
+        RegisterLootRecipient(dealer);
+
+        if (m_bCompletionProcessed)
+        {
+            damage = 0;
+            return;
+        }
+
+        // Damage reaches this hidden shared-health controller while the
+        // empowered prince is still inside its own damage callback.  Defer
+        // the multi-creature death transition to the next map update so no
+        // prince is recursively killed from its active damage stack.
+        if (!m_bFinishingEncounter && damage >= m_creature->GetHealth())
+        {
+            damage = 0;
+            m_bFinishingEncounter = true;
+            m_uiFinishTimer = 1;
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_BLOOD_PRINCE_COUNCIL, DONE);
-
-            // Kill the 3 princes
-            if (Creature* pValanar = m_pInstance->GetSingleCreatureFromStorage(NPC_VALANAR))
-                pValanar->Suicide();
-
-            if (Creature* pKeleseth = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
-                pKeleseth->Suicide();
-
-            if (Creature* pTaldaram = m_pInstance->GetSingleCreatureFromStorage(NPC_TALDARAM))
-                pTaldaram->Suicide();
-        }
+        // Fallback for non-damage death paths. Normal lethal damage is
+        // deliberately completed from UpdateAI below.
+        CompleteEncounter();
     }
 
     void JustReachedHome() override
     {
+        uint32 const summonEntries[] =
+        {
+            NPC_DARK_NUCLEUS, NPC_BALL_OF_FLAME,
+            NPC_BALL_OF_INFERNO_FLAME, NPC_KINETIC_BOMB,
+            NPC_KINETIC_BOMB_TARGET, NPC_SHOCK_VORTEX
+        };
+        for (uint32 entry : summonEntries)
+        {
+            CreatureList summons;
+            GetCreatureListWithEntryInGrid(summons, m_creature, entry, 150.0f);
+            for (Creature* summon : summons)
+                if (summon->IsTemporarySummon())
+                    summon->ForcedDespawn();
+        }
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_BLOOD_PRINCE_COUNCIL, FAIL);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_bFinishingEncounter && !m_bCompletionProcessed)
+        {
+            if (m_uiFinishTimer <= uiDiff)
+            {
+                CompleteEncounter();
+                m_creature->Suicide();
+            }
+            else
+                m_uiFinishTimer -= uiDiff;
+
+            return;
+        }
+
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
@@ -509,8 +686,16 @@ struct blood_prince_council_baseAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
+        // The controller owns the shared health but the player damages the
+        // currently empowered prince. Preserve that tap explicitly so the
+        // synchronized Valanar death generates the actual council loot.
+        if (m_uiEmpowermentTimer && m_pInstance)
+            if (Creature* orb = m_pInstance->GetSingleCreatureFromStorage(NPC_BLOOD_ORB_CONTROL))
+                if (npc_blood_orb_controlAI* orbAI = dynamic_cast<npc_blood_orb_controlAI*>(orb->AI()))
+                    orbAI->RegisterLootRecipient(pDealer);
+
         // Damage is shared by the Blood Orb Control npc
         if (!m_uiEmpowermentTimer)
             uiDamage = 0;
@@ -618,7 +803,13 @@ struct boss_valanar_iccAI : public blood_prince_council_baseAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_KINETIC_BOMB_TARGET)
+        {
+            // 38458 is a targeting helper for the falling bomb, not a visible
+            // creature. Keep its spell source active while hiding its golem
+            // display from players.
+            pSummoned->SetVisibility(VISIBILITY_OFF);
             pSummoned->CastSpell(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 20.0f, SPELL_KINETIC_BOMB, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+        }
         else if (pSummoned->GetEntry() == NPC_KINETIC_BOMB)
         {
             // Handle Kinetic bomb movement
@@ -881,4 +1072,6 @@ void AddSC_blood_prince_council()
     pNewScript->Name = "boss_valanar_icc";
     pNewScript->GetAI = &GetAI_boss_valanar_icc;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_blood_council_shadow_prison>("spell_blood_council_shadow_prison");
 }

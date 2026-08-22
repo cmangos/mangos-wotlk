@@ -1014,6 +1014,11 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         case ACHIEV_CRIT_NAUSEA_10H:
         case ACHIEV_CRIT_NAUSEA_25H:
             return m_abAchievCriteria[TYPE_ACHIEV_NAUSEA];
+        case ACHIEV_CRIT_ORB_WHISPERER_10N:
+        case ACHIEV_CRIT_ORB_WHISPERER_25N:
+        case ACHIEV_CRIT_ORB_WHISPERER_10H:
+        case ACHIEV_CRIT_ORB_WHISPERER_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_ORB_WHISPERER];
     }
 
     return false;
