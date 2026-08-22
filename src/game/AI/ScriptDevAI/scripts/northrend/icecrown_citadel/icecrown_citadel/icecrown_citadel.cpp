@@ -75,7 +75,7 @@ enum
     // Festergut
     SAY_STINKY_DIES                 = -1631081,
     // Rotface
-    SAY_PRECIOUS_DIES               = -1631070,
+    SAY_PRECIOUS_DIES               = 37837,
 
     // Gunship related spells
     SPELL_AWARD_REPUTATION          = 73845,
@@ -331,6 +331,10 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_ROTFACE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
+        case GO_GREEN_VALVE:
+            if (m_auiEncounter[TYPE_ROTFACE] == DONE)
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
         case GO_SCIENTIST_DOOR_GREEN:
             // If both Festergut and Rotface are DONE, set as ACTIVE_ALTERNATIVE
             if (m_auiEncounter[TYPE_FESTERGUT] == DONE && m_auiEncounter[TYPE_ROTFACE] == DONE)
@@ -404,7 +408,6 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_ORANGE_PLAGUE:
         case GO_GREEN_PLAGUE:
         case GO_ORANGE_VALVE:
-        case GO_GREEN_VALVE:
         case GO_DRINK_ME:
             break;
         case GO_PLAGUE_SIGIL:
@@ -496,7 +499,7 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
             if (Creature* pRotface = GetSingleCreatureFromStorage(NPC_ROTFACE))
             {
                 if (pRotface->IsAlive())
-                    DoScriptText(SAY_PRECIOUS_DIES, pRotface);
+                    DoBroadcastText(SAY_PRECIOUS_DIES, pRotface);
             }
             break;
         case NPC_CULT_ADHERENT:
