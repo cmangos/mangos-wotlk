@@ -77,6 +77,8 @@ enum
     NPC_KORKRON_REAVER              = 36957,
     NPC_KORKRON_SERGEANT            = 36960,
 
+    ITEM_GOBLIN_ROCKET_PACK         = 49278,
+
     NPC_OVERLORD_SAURFANG           = 37187,        // Saurfang intro / outro
     NPC_KORKRON_REAVER_RISE         = 37920,
     NPC_MURADIN_BRONZEBEARD         = 37200,
@@ -194,15 +196,15 @@ enum
     GO_SAURFANG_CACHE_10_H          = 202238,
     GO_SAURFANG_CACHE_25_H          = 202241,
 
-    GO_GUNSHIP_ARMORY_A             = 201872,
-    GO_GUNSHIP_ARMORY_A_25          = 201873,
-    GO_GUNSHIP_ARMORY_A_10H         = 201874,
+    GO_GUNSHIP_ARMORY_A             = 201873,
+    GO_GUNSHIP_ARMORY_A_25          = 201874,
+    GO_GUNSHIP_ARMORY_A_10H         = 201872,
     GO_GUNSHIP_ARMORY_A_25H         = 201875,
 
-    GO_GUNSHIP_ARMORY_H             = 202177,
-    GO_GUNSHIP_ARMORY_H_25          = 202178,
-    GO_GUNSHIP_ARMORY_H_10H         = 202179,
-    GO_GUNSHIP_ARMORY_H_25H         = 202180,
+    GO_GUNSHIP_ARMORY_H             = 202178,
+    GO_GUNSHIP_ARMORY_H_25          = 202180,
+    GO_GUNSHIP_ARMORY_H_10H         = 202177,
+    GO_GUNSHIP_ARMORY_H_25H         = 202179,
 
     GO_DREAMWALKER_CACHE            = 201959,
     GO_DREAMWALKER_CACHE_25         = 202339,
@@ -331,6 +333,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         bool IsEncounterInProgress() const override;
 
         void OnPlayerEnter(Player* pPlayer) override;
+        void OnPlayerLeave(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
         void OnCreatureRespawn(Creature* pCreature) override;
@@ -381,11 +384,14 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         uint32 m_uiTeam;                                    // Team of first entered player, used on the Gunship event
         uint32 m_uiPutricideValveTimer;
+        uint32 m_gunshipResetTimer;
+        uint32 m_gunshipVictoryTeleportTimer;
 
         bool m_bHasMarrowgarIntroYelled;
         bool m_bHasDeathwhisperIntroYelled;
         bool m_bHasRimefangLanded;
         bool m_bHasSpinestalkerLanded;
+        bool m_gunshipReloadPending;
 
         ObjectGuid m_leftScientistStalkerGuid;
         ObjectGuid m_rightScientistStalkerGuid;
