@@ -39,16 +39,16 @@ enum
     TEXT_ID_START_ALLIANCE          = 15101,
 
     // encounter dialogue
-    SAY_HORDE_BOARDERS             = -1631043,
-    SAY_HORDE_MAGE                 = -1631044,
-    SAY_HORDE_GUNNERS              = -1631045,
-    SAY_HORDE_ROCKETEERS           = -1631046,
-    SAY_ALLIANCE_BOARDERS          = -1631055,
-    SAY_ALLIANCE_MAGE              = -1631056,
-    SAY_ALLIANCE_GUNNERS           = -1631057,
-    SAY_ALLIANCE_MORTAR            = -1631058,
-    SAY_MURADIN_AGGRO              = -1631060,
-    SAY_SAURFANG_AGGRO             = -1631061,
+    SAY_HORDE_BOARDERS             = 37710,
+    SAY_HORDE_MAGE                 = 37711,
+    SAY_HORDE_GUNNERS              = 37708,
+    SAY_HORDE_ROCKETEERS           = 37709,
+    SAY_ALLIANCE_BOARDERS          = 37702,
+    SAY_ALLIANCE_MAGE              = 37703,
+    SAY_ALLIANCE_GUNNERS           = 37700,
+    SAY_ALLIANCE_MORTAR            = 37701,
+    SAY_MURADIN_AGGRO              = 37704,
+    SAY_SAURFANG_AGGRO             = 37712,
 
     // spells
     SPELL_FRIENDLY_BOSS_DAMAGE_MOD = 70339,
@@ -653,7 +653,7 @@ struct npc_gunship_captainAI : public ScriptedAI
         m_freezeMageGuid = mage->GetObjectGuid();
         mage->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, mage,
             travelTime > 0 ? uint32(travelTime) : 1);
-        DoScriptText(allianceCrew ? SAY_ALLIANCE_MAGE : SAY_HORDE_MAGE, m_creature);
+        DoBroadcastText(allianceCrew ? SAY_ALLIANCE_MAGE : SAY_HORDE_MAGE, m_creature);
     }
 
     void SpawnBoardingWave()
@@ -694,7 +694,7 @@ struct npc_gunship_captainAI : public ScriptedAI
                 add->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, add);
         }
 
-        DoScriptText(allianceCrew ? SAY_ALLIANCE_BOARDERS : SAY_HORDE_BOARDERS, m_creature);
+        DoBroadcastText(allianceCrew ? SAY_ALLIANCE_BOARDERS : SAY_HORDE_BOARDERS, m_creature);
     }
 
     void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damageType*/, SpellEntry const* /*spellInfo*/) override
@@ -705,7 +705,7 @@ struct npc_gunship_captainAI : public ScriptedAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(m_creature->GetEntry() == NPC_GUNSHIP_MURADIN ? SAY_MURADIN_AGGRO : SAY_SAURFANG_AGGRO, m_creature);
+        DoBroadcastText(m_creature->GetEntry() == NPC_GUNSHIP_MURADIN ? SAY_MURADIN_AGGRO : SAY_SAURFANG_AGGRO, m_creature);
         m_creature->CastSpell(m_creature, SPELL_CAPTAIN_BATTLE_FURY, TRIGGERED_OLD_TRIGGERED);
     }
 
@@ -767,7 +767,7 @@ struct npc_gunship_captainAI : public ScriptedAI
             if (m_attackCallTimer <= diff)
             {
                 bool allianceCrew = m_creature->GetEntry() == NPC_GUNSHIP_MURADIN;
-                DoScriptText(allianceCrew ?
+                DoBroadcastText(allianceCrew ?
                     (m_nextArtilleryCall ? SAY_ALLIANCE_MORTAR : SAY_ALLIANCE_GUNNERS) :
                     (m_nextArtilleryCall ? SAY_HORDE_ROCKETEERS : SAY_HORDE_GUNNERS), m_creature);
                 m_nextArtilleryCall = !m_nextArtilleryCall;
