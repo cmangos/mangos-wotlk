@@ -1042,6 +1042,7 @@ UPDATE creature_template SET ScriptName='boss_lord_marrowgar' WHERE entry=36612;
 UPDATE creature_template SET ScriptName='npc_bone_spike' WHERE entry IN (36619,38711,38712);
 UPDATE creature_template SET ScriptName='boss_lady_deathwhisper' WHERE entry=36855;
 UPDATE creature_template SET ScriptName='boss_deathbringer_saurfang' WHERE entry=37813;
+UPDATE creature_template SET ScriptName='npc_saurfang_intro_leader' WHERE entry IN (37187,37200);
 UPDATE creature_template SET ScriptName='npc_queen_lanathel_intro' WHERE entry=38004;
 UPDATE creature_template SET ScriptName='npc_blood_orb_control' WHERE entry=38008;
 UPDATE creature_template SET ScriptName='npc_ball_of_flame' WHERE entry IN (38332,38451);
