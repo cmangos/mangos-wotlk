@@ -27,33 +27,35 @@ EndScriptData */
 enum
 {
     // Yells
-    SAY_COUNCIL_INTRO_1         = -1631101,                 // Intro by Bloodqueen
-    SAY_COUNCIL_INTRO_2         = -1631102,
+    SAY_COUNCIL_INTRO_1         = 37997,                 // Intro by Bloodqueen
+    SAY_COUNCIL_INTRO_2         = 38079,
 
-    SAY_KELESETH_INVOCATION     = -1631103,
-    SAY_KELESETH_SPECIAL        = -1631104,
-    SAY_KELESETH_SLAY_1         = -1631105,
-    SAY_KELESETH_SLAY_2         = -1631106,
-    SAY_KELESETH_BERSERK        = -1631107,
-    SAY_KELESETH_DEATH          = -1631108,
+    SAY_KELESETH_INVOCATION     = 38006,
+    SAY_KELESETH_SPECIAL        = 38007,
+    SAY_KELESETH_SLAY_1         = 38003,
+    SAY_KELESETH_SLAY_2         = 38004,
+    SAY_KELESETH_BERSERK        = 13022,
+    SAY_KELESETH_DEATH          = 38005,
 
-    SAY_TALDARAM_INVOCATION     = -1631109,
-    SAY_TALDARAM_SPECIAL        = -1631110,
-    SAY_TALDARAM_SLAY_1         = -1631111,
-    SAY_TALDARAM_SLAY_2         = -1631112,
-    SAY_TALDARAM_BERSERK        = -1631113,
-    SAY_TALDARAM_DEATH          = -1631114,
+    SAY_TALDARAM_INVOCATION     = 38010,
+    SAY_TALDARAM_SPECIAL        = 38011,
+    SAY_TALDARAM_SLAY_1         = 38008,
+    SAY_TALDARAM_SLAY_2         = 38009,
+    SAY_TALDARAM_BERSERK        = 37127,
+    SAY_TALDARAM_DEATH          = 1631114,
 
-    SAY_VALANAR_INVOCATION      = -1631115,
-    SAY_VALANAR_SPECIAL         = -1631116,
-    SAY_VALANAR_SLAY_1          = -1631117,
-    SAY_VALANAR_SLAY_2          = -1631118,
-    SAY_VALANAR_BERSERK         = -1631119,
-    SAY_VALANAR_DEATH           = -1631120,
+    SAY_VALANAR_INVOCATION      = 38001,
+    SAY_VALANAR_SPECIAL         = 38002,
+    SAY_VALANAR_SLAY_1          = 37998,
+    SAY_VALANAR_SLAY_2          = 37999,
+    SAY_VALANAR_BERSERK         = 38000,
+    SAY_VALANAR_DEATH           = 1631120,
 
-    EMOTE_INVOCATION            = -1631197,
-    EMOTE_SHOCK_VORTEX          = -1631198,
-    EMOTE_FLAMES                = -1631199,
+    EMOTE_INVOCATION_KELESETH   = 38588,
+    EMOTE_INVOCATION_VALANAR    = 38589,
+    EMOTE_INVOCATION_TALDARAM   = 38590,
+    EMOTE_SHOCK_VORTEX          = 38972,
+    EMOTE_FLAMES                = 38624,
 
     // Generic spells
     SPELL_BERSERK               = 26662,
@@ -121,8 +123,8 @@ enum
 
 static const DialogueEntry aIntroDialogue[] =
 {
-    {SAY_COUNCIL_INTRO_1,   NPC_LANATHEL_INTRO, 15000},
-    {SAY_COUNCIL_INTRO_2,   NPC_LANATHEL_INTRO, 10000},
+    {SAY_COUNCIL_INTRO_1,   NPC_LANATHEL_INTRO, 15000, DIALOGUE_STEP_TEXT},
+    {SAY_COUNCIL_INTRO_2,   NPC_LANATHEL_INTRO, 10000, DIALOGUE_STEP_TEXT},
     {NPC_BLOOD_ORB_CONTROL, 0,                  0},
     {0, 0, 0},
 };
@@ -657,6 +659,7 @@ struct blood_prince_council_baseAI : public ScriptedAI
 
     uint32 m_uiInvocationSpellEntry;
     int32 m_iSayInvocationEntry;
+    int32 m_iEmoteInvocationEntry;
     int32 m_iSayBerserkEntry;
 
     uint32 m_uiEmpowermentTimer;
@@ -707,8 +710,8 @@ struct blood_prince_council_baseAI : public ScriptedAI
         if (pSpell->Id == m_uiInvocationSpellEntry)
         {
             m_creature->SetHealth(pCaster->GetHealth());
-            DoScriptText(EMOTE_INVOCATION, m_creature);
-            DoScriptText(m_iSayInvocationEntry, m_creature);
+            DoBroadcastText(m_iEmoteInvocationEntry, m_creature);
+            DoBroadcastText(m_iSayInvocationEntry, m_creature);
             m_uiEmpowermentTimer = 30000;
         }
     }
@@ -756,7 +759,7 @@ struct blood_prince_council_baseAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(m_iSayBerserkEntry, m_creature);
+                    DoBroadcastText(m_iSayBerserkEntry, m_creature);
                     m_uiBerserkTimer = 0;
                 }
             }
@@ -776,6 +779,7 @@ struct boss_valanar_iccAI : public blood_prince_council_baseAI
     {
         m_uiInvocationSpellEntry = SPELL_INVOCATION_VALANAR;
         m_iSayInvocationEntry    = SAY_VALANAR_INVOCATION;
+        m_iEmoteInvocationEntry  = EMOTE_INVOCATION_VALANAR;
         m_iSayBerserkEntry       = SAY_VALANAR_BERSERK;
         Reset();
     }
@@ -792,12 +796,12 @@ struct boss_valanar_iccAI : public blood_prince_council_baseAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_VALANAR_SLAY_1 : SAY_VALANAR_SLAY_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_VALANAR_SLAY_1 : SAY_VALANAR_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_VALANAR_DEATH, m_creature);
+        DoBroadcastText(SAY_VALANAR_DEATH, m_creature);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -840,11 +844,11 @@ struct boss_valanar_iccAI : public blood_prince_council_baseAI
                 if (DoCastSpellIfCan(pTarget, m_uiEmpowermentTimer ? SPELL_EMP_SHOCK_VORTEX : SPELL_SHOCK_VORTEX) == CAST_OK)
                 {
                     if (m_uiEmpowermentTimer)
-                        DoScriptText(EMOTE_SHOCK_VORTEX, m_creature);
+                        DoBroadcastText(EMOTE_SHOCK_VORTEX, m_creature);
 
                     if (m_uiEmpowermentTimer && !m_bIsSaidSpecial)
                     {
-                        DoScriptText(SAY_VALANAR_SPECIAL, m_creature);
+                        DoBroadcastText(SAY_VALANAR_SPECIAL, m_creature);
                         m_bIsSaidSpecial = false;
                     }
 
@@ -874,6 +878,7 @@ struct boss_keleseth_iccAI : public blood_prince_council_baseAI
     {
         m_uiInvocationSpellEntry = SPELL_INVOCATION_KELESETH;
         m_iSayInvocationEntry    = SAY_KELESETH_INVOCATION;
+        m_iEmoteInvocationEntry  = EMOTE_INVOCATION_KELESETH;
         m_iSayBerserkEntry       = SAY_KELESETH_BERSERK;
         Reset();
     }
@@ -893,12 +898,12 @@ struct boss_keleseth_iccAI : public blood_prince_council_baseAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_KELESETH_SLAY_1 : SAY_KELESETH_SLAY_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_KELESETH_SLAY_1 : SAY_KELESETH_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_KELESETH_DEATH, m_creature);
+        DoBroadcastText(SAY_KELESETH_DEATH, m_creature);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -927,7 +932,7 @@ struct boss_keleseth_iccAI : public blood_prince_council_baseAI
             {
                 if (m_uiEmpowermentTimer && !m_bIsSaidSpecial)
                 {
-                    DoScriptText(SAY_KELESETH_SPECIAL, m_creature);
+                    DoBroadcastText(SAY_KELESETH_SPECIAL, m_creature);
                     m_bIsSaidSpecial = true;
                 }
 
@@ -954,6 +959,7 @@ struct boss_taldaram_iccAI : public blood_prince_council_baseAI
     {
         m_uiInvocationSpellEntry = SPELL_INVOCATION_TALDARAM;
         m_iSayInvocationEntry    = SAY_TALDARAM_INVOCATION;
+        m_iEmoteInvocationEntry  = EMOTE_INVOCATION_TALDARAM;
         m_iSayBerserkEntry       = SAY_TALDARAM_BERSERK;
         Reset();
     }
@@ -970,12 +976,12 @@ struct boss_taldaram_iccAI : public blood_prince_council_baseAI
     void KilledUnit(Unit* pVictim) override
     {
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_TALDARAM_SLAY_1 : SAY_TALDARAM_SLAY_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_TALDARAM_SLAY_1 : SAY_TALDARAM_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_TALDARAM_DEATH, m_creature);
+        DoBroadcastText(SAY_TALDARAM_DEATH, m_creature);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -986,7 +992,7 @@ struct boss_taldaram_iccAI : public blood_prince_council_baseAI
             if (npc_ball_of_flameAI* pBallAI = dynamic_cast<npc_ball_of_flameAI*>(pSummoned->AI()))
                 pBallAI->DoInitializeTarget(pTarget->GetGUIDLow());
 
-            DoScriptText(EMOTE_FLAMES, pSummoned, pTarget);
+            DoBroadcastText(EMOTE_FLAMES, pSummoned, pTarget);
             pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
         }
     }
@@ -1004,7 +1010,7 @@ struct boss_taldaram_iccAI : public blood_prince_council_baseAI
             {
                 if (m_uiEmpowermentTimer && !m_bIsSaidSpecial)
                 {
-                    DoScriptText(SAY_TALDARAM_SPECIAL, m_creature);
+                    DoBroadcastText(SAY_TALDARAM_SPECIAL, m_creature);
                     m_bIsSaidSpecial = true;
                 }
 
