@@ -312,6 +312,7 @@ extern void AddSC_boss_lord_marrowgar();
 extern void AddSC_boss_professor_putricide();
 extern void AddSC_boss_rotface();
 extern void AddSC_boss_sindragosa();
+extern void AddSC_boss_sister_svalna();
 extern void AddSC_boss_the_lich_king();
 extern void AddSC_boss_valithria_dreamwalker();
 extern void AddSC_gunship_battle();
@@ -816,6 +817,7 @@ void AddScripts()
     AddSC_boss_professor_putricide();
     AddSC_boss_rotface();
     AddSC_boss_sindragosa();
+    AddSC_boss_sister_svalna();
     AddSC_boss_the_lich_king();
     AddSC_boss_valithria_dreamwalker();
     AddSC_gunship_battle();
