@@ -28,14 +28,14 @@ EndScriptData */
 
 enum ValithriaTexts
 {
-    SAY_AGGRO                   = -1631140,
-    SAY_PORTAL                  = -1631141,
-    SAY_75_HEALTH               = -1631142,
-    SAY_25_HEALTH               = -1631143,
-    SAY_0_HEALTH                = -1631144,
-    SAY_PLAYER_DIES             = -1631145,
-    SAY_BERSERK                 = -1631146,
-    SAY_VICTORY                 = -1631147,
+    SAY_AGGRO                   = 37875,
+    SAY_PORTAL                  = 37876,
+    SAY_75_HEALTH               = 37878,
+    SAY_25_HEALTH               = 21784,
+    SAY_0_HEALTH                = 1631144,
+    SAY_PLAYER_DIES             = 1631145,
+    SAY_BERSERK                 = 1631146,
+    SAY_VICTORY                 = 37852,
 };
 
 enum ValithriaSpells
@@ -249,13 +249,13 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
             m_creature->GetHealth() - damage <= m_creature->GetMaxHealth() / 4)
         {
             m_said25Percent = true;
-            DoScriptText(SAY_25_HEALTH, m_creature);
+            DoBroadcastText(SAY_25_HEALTH, m_creature);
         }
 
         if (damage >= m_creature->GetHealth())
         {
             damage = 0;
-            DoScriptText(SAY_0_HEALTH, m_creature);
+            DoBroadcastText(SAY_0_HEALTH, m_creature);
             FailEncounter();
         }
     }
@@ -278,7 +278,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
         // scheduler had not started.  Always restore the failed encounter and
         // give this one death a short respawn; Reset() then restores the
         // blizzlike 50-percent starting health.
-        DoScriptText(SAY_0_HEALTH, m_creature);
+        DoBroadcastText(SAY_0_HEALTH, m_creature);
         m_encounterActive = false;
         if (m_instance && m_instance->GetData(TYPE_VALITHRIA) != DONE)
             m_instance->SetData(TYPE_VALITHRIA, FAIL);
@@ -339,7 +339,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
     void KilledUnit(Unit* victim) override
     {
         if (victim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_PLAYER_DIES, m_creature, victim);
+            DoBroadcastText(SAY_PLAYER_DIES, m_creature, victim);
     }
 
     void StartEncounter()
@@ -366,7 +366,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
         m_portalsUsed = 0;
         if (m_instance)
             m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_PORTAL_JOCKEY, true);
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         // Populate the phase-only dream realm as part of this encounter.
         // Persistent phased DB actors are not guaranteed to load before the
@@ -429,7 +429,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
         uint32 preEffectEntry = heroic ? NPC_NIGHTMARE_PORTAL_PRE_EFFECT : NPC_DREAM_PORTAL_PRE_EFFECT;
 
         if (!heroic)
-            DoScriptText(SAY_PORTAL, m_creature);
+            DoBroadcastText(SAY_PORTAL, m_creature);
 
         // Retail first creates Dream/Nightmare Portal pre-effects. Fifteen
         // seconds later each precursor becomes a six-second usable portal.
@@ -510,7 +510,10 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
                 if (entry == NPC_RISEN_ARCHMAGE && !creature->IsTemporarySummon())
                 {
                     if (!respawnInitialArchmages)
+                    {
+                        creature->ForcedDespawn();
                         continue;
+                    }
 
                     if (!creature->IsAlive())
                         creature->Respawn();
@@ -549,7 +552,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
 
         m_encounterActive = false;
         m_victory = true;
-        DoScriptText(SAY_VICTORY, m_creature);
+        DoBroadcastText(SAY_VICTORY, m_creature);
         m_creature->RemoveAurasDueToSpell(SPELL_CORRUPTION);
         DoCastSpellIfCan(m_creature, SPELL_ACHIEVEMENT_CHECK, CAST_TRIGGERED | CAST_FORCE_CAST);
         DoCastSpellIfCan(m_creature, SPELL_DREAMWALKER_RAGE);
@@ -654,7 +657,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
         if (!m_said75Percent && m_creature->GetHealth() >= m_creature->GetMaxHealth() * 3 / 4)
         {
             m_said75Percent = true;
-            DoScriptText(SAY_75_HEALTH, m_creature);
+            DoBroadcastText(SAY_75_HEALTH, m_creature);
         }
 
         if (m_wipeCheckTimer <= diff)
@@ -674,7 +677,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
             if (m_berserkTimer <= diff)
             {
                 m_berserk = true;
-                DoScriptText(SAY_BERSERK, m_creature);
+                DoBroadcastText(SAY_BERSERK, m_creature);
             }
             else
                 m_berserkTimer -= diff;
@@ -732,7 +735,7 @@ struct valithria_hostile_addAI : public ScriptedAI
             return;
 
         if (Creature* valithria = m_instance->GetSingleCreatureFromStorage(NPC_VALITHRIA))
-            DoScriptText(SAY_PLAYER_DIES, valithria, victim);
+            DoBroadcastText(SAY_PLAYER_DIES, valithria, victim);
     }
 };
 
