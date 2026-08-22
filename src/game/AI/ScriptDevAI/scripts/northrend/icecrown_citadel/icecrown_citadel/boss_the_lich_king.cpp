@@ -29,41 +29,41 @@ EndScriptData */
 
 enum
 {
-    SAY_INTRO_1                 = -1631158,
-    SAY_INTRO_2                 = -1631159,
-    SAY_INTRO_3                 = -1631160,
-    SAY_INTRO_4                 = -1631161,
-    SAY_INTRO_5                 = -1631162,
-    SAY_AGGRO                   = -1631163,
-    SAY_REMORSELESS_WINTER      = -1631164,
-    SAY_SHATTER_ARENA           = -1631165,
-    SAY_SUMMON_VALKYR           = -1631166,
-    SAY_HARVEST_SOUL            = -1631167,
-    SAY_FM_TERENAS_AID_1        = -1631168,
-    SAY_FM_TERENAS_AID_2        = -1631169,
-    SAY_FM_TERENAS_AID_3        = -1631170,
-    SAY_FM_PLAYER_ESCAPE        = -1631171,
-    SAY_FM_PLAYER_DEATH         = -1631172,
-    SAY_SPECIAL_1               = -1631173,
-    SAY_SPECIAL_2               = -1631174,
-    SAY_LAST_PHASE              = -1631175,
-    SAY_SLAY_1                  = -1631176,
-    SAY_SLAY_2                  = -1631177,
-    SAY_ENRAGE                  = -1631178,
-    SAY_OUTRO_1                 = -1631179,
-    SAY_OUTRO_2                 = -1631180,
-    SAY_OUTRO_3                 = -1631181,
-    SAY_OUTRO_4                 = -1631182,
-    SAY_OUTRO_5                 = -1631183,
-    SAY_OUTRO_6                 = -1631184,
-    SAY_OUTRO_7                 = -1631185,
-    SAY_OUTRO_8                 = -1631186,
-    SAY_OUTRO_9                 = -1631187,
-    SAY_OUTRO_10                = -1631188,
-    SAY_OUTRO_11                = -1631189,
-    SAY_OUTRO_12                = -1631190,
-    SAY_OUTRO_13                = -1631191,
-    SAY_OUTRO_14                = -1631192,
+    SAY_INTRO_1                 = 38070,
+    SAY_INTRO_2                 = 38109,
+    SAY_INTRO_3                 = 38071,
+    SAY_INTRO_4                 = 38110,
+    SAY_INTRO_5                 = 38072,
+    SAY_AGGRO                   = 38073,
+    SAY_REMORSELESS_WINTER      = 38046,
+    SAY_SHATTER_ARENA           = 38047,
+    SAY_SUMMON_VALKYR           = 38052,
+    SAY_HARVEST_SOUL            = 38042,
+    SAY_FM_TERENAS_AID_1        = 38114,
+    SAY_FM_TERENAS_AID_2        = 38115,
+    SAY_FM_TERENAS_AID_3        = 38116,
+    SAY_FM_PLAYER_ESCAPE        = 38043,
+    SAY_FM_PLAYER_DEATH         = 38044,
+    SAY_SPECIAL_1               = 28736,
+    SAY_SPECIAL_2               = 38050,
+    SAY_LAST_PHASE              = 38081,
+    SAY_SLAY_1                  = 38038,
+    SAY_SLAY_2                  = 38040,
+    SAY_ENRAGE                  = 38041,
+    SAY_OUTRO_1                 = 38074,
+    SAY_OUTRO_2                 = 38075,
+    SAY_OUTRO_3                 = 38076,
+    SAY_OUTRO_4                 = 38077,
+    SAY_OUTRO_5                 = 38078,
+    SAY_OUTRO_6                 = 38111,
+    SAY_OUTRO_7                 = 38080,
+    SAY_OUTRO_8                 = 38112,
+    SAY_OUTRO_9                 = 38117,
+    SAY_OUTRO_10                = 38118,
+    SAY_OUTRO_11                = 38113,
+    SAY_OUTRO_12                = 39003,
+    SAY_OUTRO_13                = 39004,
+    SAY_OUTRO_14                = 1631192,
 };
 
 enum
@@ -440,7 +440,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
 
         SetReactState(REACT_AGGRESSIVE);
         SetCombatMovement(true);
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
         m_uiPhase = PHASE_ONE;
     }
 
@@ -454,7 +454,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
         SetLichKingCombatHome(m_creature);
         m_uiIntroStep = 1;
         m_uiPhaseTimer = 11000;
-        DoScriptText(SAY_INTRO_1, m_creature);
+        DoBroadcastText(SAY_INTRO_1, m_creature);
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         LaunchLichKingIntroWalk(m_creature);
     }
@@ -462,7 +462,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
     void KilledUnit(Unit* pWho) override
     {
         if (pWho->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void DamageTaken(Unit*, uint32& damage, DamageEffectType, SpellEntry const*) override
@@ -701,7 +701,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_LICH_KING, DONE);
 
-        DoScriptText(SAY_OUTRO_14, m_creature);
+        DoBroadcastText(SAY_OUTRO_14, m_creature);
 
         // Retail waits for the death animation before starting movie 16.
         // The 73159 script-effect target is lost after a creature death in
@@ -754,7 +754,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
             {
                 if (m_uiPhase == PHASE_RUNNING_WINTER_ONE)
                 {
-                    DoScriptText(SAY_REMORSELESS_WINTER, m_creature);
+                    DoBroadcastText(SAY_REMORSELESS_WINTER, m_creature);
 
                     DoCastSpellIfCan(m_creature, SPELL_REMORSELESS_WINTER_1);
 
@@ -767,7 +767,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 }
                 else if (m_uiPhase == PHASE_RUNNING_WINTER_TWO)
                 {
-                    DoScriptText(SAY_REMORSELESS_WINTER, m_creature);
+                    DoBroadcastText(SAY_REMORSELESS_WINTER, m_creature);
 
                     // Retail briefly destroys and then rebuilds the outer ring
                     // for the second winter before Quake breaks it again.
@@ -831,7 +831,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                     {
-                        DoScriptText(SAY_ENRAGE, m_creature);
+                        DoBroadcastText(SAY_ENRAGE, m_creature);
                         m_uiBerserkTimer = 0;
                     }
                 }
@@ -857,24 +857,24 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 {
                     case 2:
                         if (Creature* tirion = m_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_FORDRING) : nullptr)
-                            DoScriptText(SAY_INTRO_2, tirion);
+                            DoBroadcastText(SAY_INTRO_2, tirion);
                         m_uiPhaseTimer = 9000;
                         break;
                     case 3:
-                        DoScriptText(SAY_INTRO_3, m_creature);
+                        DoBroadcastText(SAY_INTRO_3, m_creature);
                         m_uiPhaseTimer = 25000;
                         break;
                     case 4:
                         if (Creature* tirion = m_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_FORDRING) : nullptr)
                         {
-                            DoScriptText(SAY_INTRO_4, tirion);
+                            DoBroadcastText(SAY_INTRO_4, tirion);
                             tirion->SetWalk(false);
                             tirion->GetMotionMaster()->MovePoint(POINT_TIRION_CHARGE, 482.902f, -2124.479f, 1040.857f, FORCED_MOVEMENT_RUN);
                         }
                         m_uiPhaseTimer = 6000;
                         break;
                     case 5:
-                        DoScriptText(SAY_INTRO_5, m_creature);
+                        DoBroadcastText(SAY_INTRO_5, m_creature);
                         // Ice Lock is an implicit area spell centered on the
                         // Lich King. A direct Tirion target bypasses its
                         // encounter target selection on CMaNGOS.
@@ -996,7 +996,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                     {
                         if (m_pInstance)
                             m_pInstance->SetLichKingPlatformWarning(true);
-                        DoScriptText(SAY_SHATTER_ARENA, m_creature);
+                        DoBroadcastText(SAY_SHATTER_ARENA, m_creature);
                         m_uiPhase = (m_uiPhase == PHASE_TRANSITION_ONE ? PHASE_QUAKE_ONE : PHASE_QUAKE_TWO);
                         m_uiPhaseTimer = 5000;
                     }
@@ -1131,7 +1131,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                     uint32 valkyrSpell = m_pInstance && m_pInstance->Is25ManDifficulty() ? SPELL_SUMMON_VALKYRS : SPELL_SUMMON_VALKYR;
                     if (DoCastSpellIfCan(m_creature, valkyrSpell) == CAST_OK)
                     {
-                        DoScriptText(SAY_SUMMON_VALKYR, m_creature);
+                        DoBroadcastText(SAY_SUMMON_VALKYR, m_creature);
                         m_uiValkyrTimer = 45000;
                     }
                 }
@@ -1149,7 +1149,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FURY_OF_FROSTMOURNE) == CAST_OK)
                     {
-                        DoScriptText(SAY_LAST_PHASE, m_creature);
+                        DoBroadcastText(SAY_LAST_PHASE, m_creature);
                         m_uiPhase = PHASE_CUTSCENE;
 
                         CleanupEncounterSummons();
@@ -1202,7 +1202,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                     {
                         if (DoCastSpellIfCan(pTarget, m_bIsHeroic ? SPELL_HARVEST_SOULS : SPELL_HARVEST_SOUL) == CAST_OK)
                         {
-                            DoScriptText(SAY_HARVEST_SOUL, m_creature);
+                            DoBroadcastText(SAY_HARVEST_SOUL, m_creature);
                             m_uiHarvestSoulTimer = m_bIsHeroic ? urand(100000, 110000) : 75000;
 
                             if (m_bIsHeroic)
@@ -1267,7 +1267,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 switch (m_uiEndingStep++)
                 {
                     case 1:
-                        DoScriptText(SAY_OUTRO_1, m_creature);
+                        DoBroadcastText(SAY_OUTRO_1, m_creature);
                         DoCastSpellIfCan(m_creature, SPELL_FURY_OF_FROSTMOURNE2, CAST_TRIGGERED);
 
                         // Fury of Frostmourne is a scripted raid execution,
@@ -1282,14 +1282,14 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                         m_uiEndingTimer = 27400;
                         break;
                     case 2:
-                        DoScriptText(SAY_OUTRO_2, m_creature);
+                        DoBroadcastText(SAY_OUTRO_2, m_creature);
                         DoCastSpellIfCan(m_creature, SPELL_EMOTE_QUESTION);
                         m_uiEndingTimer = 9000;
                         break;
                     case 3:
                         if (Creature* tirion = m_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_FORDRING) : nullptr)
                             m_creature->SetFacingToObject(tirion);
-                        DoScriptText(SAY_OUTRO_3, m_creature);
+                        DoBroadcastText(SAY_OUTRO_3, m_creature);
                         m_uiEndingTimer = 26000;
                         break;
                     case 4:
@@ -1299,17 +1299,17 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                         m_uiEndingTimer = 4000;
                         break;
                     case 5:
-                        DoScriptText(SAY_OUTRO_4, m_creature);
+                        DoBroadcastText(SAY_OUTRO_4, m_creature);
                         DoCastSpellIfCan(m_creature, SPELL_RAISE_DEAD);
                         m_uiEndingTimer = 29000;
                         break;
                     case 6:
-                        DoScriptText(SAY_OUTRO_5, m_creature);
+                        DoBroadcastText(SAY_OUTRO_5, m_creature);
                         m_uiEndingTimer = 7000;
                         break;
                     case 7:
                         if (Creature* tirion = m_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_FORDRING) : nullptr)
-                            DoScriptText(SAY_OUTRO_7, tirion);
+                            DoBroadcastText(SAY_OUTRO_6, tirion);
                         m_uiEndingTimer = 11000;
                         break;
                     case 8:
@@ -1342,11 +1342,11 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                         m_creature->CastSpell(nullptr, SPELL_BROKEN_FROSTMOURNE_VISUAL, TRIGGERED_OLD_TRIGGERED);
                         m_creature->CastSpell(nullptr, SPELL_BROKEN_FROSTMOURNE_TRIGGER, TRIGGERED_NONE);
                         m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, EQUIP_ID_BROKEN_FROSTMOURNE);
-                        DoScriptText(SAY_OUTRO_6, m_creature);
                         DoCastSpellIfCan(m_creature, SPELL_THROW_FROSTMOURNE, CAST_TRIGGERED);
                         m_uiEndingTimer = 3000;
                         break;
                     case 12:
+                        DoBroadcastText(SAY_OUTRO_7, m_creature);
                         if (Creature* frostmourne = GetClosestCreatureWithEntry(m_creature, NPC_FROSTMOURNE, 50.0f))
                         {
                             frostmourne->CastSpell(nullptr, SPELL_BROKEN_FROSTMOURNE, TRIGGERED_OLD_TRIGGERED);
@@ -1359,7 +1359,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                         m_creature->SetLevitate(true);
                         m_creature->GetMotionMaster()->MovePoint(POINT_LK_OUTRO_FLY, 509.69f, -2124.56f, 1045.36f);
                         if (Creature* tirion = m_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_FORDRING) : nullptr)
-                            DoScriptText(SAY_OUTRO_8, tirion);
+                            DoBroadcastText(SAY_OUTRO_8, tirion);
                         m_uiEndingTimer = 6000;
                         break;
                     case 14:
@@ -1371,13 +1371,13 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                         break;
                     case 15:
                         if (Creature* terenas = m_creature->GetMap()->GetCreature(m_outroTerenasGuid))
-                            DoScriptText(SAY_OUTRO_9, terenas);
+                            DoBroadcastText(SAY_OUTRO_9, terenas);
                         m_uiEndingTimer = 12000;
                         break;
                     case 16:
                         if (Creature* terenas = m_creature->GetMap()->GetCreature(m_outroTerenasGuid))
                         {
-                            DoScriptText(SAY_OUTRO_10, terenas);
+                            DoBroadcastText(SAY_OUTRO_10, terenas);
                             terenas->CastSpell(terenas, SPELL_MASS_RESURRECTION, TRIGGERED_NONE);
 
                             // TC/AC attach a trigger script to 72429 which
@@ -1400,11 +1400,12 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                         m_uiEndingTimer = 7000;
                         break;
                     case 17:
-                        DoScriptText(SAY_OUTRO_11, m_creature);
+                        if (Creature* tirion = m_pInstance ? m_pInstance->GetSingleCreatureFromStorage(NPC_TIRION_FORDRING) : nullptr)
+                            DoBroadcastText(SAY_OUTRO_11, tirion);
                         m_uiEndingTimer = 10000;
                         break;
                     case 18:
-                        DoScriptText(SAY_OUTRO_12, m_creature);
+                        DoBroadcastText(SAY_OUTRO_12, m_creature);
                         m_uiPhase = PHASE_DEATH_AWAITS;
                         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                         m_creature->SetHealth(m_creature->GetMaxHealth() / 10);
@@ -2209,6 +2210,10 @@ struct npc_valkyr_shadowguard_iccAI : public ScriptedAI
     ValkyrState state;
     ObjectGuid targetGuid;
 
+    bool HasReservedTarget(ObjectGuid const& guid) const { return targetGuid == guid; }
+    bool IsTargetReservedByOther(Player* target) const;
+    Player* SelectCarryTarget();
+
     bool IsCarrying(Player* target) const
     {
         return target && target->IsBoarded() && target->GetTransportInfo() &&
@@ -2246,7 +2251,7 @@ struct npc_valkyr_shadowguard_iccAI : public ScriptedAI
 
     void BeginBoarding(Player* target)
     {
-        if (!target)
+        if (!target || (target->IsBoarded() && !IsCarrying(target)))
         {
             BeginTargetSearch();
             return;
@@ -2354,7 +2359,7 @@ struct npc_valkyr_shadowguard_iccAI : public ScriptedAI
             return;
         }
 
-        if (Unit* target = SelectEncounterPlayer(m_creature, 1))
+        if (Player* target = SelectCarryTarget())
         {
             targetGuid = target->GetObjectGuid();
             state = VALKYR_CHARGING;
@@ -2367,6 +2372,58 @@ struct npc_valkyr_shadowguard_iccAI : public ScriptedAI
             stateTimer = 1000;
     }
 };
+
+bool npc_valkyr_shadowguard_iccAI::IsTargetReservedByOther(Player* target) const
+{
+    if (!target)
+        return false;
+
+    CreatureList valkyrs;
+    GetCreatureListWithEntryInGrid(valkyrs, m_creature, NPC_VALKYR_SHADOWGUARD, 160.0f);
+    for (Creature* valkyr : valkyrs)
+    {
+        if (valkyr == m_creature || !valkyr->IsAlive())
+            continue;
+
+        if (npc_valkyr_shadowguard_iccAI* ai = dynamic_cast<npc_valkyr_shadowguard_iccAI*>(valkyr->AI()))
+            if (ai->HasReservedTarget(target->GetObjectGuid()))
+                return true;
+    }
+
+    return false;
+}
+
+Player* npc_valkyr_shadowguard_iccAI::SelectCarryTarget()
+{
+    // The 25-player summon creates three Val'kyr at once. Retail's spell
+    // target selector assigns three different players; without that selector
+    // all CMaNGOS summons can try to board the same player, corrupting the
+    // vehicle passenger state. Preserve the non-tank preference, then choose
+    // any remaining unreserved encounter player (including a solo fallback).
+    if (Unit* preferred = SelectEncounterPlayer(m_creature, 1))
+    {
+        if (preferred->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player* player = static_cast<Player*>(preferred);
+            if (player->IsAlive() && !player->IsBoarded() && !IsTargetReservedByOther(player))
+                return player;
+        }
+    }
+
+    std::vector<Player*> candidates;
+    Map::PlayerList const& players = m_creature->GetMap()->GetPlayers();
+    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        Player* player = itr->getSource();
+        if (!player || !player->IsAlive() || player->IsBoarded() || !player->IsInCombat() ||
+            !player->IsWithinDistInMap(m_creature, 160.0f) || IsTargetReservedByOther(player))
+            continue;
+
+        candidates.push_back(player);
+    }
+
+    return candidates.empty() ? nullptr : candidates[urand(0, candidates.size() - 1)];
+}
 
 void AddSC_boss_the_lich_king()
 {
