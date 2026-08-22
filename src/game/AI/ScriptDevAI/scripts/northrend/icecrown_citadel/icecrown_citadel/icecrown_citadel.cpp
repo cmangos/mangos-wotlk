@@ -22,6 +22,7 @@ SDCategory: Icecrown Citadel
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Maps/SpawnManager.h"
 #include "icecrown_citadel.h"
 #include "Entities/Transports.h"
 
@@ -201,6 +202,19 @@ void instance_icecrown_citadel::OnPlayerEnter(Player* pPlayer)
 
         ProcessEventNpcs(pPlayer);
     }
+
+    // Static creature respawn timers are saved per instance. If the world
+    // server stopped after the starter archmages died, their normal seven-day
+    // timer could otherwise survive even though Valithria reset correctly.
+    if (m_auiEncounter[TYPE_VALITHRIA] != DONE &&
+        m_auiEncounter[TYPE_VALITHRIA] != IN_PROGRESS)
+        RespawnValithriaStarterPack();
+}
+
+void instance_icecrown_citadel::RespawnValithriaStarterPack()
+{
+    if (SpawnGroup* group = instance->GetSpawnManager().GetSpawnGroup(SPAWN_GROUP_VALITHRIA_STARTERS))
+        group->Spawn(true, true);
 }
 
 void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
@@ -217,7 +231,6 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_VALANAR:
         case NPC_KELESETH:
         case NPC_LANATHEL_INTRO:
-        case NPC_VALITHRIA:
         case NPC_SINDRAGOSA:
         case NPC_LICH_KING:
         case NPC_TIRION_FORDRING:
@@ -234,6 +247,13 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_SKYBREAKER:
         case NPC_ORGRIMS_HAMMER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_VALITHRIA:
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            // A fresh/recovered Valithria spawn must be at 50 percent. DONE is
+            // the only state where the saved creature represents success.
+            pCreature->SetHealth(m_auiEncounter[TYPE_VALITHRIA] == DONE ?
+                pCreature->GetMaxHealth() : pCreature->GetMaxHealth() / 2);
             break;
         case NPC_SPIRE_FROSTWYRM:
             if (pCreature->IsTemporarySummon())
@@ -381,6 +401,18 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_DREAMWALKER_CACHE_10_H:
         case GO_DREAMWALKER_CACHE_25_H:
             m_goEntryGuidStore[GO_DREAMWALKER_CACHE] = pGo->GetObjectGuid();
+            // Valithria's controller summons the cache a few seconds after the
+            // encounter is marked DONE. SetData therefore cannot unlock an
+            // object that does not exist yet; mirror the Saurfang cache's
+            // late-load handling so the newly created reward is usable.
+            if (m_auiEncounter[TYPE_VALITHRIA] == DONE)
+            {
+                DoRespawnGameObject(pGo->GetObjectGuid(), 60 * MINUTE);
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS,
+                    GO_FLAG_LOCKED | GO_FLAG_INTERACT_COND | GO_FLAG_NO_INTERACT);
+                pGo->SetLootState(GO_READY);
+                pGo->SetGoState(GO_STATE_READY);
+            }
             return;
         case GO_ICESHARD_1:
         case GO_ICESHARD_2:
@@ -833,6 +865,10 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_VALITHRIA:
             m_auiEncounter[uiType] = uiData;
+
+            if (uiData == FAIL || uiData == NOT_STARTED)
+                RespawnValithriaStarterPack();
+
             DoUseDoorOrButton(GO_GREEN_DRAGON_ENTRANCE);
             // Side doors
             DoUseDoorOrButton(GO_VALITHRIA_DOOR_1);
@@ -848,7 +884,13 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(GO_GREEN_DRAGON_EXIT);
                 DoUseDoorOrButton(GO_SINDRAGOSA_ENTRANCE);
                 DoRespawnGameObject(GO_DREAMWALKER_CACHE, 60 * MINUTE);
-                DoToggleGameObjectFlags(GO_DREAMWALKER_CACHE, GO_FLAG_NO_INTERACT, false);
+                if (GameObject* cache = GetSingleGameObjectFromStorage(GO_DREAMWALKER_CACHE))
+                {
+                    cache->RemoveFlag(GAMEOBJECT_FLAGS,
+                        GO_FLAG_LOCKED | GO_FLAG_INTERACT_COND | GO_FLAG_NO_INTERACT);
+                    cache->SetLootState(GO_READY);
+                    cache->SetGoState(GO_STATE_READY);
+                }
             }
             if (uiData == DONE || uiData == FAIL)
             {
@@ -1014,6 +1056,11 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         case ACHIEV_CRIT_NAUSEA_10H:
         case ACHIEV_CRIT_NAUSEA_25H:
             return m_abAchievCriteria[TYPE_ACHIEV_NAUSEA];
+        case ACHIEV_CRIT_PORTAL_JOCKEY_10N:
+        case ACHIEV_CRIT_PORTAL_JOCKEY_25N:
+        case ACHIEV_CRIT_PORTAL_JOCKEY_10H:
+        case ACHIEV_CRIT_PORTAL_JOCKEY_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_PORTAL_JOCKEY];
     }
 
     return false;
