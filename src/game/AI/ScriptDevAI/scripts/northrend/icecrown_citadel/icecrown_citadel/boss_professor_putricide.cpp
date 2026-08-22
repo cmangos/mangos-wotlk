@@ -17,30 +17,30 @@
 /* ScriptData
 SDName: boss_professor_putricide
 SD%Complete: 90%
-SDComment: Heroic spells require more research and probably core fix
+SDComment: Native phase flow, heroic variables, Unbound Plague and Mutated Plague implemented.
 SDCategory: Icecrown Citadel
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "icecrown_citadel.h"
 
 enum
 {
-    SAY_AGGRO                   = -1631092,
-    SAY_AIRLOCK                 = -1631093,
-    SAY_PHASE_CHANGE            = -1631094,
-    SAY_TRANSFORM_1             = -1631095,
-    SAY_TRANSFORM_2             = -1631096,
-    SAY_SLAY_1                  = -1631097,
-    SAY_SLAY_2                  = -1631098,
-    SAY_BERSERK                 = -1631099,
-    SAY_DEATH                   = -1631100,
+    SAY_AGGRO                   = 37838,
+    SAY_PHASE_CHANGE            = 37846,
+    SAY_TRANSFORM_1             = 37844,
+    SAY_TRANSFORM_2             = 37845,
+    SAY_SLAY_1                  = 33033,
+    SAY_SLAY_2                  = 37840,
+    SAY_BERSERK                 = 37842,
+    SAY_DEATH                   = 37841,
 
-    EMOTE_EXPERIMENT            = -1631206,
+    EMOTE_EXPERIMENT            = 38500,
 
     // Rotface encounter yells
-    SAY_SLIME_FLOW_1            = -1631074,
-    SAY_SLIME_FLOW_2            = -1631075,
+    SAY_SLIME_FLOW_1            = 38120,
+    SAY_SLIME_FLOW_2            = 37049,
 
     // Spells
     SPELL_BERSERK                   = 47008,
@@ -140,123 +140,200 @@ enum Waypoint
 ## boss_professor_putricide
 ######*/
 
-struct boss_professor_putricideAI : public ScriptedAI
+struct boss_professor_putricideAI : public CombatAI
 {
-    boss_professor_putricideAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_professor_putricideAI(Creature* creature) : CombatAI(creature, 0)
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        m_instance = static_cast<instance_icecrown_citadel*>(creature->GetInstanceData());
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         Reset();
     }
 
-    instance_icecrown_citadel* m_pInstance;
+    instance_icecrown_citadel* m_instance;
 
-    bool m_bIsOrange;
+    bool m_isOrange;
 
-    uint32 m_uiPhase;
+    uint32 m_phase;
 
-    uint32 m_uiTransitionTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiPuddleTimer;
-    uint32 m_uiUnstableExperimentTimer;
-    uint32 m_uiUnboundPlagueTimer;
-    uint32 m_uiChokingGasBombTimer;
-    uint32 m_uiMalleableGooTimer;
+    uint32 m_transitionTimer;
+    uint32 m_enrageTimer;
+    uint32 m_puddleTimer;
+    uint32 m_unstableExperimentTimer;
+    uint32 m_unboundPlagueTimer;
+    uint32 m_mutatedPlagueTimer;
+    uint32 m_chokingGasBombTimer;
+    uint32 m_malleableGooTimer;
 
     void Reset() override
     {
-        m_bIsOrange                 = urand(0, 1) != 0;
-        m_uiPhase                   = PHASE_ONE;
-        m_uiEnrageTimer             = 10 * MINUTE * IN_MILLISECONDS;
-        m_uiTransitionTimer         = 0;
-        m_uiPuddleTimer             = 10000;
-        m_uiUnstableExperimentTimer = 30000;
-        m_uiUnboundPlagueTimer      = 10000;
-        m_uiChokingGasBombTimer     = 35000;
-        m_uiMalleableGooTimer       = 25000;
+        CombatAI::Reset();
+        m_isOrange           = urand(0, 1) != 0;
+        m_phase              = PHASE_ONE;
+        m_enrageTimer        = 10 * MINUTE * IN_MILLISECONDS;
+        m_transitionTimer    = 0;
+        m_puddleTimer        = 10000;
+        m_unstableExperimentTimer = 30000;
+        m_unboundPlagueTimer = 10000;
+        m_mutatedPlagueTimer = 10000;
+        m_chokingGasBombTimer = 35000;
+        m_malleableGooTimer  = 25000;
+        m_creature->SetSpellList(0);
 
         // set or remove not selectable flag depending on Festergut and Rotface
-        if (m_pInstance)
+        if (m_instance)
         {
-            if (m_pInstance->GetData(TYPE_ROTFACE) != DONE || m_pInstance->GetData(TYPE_FESTERGUT) != DONE)
+            if (m_instance->GetData(TYPE_ROTFACE) != DONE || m_instance->GetData(TYPE_FESTERGUT) != DONE)
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
             else
+            {
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                // Once both observation encounters are complete Putricide is
+                // back at his laboratory home position.  Discard any stale
+                // balcony point movement so the client does not render him
+                // running in place while idle at the table.
+                m_creature->StopMoving();
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+            }
+        }
+
+        CleanupEncounterAuras();
+    }
+
+    void CleanupEncounterAuras()
+    {
+        for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+        {
+            if (Player* player = playerRef.getSource())
+            {
+                player->RemoveAurasDueToSpell(SPELL_UNBOUND_PLAGUE);
+                player->RemoveAurasDueToSpell(SPELL_MUTATED_PLAGUE);
+                player->RemoveAurasDueToSpell(SPELL_OOZE_VARIABLE_OOZE);
+                player->RemoveAurasDueToSpell(SPELL_GAS_VARIABLE_GAS);
+            }
+        }
+
+        // Native encounter cleanup removes the player's abomination vehicle
+        // and the two laboratory tentacle visuals.  These must run on victory
+        // as well as evade or they can keep the room in combat after death.
+        m_creature->CastSpell(m_creature, SPELL_CLEANSE_MUTATION, TRIGGERED_OLD_TRIGGERED);
+        if (m_instance)
+        {
+            if (Creature* tentacle = m_instance->GetSingleCreatureFromStorage(NPC_OOZE_TENTACLE_STALKER))
+                tentacle->RemoveAllAurasOnEvade();
+            if (Creature* tentacle = m_instance->GetSingleCreatureFromStorage(NPC_SLIMY_TENTACLE_STALKER))
+                tentacle->RemoveAllAurasOnEvade();
         }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void CleanupEncounterSummons()
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        uint32 const entries[] =
+        {
+            NPC_GROWING_OOZE_PUDDLE_TRIGGER, NPC_GROWING_OOZE_PUDDLE,
+            NPC_GAS_CLOUD, NPC_VOLATILE_OOZE, NPC_CHOKING_GAS_BOMB
+        };
+
+        for (uint32 entry : entries)
+        {
+            CreatureList summons;
+            GetCreatureListWithEntryInGrid(summons, m_creature, entry, 150.0f);
+            for (Creature* summon : summons)
+                if (summon->IsTemporarySummon())
+                    summon->ForcedDespawn();
+        }
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void ApplyHeroicVariables()
+    {
+        if (!m_instance || !m_instance->IsHeroicDifficulty() || !m_instance->Is25ManDifficulty())
+            return;
+
+        std::vector<Player*> targets;
+        for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+            if (Player* player = playerRef.getSource())
+                if (player->IsAlive() && !player->IsGameMaster() && m_creature->IsWithinDistInMap(player, 120.0f))
+                    targets.push_back(player);
+
+        bool oozeVariable = urand(0, 1) != 0;
+        while (!targets.empty())
+        {
+            size_t index = urand(0, targets.size() - 1);
+            Player* player = targets[index];
+            player->CastSpell(player, oozeVariable ? SPELL_OOZE_VARIABLE_OOZE : SPELL_GAS_VARIABLE_GAS,
+                TRIGGERED_OLD_TRIGGERED);
+            oozeVariable = !oozeVariable;
+            targets.erase(targets.begin() + index);
+        }
+    }
+
+    void Aggro(Unit* /*who*/) override
     {
         // no attacking during the Festergut / Rotface encounters
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
             return;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_PROFESSOR_PUTRICIDE, IN_PROGRESS);
 
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_PROFESSOR_PUTRICIDE, DONE);
 
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
+        CleanupEncounterAuras();
+        CleanupEncounterSummons();
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-        {
-            m_pInstance->SetData(TYPE_PROFESSOR_PUTRICIDE, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_PROFESSOR_PUTRICIDE, FAIL);
 
-            if (Creature* pTentacle = m_pInstance->GetSingleCreatureFromStorage(NPC_OOZE_TENTACLE_STALKER))
-                pTentacle->RemoveAllAurasOnEvade();
-            if (Creature* pTentacle = m_pInstance->GetSingleCreatureFromStorage(NPC_SLIMY_TENTACLE_STALKER))
-                pTentacle->RemoveAllAurasOnEvade();
-        }
+        CleanupEncounterAuras();
+        CleanupEncounterSummons();
     }
 
-    void AttackStart(Unit* pWho) override
+    void AttackStart(Unit* who) override
     {
         // no attacking during the Festergut / Rotface encounters
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
             return;
 
-        ScriptedAI::AttackStart(pWho);
+        CombatAI::AttackStart(who);
     }
 
-    void MovementInform(uint32 uiMovementType, uint32 uiData) override
+    void MovementInform(uint32 movementType, uint32 data) override
     {
-        if (uiMovementType != POINT_MOTION_TYPE)
+        if (movementType != POINT_MOTION_TYPE)
             return;
 
         // handle phase transition
-        if (uiData == POINT_PUTRICIDE_SPAWN)
+        if (data == POINT_PUTRICIDE_SPAWN)
         {
-            if (!m_pInstance)
+            if (!m_instance)
                 return;
 
-            DoCastSpellIfCan(m_creature, (m_uiPhase == PHASE_RUNNING_ONE ? SPELL_CREATE_CONCOCTION : SPELL_GUZZLE_POTIONS));
+            DoCastSpellIfCan(m_creature, (m_phase == PHASE_RUNNING_ONE ? SPELL_CREATE_CONCOCTION : SPELL_GUZZLE_POTIONS));
 
-            if (m_pInstance->IsHeroicDifficulty())
+            if (m_instance->IsHeroicDifficulty())
             {
-                DoScriptText(SAY_PHASE_CHANGE, m_creature);
-                m_uiTransitionTimer = 30000;
+                DoBroadcastText(SAY_PHASE_CHANGE, m_creature);
+                ApplyHeroicVariables();
+                m_transitionTimer = 30000;
             }
             else
-                m_uiTransitionTimer = 15000;
+                m_transitionTimer = 15000;
 
-            m_uiPhase = (m_uiPhase == PHASE_RUNNING_ONE ? PHASE_TRANSITION_ONE : PHASE_TRANSITION_TWO);           // waiting for entering next phase
+            m_phase = (m_phase == PHASE_RUNNING_ONE ? PHASE_TRANSITION_ONE : PHASE_TRANSITION_TWO);
         }
-        else if (uiData == POINT_FESTERGUT_BALCONY)
+        else if (data == POINT_FESTERGUT_BALCONY)
             m_creature->SetFacingTo(3.316f);
-        else if (uiData == POINT_ROTFACE_BALCONY)
+        else if (data == POINT_ROTFACE_BALCONY)
             m_creature->SetFacingTo(5.822f);
     }
 
@@ -290,28 +367,34 @@ struct boss_professor_putricideAI : public ScriptedAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
         // Unstable experiment
         if (eventType == AI_EVENT_CUSTOM_A)
         {
-            if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetScientistStalkerGuid(m_bIsOrange)))
-                DoCastSpellIfCan(pStalker, m_bIsOrange ? SPELL_ORANGE_OOZE_SUMMON : SPELL_GREEN_OOZE_SUMMON, CAST_TRIGGERED);
+            if (Creature* stalker = m_creature->GetMap()->GetCreature(m_instance->GetScientistStalkerGuid(m_isOrange)))
+                DoCastSpellIfCan(stalker, m_isOrange ? SPELL_ORANGE_OOZE_SUMMON : SPELL_GREEN_OOZE_SUMMON, CAST_TRIGGERED);
 
-            m_bIsOrange = !m_bIsOrange;
+            m_isOrange = !m_isOrange;
         }
         // Volatile Experiment
         else if (eventType == AI_EVENT_CUSTOM_B)
         {
-            if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetScientistStalkerGuid(true)))
-                DoCastSpellIfCan(pStalker, SPELL_ORANGE_OOZE_SUMMON, CAST_TRIGGERED);
-            if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetScientistStalkerGuid(false)))
-                DoCastSpellIfCan(pStalker, SPELL_GREEN_OOZE_SUMMON, CAST_TRIGGERED);
+            if (Creature* stalker = m_creature->GetMap()->GetCreature(m_instance->GetScientistStalkerGuid(true)))
+                DoCastSpellIfCan(stalker, SPELL_ORANGE_OOZE_SUMMON, CAST_TRIGGERED);
+            if (Creature* stalker = m_creature->GetMap()->GetCreature(m_instance->GetScientistStalkerGuid(false)))
+                DoCastSpellIfCan(stalker, SPELL_GREEN_OOZE_SUMMON, CAST_TRIGGERED);
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void OnSpellCast(SpellEntry const* spellInfo, Unit* /*target*/) override
+    {
+        if (spellInfo->Id == SPELL_UNSTABLE_EXPERIMENT)
+            DoBroadcastText(EMOTE_EXPERIMENT, m_creature);
+    }
+
+    void UpdateAI(const uint32 diff) override
     {
         // no attacking during the Festergut / Rotface encounters
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE))
@@ -320,56 +403,67 @@ struct boss_professor_putricideAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
         // Enrage
-        if (m_uiEnrageTimer)
+        if (m_enrageTimer)
         {
-            if (m_uiEnrageTimer <= uiDiff)
+            if (m_enrageTimer <= diff)
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiEnrageTimer = 0;
+                    DoBroadcastText(SAY_BERSERK, m_creature);
+                    m_enrageTimer = 0;
                 }
             }
             else
-                m_uiEnrageTimer -= uiDiff;
+                m_enrageTimer -= diff;
         }
 
-        switch (m_uiPhase)
+        switch (m_phase)
         {
             case PHASE_TWO:
             case PHASE_THREE:
             {
-                // Choking Gas
-                if (m_uiChokingGasBombTimer < uiDiff)
+                // Phase two and three abilities have encounter-specific
+                // targeting and summon side effects that cannot be expressed
+                // safely through a generic creature spell list.
+                if (m_chokingGasBombTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CHOKING_GAS_BOMB) == CAST_OK)
-                        m_uiChokingGasBombTimer = 35000;
+                        m_chokingGasBombTimer = 35000;
                 }
                 else
-                    m_uiChokingGasBombTimer -= uiDiff;
+                    m_chokingGasBombTimer -= diff;
 
-                // Malleable Goo
-                if (m_uiMalleableGooTimer < uiDiff)
+                if (m_malleableGooTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_MALLEABLE_GOO) == CAST_OK)
-                        m_uiMalleableGooTimer = 25000;
+                        m_malleableGooTimer = 25000;
                 }
                 else
-                    m_uiMalleableGooTimer -= uiDiff;
+                    m_malleableGooTimer -= diff;
 
-                if (m_uiPhase == PHASE_THREE)
+                if (m_phase == PHASE_THREE)
+                {
+                    if (m_mutatedPlagueTimer <= diff)
+                    {
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MUTATED_PLAGUE) == CAST_OK)
+                            m_mutatedPlagueTimer = 10000;
+                    }
+                    else
+                        m_mutatedPlagueTimer -= diff;
                     break;
-                // else no break;
+                }
+                // Phase two continues through the shared phase one/two flow.
             }
+            // no break
             case PHASE_ONE:
             {
-                if (m_uiTransitionTimer)
+                if (m_transitionTimer)
                 {
-                    if (m_uiTransitionTimer <= uiDiff)
+                    if (m_transitionTimer <= diff)
                     {
                         DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_PERIODIC, CAST_TRIGGERED);
 
@@ -380,51 +474,47 @@ struct boss_professor_putricideAI : public ScriptedAI
                         m_creature->GetRespawnCoord(fX, fY, fZ);
                         m_creature->GetMotionMaster()->MovePoint(POINT_PUTRICIDE_SPAWN, fX, fY, fZ);
 
-                        m_uiPhase = (m_uiPhase == PHASE_ONE ? PHASE_RUNNING_ONE : PHASE_RUNNING_TWO);
-                        m_uiTransitionTimer = 0;
+                        m_phase = (m_phase == PHASE_ONE ? PHASE_RUNNING_ONE : PHASE_RUNNING_TWO);
+                        m_transitionTimer = 0;
                     }
                     else
-                        m_uiTransitionTimer -= uiDiff;
+                        m_transitionTimer -= diff;
 
                     // Preparing for phase transition
                     return;
                 }
 
                 // Unbound Plague
-                if (m_pInstance->IsHeroicDifficulty())
+                if (m_instance->IsHeroicDifficulty())
                 {
-                    if (m_uiUnboundPlagueTimer < uiDiff)
+                    if (m_unboundPlagueTimer < diff)
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_UNBOUND_PLAGUE, SELECT_FLAG_PLAYER))
                         {
-                            if (DoCastSpellIfCan(pTarget, SPELL_UNBOUND_PLAGUE) == CAST_OK)
-                                m_uiUnboundPlagueTimer = 70000;
+                            if (DoCastSpellIfCan(target, SPELL_UNBOUND_PLAGUE) == CAST_OK)
+                                m_unboundPlagueTimer = 70000;
                         }
                     }
                     else
-                        m_uiUnboundPlagueTimer -= uiDiff;
+                        m_unboundPlagueTimer -= diff;
                 }
 
-                // Unstable Experiment
-                if (m_uiUnstableExperimentTimer < uiDiff)
+                if (m_unstableExperimentTimer < diff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_UNSTABLE_EXPERIMENT) == CAST_OK)
-                    {
-                        DoScriptText(EMOTE_EXPERIMENT, m_creature);
-                        m_uiUnstableExperimentTimer = 37000;
-                    }
+                        m_unstableExperimentTimer = 37000;
                 }
                 else
-                    m_uiUnstableExperimentTimer -= uiDiff;
+                    m_unstableExperimentTimer -= diff;
 
                 // health check
-                if (m_creature->GetHealthPercent() <= (m_uiPhase == PHASE_ONE ? 80.0f : 35.0f))
+                if (m_creature->GetHealthPercent() <= (m_phase == PHASE_ONE ? 80.0f : 35.0f))
                 {
-                    uint32 spellId = (m_pInstance->IsHeroicDifficulty() ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
+                    uint32 spellId = (m_instance->IsHeroicDifficulty() ? SPELL_VOLATILE_EXPERIMENT : SPELL_TEAR_GAS);
 
                     if (DoCastSpellIfCan(m_creature, spellId, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
-                        m_uiTransitionTimer = 2500;
+                        m_transitionTimer = 2500;
                         return;
                     }
                 }
@@ -435,23 +525,39 @@ struct boss_professor_putricideAI : public ScriptedAI
             case PHASE_TRANSITION_ONE:
             case PHASE_TRANSITION_TWO:
             {
-                if (m_uiTransitionTimer < uiDiff)
+                if (m_transitionTimer < diff)
                 {
                     SetCombatMovement(true);
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
-                    DoScriptText((m_uiPhase == PHASE_TRANSITION_ONE ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2), m_creature);
+                    DoBroadcastText((m_phase == PHASE_TRANSITION_ONE ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2), m_creature);
 
                     // in heroic it changes form at the end of the transition
-                    if (!m_pInstance->IsHeroicDifficulty())
+                    if (!m_instance->IsHeroicDifficulty())
                         DoCastSpellIfCan(m_creature, SPELL_TEAR_GAS_CANCEL, CAST_TRIGGERED);
+                    else
+                    {
+                        for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+                        {
+                            if (Player* player = playerRef.getSource())
+                            {
+                                player->RemoveAurasDueToSpell(SPELL_OOZE_VARIABLE_OOZE);
+                                player->RemoveAurasDueToSpell(SPELL_GAS_VARIABLE_GAS);
+                            }
+                        }
+                    }
 
-                    m_uiPhase = (m_uiPhase == PHASE_TRANSITION_ONE ? PHASE_TWO : PHASE_THREE);
-                    m_uiTransitionTimer = 0;
+                    m_phase = (m_phase == PHASE_TRANSITION_ONE ? PHASE_TWO : PHASE_THREE);
+                    if (m_phase == PHASE_THREE)
+                    {
+                        m_creature->CastSpell(m_creature, SPELL_CLEANSE_MUTATION, TRIGGERED_OLD_TRIGGERED);
+                        m_instance->DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, true);
+                    }
+                    m_transitionTimer = 0;
                 }
                 else
-                    m_uiTransitionTimer -= uiDiff;
+                    m_transitionTimer -= diff;
 
                 return;
             }
@@ -464,16 +570,17 @@ struct boss_professor_putricideAI : public ScriptedAI
             }
         }
 
-        // Slime Puddle (all phases, except for transition
-        if (m_uiPuddleTimer < uiDiff)
+        // Slime puddles continue throughout active combat phases, but pause
+        // while Putricide is moving to or transforming at the laboratory.
+        if (m_puddleTimer < diff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SLIME_PUDDLE_TRIGGER) == CAST_OK)
-                m_uiPuddleTimer = 35000;
+                m_puddleTimer = 35000;
         }
         else
-            m_uiPuddleTimer -= uiDiff;
+            m_puddleTimer -= diff;
 
-        DoMeleeAttackIfReady();
+        CombatAI::UpdateAI(diff);
     }
 };
 
@@ -517,19 +624,26 @@ struct OozeFloodTrigger : public SpellScript
         if (!pTarget)
             return;
 
-        // get the nearest twin tap stalker
+        // Get the nearest twin tap stalker.  The old loop simply kept the
+        // last stalker returned by the grid visitor, which could pair taps
+        // from unrelated flood lanes.
         Creature* pNearTarget = nullptr;
+        float fNearDistance = 30.0f;
         CreatureList lTargetsInRange;
         GetCreatureListWithEntryInGrid(lTargetsInRange, pTarget, pTarget->GetEntry(), 30.0f);
 
         if (lTargetsInRange.empty())
             return;
 
-        // find only the nearest tap trigger
+        // Find only the nearest *other* upper tap trigger.
         for (CreatureList::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
         {
-            if ((*itr)->GetPositionZ() > 370.0f)
+            float fDistance = pTarget->GetDistance(*itr);
+            if (*itr != pTarget && (*itr)->GetPositionZ() > 370.0f && fDistance < fNearDistance)
+            {
                 pNearTarget = *itr;
+                fNearDistance = fDistance;
+            }
         }
 
         if (!pNearTarget)
@@ -538,7 +652,7 @@ struct OozeFloodTrigger : public SpellScript
         // cast the triggered spell on each target
         target->CastSpell(pTarget, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
         target->CastSpell(pNearTarget, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
-        DoScriptText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, target);
+        DoBroadcastText(urand(0, 1) ? SAY_SLIME_FLOW_1 : SAY_SLIME_FLOW_2, target);
     }
 };
 
@@ -566,51 +680,52 @@ struct VolatileExperiment : public SpellScript
 ## npc_volatile_ooze_icc
 ######*/
 
-struct npc_volatile_ooze_iccAI : public ScriptedAI
+struct npc_volatile_ooze_iccAI : public CombatAI
 {
-    npc_volatile_ooze_iccAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_volatile_ooze_iccAI(Creature* creature) : CombatAI(creature, 0) { Reset(); }
 
-    uint32 m_uiAdhesiveTimer;
+    uint32 m_adhesiveTimer;
 
     ObjectGuid m_targetGuid;
 
     void Reset() override
     {
-        m_uiAdhesiveTimer = urand(2000, 4000);
+        CombatAI::Reset();
+        m_adhesiveTimer = urand(2000, 4000);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_uiAdhesiveTimer && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(m_creature, ATTACK_DISTANCE) && pWho->GetObjectGuid() == m_targetGuid)
+        if (!m_adhesiveTimer && who->GetTypeId() == TYPEID_PLAYER && who->IsWithinDistInMap(m_creature, ATTACK_DISTANCE) && who->GetObjectGuid() == m_targetGuid)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_OOZE_ERUPTION) == CAST_OK)
             {
-                m_uiAdhesiveTimer = urand(3000, 5000);
+                m_adhesiveTimer = urand(3000, 5000);
                 m_targetGuid.Clear();
             }
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        CombatAI::MoveInLineOfSight(who);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (m_uiAdhesiveTimer)
+        if (m_adhesiveTimer)
         {
-            if (m_uiAdhesiveTimer <= uiDiff)
+            if (m_adhesiveTimer <= diff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_OOZE_ADHESIVE, SELECT_FLAG_PLAYER))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_OOZE_ADHESIVE, SELECT_FLAG_PLAYER))
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_OOZE_ADHESIVE) == CAST_OK)
+                    if (DoCastSpellIfCan(target, SPELL_OOZE_ADHESIVE) == CAST_OK)
                     {
-                        m_creature->GetMotionMaster()->MoveFollow(pTarget, ATTACK_DISTANCE * 0.5f, m_creature->GetAngle(pTarget));
-                        m_targetGuid = pTarget->GetObjectGuid();
-                        m_uiAdhesiveTimer = 0;
+                        m_creature->GetMotionMaster()->MoveFollow(target, ATTACK_DISTANCE * 0.5f, m_creature->GetAngle(target));
+                        m_targetGuid = target->GetObjectGuid();
+                        m_adhesiveTimer = 0;
                     }
                 }
             }
             else
-                m_uiAdhesiveTimer -= uiDiff;
+                m_adhesiveTimer -= diff;
         }
     }
 };
@@ -624,51 +739,52 @@ UnitAI* GetAI_npc_volatile_ooze_icc(Creature* pCreature)
 ## npc_gas_cloud_icc
 ######*/
 
-struct npc_gas_cloud_iccAI : public ScriptedAI
+struct npc_gas_cloud_iccAI : public CombatAI
 {
-    npc_gas_cloud_iccAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_gas_cloud_iccAI(Creature* creature) : CombatAI(creature, 0) { Reset(); }
 
-    uint32 m_uiGasBloatTimer;
+    uint32 m_gasBloatTimer;
 
     ObjectGuid m_targetGuid;
 
     void Reset() override
     {
-        m_uiGasBloatTimer = urand(2000, 4000);
+        CombatAI::Reset();
+        m_gasBloatTimer = urand(2000, 4000);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_uiGasBloatTimer && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsWithinDistInMap(m_creature, ATTACK_DISTANCE) && pWho->GetObjectGuid() == m_targetGuid)
+        if (!m_gasBloatTimer && who->GetTypeId() == TYPEID_PLAYER && who->IsWithinDistInMap(m_creature, ATTACK_DISTANCE) && who->GetObjectGuid() == m_targetGuid)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_EXPUNGED_GAS) == CAST_OK)
             {
-                m_uiGasBloatTimer = urand(3000, 5000);
+                m_gasBloatTimer = urand(3000, 5000);
                 m_targetGuid.Clear();
             }
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        CombatAI::MoveInLineOfSight(who);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (m_uiGasBloatTimer)
+        if (m_gasBloatTimer)
         {
-            if (m_uiGasBloatTimer <= uiDiff)
+            if (m_gasBloatTimer <= diff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_OOZE_ADHESIVE, SELECT_FLAG_PLAYER))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_OOZE_ADHESIVE, SELECT_FLAG_PLAYER))
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_GASEOUS_BLOAT) == CAST_OK)
+                    if (DoCastSpellIfCan(target, SPELL_GASEOUS_BLOAT) == CAST_OK)
                     {
-                        m_creature->GetMotionMaster()->MoveFollow(pTarget, ATTACK_DISTANCE * 0.5f, m_creature->GetAngle(pTarget));
-                        m_targetGuid = pTarget->GetObjectGuid();
-                        m_uiGasBloatTimer = 0;
+                        m_creature->GetMotionMaster()->MoveFollow(target, ATTACK_DISTANCE * 0.5f, m_creature->GetAngle(target));
+                        m_targetGuid = target->GetObjectGuid();
+                        m_gasBloatTimer = 0;
                     }
                 }
             }
             else
-                m_uiGasBloatTimer -= uiDiff;
+                m_gasBloatTimer -= diff;
         }
     }
 };
@@ -683,14 +799,16 @@ UnitAI* GetAI_npc_gas_cloud_icc(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_growing_ooze_puddleAI : public Scripted_NoMovementAI
+struct npc_growing_ooze_puddleAI : public CombatAI
 {
-    npc_growing_ooze_puddleAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_growing_ooze_puddleAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+    }
 
-    void Reset() override { }
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
 UnitAI* GetAI_npc_growing_ooze_puddle(Creature* pCreature)
@@ -732,14 +850,16 @@ struct EatOoze : public SpellScript
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_choking_gas_bombAI : public Scripted_NoMovementAI
+struct npc_choking_gas_bombAI : public CombatAI
 {
-    npc_choking_gas_bombAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_choking_gas_bombAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+    }
 
-    void Reset() override { }
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
 UnitAI* GetAI_npc_choking_gas_bomb(Creature* pCreature)
@@ -752,14 +872,16 @@ UnitAI* GetAI_npc_choking_gas_bomb(Creature* pCreature)
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_puddle_stalkerAI : public Scripted_NoMovementAI
+struct npc_puddle_stalkerAI : public CombatAI
 {
-    npc_puddle_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_puddle_stalkerAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+    }
 
-    void Reset() override { }
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
 UnitAI* GetAI_npc_puddle_stalker(Creature* pCreature)
@@ -773,9 +895,27 @@ struct OozeFlood : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* target = spell->GetUnitTarget();
-        // Set target manually to hit exactly the stalker below the tap
-        if (Creature* pStalker = GetClosestCreatureWithEntry(target, target->GetEntry(), 20.0f))
-            target->CastSpell(pStalker, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
+
+        // Set the target manually to the closest stalker on the room floor.
+        // A generic closest-entry lookup can select another upper tap and
+        // render the ooze flood suspended in mid-air.
+        Creature* pFloorStalker = nullptr;
+        float fNearDistance = 20.0f;
+        CreatureList lTargetsInRange;
+        GetCreatureListWithEntryInGrid(lTargetsInRange, target, target->GetEntry(), 20.0f);
+
+        for (CreatureList::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
+        {
+            float fDistance = target->GetDistance(*itr);
+            if ((*itr)->GetPositionZ() < 365.0f && fDistance < fNearDistance)
+            {
+                pFloorStalker = *itr;
+                fNearDistance = fDistance;
+            }
+        }
+
+        if (pFloorStalker)
+            target->CastSpell(pFloorStalker, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
     }
 };
 

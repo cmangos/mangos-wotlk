@@ -405,7 +405,13 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_GREEN_PLAGUE:
         case GO_ORANGE_VALVE:
         case GO_GREEN_VALVE:
+            break;
         case GO_DRINK_ME:
+            // The abomination table is available only while Putricide is in
+            // the phases which use it. It must not remain clickable before a
+            // pull, after a wipe/death, or after the phase-three transition.
+            DoToggleGameObjectFlags(pGo->GetObjectGuid(), GO_FLAG_NO_INTERACT,
+                m_auiEncounter[TYPE_PROFESSOR_PUTRICIDE] != IN_PROGRESS);
             break;
         case GO_PLAGUE_SIGIL:
             if (m_auiEncounter[TYPE_PROFESSOR_PUTRICIDE] == DONE)
@@ -769,7 +775,12 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_PROFESSOR_PUTRICIDE:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_SCIENTIST_DOOR);
+            // This door is opened by the completed trap gauntlet and becomes
+            // Putricide's combat boundary afterwards.  Assign its desired
+            // state instead of toggling it, because repeated state delivery
+            // otherwise closes an already-open progression door.
+            DoUseOpenableObject(GO_SCIENTIST_DOOR,
+                uiData != IN_PROGRESS && m_auiEncounter[TYPE_PLAGUE_WING_ENTRANCE] == DONE);
             if (uiData == DONE)
             {
                 // deactivate the sigil and enable the teleporter if possible
@@ -780,10 +791,13 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                         pTransporter->SetGoState(GO_STATE_ACTIVE);
                 }
             }
-            else if (uiData == FAIL)
-                DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, false);
             else if (uiData == IN_PROGRESS)
+            {
+                DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_NAUSEA, true);
+            }
+            else
+                DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, true);
             break;
         case TYPE_BLOOD_PRINCE_COUNCIL:
             m_auiEncounter[uiType] = uiData;
@@ -892,10 +906,11 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_PLAGUE_WING_ENTRANCE:
             m_auiEncounter[uiType] = uiData;
-            // combat door
-            DoUseDoorOrButton(GO_SCIENTIST_DOOR_COLLISION);
+            // The lower collision gate seals only for the trap event. Use an
+            // explicit state so IN_PROGRESS -> DONE and reloads are stable.
+            DoUseOpenableObject(GO_SCIENTIST_DOOR_COLLISION, uiData != IN_PROGRESS);
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_SCIENTIST_DOOR);
+                DoUseOpenableObject(GO_SCIENTIST_DOOR, true);
             // combat doors with custom anim
             else if (uiData == IN_PROGRESS)
             {
