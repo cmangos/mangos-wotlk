@@ -1069,7 +1069,7 @@ UPDATE creature_template SET ScriptName='npc_gluttonous_abomination_icc' WHERE e
 UPDATE creature_template SET ScriptName='npc_valithria_rot_worm' WHERE entry=37907;
 UPDATE creature_template SET ScriptName='npc_valithria_column_of_frost' WHERE entry=37918;
 UPDATE creature_template SET ScriptName='npc_blistering_zombie_icc' WHERE entry=37934;
-UPDATE creature_template SET ScriptName='npc_valithria_portal', NpcFlags=NpcFlags | 16777216 WHERE entry IN (37945,38430);
+UPDATE creature_template SET ScriptName='npc_valithria_portal' WHERE entry IN (37945,38430);
 UPDATE creature_template SET ScriptName='npc_valithria_portal_preeffect' WHERE entry IN (38186,38429);
 UPDATE creature_template SET ScriptName='npc_valithria_cloud' WHERE entry IN (37985,38421);
 UPDATE creature_template SET ScriptName='npc_valithria_mana_void' WHERE entry=38068;
