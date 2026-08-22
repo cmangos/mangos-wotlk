@@ -82,6 +82,49 @@ enum
     SPELL_GUNSHIP_ACHIEVEMENT       = 72959,
     SPELL_TELEPORT_PLAYERS_VICTORY  = 72340,
     SPELL_CHECK_FOR_PLAYERS         = 70332,                // check for aura 70120 or 70121 on player; if not found cast 67335
+
+    // Lich King player auras. Encounter state is changed from IN_PROGRESS to
+    // NOT_STARTED while loading an instance save, so these must also be
+    // cleared when a player enters after a full world-server restart.
+    SPELL_LK_NECROTIC_PLAGUE_10N    = 70337,
+    SPELL_LK_NECROTIC_PLAGUE_25N    = 73912,
+    SPELL_LK_NECROTIC_PLAGUE_10H    = 73913,
+    SPELL_LK_NECROTIC_PLAGUE_25H    = 73914,
+    SPELL_LK_NECROTIC_JUMP_10N      = 70338,
+    SPELL_LK_NECROTIC_JUMP_25N      = 73785,
+    SPELL_LK_NECROTIC_JUMP_10H      = 73786,
+    SPELL_LK_NECROTIC_JUMP_25H      = 73787,
+    SPELL_LK_INFEST_10N             = 70541,
+    SPELL_LK_INFEST_25N             = 73779,
+    SPELL_LK_INFEST_10H             = 73780,
+    SPELL_LK_INFEST_25H             = 73781,
+    SPELL_LK_PAIN_SUFFERING_10N     = 72133,
+    SPELL_LK_PAIN_SUFFERING_25N     = 73788,
+    SPELL_LK_PAIN_SUFFERING_10H     = 73789,
+    SPELL_LK_PAIN_SUFFERING_25H     = 73790,
+    SPELL_LK_REMORSELESS_10N        = 68983,
+    SPELL_LK_REMORSELESS_25N        = 73791,
+    SPELL_LK_REMORSELESS_10H        = 73792,
+    SPELL_LK_REMORSELESS_25H        = 73793,
+    SPELL_LK_SOUL_REAPER_10N        = 69409,
+    SPELL_LK_SOUL_REAPER_25N        = 73797,
+    SPELL_LK_SOUL_REAPER_10H        = 73798,
+    SPELL_LK_SOUL_REAPER_25H        = 73799,
+    SPELL_LK_ICE_PULSE              = 69091,
+    SPELL_LK_VALKYR_CARRY           = 74445,
+    SPELL_LK_HARVEST_VEHICLE_AURA   = 68984,
+    SPELL_LK_HARVEST_VEHICLE        = 68985,
+    SPELL_LK_HARVEST_SOUL_10N       = 68980,
+    SPELL_LK_HARVEST_SOUL_25N       = 74325,
+    SPELL_LK_HARVEST_SOUL_10H       = 74326,
+    SPELL_LK_HARVEST_SOUL_25H       = 74327,
+    SPELL_LK_HARVEST_SOULS          = 73654,
+    SPELL_LK_HARVEST_SOULS_10N      = 74295,
+    SPELL_LK_HARVEST_SOULS_25N      = 74296,
+    SPELL_LK_HARVEST_SOULS_H        = 74297,
+    SPELL_LK_HARVEST_TELEPORT_N     = 72546,
+    SPELL_LK_HARVEST_TELEPORT_H     = 73655,
+    SPELL_LK_FURY_NO_REZ            = 72351,
 };
 
 static const DialogueEntry aCitadelDialogue[] =
@@ -195,6 +238,35 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
 
 void instance_icecrown_citadel::OnPlayerEnter(Player* pPlayer)
 {
+    if (m_auiEncounter[TYPE_LICH_KING] == IN_PROGRESS)
+    {
+        bool hasActiveRaider = false;
+        for (auto& playerRef : instance->GetPlayers())
+        {
+            Player* player = playerRef.getSource();
+            if (player && player != pPlayer && player->IsAlive() && !player->IsGameMaster())
+            {
+                hasActiveRaider = true;
+                break;
+            }
+        }
+
+        // A disconnected solo/last player must not re-enter an encounter whose
+        // berserk and phase timers kept running in the still-loaded map.
+        if (!hasActiveRaider)
+            if (Creature* lichKing = GetSingleCreatureFromStorage(NPC_LICH_KING))
+                if (lichKing->IsAlive())
+                    lichKing->AI()->EnterEvadeMode();
+    }
+
+    // Boss reset callbacks cannot run while the world server is offline. If
+    // the saved encounter is no longer active, remove only persisted Lich
+    // King state before the player's first normal map update. This prevents a
+    // periodic encounter aura with a vanished caster from killing the player
+    // on login without disturbing another ICC encounter.
+    if (m_auiEncounter[TYPE_LICH_KING] != IN_PROGRESS)
+        CleanupLichKingPlayer(pPlayer);
+
     if (!m_uiTeam)                      // very first player to enter
     {
         m_uiTeam = pPlayer->GetTeam();
@@ -389,8 +461,6 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_FROSTY_WIND:
         case GO_FROSTY_EDGE:
         case GO_SNOW_EDGE:
-        case GO_ARTHAS_PLATFORM:
-        case GO_ARTHAS_PRECIPICE:
         case GO_MARROWGAR_DOOR:
         case GO_BLOODPRINCE_DOOR:
         case GO_SINDRAGOSA_ENTRANCE:
@@ -406,6 +476,15 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_ORANGE_VALVE:
         case GO_GREEN_VALVE:
         case GO_DRINK_ME:
+            break;
+        case GO_ARTHAS_PLATFORM:
+            // The client requires these exact bit patterns in the first
+            // parent-rotation field before movement/collision works on the
+            // Frozen Throne destructible surface (retail/TC/AC behavior).
+            pGo->SetUInt32Value(GAMEOBJECT_PARENTROTATION, 5535469);
+            break;
+        case GO_ARTHAS_PRECIPICE:
+            pGo->SetUInt32Value(GAMEOBJECT_PARENTROTATION, 4178312);
             break;
         case GO_PLAGUE_SIGIL:
             if (m_auiEncounter[TYPE_PROFESSOR_PUTRICIDE] == DONE)
@@ -879,6 +958,8 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_LICH_KING:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == FAIL || uiData == NOT_STARTED)
+                SetLichKingPlatformDamaged(false);
             break;
         case TYPE_BLOOD_WING_ENTRANCE:
             m_auiEncounter[uiType] = uiData;
@@ -1100,6 +1181,80 @@ void instance_icecrown_citadel::ProcessEventNpcs(Player* pPlayer)
     }
 }
 
+void instance_icecrown_citadel::SetLichKingPlatformDamaged(bool damaged)
+{
+    if (GameObject* platform = GetSingleGameObjectFromStorage(GO_ARTHAS_PLATFORM))
+        platform->SetDestructibleState(damaged ? GO_DESTRUCTIBLE_DAMAGED : GO_DESTRUCTIBLE_INTACT);
+    if (GameObject* edge = GetSingleGameObjectFromStorage(GO_FROSTY_EDGE))
+        edge->SetGoState(damaged ? GO_STATE_ACTIVE : GO_STATE_READY);
+    if (GameObject* wind = GetSingleGameObjectFromStorage(GO_FROSTY_WIND))
+        wind->SetGoState(damaged ? GO_STATE_READY : GO_STATE_ACTIVE);
+    SetLichKingPlatformWarning(false);
+}
+
+void instance_icecrown_citadel::CleanupLichKingPlayer(Player* player, bool forceCombatStop)
+{
+    if (!player)
+        return;
+
+    uint32 const encounterAuras[] =
+    {
+        SPELL_LK_NECROTIC_PLAGUE_10N, SPELL_LK_NECROTIC_PLAGUE_25N,
+        SPELL_LK_NECROTIC_PLAGUE_10H, SPELL_LK_NECROTIC_PLAGUE_25H,
+        SPELL_LK_NECROTIC_JUMP_10N, SPELL_LK_NECROTIC_JUMP_25N,
+        SPELL_LK_NECROTIC_JUMP_10H, SPELL_LK_NECROTIC_JUMP_25H,
+        SPELL_LK_INFEST_10N, SPELL_LK_INFEST_25N,
+        SPELL_LK_INFEST_10H, SPELL_LK_INFEST_25H,
+        SPELL_LK_PAIN_SUFFERING_10N, SPELL_LK_PAIN_SUFFERING_25N,
+        SPELL_LK_PAIN_SUFFERING_10H, SPELL_LK_PAIN_SUFFERING_25H,
+        SPELL_LK_REMORSELESS_10N, SPELL_LK_REMORSELESS_25N,
+        SPELL_LK_REMORSELESS_10H, SPELL_LK_REMORSELESS_25H,
+        SPELL_LK_SOUL_REAPER_10N, SPELL_LK_SOUL_REAPER_25N,
+        SPELL_LK_SOUL_REAPER_10H, SPELL_LK_SOUL_REAPER_25H,
+        SPELL_LK_ICE_PULSE, SPELL_LK_VALKYR_CARRY,
+        SPELL_LK_HARVEST_VEHICLE_AURA, SPELL_LK_HARVEST_VEHICLE,
+        SPELL_LK_HARVEST_SOUL_10N, SPELL_LK_HARVEST_SOUL_25N,
+        SPELL_LK_HARVEST_SOUL_10H, SPELL_LK_HARVEST_SOUL_25H,
+        SPELL_LK_HARVEST_SOULS, SPELL_LK_HARVEST_SOULS_10N,
+        SPELL_LK_HARVEST_SOULS_25N, SPELL_LK_HARVEST_SOULS_H,
+        SPELL_LK_HARVEST_TELEPORT_N,
+        SPELL_LK_HARVEST_TELEPORT_H, SPELL_LK_FURY_NO_REZ
+    };
+
+    bool hadEncounterAura = false;
+    bool hadLichKingVehicle = player->HasAura(SPELL_LK_VALKYR_CARRY) ||
+        player->HasAura(SPELL_LK_HARVEST_VEHICLE_AURA) ||
+        player->HasAura(SPELL_LK_HARVEST_VEHICLE) ||
+        player->HasAura(SPELL_LK_HARVEST_TELEPORT_N) ||
+        player->HasAura(SPELL_LK_HARVEST_TELEPORT_H);
+
+    for (uint32 spellId : encounterAuras)
+    {
+        if (player->HasAura(spellId))
+            hadEncounterAura = true;
+        player->RemoveAurasDueToSpell(spellId);
+    }
+
+    // Do not eject a reconnecting player from an unrelated ICC vehicle.
+    if (hadLichKingVehicle)
+        player->ExitVehicle();
+    if (forceCombatStop || hadEncounterAura)
+        player->CombatStop(true);
+}
+
+void instance_icecrown_citadel::SetLichKingPlatformDestroyed()
+{
+    if (GameObject* platform = GetSingleGameObjectFromStorage(GO_ARTHAS_PLATFORM))
+        if (Creature* lichKing = GetSingleCreatureFromStorage(NPC_LICH_KING))
+            platform->SetDestructibleState(GO_DESTRUCTIBLE_DESTROYED, lichKing);
+}
+
+void instance_icecrown_citadel::SetLichKingPlatformWarning(bool active)
+{
+    if (GameObject* warning = GetSingleGameObjectFromStorage(GO_SNOW_EDGE))
+        warning->SetGoState(active ? GO_STATE_ACTIVE : GO_STATE_READY);
+}
+
 void instance_icecrown_citadel::ShowChatCommands(ChatHandler* handler)
 {
     handler->SendSysMessage("This instance supports the following commands:\n startelevator, continuegunship, lichkingfloor, spawnzeppelin");
@@ -1132,24 +1287,7 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
             gunship->SetGoState(GO_STATE_ACTIVE);
     }
     else if (val == "lichkingfloor")
-    {
-        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_FROSTY_WIND))
-            frosty->SetGoState(GO_STATE_ACTIVE);
-        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_FROSTY_EDGE))
-            frosty->SetGoState(GO_STATE_ACTIVE);
-        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_SNOW_EDGE))
-            frosty->SetGoState(GO_STATE_ACTIVE);
-        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_ARTHAS_PLATFORM))
-        {
-            frosty->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
-            frosty->SetGoState(GO_STATE_ACTIVE);
-        }
-        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_ARTHAS_PRECIPICE))
-        {
-            frosty->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
-            frosty->SetGoState(GO_STATE_ACTIVE);
-        }
-    }
+        SetLichKingPlatformDamaged(true);
     else if (val == "spawnzeppelin")
     {
         TransportTemplate* const zeppelinHorde = sTransportMgr.GetTransportTemplate(GO_ZEPPELIN_HORDE);
