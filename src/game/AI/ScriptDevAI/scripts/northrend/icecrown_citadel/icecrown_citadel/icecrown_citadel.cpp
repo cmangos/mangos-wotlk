@@ -238,6 +238,163 @@ void instance_icecrown_citadel::StartSindragosaFrostwyrm(uint32 entry, Player* p
             landed = true;
         }
     }
+    else if (uiTriggerId == AT_SAURFANG_PORTAL)
+    {
+        if (GetData(TYPE_DEATHBRINGER_SAURFANG) != DONE)
+            return;
+
+        float const destinationX = 4126.35f;
+        float const destinationY = 2769.23f;
+        float const destinationZ = 350.963f;
+        float const destinationO = 0.0f;
+
+        if (m_coldflameJetsState == NOT_STARTED)
+        {
+            // Trap AIs join the alternating schedule from the instance state.
+            // A one-time proximity scan here is unreliable in CMaNGOS because
+            // only the destination cell may be active while the player is
+            // being relocated; the other visible corridor emitters would
+            // then never receive an activation timer.
+            m_coldflameJetsState = IN_PROGRESS;
+        }
+
+        pPlayer->TeleportTo(instance->GetId(), destinationX, destinationY, destinationZ, destinationO);
+    }
+    else if (uiTriggerId == AT_SHUTDOWN_FROST_JETS)
+        SetData(DATA_COLDFLAME_JETS, DONE);
+}
+
+struct ColdflameJetSchedule
+{
+    float x;
+    float y;
+    uint32 initialDelay;
+};
+
+// Retail trap placements ordered by distance from the Upper Spire teleporter.
+// TrinityCore and AzerothCore alternate the initial delay in this order. Keep
+// that cadence while allowing every CMaNGOS grid-loaded trap to initialize
+// itself instead of depending on one proximity collection.
+static ColdflameJetSchedule const aColdflameJetSchedules[] =
+{
+    {4135.747f, 2781.602f, 11000},
+    {4156.651f, 2781.518f,  1000},
+    {4160.112f, 2788.294f, 11000},
+    {4159.713f, 2735.113f,  1000},
+    {4159.799f, 2804.188f, 11000},
+    {4183.785f, 2751.657f,  1000},
+    {4192.597f, 2733.280f, 11000},
+    {4201.849f, 2750.526f,  1000},
+    {4193.007f, 2829.084f, 11000},
+    {4225.138f, 2788.188f,  1000},
+    {4224.835f, 2735.236f, 11000},
+    {4224.706f, 2804.109f,  1000},
+};
+
+static uint32 GetColdflameJetInitialDelay(Creature* trap)
+{
+    float spawnX, spawnY, spawnZ;
+    trap->GetRespawnCoord(spawnX, spawnY, spawnZ);
+
+    float closestDistanceSq = 1000000.0f;
+    uint32 initialDelay = 11000;
+    for (ColdflameJetSchedule const& schedule : aColdflameJetSchedules)
+    {
+        float const deltaX = spawnX - schedule.x;
+        float const deltaY = spawnY - schedule.y;
+        float const distanceSq = deltaX * deltaX + deltaY * deltaY;
+        if (distanceSq < closestDistanceSq)
+        {
+            closestDistanceSq = distanceSq;
+            initialDelay = schedule.initialDelay;
+        }
+    }
+
+    return initialDelay;
+}
+
+// The corridor alternates two trap rows. Each loaded trap independently joins
+// the shared 22-second cycle with the reference 1- or 11-second initial offset.
+struct npc_frost_freeze_trapAI : public ScriptedAI
+{
+    npc_frost_freeze_trapAI(Creature* creature) : ScriptedAI(creature),
+        m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData())),
+        m_activationTimer(0), m_scheduleInitialized(false)
+    {
+        SetCombatMovement(false);
+        // Keep the whole short gauntlet updating once its grids are loaded.
+        // Otherwise the first emitter can remain the only repeating caster
+        // while the more distant trap grids unload behind the player.
+        m_creature->SetActiveObjectState(true);
+    }
+
+    instance_icecrown_citadel* m_instance;
+    uint32 m_activationTimer;
+    bool m_scheduleInitialized;
+
+    void Reset() override
+    {
+        m_activationTimer = 0;
+        m_scheduleInitialized = false;
+        RestoreSpawnFacing();
+    }
+
+    void RestoreSpawnFacing()
+    {
+        float spawnX, spawnY, spawnZ, spawnOrientation;
+        m_creature->GetRespawnCoord(spawnX, spawnY, spawnZ, &spawnOrientation);
+        m_creature->SetOrientation(spawnOrientation);
+        m_creature->SetFacingTo(spawnOrientation);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        // Match the passive TC/AC trap behavior without disabling combat on
+        // the caster. 70460 must be allowed to trigger hostile spell 70461.
+        if (m_creature->IsInCombat())
+        {
+            m_creature->CombatStop(false);
+            RestoreSpawnFacing();
+        }
+
+        uint32 const state = m_instance ? m_instance->GetData(DATA_COLDFLAME_JETS) : NOT_STARTED;
+        if (state != IN_PROGRESS)
+        {
+            if (m_scheduleInitialized)
+                m_creature->RemoveAurasDueToSpell(SPELL_COLDFLAME_JETS);
+            m_activationTimer = 0;
+            m_scheduleInitialized = false;
+            if (state == DONE)
+                m_creature->SetActiveObjectState(false);
+            return;
+        }
+
+        if (!m_scheduleInitialized)
+        {
+            m_activationTimer = GetColdflameJetInitialDelay(m_creature);
+            m_scheduleInitialized = true;
+        }
+
+        if (m_activationTimer > diff)
+        {
+            m_activationTimer -= diff;
+            return;
+        }
+
+        // 70461 is a narrow hostile cone periodically triggered by 70460.
+        // A hit may turn an otherwise passive trigger toward its victim in
+        // CMaNGOS, so restore the spawn facing before every activation.
+        RestoreSpawnFacing();
+        if (DoCastSpellIfCan(m_creature, SPELL_COLDFLAME_JETS) == CAST_OK)
+            m_activationTimer = 22000;
+        else
+            m_activationTimer = 1000;
+    }
+};
+
+UnitAI* GetAI_npc_frost_freeze_trap(Creature* creature)
+{
+    return new npc_frost_freeze_trapAI(creature);
 }
 
 struct ColdflameJetSchedule
