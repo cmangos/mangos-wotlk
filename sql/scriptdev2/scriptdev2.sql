@@ -1069,8 +1069,12 @@ UPDATE creature_template SET ScriptName='npc_gas_cloud_icc' WHERE entry=37562;
 UPDATE creature_template SET ScriptName='npc_growing_ooze_puddle' WHERE entry=37690;
 UPDATE creature_template SET ScriptName='npc_choking_gas_bomb' WHERE entry=38159;
 UPDATE creature_template SET ScriptName='boss_the_lich_king_icc' WHERE entry=36597;
-UPDATE creature_template SET ScriptName='npc_saurfang_gunship' WHERE entry=36939;
-UPDATE creature_template SET ScriptName='npc_muradin_gunship' WHERE entry=36948;
+UPDATE creature_template SET ScriptName='npc_saurfang_gunship', RegenerateStats=RegenerateStats&~2 WHERE entry=36939;
+UPDATE creature_template SET ScriptName='npc_muradin_gunship', RegenerateStats=RegenerateStats&~2 WHERE entry=36948;
+UPDATE creature_template SET ScriptName='npc_gunship', RegenerateStats=RegenerateStats&~2 WHERE entry IN (37215,37540);
+UPDATE creature_template SET ScriptName='npc_gunship_cannon' WHERE entry IN (36838,36839);
+UPDATE creature_template SET ScriptName='npc_gunship_soldier', RegenerateStats=RegenerateStats&~2 WHERE entry IN (36950,36957,36960,36961,36968,36969,36978,36982,37116,37117);
+UPDATE creature_template SET ScriptName='npc_zafod_boombox', NpcFlags=NpcFlags|1 WHERE entry=37184;
 UPDATE gameobject_template SET ScriptName='go_icc_teleporter' WHERE entry IN (202235,202242,202243,202244,202245,202246);
 INSERT INTO scripted_event_id VALUES
 (23426,'event_gameobject_citadel_valve'),

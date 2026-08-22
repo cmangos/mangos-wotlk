@@ -467,7 +467,10 @@ struct RocketPack : public AuraScript
     void OnApply(Aura* aura, bool apply) const override
     {
         if (apply)
-            aura->GetTarget()->CastSpell(nullptr, 68721, TRIGGERED_NONE);
+            // 68721 is the movement/damage aura triggered by the pack's
+            // on-use spell.  It is not a second player-initiated cast and
+            // must not repeat normal combat/casting-state validation.
+            aura->GetTarget()->CastSpell(nullptr, 68721, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
