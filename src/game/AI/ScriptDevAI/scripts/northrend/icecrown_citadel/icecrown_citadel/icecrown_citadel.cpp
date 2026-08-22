@@ -120,6 +120,7 @@ static const DialogueEntry aCitadelDialogue[] =
 instance_icecrown_citadel::instance_icecrown_citadel(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aCitadelDialogue),
     m_uiTeam(0),
     m_uiPutricideValveTimer(0),
+    m_lightsHammerDamnedKills(0),
     m_bHasMarrowgarIntroYelled(false),
     m_bHasDeathwhisperIntroYelled(false),
     m_bHasRimefangLanded(false),
@@ -132,6 +133,8 @@ void instance_icecrown_citadel::Initialize()
 {
     InitializeDialogueHelper(this);
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    m_lightsHammerDamnedKills = 0;
+    m_lightsHammerDamnedGuids.clear();
 
     for (bool& i : m_abAchievCriteria)
         i = false;
@@ -221,6 +224,7 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_SINDRAGOSA:
         case NPC_LICH_KING:
         case NPC_TIRION_FORDRING:
+        case NPC_TIRION_LIGHTS_HAMMER:
         case NPC_RIMEFANG:
         case NPC_SPINESTALKER:
         case NPC_VALITHRIA_COMBAT_TRIGGER:
@@ -234,6 +238,13 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_SKYBREAKER:
         case NPC_ORGRIMS_HAMMER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_THE_DAMNED:
+            // Only the pair immediately in front of Light's Hammer gates the
+            // prologue; later patrols with the same entry must not count.
+            if (pCreature->GetPositionX() > -142.0f && pCreature->GetPositionX() < -138.0f &&
+                    pCreature->GetPositionY() > 2204.0f && pCreature->GetPositionY() < 2219.0f)
+                m_lightsHammerDamnedGuids.insert(pCreature->GetObjectGuid());
             break;
         case NPC_SPIRE_FROSTWYRM:
             if (pCreature->IsTemporarySummon())
@@ -485,6 +496,18 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        case NPC_THE_DAMNED:
+            if (m_lightsHammerDamnedGuids.erase(pCreature->GetObjectGuid()) &&
+                    ++m_lightsHammerDamnedKills == 2)
+            {
+                if (Creature* tirion = GetSingleCreatureFromStorage(NPC_TIRION_LIGHTS_HAMMER))
+                {
+                    tirion->StopMoving();
+                    tirion->GetMotionMaster()->Clear(false, true);
+                    tirion->GetMotionMaster()->MoveWaypoint();
+                }
+            }
+            break;
         case NPC_STINKY:
             if (Creature* pFestergut = GetSingleCreatureFromStorage(NPC_FESTERGUT))
             {
