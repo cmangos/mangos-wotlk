@@ -30,7 +30,6 @@ enum
 {
     // yells
     SAY_AGGRO                   = 37831,
-    //SAY_SLIME_SPRAY           = -1631072,
     SAY_OOZE_EXPLODE            = 37063,
     SAY_SLAY_1                  = 37833,
     SAY_SLAY_2                  = 37832,
