@@ -893,7 +893,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         case TYPE_PLAGUE_WING_ENTRANCE:
             m_auiEncounter[uiType] = uiData;
             // combat door
-            DoUseDoorOrButton(GO_SCIENTIST_DOOR_COLLISION);
+            DoUseOpenableObject(GO_SCIENTIST_DOOR_COLLISION, uiData != IN_PROGRESS);
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_SCIENTIST_DOOR);
             // combat doors with custom anim
