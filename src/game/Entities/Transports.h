@@ -87,6 +87,7 @@ class ElevatorTransport : public GenericTransport
         void Update(const uint32 diff) override;
 
         void SetGoState(GOState state) override;
+        void StopMovement();
 
         bool IsCrossMapTransport() const override { return false; }
     private:
