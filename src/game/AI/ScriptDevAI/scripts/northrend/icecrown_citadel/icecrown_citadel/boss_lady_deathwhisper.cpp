@@ -30,16 +30,16 @@ EndScriptData */
 enum
 {
     // yells
-    SAY_AGGRO                   = -1631018,
-    SAY_PHASE_TWO               = -1631019,
-    SAY_DARK_EMPOWERMENT        = -1631020,
-    SAY_DARK_TRANSFORMATION     = -1631021,
-    SAY_ANIMATE_DEAD            = -1631022,
-    SAY_DOMINATE_MIND           = -1631023,
-    SAY_BERSERK                 = -1631024,
-    SAY_DEATH                   = -1631025,
-    SAY_SLAY_1                  = -1631026,
-    SAY_SLAY_2                  = -1631027,
+    SAY_AGGRO                   = 38122,
+    SAY_PHASE_TWO               = 38126,
+    SAY_DARK_EMPOWERMENT        = 38130,
+    SAY_DARK_TRANSFORMATION     = 38132,
+    SAY_ANIMATE_DEAD            = 38133,
+    SAY_DOMINATE_MIND           = 38127,
+    SAY_BERSERK                 = 38128,
+    SAY_DEATH                   = 38125,
+    SAY_SLAY_1                  = 38123,
+    SAY_SLAY_2                  = 38124,
 
     // spells - phase 1
     SPELL_SHADOW_CHANNELING     = 43897,
@@ -162,7 +162,7 @@ struct boss_lady_deathwhisperAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_MANA_BARRIER, CAST_TRIGGERED);
 
         if (m_instance)
@@ -181,12 +181,12 @@ struct boss_lady_deathwhisperAI : public CombatAI
         CombatAI::KilledUnit(victim);
 
         if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_instance)
             m_instance->SetData(TYPE_LADY_DEATHWHISPER, DONE);
@@ -367,7 +367,7 @@ struct boss_lady_deathwhisperAI : public CombatAI
     // Wrapper to handle the second phase start
     void DoStartSecondPhase()
     {
-        DoScriptText(SAY_PHASE_TWO, m_creature);
+        DoBroadcastText(SAY_PHASE_TWO, m_creature);
         SetCombatMovement(true);
         SetMeleeEnabled(true);
 
@@ -402,7 +402,7 @@ struct boss_lady_deathwhisperAI : public CombatAI
             case DEATHWHISPER_BERSRK:
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
+                    DoBroadcastText(SAY_BERSERK, m_creature);
                     DisableCombatAction(action);
                 }
                 break;
@@ -420,7 +420,7 @@ struct boss_lady_deathwhisperAI : public CombatAI
                         DoCastSpellIfCan(target, SPELL_DOMINATE_MIND, CAST_TRIGGERED);
                 }
 
-                DoScriptText(SAY_DOMINATE_MIND, m_creature);
+                DoBroadcastText(SAY_DOMINATE_MIND, m_creature);
                 ResetCombatAction(action, 45000);
                 break;
             case DEATHWHISPER_SHADOW_BOLT:
@@ -451,7 +451,7 @@ struct boss_lady_deathwhisperAI : public CombatAI
                     {
                         // Remove the selected cultist from the list because we don't want it selected twice
                         m_lCultistSpawnedGuidList.remove(target->GetObjectGuid());
-                        DoScriptText(iTextEntry, m_creature);
+                        DoBroadcastText(iTextEntry, m_creature);
                         DisableCombatAction(action);
                     }
                 }
@@ -464,7 +464,7 @@ struct boss_lady_deathwhisperAI : public CombatAI
                 {
                     if (DoCastSpellIfCan(target, SPELL_DARK_MARTYRDOM) == CAST_OK)
                     {
-                        DoScriptText(SAY_ANIMATE_DEAD, m_creature);
+                        DoBroadcastText(SAY_ANIMATE_DEAD, m_creature);
                         DisableCombatAction(action);
                     }
                 }
