@@ -27,16 +27,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1631148,
-    SAY_UNCHAINED_MAGIC         = -1631149,
-    SAY_BLISTERING_COLD         = -1631150,
-    SAY_RESPIRE                 = -1631151,
-    SAY_TAKEOFF                 = -1631152,
-    SAY_PHASE_3                 = -1631153,
-    SAY_SLAY_1                  = -1631154,
-    SAY_SLAY_2                  = -1631155,
-    SAY_BERSERK                 = -1631156,
-    SAY_DEATH                   = -1631157,
+    SAY_AGGRO                   = 37511,
+    SAY_UNCHAINED_MAGIC         = 37138,
+    SAY_BLISTERING_COLD         = 37137,
+    SAY_RESPIRE                 = 38550,
+    SAY_TAKEOFF                 = 37136,
+    SAY_PHASE_3                 = 37109,
+    SAY_SLAY_1                  = 37133,
+    SAY_SLAY_2                  = 37134,
+    SAY_BERSERK                 = 37140,
+    SAY_DEATH                   = 37139,
 
     // Spells
 
@@ -252,7 +252,10 @@ struct boss_sindragosaAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        if (urand(0, 1))
+            DoBroadcastText(SAY_SLAY_1, m_creature);
+        else
+            DoBroadcastText(SAY_SLAY_2, m_creature);
     }
 
     void AttackStart(Unit* pWho) override
@@ -286,14 +289,14 @@ struct boss_sindragosaAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
         // instance data set when sindragosa lands
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         CleanupIceTombs();
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SINDRAGOSA, DONE);
@@ -499,7 +502,7 @@ struct boss_sindragosaAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BLISTERING_COLD) == CAST_OK)
                 {
-                    DoScriptText(SAY_BLISTERING_COLD, m_creature);
+                    DoBroadcastText(SAY_BLISTERING_COLD, m_creature);
                     m_uiBlisteringColdTimer = 0;
                 }
             }
@@ -514,7 +517,7 @@ struct boss_sindragosaAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
+                    DoBroadcastText(SAY_BERSERK, m_creature);
                     m_uiBerserkTimer = 0;
                 }
             }
@@ -549,7 +552,7 @@ struct boss_sindragosaAI : public ScriptedAI
                         {
                             m_uiPhase = SINDRAGOSA_PHASE_THREE;
                             m_uiIceTombSingleTimer = urand(7000, 10000);
-                            DoScriptText(SAY_PHASE_3, m_creature);
+                            DoBroadcastText(SAY_PHASE_3, m_creature);
                         }
                     }
 
@@ -557,7 +560,7 @@ struct boss_sindragosaAI : public ScriptedAI
                     if (m_uiPhaseTimer <= uiDiff)
                     {
                         m_uiPhaseTimer = 33000;
-                        DoScriptText(SAY_TAKEOFF, m_creature);
+                        DoBroadcastText(SAY_TAKEOFF, m_creature);
                         SetCombatMovement(false);
                         m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_GROUND_CENTER, SindragosaPosition[0][0], SindragosaPosition[0][1], SindragosaPosition[0][2]);
                     }
@@ -598,7 +601,7 @@ struct boss_sindragosaAI : public ScriptedAI
                     if (DoCastSpellIfCan(m_creature, SPELL_UNCHAINED_MAGIC) == CAST_OK)
                     {
                         m_uiUnchainedMagicTimer = urand(30000, 35000);
-                        DoScriptText(SAY_UNCHAINED_MAGIC, m_creature);
+                        DoBroadcastText(SAY_UNCHAINED_MAGIC, m_creature);
                     }
                 }
                 else
