@@ -28,6 +28,10 @@ enum
     TYPE_PLAGUE_WING_ENTRANCE       = 14,
     TYPE_SPIRE_FROSTWYRM            = 15,
 
+    // Native spawn group used to recover Valithria's four static starter
+    // archmages after a wipe or a world-server restart.
+    SPAWN_GROUP_VALITHRIA_STARTERS  = 6310000,
+
     // main boss entries
     NPC_LORD_MARROWGAR              = 36612,
     NPC_LADY_DEATHWHISPER           = 36855,
@@ -40,6 +44,7 @@ enum
     NPC_KELESETH                    = 37972,
     NPC_QUEEN_LANATHEL              = 37955,
     NPC_VALITHRIA                   = 36789,
+    NPC_THE_LICH_KING_VALITHRIA     = 38153,       // hidden controller which creates Valithria's reward cache
     NPC_SINDRAGOSA                  = 36853,
     NPC_LICH_KING                   = 36597,
 
@@ -115,12 +120,13 @@ enum
     NPC_EMPOWERING_ORB_STALKER      = 36934,
 
     // achievement types
-    MAX_SPECIAL_ACHIEV_CRITS        = 4,
+    MAX_SPECIAL_ACHIEV_CRITS        = 5,
 
     TYPE_ACHIEV_BONED               = 0,
     TYPE_ACHIEV_MADE_A_MESS         = 1,
     TYPE_ACHIEV_DANCES_OOZES        = 2,
     TYPE_ACHIEV_NAUSEA              = 3,
+    TYPE_ACHIEV_PORTAL_JOCKEY       = 4,
 
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
@@ -359,6 +365,8 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         // Open Putricide door in a few seconds
         void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
+
+        void RespawnValithriaStarterPack();
 
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = nullptr, uint32 uiMiscvalue1 = 0) const override;
