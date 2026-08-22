@@ -267,9 +267,12 @@ enum
 
     NPC_FLESH_EATING_INSECT         = 37782,
 
-    // NOTE: these numbers are quesswork
+    // The retail gauntlet advances after its one-minute insect phase.  Keep
+    // the kill counter as an early-completion safeguard when the full swarm
+    // has already been cleared.
     MAX_INSECT_PER_ROUND            = 8,
     TOTAL_INSECTS_PER_EVENT         = 100,
+    PUTRICIDE_TRAP_DURATION         = MINUTE * IN_MILLISECONDS,
 };
 
 /*#####
@@ -319,11 +322,20 @@ struct npc_putricides_trapAI : public ScriptedAI
     uint32 m_uiEventTimer;
     uint32 m_uiSummonTimer;
 
+    void StopSwarm()
+    {
+        // Spell 70475 owns the persistent swarm visual/effect.  Ending the
+        // event without removing its aura and dynamic objects leaves the
+        // apparent five-minute debuff running after the one-minute gauntlet.
+        m_creature->RemoveAurasDueToSpell(SPELL_GIANT_INSECT_SWARM);
+        m_creature->RemoveAllDynObjects();
+    }
+
     void Reset() override
     {
         m_uiInsectCounter = 0;
         m_uiSummonTimer = 1000;
-        m_uiEventTimer = 5 * MINUTE * IN_MILLISECONDS;
+        m_uiEventTimer = PUTRICIDE_TRAP_DURATION;
     }
 
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
@@ -366,6 +378,7 @@ struct npc_putricides_trapAI : public ScriptedAI
                 m_uiSummonTimer = 0;
                 m_uiEventTimer = 0;
 
+                StopSwarm();
                 m_pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, DONE);
                 m_creature->ForcedDespawn();
             }
@@ -398,7 +411,8 @@ struct npc_putricides_trapAI : public ScriptedAI
                 m_uiSummonTimer -= uiDiff;
         }
 
-        // event can last max 5 min
+        // The swarm phase lasts one minute.  Surviving players advance the
+        // gauntlet; a wipe resets it through the existing FAIL path.
         if (m_uiEventTimer)
         {
             if (m_uiEventTimer <= uiDiff)
@@ -421,6 +435,7 @@ struct npc_putricides_trapAI : public ScriptedAI
                 }
 
                 // set event as done if there are still players around
+                StopSwarm();
                 m_pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, bEventFailed ? FAIL : DONE);
                 m_uiSummonTimer = 0;
                 m_uiEventTimer = 0;
