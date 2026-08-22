@@ -233,7 +233,6 @@ struct boss_alythessAI : public CombatAI
                 {
                     DoScriptText(SAY_ALYTHESS_BERSERK, m_creature);
                     ResetCombatAction(action, 6 * MINUTE * IN_MILLISECONDS);
-                    sLog.outCustomLog("Sacrolash enrage at %lu and aggro at %lu", m_creature->GetMap()->GetCurrentClockTime().time_since_epoch().count(), m_aggro.time_since_epoch().count());
                 }
                 break;
             case ALYTHESS_PYROGENICS:
@@ -422,7 +421,6 @@ struct boss_sacrolashAI : public CombatAI
                 {
                     DoScriptText(SAY_SACROLASH_BERSERK, m_creature);
                     ResetCombatAction(action, 6 * MINUTE * IN_MILLISECONDS);
-                    sLog.outCustomLog("Sacrolash enrage at %lu and aggro at %lu", m_creature->GetMap()->GetCurrentClockTime().time_since_epoch().count(), m_aggro.time_since_epoch().count());
                 }
                 break;
             case SACROLASH_SHADOW_NOVA:
