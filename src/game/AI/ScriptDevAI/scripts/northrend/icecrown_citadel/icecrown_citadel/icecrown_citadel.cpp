@@ -28,7 +28,7 @@ EndScriptData */
 enum
 {
     // Marrowgar
-    SAY_MARROWGAR_INTRO             = -1631001,
+    SAY_MARROWGAR_INTRO             = 38508,
 
     // Deathwhisper
     SAY_DEATHWHISPER_SPEECH_1       = -1631011,
@@ -154,7 +154,7 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
     {
         if (Creature* pMarrowgar = GetSingleCreatureFromStorage(NPC_LORD_MARROWGAR))
         {
-            DoScriptText(SAY_MARROWGAR_INTRO, pMarrowgar);
+            DoBroadcastText(SAY_MARROWGAR_INTRO, pMarrowgar);
             m_bHasMarrowgarIntroYelled = true;
         }
     }
@@ -565,7 +565,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
     {
         case TYPE_MARROWGAR:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_MARROWGAR_DOOR);
+            DoUseOpenableObject(GO_MARROWGAR_DOOR, uiData != IN_PROGRESS);
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_ICEWALL_1);
