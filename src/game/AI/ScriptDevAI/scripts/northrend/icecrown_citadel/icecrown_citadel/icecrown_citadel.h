@@ -28,6 +28,11 @@ enum
     TYPE_PLAGUE_WING_ENTRANCE       = 14,
     TYPE_SPIRE_FROSTWYRM            = 15,
 
+    // Non-boss Frostwing and Upper Spire progression state. These values deliberately live
+    // outside the encounter array so neither event counts as a boss pull.
+    DATA_COLDFLAME_JETS             = 100,
+    DATA_SINDRAGOSA_GAUNTLET        = 101,
+
     // main boss entries
     NPC_LORD_MARROWGAR              = 36612,
     NPC_LADY_DEATHWHISPER           = 36855,
@@ -104,8 +109,25 @@ enum
     NPC_PUDDLE_STALKER              = 37013,        // related to Festergut and Rotface
     NPC_RIMEFANG                    = 37533,
     NPC_SPINESTALKER                = 37534,
+    NPC_FROSTWARDEN_HANDLER         = 37531,
+    NPC_FROSTWING_WHELP             = 37532,
+    NPC_SINDRAGOSA_GAUNTLET         = 37503,
+    NPC_NERUBAR_CHAMPION            = 37501,
+    NPC_NERUBAR_WEBWEAVER           = 37502,
+    NPC_NERUBAR_BROODLING           = 37232,
+    NPC_FROSTWARDEN_SORCERESS       = 37229,
+    NPC_FROSTWARDEN_WARRIOR         = 37228,
     NPC_OOZE_TENTACLE_STALKER       = 38308,        // accessories to Putricide
     NPC_SLIMY_TENTACLE_STALKER      = 38309,
+
+    // Frostwing Halls escort event
+    NPC_CAPTAIN_ARNATH              = 37122,
+    NPC_CAPTAIN_BRANDON             = 37123,
+    NPC_CAPTAIN_GRONDEL             = 37124,
+    NPC_CAPTAIN_RUPERT              = 37125,
+    NPC_SISTER_SVALNA               = 37126,
+    NPC_CROK_SCOURGEBANE            = 37129,
+    NPC_IMPALING_SPEAR              = 38248,
 
     // Blood wing entrance creatures
     NPC_DARFALLEN_NOBLE             = 37663,
@@ -220,11 +242,14 @@ enum
 
     // Area triggers
     AT_SINDRAGOSA_PLATFORM          = 5604,
+    AT_SINDRAGOSA_GAUNTLET          = 5623,
     AT_LIGHTS_HAMMER_INTRO_1        = 5611,
     AT_LIGHTS_HAMMER_INTRO_2        = 5612,
     AT_RAMPART_ALLIANCE             = 5628,
     AT_RAMPART_HORDE                = 5630,
     AT_PUTRICIDES_TRAP              = 5647,
+    AT_SHUTDOWN_FROST_JETS          = 5649,
+    AT_SAURFANG_PORTAL              = 5698,
     AT_DEATHWHISPER_INTRO           = 5709,
     AT_FROZEN_THRONE_TELE           = 5718,
     AT_MARROWGAR_INTRO              = 5732,
@@ -360,6 +385,8 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         // Open Putricide door in a few seconds
         void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
 
+        void StartSindragosaFrostwyrm(uint32 entry, Player* player = nullptr);
+
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = nullptr, uint32 uiMiscvalue1 = 0) const override;
 
@@ -381,6 +408,8 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         uint32 m_uiTeam;                                    // Team of first entered player, used on the Gunship event
         uint32 m_uiPutricideValveTimer;
+        uint32 m_coldflameJetsState;
+        uint32 m_sindragosaGauntletState;
 
         bool m_bHasMarrowgarIntroYelled;
         bool m_bHasDeathwhisperIntroYelled;
@@ -397,6 +426,8 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         GuidSet m_sDarkfallenCreaturesLowerGuids;
         GuidSet m_sDarkfallenCreaturesLeftGuids;
         GuidSet m_sDarkfallenCreaturesRightGuids;
+        GuidSet m_rimefangTrashGuids;
+        GuidSet m_spinestalkerTrashGuids;
 };
 
 #endif

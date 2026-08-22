@@ -82,6 +82,7 @@ enum
     SPELL_GUNSHIP_ACHIEVEMENT       = 72959,
     SPELL_TELEPORT_PLAYERS_VICTORY  = 72340,
     SPELL_CHECK_FOR_PLAYERS         = 70332,                // check for aura 70120 or 70121 on player; if not found cast 67335
+    SPELL_COLDFLAME_JETS            = 70460,
 };
 
 static const DialogueEntry aCitadelDialogue[] =
@@ -120,6 +121,8 @@ static const DialogueEntry aCitadelDialogue[] =
 instance_icecrown_citadel::instance_icecrown_citadel(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aCitadelDialogue),
     m_uiTeam(0),
     m_uiPutricideValveTimer(0),
+    m_coldflameJetsState(NOT_STARTED),
+    m_sindragosaGauntletState(NOT_STARTED),
     m_bHasMarrowgarIntroYelled(false),
     m_bHasDeathwhisperIntroYelled(false),
     m_bHasRimefangLanded(false),
@@ -132,6 +135,10 @@ void instance_icecrown_citadel::Initialize()
 {
     InitializeDialogueHelper(this);
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    m_coldflameJetsState = NOT_STARTED;
+    m_sindragosaGauntletState = NOT_STARTED;
+    m_rimefangTrashGuids.clear();
+    m_spinestalkerTrashGuids.clear();
 
     for (bool& i : m_abAchievCriteria)
         i = false;
@@ -145,7 +152,7 @@ bool instance_icecrown_citadel::IsEncounterInProgress() const
             return true;
     }
 
-    return false;
+    return m_sindragosaGauntletState == IN_PROGRESS;
 }
 
 void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, Player* pPlayer)
@@ -172,25 +179,198 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
         }
         else
         {
-            if (!m_bHasRimefangLanded)
-            {
-                if (Creature* pRimefang = GetSingleCreatureFromStorage(NPC_RIMEFANG))
-                {
-                    pRimefang->AI()->AttackStart(pPlayer);
-                    m_bHasRimefangLanded = true;
-                }
-            }
-
-            if (!m_bHasSpinestalkerLanded)
-            {
-                if (Creature* pSpinestalker = GetSingleCreatureFromStorage(NPC_SPINESTALKER))
-                {
-                    pSpinestalker->AI()->AttackStart(pPlayer);
-                    m_bHasSpinestalkerLanded = true;
-                }
-            }
+            // The normal start signal is clearing each frostwyrm's own pack.
+            // Keep the platform trigger as a grid-load safety net only.
+            if (m_rimefangTrashGuids.empty())
+                StartSindragosaFrostwyrm(NPC_RIMEFANG, pPlayer);
+            if (m_spinestalkerTrashGuids.empty())
+                StartSindragosaFrostwyrm(NPC_SPINESTALKER, pPlayer);
         }
     }
+    else if (uiTriggerId == AT_SINDRAGOSA_GAUNTLET)
+    {
+        if (m_sindragosaGauntletState != NOT_STARTED)
+            return;
+
+        if (Creature* controller = GetSingleCreatureFromStorage(NPC_SINDRAGOSA_GAUNTLET))
+            controller->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, controller);
+    }
+    else if (uiTriggerId == AT_SAURFANG_PORTAL)
+    {
+        if (GetData(TYPE_DEATHBRINGER_SAURFANG) != DONE)
+            return;
+
+        float const destinationX = 4126.35f;
+        float const destinationY = 2769.23f;
+        float const destinationZ = 350.963f;
+        float const destinationO = 0.0f;
+
+        if (m_coldflameJetsState == NOT_STARTED)
+        {
+            // Trap AIs join the alternating schedule from the instance state.
+            // A one-time proximity scan here is unreliable in CMaNGOS because
+            // only the destination cell may be active while the player is
+            // being relocated; the other visible corridor emitters would
+            // then never receive an activation timer.
+            m_coldflameJetsState = IN_PROGRESS;
+        }
+
+        pPlayer->TeleportTo(instance->GetId(), destinationX, destinationY, destinationZ, destinationO);
+    }
+    else if (uiTriggerId == AT_SHUTDOWN_FROST_JETS)
+        SetData(DATA_COLDFLAME_JETS, DONE);
+}
+
+void instance_icecrown_citadel::StartSindragosaFrostwyrm(uint32 entry, Player* player)
+{
+    bool& landed = entry == NPC_RIMEFANG ? m_bHasRimefangLanded : m_bHasSpinestalkerLanded;
+    if (landed)
+        return;
+
+    if (!player)
+        player = GetPlayerInMap(true, false);
+
+    if (player)
+    {
+        if (Creature* frostwyrm = GetSingleCreatureFromStorage(entry))
+        {
+            frostwyrm->AI()->AttackStart(player);
+            landed = true;
+        }
+    }
+}
+
+struct ColdflameJetSchedule
+{
+    float x;
+    float y;
+    uint32 initialDelay;
+};
+
+// Retail trap placements ordered by distance from the Upper Spire teleporter.
+// TrinityCore and AzerothCore alternate the initial delay in this order. Keep
+// that cadence while allowing every CMaNGOS grid-loaded trap to initialize
+// itself instead of depending on one proximity collection.
+static ColdflameJetSchedule const aColdflameJetSchedules[] =
+{
+    {4135.747f, 2781.602f, 11000},
+    {4156.651f, 2781.518f,  1000},
+    {4160.112f, 2788.294f, 11000},
+    {4159.713f, 2735.113f,  1000},
+    {4159.799f, 2804.188f, 11000},
+    {4183.785f, 2751.657f,  1000},
+    {4192.597f, 2733.280f, 11000},
+    {4201.849f, 2750.526f,  1000},
+    {4193.007f, 2829.084f, 11000},
+    {4225.138f, 2788.188f,  1000},
+    {4224.835f, 2735.236f, 11000},
+    {4224.706f, 2804.109f,  1000},
+};
+
+static uint32 GetColdflameJetInitialDelay(Creature* trap)
+{
+    float spawnX, spawnY, spawnZ;
+    trap->GetRespawnCoord(spawnX, spawnY, spawnZ);
+
+    float closestDistanceSq = 1000000.0f;
+    uint32 initialDelay = 11000;
+    for (ColdflameJetSchedule const& schedule : aColdflameJetSchedules)
+    {
+        float const deltaX = spawnX - schedule.x;
+        float const deltaY = spawnY - schedule.y;
+        float const distanceSq = deltaX * deltaX + deltaY * deltaY;
+        if (distanceSq < closestDistanceSq)
+        {
+            closestDistanceSq = distanceSq;
+            initialDelay = schedule.initialDelay;
+        }
+    }
+
+    return initialDelay;
+}
+
+// The corridor alternates two trap rows. Each loaded trap independently joins
+// the shared 22-second cycle with the reference 1- or 11-second initial offset.
+struct npc_frost_freeze_trapAI : public ScriptedAI
+{
+    npc_frost_freeze_trapAI(Creature* creature) : ScriptedAI(creature),
+        m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData())),
+        m_activationTimer(0), m_scheduleInitialized(false)
+    {
+        SetCombatMovement(false);
+        // Keep the whole short gauntlet updating once its grids are loaded.
+        // Otherwise the first emitter can remain the only repeating caster
+        // while the more distant trap grids unload behind the player.
+        m_creature->SetActiveObjectState(true);
+    }
+
+    instance_icecrown_citadel* m_instance;
+    uint32 m_activationTimer;
+    bool m_scheduleInitialized;
+
+    void Reset() override
+    {
+        m_activationTimer = 0;
+        m_scheduleInitialized = false;
+        RestoreSpawnFacing();
+    }
+
+    void RestoreSpawnFacing()
+    {
+        float spawnX, spawnY, spawnZ, spawnOrientation;
+        m_creature->GetRespawnCoord(spawnX, spawnY, spawnZ, &spawnOrientation);
+        m_creature->SetOrientation(spawnOrientation);
+        m_creature->SetFacingTo(spawnOrientation);
+    }
+
+    void UpdateAI(uint32 diff) override
+    {
+        // Match the passive TC/AC trap behavior without disabling combat on
+        // the caster. 70460 must be allowed to trigger hostile spell 70461.
+        if (m_creature->IsInCombat())
+        {
+            m_creature->CombatStop(false);
+            RestoreSpawnFacing();
+        }
+
+        uint32 const state = m_instance ? m_instance->GetData(DATA_COLDFLAME_JETS) : NOT_STARTED;
+        if (state != IN_PROGRESS)
+        {
+            if (m_scheduleInitialized)
+                m_creature->RemoveAurasDueToSpell(SPELL_COLDFLAME_JETS);
+            m_activationTimer = 0;
+            m_scheduleInitialized = false;
+            if (state == DONE)
+                m_creature->SetActiveObjectState(false);
+            return;
+        }
+
+        if (!m_scheduleInitialized)
+        {
+            m_activationTimer = GetColdflameJetInitialDelay(m_creature);
+            m_scheduleInitialized = true;
+        }
+
+        if (m_activationTimer > diff)
+        {
+            m_activationTimer -= diff;
+            return;
+        }
+
+        // 70461 is a narrow hostile cone periodically triggered by 70460.
+        // A hit may turn an otherwise passive trigger toward its victim in
+        // CMaNGOS, so restore the spawn facing before every activation.
+        RestoreSpawnFacing();
+        if (DoCastSpellIfCan(m_creature, SPELL_COLDFLAME_JETS) == CAST_OK)
+            m_activationTimer = 22000;
+        else
+            m_activationTimer = 1000;
+    }
+};
+
+UnitAI* GetAI_npc_frost_freeze_trap(Creature* creature)
+{
+    return new npc_frost_freeze_trapAI(creature);
 }
 
 void instance_icecrown_citadel::OnPlayerEnter(Player* pPlayer)
@@ -223,6 +403,13 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_TIRION_FORDRING:
         case NPC_RIMEFANG:
         case NPC_SPINESTALKER:
+        case NPC_CAPTAIN_ARNATH:
+        case NPC_CAPTAIN_BRANDON:
+        case NPC_CAPTAIN_GRONDEL:
+        case NPC_CAPTAIN_RUPERT:
+        case NPC_SISTER_SVALNA:
+        case NPC_CROK_SCOURGEBANE:
+        case NPC_SINDRAGOSA_GAUNTLET:
         case NPC_VALITHRIA_COMBAT_TRIGGER:
         case NPC_BLOOD_ORB_CONTROL:
         case NPC_PUTRICIDES_TRAP:
@@ -272,6 +459,17 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
                 m_leftScientistStalkerGuid = pCreature->GetObjectGuid();
             else
                 m_rightScientistStalkerGuid = pCreature->GetObjectGuid();
+            return;
+        case NPC_FROSTWING_WHELP:
+        {
+            float x, y, z;
+            pCreature->GetRespawnCoord(x, y, z);
+            if (y < 2484.35f)
+                m_rimefangTrashGuids.insert(pCreature->GetObjectGuid());
+            else
+                m_spinestalkerTrashGuids.insert(pCreature->GetObjectGuid());
+            return;
+        }
     }
 }
 
@@ -282,11 +480,15 @@ void instance_icecrown_citadel::OnCreatureRespawn(Creature* pCreature)
         // following have passive behavior movement
         case NPC_COLDFLAME:
         case NPC_DEATHWHISPER_SPAWN_STALKER:
-        case NPC_FROST_FREEZE_TRAP:
         case NPC_SKYBREAKER:
         case NPC_ORGRIMS_HAMMER:
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
+            break;
+        case NPC_FROST_FREEZE_TRAP:
+            // The reference trap is passive but still allowed to cast its
+            // hostile periodic damage trigger.
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
             break;
     }
 }
@@ -358,6 +560,15 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_VALITHRIA] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
+        case GO_SINDRAGOSA_ENTRANCE:
+            if (m_sindragosaGauntletState == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
+        case GO_SINDRAGOSA_SHORTCUT_ENTRANCE:
+        case GO_SINDRAGOSA_SHORTCUT_EXIT:
+            if (m_auiEncounter[TYPE_SINDRAGOSA] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
         case GO_SAURFANG_CACHE:
         case GO_SAURFANG_CACHE_25:
         case GO_SAURFANG_CACHE_10_H:
@@ -393,14 +604,11 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_ARTHAS_PRECIPICE:
         case GO_MARROWGAR_DOOR:
         case GO_BLOODPRINCE_DOOR:
-        case GO_SINDRAGOSA_ENTRANCE:
         case GO_VALITHRIA_DOOR_1:
         case GO_VALITHRIA_DOOR_2:
         case GO_VALITHRIA_DOOR_3:
         case GO_VALITHRIA_DOOR_4:
         case GO_ICECROWN_GRATE:
-        case GO_SINDRAGOSA_SHORTCUT_ENTRANCE:
-        case GO_SINDRAGOSA_SHORTCUT_EXIT:
         case GO_ORANGE_PLAGUE:
         case GO_GREEN_PLAGUE:
         case GO_ORANGE_VALVE:
@@ -547,6 +755,20 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
                         DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);
                 }
             }
+            break;
+        case NPC_SISTER_SVALNA:
+            SetData(TYPE_FROST_WING_ENTRANCE, DONE);
+            break;
+        case NPC_FROSTWING_WHELP:
+        {
+            GuidSet& pack = pCreature->GetRespawnPosition().GetPositionY() < 2484.35f ?
+                m_rimefangTrashGuids : m_spinestalkerTrashGuids;
+            pack.erase(pCreature->GetObjectGuid());
+            if (pack.empty())
+                StartSindragosaFrostwyrm(pCreature->GetRespawnPosition().GetPositionY() < 2484.35f ?
+                    NPC_RIMEFANG : NPC_SPINESTALKER);
+            break;
+        }
         case NPC_SPIRE_FROSTWYRM:
             SetData(TYPE_SPIRE_FROSTWYRM, DONE);
             break;
@@ -561,6 +783,24 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
 
 void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
 {
+    if (uiType == DATA_COLDFLAME_JETS)
+    {
+        m_coldflameJetsState = uiData;
+
+        if (uiData == DONE)
+        {
+            OUT_SAVE_INST_DATA;
+            std::ostringstream saveStream;
+            for (uint32 i = 0; i < MAX_ENCOUNTER; ++i)
+                saveStream << m_auiEncounter[i] << " ";
+            saveStream << m_coldflameJetsState;
+            m_strInstData = saveStream.str();
+            SaveToDB();
+            OUT_SAVE_INST_DATA_COMPLETE;
+        }
+        return;
+    }
+
     switch (uiType)
     {
         case TYPE_MARROWGAR:
@@ -913,6 +1153,19 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         case TYPE_SPIRE_FROSTWYRM:
             m_auiEncounter[uiType] = uiData;
             break;
+        case DATA_COLDFLAME_JETS:
+            m_coldflameJetsState = uiData;
+            break;
+        case DATA_SINDRAGOSA_GAUNTLET:
+            m_sindragosaGauntletState = uiData;
+            if (uiData == IN_PROGRESS)
+                DoUseDoorOrButton(GO_SINDRAGOSA_ENTRANCE);
+            else if (uiData == DONE || uiData == FAIL)
+            {
+                if (GameObject* door = GetSingleGameObjectFromStorage(GO_SINDRAGOSA_ENTRANCE))
+                    door->SetGoState(GO_STATE_ACTIVE);
+            }
+            break;
         default:
             script_error_log("Instance Icecrown Citadel: ERROR SetData = %u for type %u does not exist/not implemented.", uiType, uiData);
             return;
@@ -929,7 +1182,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                    << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                    << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
                    << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
-                   << m_auiEncounter[15];
+                   << m_auiEncounter[15] << " " << m_coldflameJetsState << " " << m_sindragosaGauntletState;
 
         m_strInstData = saveStream.str();
 
@@ -937,7 +1190,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         OUT_SAVE_INST_DATA_COMPLETE;
     }
 
-    if (uiData == FAIL || uiData == DONE) // this would need to be done in all dynamic difficulty instances but wotlk only really needs it in icc
+    if (uiType < MAX_ENCOUNTER && (uiData == FAIL || uiData == DONE)) // this would need to be done in all dynamic difficulty instances but wotlk only really needs it in icc
     {
         instance->SetNewDifficultyCooldown(instance->GetCurrentClockTime() + std::chrono::milliseconds(60000));
     }
@@ -978,8 +1231,16 @@ void instance_icecrown_citadel::JustDidDialogueStep(int32 iEntry)
 
 uint32 instance_icecrown_citadel::GetData(uint32 uiType) const
 {
+    if (uiType == DATA_COLDFLAME_JETS)
+        return m_coldflameJetsState;
+
     if (uiType < MAX_ENCOUNTER)
         return m_auiEncounter[uiType];
+
+    if (uiType == DATA_COLDFLAME_JETS)
+        return m_coldflameJetsState;
+    if (uiType == DATA_SINDRAGOSA_GAUNTLET)
+        return m_sindragosaGauntletState;
 
     return 0;
 }
@@ -1046,11 +1307,27 @@ void instance_icecrown_citadel::Load(const char* strIn)
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
                >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiEncounter[15];
 
+    if (!(loadStream >> m_coldflameJetsState))
+        m_coldflameJetsState = NOT_STARTED;
+
+    // Only completed jet progression survives an instance reload; an active
+    // alternating sequence must restart cleanly after a server restart.
+    if (m_coldflameJetsState != DONE)
+        m_coldflameJetsState = NOT_STARTED;
+
+    if (!(loadStream >> m_sindragosaGauntletState))
+        m_sindragosaGauntletState = NOT_STARTED;
+
     for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;
     }
+
+    if (m_coldflameJetsState == IN_PROGRESS)
+        m_coldflameJetsState = NOT_STARTED;
+    if (m_sindragosaGauntletState == IN_PROGRESS)
+        m_sindragosaGauntletState = NOT_STARTED;
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
@@ -1164,13 +1441,25 @@ InstanceData* GetInstanceData_instance_icecrown_citadel(Map* pMap)
 
 bool AreaTrigger_at_icecrown_citadel(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
+    if (pAt->id == AT_SAURFANG_PORTAL || pAt->id == AT_SHUTDOWN_FROST_JETS)
+    {
+        if (pPlayer->IsDead())
+            return false;
+
+        if (instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData()))
+            instance->DoHandleCitadelAreaTrigger(pAt->id, pPlayer);
+
+        return true;
+    }
+
     if (pAt->id == AT_MARROWGAR_INTRO || pAt->id == AT_DEATHWHISPER_INTRO ||
-            pAt->id == AT_SINDRAGOSA_PLATFORM)
+            pAt->id == AT_SINDRAGOSA_PLATFORM || pAt->id == AT_SINDRAGOSA_GAUNTLET ||
+            pAt->id == AT_SAURFANG_PORTAL || pAt->id == AT_SHUTDOWN_FROST_JETS)
     {
         if (pPlayer->IsGameMaster() || pPlayer->IsDead())
             return false;
 
-        if (instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pPlayer->GetInstanceData())
+        if (instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData()))
             pInstance->DoHandleCitadelAreaTrigger(pAt->id, pPlayer);
     }
 
@@ -1203,6 +1492,11 @@ void AddSC_instance_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "at_icecrown_citadel";
     pNewScript->pAreaTrigger = &AreaTrigger_at_icecrown_citadel;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_frost_freeze_trap";
+    pNewScript->GetAI = &GetAI_npc_frost_freeze_trap;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
