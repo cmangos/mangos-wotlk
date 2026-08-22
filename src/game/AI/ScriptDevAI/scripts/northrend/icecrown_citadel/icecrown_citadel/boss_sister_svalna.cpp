@@ -8,14 +8,14 @@
 
 enum
 {
-    SAY_CROK_INTRO_1       = -1631130,
-    SAY_ARNATH_INTRO_2     = -1631131,
-    SAY_CROK_INTRO_3       = -1631132,
-    SAY_SVALNA_EVENT_START = -1631133,
-    SAY_SVALNA_RESURRECT   = -1631135,
-    SAY_SVALNA_AGGRO       = -1631136,
-    SAY_SVALNA_KILL_PLAYER = -1631138,
-    SAY_SVALNA_DEATH       = -1631139,
+    SAY_CROK_INTRO_1       = 36945,
+    SAY_ARNATH_INTRO_2     = 36948,
+    SAY_CROK_INTRO_3       = 36946,
+    SAY_SVALNA_EVENT_START = 37024,
+    SAY_SVALNA_RESURRECT   = 37020,
+    SAY_SVALNA_AGGRO       = 37653,
+    SAY_SVALNA_KILL_PLAYER = 37654,
+    SAY_SVALNA_DEATH       = 37135,
 
     SPELL_SCOURGE_STRIKE   = 71488,
     SPELL_DEATH_STRIKE     = 71489,
@@ -63,11 +63,11 @@ struct boss_sister_svalnaAI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_A && !m_eventStarted)
         {
             m_eventStarted = true;
-            DoScriptText(SAY_SVALNA_EVENT_START, m_creature);
+            DoBroadcastText(SAY_SVALNA_EVENT_START, m_creature);
         }
         else if (eventType == AI_EVENT_CUSTOM_B && !m_landed)
         {
-            DoScriptText(SAY_SVALNA_RESURRECT, m_creature);
+            DoBroadcastText(SAY_SVALNA_RESURRECT, m_creature);
             DoCastSpellIfCan(m_creature, SPELL_REVIVE_CHAMPION);
             m_creature->SetLevitate(true);
             m_creature->GetMotionMaster()->MovePoint(POINT_SVALNA_LAND, 4356.88f, 2512.40f, 358.436f);
@@ -96,19 +96,19 @@ struct boss_sister_svalnaAI : public ScriptedAI
         m_creature->SetLevitate(false);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         SetCombatMovement(true);
-        DoScriptText(SAY_SVALNA_AGGRO, m_creature);
+        DoBroadcastText(SAY_SVALNA_AGGRO, m_creature);
         m_creature->SetInCombatWithZone();
     }
 
     void KilledUnit(Unit* victim) override
     {
         if (victim->GetTypeId() == TYPEID_PLAYER)
-            DoScriptText(SAY_SVALNA_KILL_PLAYER, m_creature);
+            DoBroadcastText(SAY_SVALNA_KILL_PLAYER, m_creature);
     }
 
     void JustDied(Unit*) override
     {
-        DoScriptText(SAY_SVALNA_DEATH, m_creature);
+        DoBroadcastText(SAY_SVALNA_DEATH, m_creature);
     }
 
     void JustReachedHome() override
@@ -193,7 +193,7 @@ struct npc_crok_scourgebaneAI : public npc_escortAI
         m_started = true;
         m_introStep = 1;
         m_introTimer = 7000;
-        DoScriptText(SAY_CROK_INTRO_1, m_creature);
+        DoBroadcastText(SAY_CROK_INTRO_1, m_creature);
 
         if (Creature* svalna = m_instance->GetSingleCreatureFromStorage(NPC_SISTER_SVALNA))
             svalna->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, svalna);
@@ -277,12 +277,12 @@ struct npc_crok_scourgebaneAI : public npc_escortAI
                 if (m_introStep == 2)
                 {
                     if (Creature* arnath = m_instance->GetSingleCreatureFromStorage(NPC_CAPTAIN_ARNATH))
-                        DoScriptText(SAY_ARNATH_INTRO_2, arnath);
+                        DoBroadcastText(SAY_ARNATH_INTRO_2, arnath);
                     m_introTimer = 7000;
                 }
                 else if (m_introStep == 3)
                 {
-                    DoScriptText(SAY_CROK_INTRO_3, m_creature);
+                    DoBroadcastText(SAY_CROK_INTRO_3, m_creature);
                     m_introTimer = 21000;
                 }
                 else
