@@ -26,17 +26,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1631121,
-    SAY_BITE_1                  = -1631122,
-    SAY_BITE_2                  = -1631123,
-    SAY_SHADOWS                 = -1631124,
-    SAY_PACT                    = -1631125,
-    SAY_MC                      = -1631126,
-    SAY_AIR_PHASE               = -1631127,
-    SAY_BERSERK                 = -1631128,
-    SAY_DEATH                   = -1631129,
-    SAY_SLAY_1                  = -1631195,
-    SAY_SLAY_2                  = -1631196,
+    SAY_AGGRO                   = 38048,
+    SAY_BITE_1                  = 38053,
+    SAY_BITE_2                  = 38058,
+    SAY_SHADOWS                 = 38061,
+    SAY_PACT                    = 38062,
+    SAY_AIR_PHASE               = 38063,
+    SAY_BERSERK                 = 38068,
+    SAY_DEATH                   = 38069,
+    SAY_SLAY_1                  = 38066,
+    SAY_SLAY_2                  = 38067,
 
     // all phases
     SPELL_BERSERK                   = 26662,
@@ -200,12 +199,12 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_SHROUD_OF_SORROW, CAST_TRIGGERED);
         RemoveEncounterAuras();
 
@@ -220,7 +219,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
         RemoveEncounterAuras();
 
         if (m_pInstance)
@@ -265,7 +264,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BLOODBOLT_WHIRL) == CAST_OK)
             {
-                DoScriptText(SAY_AIR_PHASE, m_creature);
+                DoBroadcastText(SAY_AIR_PHASE, m_creature);
                 m_uiPhase      = PHASE_AIR;
                 m_uiPhaseTimer = 7000;
             }
@@ -283,7 +282,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
+                    DoBroadcastText(SAY_BERSERK, m_creature);
                     m_uiEnrageTimer = 0;
                 }
             }
@@ -320,7 +319,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                         if (target && DoCastSpellIfCan(target, 71726) == CAST_OK)
                         {
                             target->CastSpell(target, GetEssenceSpell(target), TRIGGERED_OLD_TRIGGERED);
-                            DoScriptText(urand(0, 1) ? SAY_BITE_1 : SAY_BITE_2, m_creature);
+                            DoBroadcastText(urand(0, 1) ? SAY_BITE_1 : SAY_BITE_2, m_creature);
                             m_uiVampiricBiteTimer = 0;
                         }
                     }
@@ -378,7 +377,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                             m_creature->CastSpell(targets[index], 71340, TRIGGERED_OLD_TRIGGERED);
                             targets.erase(targets.begin() + index);
                         }
-                        DoScriptText(SAY_PACT, m_creature);
+                        DoBroadcastText(SAY_PACT, m_creature);
                     }
                     m_uiPactDarkfallenTimer = 30500;
                 }
@@ -389,7 +388,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SWARMING_SHADOWS) == CAST_OK)
                     {
-                        DoScriptText(SAY_SHADOWS, m_creature);
+                        DoBroadcastText(SAY_SHADOWS, m_creature);
                         m_uiSwarmingShadowsTimer = urand(30000, 35000);
                     }
                 }
