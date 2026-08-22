@@ -90,7 +90,8 @@ static const uint32 aRightSummonedCultists[3] = {NPC_CULT_FANATIC, NPC_CULT_ADHE
 
 struct boss_lady_deathwhisperAI : public CombatAI
 {
-    boss_lady_deathwhisperAI(Creature* creature) : CombatAI(creature, DEATHWHISPER_ACTION_MAX), m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData()))
+    boss_lady_deathwhisperAI(Creature* creature) : CombatAI(creature, DEATHWHISPER_ACTION_MAX), m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData())),
+        m_bIsHeroicMode(false), m_bIsLeftSideSummon(false), m_bIsPhaseOne(true), m_uiMindControlCount(0)
     {
         // Set the max allowed mind control targets
         if (m_instance)
@@ -106,7 +107,10 @@ struct boss_lady_deathwhisperAI : public CombatAI
         // common actions
         AddCombatAction(DEATHWHISPER_BERSRK, uint32(10 * MINUTE * IN_MILLISECONDS));
         AddCombatAction(DEATHWHISPER_DEATH_AND_DECAY, 20000u);
-        AddCombatAction(DEATHWHISPER_DOMINATE_MIND, 30000u);
+        if (m_uiMindControlCount)
+            AddCombatAction(DEATHWHISPER_DOMINATE_MIND, 30000u);
+        else
+            AddCombatAction(DEATHWHISPER_DOMINATE_MIND, true);
 
         // phase 1 actions
         AddCombatAction(DEATHWHISPER_SHADOW_BOLT, 0u);
@@ -146,6 +150,14 @@ struct boss_lady_deathwhisperAI : public CombatAI
 
         m_bIsPhaseOne = true;
         m_bIsLeftSideSummon = roll_chance_i(50);
+        m_lCultistSpawnedGuidList.clear();
+        m_vRightStalkersGuidVector.clear();
+        m_vLeftStalkersGuidVector.clear();
+        m_middleStalkerGuid.Clear();
+
+        // Heroic Deathwhisper only becomes taunt immune in phase two.
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, false);
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, false);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -222,6 +234,10 @@ struct boss_lady_deathwhisperAI : public CombatAI
     // Wrapper to help sort the summoning stalkers
     void DoSortSummoningStalkers(GuidList& lDeathwhisperStalkers)
     {
+        m_vLeftStalkersGuidVector.clear();
+        m_vRightStalkersGuidVector.clear();
+        m_middleStalkerGuid.Clear();
+
         CreatureList lRightStalkers;
         CreatureList lLeftStalkers;
 
@@ -295,19 +311,34 @@ struct boss_lady_deathwhisperAI : public CombatAI
             return;
         }
 
-        // On 25 man mode we need to summon on all points
+        // On 25 player phase one we summon from both sides and the upper point.
+        // Heroic phase two keeps add waves, but only summons three from one side.
         if (m_instance->Is25ManDifficulty())
         {
-            for (uint8 i = 0; i < 3; ++i)
+            if (m_bIsHeroicMode && !m_bIsPhaseOne)
             {
-                if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_vLeftStalkersGuidVector[i]))
-                    m_creature->SummonCreature(aLeftSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-                if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_vRightStalkersGuidVector[i]))
-                    m_creature->SummonCreature(aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                GuidVector const& stalkers = m_bIsLeftSideSummon ? m_vLeftStalkersGuidVector : m_vRightStalkersGuidVector;
+                uint32 const* entries = m_bIsLeftSideSummon ? aLeftSummonedCultists : aRightSummonedCultists;
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    if (Creature* pStalker = m_creature->GetMap()->GetCreature(stalkers[i]))
+                        m_creature->SummonCreature(entries[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                }
+                m_bIsLeftSideSummon = !m_bIsLeftSideSummon;
             }
+            else
+            {
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_vLeftStalkersGuidVector[i]))
+                        m_creature->SummonCreature(aLeftSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                    if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_vRightStalkersGuidVector[i]))
+                        m_creature->SummonCreature(aRightSummonedCultists[i], pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                }
 
-            if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_middleStalkerGuid))
-                m_creature->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
+                if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_middleStalkerGuid))
+                    m_creature->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
+            }
         }
         // On 10 man mode we summon on the left or on the right
         else
@@ -356,6 +387,12 @@ struct boss_lady_deathwhisperAI : public CombatAI
         ResetCombatAction(DEATHWHISPER_SUMMON_SPIRIT, 20000);
 
         m_bIsPhaseOne = false;
+
+        if (m_bIsHeroicMode)
+        {
+            m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
+            m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
+        }
     }
 
     void ExecuteAction(uint32 action) override
@@ -448,12 +485,33 @@ struct boss_lady_deathwhisperAI : public CombatAI
                     ResetCombatAction(action, 20000);
                 break;
             case DEATHWHISPER_SUMMON_SPIRIT:
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            {
+                uint8 shadeCount = 1;
+                if (m_instance && m_instance->Is25ManDifficulty())
+                    shadeCount = m_bIsHeroicMode ? 3 : 2;
+
+                std::vector<Player*> targets;
+                Map::PlayerList const& players = m_creature->GetMap()->GetPlayers();
+                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
                 {
-                    if (DoCastSpellIfCan(target, SPELL_SUMMON_SPIRIT) == CAST_OK)
-                        ResetCombatAction(action, 10000);
+                    Player* player = itr->getSource();
+                    if (!player || !player->IsAlive() || player->IsGameMaster() ||
+                        !m_creature->IsWithinDistInMap(player, 150.0f) || player == m_creature->GetVictim())
+                        continue;
+
+                    targets.push_back(player);
                 }
+
+                for (uint8 i = 0; i < shadeCount && !targets.empty(); ++i)
+                {
+                    uint32 index = urand(0, targets.size() - 1);
+                    DoCastSpellIfCan(targets[index], SPELL_SUMMON_SPIRIT, CAST_TRIGGERED);
+                    targets.erase(targets.begin() + index);
+                }
+
+                ResetCombatAction(action, 12000);
                 break;
+            }
         }
     }
 };
