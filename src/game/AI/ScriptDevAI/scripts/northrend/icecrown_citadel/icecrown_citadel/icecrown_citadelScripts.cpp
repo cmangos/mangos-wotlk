@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/BaseAI/GameObjectAI.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
@@ -234,29 +235,161 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
 ## at_rampart_skull
 #####*/
 
-static const float aFrostwyrmAllySpawnLocs[3] = { -326.5525f, 2236.194f, 328.9574f };
-static const float aFrostwyrmHordeSpawnLocs[3] = { -317.854f ,2190.76f ,328.711f };
-
-bool AreaTrigger_at_rampart_skull(Player* pPlayer, AreaTriggerEntry const* pAt)
+enum SpireFrostwyrmData
 {
-    if (pPlayer->IsGameMaster() || pPlayer->IsDead())
+    SPELL_SPIRE_ENRAGE                 = 47008,
+
+    SPELL_LIST_SPIRE                   = 3723001,
+
+    BROADCAST_SPIRE_FROSTWYRM          = 37161,
+
+    POINT_SPIRE_FROSTWYRM_APPROACH     = 1,
+    POINT_SPIRE_FROSTWYRM_LAND         = 2,
+
+    ACTION_SPIRE_ENRAGE                = 0,
+    ACTION_SPIRE_MAX,
+};
+
+static const Position aFrostwyrmAllyApproachLoc(-423.2222f, 2341.465f, 202.5808f, 2.543328f);
+static const Position aFrostwyrmHordeApproachLoc(-437.643f, 2078.05f, 197.009f, 3.825093f);
+static const Position aFrostwyrmAllyLandingLoc(-433.589508f, 2344.564697f, 191.253616f, 2.543328f);
+static const Position aFrostwyrmHordeLandingLoc(-433.667084f, 2080.347412f, 191.253860f, 3.825093f);
+
+struct npc_spire_frostwyrm_iccAI : public CombatAI
+{
+    npc_spire_frostwyrm_iccAI(Creature* creature) : CombatAI(creature, ACTION_SPIRE_MAX),
+        m_landing(false), m_hordeSide(false)
+    {
+        AddTimerlessCombatAction(ACTION_SPIRE_ENRAGE, true);
+        Reset();
+    }
+
+    bool m_landing;
+    bool m_hordeSide;
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetCombatScriptStatus(m_landing);
+        m_creature->SetSpellList(SPELL_LIST_SPIRE);
+
+        if (!m_landing && m_creature->GetPositionZ() < 200.0f)
+        {
+            SetCombatMovement(true);
+            m_creature->SetCanEnterCombat(true);
+            m_creature->SetAnimTier(AnimTier::Ground);
+            m_creature->SetLevitate(false);
+            m_creature->SetWalk(false);
+            m_creature->SetActiveObjectState(false);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (!m_landing)
+            CombatAI::EnterEvadeMode();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
+    {
+        if (eventType != AI_EVENT_CUSTOM_A || m_landing)
+            return;
+
+        m_hordeSide = miscValue == AT_RAMPART_HORDE || miscValue == AT_RAMPART_HORDE_2;
+        m_landing = true;
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+        m_creature->SetCanEnterCombat(false);
+        m_creature->SetActiveObjectState(true);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
+        m_creature->SetAnimTier(AnimTier::Fly);
+        m_creature->SetLevitate(true);
+        m_creature->SetWalk(false);
+
+        Position const& landing = m_hordeSide ? aFrostwyrmHordeLandingLoc : aFrostwyrmAllyLandingLoc;
+        Position const& approach = m_hordeSide ? aFrostwyrmHordeApproachLoc : aFrostwyrmAllyApproachLoc;
+        m_creature->SetRespawnCoord(landing.x, landing.y, landing.z, landing.o);
+        m_creature->GetMotionMaster()->Clear();
+        m_creature->GetMotionMaster()->MovePoint(POINT_SPIRE_FROSTWYRM_APPROACH, approach,
+            FORCED_MOVEMENT_FLIGHT, 18.0f, false);
+        DoBroadcastText(BROADCAST_SPIRE_FROSTWYRM, m_creature, nullptr, CHAT_TYPE_BOSS_EMOTE);
+    }
+
+    void MovementInform(uint32 movementType, uint32 pointId) override
+    {
+        if (movementType != POINT_MOTION_TYPE || !m_landing)
+            return;
+
+        Position const& landing = m_hordeSide ? aFrostwyrmHordeLandingLoc : aFrostwyrmAllyLandingLoc;
+        if (pointId == POINT_SPIRE_FROSTWYRM_APPROACH)
+        {
+            m_creature->GetMotionMaster()->MovePoint(POINT_SPIRE_FROSTWYRM_LAND, landing,
+                FORCED_MOVEMENT_FLIGHT, 8.5f, false, ObjectGuid(), 0, AnimTier::Fly);
+        }
+        else if (pointId == POINT_SPIRE_FROSTWYRM_LAND)
+        {
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetFacingTo(landing.o);
+            m_landing = false;
+            SetCombatScriptStatus(false);
+            SetCombatMovement(true);
+            m_creature->SetAnimTier(AnimTier::Ground);
+            m_creature->SetLevitate(false);
+            m_creature->SetActiveObjectState(false);
+            m_creature->SetCanEnterCombat(true);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
+            m_creature->SetInCombatWithZone();
+            m_creature->AI()->AttackClosestEnemy();
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == ACTION_SPIRE_ENRAGE && m_creature->GetHealthPercent() <= 10.0f)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_SPIRE_ENRAGE) == CAST_OK)
+                SetActionReadyStatus(action, false);
+        }
+    }
+
+};
+
+bool AreaTrigger_at_rampart_skull(Player* player, AreaTriggerEntry const* areaTrigger)
+{
+    if (player->IsGameMaster() || player->IsDead())
         return false;
 
-    instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData());
-    if (!pInstance)
+    instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(player->GetInstanceData());
+    if (!instance)
         return false;
 
-    if (pInstance->GetData(TYPE_LADY_DEATHWHISPER) != DONE || pInstance->GetData(TYPE_SPIRE_FROSTWYRM) == DONE)
+    if (instance->GetData(TYPE_LADY_DEATHWHISPER) != DONE || instance->GetData(TYPE_SPIRE_FROSTWYRM) == DONE)
         return false;
 
-    if (pInstance->GetSingleCreatureFromStorage(NPC_SPIRE_FROSTWYRM))
+    if (Creature* frostwyrm = instance->GetSingleCreatureFromStorage(NPC_SPIRE_FROSTWYRM))
+    {
+        if (frostwyrm->IsAlive())
+            return false;
+    }
+
+    bool const validTrigger =
+        ((areaTrigger->id == AT_RAMPART_ALLIANCE || areaTrigger->id == AT_RAMPART_ALLIANCE_2) && instance->GetPlayerTeam() == ALLIANCE) ||
+        ((areaTrigger->id == AT_RAMPART_HORDE || areaTrigger->id == AT_RAMPART_HORDE_2) && instance->GetPlayerTeam() == HORDE);
+    if (!validTrigger)
         return false;
 
-    // spawn a Spire Frostwyrm based on the team faction
-    if (pAt->id == AT_RAMPART_ALLIANCE && pInstance->GetPlayerTeam() == ALLIANCE)
-        pPlayer->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmAllySpawnLocs[0], aFrostwyrmAllySpawnLocs[1], aFrostwyrmAllySpawnLocs[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 0);
-    else if (pAt->id == AT_RAMPART_HORDE && pInstance->GetPlayerTeam() == HORDE)
-        pPlayer->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmHordeSpawnLocs[0], aFrostwyrmHordeSpawnLocs[1], aFrostwyrmHordeSpawnLocs[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 1);
+    SpawnGroup* spawnGroup = player->GetMap()->GetSpawnManager().GetSpawnGroup("ICC_SPIRE_FROSTWYRM");
+    if (spawnGroup)
+        spawnGroup->Spawn(true, false);
+
+    const std::vector<Creature*>* frostwyrms = player->GetMap()->GetCreatures("ICC_SPIRE_FROSTWYRM");
+    if (frostwyrms && !frostwyrms->empty())
+    {
+        Creature* frostwyrm = frostwyrms->front();
+        instance->SetData(TYPE_SPIRE_FROSTWYRM, IN_PROGRESS);
+        frostwyrm->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, player, frostwyrm, areaTrigger->id);
+    }
 
     return false;
 }
@@ -502,6 +635,11 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "at_rampart_skull";
     pNewScript->pAreaTrigger = &AreaTrigger_at_rampart_skull;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_spire_frostwyrm_icc";
+    pNewScript->GetAI = &GetNewAIInstance<npc_spire_frostwyrm_iccAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
