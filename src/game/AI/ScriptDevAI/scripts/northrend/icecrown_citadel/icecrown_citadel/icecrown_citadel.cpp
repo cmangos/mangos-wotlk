@@ -240,14 +240,11 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_THE_DAMNED:
-            // Only the pair immediately in front of Light's Hammer gates the
-            // prologue; later patrols with the same entry must not count.
-            if (pCreature->GetPositionX() > -142.0f && pCreature->GetPositionX() < -138.0f &&
-                    pCreature->GetPositionY() > 2204.0f && pCreature->GetPositionY() < 2219.0f)
+            if (pCreature->HasStringId("ICC_LIGHTS_HAMMER_DAMNED"))
                 m_lightsHammerDamnedGuids.insert(pCreature->GetObjectGuid());
             break;
         case NPC_SPIRE_FROSTWYRM:
-            if (pCreature->IsTemporarySummon())
+            if (pCreature->HasStringId("ICC_SPIRE_FROSTWYRM"))
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:

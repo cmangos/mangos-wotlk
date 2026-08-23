@@ -250,8 +250,6 @@ enum SpireFrostwyrmData
     ACTION_SPIRE_MAX,
 };
 
-static const Position aFrostwyrmAllySpawnLoc(-361.154358f, 2305.821289f, 244.771713f, 2.704335f);
-static const Position aFrostwyrmHordeSpawnLoc(-375.538879f, 2120.774658f, 242.256775f, 3.714352f);
 static const Position aFrostwyrmAllyApproachLoc(-423.2222f, 2341.465f, 202.5808f, 2.543328f);
 static const Position aFrostwyrmHordeApproachLoc(-437.643f, 2078.05f, 197.009f, 3.825093f);
 static const Position aFrostwyrmAllyLandingLoc(-433.589508f, 2344.564697f, 191.253616f, 2.543328f);
@@ -260,14 +258,12 @@ static const Position aFrostwyrmHordeLandingLoc(-433.667084f, 2080.347412f, 191.
 struct npc_spire_frostwyrm_iccAI : public CombatAI
 {
     npc_spire_frostwyrm_iccAI(Creature* creature) : CombatAI(creature, ACTION_SPIRE_MAX),
-        m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData())),
         m_landing(false), m_hordeSide(false)
     {
         AddTimerlessCombatAction(ACTION_SPIRE_ENRAGE, true);
         Reset();
     }
 
-    instance_icecrown_citadel* m_instance;
     bool m_landing;
     bool m_hordeSide;
 
@@ -276,7 +272,7 @@ struct npc_spire_frostwyrm_iccAI : public CombatAI
         CombatAI::Reset();
         m_creature->SetSpellList(SPELL_LIST_SPIRE);
 
-        if (!m_landing && m_creature->IsTemporarySummon() && m_creature->GetPositionZ() < 200.0f)
+        if (!m_landing && m_creature->GetPositionZ() < 200.0f)
         {
             SetCombatMovement(true);
             m_creature->SetCanEnterCombat(true);
@@ -315,7 +311,7 @@ struct npc_spire_frostwyrm_iccAI : public CombatAI
         m_creature->GetMotionMaster()->Clear();
         m_creature->GetMotionMaster()->MovePoint(POINT_SPIRE_FROSTWYRM_APPROACH, approach,
             FORCED_MOVEMENT_FLIGHT, 18.0f, false);
-        DoBroadcastText(BROADCAST_SPIRE_FROSTWYRM, m_creature);
+        DoBroadcastText(BROADCAST_SPIRE_FROSTWYRM, m_creature, nullptr, CHAT_TYPE_BOSS_EMOTE);
     }
 
     void MovementInform(uint32 movementType, uint32 pointId) override
@@ -361,11 +357,6 @@ struct npc_spire_frostwyrm_iccAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_npc_spire_frostwyrm_icc(Creature* creature)
-{
-    return new npc_spire_frostwyrm_iccAI(creature);
-}
-
 bool AreaTrigger_at_rampart_skull(Player* player, AreaTriggerEntry const* areaTrigger)
 {
     if (player->IsGameMaster() || player->IsDead())
@@ -384,19 +375,20 @@ bool AreaTrigger_at_rampart_skull(Player* player, AreaTriggerEntry const* areaTr
             return false;
     }
 
-    // spawn a Spire Frostwyrm based on the team faction
-    Creature* frostwyrm = nullptr;
-    if ((areaTrigger->id == AT_RAMPART_ALLIANCE || areaTrigger->id == AT_RAMPART_ALLIANCE_2) &&
-            instance->GetPlayerTeam() == ALLIANCE)
-        frostwyrm = player->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmAllySpawnLoc.x, aFrostwyrmAllySpawnLoc.y,
-            aFrostwyrmAllySpawnLoc.z, aFrostwyrmAllySpawnLoc.o, TEMPSPAWN_DEAD_DESPAWN, 0, true, true);
-    else if ((areaTrigger->id == AT_RAMPART_HORDE || areaTrigger->id == AT_RAMPART_HORDE_2) &&
-            instance->GetPlayerTeam() == HORDE)
-        frostwyrm = player->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmHordeSpawnLoc.x, aFrostwyrmHordeSpawnLoc.y,
-            aFrostwyrmHordeSpawnLoc.z, aFrostwyrmHordeSpawnLoc.o, TEMPSPAWN_DEAD_DESPAWN, 0, true, true);
+    bool const validTrigger =
+        ((areaTrigger->id == AT_RAMPART_ALLIANCE || areaTrigger->id == AT_RAMPART_ALLIANCE_2) && instance->GetPlayerTeam() == ALLIANCE) ||
+        ((areaTrigger->id == AT_RAMPART_HORDE || areaTrigger->id == AT_RAMPART_HORDE_2) && instance->GetPlayerTeam() == HORDE);
+    if (!validTrigger)
+        return false;
 
-    if (frostwyrm)
+    SpawnGroup* spawnGroup = player->GetMap()->GetSpawnManager().GetSpawnGroup("ICC_SPIRE_FROSTWYRM");
+    if (spawnGroup)
+        spawnGroup->Spawn(true, false);
+
+    const std::vector<Creature*>* frostwyrms = player->GetMap()->GetCreatures("ICC_SPIRE_FROSTWYRM");
+    if (frostwyrms && !frostwyrms->empty())
     {
+        Creature* frostwyrm = frostwyrms->front();
         instance->SetData(TYPE_SPIRE_FROSTWYRM, IN_PROGRESS);
         frostwyrm->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, player, frostwyrm, areaTrigger->id);
     }
@@ -649,7 +641,7 @@ void AddSC_icecrown_citadel()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_spire_frostwyrm_icc";
-    pNewScript->GetAI = &GetAI_npc_spire_frostwyrm_icc;
+    pNewScript->GetAI = &GetNewAIInstance<npc_spire_frostwyrm_iccAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
