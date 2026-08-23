@@ -119,8 +119,8 @@ void WorldSession::HandleLootOpcode(WorldPacket& recv_data)
         {
             if (Unit* unit = _player->GetMap()->GetUnit(lguid))
             {
-                float range = std::max(5.f, unit->GetCombatReach() + (4.f / 3.f) + _player->GetCombatReach());
-                if (range * range < _player->GetDistance(unit, true, DIST_CALC_NONE))
+                float range = std::max(5.f, unit->GetObjectBoundingRadius() + (4.f / 3.f) + _player->GetObjectBoundingRadius());
+                if (range > _player->GetDistance(unit, true, DIST_CALC_NONE))
                 {
                     _player->SendLootError(lguid, LOOT_ERROR_TOO_FAR);
                     return;
