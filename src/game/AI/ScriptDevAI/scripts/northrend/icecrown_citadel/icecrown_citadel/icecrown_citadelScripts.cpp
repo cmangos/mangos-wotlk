@@ -270,6 +270,7 @@ struct npc_spire_frostwyrm_iccAI : public CombatAI
     void Reset() override
     {
         CombatAI::Reset();
+        SetCombatScriptStatus(m_landing);
         m_creature->SetSpellList(SPELL_LIST_SPIRE);
 
         if (!m_landing && m_creature->GetPositionZ() < 200.0f)
@@ -297,6 +298,7 @@ struct npc_spire_frostwyrm_iccAI : public CombatAI
 
         m_hordeSide = miscValue == AT_RAMPART_HORDE || miscValue == AT_RAMPART_HORDE_2;
         m_landing = true;
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
         m_creature->SetCanEnterCombat(false);
         m_creature->SetActiveObjectState(true);
@@ -330,6 +332,7 @@ struct npc_spire_frostwyrm_iccAI : public CombatAI
             m_creature->GetMotionMaster()->MoveIdle();
             m_creature->SetFacingTo(landing.o);
             m_landing = false;
+            SetCombatScriptStatus(false);
             SetCombatMovement(true);
             m_creature->SetAnimTier(AnimTier::Ground);
             m_creature->SetLevitate(false);
@@ -350,11 +353,6 @@ struct npc_spire_frostwyrm_iccAI : public CombatAI
         }
     }
 
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_landing)
-            CombatAI::UpdateAI(diff);
-    }
 };
 
 bool AreaTrigger_at_rampart_skull(Player* player, AreaTriggerEntry const* areaTrigger)
