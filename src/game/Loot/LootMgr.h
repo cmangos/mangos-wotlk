@@ -39,7 +39,7 @@ struct LootItem;
 struct ItemPrototype;
 
 
-#define MAX_NR_LOOT_ITEMS 16
+#define MAX_LOOT_ITEMS 16
 // note: the client cannot show more than 16 items total
 
 enum PermissionTypes
