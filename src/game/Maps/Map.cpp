@@ -3570,6 +3570,8 @@ bool Map::IsDynguidForced() const
         case 533: // Naxxramas
         case 543: // Hellfire Ramparts
         case 603: // Ulduar
+        case 631: // Icecrown Citadel
+        case 724: // Ruby Sanctum
             return true;
         default: break;
     }
