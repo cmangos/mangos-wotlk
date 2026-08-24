@@ -107,6 +107,8 @@ enum
     NPC_PUDDLE_STALKER              = 37013,        // related to Festergut and Rotface
     NPC_RIMEFANG                    = 37533,
     NPC_SPINESTALKER                = 37534,
+    NPC_FROSTWARDEN_HANDLER         = 37531,
+    NPC_FROSTWING_WHELP             = 37532,
     NPC_OOZE_TENTACLE_STALKER       = 38308,        // accessories to Putricide
     NPC_SLIMY_TENTACLE_STALKER      = 38309,
 
@@ -118,12 +120,13 @@ enum
     NPC_EMPOWERING_ORB_STALKER      = 36934,
 
     // achievement types
-    MAX_SPECIAL_ACHIEV_CRITS        = 4,
+    MAX_SPECIAL_ACHIEV_CRITS        = 8,
 
     TYPE_ACHIEV_BONED               = 0,
     TYPE_ACHIEV_MADE_A_MESS         = 1,
     TYPE_ACHIEV_DANCES_OOZES        = 2,
     TYPE_ACHIEV_NAUSEA              = 3,
+    TYPE_ACHIEV_ALL_YOU_CAN_EAT     = 6,
 
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
