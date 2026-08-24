@@ -268,10 +268,11 @@ enum
 
     NPC_FLESH_EATING_INSECT         = 37782,
 
-    // NOTE: these numbers are quesswork
+    // The retail gauntlet advances after its one-minute insect phase. Keep
+    // the kill counter as an early-completion safeguard when the full swarm
+    // has already been cleared.
     MAX_INSECT_PER_ROUND            = 8,
     TOTAL_INSECTS_PER_EVENT         = 100,
-    PUTRICIDE_TRAP_DURATION         = MINUTE * IN_MILLISECONDS,
 };
 
 enum PutricideTrapActions
@@ -327,7 +328,7 @@ struct npc_putricides_trapAI : public CombatAI
     instance_icecrown_citadel* m_instance;
 
     uint8 m_insectCounter;
-    GuidList m_insectGuids;
+    GuidVector m_insectGuids;
 
     void Reset() override
     {
@@ -347,50 +348,31 @@ struct npc_putricides_trapAI : public CombatAI
             return;
 
         m_insectCounter = 0;
-        ResetTimer(PUTRICIDE_TRAP_SUMMON, 1000);
-        ResetTimer(PUTRICIDE_TRAP_FINISH, PUTRICIDE_TRAP_DURATION);
+        ResetTimer(PUTRICIDE_TRAP_SUMMON, 1s);
+        ResetTimer(PUTRICIDE_TRAP_FINISH, 1min);
     }
 
     void StopSwarm()
     {
-        m_creature->RemoveAurasDueToSpell(SPELL_GIANT_INSECT_SWARM);
+        m_creature->RemoveAllAuras();
         m_creature->RemoveAllDynObjects();
         m_creature->CombatStop(true);
         m_creature->DeleteThreatList();
-
-        GuidList insectGuids = m_insectGuids;
-        m_insectGuids.clear();
-        for (ObjectGuid const& guid : insectGuids)
-        {
-            if (Creature* insect = m_creature->GetMap()->GetCreature(guid))
-            {
-                insect->CombatStop(true);
-                insect->DeleteThreatList();
-                insect->ForcedDespawn();
-            }
-        }
-
-        // Recover summons whose GUID bookkeeping was lost across a reset or
-        // unload.  Keep this local to the gauntlet so unrelated ICC insects
-        // are never affected.
-        std::list<Creature*> insects;
-        GetCreatureListWithEntryInGrid(insects, m_creature, NPC_FLESH_EATING_INSECT, 120.0f);
-        for (Creature* insect : insects)
-        {
-            insect->CombatStop(true);
-            insect->DeleteThreatList();
-            insect->ForcedDespawn();
-        }
+        DespawnGuids(m_insectGuids);
     }
 
     void FinishEvent(EncounterState state)
     {
         DisableTimer(PUTRICIDE_TRAP_SUMMON);
         DisableTimer(PUTRICIDE_TRAP_FINISH);
-        StopSwarm();
 
         if (m_instance)
             m_instance->SetData(TYPE_PLAGUE_WING_ENTRANCE, state);
+
+        // Finalize the event before despawning its summons. ForcedDespawn can
+        // notify SummonedCreatureJustDied, which must not count cleanup as an
+        // event kill and re-enter FinishEvent while the GUID list is cleared.
+        StopSwarm();
     }
 
     void JustSummoned(Creature* summoned) override
@@ -398,21 +380,17 @@ struct npc_putricides_trapAI : public CombatAI
         if (summoned->GetEntry() == NPC_FLESH_EATING_INSECT)
         {
             m_insectGuids.push_back(summoned->GetObjectGuid());
-            float x, y, z;
-            summoned->GetPosition(x, y, z);
-            summoned->UpdateAllowedPositionZ(x, y, z);
-            summoned->SetWalk(false);
-            summoned->SetLevitate(true);
-            summoned->GetMotionMaster()->MovePoint(1, x, y, z);
+            if (!summoned->GetMotionMaster()->MoveFall())
+                summoned->SetInCombatWithZone();
         }
     }
 
     void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 pointId) override
     {
-        if (motionType != POINT_MOTION_TYPE || !pointId)
+        if (motionType != FALL_MOTION_TYPE || pointId != EVENT_FALL)
             return;
 
-        summoned->SetLevitate(false);
+        summoned->SetInCombatWithZone();
     }
 
     void SummonedCreatureJustDied(Creature* summoned) override
@@ -422,7 +400,6 @@ struct npc_putricides_trapAI : public CombatAI
 
         if (summoned->GetEntry() == NPC_FLESH_EATING_INSECT)
         {
-            m_insectGuids.remove(summoned->GetObjectGuid());
             ++m_insectCounter;
             if (m_insectCounter >= TOTAL_INSECTS_PER_EVENT)
             {
@@ -430,12 +407,6 @@ struct npc_putricides_trapAI : public CombatAI
                 m_creature->ForcedDespawn();
             }
         }
-    }
-
-    void SummonedCreatureDespawn(Creature* summoned) override
-    {
-        if (summoned->GetEntry() == NPC_FLESH_EATING_INSECT)
-            m_insectGuids.remove(summoned->GetObjectGuid());
     }
 
     void SummonInsects()
@@ -451,7 +422,8 @@ struct npc_putricides_trapAI : public CombatAI
         for (uint8 i = 0; i < insectCount; ++i)
         {
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, x, y, z);
-            m_creature->SummonCreature(NPC_FLESH_EATING_INSECT, x, y, z + 20.0f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+            m_creature->SummonCreature(NPC_FLESH_EATING_INSECT, x, y, z + 20.0f, 0,
+                TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15s.count());
         }
 
         ResetTimer(PUTRICIDE_TRAP_SUMMON, urand(2000, 5000));
@@ -478,18 +450,6 @@ struct npc_putricides_trapAI : public CombatAI
 
         FinishEvent(eventFailed ? FAIL : DONE);
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_instance || m_instance->GetData(TYPE_PLAGUE_WING_ENTRANCE) != IN_PROGRESS)
-        {
-            if (m_creature->HasAura(SPELL_GIANT_INSECT_SWARM) || !m_insectGuids.empty())
-                StopSwarm();
-            return;
-        }
-
-        CombatAI::UpdateAI(diff);
-    }
 };
 
 UnitAI* GetAI_npc_putricides_trap(Creature* pCreature)
@@ -506,13 +466,15 @@ enum VengefulFleshreaperActions
     POINT_PIPE_JUMP = 3703801,
 };
 
+const std::string STRING_ID_PIPE_FLESHREAPER = "ICC_PLAGUEWORKS_PIPE_FLESHREAPER";
+
 // Pipe movement cannot build a generic chase path to players on the floor.
 // Combat spells are supplied by creature_spell_list; this AI only performs
 // the geometry-specific jump before normal combat begins.
 struct npc_icc_vengeful_fleshreaperAI : public CombatAI
 {
     npc_icc_vengeful_fleshreaperAI(Creature* creature) : CombatAI(creature, 0),
-        m_pipeSpawn(creature->GetRespawnPosition().z > 365.0f)
+        m_pipeSpawn(creature->HasStringId(STRING_ID_PIPE_FLESHREAPER))
     {
         Reset();
     }
@@ -524,6 +486,7 @@ struct npc_icc_vengeful_fleshreaperAI : public CombatAI
     void Reset() override
     {
         CombatAI::Reset();
+        SetCombatScriptStatus(false);
         m_jumping = false;
         m_jumpTargetGuid.Clear();
         m_creature->SetWalk(false);
@@ -544,20 +507,17 @@ struct npc_icc_vengeful_fleshreaperAI : public CombatAI
 
     void AttackStart(Unit* who) override
     {
-        if (!who)
-            return;
-
         CombatAI::AttackStart(who);
 
-        if (!m_pipeSpawn || m_jumping || m_creature->GetPositionZ() < 365.0f)
+        if (!m_pipeSpawn || m_jumping)
             return;
 
-        float angle = who->GetAngle(m_creature);
-        float x = who->GetPositionX() + std::cos(angle) * 3.0f;
-        float y = who->GetPositionY() + std::sin(angle) * 3.0f;
+        float x, y, z;
+        who->GetContactPoint(m_creature, x, y, z);
+        SetCombatScriptStatus(true);
         m_jumping = true;
         m_jumpTargetGuid = who->GetObjectGuid();
-        m_creature->GetMotionMaster()->MoveJump(x, y, who->GetPositionZ(), 10.0f, 6.0f, POINT_PIPE_JUMP);
+        m_creature->GetMotionMaster()->MoveJump(x, y, z, 10.0f, 6.0f, POINT_PIPE_JUMP);
     }
 
     void MovementInform(uint32 movementType, uint32 pointId) override
@@ -566,24 +526,15 @@ struct npc_icc_vengeful_fleshreaperAI : public CombatAI
             return;
 
         m_jumping = false;
+        SetCombatScriptStatus(false);
         if (Unit* target = m_creature->GetMap()->GetUnit(m_jumpTargetGuid))
         {
             if (target->IsAlive() && m_creature->CanAttack(target))
                 CombatAI::AttackStart(target);
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_jumping)
-            CombatAI::UpdateAI(diff);
+        m_jumpTargetGuid.Clear();
     }
 };
-
-UnitAI* GetAI_npc_icc_vengeful_fleshreaper(Creature* creature)
-{
-    return new npc_icc_vengeful_fleshreaperAI(creature);
-}
 
 struct LadyDeathwhisperElevator : public GameObjectAI, public TimerManager
 {
@@ -665,7 +616,7 @@ void AddSC_icecrown_citadel()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_icc_vengeful_fleshreaper";
-    pNewScript->GetAI = &GetAI_npc_icc_vengeful_fleshreaper;
+    pNewScript->GetAI = &GetNewAIInstance<npc_icc_vengeful_fleshreaperAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
