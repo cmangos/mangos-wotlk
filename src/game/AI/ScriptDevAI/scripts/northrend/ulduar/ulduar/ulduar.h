@@ -507,6 +507,10 @@ enum
     ACHIEV_CRIT_CONQ_HODIR      = 10719,
 
     TIMER_HODIRS_PROTECTIVE_GAZE = 0,
+
+    SAY_BRUNDIR_AGGRO                   = 34314,
+    SAY_MOLGEIM_AGGRO                   = 34328,
+    SAY_STEEL_AGGRO                     = 34321,
 };
 
 struct UlduarSpawn
@@ -610,6 +614,8 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
+        void CheckLastCouncilStanding(uint32 entry);
+
         void DoSpawnThorimNpcs(Player* pSummoner);
         void DoProcessShatteredEvent();
 
@@ -657,6 +663,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         uint32 m_uiStairsSpawnTimer;
         uint32 m_uiTramRotateTimer;
         uint8 m_uiSlayedArenaMobs;
+        uint32 m_ironCouncilBossesKilled;
 
         ObjectGuid m_leftKoloStalkerGuid;
         ObjectGuid m_rightKoloStalkerGuid;

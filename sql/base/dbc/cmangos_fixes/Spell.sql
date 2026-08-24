@@ -3848,7 +3848,7 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`
 ('64899','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Hodir'),
 ('64985','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Thorim'),
 ('65074','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Freya'),
-('65195','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Assembly of Iron'),
+('65195','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','The Iron Council credit marker'),
 ('65246','256','0','0','0','0','524288','0','0','3','1','0','0','0','1','Achievement check - Strand of the Ancients - Storm the Beach'),
 ('68184','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Faction Champions'),
 ('68523','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Trial of the Crusader - Not One, But Two Jormungars'),
