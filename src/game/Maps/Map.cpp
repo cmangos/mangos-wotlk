@@ -3569,6 +3569,7 @@ bool Map::IsDynguidForced() const
     {
         case 533: // Naxxramas
         case 543: // Hellfire Ramparts
+        case 603: // Ulduar
             return true;
         default: break;
     }
