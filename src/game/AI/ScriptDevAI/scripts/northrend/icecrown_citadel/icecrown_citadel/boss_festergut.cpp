@@ -36,7 +36,14 @@ enum
     SPELL_GASTRIC_EXPLOSION     = 72227,
     SPELL_GAS_SPORE             = 69278,            // should trigger 69291 on surviving targets
     SPELL_VILE_GAS              = 71307,            // triggers 69240
-    SPELL_INOCULATED            = 69291,
+    SPELL_BLIGHTED_SPORES_10_NORMAL = 69290,
+    SPELL_BLIGHTED_SPORES_25_NORMAL = 71222,
+    SPELL_BLIGHTED_SPORES_10_HEROIC = 73033,
+    SPELL_BLIGHTED_SPORES_25_HEROIC = 73034,
+    SPELL_INOCULATED_10_NORMAL  = 69291,
+    SPELL_INOCULATED_25_NORMAL  = 72101,
+    SPELL_INOCULATED_10_HEROIC  = 72102,
+    SPELL_INOCULATED_25_HEROIC  = 72103,
 
     // Blight spells
     SPELL_INHALE_BLIGHT         = 69165,
@@ -44,7 +51,10 @@ enum
     SPELL_INHALED_BLIGHT_25     = 71912,            // 25 man aura version
 
     // Pungent Blight
-    SPELL_PUNGENT_BLIGHT        = 69195,            // reset the gas cloud
+    SPELL_PUNGENT_BLIGHT_10_NORMAL = 69195,         // reset the gas cloud
+    SPELL_PUNGENT_BLIGHT_25_NORMAL = 71219,
+    SPELL_PUNGENT_BLIGHT_10_HEROIC = 73031,
+    SPELL_PUNGENT_BLIGHT_25_HEROIC = 73032,
 
     // Gaseous Blight
     SPELL_GASEOUS_BLIGHT_INIT   = 69125,            // initial spell cast by Putricide
@@ -101,22 +111,22 @@ struct boss_festergutAI : public CombatAI
 {
     boss_festergutAI(Creature* creature) : CombatAI(creature, FESTERGUT_ACTION_MAX),
         m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData())),
-        m_isHeroic(m_instance && m_instance->IsHeroicDifficulty())
+        m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddCombatAction(FESTERGUT_BERSERK, uint32(5 * MINUTE * IN_MILLISECONDS));
-        AddCombatAction(FESTERGUT_GASEOUS_BLIGHT, 9000u);
-        AddCombatAction(FESTERGUT_INHALE_BLIGHT, 34000u);
-        AddCombatAction(FESTERGUT_GAS_SPORE, 20000u);
-        AddCombatAction(FESTERGUT_VILE_GAS, 10000u);
-        if (m_isHeroic)
-            AddCombatAction(FESTERGUT_MALLEABLE_GOO, 15000u);
+        AddCombatAction(FESTERGUT_BERSERK, 5min);
+        AddCustomAction(FESTERGUT_GASEOUS_BLIGHT, 9s, [&]() { HandleGaseousBlight(); }, TIMER_COMBAT_COMBAT);
+        AddCombatAction(FESTERGUT_INHALE_BLIGHT, 34s);
+        AddCombatAction(FESTERGUT_GAS_SPORE, 20s);
+        AddCombatAction(FESTERGUT_VILE_GAS, 10s);
+        if (!m_inRegularMode)
+            AddCombatAction(FESTERGUT_MALLEABLE_GOO, 15s);
 
         AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         Reset();
     }
 
     instance_icecrown_citadel* m_instance;
-    bool m_isHeroic;
+    bool m_inRegularMode;
     uint8 m_gaseousBlightStage;
 
     void Reset() override
@@ -142,7 +152,7 @@ struct boss_festergutAI : public CombatAI
                 putricide->GetMotionMaster()->MovePoint(101, balconyLocation[0], balconyLocation[1], balconyLocation[2]);
 
                 // heroic aggro text
-                if (m_isHeroic && m_instance->GetData(TYPE_ROTFACE) == DONE)
+                if (!m_inRegularMode && m_instance->GetData(TYPE_ROTFACE) == DONE)
                     DoBroadcastText(SAY_PUTRICIDE_AGGRO, putricide);
             }
         }
@@ -215,12 +225,41 @@ struct boss_festergutAI : public CombatAI
             return;
 
         // Pungent Blight consumes every difficulty version of Inoculated.
-        if (spellInfo->Id == 69195 || spellInfo->Id == 71219 || spellInfo->Id == 73031 || spellInfo->Id == 73032)
+        if (spellInfo->Id == SPELL_PUNGENT_BLIGHT_10_NORMAL || spellInfo->Id == SPELL_PUNGENT_BLIGHT_25_NORMAL ||
+                spellInfo->Id == SPELL_PUNGENT_BLIGHT_10_HEROIC || spellInfo->Id == SPELL_PUNGENT_BLIGHT_25_HEROIC)
         {
-            target->RemoveAurasDueToSpell(69291);
-            target->RemoveAurasDueToSpell(72101);
-            target->RemoveAurasDueToSpell(72102);
-            target->RemoveAurasDueToSpell(72103);
+            target->RemoveAurasDueToSpell(SPELL_INOCULATED_10_NORMAL);
+            target->RemoveAurasDueToSpell(SPELL_INOCULATED_25_NORMAL);
+            target->RemoveAurasDueToSpell(SPELL_INOCULATED_10_HEROIC);
+            target->RemoveAurasDueToSpell(SPELL_INOCULATED_25_HEROIC);
+        }
+    }
+
+    void HandleGaseousBlight()
+    {
+        if (!m_instance)
+            return;
+
+        switch (m_gaseousBlightStage)
+        {
+            case 0:
+                if (Creature* professor = m_instance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
+                {
+                    professor->HandleEmote(EMOTE_ONESHOT_TALK_NOSHEATHE);
+                    professor->CastSpell(professor, SPELL_GASEOUS_BLIGHT_INIT, TRIGGERED_OLD_TRIGGERED);
+                    DoBroadcastText((m_instance->GetData(TYPE_ROTFACE) == DONE && !m_inRegularMode) ? SAY_BLIGHT_ROTFACE_DEAD : SAY_BLIGHT, professor);
+                }
+                ++m_gaseousBlightStage;
+                ResetTimer(FESTERGUT_GASEOUS_BLIGHT, 1s);
+                break;
+            case 1:
+                if (DoCastSpellIfCan(m_creature, SPELL_GASEOUS_BLIGHT_1) != CAST_OK)
+                {
+                    ResetTimer(FESTERGUT_GASEOUS_BLIGHT, 1s);
+                    return;
+                }
+                ++m_gaseousBlightStage;
+                break;
         }
     }
 
@@ -232,29 +271,6 @@ struct boss_festergutAI : public CombatAI
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                     DisableCombatAction(action);
                 break;
-            case FESTERGUT_GASEOUS_BLIGHT:
-                if (!m_instance)
-                    return;
-
-                // two stage event; first trigger all the puddle stalkers around then set the room in gas
-                switch (m_gaseousBlightStage)
-                {
-                    case 0:
-                        if (Creature* professor = m_instance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
-                        {
-                            professor->HandleEmote(EMOTE_ONESHOT_TALK_NOSHEATHE);
-                            professor->CastSpell(professor, SPELL_GASEOUS_BLIGHT_INIT, TRIGGERED_OLD_TRIGGERED);
-                            DoBroadcastText((m_instance->GetData(TYPE_ROTFACE) == DONE && m_isHeroic) ? SAY_BLIGHT_ROTFACE_DEAD : SAY_BLIGHT, professor);
-                        }
-                        ResetCombatAction(action, 1000);
-                        break;
-                    case 1:
-                        if (DoCastSpellIfCan(m_creature, SPELL_GASEOUS_BLIGHT_1) == CAST_OK)
-                            DisableCombatAction(action);
-                        break;
-                }
-                ++m_gaseousBlightStage;
-                break;
             case FESTERGUT_INHALE_BLIGHT:
             {
                 if (!m_instance)
@@ -265,36 +281,31 @@ struct boss_festergutAI : public CombatAI
                 // inhale the gas or, at three stacks, release it
                 if (holder && holder->GetStackAmount() >= 3)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_PUNGENT_BLIGHT) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature, SPELL_PUNGENT_BLIGHT_10_NORMAL) == CAST_OK)
                     {
                         DoBroadcastText(SAY_PUNGUENT_BLIGHT, m_creature);
-                        ResetCombatAction(action, 38000);
+                        ResetCombatAction(action, 38s);
                     }
                 }
                 else if (DoCastSpellIfCan(m_creature, SPELL_INHALE_BLIGHT) == CAST_OK)
-                    ResetCombatAction(action, 36000);
+                    ResetCombatAction(action, 36s);
                 break;
             }
             case FESTERGUT_GAS_SPORE:
-                if (DoCastSpellIfCan(m_creature, SPELL_GAS_SPORE) == CAST_OK)
-                    ResetCombatAction(action, 40000);
+                if (DoCastSpellIfCan(nullptr, SPELL_GAS_SPORE) == CAST_OK)
+                    ResetCombatAction(action, 40s);
                 break;
             case FESTERGUT_VILE_GAS:
-                if (DoCastSpellIfCan(m_creature, SPELL_VILE_GAS) == CAST_OK)
-                    ResetCombatAction(action, 30000);
+                if (DoCastSpellIfCan(nullptr, SPELL_VILE_GAS) == CAST_OK)
+                    ResetCombatAction(action, 30s);
                 break;
             case FESTERGUT_MALLEABLE_GOO:
-                if (DoCastSpellIfCan(m_creature, SPELL_MALLEABLE_GOO_SUMMON) == CAST_OK)
-                    ResetCombatAction(action, 15000);
+                if (DoCastSpellIfCan(nullptr, SPELL_MALLEABLE_GOO_SUMMON) == CAST_OK)
+                    ResetCombatAction(action, 15s);
                 break;
         }
     }
 };
-
-UnitAI* GetAI_boss_festergut(Creature* creature)
-{
-    return new boss_festergutAI(creature);
-}
 
 // 69165 - Inhale Blight
 struct InhaleBlight : public SpellScript
@@ -331,7 +342,7 @@ struct InhaleBlight : public SpellScript
 
 // 69290, 71222, 73033, 73034 - Blighted Spores. A player who survives
 // the full aura receives the matching Inoculated stack.
-struct spell_festergut_blighted_spores : public AuraScript
+struct FestergutBlightedSpores : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
@@ -342,12 +353,12 @@ struct spell_festergut_blighted_spores : public AuraScript
         if (!target || !target->IsAlive())
             return;
 
-        uint32 inoculated = SPELL_INOCULATED;
+        uint32 inoculated = SPELL_INOCULATED_10_NORMAL;
         switch (aura->GetId())
         {
-            case 71222: inoculated = 72101; break;
-            case 73033: inoculated = 72102; break;
-            case 73034: inoculated = 72103; break;
+            case SPELL_BLIGHTED_SPORES_25_NORMAL: inoculated = SPELL_INOCULATED_25_NORMAL; break;
+            case SPELL_BLIGHTED_SPORES_10_HEROIC: inoculated = SPELL_INOCULATED_10_HEROIC; break;
+            case SPELL_BLIGHTED_SPORES_25_HEROIC: inoculated = SPELL_INOCULATED_25_HEROIC; break;
         }
 
         if (SpellAuraHolder* holder = target->GetSpellAuraHolder(inoculated))
@@ -360,7 +371,7 @@ struct spell_festergut_blighted_spores : public AuraScript
 };
 
 // 72219, 72551, 72552, 72553 - the tenth stack detonates and clears.
-struct spell_festergut_gastric_bloat : public SpellScript
+struct FestergutGastricBloat : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -391,33 +402,23 @@ struct npc_orange_gas_stalkerAI : public CombatAI
     npc_orange_gas_stalkerAI(Creature* creature) : CombatAI(creature, 0)
     {
         SetCombatMovement(false);
-        Reset();
+        SetReactState(REACT_PASSIVE);
     }
-
-    void Reset() override { }
-    void AttackStart(Unit* /*who*/) override { }
-    void MoveInLineOfSight(Unit* /*who*/) override { }
-    void UpdateAI(const uint32 /*diff*/) override { }
 };
-
-UnitAI* GetAI_npc_orange_gas_stalker(Creature* creature)
-{
-    return new npc_orange_gas_stalkerAI(creature);
-}
 
 void AddSC_boss_festergut()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_festergut";
-    pNewScript->GetAI = &GetAI_boss_festergut;
+    pNewScript->GetAI = &GetNewAIInstance<boss_festergutAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_orange_gas_stalker";
-    pNewScript->GetAI = GetAI_npc_orange_gas_stalker;
+    pNewScript->GetAI = &GetNewAIInstance<npc_orange_gas_stalkerAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<InhaleBlight>("spell_inhale_blight");
-    RegisterSpellScript<spell_festergut_blighted_spores>("spell_festergut_blighted_spores");
-    RegisterSpellScript<spell_festergut_gastric_bloat>("spell_festergut_gastric_bloat");
+    RegisterSpellScript<FestergutBlightedSpores>("spell_festergut_blighted_spores");
+    RegisterSpellScript<FestergutGastricBloat>("spell_festergut_gastric_bloat");
 }
