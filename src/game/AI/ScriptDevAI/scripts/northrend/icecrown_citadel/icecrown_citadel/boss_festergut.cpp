@@ -36,6 +36,7 @@ enum
     SPELL_GASTRIC_EXPLOSION     = 72227,
     SPELL_GAS_SPORE             = 69278,            // should trigger 69291 on surviving targets
     SPELL_VILE_GAS              = 71307,            // triggers 69240
+    SPELL_VILE_GAS_25           = 71908,
     SPELL_BLIGHTED_SPORES_10_NORMAL = 69290,
     SPELL_BLIGHTED_SPORES_25_NORMAL = 71222,
     SPELL_BLIGHTED_SPORES_10_HEROIC = 73033,
@@ -91,6 +92,29 @@ enum
 };
 
 static const float balconyLocation[3] = {4324.82f, 3166.03f, 389.3831f};
+
+static uint32 const gaseousBlightSpells[] =
+{
+    SPELL_GASEOUS_BLIGHT_1,
+    SPELL_GASEOUS_BLIGHT_2,
+    SPELL_GASEOUS_BLIGHT_3,
+};
+
+static uint32 const gaseousBlightVisualSpells[] =
+{
+    SPELL_GASEOUS_BLIGHT_DUMMY1,
+    SPELL_GASEOUS_BLIGHT_DUMMY2,
+    SPELL_GASEOUS_BLIGHT_DUMMY3,
+};
+
+static void RemoveGaseousBlight(Unit* festergut, Creature* gasStalker)
+{
+    for (uint8 i = 0; i < 3; ++i)
+    {
+        festergut->RemoveAurasDueToSpell(gaseousBlightSpells[i]);
+        gasStalker->RemoveAurasDueToSpell(gaseousBlightVisualSpells[i]);
+    }
+}
 
 enum FestergutActions
 {
@@ -166,7 +190,7 @@ struct boss_festergutAI : public CombatAI
 
             // reset gas stalker and putricide
             if (Creature* stalker = m_instance->GetSingleCreatureFromStorage(NPC_GAS_STALKER))
-                stalker->RemoveAllAurasOnEvade();
+                RemoveGaseousBlight(m_creature, stalker);
 
             if (Creature* putricide = m_instance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
                 putricide->AI()->EnterEvadeMode();
@@ -183,7 +207,7 @@ struct boss_festergutAI : public CombatAI
 
             // reset gas stalker and putricide
             if (Creature* stalker = m_instance->GetSingleCreatureFromStorage(NPC_GAS_STALKER))
-                stalker->RemoveAllAurasOnEvade();
+                RemoveGaseousBlight(m_creature, stalker);
 
             // ToDo: research if there is any event/yell happening on boss death
             if (Creature* putricide = m_instance->GetSingleCreatureFromStorage(NPC_PROFESSOR_PUTRICIDE))
@@ -325,18 +349,15 @@ struct InhaleBlight : public SpellScript
         if (!gasStalker)
             return;
 
+        uint32 nextBlightSpell = 0;
         if (target->HasAura(SPELL_GASEOUS_BLIGHT_1))
-        {
-            gasStalker->RemoveAllAurasOnEvade();
-            target->CastSpell(nullptr, SPELL_GASEOUS_BLIGHT_2, TRIGGERED_OLD_TRIGGERED);
-        }
+            nextBlightSpell = SPELL_GASEOUS_BLIGHT_2;
         else if (target->HasAura(SPELL_GASEOUS_BLIGHT_2))
-        {
-            gasStalker->RemoveAllAurasOnEvade();
-            target->CastSpell(nullptr, SPELL_GASEOUS_BLIGHT_3, TRIGGERED_OLD_TRIGGERED);
-        }
-        else if (target->HasAura(SPELL_GASEOUS_BLIGHT_3))
-            gasStalker->RemoveAllAurasOnEvade();
+            nextBlightSpell = SPELL_GASEOUS_BLIGHT_3;
+
+        RemoveGaseousBlight(target, gasStalker);
+        if (nextBlightSpell)
+            target->CastSpell(target, nextBlightSpell, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -384,7 +405,8 @@ struct FestergutGastricBloat : public SpellScript
 
         if (SpellAuraHolder* holder = target->GetSpellAuraHolder(spell->m_spellInfo->Id))
         {
-            if (holder->GetStackAmount() < 10)
+            // OnEffectExecute runs before the incoming aura stack is committed.
+            if (holder->GetStackAmount() < 9)
                 return;
             target->RemoveAurasDueToSpell(spell->m_spellInfo->Id);
             target->CastSpell(target, SPELL_GASTRIC_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
@@ -401,6 +423,7 @@ struct npc_orange_gas_stalkerAI : public CombatAI
 {
     npc_orange_gas_stalkerAI(Creature* creature) : CombatAI(creature, 0)
     {
+        SetCombatScriptStatus(true);
         SetCombatMovement(false);
         SetReactState(REACT_PASSIVE);
     }
