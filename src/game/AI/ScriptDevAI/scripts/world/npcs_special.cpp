@@ -733,7 +733,11 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
                             return;
                     }
 
-                    if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5000))
+                    // Patients are already governed by their scripted health drain and
+                    // explicit despawns after being saved or dying.  A timed OOC spawn
+                    // policy removes these permanently out-of-combat NPCs before the
+                    // player has a chance to bandage them.
+                    if (Creature* Patient = m_creature->SummonCreature(patientEntry, (*itr)->x, (*itr)->y, (*itr)->z, (*itr)->o, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
                         totalSpawned++;
 
