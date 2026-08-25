@@ -3627,14 +3627,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 71307:                                 // Vile Gas
-                case 71908:                                 // Vile Gas - 25 player
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER)
-                        m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
                 case 71445:                                 // Twilight Bloodbolt
                 case 71471:                                 // Twilight Bloodbolt
                 {
@@ -9979,17 +9971,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->InterruptNonMeleeSpells(false);
                     unitTarget->CastSpell(unitTarget, 67729, TRIGGERED_NONE);
-                    return;
-                }
-                case 69195:                                 // Pungent Blight
-                case 71219:                                 // Pungent Blight - 25 player
-                case 73031:                                 // Pungent Blight - 10 player heroic
-                case 73032:                                 // Pungent Blight - 25 player heroic
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 69298:                                 // Cancel Resistant to Blight

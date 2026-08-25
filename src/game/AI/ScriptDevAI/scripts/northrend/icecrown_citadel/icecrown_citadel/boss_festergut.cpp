@@ -361,6 +361,38 @@ struct InhaleBlight : public SpellScript
     }
 };
 
+// 71307, 71908 - Vile Gas
+struct FestergutVileGas : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->m_spellInfo->Effect[effIdx] != SPELL_EFFECT_DUMMY)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        spell->GetCaster()->CastSpell(target, spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 69195, 71219, 73031, 73032 - Pungent Blight
+struct FestergutPungentBlight : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->m_spellInfo->Effect[effIdx] != SPELL_EFFECT_SCRIPT_EFFECT)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->RemoveAurasDueToSpell(spell->m_spellInfo->CalculateSimpleValue(effIdx));
+    }
+};
+
 // 69290, 71222, 73033, 73034 - Blighted Spores. A player who survives
 // the full aura receives the matching Inoculated stack.
 struct FestergutBlightedSpores : public AuraScript
@@ -442,6 +474,8 @@ void AddSC_boss_festergut()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<InhaleBlight>("spell_inhale_blight");
+    RegisterSpellScript<FestergutVileGas>("spell_festergut_vile_gas");
+    RegisterSpellScript<FestergutPungentBlight>("spell_festergut_pungent_blight");
     RegisterSpellScript<FestergutBlightedSpores>("spell_festergut_blighted_spores");
     RegisterSpellScript<FestergutGastricBloat>("spell_festergut_gastric_bloat");
 }
