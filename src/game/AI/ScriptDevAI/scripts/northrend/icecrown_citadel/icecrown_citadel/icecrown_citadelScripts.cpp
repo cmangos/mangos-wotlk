@@ -320,6 +320,7 @@ struct npc_putricides_trapAI : public CombatAI
     npc_putricides_trapAI(Creature* creature) : CombatAI(creature, 0),
         m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData()))
     {
+        SetReactState(REACT_PASSIVE);
         AddCustomAction(PUTRICIDE_TRAP_SUMMON, true, [&]() { SummonInsects(); });
         AddCustomAction(PUTRICIDE_TRAP_FINISH, true, [&]() { FinishByTimer(); });
         Reset();
@@ -338,9 +339,6 @@ struct npc_putricides_trapAI : public CombatAI
         DisableTimer(PUTRICIDE_TRAP_FINISH);
         StopSwarm();
     }
-
-    void MoveInLineOfSight(Unit* /*who*/) override { }
-    void AttackStart(Unit* /*who*/) override { }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
