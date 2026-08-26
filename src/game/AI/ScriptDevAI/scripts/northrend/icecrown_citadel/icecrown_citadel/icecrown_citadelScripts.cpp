@@ -554,7 +554,7 @@ struct npc_putricides_trapAI : public CombatAI
         {
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, x, y, z);
             m_creature->SummonCreature(NPC_FLESH_EATING_INSECT, x, y, z + 20.0f, 0,
-                TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15s.count());
+                TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15 * IN_MILLISECONDS);
         }
 
         ResetTimer(PUTRICIDE_TRAP_SUMMON, urand(2000, 5000));
