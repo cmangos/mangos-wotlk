@@ -3207,13 +3207,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 return;
             }
-            case 61900:                                     // Electrical Charge
-            {
-                if (m_removeMode == AURA_REMOVE_BY_DEATH)
-                    target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0), TRIGGERED_OLD_TRIGGERED);
-
-                return;
-            }
             case 70308:                                     // Mutated Transformation
             {
                 if (target->GetMap()->IsDungeon())
@@ -3820,7 +3813,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
 
         m_modifier.m_amount = display_id;
 
-        target->Mount(display_id, this, this->GetAmount(), IsSpellHaveAura(GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED));
+        target->Mount(display_id, true, this->GetAmount(), IsSpellHaveAura(GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED));
 
         if (ci->VehicleTemplateId)
         {
@@ -3832,7 +3825,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
     }
     else
     {
-        target->Unmount(this, this->GetAmount(), IsSpellHaveAura(GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED));
+        target->Unmount(true, this->GetAmount(), IsSpellHaveAura(GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED));
 
         CreatureInfo const* ci = ObjectMgr::GetCreatureTemplate(m_modifier.m_miscvalue);
         if (ci && target->IsVehicle() && ci->VehicleTemplateId == target->GetVehicleInfo()->GetVehicleEntry()->m_ID)
@@ -8953,11 +8946,6 @@ void Aura::PeriodicDummyTick()
                 {
                     // lose 1% of health every second
                     Unit::DealDamage(target, target, target->GetMaxHealth() * .01, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                    return;
-                }
-                case 62019:                                 // Rune of Summoning
-                {
-                    target->CastSpell(target, 62020, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                     return;
                 }
                 case 62566:                                 // Healthy Spore Summon Periodic

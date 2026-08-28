@@ -19885,7 +19885,7 @@ INSERT INTO `spell_threat` VALUES
 (48568, 515, 0.5, 0, 0),
 (52212,   0, 1.90, 0, 0),
 (56815,   0, 1.75, 0, 0),
-(57755,   0, 1.50, 0),
+(57755,   0, 1.50, 0, 0),
 (57823, 500, 1, 0, 0);
 /*!40000 ALTER TABLE `spell_threat` ENABLE KEYS */;
 UNLOCK TABLES;

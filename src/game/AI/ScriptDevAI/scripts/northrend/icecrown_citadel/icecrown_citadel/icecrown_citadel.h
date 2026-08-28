@@ -46,6 +46,9 @@ enum
     // boss-related and other NPCs
     NPC_COLDFLAME                   = 36672,
 
+    NPC_THE_DAMNED                  = 37011,        // Light's Hammer prologue
+    NPC_TIRION_LIGHTS_HAMMER        = 37119,
+
     NPC_DEATHWHISPER_SPAWN_STALKER  = 37947,        // Lady Deathwhisper stalkers
     NPC_DEATHWHISPER_CONTROLLER     = 37948,
 
@@ -115,12 +118,13 @@ enum
     NPC_EMPOWERING_ORB_STALKER      = 36934,
 
     // achievement types
-    MAX_SPECIAL_ACHIEV_CRITS        = 4,
+    MAX_SPECIAL_ACHIEV_CRITS        = 5,
 
     TYPE_ACHIEV_BONED               = 0,
     TYPE_ACHIEV_MADE_A_MESS         = 1,
     TYPE_ACHIEV_DANCES_OOZES        = 2,
     TYPE_ACHIEV_NAUSEA              = 3,
+    TYPE_ACHIEV_FLU_SHOT_SHORTAGE   = 4,
 
     // GameObjects entries
     GO_ICEWALL_1                    = 201911,
@@ -223,7 +227,9 @@ enum
     AT_LIGHTS_HAMMER_INTRO_1        = 5611,
     AT_LIGHTS_HAMMER_INTRO_2        = 5612,
     AT_RAMPART_ALLIANCE             = 5628,
+    AT_RAMPART_ALLIANCE_2           = 5629,
     AT_RAMPART_HORDE                = 5630,
+    AT_RAMPART_HORDE_2              = 5631,
     AT_PUTRICIDES_TRAP              = 5647,
     AT_DEATHWHISPER_INTRO           = 5709,
     AT_FROZEN_THRONE_TELE           = 5718,
@@ -381,6 +387,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         uint32 m_uiTeam;                                    // Team of first entered player, used on the Gunship event
         uint32 m_uiPutricideValveTimer;
+        uint8 m_lightsHammerDamnedKills;
 
         bool m_bHasMarrowgarIntroYelled;
         bool m_bHasDeathwhisperIntroYelled;
@@ -394,6 +401,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         GuidList m_lDeathwhisperCultistsGuids;
         GuidList m_lRotfaceUpperStalkersGuids;
         GuidList m_lFactionTeleporterGuids[PVP_TEAM_COUNT];
+        GuidSet m_lightsHammerDamnedGuids;
         GuidSet m_sDarkfallenCreaturesLowerGuids;
         GuidSet m_sDarkfallenCreaturesLeftGuids;
         GuidSet m_sDarkfallenCreaturesRightGuids;

@@ -1768,12 +1768,12 @@ void ObjectMgr::LoadSpawnGroups()
                     {
                         if (CreatureInfo const* cinfo = GetCreatureTemplate(data.Entry))
                         {
-                            if (actives && (cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE) != 0)
+                            if (actives && cinfo->HasFlag(CREATURE_EXTRA_FLAG_ACTIVE))
                             {
                                 entry.Active = true;
                                 break;
                             }
-                            else if (specials && cinfo->IsLargeOrBiggerCreature())
+                            else if (specials && cinfo->IsSpecialActive())
                             {
                                 entry.Large = true;
                                 break;
@@ -2505,9 +2505,9 @@ void ObjectMgr::LoadCreatures()
         {
             AddCreatureToGrid(guid, &data);
 
-            if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && cInfo && cInfo->ExtraFlags & CREATURE_EXTRA_FLAG_ACTIVE)
+            if (sWorld.getConfig(CONFIG_BOOL_AUTOLOAD_ACTIVE) && cInfo && cInfo->HasFlag(CREATURE_EXTRA_FLAG_ACTIVE))
                 m_activeCreatures.emplace(data.mapid, guid);
-            else if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE) && cInfo && cInfo->IsLargeOrBiggerCreature())
+            else if (sWorld.getConfig(CONFIG_BOOL_SPECIALS_ACTIVE) && cInfo && cInfo->IsSpecialActive())
                 m_largeCreatures.emplace(data.mapid, guid);
         }
 

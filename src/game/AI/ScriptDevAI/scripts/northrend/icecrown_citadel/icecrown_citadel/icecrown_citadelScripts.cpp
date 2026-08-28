@@ -23,7 +23,9 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/BaseAI/GameObjectAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
 /*#####
@@ -234,29 +236,161 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
 ## at_rampart_skull
 #####*/
 
-static const float aFrostwyrmAllySpawnLocs[3] = { -326.5525f, 2236.194f, 328.9574f };
-static const float aFrostwyrmHordeSpawnLocs[3] = { -317.854f ,2190.76f ,328.711f };
-
-bool AreaTrigger_at_rampart_skull(Player* pPlayer, AreaTriggerEntry const* pAt)
+enum SpireFrostwyrmData
 {
-    if (pPlayer->IsGameMaster() || pPlayer->IsDead())
+    SPELL_SPIRE_ENRAGE                 = 47008,
+
+    SPELL_LIST_SPIRE                   = 3723001,
+
+    BROADCAST_SPIRE_FROSTWYRM          = 37161,
+
+    POINT_SPIRE_FROSTWYRM_APPROACH     = 1,
+    POINT_SPIRE_FROSTWYRM_LAND         = 2,
+
+    ACTION_SPIRE_ENRAGE                = 0,
+    ACTION_SPIRE_MAX,
+};
+
+static const Position aFrostwyrmAllyApproachLoc(-423.2222f, 2341.465f, 202.5808f, 2.543328f);
+static const Position aFrostwyrmHordeApproachLoc(-437.643f, 2078.05f, 197.009f, 3.825093f);
+static const Position aFrostwyrmAllyLandingLoc(-433.589508f, 2344.564697f, 191.253616f, 2.543328f);
+static const Position aFrostwyrmHordeLandingLoc(-433.667084f, 2080.347412f, 191.253860f, 3.825093f);
+
+struct npc_spire_frostwyrm_iccAI : public CombatAI
+{
+    npc_spire_frostwyrm_iccAI(Creature* creature) : CombatAI(creature, ACTION_SPIRE_MAX),
+        m_landing(false), m_hordeSide(false)
+    {
+        AddTimerlessCombatAction(ACTION_SPIRE_ENRAGE, true);
+        Reset();
+    }
+
+    bool m_landing;
+    bool m_hordeSide;
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetCombatScriptStatus(m_landing);
+        m_creature->SetSpellList(SPELL_LIST_SPIRE);
+
+        if (!m_landing && m_creature->GetPositionZ() < 200.0f)
+        {
+            SetCombatMovement(true);
+            m_creature->SetCanEnterCombat(true);
+            m_creature->SetAnimTier(AnimTier::Ground);
+            m_creature->SetLevitate(false);
+            m_creature->SetWalk(false);
+            m_creature->SetActiveObjectState(false);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (!m_landing)
+            CombatAI::EnterEvadeMode();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
+    {
+        if (eventType != AI_EVENT_CUSTOM_A || m_landing)
+            return;
+
+        m_hordeSide = miscValue == AT_RAMPART_HORDE || miscValue == AT_RAMPART_HORDE_2;
+        m_landing = true;
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+        m_creature->SetCanEnterCombat(false);
+        m_creature->SetActiveObjectState(true);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
+        m_creature->SetAnimTier(AnimTier::Fly);
+        m_creature->SetLevitate(true);
+        m_creature->SetWalk(false);
+
+        Position const& landing = m_hordeSide ? aFrostwyrmHordeLandingLoc : aFrostwyrmAllyLandingLoc;
+        Position const& approach = m_hordeSide ? aFrostwyrmHordeApproachLoc : aFrostwyrmAllyApproachLoc;
+        m_creature->SetRespawnCoord(landing.x, landing.y, landing.z, landing.o);
+        m_creature->GetMotionMaster()->Clear();
+        m_creature->GetMotionMaster()->MovePoint(POINT_SPIRE_FROSTWYRM_APPROACH, approach,
+            FORCED_MOVEMENT_FLIGHT, 18.0f, false);
+        DoBroadcastText(BROADCAST_SPIRE_FROSTWYRM, m_creature, nullptr, CHAT_TYPE_BOSS_EMOTE);
+    }
+
+    void MovementInform(uint32 movementType, uint32 pointId) override
+    {
+        if (movementType != POINT_MOTION_TYPE || !m_landing)
+            return;
+
+        Position const& landing = m_hordeSide ? aFrostwyrmHordeLandingLoc : aFrostwyrmAllyLandingLoc;
+        if (pointId == POINT_SPIRE_FROSTWYRM_APPROACH)
+        {
+            m_creature->GetMotionMaster()->MovePoint(POINT_SPIRE_FROSTWYRM_LAND, landing,
+                FORCED_MOVEMENT_FLIGHT, 8.5f, false, ObjectGuid(), 0, AnimTier::Fly);
+        }
+        else if (pointId == POINT_SPIRE_FROSTWYRM_LAND)
+        {
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetFacingTo(landing.o);
+            m_landing = false;
+            SetCombatScriptStatus(false);
+            SetCombatMovement(true);
+            m_creature->SetAnimTier(AnimTier::Ground);
+            m_creature->SetLevitate(false);
+            m_creature->SetActiveObjectState(false);
+            m_creature->SetCanEnterCombat(true);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
+            m_creature->SetInCombatWithZone();
+            m_creature->AI()->AttackClosestEnemy();
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        if (action == ACTION_SPIRE_ENRAGE && m_creature->GetHealthPercent() <= 10.0f)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_SPIRE_ENRAGE) == CAST_OK)
+                SetActionReadyStatus(action, false);
+        }
+    }
+
+};
+
+bool AreaTrigger_at_rampart_skull(Player* player, AreaTriggerEntry const* areaTrigger)
+{
+    if (player->IsGameMaster() || player->IsDead())
         return false;
 
-    instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData());
-    if (!pInstance)
+    instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(player->GetInstanceData());
+    if (!instance)
         return false;
 
-    if (pInstance->GetData(TYPE_LADY_DEATHWHISPER) != DONE || pInstance->GetData(TYPE_SPIRE_FROSTWYRM) == DONE)
+    if (instance->GetData(TYPE_LADY_DEATHWHISPER) != DONE || instance->GetData(TYPE_SPIRE_FROSTWYRM) == DONE)
         return false;
 
-    if (pInstance->GetSingleCreatureFromStorage(NPC_SPIRE_FROSTWYRM))
+    if (Creature* frostwyrm = instance->GetSingleCreatureFromStorage(NPC_SPIRE_FROSTWYRM))
+    {
+        if (frostwyrm->IsAlive())
+            return false;
+    }
+
+    bool const validTrigger =
+        ((areaTrigger->id == AT_RAMPART_ALLIANCE || areaTrigger->id == AT_RAMPART_ALLIANCE_2) && instance->GetPlayerTeam() == ALLIANCE) ||
+        ((areaTrigger->id == AT_RAMPART_HORDE || areaTrigger->id == AT_RAMPART_HORDE_2) && instance->GetPlayerTeam() == HORDE);
+    if (!validTrigger)
         return false;
 
-    // spawn a Spire Frostwyrm based on the team faction
-    if (pAt->id == AT_RAMPART_ALLIANCE && pInstance->GetPlayerTeam() == ALLIANCE)
-        pPlayer->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmAllySpawnLocs[0], aFrostwyrmAllySpawnLocs[1], aFrostwyrmAllySpawnLocs[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 0);
-    else if (pAt->id == AT_RAMPART_HORDE && pInstance->GetPlayerTeam() == HORDE)
-        pPlayer->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmHordeSpawnLocs[0], aFrostwyrmHordeSpawnLocs[1], aFrostwyrmHordeSpawnLocs[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 1);
+    SpawnGroup* spawnGroup = player->GetMap()->GetSpawnManager().GetSpawnGroup("ICC_SPIRE_FROSTWYRM");
+    if (spawnGroup)
+        spawnGroup->Spawn(true, false);
+
+    const std::vector<Creature*>* frostwyrms = player->GetMap()->GetCreatures("ICC_SPIRE_FROSTWYRM");
+    if (frostwyrms && !frostwyrms->empty())
+    {
+        Creature* frostwyrm = frostwyrms->front();
+        instance->SetData(TYPE_SPIRE_FROSTWYRM, IN_PROGRESS);
+        frostwyrm->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, player, frostwyrm, areaTrigger->id);
+    }
 
     return false;
 }
@@ -267,7 +401,7 @@ enum
 
     NPC_FLESH_EATING_INSECT         = 37782,
 
-    // The retail gauntlet advances after its one-minute insect phase.  Keep
+    // The retail gauntlet advances after its one-minute insect phase. Keep
     // the kill counter as an early-completion safeguard when the full swarm
     // has already been cleared.
     MAX_INSECT_PER_ROUND            = 8,
@@ -275,30 +409,37 @@ enum
     PUTRICIDE_TRAP_DURATION         = MINUTE * IN_MILLISECONDS,
 };
 
+enum PutricideTrapActions
+{
+    PUTRICIDE_TRAP_SUMMON,
+    PUTRICIDE_TRAP_FINISH,
+};
+
 /*#####
 ## at_putricides_trap
 #####*/
 
-bool AreaTrigger_at_putricides_trap(Player* pPlayer, AreaTriggerEntry const* pAt)
+bool AreaTrigger_at_putricides_trap(Player* player, AreaTriggerEntry const* areaTrigger)
 {
-    if (pPlayer->IsGameMaster() || pPlayer->IsDead())
+    if (player->IsGameMaster() || player->IsDead())
         return false;
 
-    if (pAt->id != AT_PUTRICIDES_TRAP)
+    if (areaTrigger->id != AT_PUTRICIDES_TRAP)
         return false;
 
-    instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pPlayer->GetInstanceData();
-    if (!pInstance)
+    instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(player->GetInstanceData());
+    if (!instance)
         return false;
 
-    if (pInstance->GetData(TYPE_PLAGUE_WING_ENTRANCE) == DONE || pInstance->GetData(TYPE_PLAGUE_WING_ENTRANCE) == IN_PROGRESS)
+    if (instance->GetData(TYPE_PLAGUE_WING_ENTRANCE) == DONE || instance->GetData(TYPE_PLAGUE_WING_ENTRANCE) == IN_PROGRESS)
         return false;
 
     // cast spell and start event
-    if (Creature* pTrap = pInstance->GetSingleCreatureFromStorage(NPC_PUTRICIDES_TRAP))
+    if (Creature* trap = instance->GetSingleCreatureFromStorage(NPC_PUTRICIDES_TRAP))
     {
-        pTrap->CastSpell(pTrap, SPELL_GIANT_INSECT_SWARM, TRIGGERED_NONE);
-        pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, IN_PROGRESS);
+        trap->CastSpell(trap, SPELL_GIANT_INSECT_SWARM, TRIGGERED_NONE);
+        instance->SetData(TYPE_PLAGUE_WING_ENTRANCE, IN_PROGRESS);
+        trap->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, player, trap);
     }
 
     return false;
@@ -308,19 +449,21 @@ bool AreaTrigger_at_putricides_trap(Player* pPlayer, AreaTriggerEntry const* pAt
 ## npc_putricides_trap
 ######*/
 
-struct npc_putricides_trapAI : public ScriptedAI
+struct npc_putricides_trapAI : public CombatAI
 {
-    npc_putricides_trapAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_putricides_trapAI(Creature* creature) : CombatAI(creature, 0),
+        m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
+        AddCustomAction(PUTRICIDE_TRAP_SUMMON, true, [&]() { SummonInsects(); });
+        AddCustomAction(PUTRICIDE_TRAP_FINISH, true, [&]() { FinishByTimer(); });
         Reset();
     }
 
-    instance_icecrown_citadel* m_pInstance;
+    instance_icecrown_citadel* m_instance;
 
-    uint8 m_uiInsectCounter;
-    uint32 m_uiEventTimer;
-    uint32 m_uiSummonTimer;
+    uint8 m_insectCounter;
+    GuidVector m_insectGuids;
 
     void StopSwarm()
     {
@@ -333,122 +476,205 @@ struct npc_putricides_trapAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiInsectCounter = 0;
-        m_uiSummonTimer = 1000;
-        m_uiEventTimer = PUTRICIDE_TRAP_DURATION;
+        CombatAI::Reset();
+        m_insectCounter = 0;
+        DisableTimer(PUTRICIDE_TRAP_SUMMON);
+        DisableTimer(PUTRICIDE_TRAP_FINISH);
+        StopSwarm();
     }
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-
-    void JustSummoned(Creature* pSummoned) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (pSummoned->GetEntry() == NPC_FLESH_EATING_INSECT)
+        if (eventType != AI_EVENT_CUSTOM_A || !m_instance || m_instance->GetData(TYPE_PLAGUE_WING_ENTRANCE) != IN_PROGRESS)
+            return;
+
+        m_insectCounter = 0;
+        ResetTimer(PUTRICIDE_TRAP_SUMMON, 1s);
+        ResetTimer(PUTRICIDE_TRAP_FINISH, 1min);
+    }
+
+    void StopSwarm()
+    {
+        m_creature->RemoveAllAuras();
+        m_creature->RemoveAllDynObjects();
+        m_creature->CombatStop(true);
+        m_creature->DeleteThreatList();
+        DespawnGuids(m_insectGuids);
+    }
+
+    void FinishEvent(EncounterState state)
+    {
+        DisableTimer(PUTRICIDE_TRAP_SUMMON);
+        DisableTimer(PUTRICIDE_TRAP_FINISH);
+
+        if (m_instance)
+            m_instance->SetData(TYPE_PLAGUE_WING_ENTRANCE, state);
+
+        // Finalize the event before despawning its summons. ForcedDespawn can
+        // notify SummonedCreatureJustDied, which must not count cleanup as an
+        // event kill and re-enter FinishEvent while the GUID list is cleared.
+        StopSwarm();
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_FLESH_EATING_INSECT)
         {
-            float fX, fY, fZ;
-            pSummoned->GetPosition(fX, fY, fZ);
-            pSummoned->UpdateAllowedPositionZ(fX, fY, fZ);
-            pSummoned->SetWalk(false);
-            pSummoned->SetLevitate(true);
-            pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+            m_insectGuids.push_back(summoned->GetObjectGuid());
+            if (!summoned->GetMotionMaster()->MoveFall())
+                summoned->SetInCombatWithZone();
         }
     }
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
+    void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 pointId) override
     {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
+        if (motionType != FALL_MOTION_TYPE || pointId != EVENT_FALL)
             return;
 
-        pSummoned->SetLevitate(false);
+        summoned->SetInCombatWithZone();
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void SummonedCreatureJustDied(Creature* summoned) override
     {
-        if (!m_pInstance)
+        if (!m_instance || m_instance->GetData(TYPE_PLAGUE_WING_ENTRANCE) != IN_PROGRESS)
             return;
 
-        if (m_pInstance->GetData(TYPE_PLAGUE_WING_ENTRANCE) != IN_PROGRESS)
-            return;
-
-        if (pSummoned->GetEntry() == NPC_FLESH_EATING_INSECT)
+        if (summoned->GetEntry() == NPC_FLESH_EATING_INSECT)
         {
-            ++m_uiInsectCounter;
-            if (m_uiInsectCounter >= TOTAL_INSECTS_PER_EVENT)
+            ++m_insectCounter;
+            if (m_insectCounter >= TOTAL_INSECTS_PER_EVENT)
             {
-                m_uiSummonTimer = 0;
-                m_uiEventTimer = 0;
-
-                StopSwarm();
-                m_pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, DONE);
+                FinishEvent(DONE);
                 m_creature->ForcedDespawn();
             }
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void SummonInsects()
     {
-        if (!m_pInstance)
-            return;
-
-        if (m_pInstance->GetData(TYPE_PLAGUE_WING_ENTRANCE) != IN_PROGRESS)
-            return;
-
-        // random summon creatures
-        if (m_uiSummonTimer)
+        if (!m_instance || m_instance->GetData(TYPE_PLAGUE_WING_ENTRANCE) != IN_PROGRESS)
         {
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                float fX, fY, fZ;
-                uint8 uiMaxInsects = urand(static_cast<float>(MAX_INSECT_PER_ROUND) * 0.5f, static_cast<float>(MAX_INSECT_PER_ROUND));
-                for (uint8 i = 0; i < uiMaxInsects; ++i)
-                {
-                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_FLESH_EATING_INSECT, fX, fY, fZ + 20.0f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
-                }
-                m_uiSummonTimer = urand(2000, 5000);
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
+            DisableTimer(PUTRICIDE_TRAP_SUMMON);
+            return;
         }
 
-        // The swarm phase lasts one minute.  Surviving players advance the
-        // gauntlet; a wipe resets it through the existing FAIL path.
-        if (m_uiEventTimer)
+        float x, y, z;
+        uint8 insectCount = urand(MAX_INSECT_PER_ROUND / 2, MAX_INSECT_PER_ROUND);
+        for (uint8 i = 0; i < insectCount; ++i)
         {
-            if (m_uiEventTimer <= uiDiff)
-            {
-                bool bEventFailed = true;
-
-                // check withing all players in map if any are still alive and in LoS
-                Map::PlayerList const& pAllPlayers = m_pInstance->instance->GetPlayers();
-
-                if (!pAllPlayers.isEmpty())
-                {
-                    for (const auto& pAllPlayer : pAllPlayers)
-                    {
-                        if (Player* pPlayer = pAllPlayer.getSource())
-                        {
-                            if (pPlayer->IsAlive() && pPlayer->IsWithinLOSInMap(m_creature))
-                                bEventFailed = false;
-                        }
-                    }
-                }
-
-                // set event as done if there are still players around
-                StopSwarm();
-                m_pInstance->SetData(TYPE_PLAGUE_WING_ENTRANCE, bEventFailed ? FAIL : DONE);
-                m_uiSummonTimer = 0;
-                m_uiEventTimer = 0;
-            }
-            else
-                m_uiEventTimer -= uiDiff;
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, x, y, z);
+            m_creature->SummonCreature(NPC_FLESH_EATING_INSECT, x, y, z + 20.0f, 0,
+                TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 15s.count());
         }
+
+        ResetTimer(PUTRICIDE_TRAP_SUMMON, urand(2000, 5000));
+    }
+
+    void FinishByTimer()
+    {
+        if (!m_instance || m_instance->GetData(TYPE_PLAGUE_WING_ENTRANCE) != IN_PROGRESS)
+            return;
+
+        bool eventFailed = true;
+        Map::PlayerList const& players = m_instance->instance->GetPlayers();
+        for (const auto& playerReference : players)
+        {
+            if (Player* player = playerReference.getSource())
+            {
+                if (player->IsAlive() && player->IsWithinLOSInMap(m_creature))
+                {
+                    eventFailed = false;
+                    break;
+                }
+            }
+        }
+
+        FinishEvent(eventFailed ? FAIL : DONE);
     }
 };
 
 UnitAI* GetAI_npc_putricides_trap(Creature* pCreature)
 {
     return new npc_putricides_trapAI(pCreature);
+};
+
+/*#####
+## npc_icc_vengeful_fleshreaper
+#####*/
+
+enum VengefulFleshreaperActions
+{
+    POINT_PIPE_JUMP = 3703801,
+};
+
+const std::string STRING_ID_PIPE_FLESHREAPER = "ICC_PLAGUEWORKS_PIPE_FLESHREAPER";
+
+// Pipe movement cannot build a generic chase path to players on the floor.
+// Combat spells are supplied by creature_spell_list; this AI only performs
+// the geometry-specific jump before normal combat begins.
+struct npc_icc_vengeful_fleshreaperAI : public CombatAI
+{
+    npc_icc_vengeful_fleshreaperAI(Creature* creature) : CombatAI(creature, 0),
+        m_pipeSpawn(creature->HasStringId(STRING_ID_PIPE_FLESHREAPER))
+    {
+        Reset();
+    }
+
+    bool m_pipeSpawn;
+    bool m_jumping;
+    ObjectGuid m_jumpTargetGuid;
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetCombatScriptStatus(false);
+        m_jumping = false;
+        m_jumpTargetGuid.Clear();
+        m_creature->SetWalk(false);
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (!m_pipeSpawn)
+        {
+            CombatAI::MoveInLineOfSight(who);
+            return;
+        }
+
+        if (!m_jumping && !m_creature->IsInCombat() && who->IsPlayer() && who->IsAlive() &&
+                m_creature->CanAttack(who) && m_creature->IsWithinDistInMap(who, 25.0f))
+            AttackStart(who);
+    }
+
+    void AttackStart(Unit* who) override
+    {
+        CombatAI::AttackStart(who);
+
+        if (!m_pipeSpawn || m_jumping)
+            return;
+
+        float x, y, z;
+        who->GetContactPoint(m_creature, x, y, z);
+        SetCombatScriptStatus(true);
+        m_jumping = true;
+        m_jumpTargetGuid = who->GetObjectGuid();
+        m_creature->GetMotionMaster()->MoveJump(x, y, z, 10.0f, 6.0f, POINT_PIPE_JUMP);
+    }
+
+    void MovementInform(uint32 movementType, uint32 pointId) override
+    {
+        if (movementType != EFFECT_MOTION_TYPE || pointId != POINT_PIPE_JUMP)
+            return;
+
+        m_jumping = false;
+        SetCombatScriptStatus(false);
+        if (Unit* target = m_creature->GetMap()->GetUnit(m_jumpTargetGuid))
+        {
+            if (target->IsAlive() && m_creature->CanAttack(target))
+                CombatAI::AttackStart(target);
+        }
+        m_jumpTargetGuid.Clear();
+    }
 };
 
 struct LadyDeathwhisperElevator : public GameObjectAI, public TimerManager
@@ -520,6 +746,11 @@ void AddSC_icecrown_citadel()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
+    pNewScript->Name = "npc_spire_frostwyrm_icc";
+    pNewScript->GetAI = &GetNewAIInstance<npc_spire_frostwyrm_iccAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
     pNewScript->Name = "at_putricides_trap";
     pNewScript->pAreaTrigger = &AreaTrigger_at_putricides_trap;
     pNewScript->RegisterSelf();
@@ -527,6 +758,11 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "npc_putricides_trap";
     pNewScript->GetAI = &GetAI_npc_putricides_trap;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_icc_vengeful_fleshreaper";
+    pNewScript->GetAI = &GetNewAIInstance<npc_icc_vengeful_fleshreaperAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

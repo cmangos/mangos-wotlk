@@ -73,7 +73,7 @@ enum
     SAY_SAURFANG_AGGRO              = -1631061,
 
     // Festergut
-    SAY_STINKY_DIES                 = -1631081,
+    SAY_STINKY_DIES                 = 37830,
     // Rotface
     SAY_PRECIOUS_DIES               = -1631070,
 
@@ -120,6 +120,7 @@ static const DialogueEntry aCitadelDialogue[] =
 instance_icecrown_citadel::instance_icecrown_citadel(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aCitadelDialogue),
     m_uiTeam(0),
     m_uiPutricideValveTimer(0),
+    m_lightsHammerDamnedKills(0),
     m_bHasMarrowgarIntroYelled(false),
     m_bHasDeathwhisperIntroYelled(false),
     m_bHasRimefangLanded(false),
@@ -132,6 +133,8 @@ void instance_icecrown_citadel::Initialize()
 {
     InitializeDialogueHelper(this);
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
+    m_lightsHammerDamnedKills = 0;
+    m_lightsHammerDamnedGuids.clear();
 
     for (bool& i : m_abAchievCriteria)
         i = false;
@@ -221,6 +224,7 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_SINDRAGOSA:
         case NPC_LICH_KING:
         case NPC_TIRION_FORDRING:
+        case NPC_TIRION_LIGHTS_HAMMER:
         case NPC_RIMEFANG:
         case NPC_SPINESTALKER:
         case NPC_VALITHRIA_COMBAT_TRIGGER:
@@ -235,8 +239,12 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_ORGRIMS_HAMMER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_THE_DAMNED:
+            if (pCreature->HasStringId("ICC_LIGHTS_HAMMER_DAMNED"))
+                m_lightsHammerDamnedGuids.insert(pCreature->GetObjectGuid());
+            break;
         case NPC_SPIRE_FROSTWYRM:
-            if (pCreature->IsTemporarySummon())
+            if (pCreature->HasStringId("ICC_SPIRE_FROSTWYRM"))
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:
@@ -327,6 +335,10 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_FESTERGUT] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
+        case GO_ORANGE_VALVE:
+            if (m_auiEncounter[TYPE_FESTERGUT] == DONE)
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
         case GO_GREEN_TUBE:
             if (m_auiEncounter[TYPE_ROTFACE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
@@ -403,7 +415,6 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_SINDRAGOSA_SHORTCUT_EXIT:
         case GO_ORANGE_PLAGUE:
         case GO_GREEN_PLAGUE:
-        case GO_ORANGE_VALVE:
         case GO_GREEN_VALVE:
             break;
         case GO_DRINK_ME:
@@ -491,11 +502,23 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        case NPC_THE_DAMNED:
+            if (m_lightsHammerDamnedGuids.erase(pCreature->GetObjectGuid()) &&
+                    ++m_lightsHammerDamnedKills == 2)
+            {
+                if (Creature* tirion = GetSingleCreatureFromStorage(NPC_TIRION_LIGHTS_HAMMER))
+                {
+                    tirion->StopMoving();
+                    tirion->GetMotionMaster()->Clear(false, true);
+                    tirion->GetMotionMaster()->MoveWaypoint();
+                }
+            }
+            break;
         case NPC_STINKY:
             if (Creature* pFestergut = GetSingleCreatureFromStorage(NPC_FESTERGUT))
             {
                 if (pFestergut->IsAlive())
-                    DoScriptText(SAY_STINKY_DIES, pFestergut);
+                    DoBroadcastText(SAY_STINKY_DIES, pFestergut);
             }
             break;
         case NPC_PRECIOUS:
@@ -906,8 +929,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_PLAGUE_WING_ENTRANCE:
             m_auiEncounter[uiType] = uiData;
-            // The lower collision gate seals only for the trap event. Use an
-            // explicit state so IN_PROGRESS -> DONE and reloads are stable.
+            // combat door
             DoUseOpenableObject(GO_SCIENTIST_DOOR_COLLISION, uiData != IN_PROGRESS);
             if (uiData == DONE)
                 DoUseOpenableObject(GO_SCIENTIST_DOOR, true);
@@ -1029,6 +1051,11 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
         case ACHIEV_CRIT_NAUSEA_10H:
         case ACHIEV_CRIT_NAUSEA_25H:
             return m_abAchievCriteria[TYPE_ACHIEV_NAUSEA];
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_10N:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_25N:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_10H:
+        case ACHIEV_CRIT_FLU_SHOT_SHORTAGE_25H:
+            return m_abAchievCriteria[TYPE_ACHIEV_FLU_SHOT_SHORTAGE];
     }
 
     return false;

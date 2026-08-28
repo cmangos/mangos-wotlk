@@ -94,7 +94,10 @@ void BossAI::AddExitObject(uint32 value)
 void BossAI::EnterEvadeMode()
 {
     if (m_instanceDataType == -1)
+    {
+        CombatAI::EnterEvadeMode();
         return;
+    }
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, FAIL);
     OpenEntrances();
