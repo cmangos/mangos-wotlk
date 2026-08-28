@@ -406,7 +406,6 @@ enum
     // has already been cleared.
     MAX_INSECT_PER_ROUND            = 8,
     TOTAL_INSECTS_PER_EVENT         = 100,
-    PUTRICIDE_TRAP_DURATION         = MINUTE * IN_MILLISECONDS,
 };
 
 enum PutricideTrapActions
@@ -464,15 +463,6 @@ struct npc_putricides_trapAI : public CombatAI
 
     uint8 m_insectCounter;
     GuidVector m_insectGuids;
-
-    void StopSwarm()
-    {
-        // Spell 70475 owns the persistent swarm visual/effect.  Ending the
-        // event without removing its aura and dynamic objects leaves the
-        // apparent five-minute debuff running after the one-minute gauntlet.
-        m_creature->RemoveAurasDueToSpell(SPELL_GIANT_INSECT_SWARM);
-        m_creature->RemoveAllDynObjects();
-    }
 
     void Reset() override
     {
