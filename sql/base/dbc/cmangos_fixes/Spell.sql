@@ -3662,6 +3662,7 @@ INSERT INTO spell_template (Id,Attributes,AttributesEx2,CastingTimeIndex,Duratio
 -- ============================================================
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 44652, -- Iron Rune Aura
+46669, -- Evacuee Random Action
 50665, -- Bleeding Out
 50681, -- Bleeding Out
 50695, -- Bleeding Out
@@ -3834,6 +3835,9 @@ UPDATE spell_template SET EffectBasePoints1=599 WHERE Id IN('8087','8088','8089'
 
 -- Vrykul Bowshot - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 54548;
+
+-- Summon Ghouls On Scarlet Crusade - shouldnt have targets limit (its an AOE)
+UPDATE spell_template SET MaxAffectedTargets = 0 WHERE Id IN (51904,54522);
 
 -- ============================================================
 -- Missing WotLK Achievement Spells
