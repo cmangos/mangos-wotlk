@@ -312,6 +312,8 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_DEATHWHISPER_ELEVATOR:
             break;
         case GO_SAURFANG_DOOR:
+            if (m_auiEncounter[TYPE_DEATHBRINGER_SAURFANG] == DONE)
+                pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ALLIANCE_TELEPORTER:
             m_lFactionTeleporterGuids[TEAM_INDEX_ALLIANCE].push_back(pGo->GetObjectGuid());
@@ -375,6 +377,14 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_SAURFANG_CACHE_10_H:
         case GO_SAURFANG_CACHE_25_H:
             m_goEntryGuidStore[GO_SAURFANG_CACHE] = pGo->GetObjectGuid();
+            // The cache can enter the loaded grid after Saurfang is already
+            // marked DONE. Unlock it here too, otherwise the valid loot chest
+            // remains hidden or non-interactable until another state change.
+            if (m_auiEncounter[TYPE_DEATHBRINGER_SAURFANG] == DONE)
+            {
+                DoRespawnGameObject(pGo->GetObjectGuid(), 60 * MINUTE);
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
             return;
         case GO_GUNSHIP_ARMORY_A:
         case GO_GUNSHIP_ARMORY_A_25:
@@ -436,7 +446,10 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             break;
         case GO_TRANSPORTER_UPPER_SPIRE:
             if (m_auiEncounter[TYPE_DEATHBRINGER_SAURFANG] == DONE)
+            {
                 pGo->SetGoState(GO_STATE_ACTIVE);
+                pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
             break;
         case GO_TRANSPORTER_LIGHTS_HAMMER:
         case GO_TRANSPORTER_ORATORY_DAMNED:
@@ -760,17 +773,28 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_DEATHBRINGER_SAURFANG:
             m_auiEncounter[uiType] = uiData;
+            // The Upper Spire door is the encounter boundary.  It is opened
+            // for the intro, locked while Saurfang is in combat, and reopened
+            // on a wipe or completed kill.
+            DoUseOpenableObject(GO_SAURFANG_DOOR, uiData != IN_PROGRESS);
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_SAURFANG_DOOR);
+                // Persistently unlock the route into the Upper Spire.  Avoid a
+                // toggle here because the faction outro may already have used
+                // the door before the encounter state is saved.
+                DoUseOpenableObject(GO_SAURFANG_DOOR, true);
+                DoToggleGameObjectFlags(GO_TRANSPORTER_UPPER_SPIRE, GO_FLAG_NO_INTERACT, false);
+                if (GameObject* transporter = GetSingleGameObjectFromStorage(GO_TRANSPORTER_UPPER_SPIRE))
+                    transporter->SetGoState(GO_STATE_ACTIVE);
+
                 DoRespawnGameObject(GO_SAURFANG_CACHE, 60 * MINUTE);
                 DoToggleGameObjectFlags(GO_SAURFANG_CACHE, GO_FLAG_NO_INTERACT, false);
 
                 // spawn the Saurfang's ship for alliance only
                 if (m_uiTeam == ALLIANCE)
                 {
-                    TransportTemplate* const zeppelinHorde = sTransportMgr.GetTransportTemplate(GO_ZEPPELIN_HORDE);
-                    Transport::LoadTransport(*zeppelinHorde, instance, true);
+                    if (TransportTemplate* const zeppelinHorde = sTransportMgr.GetTransportTemplate(GO_ZEPPELIN_HORDE))
+                        Transport::LoadTransport(*zeppelinHorde, instance, true);
                 }
             }
             else if (uiData == IN_PROGRESS)
@@ -1107,14 +1131,18 @@ void instance_icecrown_citadel::Update(uint32 uiDiff)
 
 void instance_icecrown_citadel::ProcessEventNpcs(Player* pPlayer)
 {
-    // ToDo: enable this when gunship is implementee
-    //if (GetData(TYPE_GUNSHIP_BATTLE) == DONE)
+    if (GetData(TYPE_GUNSHIP_BATTLE) == DONE)
     {
-        // Summon Saurfang mobs
-        for (const auto& aEventBeginLocation : aSaurfangLocations)
+        // The faction group exists only for Saurfang's intro/outro. On an
+        // instance reload after Saurfang is complete, respawning this group
+        // leaves Muradin and the marines permanently stranded on the rise.
+        if (GetData(TYPE_DEATHBRINGER_SAURFANG) != DONE)
         {
-            pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
-                aEventBeginLocation.fSpawnX, aEventBeginLocation.fSpawnY, aEventBeginLocation.fSpawnZ, aEventBeginLocation.fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS, true);
+            for (const auto& aEventBeginLocation : aSaurfangLocations)
+            {
+                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+                    aEventBeginLocation.fSpawnX, aEventBeginLocation.fSpawnY, aEventBeginLocation.fSpawnZ, aEventBeginLocation.fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS, true);
+            }
         }
 
         // Show portal gameobjects

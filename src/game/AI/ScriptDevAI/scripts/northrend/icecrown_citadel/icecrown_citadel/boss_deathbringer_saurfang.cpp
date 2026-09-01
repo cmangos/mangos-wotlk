@@ -29,15 +29,15 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1631028,
-    SAY_FALLENCHAMPION          = -1631029,
-    SAY_BLOODBEASTS             = -1631030,
-    SAY_SLAY_1                  = -1631031,
-    SAY_SLAY_2                  = -1631032,
-    SAY_BERSERK                 = -1631033,
-    SAY_DEATH                   = -1631034,
-    EMOTE_FRENZY                = -1631193,
-    EMOTE_SCENT                 = -1631194,
+    SAY_AGGRO                   = 38464,
+    SAY_FALLENCHAMPION          = 37995,
+    SAY_BLOODBEASTS             = 38466,
+    SAY_SLAY_1                  = 37991,
+    SAY_SLAY_2                  = 37992,
+    SAY_BERSERK                 = 37994,
+    SAY_DEATH                   = 37477,
+    EMOTE_FRENZY                = 38630,
+    EMOTE_SCENT                 = 38631,
 
     // intro event related
     SPELL_GRIP_OF_AGONY         = 70572,
@@ -77,8 +77,53 @@ enum
     SPELL_RESISTANT_SKIN        = 72723,
     SPELL_BLOOD_LINK_BEAST      = 72176,
 
+    NPC_BLOOD_BEAST             = 38508,
+
     FACTION_ID_UNDEAD           = 974,
     FACTION_ID_FRIENDLY         = 35,
+
+    // Deathbringer's Rise Alliance introduction.  These use a separate text
+    // range from the existing combat text above.
+    SAY_INTRO_ALLIANCE_1         = 37457,
+    SAY_INTRO_ALLIANCE_2         = 37458,
+    SAY_INTRO_ALLIANCE_3         = 37459,
+    SAY_INTRO_ALLIANCE_4         = 37460,
+    SAY_INTRO_ALLIANCE_5         = 37461,
+    SAY_INTRO_ALLIANCE_6         = 37471,
+
+    // CMaNGOS DB relay scripts which drive the faction-specific post-kill
+    // cinematics.  The faction leaders use ScriptDevAI for the repaired
+    // introduction, so their former EventAI relay action must be forwarded
+    // here explicitly.
+    RELAY_SAURFANG_OUTRO_ALLIANCE = 20519,
+    RELAY_SAURFANG_OUTRO_HORDE    = 20520,
+};
+
+enum SaurfangIntroActions
+{
+    SAURFANG_INTRO_BOSS_REPLY_1 = 1,
+    SAURFANG_INTRO_BOSS_REPLY_2,
+    SAURFANG_INTRO_MURADIN_CHALLENGE,
+    SAURFANG_INTRO_MURADIN_CHARGE,
+    SAURFANG_INTRO_GRIP,
+    SAURFANG_INTRO_FINAL_WORD,
+    SAURFANG_INTRO_BEGIN_COMBAT,
+};
+
+float const aSaurfangIntroFirstStep[3] = { -541.318f, 2211.365f, 539.292f };
+float const aSaurfangIntroCharge[3] = { -509.651f, 2211.377f, 539.287f };
+float const aSaurfangCombatPosition[3] = { -496.354f, 2211.330f, 541.114f };
+
+// Retail sends the rise guards forward with the faction leader.  Keep their
+// destinations separate so Grip of Agony suspends a formation instead of a
+// stack of creatures at the teleporter.
+float const aSaurfangGuardCharge[5][3] =
+{
+    { -508.748f, 2211.897f, 539.287f },
+    { -509.293f, 2211.411f, 539.287f },
+    { -506.661f, 2211.367f, 539.287f },
+    { -506.114f, 2213.306f, 539.287f },
+    { -509.004f, 2211.743f, 539.287f },
 };
 
 enum DeathbringerActions
@@ -106,11 +151,11 @@ struct boss_deathbringer_saurfangAI : public CombatAI
         }
 
         // common actions
-        AddCombatAction(DEATHBRINGER_BERSERK, uint32(m_bIsHeroicMode ? 6 : 8 * MINUTE * IN_MILLISECONDS));
-        AddCombatAction(DEATHBRINGER_RUNE_OF_BLOOD, 25000u);
-        AddCombatAction(DEATHBRINGER_BOILING_BLOOD, 19000u);
-        AddCombatAction(DEATHBRINGER_BLOOD_NOVA, 20000u);
-        AddCombatAction(DEATHBRINGER_BLOOD_BEAST, 40000u);
+        AddCombatAction(DEATHBRINGER_BERSERK, uint32((m_bIsHeroicMode ? 6 : 8) * MINUTE * IN_MILLISECONDS));
+        AddCombatAction(DEATHBRINGER_RUNE_OF_BLOOD, 20000u);
+        AddCombatAction(DEATHBRINGER_BOILING_BLOOD, 15500u);
+        AddCombatAction(DEATHBRINGER_BLOOD_NOVA, 17000u);
+        AddCombatAction(DEATHBRINGER_BLOOD_BEAST, 30000u);
 
         if (m_bIsHeroicMode)
             AddCombatAction(DEATHBRINGER_SCENT_OF_BLOOD, 47000u);
@@ -131,6 +176,15 @@ struct boss_deathbringer_saurfangAI : public CombatAI
     bool m_bIs25ManMode;
     bool m_bIsHeroicMode;
     bool m_bIsFakingDeath;
+    GuidList m_bloodBeastGuids;
+
+    void CleanupBloodBeasts()
+    {
+        for (GuidList::const_iterator itr = m_bloodBeastGuids.begin(); itr != m_bloodBeastGuids.end(); ++itr)
+            if (Creature* beast = m_creature->GetMap()->GetCreature(*itr))
+                beast->ForcedDespawn();
+        m_bloodBeastGuids.clear();
+    }
 
     void Reset() override
     {
@@ -138,11 +192,12 @@ struct boss_deathbringer_saurfangAI : public CombatAI
 
         m_uiAchievSpellCount = 0;
         m_creature->SetPower(m_creature->GetPowerType(), 0);
+        CleanupBloodBeasts();
     }
 
     void Aggro(Unit* /*who*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
 
         DoCastSpellIfCan(m_creature, SPELL_BLOOD_LINK, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_MARK_FALLEN_DAMAGE, CAST_TRIGGERED);
@@ -157,7 +212,7 @@ struct boss_deathbringer_saurfangAI : public CombatAI
         CombatAI::KilledUnit(victim);
 
         if (urand(0, 1))
-            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+            DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void EnterEvadeMode() override
@@ -182,7 +237,7 @@ struct boss_deathbringer_saurfangAI : public CombatAI
             m_bIsFakingDeath = true;
 
             // yell death and change flags
-            DoScriptText(SAY_DEATH, m_creature);
+            DoBroadcastText(SAY_DEATH, m_creature);
 
             ClearCombatOnlyRoot();
             m_creature->RemoveAllAurasOnEvade();
@@ -196,6 +251,19 @@ struct boss_deathbringer_saurfangAI : public CombatAI
 
             if (m_instance)
                 m_instance->SetData(TYPE_DEATHBRINGER_SAURFANG, DONE);
+
+            // Blood Beasts are encounter summons and must not survive the
+            // boss completion or retain combat on the raid afterward.
+            CleanupBloodBeasts();
+
+            // The intro holds the faction leader aloft with Grip of Agony.
+            // The spell aura does not naturally expire, so explicitly remove
+            // it when the encounter completes and let its aura handler return
+            // the leader to the ground.
+            if (Creature* leader = GetClosestCreatureWithEntry(m_creature, NPC_MURADIN_BRONZEBEARD, 100.0f))
+                leader->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
+            else if (Creature* leader = GetClosestCreatureWithEntry(m_creature, NPC_OVERLORD_SAURFANG, 100.0f))
+                leader->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
 
             // change faction and start outro
             ResetTimer(DEATHBRINGER_DEATH, 5 * IN_MILLISECONDS);
@@ -214,22 +282,34 @@ struct boss_deathbringer_saurfangAI : public CombatAI
             m_instance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
+        CleanupBloodBeasts();
     }
 
     void JustSummoned(Creature* summoned) override
     {
+        if (summoned->GetEntry() == NPC_BLOOD_BEAST)
+            m_bloodBeastGuids.push_back(summoned->GetObjectGuid());
+
         summoned->CastSpell(summoned, SPELL_RESISTANT_SKIN, TRIGGERED_OLD_TRIGGERED);
         summoned->CastSpell(summoned, SPELL_BLOOD_LINK_BEAST, TRIGGERED_OLD_TRIGGERED);
 
         // Note: the summoned should be activated only after 2-3 seconds after summon - can be done in eventAI
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             summoned->AI()->AttackStart(pTarget);
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_BLOOD_BEAST)
+            m_bloodBeastGuids.remove(summoned->GetObjectGuid());
     }
 
     void HandleDeath()
     {
-        // inform creatures to start outro event
-        SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_C, m_creature, 0, 30.0f);
+        // Inform the faction leader and every suspended escort to start the
+        // outro.  The stock 30-yard radius did not reach the guards spread
+        // across Deathbringer's Rise, leaving them levitating indefinitely.
+        SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_C, m_creature, 0, 150.0f);
 
         m_creature->SetFactionTemporary(FACTION_ID_FRIENDLY, TEMPFACTION_NONE);
     }
@@ -241,7 +321,7 @@ struct boss_deathbringer_saurfangAI : public CombatAI
             case DEATHBRINGER_BERSERK:
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
+                    DoBroadcastText(SAY_BERSERK, m_creature);
                     DisableCombatAction(action);
                 }
                 break;
@@ -250,25 +330,25 @@ struct boss_deathbringer_saurfangAI : public CombatAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
                     {
-                        DoScriptText(EMOTE_FRENZY, m_creature);
+                        DoBroadcastText(EMOTE_FRENZY, m_creature);
                         DisableCombatAction(action);
                     }
                 }
                 break;
             case DEATHBRINGER_RUNE_OF_BLOOD:
                 if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
-                    ResetCombatAction(action, 25000);
+                    ResetCombatAction(action, urand(20000, 25000));
                 break;
             case DEATHBRINGER_BOILING_BLOOD:
                 if (DoCastSpellIfCan(m_creature, SPELL_BOILING_BLOOD) == CAST_OK)
-                    ResetCombatAction(action, 15000);
+                    ResetCombatAction(action, urand(15000, 20000));
                 break;
             case DEATHBRINGER_BLOOD_NOVA:
                 if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_NOVA) == CAST_OK)
-                    ResetCombatAction(action, 20000);
+                    ResetCombatAction(action, urand(20000, 25000));
                 break;
             case DEATHBRINGER_BLOOD_BEAST:
-                DoScriptText(SAY_BLOODBEASTS, m_creature);
+                DoBroadcastText(SAY_BLOODBEASTS, m_creature);
 
                 DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_1, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_2, CAST_TRIGGERED);
@@ -288,7 +368,7 @@ struct boss_deathbringer_saurfangAI : public CombatAI
             case DEATHBRINGER_SCENT_OF_BLOOD:
                 if (DoCastSpellIfCan(m_creature, SPELL_SCENT_OF_BLOOD) == CAST_OK)
                 {
-                    DoScriptText(EMOTE_SCENT, m_creature);
+                    DoBroadcastText(EMOTE_SCENT, m_creature);
                     ResetCombatAction(action, 40000);
                 }
                 break;
@@ -297,7 +377,7 @@ struct boss_deathbringer_saurfangAI : public CombatAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_MARK_FALLEN_CHAMPION) == CAST_OK)
                     {
-                        DoScriptText(SAY_FALLENCHAMPION, m_creature);
+                        DoBroadcastText(SAY_FALLENCHAMPION, m_creature);
                         m_creature->RemoveAurasDueToSpell(SPELL_BLOOD_POWER);
                         m_creature->SetPower(m_creature->GetPowerType(), 0);
 
@@ -315,6 +395,199 @@ struct boss_deathbringer_saurfangAI : public CombatAI
         }
     }
 };
+
+// The faction leader at Deathbringer's Rise is the retail start control for
+// this encounter.  CMaNGOS already spawned the leader and guards after
+// Gunship, but had no script binding for the gossip or the introduction.
+struct npc_saurfang_intro_leaderAI : public ScriptedAI
+{
+    npc_saurfang_intro_leaderAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData()))
+    {
+        AddCustomAction(SAURFANG_INTRO_BOSS_REPLY_1, true, [&]() { SayByEntry(NPC_DEATHBRINGER_SAURFANG, SAY_INTRO_ALLIANCE_2); });
+        AddCustomAction(SAURFANG_INTRO_BOSS_REPLY_2, true, [&]() { SayByEntry(NPC_DEATHBRINGER_SAURFANG, SAY_INTRO_ALLIANCE_3); });
+        AddCustomAction(SAURFANG_INTRO_MURADIN_CHALLENGE, true, [&]()
+        {
+            DoBroadcastText(SAY_INTRO_ALLIANCE_4, m_creature);
+            m_creature->SetWalk(true);
+            m_creature->GetMotionMaster()->MovePoint(1, aSaurfangIntroFirstStep[0], aSaurfangIntroFirstStep[1], aSaurfangIntroFirstStep[2]);
+        });
+        AddCustomAction(SAURFANG_INTRO_MURADIN_CHARGE, true, [&]()
+        {
+            DoBroadcastText(SAY_INTRO_ALLIANCE_5, m_creature);
+            MoveIntroGuards();
+            m_creature->SetWalk(false);
+            m_creature->GetMotionMaster()->MovePoint(2, aSaurfangIntroCharge[0], aSaurfangIntroCharge[1], aSaurfangIntroCharge[2]);
+        });
+        AddCustomAction(SAURFANG_INTRO_GRIP, true, [&]()
+        {
+            if (Creature* boss = GetBoss())
+            {
+                // Grip is an encounter-area spell.  Casting it on Saurfang,
+                // as in the reference implementations, catches the leader
+                // and every guard that just charged with him.
+                boss->CastSpell(boss, SPELL_GRIP_OF_AGONY, TRIGGERED_OLD_TRIGGERED);
+            }
+        });
+        AddCustomAction(SAURFANG_INTRO_FINAL_WORD, true, [&]() { SayByEntry(NPC_DEATHBRINGER_SAURFANG, SAY_INTRO_ALLIANCE_6); });
+        AddCustomAction(SAURFANG_INTRO_BEGIN_COMBAT, true, [&]()
+        {
+            if (Creature* boss = GetBoss())
+            {
+                // The intro's boss spawn begins neutral and immune.  The
+                // final scene handoff must change both its reaction flags and
+                // faction before Aggro; otherwise it can attack a player
+                // while still displaying as a friendly green unit.
+                boss->SetFactionTemporary(FACTION_ID_UNDEAD, TEMPFACTION_NONE);
+                boss->SetImmuneToPlayer(false);
+                boss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+                if (Player* player = m_instance->GetPlayerInMap(true))
+                    boss->AI()->AttackStart(player);
+            }
+        });
+    }
+
+    instance_icecrown_citadel* m_instance;
+    bool m_started = false;
+
+    void Reset() override
+    {
+        m_started = false;
+        SetReactState(REACT_PASSIVE);
+        // Both faction leaders are scene actors, including High Overlord
+        // Saurfang while he retrieves his son during the Alliance outro.
+        // Keep them selectable for the pre-fight gossip, but never valid
+        // player combat targets.
+        m_creature->SetImmuneToPlayer(true);
+
+        if (m_instance && m_instance->GetData(TYPE_DEATHBRINGER_SAURFANG) == DONE)
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        else
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType != AI_EVENT_CUSTOM_EVENTAI_C || !sender || sender->GetEntry() != NPC_DEATHBRINGER_SAURFANG)
+            return;
+
+        // This is the ScriptDevAI equivalent of the stock EventAI actions
+        // 3718704 / 3720004.  Removing Grip lands the leader; the relay then
+        // performs the complete Alliance or Horde body-recovery cinematic,
+        // including guard cleanup and the replacement post-event party.
+        m_creature->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
+        CleanupIntroGuards();
+
+        uint32 relayId = m_creature->GetEntry() == NPC_MURADIN_BRONZEBEARD
+            ? RELAY_SAURFANG_OUTRO_ALLIANCE
+            : RELAY_SAURFANG_OUTRO_HORDE;
+        m_creature->GetMap()->ScriptsStart(SCRIPT_TYPE_RELAY, relayId, m_creature, m_creature);
+    }
+
+    Creature* GetBoss() const
+    {
+        return GetClosestCreatureWithEntry(m_creature, NPC_DEATHBRINGER_SAURFANG, 120.0f);
+    }
+
+    void MoveIntroGuards()
+    {
+        CreatureList guards;
+        uint32 guardEntry = m_creature->GetEntry() == NPC_MURADIN_BRONZEBEARD
+            ? NPC_SKYBREAKER_MARINE_RISE
+            : NPC_KORKRON_REAVER_RISE;
+        GetCreatureListWithEntryInGrid(guards, m_creature, guardEntry, 100.0f);
+
+        uint8 index = 0;
+        for (Creature* guard : guards)
+        {
+            if (!guard->IsAlive() || index >= 5)
+                continue;
+
+            guard->SetWalk(false);
+            guard->GetMotionMaster()->MovePoint(10 + index,
+                aSaurfangGuardCharge[index][0], aSaurfangGuardCharge[index][1], aSaurfangGuardCharge[index][2]);
+            ++index;
+        }
+    }
+
+    void CleanupIntroGuards()
+    {
+        CreatureList guards;
+        uint32 guardEntry = m_creature->GetEntry() == NPC_MURADIN_BRONZEBEARD
+            ? NPC_SKYBREAKER_MARINE_RISE
+            : NPC_KORKRON_REAVER_RISE;
+        GetCreatureListWithEntryInGrid(guards, m_creature, guardEntry, 120.0f);
+
+        // These are the temporary actors from the pull scene.  The outro DB
+        // relay later creates a fresh leader-and-guard group at the staging
+        // point, so keeping this set produces the duplicate formation seen
+        // beside Saurfang's corpse.
+        for (Creature* guard : guards)
+        {
+            guard->RemoveAurasDueToSpell(SPELL_GRIP_OF_AGONY);
+            guard->ForcedDespawn();
+        }
+    }
+
+    void SayByEntry(uint32 entry, uint32 text)
+    {
+        if (Creature* creature = GetClosestCreatureWithEntry(m_creature, entry, 120.0f))
+            DoBroadcastText(text, creature);
+    }
+
+    void StartEvent()
+    {
+        if (m_started || !m_instance || m_instance->GetData(TYPE_DEATHBRINGER_SAURFANG) == DONE)
+            return;
+
+        Creature* boss = GetBoss();
+        if (!boss)
+            return;
+
+        m_started = true;
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        m_instance->DoUseOpenableObject(GO_SAURFANG_DOOR, true);
+
+        // The boss moves down from the throne while the faction leader begins
+        // the scene, exactly as in the original encounter.
+        boss->SetImmuneToPlayer(true);
+        boss->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+        boss->SetWalk(false);
+        boss->GetMotionMaster()->MovePoint(3, aSaurfangCombatPosition[0], aSaurfangCombatPosition[1], aSaurfangCombatPosition[2]);
+
+        DoBroadcastText(SAY_INTRO_ALLIANCE_1, m_creature);
+        ResetTimer(SAURFANG_INTRO_BOSS_REPLY_1, 2500);
+        ResetTimer(SAURFANG_INTRO_BOSS_REPLY_2, 20000);
+        ResetTimer(SAURFANG_INTRO_MURADIN_CHALLENGE, 29500);
+        ResetTimer(SAURFANG_INTRO_MURADIN_CHARGE, 34500);
+        ResetTimer(SAURFANG_INTRO_GRIP, 36500);
+        ResetTimer(SAURFANG_INTRO_FINAL_WORD, 38500);
+        ResetTimer(SAURFANG_INTRO_BEGIN_COMBAT, 43000);
+    }
+};
+
+bool GossipHello_npc_saurfang_intro_leader(Player* player, Creature* creature)
+{
+    if (instance_icecrown_citadel* instance = static_cast<instance_icecrown_citadel*>(creature->GetInstanceData()))
+    {
+        if (instance->GetData(TYPE_DEATHBRINGER_SAURFANG) != DONE && instance->GetData(TYPE_DEATHBRINGER_SAURFANG) != IN_PROGRESS)
+        {
+            player->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, "We are ready. Begin the assault.", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetObjectGuid());
+            return true;
+        }
+    }
+
+    player->SEND_GOSSIP_MENU(player->GetGossipTextId(creature), creature->GetObjectGuid());
+    return true;
+}
+
+bool GossipSelect_npc_saurfang_intro_leader(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+{
+    player->CLOSE_GOSSIP_MENU();
+    if (action == GOSSIP_ACTION_INFO_DEF + 1)
+        static_cast<npc_saurfang_intro_leaderAI*>(creature->AI())->StartEvent();
+    return true;
+}
 
 /*######
 ## spell_grip_of_agony_aura - 70572
@@ -387,6 +660,13 @@ void AddSC_boss_deathbringer_saurfang()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_deathbringer_saurfang";
     pNewScript->GetAI = &GetNewAIInstance<boss_deathbringer_saurfangAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_saurfang_intro_leader";
+    pNewScript->GetAI = &GetNewAIInstance<npc_saurfang_intro_leaderAI>;
+    pNewScript->pGossipHello = &GossipHello_npc_saurfang_intro_leader;
+    pNewScript->pGossipSelect = &GossipSelect_npc_saurfang_intro_leader;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_grip_of_agony_aura>("spell_grip_of_agony_aura");
