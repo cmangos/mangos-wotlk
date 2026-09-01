@@ -757,6 +757,15 @@ void ElevatorTransport::SetGoState(GOState state)
     m_eventTriggered = false;
 }
 
+void ElevatorTransport::StopMovement()
+{
+    if (!GetGOInfo()->transport.pause)
+        return;
+
+    m_stopped = true;
+    SetInt16Value(GAMEOBJECT_DYNAMIC, 1, -1);
+}
+
 void GenericTransport::UpdatePassengerPositions(PassengerSet& passengers)
 {
     for (const auto passenger : passengers)

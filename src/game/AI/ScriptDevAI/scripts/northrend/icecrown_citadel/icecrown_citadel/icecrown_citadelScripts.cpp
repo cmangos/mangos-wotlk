@@ -27,6 +27,7 @@ EndScriptData */
 #include "AI/BaseAI/GameObjectAI.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Entities/Transports.h"
 
 /*#####
 ## go_icc_teleporter
@@ -671,6 +672,15 @@ struct LadyDeathwhisperElevator : public GameObjectAI, public TimerManager
 {
     LadyDeathwhisperElevator(GameObject* go) : GameObjectAI(go)
     {
+        // SetGoState() resumes an ElevatorTransport. Keep this lift at its
+        // initial stop until Deathwhisper's DONE transition explicitly starts
+        // it, matching the encounter progression gate used by the client.
+        if (InstanceData* instance = m_go->GetMap()->GetInstanceData())
+        {
+            if (instance->GetData(TYPE_LADY_DEATHWHISPER) != DONE)
+                static_cast<ElevatorTransport*>(m_go)->StopMovement();
+        }
+
         AddCustomAction(1, true, [&]()
         {
             HandleStateChange();
@@ -679,11 +689,23 @@ struct LadyDeathwhisperElevator : public GameObjectAI, public TimerManager
 
     void JustReachedStopPoint() override
     {
-        ResetTimer(1, 5000);
+        // The lift is progression beyond Deathwhisper. Do not let its
+        // automatic shuttle loop start before her encounter is complete.
+        if (InstanceData* instance = m_go->GetMap()->GetInstanceData())
+        {
+            if (instance->GetData(TYPE_LADY_DEATHWHISPER) == DONE)
+                ResetTimer(1, 5000);
+        }
     }
 
     void HandleStateChange()
     {
+        if (InstanceData* instance = m_go->GetMap()->GetInstanceData())
+        {
+            if (instance->GetData(TYPE_LADY_DEATHWHISPER) != DONE)
+                return;
+        }
+
         m_go->SetGoState(m_go->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
     }
 
