@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_blood_queen_lanathel
-SD%Complete: 60%
-SDComment: Timers; Most spells are dummy targeting spells and need core support; Quest 24756 event NYI.
+SD%Complete: 90%
+SDComment: Encounter mechanics and four raid difficulties implemented; Blood Infusion quest credit remains NYI.
 SDCategory: Icecrown Citadel
 EndScriptData */
 
@@ -26,17 +26,16 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                   = -1631121,
-    SAY_BITE_1                  = -1631122,
-    SAY_BITE_2                  = -1631123,
-    SAY_SHADOWS                 = -1631124,
-    SAY_PACT                    = -1631125,
-    SAY_MC                      = -1631126,
-    SAY_AIR_PHASE               = -1631127,
-    SAY_BERSERK                 = -1631128,
-    SAY_DEATH                   = -1631129,
-    SAY_SLAY_1                  = -1631195,
-    SAY_SLAY_2                  = -1631196,
+    SAY_AGGRO                   = 38048,
+    SAY_BITE_1                  = 38053,
+    SAY_BITE_2                  = 38058,
+    SAY_SHADOWS                 = 38061,
+    SAY_PACT                    = 38062,
+    SAY_AIR_PHASE               = 38063,
+    SAY_BERSERK                 = 38068,
+    SAY_DEATH                   = 38069,
+    SAY_SLAY_1                  = 38066,
+    SAY_SLAY_2                  = 38067,
 
     // all phases
     SPELL_BERSERK                   = 26662,
@@ -51,6 +50,17 @@ enum
     SPELL_DELIRIOUS_SLASH           = 72261,            // heroic only - triggers 71623 and 72264
     SPELL_PRESENCE_OF_DARKFALLEN    = 70994,            // heroic only - triggers 71958, 71959 and 71952
     SPELL_THIRST_QUENCHED           = 72154,            // related to quest 24756
+
+    SPELL_ESSENCE_10_NORMAL         = 70879,
+    SPELL_ESSENCE_25_NORMAL         = 71525,
+    SPELL_ESSENCE_10_HEROIC         = 71530,
+    SPELL_ESSENCE_25_HEROIC         = 71531,
+    SPELL_FRENZIED_10               = 70877,
+    SPELL_FRENZIED_25               = 71474,
+    SPELL_UNCONTROLLABLE_FRENZY     = 70923,
+    SPELL_BLOOD_MIRROR_DAMAGE       = 70821,
+    SPELL_BLOOD_MIRROR_VISUAL       = 71510,
+    SPELL_BLOOD_MIRROR_DUMMY        = 70838,
 
     // air phase
     SPELL_INCITE_TERROR             = 73070,
@@ -69,6 +79,30 @@ enum
     POINT_CENTER_GROUND             = 1,
     POINT_CENTER_AIR                = 2
 };
+
+static uint32 GetEssenceSpell(const Unit* unit)
+{
+    switch (unit->GetMap()->GetDifficulty())
+    {
+        case RAID_DIFFICULTY_25MAN_NORMAL: return SPELL_ESSENCE_25_NORMAL;
+        case RAID_DIFFICULTY_10MAN_HEROIC: return SPELL_ESSENCE_10_HEROIC;
+        case RAID_DIFFICULTY_25MAN_HEROIC: return SPELL_ESSENCE_25_HEROIC;
+        default: return SPELL_ESSENCE_10_NORMAL;
+    }
+}
+
+static uint32 GetFrenziedSpell(const Unit* unit)
+{
+    return unit->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL ||
+        unit->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC ? SPELL_FRENZIED_25 : SPELL_FRENZIED_10;
+}
+
+static bool IsVampire(const Unit* unit)
+{
+    return unit->HasAura(SPELL_ESSENCE_10_NORMAL) || unit->HasAura(SPELL_ESSENCE_25_NORMAL) ||
+        unit->HasAura(SPELL_ESSENCE_10_HEROIC) || unit->HasAura(SPELL_ESSENCE_25_HEROIC) ||
+        unit->HasAura(SPELL_FRENZIED_10) || unit->HasAura(SPELL_FRENZIED_25);
+}
 
 static const float aQueenPosition[2][3] =
 {
@@ -97,6 +131,46 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
     uint32 m_uiSwarmingShadowsTimer;
     uint32 m_uiDeliriousSlashTimer;
 
+    ObjectGuid m_offTankGuid;
+
+    void RemoveEncounterAuras()
+    {
+        if (!m_creature->GetMap())
+            return;
+
+        for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+        {
+            Player* player = playerRef.getSource();
+            if (!player)
+                continue;
+
+            uint32 const auras[] = { SPELL_ESSENCE_10_NORMAL, SPELL_ESSENCE_25_NORMAL, SPELL_ESSENCE_10_HEROIC,
+                SPELL_ESSENCE_25_HEROIC, SPELL_FRENZIED_10, SPELL_FRENZIED_25, SPELL_UNCONTROLLABLE_FRENZY,
+                SPELL_BLOOD_MIRROR_DAMAGE, SPELL_BLOOD_MIRROR_VISUAL, SPELL_BLOOD_MIRROR_DUMMY,
+                SPELL_PACT_OF_THE_DARKFALLEN };
+            for (uint32 aura : auras)
+                player->RemoveAurasDueToSpell(aura);
+        }
+    }
+
+    std::vector<Player*> GetEligiblePlayers(bool excludeTank = false, bool excludeVampires = false) const
+    {
+        std::vector<Player*> players;
+        Unit* tank = m_creature->GetVictim();
+        for (auto& playerRef : m_creature->GetMap()->GetPlayers())
+        {
+            Player* player = playerRef.getSource();
+            if (!player || !player->IsAlive() || !m_creature->CanAttack(player) || !m_creature->IsWithinDistInMap(player, 200.0f))
+                continue;
+            if (excludeTank && player == tank)
+                continue;
+            if (excludeVampires && IsVampire(player))
+                continue;
+            players.push_back(player);
+        }
+        return players;
+    }
+
     void Reset() override
     {
         m_uiPhase                = PHASE_GROUND;
@@ -110,24 +184,29 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
         m_uiPactDarkfallenTimer  = 15000;
         m_uiSwarmingShadowsTimer = 30000;
 
+        m_offTankGuid.Clear();
+        RemoveEncounterAuras();
+
         m_creature->SetAnimTier(AnimTier::Ground);
     }
 
     void JustReachedHome() override
     {
+        RemoveEncounterAuras();
         if (m_pInstance)
             m_pInstance->SetData(TYPE_QUEEN_LANATHEL, FAIL);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        DoBroadcastText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
+        DoBroadcastText(SAY_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_SHROUD_OF_SORROW, CAST_TRIGGERED);
+        RemoveEncounterAuras();
 
         if (m_pInstance)
         {
@@ -140,7 +219,8 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        DoScriptText(SAY_DEATH, m_creature);
+        DoBroadcastText(SAY_DEATH, m_creature);
+        RemoveEncounterAuras();
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_QUEEN_LANATHEL, DONE);
@@ -184,7 +264,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BLOODBOLT_WHIRL) == CAST_OK)
             {
-                DoScriptText(SAY_AIR_PHASE, m_creature);
+                DoBroadcastText(SAY_AIR_PHASE, m_creature);
                 m_uiPhase      = PHASE_AIR;
                 m_uiPhaseTimer = 7000;
             }
@@ -202,7 +282,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
-                    DoScriptText(SAY_BERSERK, m_creature);
+                    DoBroadcastText(SAY_BERSERK, m_creature);
                     m_uiEnrageTimer = 0;
                 }
             }
@@ -232,9 +312,14 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                 {
                     if (m_uiVampiricBiteTimer <= uiDiff)
                     {
-                        if (DoCastSpellIfCan(m_creature, SPELL_VAMPIRIC_BITE) == CAST_OK)
+                        std::vector<Player*> targets = GetEligiblePlayers(true, true);
+                        if (targets.empty())
+                            targets = GetEligiblePlayers(false, true);
+                        Player* target = targets.empty() ? nullptr : targets[urand(0, targets.size() - 1)];
+                        if (target && DoCastSpellIfCan(target, 71726) == CAST_OK)
                         {
-                            DoScriptText(urand(0, 1) ? SAY_BITE_1 : SAY_BITE_2, m_creature);
+                            target->CastSpell(target, GetEssenceSpell(target), TRIGGERED_OLD_TRIGGERED);
+                            DoBroadcastText(urand(0, 1) ? SAY_BITE_1 : SAY_BITE_2, m_creature);
                             m_uiVampiricBiteTimer = 0;
                         }
                     }
@@ -244,27 +329,57 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
 
                 if (m_uiBloodMirrorTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_MIRROR) == CAST_OK)
-                        m_uiBloodMirrorTimer = 5000;
+                    std::vector<Player*> targets = GetEligiblePlayers(true, false);
+                    if (!targets.empty() && m_creature->GetVictim())
+                    {
+                        std::sort(targets.begin(), targets.end(), [this](Player* left, Player* right)
+                        {
+                            return m_creature->GetVictim()->GetDistance(left) < m_creature->GetVictim()->GetDistance(right);
+                        });
+                        Player* offTank = targets.front();
+                        if (m_offTankGuid != offTank->GetObjectGuid())
+                        {
+                            m_offTankGuid = offTank->GetObjectGuid();
+                            offTank->CastSpell(m_creature->GetVictim(), SPELL_BLOOD_MIRROR_DAMAGE, TRIGGERED_OLD_TRIGGERED);
+                            m_creature->GetVictim()->CastSpell(offTank, SPELL_BLOOD_MIRROR_DUMMY, TRIGGERED_OLD_TRIGGERED);
+                            m_creature->CastSpell(m_creature->GetVictim(), SPELL_BLOOD_MIRROR_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                        }
+                    }
+                    m_uiBloodMirrorTimer = 2500;
                 }
                 else
                     m_uiBloodMirrorTimer -= uiDiff;
 
                 if (m_uiBloodboltTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_BLOODBOLT) == CAST_OK)
-                        m_uiBloodboltTimer = urand(15000, 20000);
+                    std::vector<Player*> targets = GetEligiblePlayers(true, false);
+                    uint32 count = m_pInstance && m_pInstance->Is25ManDifficulty() ? 4 : 2;
+                    while (count-- && !targets.empty())
+                    {
+                        uint32 index = urand(0, targets.size() - 1);
+                        m_creature->CastSpell(targets[index], 71446, TRIGGERED_OLD_TRIGGERED);
+                        targets.erase(targets.begin() + index);
+                    }
+                    m_uiBloodboltTimer = urand(10000, 15000);
                 }
                 else
                     m_uiBloodboltTimer -= uiDiff;
 
                 if (m_uiPactDarkfallenTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_PACT_OF_THE_DARKFALLEN) == CAST_OK)
+                    std::vector<Player*> targets = GetEligiblePlayers(true, false);
+                    uint32 count = m_pInstance && m_pInstance->Is25ManDifficulty() ? 3 : 2;
+                    if (targets.size() >= count)
                     {
-                        DoScriptText(SAY_PACT, m_creature);
-                        m_uiPactDarkfallenTimer = urand(20000, 25000);
+                        while (count--)
+                        {
+                            uint32 index = urand(0, targets.size() - 1);
+                            m_creature->CastSpell(targets[index], 71340, TRIGGERED_OLD_TRIGGERED);
+                            targets.erase(targets.begin() + index);
+                        }
+                        DoBroadcastText(SAY_PACT, m_creature);
                     }
+                    m_uiPactDarkfallenTimer = 30500;
                 }
                 else
                     m_uiPactDarkfallenTimer -= uiDiff;
@@ -273,7 +388,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SWARMING_SHADOWS) == CAST_OK)
                     {
-                        DoScriptText(SAY_SHADOWS, m_creature);
+                        DoBroadcastText(SAY_SHADOWS, m_creature);
                         m_uiSwarmingShadowsTimer = urand(30000, 35000);
                     }
                 }
@@ -321,6 +436,43 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
     }
 };
 
+// Player bite: consume Bloodthirst, make the bitten target a vampire, and keep
+// the biter from being mind controlled when the bite succeeds.
+struct spell_blood_queen_vampiric_bite : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        return target && !IsVampire(target) ? SPELL_CAST_OK : SPELL_FAILED_BAD_TARGETS;
+    }
+
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target || missInfo != SPELL_MISS_NONE)
+            return;
+
+        caster->RemoveAurasDueToSpell(GetFrenziedSpell(caster), nullptr, AURA_REMOVE_BY_DEFAULT);
+        caster->CastSpell(caster, GetEssenceSpell(caster), TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, GetEssenceSpell(target), TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 71952, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct spell_blood_queen_frenzied_bloodthirst : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+        {
+            Unit* target = aura->GetTarget();
+            if (target && !target->HasAura(GetEssenceSpell(target)))
+                target->CastSpell(target, SPELL_UNCONTROLLABLE_FRENZY, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 UnitAI* GetAI_boss_blood_queen_lanathel(Creature* pCreature)
 {
     return new boss_blood_queen_lanathelAI(pCreature);
@@ -332,4 +484,7 @@ void AddSC_boss_blood_queen_lanathel()
     pNewScript->Name = "boss_blood_queen_lanathel";
     pNewScript->GetAI = &GetAI_boss_blood_queen_lanathel;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_blood_queen_vampiric_bite>("spell_blood_queen_vampiric_bite");
+    RegisterSpellScript<spell_blood_queen_frenzied_bloodthirst>("spell_blood_queen_frenzied_bloodthirst");
 }
