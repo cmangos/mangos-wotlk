@@ -1932,7 +1932,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
     UnitList& tempUnitList = data.tmpUnitList[targetB];
     GameObjectList& tempGOList = data.tmpGOList[targetB];
- 
+
     switch (targetMode)
     {
         case TARGET_LOCATION_UNIT_RANDOM_SIDE:
@@ -4094,15 +4094,16 @@ void Spell::update(uint32 difftime)
     Position pos = m_trueCaster->GetPosition(m_trueCaster->GetTransport());
     // check if the player or unit caster has moved before the spell finished (exclude casting on vehicles)
     if ((m_trueCaster->IsUnit() && m_timer != 0) &&
-        (m_castPositionX != pos.GetPositionX() || m_castPositionY != pos.GetPositionY() || m_castPositionZ != pos.GetPositionZ()) &&
-            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)))
+            (m_castPositionX != pos.GetPositionX() || m_castPositionY != pos.GetPositionY() || m_castPositionZ != pos.GetPositionZ()) &&
+            (m_spellInfo->Effect[EFFECT_INDEX_0] != SPELL_EFFECT_STUCK || !m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLINGFAR)) &&
+            (!m_trueCaster->m_movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT)))
     {
         // always cancel for channeled spells
         if (m_spellState == SPELL_STATE_CHANNELING)
         {
             if (m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVING && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_ACTIONS_DURING_CHANNEL))
                 cancel();
-        }            
+        }
         // don't cancel for melee, autorepeat, triggered and instant spells
         else if (!IsNextMeleeSwingSpell(m_spellInfo) && !IsAutoRepeat() && !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
             cancel();
@@ -5642,7 +5643,8 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Caster aura req check if need
         if (m_spellInfo->casterAuraSpell && !m_caster->HasAura(m_spellInfo->casterAuraSpell))
-            return SPELL_FAILED_CASTER_AURASTATE;
+            if (!m_triggeredBySpellInfo || m_triggeredBySpellInfo->Id != m_spellInfo->casterAuraSpell)
+                return SPELL_FAILED_CASTER_AURASTATE;
         if (m_spellInfo->excludeCasterAuraSpell)
         {
             // Special cases of non existing auras handling
@@ -5812,7 +5814,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         if (Creature const* targetCreature = dynamic_cast<Creature*>(target))
                             if ((!targetCreature->GetLootRecipientGuid().IsEmpty()) && !targetCreature->IsTappedBy(static_cast<Player*>(m_trueCaster)))
                                 return SPELL_FAILED_CANT_CAST_ON_TAPPED;
-                    
+
                     // Do not allow spells to complete which are targeting players that are invisible to the caster since the time of cast start
                     if (!m_trueCaster->IsGameObject() && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !IsPositiveEffectMask(m_spellInfo, affectedMask, m_trueCaster, target) && !target->IsVisibleForOrDetect(m_caster, m_trueCaster, false, false, true, false, m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT)))
                         return SPELL_FAILED_BAD_TARGETS;
@@ -6248,7 +6250,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                             break;
                         }
                     }
-                            
+
                     if (inCombat)
                         return SPELL_FAILED_TARGET_IN_COMBAT;
                 }
@@ -7045,7 +7047,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (!expectedTarget->IsVehicle())
                         return SPELL_FAILED_BAD_TARGETS;
 
-                    if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS))
+                    // It is possible to change between vehicles that are boarded on each other
+                    /*if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
                     {
                         // It is possible to change between vehicles that are boarded on each other
                         if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
@@ -7056,10 +7059,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                             if (!boardedOnEachOther)
                                 boardedOnEachOther = expectedTarget->GetVehicleInfo()->HasOnBoard(m_caster);
 
-                            if (!boardedOnEachOther)
-                                return SPELL_FAILED_NOT_ON_TRANSPORT;
-                        }
-                    }
+                        if (!boardedOnEachOther)
+                            return SPELL_FAILED_NOT_ON_TRANSPORT;
+                    }*/
 
                     if (!expectedTarget->GetVehicleInfo()->CanBoard(m_caster))
                         return SPELL_FAILED_BAD_TARGETS;
@@ -8374,10 +8376,10 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, bool n
     {
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX6_CAN_TARGET_UNTARGETABLE) && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNTARGETABLE))
             return false;
-        
+
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_ONLY_PEACEFUL_TARGETS) && target->IsInCombat())
             return false;
-    }    
+    }
 
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NOT_ON_AOE_IMMUNE) || m_spellInfo->HasAttribute(SPELL_ATTR_EX5_TREAT_AS_AREA_EFFECT)) // rest done in aoe code
         if (target->IsAOEImmune())
@@ -8731,7 +8733,7 @@ float Spell::GetSpellSpeed() const
 
     if (m_overrideSpeed)
         return m_overridenSpeed;
-    
+
     return m_spellInfo->speed;
 }
 

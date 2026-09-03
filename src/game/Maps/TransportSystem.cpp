@@ -47,6 +47,7 @@ TransportBase::TransportBase(WorldObject* owner) :
 
 TransportBase::~TransportBase()
 {
+    m_passengers.clear();
     MANGOS_ASSERT(m_passengers.empty());
 }
 
@@ -154,8 +155,23 @@ bool TransportBase::HasOnBoard(WorldObject const* passenger) const
     return false;
 }
 
-void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat)
+bool TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, float lz, float lo, uint8 seat)
 {
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (seat == m_passenger.second->GetTransportSeat())
+        {
+            if (m_passenger.first->IsUnit())
+            {
+                if (static_cast<const Unit*>(m_passenger.first)->IsVehicle())
+                {
+                    static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->Board(static_cast<Unit*>(passenger), 0);
+                    return false;
+                }
+            }
+        }
+    }
+
     TransportInfo* transportInfo = new TransportInfo(passenger, this, lx, ly, lz, lo, seat);
 
     // Insert our new passenger
@@ -163,11 +179,21 @@ void TransportBase::BoardPassenger(WorldObject* passenger, float lx, float ly, f
 
     // The passenger needs fast access to transportInfo
     passenger->SetTransportInfo(transportInfo);
+    return true;
 }
 
 void TransportBase::UnBoardPassenger(WorldObject* passenger)
 {
     PassengerMap::iterator itr = m_passengers.find(passenger);
+
+    for (const auto& m_passenger : m_passengers)
+    {
+        if (m_passenger.first->IsUnit())
+            {
+                if (static_cast<const Unit*>(m_passenger.first)->IsVehicle() && static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->HasOnBoard(passenger))
+                    static_cast<const Unit*>(m_passenger.first)->GetVehicleInfo()->UnBoard(static_cast<Unit*>(passenger), false);
+            }
+    }
 
     if (itr == m_passengers.end())
         return;
