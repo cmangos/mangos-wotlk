@@ -360,7 +360,9 @@ void WorldSession::HandleZoneUpdateOpcode(WorldPacket& recv_data)
 
     DETAIL_LOG("WORLD: Received opcode CMSG_ZONEUPDATE: newzone is %u", newZone);
 
-    GetPlayer()->SetDelayedZoneUpdate(true, newZone);
+    Unit* mover = _player->GetMover();
+    if (mover->IsPlayer()) // TODO: Need to handle unit case as well
+        static_cast<Player*>(mover)->SetDelayedZoneUpdate(true, newZone);
 
     if (!IsInitialZoneUpdated() && _player->IsTaxiFlying())
         if (sWorld.getConfig(CONFIG_BOOL_TAXI_FLIGHT_CHAT_FIX))
