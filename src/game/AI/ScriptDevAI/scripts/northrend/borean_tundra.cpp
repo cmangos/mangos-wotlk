@@ -566,7 +566,7 @@ struct ArcaneChainsBorean : public SpellScript, public AuraScript
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
         Unit* target = spell->m_targets.getUnitTarget();
-        if (!target || target->GetEntry() != NPC_BERYL_SORCERER)
+        if (!target || target->GetEntry() != NPC_BERYL_SORCERER || target->GetHealthPercent() > 30.0f) // only for wounded creatures
             return SPELL_FAILED_BAD_TARGETS;
         return SPELL_CAST_OK;
     }
@@ -579,10 +579,6 @@ struct ArcaneChainsBorean : public SpellScript, public AuraScript
         Unit* caster = aura->GetCaster();
         Unit* target = aura->GetTarget();
         if (!caster || !caster->IsPlayer() || !target->IsCreature())
-            return;
-
-        // only for wounded creatures
-        if (target->GetHealthPercent() > 30.0f)
             return;
 
         // spawn the captured sorcerer, apply dummy aura on the summoned and despawn
