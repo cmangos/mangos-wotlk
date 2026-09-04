@@ -582,7 +582,7 @@ struct ArcaneChainsBorean : public SpellScript, public AuraScript
             return;
 
         // spawn the captured sorcerer, apply dummy aura on the summoned and despawn
-        caster->CastSpell(target, SPELL_SUMMON_CHAINS_CHARACTER, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(caster, SPELL_SUMMON_CHAINS_CHARACTER, TRIGGERED_OLD_TRIGGERED);
         caster->CastSpell(nullptr, SPELL_ARCANE_CHAINS_CHANNEL, TRIGGERED_OLD_TRIGGERED);
         static_cast<Creature*>(target)->ForcedDespawn();
     }
