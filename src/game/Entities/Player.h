@@ -1625,7 +1625,8 @@ class Player : public Unit
 
         void SetBindPoint(ObjectGuid guid) const;
         void SendTalentWipeConfirm(ObjectGuid guid) const;
-        void RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker);
+        float CalculateRageConversion() const;
+        void RewardRage(uint32 damage, bool attacker);
         void SendPetSkillWipeConfirm() const;
         void RegenerateAll(uint32 diff = REGEN_TIME_FULL);
         void Regenerate(Powers power, uint32 diff);

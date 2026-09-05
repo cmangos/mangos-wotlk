@@ -209,7 +209,7 @@ enum HitInfo
     // 0x00100000
     HITINFO_SWINGNOHITSOUND     = 0x00200000,               // guessed
     // 0x00400000
-    HITINFO_UNK22               = 0x00800000
+    HITINFO_RAGE_GAIN           = 0x00800000
 };
 
 struct FactionTemplateEntry;
@@ -688,13 +688,14 @@ inline const char* UnitCombatDieSideText(UnitCombatDieSide side)
 
 struct CleanDamage
 {
-    CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome, bool _takenOrAbsorbedDamage) :
-        damage(_damage), attackType(_attackType), hitOutCome(_hitOutCome), takenOrAbsorbedDamage(_takenOrAbsorbedDamage) {}
+    CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome, bool _takenOrAbsorbedDamage, uint32 _rageGained) :
+        damage(_damage), attackType(_attackType), hitOutCome(_hitOutCome), takenOrAbsorbedDamage(_takenOrAbsorbedDamage), rageGained(_rageGained) {}
 
     uint32 damage; // only used for rage generation
     WeaponAttackType attackType;
     MeleeHitOutcome hitOutCome;
     bool takenOrAbsorbedDamage;
+    uint32 rageGained;
 };
 
 struct SubDamageInfo
@@ -716,6 +717,7 @@ struct CalcDamageInfo
     uint32 blocked_amount;
     uint32 HitInfo;
     uint8  TargetState;
+    uint32 rageGained;
     // Helper
     WeaponAttackType attackType; //
     uint32 procAttacker;
