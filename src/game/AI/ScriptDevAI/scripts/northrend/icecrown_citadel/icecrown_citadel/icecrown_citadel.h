@@ -366,6 +366,12 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         // Open Putricide door in a few seconds
         void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
 
+        // Frozen Throne platform state used by the Lich King transitions.
+        void SetLichKingPlatformDamaged(bool damaged);
+        void SetLichKingPlatformDestroyed();
+        void SetLichKingPlatformWarning(bool active);
+        void CleanupLichKingPlayer(Player* player, bool forceCombatStop = false);
+
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = nullptr, uint32 uiMiscvalue1 = 0) const override;
 
