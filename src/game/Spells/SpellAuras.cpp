@@ -3207,22 +3207,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 return;
             }
-            case 70308:                                     // Mutated Transformation
-            {
-                if (target->GetMap()->IsDungeon())
-                {
-                    uint32 spellId;
-
-                    Difficulty diff = target->GetMap()->GetDifficulty();
-                    if (diff == RAID_DIFFICULTY_10MAN_NORMAL || diff == RAID_DIFFICULTY_10MAN_HEROIC)
-                        spellId = 70311;
-                    else
-                        spellId = 71503;
-
-                    target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                }
-                return;
-            }
         }
 
         // Living Bomb
@@ -5851,18 +5835,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                         pCaster->CastSpell(target, GetSpellProto()->EffectTriggerSpell[GetEffIndex()], TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 }
                 return;
-            case 70405:                                     // Mutated Transformation (10n)
-            case 72508:                                     // Mutated Transformation (25n)
-            case 72509:                                     // Mutated Transformation (10h)
-            case 72510:                                     // Mutated Transformation (25h)
-                if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
-                {
-                    if (target->IsVehicle() && target->GetTypeId() == TYPEID_UNIT)
-                    {
-                        target->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
-                        ((Creature*)target)->ForcedDespawn();
-                    }
-                }
             default:
                 break;
         }

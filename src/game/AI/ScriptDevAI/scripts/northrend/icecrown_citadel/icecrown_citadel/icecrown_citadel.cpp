@@ -82,6 +82,22 @@ enum
     SPELL_GUNSHIP_ACHIEVEMENT       = 72959,
     SPELL_TELEPORT_PLAYERS_VICTORY  = 72340,
     SPELL_CHECK_FOR_PLAYERS         = 70332,                // check for aura 70120 or 70121 on player; if not found cast 67335
+
+    // Putricide encounter auras which can persist if the world server stops
+    // during an attempt.
+    SPELL_PUTRICIDE_UNBOUND_10N      = 70911,
+    SPELL_PUTRICIDE_UNBOUND_25N      = 72854,
+    SPELL_PUTRICIDE_UNBOUND_10H      = 72855,
+    SPELL_PUTRICIDE_UNBOUND_25H      = 72856,
+    SPELL_PUTRICIDE_MUTATED_10N      = 72451,
+    SPELL_PUTRICIDE_MUTATED_25N      = 72463,
+    SPELL_PUTRICIDE_MUTATED_10H      = 72671,
+    SPELL_PUTRICIDE_MUTATED_25H      = 72672,
+    SPELL_PUTRICIDE_SEARCHER         = 70917,
+    SPELL_PUTRICIDE_SICKNESS         = 70953,
+    SPELL_PUTRICIDE_PROTECTION       = 70955,
+    SPELL_PUTRICIDE_OOZE_VARIABLE    = 74118,
+    SPELL_PUTRICIDE_GAS_VARIABLE     = 74119,
 };
 
 static const DialogueEntry aCitadelDialogue[] =
@@ -198,6 +214,23 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
 
 void instance_icecrown_citadel::OnPlayerEnter(Player* pPlayer)
 {
+    if (m_auiEncounter[TYPE_PROFESSOR_PUTRICIDE] != IN_PROGRESS)
+    {
+        uint32 const putricideAuras[] =
+        {
+            SPELL_PUTRICIDE_UNBOUND_10N, SPELL_PUTRICIDE_UNBOUND_25N,
+            SPELL_PUTRICIDE_UNBOUND_10H, SPELL_PUTRICIDE_UNBOUND_25H,
+            SPELL_PUTRICIDE_MUTATED_10N, SPELL_PUTRICIDE_MUTATED_25N,
+            SPELL_PUTRICIDE_MUTATED_10H, SPELL_PUTRICIDE_MUTATED_25H,
+            SPELL_PUTRICIDE_SEARCHER, SPELL_PUTRICIDE_SICKNESS,
+            SPELL_PUTRICIDE_PROTECTION, SPELL_PUTRICIDE_OOZE_VARIABLE,
+            SPELL_PUTRICIDE_GAS_VARIABLE,
+        };
+
+        for (uint32 spellId : putricideAuras)
+            pPlayer->RemoveAurasDueToSpell(spellId);
+    }
+
     if (!m_uiTeam)                      // very first player to enter
     {
         m_uiTeam = pPlayer->GetTeam();
@@ -416,7 +449,13 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
         case GO_ORANGE_PLAGUE:
         case GO_GREEN_PLAGUE:
         case GO_GREEN_VALVE:
+            break;
         case GO_DRINK_ME:
+            // The abomination table is available only while Putricide is in
+            // the phases which use it. It must not remain clickable before a
+            // pull, after a wipe/death, or after the phase-three transition.
+            DoToggleGameObjectFlags(pGo->GetObjectGuid(), GO_FLAG_NO_INTERACT,
+                m_auiEncounter[TYPE_PROFESSOR_PUTRICIDE] != IN_PROGRESS);
             break;
         case GO_PLAGUE_SIGIL:
             if (m_auiEncounter[TYPE_PROFESSOR_PUTRICIDE] == DONE)
@@ -792,7 +831,12 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_PROFESSOR_PUTRICIDE:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_SCIENTIST_DOOR);
+            // This door is opened by the completed trap gauntlet and becomes
+            // Putricide's combat boundary afterwards.  Assign its desired
+            // state instead of toggling it, because repeated state delivery
+            // otherwise closes an already-open progression door.
+            DoUseOpenableObject(GO_SCIENTIST_DOOR,
+                uiData != IN_PROGRESS && m_auiEncounter[TYPE_PLAGUE_WING_ENTRANCE] == DONE);
             if (uiData == DONE)
             {
                 // deactivate the sigil and enable the teleporter if possible
@@ -803,10 +847,13 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                         pTransporter->SetGoState(GO_STATE_ACTIVE);
                 }
             }
-            else if (uiData == FAIL)
-                DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, false);
             else if (uiData == IN_PROGRESS)
+            {
+                DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, false);
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_NAUSEA, true);
+            }
+            else
+                DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, true);
             break;
         case TYPE_BLOOD_PRINCE_COUNCIL:
             m_auiEncounter[uiType] = uiData;
@@ -918,7 +965,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             // combat door
             DoUseOpenableObject(GO_SCIENTIST_DOOR_COLLISION, uiData != IN_PROGRESS);
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_SCIENTIST_DOOR);
+                DoUseOpenableObject(GO_SCIENTIST_DOOR, true);
             // combat doors with custom anim
             else if (uiData == IN_PROGRESS)
             {

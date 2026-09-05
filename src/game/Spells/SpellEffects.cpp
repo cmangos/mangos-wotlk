@@ -3635,13 +3635,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 71693:                                 // Cleanse Mutation
-                {
-                    if (unitTarget)
-                        unitTarget->RemoveAurasDueToSpell(70405);
-
-                    return;
-                }
                 case 71718:                                 // Conjure Flame
                 case 72040:                                 // Conjure Empowered Flame
                 {
@@ -10058,36 +10051,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 70079:                                 // Ooze Flood Periodic Trigger Cancel
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
-                    return;
-                }
-                case 71255:                                 // Choking Gas Bomb
-                {
-                    if (!unitTarget)
-                        return;
-
-                    switch (urand(0, 2))
-                    {
-                        case 0:
-                            unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                            unitTarget->CastSpell(unitTarget, 71275, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                        case 1:
-                            unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                            unitTarget->CastSpell(unitTarget, 71276, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                        case 2:
-                            unitTarget->CastSpell(unitTarget, 71275, TRIGGERED_OLD_TRIGGERED);
-                            unitTarget->CastSpell(unitTarget, 71276, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                    }
-                    return;
-                }
-                case 71620:                                 // Tear Gas Cancel
                 {
                     if (!unitTarget)
                         return;
