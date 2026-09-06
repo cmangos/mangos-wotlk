@@ -27,19 +27,19 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO                           = -1603126,
-    SAY_SHOCKWAVE                       = -1603127,
-    SAY_GRAB                            = -1603128,
-    SAY_ARM_LOST_LEFT                   = -1603129,
-    SAY_ARM_LOST_RIGHT                  = -1603130,
-    SAY_SLAY_1                          = -1603131,
-    SAY_SLAY_2                          = -1603132,
-    SAY_BERSERK                         = -1603133,
-    SAY_DEATH                           = -1603134,
+    SAY_AGGRO                           = 34133,
+    SAY_SHOCKWAVE                       = 34140,
+    SAY_GRAB                            = 34138,
+    SAY_ARM_LOST_LEFT                   = 34143,
+    SAY_ARM_LOST_RIGHT                  = 34144,
+    SAY_SLAY_1                          = 34135,
+    SAY_SLAY_2                          = 34137,
+    SAY_BERSERK                         = 34142,
+    SAY_DEATH                           = 34141,
 
-    EMOTE_ARM_RIGHT                     = -1603135,
-    EMOTE_ARM_LEFT                      = -1603136,
-    EMOTE_STONE_GRIP                    = -1603137,
+    EMOTE_ARM_RIGHT                     = 34296,
+    EMOTE_ARM_LEFT                      = 34295,
+    EMOTE_STONE_GRIP                    = 33864,
 
     // Kologarn
     SPELL_INSTAKILL_KOLOGARN_ARM        = 63628,                // kill both arms on death
@@ -193,10 +193,10 @@ struct boss_kologarnAI : public BossAI
         m_disarmedStatus            = false;
         ResetTimer(KOLOGARN_INIT_ARMS, 5s);
 
-        DoCastSpellIfCan(m_creature, SPELL_REDUCE_PARRY_CHANCE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_REDUCE_PARRY_CHANCE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         BossAI::JustDied();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
@@ -423,7 +423,7 @@ struct boss_kologarnAI : public BossAI
             }
             case KOLOGARN_BERSERK:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                 {
                     if (m_instance)
                     {
@@ -522,6 +522,7 @@ struct npc_rubble_stalkerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
+// 63343, 63701 - Focused Eyebeam Summon
 struct FocusedEyebeamSummon : SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
