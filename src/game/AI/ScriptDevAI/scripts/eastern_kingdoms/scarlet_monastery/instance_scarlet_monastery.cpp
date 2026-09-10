@@ -46,30 +46,33 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        case NPC_SORCERER:
-        case NPC_MYRMIDON:
-        case NPC_DEFENDER:
-        case NPC_CHAPLAIN: 
-        case NPC_WIZARD:
-        case NPC_CENTURION:
-        case NPC_CHAMPION: 
-        case NPC_ABBOT:    
-        case NPC_MONK:
-        case NPC_FAIRBANKS:
-            m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
-            break;
+         //church
+         case NPC_RABBIT:
+         //cemetery
+        case NPC_INTERROGATOR_VISHAS:
+        case NPC_RAT:
+        case NPC_SCARLET_SENTRY:
+        case NPC_SCARLET_SCRYER:
+        case NPC_UNFETTERED_SPIRIT:
+        case NPC_SCARLET_TORTURER:
+        case NPC_ANGUISHED_DEAD:
+        case NPC_HAUNTING_PHANTASM:
+        case NPC_FALLON_CHAMPION:
+        case NPC_BLOODMAGE_THALNOS:
+        case NPC_SUFFERING_VICTIM:            
+           return;        
+        case NPC_VORREL:
+        case NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY:
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+           return; 
         case NPC_WHITEMANE:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_MOGRAINE:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
-            break;
-        case NPC_VORREL:
-        case NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();           
             break;
     }
+     m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
 }
 
 void instance_scarlet_monastery::OnCreatureDeath(Creature* pCreature)
