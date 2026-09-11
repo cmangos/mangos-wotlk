@@ -2046,6 +2046,10 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
             break;
     }
 
+    // Set after the switch above (it assigns HitInfo) and before the immunity/evade early returns
+    if (IsPlayerControlled() && pVictim->IsPlayerControlled())
+        calcDamageInfo->HitInfo |= HITINFO_PVP;
+
     bool immune = true;
 
     for (uint8 i = 0; i < m_weaponDamageInfo.weapon[calcDamageInfo->attackType].lines; i++)

@@ -205,7 +205,7 @@ enum HitInfo
     HITINFO_GLANCING            = 0x00010000,
     HITINFO_CRUSHING            = 0x00020000,
     HITINFO_NOACTION            = 0x00040000,               // guessed
-    // 0x00080000
+    HITINFO_PVP                 = 0x00080000,               // always set if both attacker and victim are player controlled
     // 0x00100000
     HITINFO_SWINGNOHITSOUND     = 0x00200000,               // guessed
     // 0x00400000
