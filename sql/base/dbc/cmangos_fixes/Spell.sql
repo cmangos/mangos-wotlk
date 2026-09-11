@@ -3839,6 +3839,11 @@ UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 54548;
 -- Summon Ghouls On Scarlet Crusade - shouldnt have targets limit (its an AOE)
 UPDATE spell_template SET MaxAffectedTargets = 0 WHERE Id IN (51904,54522);
 
+-- Channeling shouldnt be interupted by movement, jump , etc
+UPDATE spell_template set AttributesEx5  = AttributesEx5|0x00000001 WHERE id IN (
+46607    -- Drake Harpoon
+);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

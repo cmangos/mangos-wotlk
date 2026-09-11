@@ -4136,7 +4136,7 @@ void Spell::update(uint32 difftime)
                 if (m_trueCaster->IsUnit())
                 {
                     // check if player has jumped before the channeling finished
-                    if (m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING))
+                    if (m_caster->m_movementInfo.HasMovementFlag(MOVEFLAG_FALLING) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_ACTIONS_DURING_CHANNEL))
                     {
                         cancel();
                         return;

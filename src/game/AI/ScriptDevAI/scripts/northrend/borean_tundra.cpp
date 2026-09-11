@@ -25,8 +25,6 @@ EndScriptData */
 npc_nesingwary_trapper
 npc_sinkhole_kill_credit
 npc_lurgglbr
-npc_beryl_sorcerer
-npc_captured_beryl_sorcerer
 npc_nexus_drake_hatchling
 npc_scourged_flamespitter
 npc_bonker_togglevolt
@@ -544,77 +542,6 @@ UnitAI* GetAI_npc_lurgglbr(Creature* pCreature)
 {
     return new npc_lurgglbrAI(pCreature);
 }
-
-/*#####
-# npc_beryl_sorcerer
-#####*/
-
-enum
-{
-    SPELL_ARCANE_CHAINS                 = 45611,
-    SPELL_ARCANE_CHAINS_CHANNEL         = 45630,
-    SPELL_SUMMON_CHAINS_CHARACTER       = 45625,                // triggers 45626
-    // SPELL_ENSLAVED_ARCANE_CHAINS     = 45632,                // chain visual - purpose unk, probably used on quest end
-
-    NPC_BERYL_SORCERER                  = 25316,
-    NPC_CAPTURED_BERYL_SORCERER         = 25474,
-};
-
-// 45611 - Arcane Chains
-struct ArcaneChainsBorean : public SpellScript, public AuraScript
-{
-    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
-    {
-        Unit* target = spell->m_targets.getUnitTarget();
-        if (!target || target->GetEntry() != NPC_BERYL_SORCERER)
-            return SPELL_FAILED_BAD_TARGETS;
-        return SPELL_CAST_OK;
-    }
-
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        if (aura->GetEffIndex() != EFFECT_INDEX_0 || !apply)
-            return;
-
-        Unit* caster = aura->GetCaster();
-        Unit* target = aura->GetTarget();
-        if (!caster || !caster->IsPlayer() || !target->IsCreature())
-            return;
-
-        // only for wounded creatures
-        if (target->GetHealthPercent() > 30.0f)
-            return;
-
-        // spawn the captured sorcerer, apply dummy aura on the summoned and despawn
-        caster->CastSpell(target, SPELL_SUMMON_CHAINS_CHARACTER, TRIGGERED_OLD_TRIGGERED);
-        caster->CastSpell(nullptr, SPELL_ARCANE_CHAINS_CHANNEL, TRIGGERED_OLD_TRIGGERED);
-        static_cast<Creature*>(target)->ForcedDespawn();
-    }
-};
-
-/*#####
-# npc_captured_beryl_sorcerer
-#####*/
-
-// 45630 - Arcane Chains: Chain Channel
-struct ArcaneChainsChannelBorean : public AuraScript
-{
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        if (aura->GetEffIndex() != EFFECT_INDEX_0 || !apply || !aura->GetTarget()->IsCreature())
-            return;
-
-        Unit* caster = aura->GetCaster();
-        Unit* target = aura->GetTarget();
-        if (!caster || !caster->IsPlayer())
-            return;
-
-        // follow the caster
-        static_cast<Player*>(caster)->KilledMonsterCredit(NPC_CAPTURED_BERYL_SORCERER);
-        target->GetMotionMaster()->MoveFollow(caster, target->GetDistance(caster), M_PI_F - target->GetAngle(caster));
-        return;
-    }
-};
 
 /*######
 ## npc_nexus_drake_hatchling
@@ -1707,6 +1634,77 @@ struct TheUltrasonicScrewdriver : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_ARCANE_CHAINS                 = 45611,
+    SPELL_ARCANE_CHAINS_CHANNEL         = 45630,
+    SPELL_SUMMON_CHAINS_CHARACTER       = 45625,                // triggers 45626
+    SPELL_ENSLAVED_ARCANE_CHAINS        = 45632,                // chain visual on spawned mob
+
+    NPC_BERYL_SORCERER                  = 25316,
+    NPC_CAPTURED_BERYL_SORCERER         = 25474,
+};
+
+// 45611 - Arcane Chains
+struct ArcaneChainsBorean : public SpellScript, public AuraScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetEntry() != NPC_BERYL_SORCERER || target->GetHealthPercent() > 30.0f) // only for wounded creatures
+            return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0 || !apply)
+            return;
+
+        Unit* caster = aura->GetCaster();
+        Unit* target = aura->GetTarget();
+        if (!caster || !caster->IsPlayer() || !target->IsCreature())
+            return;
+
+        // spawn the captured sorcerer, apply dummy aura on the summoned and despawn
+        target->CastSpell(caster, SPELL_SUMMON_CHAINS_CHARACTER, TRIGGERED_OLD_TRIGGERED);
+        if (target->AI())
+        {
+            target->AI()->SetCombatScriptStatus(true);
+            target->AI()->SetMeleeEnabled(false);
+            target->SetTarget(nullptr);
+        }
+        static_cast<Creature*>(target)->ForcedDespawn(1000);
+    }
+};
+
+// 45625 - Arcane Chains: Character Force Cast
+struct ArcaneChainsCharacterForceCast : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || effIdx != EFFECT_INDEX_0)
+            return;
+
+        target->CastSpell(spell->GetCaster(), spell->m_spellInfo->CalculateSimpleValue(effIdx), TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+// 45626 - Arcane Chains: Summon Chained Mage Hunter
+struct ACSummonChainedMageHunter : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        Unit* caster = spell->GetCaster();
+
+        summon->SelectLevel(caster->GetLevel());
+        summon->SetFactionTemporary(caster->GetFaction());
+        summon->CastSpell(caster, SPELL_ENSLAVED_ARCANE_CHAINS, TRIGGERED_OLD_TRIGGERED); // 45632 - Enslaved Arcane Chains: Character Force Cast
+        summon->GetMotionMaster()->MoveFollow(caster, summon->GetDistance(caster), M_PI_F, true);
+    }
+};
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript = new Script;
@@ -1789,7 +1787,8 @@ void AddSC_borean_tundra()
     RegisterSpellScript<PlantWarsongBanner>("spell_plant_warsong_banner");
     RegisterSpellScript<HasEatenRecently>("spell_has_eaten_recently");
     RegisterSpellScript<ArcaneChainsBorean>("spell_arcane_chains_borean");
-    RegisterSpellScript<ArcaneChainsChannelBorean>("spell_arcane_chains_channel_borean");
+    RegisterSpellScript<ArcaneChainsCharacterForceCast>("spell_arcane_chains_character_force_cast");
+    RegisterSpellScript<ACSummonChainedMageHunter>("spell_ac_summon_chained_mage_hunter");
     RegisterSpellScript<DrakeHarpoonBorean>("spell_drake_harpoon_borean");
     RegisterSpellScript<RedDragonblood>("spell_red_dragonblood");
     RegisterSpellScript<SubduedBorean>("spell_subdued_borean");

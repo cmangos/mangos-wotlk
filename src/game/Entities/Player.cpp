@@ -2509,31 +2509,31 @@ void Player::RemoveFromWorld()
     Unit::RemoveFromWorld();
 }
 
-void Player::RewardRage(uint32 damage, uint32 weaponSpeedHitFactor, bool attacker)
+float Player::CalculateRageConversion() const
+{
+    return float((0.0091107836 * GetLevel() * GetLevel()) + 3.225598133 * GetLevel()) + 4.2652911f;
+}
+
+void Player::RewardRage(uint32 damage, bool attacker)
 {
     float addRage;
 
-    float rageconversion = float((0.0091107836 * GetLevel() * GetLevel()) + 3.225598133 * GetLevel()) + 4.2652911f;
-
-    if (attacker)
+    if (!attacker) // attacker is already computed
     {
-        addRage = ((damage / rageconversion * 7.5f + weaponSpeedHitFactor) / 2.0f);
-
-        // talent who gave more rage on attack
-        addRage *= 1.0f + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT) / 100.0f;
-    }
-    else
-    {
-        addRage = damage / rageconversion * 2.5f;
+        addRage = damage / CalculateRageConversion() * 2.5f;
 
         // Berserker Rage effect
         if (HasAura(18499, EFFECT_INDEX_0))
             addRage *= 1.3f;
+
+        addRage *= sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RAGE_INCOME);
+
+        addRage = uint32(addRage * 10);
     }
+    else
+        addRage = damage;
 
-    addRage *= sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_RAGE_INCOME);
-
-    ModifyPower(POWER_RAGE, uint32(addRage * 10));
+    ModifyPower(POWER_RAGE, addRage);
 }
 
 void Player::RegenerateAll(uint32 diff)
