@@ -180,91 +180,97 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     }
     else
         GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
-    auto lambda = [this, loc, old_loc, mEntry, mInstance](Map* map)
+    auto lambda = [playerGuid = GetPlayer()->GetObjectGuid(), loc, old_loc, mEntry, mInstance](Map* map)
     {
-        if (GenericTransport* transport = map->GetTransport(GetPlayer()->m_teleportTransport))
+        Player* player = map->GetPlayer(playerGuid);
+        if (!player)
+            return;
+
+        if (GenericTransport* transport = map->GetTransport(player->m_teleportTransport))
         {
             if (transport->GetMapId() == loc.mapid)
             {
-                transport->AddPassenger(GetPlayer(), false);
-                transport->UpdatePassengerPosition(GetPlayer());
-                if (GetPlayer()->IsVehicle()) // when teleporting onto transport, protocol doesnt support summoning accessories
-                    GetPlayer()->GetVehicleInfo()->DisableAccessoryInit();
+                transport->AddPassenger(player, false);
+                transport->UpdatePassengerPosition(player);
+                if (player->IsVehicle()) // when teleporting onto transport, protocol doesnt support summoning accessories
+                    player->GetVehicleInfo()->DisableAccessoryInit();
             }
         }
-        GetPlayer()->m_teleportTransport = ObjectGuid();
+        player->m_teleportTransport = ObjectGuid();
 
-        GetPlayer()->SendInitialPacketsBeforeAddToMap();
+        player->SendInitialPacketsBeforeAddToMap();
         // the CanEnter checks are done in TeleporTo but conditions may change
         // while the player is in transit, for example the map may get full
-        if (!GetPlayer()->GetMap()->Add(GetPlayer()))
+        if (!player->GetMap()->Add(player))
         {
             // if player wasn't added to map, reset his map pointer!
-            GetPlayer()->ResetMap();
+            player->ResetMap();
 
             DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s was teleported far but couldn't be added to map "
                 " (map:%u, x:%f, y:%f, z:%f) Trying to port him to his previous place..",
-                GetPlayer()->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
+                player->GetGuidStr().c_str(), loc.mapid, loc.coord_x, loc.coord_y, loc.coord_z);
 
             // Teleport to previous place, if cannot be ported back TP to homebind place
-            if (!GetPlayer()->TeleportTo(old_loc))
+            if (!player->TeleportTo(old_loc))
             {
                 DETAIL_LOG("WorldSession::HandleMoveWorldportAckOpcode: %s cannot be ported to his previous place, teleporting him to his homebind place...",
-                    GetPlayer()->GetGuidStr().c_str());
-                GetPlayer()->TeleportToHomebind();
+                    player->GetGuidStr().c_str());
+                player->TeleportToHomebind();
             }
             return;
         }
 
         // battleground state prepare (in case join to BG), at relogin/tele player not invited
         // only add to bg group and object, if the player was invited (else he entered through command)
-        if (_player->InBattleGround())
+        if (player->InBattleGround())
         {
             // cleanup setting if outdated
             if (!mEntry->IsBattleGroundOrArena())
             {
                 // We're not in BG
-                _player->SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
+                player->SetBattleGroundId(0, BATTLEGROUND_TYPE_NONE);
                 // reset destination bg team
-                _player->SetBGTeam(TEAM_NONE);
+                player->SetBGTeam(TEAM_NONE);
             }
             // join to bg case
-            else if (BattleGround* bg = _player->GetBattleGround())
+            else if (BattleGround* bg = player->GetBattleGround())
             {
-                if (_player->IsInvitedForBattleGroundInstance(_player->GetBattleGroundId()))
-                    bg->AddPlayer(_player);
+                if (player->IsInvitedForBattleGroundInstance(player->GetBattleGroundId()))
+                    bg->AddPlayer(player);
             }
         }
 
-        m_anticheat->Teleport({ loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation });
+        if (WorldSession* session = player->GetSession())
+            if (SessionAnticheatInterface* anticheat = session->GetAnticheat())
+                anticheat->Teleport({ loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation });
 
-        GetPlayer()->SendInitialPacketsAfterAddToMap(false);
+        player->SendInitialPacketsAfterAddToMap(false);
 
         // flight fast teleport case
-        if (_player->InBattleGround())
-            _player->TaxiFlightInterrupt(false);
+        if (player->InBattleGround())
+            player->TaxiFlightInterrupt(false);
         else
-            _player->TaxiFlightResume();
+            player->TaxiFlightResume();
 
         if (mInstance)
         {
             // mount allow check
             if (!mInstance->mountAllowed)
-                _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+                player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
         }
 
         // honorless target
-        if (GetPlayer()->pvpInfo.inPvPEnforcedArea)
-            GetPlayer()->CastSpell(GetPlayer(), 2479, TRIGGERED_OLD_TRIGGERED);
+        if (player->pvpInfo.inPvPEnforcedArea)
+            player->CastSpell(player, 2479, TRIGGERED_OLD_TRIGGERED);
 
-        _player->ResummonPetTemporaryUnSummonedIfAny();
+        player->ResummonPetTemporaryUnSummonedIfAny();
 
         // lets process all delayed operations on successful teleport
-        GetPlayer()->ProcessDelayedOperations();
+        player->ProcessDelayedOperations();
 
         // notify group after successful teleport
-        if (_player->GetGroup())
-            _player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+        if (player->GetGroup())
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
     };
     if (found)
         lambda(map);
