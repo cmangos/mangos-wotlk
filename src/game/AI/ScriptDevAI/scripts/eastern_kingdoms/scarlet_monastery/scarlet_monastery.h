@@ -14,8 +14,6 @@ enum
 
     NPC_MOGRAINE                    = 3976,
     NPC_WHITEMANE                   = 3977,
-    NPC_VORREL                      = 3981,
-    NPC_INTERROGATOR_VISHAS         = 3983,
 
     GO_WHITEMANE_DOOR               = 104600,
     GO_CHAPEL_DOOR                  = 104591,
@@ -26,10 +24,11 @@ enum
     SAY_ASHBRINGER_ENTRANCE         = -1189036,
     AREATRIGGER_CATHEDRAL_ENTRANCE  = 4089, // used to trigger Corrupted Ashbringer event
 
-   // Only NPCs and small animals in the graveyard won't be tracked, so they won't change during the Corrupt Ash Messenger event
-   //church
+    // Only NPCs and small animals in the graveyard won't be tracked, so they won't change during the Corrupt Ash Messenger event
+    //church
     NPC_RABBIT = 721,
     //cemetery
+    NPC_VORREL = 3981,
     NPC_INTERROGATOR_VISHAS = 3983,
     NPC_RAT = 4075,
     NPC_SCARLET_SENTRY = 4283,
@@ -68,6 +67,7 @@ class instance_scarlet_monastery : public ScriptedInstance
     private:
         GuidSet m_sAshbringerFriendlyGuids;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
+        bool m_isLoadGrid = false;
 };
 
 #endif

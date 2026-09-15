@@ -40,15 +40,25 @@ void instance_scarlet_monastery::OnPlayerEnter(Player* player)
 {
     if (player->GetLfgData().GetDungeon() == SEASONAL_HEADLESS_HORSEMAN)
         instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_HEADLESS_HORSEMAN_DUNGEON, 1);
+
+    if (!player->HasItemCount(ITEM_CORRUPTED_ASHRBRINGER, 1) && m_isLoadGrid)
+        return;
+
+    if (GetData(TYPE_ASHBRINGER_EVENT) != NOT_STARTED)
+        return;
+
+    sObjectMgr.LoadLargeEntities(instance);
+    m_isLoadGrid = true;
 }
 
 void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-         //church
-         case NPC_RABBIT:
-         //cemetery
+        //church
+        case NPC_RABBIT:
+
+        //cemetery
         case NPC_INTERROGATOR_VISHAS:
         case NPC_RAT:
         case NPC_SCARLET_SENTRY:
@@ -59,20 +69,22 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
         case NPC_HAUNTING_PHANTASM:
         case NPC_FALLON_CHAMPION:
         case NPC_BLOODMAGE_THALNOS:
-        case NPC_SUFFERING_VICTIM:            
-           return;        
+        case NPC_SUFFERING_VICTIM:
+            return;
         case NPC_VORREL:
         case NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-           return; 
+            return;
         case NPC_WHITEMANE:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_MOGRAINE:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();           
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        default:
             break;
     }
-     m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
+    m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
 }
 
 void instance_scarlet_monastery::OnCreatureDeath(Creature* pCreature)
@@ -160,7 +172,7 @@ void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
             if (whitemane && whitemane->IsAlive() && !whitemane->IsInCombat())
                 whitemane->ForcedDespawn();
 
-            for (auto scarletCathedralNpcGuid : m_sAshbringerFriendlyGuids)
+            for (const auto& scarletCathedralNpcGuid : m_sAshbringerFriendlyGuids)
                 if (Creature* scarletNpc = instance->GetCreature(scarletCathedralNpcGuid))
                     if (scarletNpc->IsAlive() && !scarletNpc->IsInCombat())
                         scarletNpc->setFaction(35);
@@ -186,16 +198,20 @@ InstanceData* GetInstanceData_instance_scarlet_monastery(Map* pMap)
 
 bool instance_scarlet_monastery::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger)
 {
-    if (areaTrigger->id == AREATRIGGER_CATHEDRAL_ENTRANCE)
+     if (areaTrigger->id != AREATRIGGER_CATHEDRAL_ENTRANCE)
+        return false;
+
+    if (GetData(TYPE_ASHBRINGER_EVENT) != NOT_STARTED)
+        return false;
+
+    SetData(TYPE_ASHBRINGER_EVENT, IN_PROGRESS);
+    if (Creature* mograine = GetSingleCreatureFromStorage(NPC_MOGRAINE))
     {
-        if (GetData(TYPE_ASHBRINGER_EVENT) == NOT_STARTED)
-        {
-            SetData(TYPE_ASHBRINGER_EVENT, IN_PROGRESS);
-            DoOrSimulateScriptTextForThisInstance(SAY_ASHBRINGER_ENTRANCE, NPC_MOGRAINE);
-            return true;
-        }
+        if (mograine->IsAlive())
+            DoScriptText(SAY_ASHBRINGER_ENTRANCE, mograine);
     }
-    return false;
+
+    return true;
 }
 
 bool AreaTrigger_at_cathedral_entrance(Player* player, AreaTriggerEntry const* areaTrigger)
