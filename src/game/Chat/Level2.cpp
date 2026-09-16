@@ -967,7 +967,7 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
             PSendSysMessage("GO is part of gameobject_spawn_entry: %s", output.data());
         }
 
-        time_t curRespawnDelay = target->GetRespawnTimeEx() - time(nullptr);
+        time_t curRespawnDelay = Clock::to_time_t(target->GetRespawnTimeEx()) - time(nullptr);
         if (curRespawnDelay < 0)
             curRespawnDelay = 0;
 
@@ -1382,7 +1382,7 @@ bool ChatHandler::HandleGameObjectForcedDespawnCommand(char* args)
     }
 
     obj->SetLootState(GO_JUST_DEACTIVATED);
-    obj->SetRespawnDelay(10000);
+    obj->SetRespawnDelay(10000s);
     obj->SetForcedDespawn();
 
     return true;

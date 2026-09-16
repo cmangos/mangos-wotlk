@@ -737,7 +737,7 @@ void BattleGroundSA::ChangeBannerState(uint8 nodeId)
     if (GameObject* newBanner = GetSingleGameObjectFromStorage(m_strandGraveyard[nodeId].newEntry))
     {
         newBanner->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-        newBanner->SetRespawnTime(13 * MINUTE);
+        newBanner->SetRespawnTime(13min);
         newBanner->Refresh();
     }
 }

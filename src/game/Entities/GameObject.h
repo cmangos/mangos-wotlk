@@ -852,30 +852,22 @@ class GameObject : public WorldObject
 
         void ForcedDespawn(uint32 timeMSToDespawn = 0);
 
-        time_t GetRespawnTime() const { return m_respawnTime; }
-        time_t GetRespawnTimeEx() const
-        {
-            time_t now = time(nullptr);
-            if (m_respawnTime > now)
-                return m_respawnTime;
-            return now;
-        }
+        TimePoint GetRespawnTime() const { return m_respawnTime; }
+        TimePoint GetRespawnTimeEx() const;
+        bool HasRespawnTime() const { return m_respawnTime.time_since_epoch() != std::chrono::milliseconds::zero(); }
 
-        void SetRespawnTime(time_t respawn)
-        {
-            m_respawnTime = respawn > 0 ? time(nullptr) + respawn : 0;
-            m_respawnDelay = respawn > 0 ? uint32(respawn) : 0;
-        }
+        void SetRespawnTime(uint32 respawnTime);
+        void SetRespawnTime(std::chrono::milliseconds respawnTime);
         void Respawn();
-        bool IsSpawned() const
-        {
-            return m_respawnDelay == 0 ||
-                   (m_respawnTime > 0 && !m_spawnedByDefault) ||
-                   (m_respawnTime == 0 && m_spawnedByDefault);
-        }
+        bool IsSpawned() const;
         bool IsSpawnedByDefault() const { return m_spawnedByDefault; }
-        uint32 GetRespawnDelay() const override { return m_respawnDelay; }
-        void SetRespawnDelay(uint32 delay, bool once = false) { m_respawnDelay = delay; m_respawnOverriden = true; m_respawnOverrideOnce = once; }
+        uint32 GetRespawnDelay() const override { return m_respawnDelay.count(); }
+        void SetRespawnDelay(std::chrono::seconds delay, bool once = false)
+        {
+            m_respawnDelay = delay;
+            m_respawnOverriden = true;
+            m_respawnOverrideOnce = once;
+        }
         void SetForcedDespawn() { m_forcedDespawn = true; };
         void SetChestDespawn();
         void Refresh();
@@ -1026,8 +1018,8 @@ class GameObject : public WorldObject
 
     protected:
         uint32      m_spellId;
-        time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
-        uint32      m_respawnDelay;                         // (secs) if 0 then current GO state no dependent from timer
+        TimePoint   m_respawnTime;                          // time of next respawn (or despawn if GO have owner()),
+        std::chrono::milliseconds m_respawnDelay;           // (secs) if 0 then current GO state no dependent from timer
         bool        m_respawnOverriden;
         bool        m_respawnOverrideOnce;
         bool        m_forcedDespawn;

@@ -670,7 +670,7 @@ void instance_sunwell_plateau::FailKiljaeden()
         if (GameObject* object = GetSingleGameObjectFromStorage(entry))
         {
             object->SetForcedDespawn();
-            object->SetRespawnDelay(30, true);
+            object->SetRespawnDelay(30s, true);
             object->SetLootState(GO_JUST_DEACTIVATED);
         }
     }

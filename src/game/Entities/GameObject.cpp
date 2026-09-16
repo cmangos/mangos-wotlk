@@ -78,8 +78,8 @@ GameObject::GameObject() : WorldObject(),
 
     m_valuesCount = GAMEOBJECT_END;
 
-    m_respawnTime = 0;
-    m_respawnDelay = 25;
+    m_respawnTime = TimePoint();
+    m_respawnDelay = 25s;
     m_respawnOverriden = false;
     m_respawnOverrideOnce = false;
     m_forcedDespawn = false;
@@ -347,7 +347,7 @@ void GameObject::Update(const uint32 diff)
                 case GAMEOBJECT_TYPE_FISHINGNODE:           // Keep not ready for some delay
                 {
                     // fishing code (bobber ready)
-                    if (time(nullptr) > m_respawnTime - FISHING_BOBBER_READY_TIME)
+                    if (GetMap()->GetCurrentClockTime() > m_respawnTime - std::chrono::seconds(FISHING_BOBBER_READY_TIME))
                     {
                         // splash bobber (bobber ready now)
                         Unit* caster = GetOwner();
@@ -394,11 +394,11 @@ void GameObject::Update(const uint32 diff)
         }
         case GO_READY:
         {
-            if (m_respawnTime > 0)                          // timer on
+            if (m_respawnTime.time_since_epoch() > std::chrono::milliseconds::zero()) // timer on
             {
-                if (m_respawnTime <= time(nullptr))            // timer expired
+                if (m_respawnTime <= GetMap()->GetCurrentClockTime())            // timer expired
                 {
-                    m_respawnTime = 0;
+                    m_respawnTime = TimePoint();
                     ClearAllUsesData();
 
                     switch (GetGoType())
@@ -470,7 +470,7 @@ void GameObject::Update(const uint32 diff)
                                 valid = false;
                             else
                             {
-                                if (m_respawnTime > 0)
+                                if (m_respawnTime.time_since_epoch() > std::chrono::milliseconds::zero())
                                     valid = false;
                                 else // battlegrounds gameobjects has data2 == 0 && data5 == 3
                                     radius = float(goInfo->trap.cooldown);
@@ -710,7 +710,7 @@ void GameObject::Update(const uint32 diff)
             if ((GetGoType() == GAMEOBJECT_TYPE_CHEST || GetGoType() == GAMEOBJECT_TYPE_GOOBER) && !GetGOInfo()->IsDespawnAtAction() && !m_forcedDespawn)
                 return;
 
-            if (!m_respawnDelay)
+            if (m_respawnDelay.count() == 0)
                 return;
 
             m_forcedDespawn = false;
@@ -727,15 +727,15 @@ void GameObject::Update(const uint32 diff)
                 if (IsSpawnedByDefault())
                 {
                     if (GetGameObjectGroup() && GetGameObjectGroup()->IsRespawnOverriden())
-                        m_respawnDelay = GetGameObjectGroup()->GetRandomRespawnTime();
+                        m_respawnDelay = std::chrono::seconds(GetGameObjectGroup()->GetRandomRespawnTime());
                     else if (GameObjectData const* data = sObjectMgr.GetGOData(GetDbGuid()))
-                        m_respawnDelay = data->GetRandomRespawnTime();
+                        m_respawnDelay = std::chrono::seconds(data->GetRandomRespawnTime());
                 }
             }
             else if (m_respawnOverrideOnce)
                 m_respawnOverriden = false;
 
-            m_respawnTime = m_spawnedByDefault ? time(nullptr) + m_respawnDelay : 0;
+            m_respawnTime = m_spawnedByDefault ? GetMap()->GetCurrentClockTime() + m_respawnDelay : TimePoint();
 
             // if option not set then object will be saved at grid unload
             if (sWorld.getConfig(CONFIG_BOOL_SAVE_RESPAWN_TIME_IMMEDIATELY))
@@ -743,11 +743,11 @@ void GameObject::Update(const uint32 diff)
 
             if (IsUsingNewSpawningSystem()) // does not support pooling
             {
-                m_respawnTime = std::numeric_limits<time_t>::max();
-                if (m_respawnDelay && !GetGameObjectGroup())
+                m_respawnTime = TimePoint::max();
+                if (m_respawnDelay.count() > 0 && !GetGameObjectGroup())
                     GetMap()->GetSpawnManager().AddGameObject(GetDbGuid());
 
-                if (m_respawnDelay || !m_spawnedByDefault || m_forcedDespawn)
+                if (m_respawnDelay.count() > 0 || !m_spawnedByDefault || m_forcedDespawn)
                     AddObjectToRemoveList();
             }
             else
@@ -807,7 +807,7 @@ void GameObject::SetChestDespawn()
 void GameObject::Refresh()
 {
     // not refresh despawned not casted GO (despawned casted GO destroyed in all cases anyway)
-    if (m_respawnTime > 0 && m_spawnedByDefault)
+    if (m_respawnTime.time_since_epoch() > std::chrono::milliseconds::zero() && m_spawnedByDefault)
         return;
 
     if (IsSpawned())
@@ -888,8 +888,8 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
     data.rotation.y = m_localRotation.y;
     data.rotation.z = m_localRotation.z;
     data.rotation.w = m_localRotation.w;
-    data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
-    data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
+    data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelay.count() : -(int32)m_respawnDelay.count();
+    data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelay.count() : -(int32)m_respawnDelay.count();
     data.spawnMask = spawnMask;
 
     // updated in DB
@@ -994,30 +994,30 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     {
         SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
         m_spawnedByDefault = true;
-        m_respawnDelay = 0;
-        m_respawnTime = 0;
+        m_respawnDelay = 0s;
+        m_respawnTime = TimePoint();
     }
     else
     {
         if (data->spawntimesecsmin >= 0)
         {
             m_spawnedByDefault = true;
-            m_respawnDelay = data->GetRandomRespawnTime();
+            m_respawnDelay = std::chrono::seconds(data->GetRandomRespawnTime());
 
-            m_respawnTime  = map->GetPersistentState()->GetGORespawnTime(GetDbGuid());
+            m_respawnTime = std::chrono::time_point_cast<std::chrono::seconds>(Clock::from_time_t(map->GetPersistentState()->GetGORespawnTime(GetDbGuid())));
 
             // ready to respawn
-            if (m_respawnTime && m_respawnTime <= time(nullptr))
+            if (m_respawnTime.time_since_epoch() > std::chrono::milliseconds::zero() && m_respawnTime <= map->GetCurrentClockTime())
             {
-                m_respawnTime = 0;
+                m_respawnTime = TimePoint();
                 map->GetPersistentState()->SaveGORespawnTime(GetDbGuid(), 0);
             }
         }
         else
         {
             m_spawnedByDefault = false;
-            m_respawnDelay = -data->spawntimesecsmin;
-            m_respawnTime = 0;
+            m_respawnDelay = std::chrono::seconds(-data->spawntimesecsmin);
+            m_respawnTime = TimePoint();
         }
     }
 
@@ -1146,8 +1146,8 @@ bool GameObject::IsMoTransport() const
 
 void GameObject::SaveRespawnTime()
 {
-    if (m_respawnTime > time(nullptr) && m_spawnedByDefault)
-        GetMap()->GetPersistentState()->SaveGORespawnTime(GetDbGuid(), m_respawnTime);
+    if (m_respawnTime > GetMap()->GetCurrentClockTime() && m_spawnedByDefault)
+        GetMap()->GetPersistentState()->SaveGORespawnTime(GetDbGuid(), Clock::to_time_t(m_respawnTime));
 }
 
 bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool /*inVisibleList*/) const
@@ -1242,13 +1242,31 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
     return IsWithinDistInMap(viewPoint, GetVisibilityData().GetVisibilityDistance(), false);
 }
 
+void GameObject::SetRespawnTime(uint32 respawnTime)
+{
+    SetRespawnTime(std::chrono::seconds(respawnTime));
+}
+
+void GameObject::SetRespawnTime(std::chrono::milliseconds respawnTime)
+{
+    m_respawnTime = respawnTime.count() > 0 ? GetMap()->GetCurrentClockTime() + respawnTime : TimePoint();
+    m_respawnDelay = respawnTime.count() > 0 ? respawnTime : std::chrono::seconds::zero();
+}
+
 void GameObject::Respawn()
 {
-    if (m_spawnedByDefault && m_respawnTime > 0)
+    if (m_spawnedByDefault && m_respawnTime.time_since_epoch() > std::chrono::milliseconds::zero())
     {
-        m_respawnTime = time(nullptr);
+        m_respawnTime = GetMap()->GetCurrentClockTime();
         GetMap()->GetPersistentState()->SaveGORespawnTime(GetDbGuid(), 0);
     }
+}
+
+bool GameObject::IsSpawned() const
+{
+    return m_respawnDelay == 0s ||
+        (m_respawnTime.time_since_epoch() > std::chrono::milliseconds::zero() && !m_spawnedByDefault) ||
+        (m_respawnTime.time_since_epoch() == std::chrono::milliseconds::zero() && m_spawnedByDefault);
 }
 
 bool GameObject::ActivateToQuest(Player* pTarget) const
@@ -1341,7 +1359,7 @@ GameObject* GameObject::SummonLinkedTrapIfAny() const
         return nullptr;
     }
 
-    linkedGO->m_respawnDelay = 0;
+    linkedGO->m_respawnDelay = 0s;
     linkedGO->SetSpellId(GetSpellId());
 
     if (GetOwnerGuid())
@@ -1676,7 +1694,7 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
 
             GameObjectInfo const* goInfo = GetGOInfo();
             float radius = float(goInfo->trap.diameter) / 2.0f;
-            bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime == 0;
+            bool IsBattleGroundTrap = !radius && goInfo->trap.cooldown == 3 && m_respawnTime.time_since_epoch()== std::chrono::milliseconds::zero();
 
             std::set<uint32> confirmedGoCasts =
             {
@@ -3173,12 +3191,20 @@ void GameObject::ForcedDespawn(uint32 timeMSToDespawn)
     SetLootState(GO_JUST_DEACTIVATED);
 
     // some GOs have respawn time not filled to prevent despawn on action - need to override that this time
-    if (!m_respawnDelay && GetDbGuid() && !m_respawnOverriden)
+    if (m_respawnDelay == std::chrono::seconds::zero() && GetDbGuid() && !m_respawnOverriden)
     {
         // only static spawns should arrive here
         if (GameObjectData const* data = sObjectMgr.GetGOData(GetDbGuid()))
-            SetRespawnDelay(data->GetRandomRespawnTime(), true);
+            SetRespawnDelay(std::chrono::seconds(data->GetRandomRespawnTime()), true);
     }
+}
+
+TimePoint GameObject::GetRespawnTimeEx() const
+{
+    TimePoint now = GetMap()->GetCurrentClockTime();
+    if (m_respawnTime > now)
+        return m_respawnTime;
+    return now;
 }
 
 bool ForcedDespawnDelayGameObjectEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)

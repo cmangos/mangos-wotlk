@@ -299,7 +299,7 @@ void instance_dire_maul::SetData(uint32 uiType, uint32 uiData)
                     if (GameObject* pGo = GetSingleGameObjectFromStorage(id))
                     {
                         pGo->SetLootState(GO_JUST_DEACTIVATED);
-                        pGo->SetRespawnDelay(1);
+                        pGo->SetRespawnDelay(1s);
                     }
                 }
 
