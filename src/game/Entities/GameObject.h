@@ -1007,7 +1007,7 @@ class GameObject : public WorldObject
 
         HighGuid GetParentHigh() const override { return HIGHGUID_GAMEOBJECT; }
 
-        void SetCooldown(uint32 cooldown); // seconds
+        void SetCooldown(std::chrono::seconds cooldown);
 
         void SetGameObjectGroup(GameObjectGroup* group);
         void ClearGameObjectGroup();
@@ -1025,7 +1025,7 @@ class GameObject : public WorldObject
         bool        m_forcedDespawn;
         LootState   m_lootState;
         bool        m_spawnedByDefault;
-        time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
+        TimePoint   m_cooldownTime; // used as internal reaction delay time store (not state change reaction).
         // For traps/goober this: spell casting cooldown, for doors/buttons: reset time.
 
         uint32      m_captureTimer;                         // (msecs) timer used for capture points

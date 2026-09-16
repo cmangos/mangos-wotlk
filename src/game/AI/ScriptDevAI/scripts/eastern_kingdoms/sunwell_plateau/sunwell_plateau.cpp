@@ -297,7 +297,7 @@ void instance_sunwell_plateau::OnObjectCreate(GameObject* go)
             break;
         case GO_BLAZE:
             m_twinsSpawns.push_back(go->GetObjectGuid());
-            go->SetCooldown(1);
+            go->SetCooldown(1s);
         default:
             return;
     }
