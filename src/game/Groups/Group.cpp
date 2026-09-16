@@ -688,7 +688,7 @@ void Group::SendUpdateTo(Player* player)
             Player* player = sObjectMgr.GetPlayer(citr2->guid); // can be nullptr
             data << citr2->name;
             data << citr2->guid;
-            data << uint8(GetGroupMemberStatus());
+            data << uint8(GetGroupMemberStatus(player));
             data << uint8(citr2->group);                    // groupid
             data << uint8(GetFlags(*citr2));                // group flags
             data << uint8(player != nullptr ? player->GetLfgData().GetPlayerRoles() : 0); // lfg roles
