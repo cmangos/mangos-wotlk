@@ -77,6 +77,12 @@ uint32 urand(uint32 min, uint32 max)
     return dist(*mtRand.get());
 }
 
+std::chrono::milliseconds crand(std::chrono::milliseconds min, std::chrono::milliseconds max)
+{
+    std::uniform_int_distribution<uint32> dist(min.count(), max.count());
+    return std::chrono::milliseconds {dist((*mtRand.get()))};
+}
+
 float frand(float min, float max)
 {
     std::uniform_real_distribution<float> dist(min, max);

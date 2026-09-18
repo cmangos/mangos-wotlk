@@ -79,9 +79,17 @@ class TimerManager
         }
 
         virtual void ResetTimer(uint32 index, uint32 timer);
+        virtual void ResetTimer(uint32 index, uint32 min, uint32 max)
+        {
+            ResetTimer(index, urand(min, max));
+        }
         virtual void ResetTimer(uint32 index, std::chrono::milliseconds timer)
         {
             ResetTimer(index, timer.count());
+        }
+        virtual void ResetTimer(uint32 index, std::chrono::milliseconds min, std::chrono::milliseconds max)
+        {
+            ResetTimer(index, crand(min, max));
         }
         virtual void DisableTimer(uint32 index);
         virtual void ReduceTimer(uint32 index, uint32 timer);
@@ -138,9 +146,17 @@ class CombatActions : public TimerManager
         void AddTimerlessCombatAction(uint32 id, bool byDefault);
 
         virtual void ResetTimer(uint32 index, uint32 timer) override;
+        virtual void ResetTimer(uint32 index, uint32 min, uint32 max) override
+        {
+            ResetTimer(index, urand(min, max));
+        }
         virtual void ResetTimer(uint32 index, std::chrono::milliseconds timer) override
         {
             ResetTimer(index, timer.count());
+        }
+        virtual void ResetTimer(uint32 index, std::chrono::milliseconds min, std::chrono::milliseconds max) override
+        {
+            ResetTimer(index, crand(min, max));            
         }
         virtual void DisableTimer(uint32 index) override;
         virtual void ReduceTimer(uint32 index, uint32 timer) override;
