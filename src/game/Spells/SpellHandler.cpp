@@ -123,6 +123,14 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     {
         for (const auto& Spell : proto->Spells)
         {
+            // Only spells which are actually cast by using the item can
+            // prevent that use in combat.  Passive/on-equip spells share the
+            // same item spell array, but are not cast by CMSG_USE_ITEM.
+            // Goblin Rocket Pack (49278) exposes this: its on-use launch
+            // spell is combat-safe while its secondary equipped aura is not.
+            if (Spell.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
+                continue;
+
             if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId))
             {
                 if (IsNonCombatSpell(spellInfo))

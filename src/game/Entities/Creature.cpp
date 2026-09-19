@@ -1865,6 +1865,9 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     {
         if (isUsingNewSpawningSystem && !group) // only at this point we know if marked as dynguid per entry
         {
+            // Create initialized optional vehicle state, but the grid loader
+            // will delete this creature without adding it to the world.
+            SetVehicleId(0, 0);
             return false;
         }
         m_deathState = DEAD;
