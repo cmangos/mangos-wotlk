@@ -112,11 +112,16 @@ enum
 
     // Gas cloud
     SPELL_GASEOUS_BLOAT             = 70672,                // Chase players and expunge gas
+    SPELL_GASEOUS_BLOAT_25_NORMAL   = 72455,
+    SPELL_GASEOUS_BLOAT_10_HEROIC    = 72832,
+    SPELL_GASEOUS_BLOAT_25_HEROIC    = 72833,
     SPELL_EXPUNGED_GAS              = 70701,
     SPELL_GASEOUS_BLOAT_PROTECTION  = 70812,
     SPELL_GASEOUS_BLOAT_VISUAL      = 70215,
 
     // Mutated Abomination
+    SPELL_MUTATED_TRANSFORMATION_10  = 70311,
+    SPELL_MUTATED_TRANSFORMATION_25  = 71503,
     SPELL_TRANSFORMATION_NAME         = 72401,
     SPELL_TRANSFORMATION_DAMAGE       = 70405,
     SPELL_POWER_DRAIN                 = 70385,
@@ -176,7 +181,8 @@ void RemovePutricideDifficultyAura(Unit* target, uint32 spellId)
 
 bool IsGaseousBloatSpell(uint32 spellId)
 {
-    return spellId == 70672 || spellId == 72455 || spellId == 72832 || spellId == 72833;
+    return spellId == SPELL_GASEOUS_BLOAT || spellId == SPELL_GASEOUS_BLOAT_25_NORMAL ||
+        spellId == SPELL_GASEOUS_BLOAT_10_HEROIC || spellId == SPELL_GASEOUS_BLOAT_25_HEROIC;
 }
 
 /*######
@@ -269,7 +275,6 @@ struct boss_professor_putricideAI : public CombatAI
         CombatAI::Reset();
         m_isOrange = urand(0, 1) != 0;
         m_phase = PHASE_ONE;
-        m_creature->UpdateSpeed(MOVE_RUN, false);
         m_creature->SetSpellList(0);
 
         SetEncounterAvailability();
@@ -431,8 +436,6 @@ struct boss_professor_putricideAI : public CombatAI
         // handle phase transition
         if (data == POINT_PUTRICIDE_SPAWN)
         {
-            m_creature->UpdateSpeed(MOVE_RUN, false);
-
             if (!m_instance)
                 return;
 
@@ -560,10 +563,6 @@ struct boss_professor_putricideAI : public CombatAI
         if (DoCastSpellIfCan(nullptr, spellId, CAST_INTERRUPT_PREVIOUS) != CAST_OK)
             return;
 
-        // Retail transition movement is twice Putricide's normal run speed.
-        // Regurgitated Ooze can still slow him normally; its 50% snare then
-        // reduces this transition run to the regular movement rate.
-        m_creature->UpdateSpeed(MOVE_RUN, false, 2.0f);
         DisablePhaseActions();
         SetCombatScriptStatus(true);
         SetCombatMovement(false);
@@ -578,10 +577,10 @@ struct boss_professor_putricideAI : public CombatAI
             DoCastSpellIfCan(nullptr, SPELL_TEAR_GAS_PERIODIC, CAST_TRIGGERED);
 
             m_creature->GetMotionMaster()->Clear();
-            // Retail 10-player sniff: Putricide runs to the laboratory table at
-            // this exact position before casting his transition spell.
+            // 10-player sniff: both table transitions use an 18 yd/s spline
+            // without changing the unit's run speed.
             m_creature->GetMotionMaster()->MovePoint(POINT_PUTRICIDE_SPAWN,
-                Position(4356.193f, 3262.9001f, 389.48157f, 1.4835298f), FORCED_MOVEMENT_RUN);
+                Position(4356.193f, 3262.9001f, 389.48157f, 1.4835298f), FORCED_MOVEMENT_RUN, 18.0f);
             m_phase = m_phase == PHASE_ONE ? PHASE_RUNNING_ONE : PHASE_RUNNING_TWO;
             return;
         }
@@ -614,11 +613,8 @@ struct boss_professor_putricideAI : public CombatAI
             m_instance->DoToggleGameObjectFlags(GO_DRINK_ME, GO_FLAG_NO_INTERACT, true);
         }
 
-        SetCombatMovement(true);
+        SetCombatMovement(true, true);
         SetMeleeEnabled(true);
-        m_creature->GetMotionMaster()->Clear();
-        if (Unit* victim = m_creature->GetVictim())
-            m_creature->GetMotionMaster()->MoveChase(victim);
         PreparePhaseActions();
         SetCombatScriptStatus(false);
     }
@@ -1084,7 +1080,8 @@ struct PutricideMutationInit : public SpellScript, public AuraScript
         if (!target || !target->GetMap()->IsDungeon())
             return;
 
-        uint32 const spellId = IsPutricide25Man(target) ? 71503 : 70311;
+        uint32 const spellId = IsPutricide25Man(target) ?
+            SPELL_MUTATED_TRANSFORMATION_25 : SPELL_MUTATED_TRANSFORMATION_10;
         target->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(),
             spellId, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
     }
