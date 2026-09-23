@@ -40,15 +40,6 @@ void instance_scarlet_monastery::OnPlayerEnter(Player* player)
 {
     if (player->GetLfgData().GetDungeon() == SEASONAL_HEADLESS_HORSEMAN)
         instance->GetVariableManager().SetVariable(WORLD_STATE_CUSTOM_HEADLESS_HORSEMAN_DUNGEON, 1);
-
-    if (!player->HasItemCount(ITEM_CORRUPTED_ASHRBRINGER, 1) && m_isLoadGrid)
-        return;
-
-    if (GetData(TYPE_ASHBRINGER_EVENT) != NOT_STARTED)
-        return;
-
-    sObjectMgr.LoadLargeEntities(instance);
-    m_isLoadGrid = true;
 }
 
 void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)

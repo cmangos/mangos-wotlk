@@ -67,7 +67,6 @@ class instance_scarlet_monastery : public ScriptedInstance
     private:
         GuidSet m_sAshbringerFriendlyGuids;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
-        bool m_isLoadGrid = false;
 };
 
 #endif
