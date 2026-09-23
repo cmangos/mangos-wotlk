@@ -1068,6 +1068,7 @@ UPDATE creature_template SET ScriptName='npc_volatile_ooze_icc' WHERE entry=3769
 UPDATE creature_template SET ScriptName='npc_gas_cloud_icc' WHERE entry=37562;
 UPDATE creature_template SET ScriptName='npc_growing_ooze_puddle' WHERE entry=37690;
 UPDATE creature_template SET ScriptName='npc_choking_gas_bomb' WHERE entry=38159;
+UPDATE creature_template SET ScriptName='npc_mutated_abomination' WHERE entry IN (37672,38285);
 UPDATE creature_template SET ScriptName='boss_the_lich_king_icc' WHERE entry=36597;
 UPDATE creature_template SET ScriptName='npc_saurfang_gunship' WHERE entry=36939;
 UPDATE creature_template SET ScriptName='npc_muradin_gunship' WHERE entry=36948;

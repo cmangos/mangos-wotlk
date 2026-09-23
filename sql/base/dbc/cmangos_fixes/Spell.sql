@@ -3663,6 +3663,9 @@ INSERT INTO spell_template (Id,Attributes,AttributesEx2,CastingTimeIndex,Duratio
 UPDATE `spell_template` SET `AttributesServerSide` = `AttributesServerSide`|0x00000004 WHERE `Id` IN (
 44652, -- Iron Rune Aura
 46669, -- Evacuee Random Action
+48368, -- Bear Form (Shapeshift)
+48369, -- Moonkin Form (Shapeshift)
+48371, -- Tree of Life (Shapeshift)
 50665, -- Bleeding Out
 50681, -- Bleeding Out
 50695, -- Bleeding Out

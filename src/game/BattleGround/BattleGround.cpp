@@ -2014,13 +2014,13 @@ void BattleGround::ChangeBgObjectSpawnState(uint32 dbGuid, uint32 respawntime)
         // if despawned by default, set respawn delay
         if (!obj->IsSpawnedByDefault())
         {
-            obj->SetRespawnTime(RESPAWN_ONE_DAY);
+            obj->SetRespawnTime(std::chrono::seconds(RESPAWN_ONE_DAY));
             obj->Refresh();
         }
     }
     else
     {
-        obj->SetRespawnDelay(respawntime);
+        obj->SetRespawnDelay(std::chrono::seconds(respawntime));
         obj->SetForcedDespawn();
         obj->SetLootState(GO_JUST_DEACTIVATED);
     }

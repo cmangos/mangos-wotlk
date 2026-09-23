@@ -729,7 +729,7 @@ void GameObjectGroup::Despawn(uint32 timeMSToDespawn /*= 0*/, uint32 forcedDespa
         if (GameObject* go = m_map.GetGameObject(dbGuid))
         {
             if (forcedDespawnTime)
-                go->SetRespawnDelay(forcedDespawnTime, true);
+                go->SetRespawnDelay(std::chrono::seconds(forcedDespawnTime), true);
             go->ForcedDespawn(timeMSToDespawn);
         }
         else if (timeMSToDespawn == 0)

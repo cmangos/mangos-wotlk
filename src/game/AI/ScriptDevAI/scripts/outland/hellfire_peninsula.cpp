@@ -2029,7 +2029,7 @@ struct KaliriNest : public GameObjectAI
         {
             m_go->SetForcedDespawn();
             if (GameObjectData const* data = sObjectMgr.GetGOData(m_go->GetObjectGuid().GetCounter()))
-                m_go->SetRespawnDelay(data->GetRandomRespawnTime());
+                m_go->SetRespawnDelay(std::chrono::seconds(data->GetRandomRespawnTime()));
         }
     }
 };
@@ -2266,7 +2266,7 @@ struct npc_razorthorn_ravager_pet : public PetAI
             case 0:
             {
                 GameObject* mound = GetClosestGameObjectWithEntry(m_creature, GO_RAZORTHORN_DIRT_MOUND, 20.0f);
-                if (!mound || mound->GetRespawnTime() != 0)
+                if (!mound || mound->HasRespawnTime())
                 {
                     m_animStage = 0;
                     return;

@@ -472,7 +472,7 @@ struct ThrowIce : public SpellScript
 
         if (GameObject* scrap = GetClosestGameObjectWithEntry(target, GO_SMOLDERING_SCRAP, 5.0f))
         {
-            if (scrap->GetRespawnTime() != 0)
+            if (scrap->HasRespawnTime())
                 return;
 
             target->CastSpell(nullptr, SPELL_FROZEN_IRON_SCRAP, TRIGGERED_OLD_TRIGGERED);
@@ -544,7 +544,7 @@ struct GatherSnow : public SpellScript
 
         if (GameObject* snow = GetClosestGameObjectWithEntry(target, 192075, 10.0f))
         {
-            if (snow->GetRespawnTime() != 0)
+            if (snow->HasRespawnTime())
                 return;
 
             snow->SetLootState(GO_JUST_DEACTIVATED);

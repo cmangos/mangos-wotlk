@@ -242,7 +242,7 @@ struct DreadsteedQuestObjects : public GameObjectAI
                 m_go->SetLootState(GO_JUST_DEACTIVATED);
                 return;
             }
-        m_go->SetRespawnDelay(0);
+        m_go->SetRespawnDelay(0s);
     }
 
     void UpdateAI(const uint32 diff) override

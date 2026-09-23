@@ -566,7 +566,7 @@ bool ProcessEventId_arcanite_buoy(uint32 uiEventId, Object* pSource, Object* /*p
                 {
                     if (!lightning->IsSpawned())
                     {
-                        lightning->SetRespawnTime(9000);
+                        lightning->SetRespawnTime(9000s);
                         lightning->Refresh();
                     }
                 }

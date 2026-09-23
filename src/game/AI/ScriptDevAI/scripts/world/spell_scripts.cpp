@@ -115,7 +115,7 @@ struct AnuniaqsNet : public SpellScript
     {
         GameObject* goTarget = spell->GetGOTarget();
         Unit* caster         = spell->GetCaster();
-        if (goTarget->GetRespawnTime() != 0 || !caster->IsPlayer())
+        if (goTarget->HasRespawnTime() || !caster->IsPlayer())
             return;
 
         if (urand(0, 3))
@@ -132,7 +132,7 @@ struct CastFishingNet : public SpellScript
     {
         GameObject* goTarget = spell->GetGOTarget();
         Unit* caster = spell->GetCaster();
-        if (goTarget->GetRespawnTime() != 0 || !caster->IsPlayer())
+        if (goTarget->HasRespawnTime() || !caster->IsPlayer())
             return;
 
         if (urand(0, 2))

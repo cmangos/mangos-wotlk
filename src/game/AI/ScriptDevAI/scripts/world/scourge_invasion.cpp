@@ -150,7 +150,7 @@ void DespawnEventDoodads(Creature* shard)
     GetGameObjectListWithEntryInGrid(doodadList, shard, { GO_SUMMON_CIRCLE, GO_UNDEAD_FIRE, GO_UNDEAD_FIRE_AURA, GO_SKULLPILE_01, GO_SKULLPILE_02, GO_SKULLPILE_03, GO_SKULLPILE_04, GO_SUMMONER_SHIELD }, 60.0f);
     for (const auto pDoodad : doodadList)
     {
-        pDoodad->SetRespawnDelay(-1);
+        pDoodad->SetRespawnDelay(1s);
         pDoodad->ForcedDespawn();
     }
 
