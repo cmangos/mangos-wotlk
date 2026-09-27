@@ -14,32 +14,46 @@ enum
 
     NPC_MOGRAINE                    = 3976,
     NPC_WHITEMANE                   = 3977,
+    NPC_VORREL                      = 3981,
+    NPC_INTERROGATOR_VISHAS         = 3983,
 
     GO_WHITEMANE_DOOR               = 104600,
     GO_CHAPEL_DOOR                  = 104591,
 
-    SAY_TRIGGER_VORREL              = -1189015,
+    SAY_TRIGGER_VORREL              = 1376,
 
     ITEM_CORRUPTED_ASHRBRINGER      = 22691,
-    SAY_ASHBRINGER_ENTRANCE         = -1189036,
-    AREATRIGGER_CATHEDRAL_ENTRANCE  = 4089, // used to trigger Corrupted Ashbringer event
+    SAY_ASHBRINGER_ENTRANCE         = 12389,
+    AREATRIGGER_CATHEDRAL_ENTRANCE = 4089, // used to trigger Corrupted Ashbringer event
 
-    // Only NPCs and small animals in the graveyard won't be tracked, so they won't change during the Corrupt Ash Messenger event
-    //church
-    NPC_RABBIT = 721,
-    //cemetery
-    NPC_VORREL = 3981,
-    NPC_INTERROGATOR_VISHAS = 3983,
-    NPC_RAT = 4075,
-    NPC_SCARLET_SENTRY = 4283,
-    NPC_SCARLET_SCRYER = 4293,
-    NPC_UNFETTERED_SPIRIT = 4308,
-    NPC_SCARLET_TORTURER = 4306,
-    NPC_ANGUISHED_DEAD = 6426,
-    NPC_HAUNTING_PHANTASM = 6427,
-    NPC_FALLON_CHAMPION = 6488,
-    NPC_BLOODMAGE_THALNOS = 4543,
-    NPC_SUFFERING_VICTIM = 6547,
+    // these npcs are tracked for purposes of turning them friendly during the Corrupted Ashbringer event
+    // Church
+    NPC_SORCERER = 4294,
+    NPC_MYRMIDON = 4295,
+    NPC_DEFENDER = 4298,
+    NPC_CHAPLAIN = 4299,
+    NPC_WIZARD = 4300,
+    NPC_CENTURION = 4301,
+    NPC_CHAMPION = 4302,
+    NPC_ABBOT = 4303,
+    NPC_MONK = 4540,
+    NPC_FAIRBANKS = 4542,
+    //armory
+    NPC_DEFIAS_CUTPURSE = 94,
+	NPC_THE_SCARLET_CHAMPION = 3975,
+    NPC_SCARLET_SOLDIER = 4286,
+    NPC_SCARLET_EVOKER = 4289,
+    NPC_SCARLET_GUARDSMAN = 4290,
+    NPC_SCARLET_PROTECTOR = 4292,
+    NPC_SCARLET_CONJUROR = 4297,    
+    //LIBRARY
+	NPC_HOUNDMASTER_LOKSEY=3974,
+    NPC_SCARLET_GALLANT = 4287,
+    NPC_SCARLET_BEASTMASTER = 4288,
+    NPC_SCARLET_DIVINER = 4291,
+	NPC_SCARLET_ADEPT = 4296,
+    NPC_SCARLET_TRACKING_HOUND = 4304,
+    NPC_ARCANIST_DOAN = 6487,
 
     NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY = 23758,
 };
@@ -62,7 +76,7 @@ class instance_scarlet_monastery : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiData) const override;
 
-        bool DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger);
+        bool DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger, Player* player);
 
     private:
         GuidSet m_sAshbringerFriendlyGuids;

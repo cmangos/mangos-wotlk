@@ -46,36 +46,52 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        //church
-        case NPC_RABBIT:
-
-        //cemetery
-        case NPC_INTERROGATOR_VISHAS:
-        case NPC_RAT:
-        case NPC_SCARLET_SENTRY:
-        case NPC_SCARLET_SCRYER:
-        case NPC_UNFETTERED_SPIRIT:
-        case NPC_SCARLET_TORTURER:
-        case NPC_ANGUISHED_DEAD:
-        case NPC_HAUNTING_PHANTASM:
-        case NPC_FALLON_CHAMPION:
-        case NPC_BLOODMAGE_THALNOS:
-        case NPC_SUFFERING_VICTIM:
-            return;
-        case NPC_VORREL:
-        case NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY:
+        // Church
+        case NPC_SORCERER:
+        case NPC_MYRMIDON:
+        case NPC_DEFENDER:
+        case NPC_CHAPLAIN:
+        case NPC_WIZARD:
+        case NPC_CENTURION:
+        case NPC_CHAMPION:
+        case NPC_ABBOT:
+        case NPC_MONK:
+        case NPC_FAIRBANKS:
+            m_sAshbringerFriendlyGuids.emplace(pCreature->GetObjectGuid());
+            break;
+        case NPC_MOGRAINE:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            return;
+            m_sAshbringerFriendlyGuids.emplace(pCreature->GetObjectGuid());
+            break;
         case NPC_WHITEMANE:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
-        case NPC_MOGRAINE:
+        //armory
+        case NPC_DEFIAS_CUTPURSE:
+        case NPC_THE_SCARLET_CHAMPION:
+        case NPC_SCARLET_SOLDIER:
+        case NPC_SCARLET_EVOKER:
+        case NPC_SCARLET_GUARDSMAN:
+        case NPC_SCARLET_PROTECTOR:
+        case NPC_SCARLET_CONJUROR:
+       //Library
+        case NPC_HOUNDMASTER_LOKSEY:
+        case NPC_SCARLET_GALLANT:
+        case NPC_SCARLET_BEASTMASTER:
+        case NPC_SCARLET_DIVINER:
+        case NPC_SCARLET_ADEPT:
+        case NPC_SCARLET_TRACKING_HOUND:
+        case NPC_ARCANIST_DOAN:
+            m_sAshbringerFriendlyGuids.emplace(pCreature->GetObjectGuid());
+            break;
+
+        case NPC_VORREL:
+        case NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         default:
             break;
     }
-    m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
 }
 
 void instance_scarlet_monastery::OnCreatureDeath(Creature* pCreature)
@@ -84,7 +100,7 @@ void instance_scarlet_monastery::OnCreatureDeath(Creature* pCreature)
     {
         // Any other actions to do with Vorrel? setStandState?
         if (Creature* pVorrel = GetSingleCreatureFromStorage(NPC_VORREL))
-            DoScriptText(SAY_TRIGGER_VORREL, pVorrel);
+            DoBroadcastText(SAY_TRIGGER_VORREL, pVorrel);
     }
 }
 
@@ -187,9 +203,9 @@ InstanceData* GetInstanceData_instance_scarlet_monastery(Map* pMap)
     return new instance_scarlet_monastery(pMap);
 }
 
-bool instance_scarlet_monastery::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger)
+bool instance_scarlet_monastery::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger, Player* player)
 {
-     if (areaTrigger->id != AREATRIGGER_CATHEDRAL_ENTRANCE)
+    if (areaTrigger->id != AREATRIGGER_CATHEDRAL_ENTRANCE)
         return false;
 
     if (GetData(TYPE_ASHBRINGER_EVENT) != NOT_STARTED)
@@ -199,7 +215,7 @@ bool instance_scarlet_monastery::DoHandleAreaTrigger(AreaTriggerEntry const* are
     if (Creature* mograine = GetSingleCreatureFromStorage(NPC_MOGRAINE))
     {
         if (mograine->IsAlive())
-            DoScriptText(SAY_ASHBRINGER_ENTRANCE, mograine);
+            DoBroadcastText(SAY_ASHBRINGER_ENTRANCE, mograine, player, CHAT_TYPE_ZONE_YELL);
     }
 
     return true;
@@ -211,7 +227,7 @@ bool AreaTrigger_at_cathedral_entrance(Player* player, AreaTriggerEntry const* a
         return false;
 
     if (auto* instance = (instance_scarlet_monastery*)player->GetInstanceData())
-        return instance->DoHandleAreaTrigger(areaTrigger);
+        return instance->DoHandleAreaTrigger(areaTrigger, player);
 
     return false;
 }
