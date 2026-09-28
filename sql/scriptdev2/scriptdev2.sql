@@ -3651,8 +3651,6 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1189013','REUSE_ME','0','0','0','0','0','REUSE_ME'),
 ('-1189014','REUSE_ME','0','0','0','0','0','REUSE_ME'),
 
-('-1189015','The monster got what he deserved.','0','0','1','0','0','vishas SAY_TRIGGER_VORREL'),
-
 ('-1189016','REUSE_ME','0','0','0','0','0','REUSE_ME'),
 ('-1189017','REUSE_ME','0','0','0','0','0','REUSE_ME'),
 ('-1189018','REUSE_ME','0','0','0','0','0','REUSE_ME'),
@@ -3676,9 +3674,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1189033','You felt death once...','0','0','0','0','22720','horseman SAY_PLAYER3'),
 ('-1189034','Now, know demise!','0','0','0','0','22721','horseman SAY_PLAYER4'),
 
-('-1189035','The master has fallen! Avenge him my brethren!','5834','1','0','0','2842','trainee SAY_TRAINEE_SPAWN'),
-
-('-1189036','Bow down! Kneel before the Ashbringer! A new dawn approaches, brother and sisters! Our message will be delivered to the filth of this world through the chosen one!','0','6','0','0','12389','mograine SAY_ASHBRINGER_ENTRANCE');
+('-1189035','The master has fallen! Avenge him my brethren!','5834','1','0','0','2842','trainee SAY_TRAINEE_SPAWN');
 
 -- -1 209 000 ZUL'FARRAK
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
