@@ -2550,6 +2550,7 @@ void Player::RegenerateAll(uint32 diff)
         case CLASS_DRUID:
             Regenerate(POWER_ENERGY, diff);
             Regenerate(POWER_MANA, diff);
+            [[fallthrough]];
         case CLASS_WARRIOR:
             if (!IsInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
                 Regenerate(POWER_RAGE, diff);
