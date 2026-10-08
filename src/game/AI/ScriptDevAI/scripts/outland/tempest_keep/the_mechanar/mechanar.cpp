@@ -223,6 +223,7 @@ void instance_mechanar::DoSpawnBridgeWave()
                 {
                     case 0:
                         SetData(TYPE_BRIDGEEVENT, IN_PROGRESS);
+                        [[fallthrough]];
                     case 1:
                     case 2:
                     case 3:

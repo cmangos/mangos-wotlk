@@ -166,6 +166,7 @@ void instance_sunwell_plateau::OnCreatureCreate(Creature* creature)
         case NPC_WORLD_TRIGGER_LARGE:
             if (creature->GetPositionY() < 523.0f)
                 m_lBackdoorTriggersList.push_back(creature->GetObjectGuid());
+            [[fallthrough]];
         case NPC_MURU_PORTAL_TARGET:
         case NPC_BLUE_ORB_TARGET:
         case NPC_SINISTER_REFLECTION:
@@ -183,6 +184,7 @@ void instance_sunwell_plateau::OnCreatureCreate(Creature* creature)
             break;
         case NPC_UNYELDING_DEAD:
             creature->SetCorpseDelay(5);
+            [[fallthrough]];
         case NPC_DEMONIC_VAPOR:
         case NPC_DEMONIC_VAPOR_TRAIL:
             m_felmystSpawns.push_back(creature->GetObjectGuid());
@@ -298,6 +300,7 @@ void instance_sunwell_plateau::OnObjectCreate(GameObject* go)
         case GO_BLAZE:
             m_twinsSpawns.push_back(go->GetObjectGuid());
             go->SetCooldown(1s);
+            [[fallthrough]];
         default:
             return;
     }

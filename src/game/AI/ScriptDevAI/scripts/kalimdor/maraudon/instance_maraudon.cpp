@@ -68,7 +68,7 @@ void instance_maraudon::SetData(uint32 type, uint32 data)
                 // Destroy the corruption spewer near Noxxion
                 if (GameObject* go = GetSingleGameObjectFromStorage(GO_CORRUPTION_SPEWER))
                     go->SetLootState(GO_ACTIVATED);
-                // no break, the special part is also executed
+                [[fallthrough]]; // no break, the special part is also executed
             case SPECIAL:
                 m_spewLarvaTimer = 0;
                 // Destroy the larva spewer if not already done

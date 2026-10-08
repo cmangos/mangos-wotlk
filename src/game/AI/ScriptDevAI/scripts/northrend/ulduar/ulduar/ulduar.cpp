@@ -1457,6 +1457,7 @@ bool instance_ulduar::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player c
         case ACHIEV_CRIT_STUNNED_MOLG_H:
             if (GetData(TYPE_ASSEMBLY) == SPECIAL)
                 return m_abAchievCriteria[TYPE_ACHIEV_STUNNED];
+            [[fallthrough]];
         case ACHIEV_CRIT_SHATTERED_N:
         case ACHIEV_CRIT_SHATTERED_H:
             return m_abAchievCriteria[TYPE_ACHIEV_SHATTERED];

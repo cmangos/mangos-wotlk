@@ -52,6 +52,7 @@ void instance_obsidian_sanctum::OnCreatureCreate(Creature* creature)
         case NPC_SHADRON:
         case NPC_VESPERON:
             creature->SetActiveObjectState(true);
+            [[fallthrough]];
         case NPC_SARTHARION:
         case NPC_VESPERON_CONTROLLER:
         case NPC_VESPERON_CONTROLLER_DEBUFF_CLEAR:

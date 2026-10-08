@@ -184,6 +184,7 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
         case NPC_SINCLARI:
             if (pCreature->IsTemporarySummon())
                 return;
+            [[fallthrough]];
         case NPC_SINCLARI_ALT:
         case NPC_DOOR_SEAL:
         case NPC_EVENT_CONTROLLER:

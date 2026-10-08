@@ -63,7 +63,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
             // replace the princess if required
             if (CanReplacePrincess())
                 pCreature->UpdateEntry(NPC_PRIESTESS);
-        // no break;
+            [[fallthrough]];
         case NPC_EMPEROR:
         case NPC_MAGMUS:
         case NPC_PHALANX:
@@ -91,6 +91,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
                 break;
             // Golems in Relict Vault need to have a stoned aura, set manually to prevent reapply when reached home
             pCreature->CastSpell(pCreature, SPELL_STONED, TRIGGERED_OLD_TRIGGERED);
+            [[fallthrough]];
         // Store the Relict Vault Golems into m_sVaultNpcGuids
         case NPC_WATCHER_DOOMGRIP:
             m_sVaultNpcGuids.insert(pCreature->GetObjectGuid());
@@ -736,6 +737,7 @@ void instance_blackrock_depths::HandleBarPatrol(uint8 uiStep)
                 m_uiPatrolTimer = 4000;
                 break;
             }
+            [[fallthrough]];
         case 1:
             for (auto m_sBarPatrolGuid : m_sBarPatrolGuids)
             {

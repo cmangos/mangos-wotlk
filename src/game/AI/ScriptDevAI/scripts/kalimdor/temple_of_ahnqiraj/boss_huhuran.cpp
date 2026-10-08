@@ -90,6 +90,7 @@ struct boss_huhuranAI : public CombatAI
             case HUHURAN_BERSERK_HP_CHECK:
                 if (m_creature->GetHealthPercent() > 30.0f)
                     return;
+                [[fallthrough]];
             case HUHURAN_BERSERK:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)

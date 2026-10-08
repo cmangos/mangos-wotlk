@@ -604,6 +604,7 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
                         DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);
                 }
             }
+            [[fallthrough]];
         case NPC_SPIRE_FROSTWYRM:
             SetData(TYPE_SPIRE_FROSTWYRM, DONE);
             break;

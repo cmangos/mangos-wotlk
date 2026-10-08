@@ -87,6 +87,7 @@ void instance_scholomance::OnObjectCreate(GameObject* pGo)
             // In normal flow of the instance, this door is opened by a dropped key
             if (m_auiEncounter[TYPE_RATTLEGORE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
+            [[fallthrough]];
         case GO_GATE_KIRTONOS:
         case GO_GATE_RAS:
         case GO_GATE_GANDLING:

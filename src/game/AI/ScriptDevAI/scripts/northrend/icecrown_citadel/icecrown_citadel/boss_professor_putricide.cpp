@@ -474,7 +474,7 @@ struct boss_professor_putricideAI : public CombatAI
                 break;
             case NPC_GAS_CLOUD:
                 pSummoned->CastSpell(nullptr, SPELL_GASEOUS_BLOAT_VISUAL, TRIGGERED_OLD_TRIGGERED);
-            // no break;
+                [[fallthrough]];
             case NPC_VOLATILE_OOZE:
                 pSummoned->SetInCombatWithZone();
                 break;

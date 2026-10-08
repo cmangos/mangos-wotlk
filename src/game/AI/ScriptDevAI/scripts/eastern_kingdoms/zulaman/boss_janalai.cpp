@@ -259,6 +259,7 @@ struct boss_janalaiAI : public CombatAI
             case JANALAI_ACTION_ENRAGE_HP:
                 if (m_creature->GetHealthPercent() > 20.0f)
                     return;
+                [[fallthrough]];
             case JANALAI_ACTION_ENRAGE_TIMER:
                 if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
                 {

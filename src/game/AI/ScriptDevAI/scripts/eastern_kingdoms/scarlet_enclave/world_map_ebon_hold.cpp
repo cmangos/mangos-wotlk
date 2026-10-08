@@ -155,7 +155,7 @@ void world_map_ebon_hold::OnCreatureDeath(Creature* pCreature)
         case NPC_DEFENDER_OF_THE_LIGHT:
             ++m_uiDefendersDead;
             DoUpdateBattleWorldState(WORLD_STATE_FORCES_LIGHT, MAX_FORCES_LIGHT - m_uiDefendersDead);
-            // no break;
+            [[fallthrough]];
         case NPC_KORFAX_CHAMPION_OF_THE_LIGHT:
         case NPC_LORD_MAXWELL_TYROSUS:
         case NPC_COMMANDER_ELIGOR_DAWNBRINGER:

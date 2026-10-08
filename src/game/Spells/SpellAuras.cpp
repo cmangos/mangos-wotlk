@@ -1132,6 +1132,7 @@ void Aura::PickTargetsForSpellTrigger(Unit*& triggerCaster, Unit*& triggerTarget
             triggerCaster = GetCaster();
             if (triggerCaster)
                 triggerTargetObject = GetCaster()->GetChannelObject();
+            [[fallthrough]];
         case TARGET_LOCATION_CASTER_SRC: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
             //[[fallthrough]]
         case TARGET_LOCATION_CASTER_DEST:
@@ -4138,7 +4139,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             case FORM_CAT: // need to cast Track Humanoids if no other tracking is on
                 if (target->HasSpell(5225) && !target->HasAura(2383) && !target->HasAura(2580))
                     target->CastSpell(nullptr, 5225, TRIGGERED_OLD_TRIGGERED);
-                // no break
+                [[fallthrough]];
             case FORM_BEAR:
             case FORM_DIREBEAR:
             {
@@ -4269,6 +4270,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                             m_modifier.m_amount = 29204;    // Catrina
                             break;
                     }
+                    [[fallthrough]];
                 }
                 // case 65511:                              // Gossip NPC Appearance - Brewfest
                 // break;
@@ -5863,6 +5865,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                         ((Creature*)target)->ForcedDespawn();
                     }
                 }
+                [[fallthrough]];
             default:
                 break;
         }
@@ -6013,6 +6016,7 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                     break;
                 }
             }
+            [[fallthrough]];
         }
         case SPELLFAMILY_ROGUE:
         {
@@ -6769,7 +6773,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
         case 61254:                                         // Will of Sartharion (Obsidian Sanctum)
             if (Real && apply)
                 m_modifier.m_amount = target->GetMaxHealth() * m_modifier.m_amount / 100;
-        // no break here
+            [[fallthrough]];
 
         // Cases where m_amount already has the correct value (spells cast with CastCustomSpell or absolute values)
         case 4148:                                          // Growl of Fortitude

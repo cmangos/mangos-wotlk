@@ -212,6 +212,7 @@ struct boss_kazzakAI : public ScriptedAI
                             }
                             break;
                         }
+                        [[fallthrough]];
                     }
                     case KAZZAK_ACTION_SHADOW_BOLT_VOLLEY:
                     {

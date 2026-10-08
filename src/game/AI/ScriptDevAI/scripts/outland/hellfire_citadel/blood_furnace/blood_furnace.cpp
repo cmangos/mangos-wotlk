@@ -46,6 +46,7 @@ void instance_blood_furnace::OnCreatureCreate(Creature* creature)
     {
         case NPC_BROGGOK:
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
+            [[fallthrough]];
         case NPC_KELIDAN_THE_BREAKER:
         case NPC_MAGTHERIDON:
         case NPC_IN_COMBAT_TRIGGER:

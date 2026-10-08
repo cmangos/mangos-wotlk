@@ -709,6 +709,7 @@ void Spell::FillTargetMap()
                     for (Corpse* corpse : corpseTargetList)
                         AddCorpseTarget(corpse, effectMask);
                 }
+                [[fallthrough]];
             case TARGET_TYPE_UNIT:
             case TARGET_TYPE_UNIT_DEST:
             case TARGET_TYPE_PLAYER: // for now player handled here
@@ -726,7 +727,7 @@ void Spell::FillTargetMap()
                         AddItemTarget(item, targetMask[0]); // no spell in all of vanilla through wotlk has item target in B
                 if (effectTargetType == TARGET_TYPE_ITEM)
                     break;
-                // [[fallthrough]]
+                [[fallthrough]];
             case TARGET_TYPE_GAMEOBJECT:
                 processedGOs = true;
                 for (uint8 rightTarget = 0; rightTarget < 2; ++rightTarget) // need to process target A and B separately due to effect masks
@@ -2000,6 +2001,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 case TARGET_LOCATION_CASTER_FRONT:                                break;
                 case TARGET_LOCATION_CASTER_BACK:        angle += M_PI_F;         break;
                 case TARGET_LOCATION_UNIT_MINION_POSITION: caster = GetCastingObject(); // projected from original caster if necessary
+                    [[fallthrough]];
                 case TARGET_LOCATION_CASTER_LEFT:        angle += M_PI_F / 2;     break;
                 case TARGET_LOCATION_CASTER_RIGHT:       angle -= M_PI_F / 2;     break;
             }
@@ -2599,7 +2601,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                             itr = tempGOList.erase(itr);
                             continue;
                         }
-                    // no break here
+                        [[fallthrough]];
                     case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_SRC_LOC:
                     case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_DEST_LOC:
                     default:
@@ -3457,7 +3459,7 @@ void Spell::cancel()
         case SPELL_STATE_CASTING:
             if (m_caster)
                 m_caster->ResetGCD(m_spellInfo);
-            // [[fallthrough]]
+            [[fallthrough]];
         case SPELL_STATE_TRAVELING:
             SendInterrupted(SPELL_FAILED_INTERRUPTED);
             if (sendInterrupt)
@@ -3465,7 +3467,7 @@ void Spell::cancel()
             break;
         case SPELL_STATE_LANDING:
             sLog.outError("Spell [%u] is interrupted while processing", m_spellInfo->Id);
-            // [[fallthrough]]
+            [[fallthrough]];
         case SPELL_STATE_CHANNELING:
             for (auto& ihit : m_UniqueTargetInfo)
             {
@@ -6747,8 +6749,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     if (target->GetMapId() != mapId)
                         return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
                 }
-                break;
 #endif
+                break;
             }
             case SPELL_EFFECT_SUMMON_PLAYER:
             {
@@ -9061,6 +9063,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                 case 56429:                                 // Summon Arcane Bomb (Eye of Eternity, Malygos) - only target A
                     if (targetB)
                         break;
+                    [[fallthrough]];
                 case 69057:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10N)
                 case 70826:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 25N)
                 case 72088:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10H)
@@ -9104,6 +9107,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                     radius = CONTACT_DISTANCE;
                     break;
             }
+            [[fallthrough]];
         }
         default:
             break;

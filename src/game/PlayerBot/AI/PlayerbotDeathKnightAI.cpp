@@ -306,6 +306,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit* pTar
             }
 
             LastSpellUnholyDK = 0;
+            [[fallthrough]];
 
         case SPELL_DK_FROST:
             if (FROST_PRESENCE > 0 && !m_bot.HasAura(FROST_PRESENCE, EFFECT_INDEX_0) && !m_bot.HasAura(BLOOD_PRESENCE, EFFECT_INDEX_0) && !m_bot.HasAura(UNHOLY_PRESENCE, EFFECT_INDEX_0) && m_ai.CastSpell(FROST_PRESENCE, m_bot) == SPELL_CAST_OK)
@@ -414,6 +415,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit* pTar
             }
 
             LastSpellFrostDK = 0;
+            [[fallthrough]];
 
         case SPELL_DK_BLOOD:
             if (BLOOD_PRESENCE > 0 && !m_bot.HasAura(BLOOD_PRESENCE, EFFECT_INDEX_0) && !m_bot.HasAura(UNHOLY_PRESENCE, EFFECT_INDEX_0) && !m_bot.HasAura(FROST_PRESENCE, EFFECT_INDEX_0) && m_ai.CastSpell(BLOOD_PRESENCE, m_bot) == SPELL_CAST_OK)

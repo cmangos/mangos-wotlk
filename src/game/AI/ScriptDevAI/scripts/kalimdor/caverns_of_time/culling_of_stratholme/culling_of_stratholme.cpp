@@ -556,7 +556,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
             case NPC_INFINITE_AGENT:
             case NPC_INFINITE_HUNTER:
                 pSummoned->AI()->AttackStart(m_creature);
-            // no break;
+                [[fallthrough]];
             case NPC_TOWNHALL_CITIZEN:
             case NPC_TOWNHALL_RESIDENT:
                 m_lSummonedGuidsList.push_back(pSummoned->GetObjectGuid());

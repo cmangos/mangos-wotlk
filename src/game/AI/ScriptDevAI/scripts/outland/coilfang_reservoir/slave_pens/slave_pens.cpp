@@ -61,6 +61,7 @@ void instance_slave_pens::OnCreatureCreate(Creature* creature)
     {
         case NPC_QUAGMIRRAN:
             m_quagmirranTimer = 1000;
+            [[fallthrough]];
         case NPC_NATURALIST_BITE:
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;

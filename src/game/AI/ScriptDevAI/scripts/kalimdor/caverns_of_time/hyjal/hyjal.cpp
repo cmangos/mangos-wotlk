@@ -812,6 +812,7 @@ uint32 GetRunningPerWaveMobEntry(uint32 entry, uint32 waveIndex)
         case NPC_FROST:
             if (waveIndex == 6) // this wave runs
                 return true;
+            [[fallthrough]];
         case NPC_KAZROGAL:
         case NPC_AZGALOR:
             return false;
@@ -948,7 +949,7 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* creature)
                 case NPC_KAZROGAL: SetData(TYPE_KAZROGAL, IN_PROGRESS); break;
                 case NPC_AZGALOR: SetData(TYPE_AZGALOR, IN_PROGRESS); break;
             }
-            // no break
+            [[fallthrough]];
         }
         case NPC_GHOUL:
         case NPC_NECRO:

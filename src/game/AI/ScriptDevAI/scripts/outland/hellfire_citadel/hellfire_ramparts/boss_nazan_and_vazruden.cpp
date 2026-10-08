@@ -208,7 +208,7 @@ struct boss_vazruden_heraldAI : public CombatAI
                 }
                 case POINT_ID_FLYING:
                     HandlePhaseChange(false);
-                // [[fallthrough]]
+                    [[fallthrough]];
                 case POINT_ID_FLIGHT_MOVE:
                     SetCombatScriptStatus(false);
                     m_creature->SetImmobilizedState(true);

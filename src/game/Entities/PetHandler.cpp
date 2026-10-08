@@ -316,6 +316,7 @@ void WorldSession::HandlePetActionHelper(uint8 flag, uint32 spellid, Unit* petUn
                         petUnit->AttackStop(true, true);
                         charmInfo->SetSpellOpener();
                     }
+                    [[fallthrough]];
                 }
                 case REACT_DEFENSIVE:                       // recovery
                 case REACT_AGGRESSIVE:                      // activete

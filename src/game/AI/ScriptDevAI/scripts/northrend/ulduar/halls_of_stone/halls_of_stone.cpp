@@ -129,6 +129,7 @@ void instance_halls_of_stone::OnCreatureCreate(Creature* pCreature)
         case NPC_BRANN:
             if (pCreature->IsTemporarySummon())
                 return;
+            [[fallthrough]];
         case NPC_DARK_MATTER:
         case NPC_SJONNIR:
         case NPC_SEARING_GAZE_TARGET:

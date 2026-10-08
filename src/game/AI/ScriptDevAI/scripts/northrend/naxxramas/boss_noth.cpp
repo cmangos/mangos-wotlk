@@ -277,6 +277,7 @@ struct SummonSkeletonsNoth : public AuraScript
                 {
                     target->CastSpell(nullptr, SPELL_SUMMON_WARRIOR_THREE, TRIGGERED_OLD_TRIGGERED);
                 }
+                [[fallthrough]];
             }
             case 27: // 135s
             case 33: // 165s

@@ -317,7 +317,7 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
             // alliance vendors
         case NPC_COMMANDER_ZANNETH:
             m_zoneLeaderGuid[TEAM_INDEX_ALLIANCE] = creature->GetObjectGuid();
-            // no break;
+            [[fallthrough]];
         case NPC_ANCHORITE_TESSA:
         case NPC_SENIOR_DEMOLITIONIST_LEGOSO:
         case NPC_SIEGE_MASTER_STOUTHANDLE:
@@ -334,7 +334,7 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
             // horde vendors
         case NPC_COMMANDER_DARDOSH:
             m_zoneLeaderGuid[TEAM_INDEX_HORDE] = creature->GetObjectGuid();
-            // no break;
+            [[fallthrough]];
         case NPC_HOODOO_MASTER_FUJIN:
         case NPC_LEUTENANT_MURP:
         case NPC_PRIMALIST_MULFORT:
@@ -1154,7 +1154,7 @@ void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
             case NPC_WINTERGRASP_SIEGE_ENGINE_H:
                 if (player->GetTeam() == GetDefender())
                     player->KilledMonsterCredit(NPC_QUEST_CREDIT_KILL_VEHICLE);
-                // no break;
+                [[fallthrough]];
             case NPC_WINTERGRASP_TOWER_CANNON:
                 playerData->IncreaseKillCount();
                 break;

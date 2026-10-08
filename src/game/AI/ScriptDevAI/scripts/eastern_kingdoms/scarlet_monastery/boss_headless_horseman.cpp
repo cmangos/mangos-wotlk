@@ -328,7 +328,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
                 else
                     m_uiPumpkinTimer -= uiDiff;
 
-                // no break;
+                [[fallthrough]];
             case PHASE_CONFLAGRATION:
 
                 // conflagration not happening during pumpkin phase
@@ -349,7 +349,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
                         m_uiConflagrationTimer -= uiDiff;
                 }
 
-                // no break;
+                [[fallthrough]];
             case PHASE_HORSEMAN:
 
                 // cleave - all phases

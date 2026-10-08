@@ -195,6 +195,7 @@ void instance_halls_of_reflection::OnObjectCreate(GameObject* pGo)
             return;
         case GO_ICE_WALL:
             m_lIceWallGuids.push_back(pGo->GetObjectGuid());
+            [[fallthrough]];
         default:
             return;
     }
@@ -368,6 +369,7 @@ void instance_halls_of_reflection::OnCreatureEvade(Creature* pCreature)
         case NPC_PHANTOM_MAGE:
             if (pCreature->HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
                 break;
+            [[fallthrough]];
         case NPC_SPECTRAL_FOOTMAN:
         case NPC_GHOSTLY_PRIEST:
         case NPC_TORTURED_RIFLEMAN:

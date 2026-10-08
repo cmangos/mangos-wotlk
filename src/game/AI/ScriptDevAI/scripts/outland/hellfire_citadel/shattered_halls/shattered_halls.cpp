@@ -121,7 +121,7 @@ void instance_shattered_halls::OnCreatureCreate(Creature* creature)
             break;
         case NPC_SHATTERED_HAND_ARCHER:
             m_npcEntryGuidCollection[creature->GetEntry()].push_back(creature->GetObjectGuid());
-            // [[breakthrough]]
+            [[fallthrough]];
         case NPC_BLOOD_GUARD:
         case NPC_PORUNG:
             m_gauntletBossGuids.push_back(creature->GetDbGuid());

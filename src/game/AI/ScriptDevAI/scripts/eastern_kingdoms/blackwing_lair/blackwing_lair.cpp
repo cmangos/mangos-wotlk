@@ -508,6 +508,7 @@ void instance_blackwing_lair::Update(uint32 uiDiff)
                         DoOrSimulateScriptTextForThisInstance(EMOTE_REDSHARD_TAUNT_2, NPC_LORD_VICTOR_NEFARIUS);
                         DoOrSimulateScriptTextForThisInstance(YELL_REDSHARD_TAUNT_7, NPC_LORD_VICTOR_NEFARIUS);
                     }
+                    [[fallthrough]];
                 default:    // Something weird happened: stop timer and fail the event
                     m_uiScepterEpicTimer = 0;
                     SetData(TYPE_QUEST_SCEPTER, FAIL);

@@ -713,6 +713,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                     m_bIsEventStarted = true;
                     break;
                 }
+                [[fallthrough]];
             case PHASE_LEVEL_PREPARE:
                 // delay before each level - handled by big timer aura
                 if (eventType == AI_EVENT_CUSTOM_A)

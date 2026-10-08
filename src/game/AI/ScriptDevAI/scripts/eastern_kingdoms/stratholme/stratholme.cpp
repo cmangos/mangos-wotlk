@@ -105,7 +105,7 @@ void instance_stratholme::OnCreatureCreate(Creature* creature)
             creature->SetStandState(UNIT_STAND_STATE_KNEEL);
             if (m_auiEncounter[TYPE_AURIUS] == DONE)
                 creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-        // no break here
+            [[fallthrough]];
         case NPC_BARON:
         case NPC_YSIDA:
         case NPC_BARTHILAS:
@@ -966,9 +966,11 @@ void instance_stratholme::DoScarletBastionDefense(uint8 step, Creature* creature
         case ENTRANCE:
         case INNER_BASTION_1:
             DoScriptText(ScarletEventYells[step], creature);
+            [[fallthrough]];
         case CRIMSON_THRONE:
             if (Player* player = GetPlayerInMap())
                 DoSpawnScourgeInvaders(step, player);
+            [[fallthrough]];
         default:
             return;
     }

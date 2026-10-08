@@ -1237,7 +1237,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
                         pBunny->CastSpell(pBunny, SPELL_SPRING_RABBIT_IN_LOVE, TRIGGERED_NONE);
 
                     DoCastSpellIfCan(m_creature, SPELL_SPRING_RABBIT_IN_LOVE);
-                // no break here
+                    [[fallthrough]];
                 case 3:
                     m_uiStepTimer = 5000;
                     m_uiStep += 2;
@@ -1245,7 +1245,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
 
                 case 4:                                     // Called for the rabbit first reached meeting point
                     DoCastSpellIfCan(m_creature, SEPLL_SUMMON_BABY_BUNNY);
-                // no break here
+                    [[fallthrough]];
                 case 5:
                     // Let owner cast achievement related spell
                     if (Unit* pOwner = m_creature->GetMaster())
@@ -1714,6 +1714,7 @@ struct npc_burster_wormAI : public CombatAI
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_WORM_SWEEP) == CAST_OK)
                     ResetCombatAction(action, urand(15000, 25000));
+                [[fallthrough]];
             }
             case BURSTER_SWEEP_2:
             {

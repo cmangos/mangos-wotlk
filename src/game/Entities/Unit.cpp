@@ -5587,7 +5587,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 case TRACK_AURA_TYPE_CONTROL_VEHICLE:       // Only track the controlled vehicle, no secondary effects
                     if (!IsSpellHaveAura(aurSpellInfo, SPELL_AURA_CONTROL_VEHICLE, holder->GetAuraFlags()))
                         break;
-                // no break here, track other controlled
+                    [[fallthrough]]; // no break here, track other controlled
                 case TRACK_AURA_TYPE_SINGLE_TARGET:         // Register spell holder single target
                     scTargets[aurSpellInfo] = GetObjectGuid();
                     break;

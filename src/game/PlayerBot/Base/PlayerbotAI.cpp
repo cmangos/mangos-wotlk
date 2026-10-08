@@ -1280,6 +1280,7 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
         case ITEM_CLASS_QUEST:
             if (!HasCollectFlag(COLLECT_FLAG_QUEST))
                 break;
+            [[fallthrough]];
         case ITEM_CLASS_KEY:
             return true;
         case ITEM_CLASS_GEM:
@@ -1392,6 +1393,7 @@ bool PlayerbotAI::IsItemUseful(uint32 itemid)
                 default:
                     break;
             }
+            [[fallthrough]];
         }
         default:
             break;

@@ -257,6 +257,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit* pTarget)
             if ((KIDNEY_SHOT > 0 && m_bot.GetComboPoints() >= 2 && m_ai.CastSpell(KIDNEY_SHOT, *pTarget) == SPELL_CAST_OK) ||
                 (KICK > 0 && m_ai.CastSpell(KICK, *pTarget) == SPELL_CAST_OK))
                 return RETURN_CONTINUE;
+            [[fallthrough]];
         // break; // No action? Go combat!
 
         case RogueCombat:

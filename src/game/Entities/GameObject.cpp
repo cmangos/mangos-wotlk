@@ -260,7 +260,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
                 GetVisibilityData().SetInvisibilityMask(INVISIBILITY_TRAP, true);
                 GetVisibilityData().AddInvisibilityValue(INVISIBILITY_TRAP, 300);
             }
-            // [[fallthrough]]
+            [[fallthrough]];
         case GAMEOBJECT_TYPE_FISHINGNODE:
             m_lootState = GO_NOT_READY;                     // Initialize Traps and Fishingnode delayed in ::Update
             break;
@@ -386,6 +386,7 @@ void GameObject::Update(const uint32 diff)
                         return;
                     }
                     m_lootState = GO_READY;
+                    [[fallthrough]];
                 }
                 default:
                     break;
@@ -422,6 +423,7 @@ void GameObject::Update(const uint32 diff)
                             // we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for battlegrounds)
                             if (GetGoState() != GO_STATE_READY)
                                 ResetDoorOrButton();
+                            [[fallthrough]];
                         // flags in AB are type_button and we need to add them here so no break!
                         default:
                             if (!m_spawnedByDefault)        // despawn timer
@@ -1206,7 +1208,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                         isEnemyTrap = true;
                 }
             }
-            //[[fallthrough]]
+                [[fallthrough]];
             default:
             {
                 if (GetVisibilityData().GetInvisibilityMask()) // invisible gos

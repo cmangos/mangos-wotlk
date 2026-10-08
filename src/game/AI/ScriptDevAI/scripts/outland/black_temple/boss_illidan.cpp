@@ -801,7 +801,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             {
                 DisableCombatAction(ILLIDAN_ACTION_ENRAGE);
                 DisableCombatAction(ILLIDAN_ACTION_TRAP);
-                // [[fallthrough]]
+                [[fallthrough]];
             }
             case PHASE_3_NORMAL:
             {
@@ -887,7 +887,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             case PHASE_5_MAIEV:
                 ResetCombatAction(ILLIDAN_ACTION_ENRAGE, GetInitialActionTimer(ILLIDAN_ACTION_ENRAGE));
                 ResetCombatAction(ILLIDAN_ACTION_TRAP, GetInitialActionTimer(ILLIDAN_ACTION_TRAP));
-                // [fallthrough]
+                [[fallthrough]];
             case PHASE_3_NORMAL:
             {
                 // phase 2 cleanup

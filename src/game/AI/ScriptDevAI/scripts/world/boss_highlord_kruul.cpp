@@ -259,6 +259,7 @@ struct boss_highlord_kruulAI : public ScriptedAI
                             }
                             break;
                         }
+                        [[fallthrough]];
                     }
                     case KRUUL_ACTION_SHADOW_BOLT_VOLLEY:
                     {

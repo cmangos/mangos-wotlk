@@ -82,7 +82,7 @@ void instance_ruby_sanctum::OnCreatureCreate(Creature* pCreature)
         case NPC_ZARITHRIAN:
             if (m_auiEncounter[TYPE_SAVIANA] == DONE && m_auiEncounter[TYPE_BALTHARUS] == DONE)
                 pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNINTERACTIBLE);
-        // no break;
+            [[fallthrough]];
         case NPC_BALTHARUS:
         case NPC_HALION_REAL:
         case NPC_HALION_TWILIGHT:
@@ -239,7 +239,7 @@ void instance_ruby_sanctum::SetData(uint32 uiType, uint32 uiData)
                     // Note: rest of the cleanup is handled by creature_linking
 
                     m_uiHalionResetTimer = 30000;
-                // no break;
+                    [[fallthrough]];
                 case DONE:
                     // clear debuffs
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
@@ -316,6 +316,7 @@ void instance_ruby_sanctum::Update(uint32 uiDiff)
                     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
                         pSummoner->CastSpell(pSummoner, SPELL_FIERY_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
                     m_uiHalionSummonTimer = 2000;
+                    [[fallthrough]];
                 case 3:
                     // Spawn Halion
                     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))

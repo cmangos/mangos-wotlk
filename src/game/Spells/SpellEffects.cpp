@@ -290,7 +290,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     case 35181:                             // Al'ar - Dive Bomb
                         if (unitTarget->GetObjectGuid() == m_targets.getUnitTargetGuid()) // summons two adds
                             unitTarget->CastSpell(nullptr, 39110, TRIGGERED_OLD_TRIGGERED);
-                    // [[fallthrough]]
+                        [[fallthrough]];
                     // Meteor like spells (divided damage to targets)
                     case 24340: case 26558: case 28884:     // Meteor
                     case 36837: case 38903: case 41276:     // Meteor
@@ -2819,6 +2819,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     // remove player aura and despawn
                     unitTarget->GetOwner()->RemoveAurasDueToSpell(46233);
                     ((Creature*)unitTarget)->ForcedDespawn(5000);
+                    return;
                 }
                 case 46292:                                 // Cataclysm Breath
                 {
@@ -3812,6 +3813,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(m_caster, 30253, TRIGGERED_OLD_TRIGGERED);
+                    return;
                 }
                 case 30284:                                 // Change Facing
                 {
@@ -8373,6 +8375,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 30629:                                 // Debris - Magtheridon
                 {
                     unitTarget->CastSpell(nullptr, 30630, TRIGGERED_OLD_TRIGGERED);
+                    return;
                 }               
                 case 30834:                                 // Infernal Relay
                 {

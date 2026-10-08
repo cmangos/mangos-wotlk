@@ -206,6 +206,7 @@ void TemporarySpawn::Update(const uint32 diff)
                 RemoveAuraFromOwner();
                 m_linkedToOwnerAura = 0;                    // we dont need to recheck
             }
+            [[fallthrough]];
 
         default:
             break;

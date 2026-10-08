@@ -675,6 +675,7 @@ void MotionMaster::Mutate(MovementGenerator* m)
             case DISTRACT_MOTION_TYPE:
             case EFFECT_MOTION_TYPE:
                 MovementExpired(false);
+                [[fallthrough]];
             default:
                 break;
         }

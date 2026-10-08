@@ -184,6 +184,7 @@ void instance_trial_of_the_crusader::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_FIZZLEBANG:
             DoUseDoorOrButton(GO_MAIN_GATE);
+            [[fallthrough]];
         case NPC_TIRION_A:
         case NPC_TIRION_B:
         case NPC_VARIAN:

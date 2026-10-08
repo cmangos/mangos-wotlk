@@ -206,6 +206,7 @@ void BattleGroundAV::HandleQuestComplete(uint32 questid, Player* player)
         case BG_AV_QUEST_GALLON_OF_BLOOD:
             m_teamQuestStatus[teamIdx][4] += 4;            // there are 2 quests where you can turn in 5 or 1 item.. ( + 4 cause +1 will be done some lines below)
             reputation = 4;
+            [[fallthrough]];
         case BG_AV_QUEST_IVUS_FOREST_LORD:
         case BG_AV_QUEST_LOKHOLAR_ICE_LORD:
             m_teamQuestStatus[teamIdx][4]++;

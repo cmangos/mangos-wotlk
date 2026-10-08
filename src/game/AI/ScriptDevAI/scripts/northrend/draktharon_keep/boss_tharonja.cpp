@@ -168,8 +168,7 @@ struct boss_tharonjaAI : public ScriptedAI
                         return;                             // return here, as there is nothing more to be done in this phase
                     }
                 }
-
-            // No break here, the last phase is exactly like the first, but he doesn't change anymore
+                [[fallthrough]]; // No break here, the last phase is exactly like the first, but he doesn't change anymore            
             case PHASE_SKELETAL_END:
                 if (m_uiCurseLifeTimer < uiDiff)
                 {

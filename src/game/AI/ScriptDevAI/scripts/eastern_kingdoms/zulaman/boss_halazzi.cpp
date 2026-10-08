@@ -221,13 +221,14 @@ struct boss_halazziAI : public CombatAI
             case PHASE_TOTEM:
                 DisableCombatAction(HALAZZI_ACTION_FRENZY);
                 DisableCombatAction(HALAZZI_ACTION_SABER_LASH);
+                [[fallthrough]];
             case PHASE_FINAL:
                 ResetCombatAction(HALAZZI_ACTION_SHOCK, 10000);
                 ResetCombatAction(HALAZZI_ACTION_TOTEM, 12000);
                 if (m_phase == PHASE_TOTEM)
                     break;
                 SetDeathPrevention(false);
-                //[[fallthrough]]
+                [[fallthrough]];
             case PHASE_SINGLE:
                 ResetCombatAction(HALAZZI_ACTION_FRENZY, 16000);
                 ResetCombatAction(HALAZZI_ACTION_SABER_LASH, 20000);

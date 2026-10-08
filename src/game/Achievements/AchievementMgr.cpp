@@ -2691,6 +2691,7 @@ void AchievementGlobalMgr::LoadAchievementCriteriaRequirements()
                     default:
                         continue;
                 }
+                [[fallthrough]];
             }
             case ACHIEVEMENT_CRITERIA_TYPE_FALL_WITHOUT_DYING:
                 break;                                      // any cases

@@ -159,6 +159,7 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
                     }
                     break;
             }
+            [[fallthrough]];
         case TYPE_LEOTHERAS_EVENT:
             if (uiData == FAIL)
             {
@@ -170,7 +171,7 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
 
                 m_uiSpellBinderCount = 0;
             }
-            // no break;
+            [[fallthrough]];
         case TYPE_HYDROSS_EVENT:
         case TYPE_KARATHRESS_EVENT:
         case TYPE_MOROGRIM_EVENT:

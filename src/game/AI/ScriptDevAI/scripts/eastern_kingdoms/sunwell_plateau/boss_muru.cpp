@@ -180,7 +180,6 @@ struct boss_muruAI : public CombatAI
                 summoned->CastSpell(nullptr, SPELL_ENTROPIUS_SPAWN, TRIGGERED_OLD_TRIGGERED);
                 m_creature->ForcedDespawn(1000);
                 break;
-            // no break here; All other summons should behave the same way
             default:
                 summoned->AI()->SetReactState(REACT_PASSIVE);
                 summoned->AI()->SetCombatMovement(false);

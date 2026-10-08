@@ -78,6 +78,7 @@ void instance_black_temple::OnCreatureCreate(Creature* creature)
             // Use only the summoned versions
             if (!creature->IsTemporarySummon())
                 break;
+            [[fallthrough]];
         case NPC_AKAMA:
         case NPC_ILLIDAN_STORMRAGE:
         case NPC_MAIEV_SHADOWSONG:

@@ -582,6 +582,7 @@ void Pet::SetOwnerGuid(ObjectGuid owner)
         case GUARDIAN_PET:
             if (!m_controllableGuardian)
                 break;
+            [[fallthrough]];
         case SUMMON_PET:
         case HUNTER_PET:
             SetSummonerGuid(owner);

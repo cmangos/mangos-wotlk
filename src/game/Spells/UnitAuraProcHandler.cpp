@@ -1388,6 +1388,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     // Remove only single aura from stack
                     if (triggeredByAura->GetStackAmount() > 1 && !triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr))
                         return SPELL_AURA_PROC_CANT_TRIGGER;
+                    [[fallthrough]];
                 }
                 // Grim Reprisal
                 case 63305:
@@ -4364,6 +4365,7 @@ SpellAuraProcResult Unit::HandlePeriodicAuraProc(ProcExecutionData& data)
         case 36659: // Tail Sting
             if (triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr)) // Remove aura on return true
                 RemoveSpellAuraHolder(triggeredByAura->GetHolder(), AURA_REMOVE_BY_DEFAULT);
+            [[fallthrough]];
         case 35244: // Choking Vines
             if (triggeredByAura->GetHolder()->GetStackAmount() == triggeredByAura->GetHolder()->GetSpellProto()->StackAmount)
             {

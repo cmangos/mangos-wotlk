@@ -562,13 +562,13 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 vendor = player->SummonCreature(NPC_AETHER_TECH_MASTER, bashirCustomSpawnPositions[7][0], bashirCustomSpawnPositions[7][1], bashirCustomSpawnPositions[7][2], bashirCustomSpawnPositions[7][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 1000, true);
                 vendor->HandleEmote(EMOTE_STATE_USESTANDING);
                 vendor->SetCanFly(false);
-                // no break
+                [[fallthrough]];
             case BASHIR_PHASE_TRANSITION_3:
             case BASHIR_PHASE_3:
                 vendor = player->SummonCreature(NPC_AETHER_TECH_ADEPT, bashirCustomSpawnPositions[6][0], bashirCustomSpawnPositions[6][1], bashirCustomSpawnPositions[6][2], bashirCustomSpawnPositions[6][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 1000, true);
                 vendor->HandleEmote(EMOTE_STATE_USESTANDING);
                 vendor->SetCanFly(false);
-                // no break
+                [[fallthrough]];
             case BASHIR_PHASE_TRANSITION_2:
             case BASHIR_PHASE_2:
                 vendor = player->SummonCreature(NPC_AETHER_TECH_ASSISTANT, bashirCustomSpawnPositions[5][0], bashirCustomSpawnPositions[5][1], bashirCustomSpawnPositions[5][2], bashirCustomSpawnPositions[5][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 1000, true);
@@ -696,6 +696,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                     case BASHIR_PHASE_3: return 5000;
                     default: break;
                 }
+                [[fallthrough]];
             }
             default: return 0;
         }
@@ -1535,6 +1536,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case NPC_GANARG_UNDERLING:
             case NPC_MOARG_TORMENTER:
                 creature->GetCombatManager().SetLeashingDisable(true);
+                [[fallthrough]];
             case NPC_VIMGOL_VISUAL_BUNNY:
             case PHASE_0_SHARTUUL_DISABLED:
             case NPC_SKYGUARD_TARGET:
@@ -1578,6 +1580,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 {
                     case NPC_SKYGUARD_RANGER: // store all + last ranger
                         m_npcEntryGuidCollection[creature->GetEntry()].push_back(creature->GetObjectGuid());
+                        [[fallthrough]];
                     case NPC_SKYGUARD_AETHER_TECH:
                     case NPC_SKYGUARD_LIEUTENANT:
                         m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid(); // Note: we want last ranger to be stored
@@ -1590,6 +1593,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case NPC_BASHIR_INQUISITOR:
             case NPC_BASHIR_FLESH_FIEND:
                 m_bashirEnemyWaveSpawns.push_back(creature->GetObjectGuid());
+                [[fallthrough]];
             case NPC_DISRUPTOR_TOWER:
             case NPC_GRAND_COLLECTOR:
                 m_bashirEnemySpawns.push_back(creature->GetObjectGuid());

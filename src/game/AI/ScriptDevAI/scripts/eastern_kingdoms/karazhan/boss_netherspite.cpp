@@ -418,6 +418,7 @@ struct npc_netherspite_portalAI : public Scripted_NoMovementAI
                 case SPELL_BEAM_PER:
                     if (Creature* pNetherspite = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHERSPITE))
                         pNetherspite->FixateTarget(target);
+                    [[fallthrough]];
                 case SPELL_BEAM_SER:
                 case SPELL_BEAM_DOM:
                     m_uiCurrentBeamTarget = target->GetObjectGuid();

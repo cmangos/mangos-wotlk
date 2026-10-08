@@ -2174,6 +2174,7 @@ bool ChatHandler::ModifyMountCommandHelper(Player* target, char* args)
                 pool.push_back(32420);      // Old Crappy McWeakSauce
             else
                 pool.push_back(34068);      // Summon Dodostrider
+            [[fallthrough]];
         }
         case SEC_GAMEMASTER:        // Mounts that were never obtainable by players, cut during development
         {
@@ -2235,6 +2236,7 @@ bool ChatHandler::ModifyMountCommandHelper(Player* target, char* args)
                 pool.push_back(10803);      // Summon Purple Tallstrider
                 pool.push_back(10804);      // Summon Turquoise Tallstrider
             }
+            [[fallthrough]];
         }
         case SEC_MODERATOR:         // Mounts that were obtainable by players at some pont in the past and now extremely rare
         {
@@ -2268,6 +2270,7 @@ bool ChatHandler::ModifyMountCommandHelper(Player* target, char* args)
             {
                 pool.push_back(58997);      // Big Blizzard Bear
             }
+            [[fallthrough]];
         }
         default:                        // Mounts that are obtainable by players but rare or somewhat restricted
         {

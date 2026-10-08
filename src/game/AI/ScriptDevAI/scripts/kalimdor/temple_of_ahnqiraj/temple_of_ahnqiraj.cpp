@@ -143,6 +143,7 @@ void instance_temple_of_ahnqiraj::OnCreatureCreate(Creature* creature)
             // Don't store the summoned images guid
             if (GetData(TYPE_SKERAM) == IN_PROGRESS)
                 break;
+            [[fallthrough]];
         case NPC_KRI:
         case NPC_YAUJ:
         case NPC_VEM:
@@ -293,7 +294,7 @@ void instance_temple_of_ahnqiraj::SetData(uint32 type, uint32 data)
                     // Respawn the Ouro spawner on fail
                     if (Creature* pSpawner = GetSingleCreatureFromStorage(NPC_OURO_SPAWNER))
                         pSpawner->Respawn();
-                // no break;
+                    [[fallthrough]];
                 case DONE:
                     // Despawn the sandworm base on Done or Fail
                     if (GameObject* pBase = GetSingleGameObjectFromStorage(GO_SANDWORM_BASE))

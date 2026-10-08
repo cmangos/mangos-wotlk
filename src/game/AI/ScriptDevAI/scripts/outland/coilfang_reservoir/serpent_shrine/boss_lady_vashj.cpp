@@ -337,6 +337,7 @@ struct boss_lady_vashjAI : public CombatAI
                 break;
             case NPC_COILFANG_STRIDER:
                 summoned->AI()->DoCastSpellIfCan(summoned, SPELL_PANIC_PERIODIC, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                [[fallthrough]];
             case NPC_COILFANG_ELITE:
                 summoned->SetInCombatWithZone();
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0))
