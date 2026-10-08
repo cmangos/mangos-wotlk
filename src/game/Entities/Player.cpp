@@ -2626,10 +2626,11 @@ void Player::Regenerate(Powers power, uint32 diff)
                 if (uint16 cd = GetRuneCooldown(rune))      // if we have cooldown, reduce it...
                 {
                     uint32 cd_diff = diff;
-                    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-                    for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
-                        if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == int32(power) && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(rune))
-                            cd_diff = cd_diff * (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100;
+                    // TODO: Validate if cooldown is snapshotted or increases each tick
+                    //AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+                    //for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
+                    //    if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == int32(power) && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(rune))
+                    //        cd_diff = cd_diff * (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100;
 
                     SetRuneCooldown(rune, (cd < cd_diff) ? 0 : cd - cd_diff);
                 }
