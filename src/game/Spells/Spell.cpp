@@ -4309,39 +4309,6 @@ void Spell::finish(bool ok)
         m_caster->DealHeal(m_caster, uint32(m_healthLeech) - absorb, m_spellInfo, false, absorb);
     }
 
-    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISCOUNT_POWER_ON_MISS) || m_spellInfo->HasAttribute(SPELL_ATTR_EX_FINISHING_MOVE_DAMAGE))
-    {
-        for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
-        {
-            bool end = false;
-            switch (ihit->missCondition)
-            {
-                case SPELL_MISS_MISS:
-                case SPELL_MISS_DODGE:
-                case SPELL_MISS_PARRY:
-                case SPELL_MISS_DEFLECT:
-                {
-                    float coeff = 0.8f;
-                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_FINISHING_MOVE_DAMAGE)) // optimization in wotlk because no other utilize it
-                    {
-                        coeff = 1;
-                        if (Player* modOwner = m_caster->GetSpellModOwner())
-                            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_SPELL_COST_REFUND_ON_FAIL, coeff);
-                        coeff = 1 - coeff;
-                    }
-                    if (coeff > 0)
-                        m_caster->ModifyPower(Powers(m_spellInfo->powerType), int32(float(m_powerCost) * coeff));
-                    end = true;
-                    break;
-                }
-                default:
-                    break;
-            }
-            if (end)
-                break;
-        }
-    }
-
     OnSuccessfulFinish();
 
     // Clear combo at finish state
@@ -5154,24 +5121,65 @@ void Spell::TakePower()
         return;
     }
 
+    int32 finalPowerCost = m_powerCost;
+
     Powers powerType = Powers(m_spellInfo->powerType);
+    bool hit = true;
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISCOUNT_POWER_ON_MISS) || m_spellInfo->HasAttribute(SPELL_ATTR_EX_FINISHING_MOVE_DAMAGE))
+    {
+        for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
+        {
+            bool end = false;
+            switch (ihit->missCondition)
+            {
+                case SPELL_MISS_MISS:
+                case SPELL_MISS_DODGE:
+                case SPELL_MISS_PARRY:
+                case SPELL_MISS_DEFLECT:
+                {
+                    float coeff = 0.8f;
+                    if (powerType != POWER_RUNE)
+                    {
+                        if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_FINISHING_MOVE_DAMAGE)) // optimization in wotlk because no other utilize it
+                        {
+                            coeff = 1;
+                            if (Player* modOwner = m_caster->GetSpellModOwner())
+                                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_SPELL_COST_REFUND_ON_FAIL, coeff);
+                            coeff = 1 - coeff;
+                            if (coeff != 1)
+                                finalPowerCost = int32(float(finalPowerCost) * coeff);
+                        }
+                        else if (coeff > 0)
+                            finalPowerCost = int32(float(finalPowerCost) * coeff);
+                    }
+                    hit = false;
+                    end = true;
+                    break;
+                }
+                default:
+                    break;
+            }
+            if (end)
+                break;
+        }
+    }
 
     if (powerType == POWER_RUNE)
     {
-        CheckOrTakeRunePower(true);
+        CheckOrTakeRunePower(true, hit);
         return;
     }
 
-    m_caster->ModifyPower(powerType, -(int32)m_powerCost);
+    m_caster->ModifyPower(powerType, -finalPowerCost);
 
     // Set the five second timer
     if (powerType == POWER_MANA && m_powerCost > 0 && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_DONT_BLOCK_MANA_REGEN))
         m_caster->SetLastManaUse();
 }
 
-SpellCastResult Spell::CheckOrTakeRunePower(bool take)
+SpellCastResult Spell::CheckOrTakeRunePower(bool take, bool hit)
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (!m_caster->IsPlayer())
         return SPELL_CAST_OK;
 
     Player* plr = (Player*)m_caster;
@@ -5217,7 +5225,7 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
                 continue;
 
             if (take)
-                plr->SetRuneCooldown(i, plr->GetRuneBaseCooldown(i));     // 5*2=10 sec
+                plr->SetRuneCooldown(i, hit ? plr->GetRuneBaseCooldown(i) : RUNE_MISS_COOLDOWN);
 
             --runeCost[rune];
         }
@@ -5227,7 +5235,36 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
             if (runeCost[i] > 0)
                 runeCost[RUNE_DEATH] += runeCost[i];
 
-        // scan death runes
+        // find a Death rune where the base rune matches the one we need
+        if (runeCost[RUNE_DEATH] > 0)
+        {
+            for (uint32 i = 0; i < MAX_RUNES && runeCost[RUNE_DEATH]; ++i)
+            {
+                RuneType rune = plr->GetCurrentRune(i);
+                if (rune != RUNE_DEATH)
+                    continue;
+
+                // already used
+                if (plr->GetRuneCooldown(i) != 0)
+                    continue;
+
+                RuneType baseRune = plr->GetBaseRune(i);
+                if (runeCost[baseRune] == 0)
+                    continue;
+
+                if (take)
+                    plr->SetRuneCooldown(i, hit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+
+                --runeCost[baseRune];
+                --runeCost[rune];
+
+                // keep Death Rune type if missed
+                if (take && hit)
+                    plr->RestoreBaseRune(i);
+            }
+        }
+
+        // scan any other death runes
         if (runeCost[RUNE_DEATH] > 0)
         {
             for (uint32 i = 0; i < MAX_RUNES && runeCost[RUNE_DEATH]; ++i)
@@ -5241,11 +5278,12 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take)
                     continue;
 
                 if (take)
-                    plr->SetRuneCooldown(i, RUNE_COOLDOWN); // 5*2=10 sec
+                    plr->SetRuneCooldown(i, hit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
 
                 --runeCost[rune];
 
-                if (take)
+                // keep Death Rune type if missed
+                if (take && hit)
                     plr->RestoreBaseRune(i);
             }
         }
@@ -7573,7 +7611,7 @@ SpellCastResult Spell::CheckPower(bool strict)
     // check rune cost only if a spell has PowerType == POWER_RUNE
     if (m_spellInfo->powerType == POWER_RUNE)
     {
-        SpellCastResult failReason = CheckOrTakeRunePower(false);
+        SpellCastResult failReason = CheckOrTakeRunePower(false, true);
         if (failReason != SPELL_CAST_OK)
             return failReason;
     }

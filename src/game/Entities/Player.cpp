@@ -23318,12 +23318,13 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
 {
     uint8 rune = GetBaseRune(index);
     uint32 cooldown = RUNE_COOLDOWN;
+    float multiplier = 1.f;
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
-        if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == POWER_RUNE && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(rune))
-            cooldown = cooldown * (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100;
+        if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == POWER_RUNE && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(index))
+            multiplier *= (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100.f;
 
-    return cooldown;
+    return cooldown / multiplier;
 }
 
 Item* Player::ConvertItem(Item* item, uint32 newItemId)

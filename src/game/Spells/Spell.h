@@ -571,7 +571,7 @@ class Spell
         SpellCastResult CheckItems();
         SpellCastResult CheckRange(bool strict);
         SpellCastResult CheckPower(bool strict);
-        SpellCastResult CheckOrTakeRunePower(bool take);
+        SpellCastResult CheckOrTakeRunePower(bool take, bool hit);
         SpellCastResult CheckCasterAuras(uint32& param1) const;
 
         bool CheckSpellCancelsAuraEffect(AuraType auraType, uint32& param1) const;
