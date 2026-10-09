@@ -757,6 +757,271 @@ struct GlyphOfDeathsEmbrace : public AuraScript
     }
 };
 
+enum DkPresenceSpells
+{
+    SPELL_BLOOD_PRESENCE    = 48266,
+    SPELL_FROST_PRESENCE    = 48263,
+    SPELL_UNHOLY_PRESENCE   = 48265,
+
+    SPELL_BLOOD_PRESENCE_HEAL = 63611,
+
+    SPELL_FROST_PRESENCE_STAMINA_AND_THREAT = 61261,
+
+    SPELL_UNHOLY_PRESENCE_SPEED = 49772,
+
+    SPELL_IMPROVED_UNHOLY_PRESENCE_RUNE_REGEN       = 63622,
+    SPELL_IMPROVED_UNHOLY_PRESENCE_DEATH_RUNE_REGEN = 65095,
+};
+
+// 48263 - Frost Presence
+struct FrostPresence : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = aura->GetTarget();
+        if (apply)
+        {
+            target->CastSpell(nullptr, SPELL_FROST_PRESENCE_STAMINA_AND_THREAT, TRIGGERED_OLD_TRIGGERED);      
+        }
+        else
+        {
+            target->RemoveAurasDueToSpell(SPELL_FROST_PRESENCE_STAMINA_AND_THREAT);
+        }
+
+        if (apply)
+        {
+
+            Aura* improvedBloodPresence = target->GetAura(50371, EFFECT_INDEX_0);
+            if (!improvedBloodPresence)
+                improvedBloodPresence = target->GetAura(50365, EFFECT_INDEX_0);
+
+            if (improvedBloodPresence)
+            {
+                int32 bp = improvedBloodPresence->GetAmount();
+                target->CastCustomSpell(target, SPELL_BLOOD_PRESENCE_HEAL, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+            target->RemoveAurasDueToSpell(SPELL_BLOOD_PRESENCE_HEAL);
+
+        if (apply)
+        {
+            Aura* improvedUnholyPresence = target->GetAura(50392, EFFECT_INDEX_0);
+            if (!improvedUnholyPresence)
+                improvedUnholyPresence = target->GetAura(50391, EFFECT_INDEX_0);
+
+            if (improvedUnholyPresence)
+            {
+                int32 bp = improvedUnholyPresence->GetAmount();
+                target->CastCustomSpell(nullptr, SPELL_UNHOLY_PRESENCE_SPEED, &bp, &bp, &bp, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+            target->RemoveAurasDueToSpell(SPELL_UNHOLY_PRESENCE_SPEED);
+    }
+};
+
+// 48265 - Unholy Presence
+struct UnholyPresence : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = aura->GetTarget();
+        if (apply)
+        {
+            target->CastSpell(nullptr, SPELL_UNHOLY_PRESENCE_SPEED, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+        {
+            target->RemoveAurasDueToSpell(SPELL_UNHOLY_PRESENCE_SPEED);
+        }
+
+        if (apply)
+        {
+            Aura* improvedUnholyPresence = target->GetAura(50392, EFFECT_INDEX_0);
+            if (!improvedUnholyPresence)
+                improvedUnholyPresence = target->GetAura(50391, EFFECT_INDEX_0);
+
+            if (improvedUnholyPresence)
+            {
+                int32 bp = improvedUnholyPresence->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
+                target->CastCustomSpell(nullptr, SPELL_IMPROVED_UNHOLY_PRESENCE_RUNE_REGEN, &bp, &bp, &bp, TRIGGERED_OLD_TRIGGERED);
+                target->CastCustomSpell(nullptr, SPELL_IMPROVED_UNHOLY_PRESENCE_DEATH_RUNE_REGEN, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+        {
+            target->RemoveAurasDueToSpell(SPELL_IMPROVED_UNHOLY_PRESENCE_RUNE_REGEN);
+            target->RemoveAurasDueToSpell(SPELL_IMPROVED_UNHOLY_PRESENCE_DEATH_RUNE_REGEN);
+        }
+
+        if (apply)
+        {
+            Aura* improvedBloodPresence = target->GetAura(50371, EFFECT_INDEX_0);
+            if (!improvedBloodPresence)
+                improvedBloodPresence = target->GetAura(50365, EFFECT_INDEX_0);
+
+            if (improvedBloodPresence)
+            {
+                int32 bp = improvedBloodPresence->GetAmount();
+                target->CastCustomSpell(target, SPELL_BLOOD_PRESENCE_HEAL, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+            target->RemoveAurasDueToSpell(SPELL_BLOOD_PRESENCE_HEAL);
+
+        if (apply)
+        {
+            Aura* improvedFrostPresence = target->GetAura(50385, EFFECT_INDEX_0);
+            if (!improvedFrostPresence)
+                improvedFrostPresence = target->GetAura(50384, EFFECT_INDEX_0);
+
+            if (improvedFrostPresence)
+            {
+                int32 bp = improvedFrostPresence->GetAmount();
+                int32 bpZero = 0;
+                target->CastCustomSpell(target, SPELL_FROST_PRESENCE_STAMINA_AND_THREAT, &bp, &bpZero, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+            target->RemoveAurasDueToSpell(SPELL_FROST_PRESENCE_STAMINA_AND_THREAT);
+    }
+};
+
+// 48266 - Blood Presence
+struct BloodPresence : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = aura->GetTarget();
+        if (apply)
+        {
+            target->CastSpell(nullptr, SPELL_BLOOD_PRESENCE_HEAL, TRIGGERED_OLD_TRIGGERED);            
+        }
+        else
+        {
+            target->RemoveAurasDueToSpell(SPELL_BLOOD_PRESENCE_HEAL);
+        }
+
+        if (apply)
+        {
+            Aura* improvedFrostPresence = target->GetAura(50385, EFFECT_INDEX_0);
+            if (!improvedFrostPresence)
+                improvedFrostPresence = target->GetAura(50384, EFFECT_INDEX_0);
+
+            if (improvedFrostPresence)
+            {
+                int32 bp = improvedFrostPresence->GetAmount();
+                int32 bpZero = 0;
+                target->CastCustomSpell(target, SPELL_FROST_PRESENCE_STAMINA_AND_THREAT, &bp, &bpZero, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+            target->RemoveAurasDueToSpell(SPELL_FROST_PRESENCE_STAMINA_AND_THREAT);
+
+        if (apply)
+        {
+            Aura* improvedUnholyPresence = target->GetAura(50392, EFFECT_INDEX_0);
+            if (!improvedUnholyPresence)
+                improvedUnholyPresence = target->GetAura(50391, EFFECT_INDEX_0);
+
+            if (improvedUnholyPresence)
+            {
+                int32 bp = improvedUnholyPresence->GetAmount();
+                target->CastCustomSpell(nullptr, SPELL_UNHOLY_PRESENCE_SPEED, &bp, &bp, &bp, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+            target->RemoveAurasDueToSpell(SPELL_UNHOLY_PRESENCE_SPEED);
+    }
+};
+
+// 50365, 50371 - Improved Blood Presence
+struct ImprovedBloodPresence : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = aura->GetTarget();
+
+        // if presence active: Frost Presence or Unholy Presence
+        if (apply && (target->HasAura(SPELL_FROST_PRESENCE) || target->HasAura(SPELL_UNHOLY_PRESENCE)))
+        {
+            int32 bp = aura->GetModifier()->m_amount;
+            target->CastCustomSpell(nullptr, SPELL_BLOOD_PRESENCE_HEAL, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+        else if (!apply && !target->HasAura(SPELL_BLOOD_PRESENCE))
+            target->RemoveAurasDueToSpell(SPELL_BLOOD_PRESENCE_HEAL);
+    }
+};
+
+// 50384, 50385 - Improved Frost Presence
+struct ImprovedFrostPresence : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = aura->GetTarget();
+
+        // if presence active: Unholy Presence or Blood Presence
+        if (apply && (target->HasAura(SPELL_UNHOLY_PRESENCE) || target->HasAura(SPELL_BLOOD_PRESENCE)))
+        {
+            int32 bp0 = aura->GetAmount();
+            int32 bp1 = 0; // disable threat mod part for not Frost Presence case
+            target->CastCustomSpell(nullptr, SPELL_FROST_PRESENCE_STAMINA_AND_THREAT, &bp0, &bp1, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+        else if (!apply && !target->HasAura(SPELL_FROST_PRESENCE))
+            target->RemoveAurasDueToSpell(SPELL_FROST_PRESENCE_STAMINA_AND_THREAT);
+    }
+};
+
+// 50391, 50392 - Improved Unholy Presence
+struct ImprovedUnholyPresence : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = aura->GetTarget();
+
+        if (apply)
+        {
+            if (target->HasAura(SPELL_UNHOLY_PRESENCE)) // if presence active: Unholy Presence
+            {
+                int32 bp = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1);
+                target->CastCustomSpell(nullptr, SPELL_IMPROVED_UNHOLY_PRESENCE_RUNE_REGEN, &bp, &bp, &bp, TRIGGERED_OLD_TRIGGERED);
+                target->CastCustomSpell(nullptr, SPELL_IMPROVED_UNHOLY_PRESENCE_DEATH_RUNE_REGEN, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+            if (target->HasAura(SPELL_BLOOD_PRESENCE) || target->HasAura(SPELL_FROST_PRESENCE))
+            {
+                int32 bp = aura->GetAmount();
+                target->CastCustomSpell(nullptr, SPELL_UNHOLY_PRESENCE_SPEED, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+        else
+        {
+            target->RemoveAurasDueToSpell(SPELL_IMPROVED_UNHOLY_PRESENCE_RUNE_REGEN);
+            target->RemoveAurasDueToSpell(SPELL_IMPROVED_UNHOLY_PRESENCE_DEATH_RUNE_REGEN);
+            if (target->HasAura(SPELL_UNHOLY_PRESENCE_SPEED) && !target->HasAura(SPELL_UNHOLY_PRESENCE))
+                target->RemoveAurasDueToSpell(SPELL_UNHOLY_PRESENCE_SPEED);
+        }
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -791,6 +1056,13 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<ObliterateDK>("spell_obliterate_dk");
     RegisterSpellScript<GlyphOfScourgeStrike>("spell_glyph_of_scourge_strike");
     RegisterSpellScript<GlyphOfDeathsEmbrace>("spell_glyph_of_deaths_embrace");
+
+    RegisterSpellScript<FrostPresence>("spell_frost_presence");
+    RegisterSpellScript<UnholyPresence>("spell_unholy_presence");
+    RegisterSpellScript<BloodPresence>("spell_blood_presence");
+    RegisterSpellScript<ImprovedBloodPresence>("spell_improved_blood_presence");
+    RegisterSpellScript<ImprovedFrostPresence>("spell_improved_frost_presence");
+    RegisterSpellScript<ImprovedUnholyPresence>("spell_improved_unholy_presence");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_gargoyle_dk";
