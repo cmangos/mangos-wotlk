@@ -13181,6 +13181,7 @@ void Unit::BreakCharmOutgoing(Unit* charmed)
         charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM, guid);
         charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS_PET, guid);
         charmed->RemoveSpellsCausingAura(SPELL_AURA_AOE_CHARM, guid);
+        charmed->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, guid);
 
         // Re-check: if still charmed after aura removal attempt - likely non-aura charm (summon charmed for example)
         if (charmed->HasCharmer(guid))
