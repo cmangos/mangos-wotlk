@@ -1324,7 +1324,11 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
 
     Difficulty difficulty = Difficulty(mode);
     if (difficulty == _player->GetDifficulty(true))
+    {
+        // A repeated selection must also correct stale client difficulty state.
+        _player->SendRaidDifficulty(_player->GetGroup() != nullptr, difficulty);
         return;
+    }
 
     // cannot reset while in an instance
     Map* map = _player->GetMap();
