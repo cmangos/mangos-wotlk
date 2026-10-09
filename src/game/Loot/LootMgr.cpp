@@ -996,7 +996,7 @@ GroupLootRoll* Loot::GetRollForSlot(uint32 itemSlot)
 // Inserts the item into the loot (called by LootTemplate processors)
 void Loot::AddItem(LootStoreItem const& item)
 {
-    if (m_lootItems.size() < MAX_NR_LOOT_ITEMS)                              // Normal drop
+    if (m_lootItems.size() < MAX_LOOT_ITEMS)                              // Normal drop
     {
         LootItem* lootItem = new LootItem(item, m_maxSlot++, uint32(m_threshold));
 
@@ -1010,7 +1010,7 @@ void Loot::AddItem(LootStoreItem const& item)
 // Insert item into the loot explicit way. (used for container item and Item::LoadFromDB)
 void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 randomPropertyId, Player* player, bool notify)
 {
-    if (m_lootItems.size() < MAX_NR_LOOT_ITEMS)                              // Normal drop
+    if (m_lootItems.size() < MAX_LOOT_ITEMS)                              // Normal drop
     {
         LootItem* lootItem = new LootItem(itemid, count, randomSuffix, randomPropertyId, m_maxSlot++);
 
@@ -1044,7 +1044,7 @@ bool Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* lootOwner, b
         return false;
     }
 
-    m_lootItems.reserve(MAX_NR_LOOT_ITEMS);
+    m_lootItems.reserve(MAX_LOOT_ITEMS);
 
     tab->Process(*this, lootOwner, store.IsRatesAllowed()); // Processing is done there, callback via Loot::AddItem()
 
