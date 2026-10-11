@@ -356,7 +356,6 @@ struct Areas
 
 #define MAX_RUNES               6
 #define RUNE_COOLDOWN           (10000)     // miliseconds
-#define RUNE_MISS_COOLDOWN      (1500)      // miliseconds
 
 enum RuneType
 {
@@ -1381,8 +1380,7 @@ class Player : public Unit
 
         uint32 GetMaxKeyringSize() const { return KEYRING_SLOT_END - KEYRING_SLOT_START; }
         void SendEquipError(InventoryResult msg, Item* pItem = nullptr, Item* pItem2 = nullptr, uint8 slot = 0, uint32 itemid = 0) const;
-        void SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint32 param) const;
-        void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid, uint32 param) const;
+        void SendBuyError(BuyResult msg, Creature* pCreature, uint32 vendorSlot) const;
         void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid) const;
         void SendOpenContainer(ObjectGuid itemGuid);
         void SendResetRangedCombatTimer();
@@ -1946,6 +1944,7 @@ class Player : public Unit
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
         void UpdateEnergyRegen();
+        void UpdateRuneRegen(uint32 runeType);
 
         void UpdateWeaponDependantStats(WeaponAttackType attType);
 
