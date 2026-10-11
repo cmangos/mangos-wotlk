@@ -512,6 +512,12 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if ((pCreature->GetCreatureInfo()->HasFlag(CREATURE_EXTRA_FLAG_NO_SELL_VENDOR)) != 0)
+    {
+        _player->SendSellError(SellResult::VENDOR_DOESNT_BUY_THIS_ITEM, pCreature, itemGuid);
+        return;
+    }
+
     Item* pItem = _player->GetItemByGuid(itemGuid);
 
     if (!pItem)

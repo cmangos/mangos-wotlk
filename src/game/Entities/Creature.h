@@ -54,7 +54,7 @@ enum CreatureFlagsExtra
     CREATURE_EXTRA_FLAG_RUN_DURING_WANDER      = 0x00000020,       // 32 15% chance during wander (random movement)
     CREATURE_EXTRA_FLAG_SPECIAL                = 0x00000040,       // 64 Loaded into the world on start
     CREATURE_EXTRA_FLAG_INVISIBLE              = 0x00000080,       // 128 creature is always invisible for player (mostly trigger creatures)
-    CREATURE_EXTRA_FLAG_UNUSED3                = 0x00000100,       // 256
+    CREATURE_EXTRA_FLAG_NO_SELL_VENDOR         = 0x00000100,       // 256 players can't sell items to this vendor
     CREATURE_EXTRA_FLAG_AGGRO_ZONE             = 0x00000200,       // 512 creature sets itself in combat with zone on aggro
     CREATURE_EXTRA_FLAG_GUARD                  = 0x00000400,       // 1024 creature is a guard
     CREATURE_EXTRA_FLAG_NO_CALL_ASSIST         = 0x00000800,       // 2048 creature shouldn't call for assistance on aggro
