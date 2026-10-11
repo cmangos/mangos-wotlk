@@ -5345,6 +5345,20 @@ float Unit::GetTotalAuraMultiplierByMiscValue(AuraType auratype, int32 misc_valu
     return multiplier;
 }
 
+float Unit::GetTotalAuraMultiplierByMiscValueAB(AuraType auratype, int32 miscValue, int32 miscValueB) const
+{
+    float multiplier = 1.0f;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for (auto i : mTotalAuraList)
+    {
+        Modifier* mod = i->GetModifier();
+        if (mod->m_miscvalue == miscValue && i->GetSpellProto()->EffectMiscValueB[i->GetEffIndex()] == miscValueB)
+            multiplier *= (100.0f + mod->m_amount) / 100.0f;
+    }
+    return multiplier;
+}
+
 int32 Unit::GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const
 {
     int32 modifier = 0;

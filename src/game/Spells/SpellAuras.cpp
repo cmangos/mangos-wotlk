@@ -6721,6 +6721,8 @@ void Aura::HandleModPowerRegenPCT(bool /*apply*/, bool Real)
         static_cast<Player*>(GetTarget())->UpdateManaRegen();
     else if (m_modifier.m_miscvalue == POWER_ENERGY)
         static_cast<Player*>(GetTarget())->UpdateEnergyRegen();
+    else if (m_modifier.m_miscvalue == POWER_RUNE)
+        static_cast<Player*>(GetTarget())->UpdateRuneRegen(GetSpellProto()->EffectMiscValueB[GetEffIndex()]);
 }
 
 void Aura::HandleModHealingPCT(bool apply, bool real)

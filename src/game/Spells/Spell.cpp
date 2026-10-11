@@ -5226,8 +5226,8 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take, bool hit)
             if (plr->GetRuneCooldown(i) != 0)
                 continue;
 
-            if (take)
-                plr->SetRuneCooldown(i, hit ? plr->GetRuneBaseCooldown(i) : RUNE_MISS_COOLDOWN);
+            if (hit)
+                plr->SetRuneCooldown(i, plr->GetRuneBaseCooldown(i));
 
             --runeCost[rune];
         }
@@ -5254,8 +5254,8 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take, bool hit)
                 if (runeCost[baseRune] == 0)
                     continue;
 
-                if (take)
-                    plr->SetRuneCooldown(i, hit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+                if (hit)
+                    plr->SetRuneCooldown(i, plr->GetRuneBaseCooldown(i));
 
                 --runeCost[baseRune];
                 --runeCost[rune];
@@ -5279,8 +5279,8 @@ SpellCastResult Spell::CheckOrTakeRunePower(bool take, bool hit)
                 if (plr->GetRuneCooldown(i) != 0)
                     continue;
 
-                if (take)
-                    plr->SetRuneCooldown(i, hit ? plr->GetRuneBaseCooldown(i) : uint32(RUNE_MISS_COOLDOWN));
+                if (hit)
+                    plr->SetRuneCooldown(i, plr->GetRuneBaseCooldown(i));
 
                 --runeCost[rune];
 

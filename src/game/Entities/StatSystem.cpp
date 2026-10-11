@@ -802,6 +802,11 @@ void Player::UpdateEnergyRegen()
     m_energyRegenRate = GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_ENERGY);
 }
 
+void Player::UpdateRuneRegen(uint32 runeType)
+{
+    SetFloatValue(PLAYER_RUNE_REGEN_1 + runeType, 0.1f * GetTotalAuraMultiplierByMiscValueAB(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_RUNE, runeType));
+}
+
 void Player::UpdateWeaponDependantStats(WeaponAttackType attType)
 {
     switch (attType)

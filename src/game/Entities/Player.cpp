@@ -2626,14 +2626,12 @@ void Player::Regenerate(Powers power, uint32 diff)
             {
                 if (uint16 cd = GetRuneCooldown(rune))      // if we have cooldown, reduce it...
                 {
-                    uint32 cd_diff = diff;
-                    // TODO: Validate if cooldown is snapshotted or increases each tick
-                    //AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-                    //for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
-                    //    if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == int32(power) && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(rune))
-                    //        cd_diff = cd_diff * (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100;
+                    uint32 cdDiff = diff;
+                    RuneType runeType = GetCurrentRune(rune);
+                    float runeRegen = GetFloatValue(PLAYER_RUNE_REGEN_1 + uint32(runeType)); // stored as per second rate, default 0.1
+                    cdDiff = float(cdDiff) * (runeRegen * 10);
 
-                    SetRuneCooldown(rune, (cd < cd_diff) ? 0 : cd - cd_diff);
+                    SetRuneCooldown(rune, (cd < cdDiff) ? 0 : cd - cdDiff);
                 }
             }
         }   break;
@@ -23321,10 +23319,10 @@ uint32 Player::GetRuneBaseCooldown(uint8 index)
     uint8 rune = GetBaseRune(index);
     uint32 cooldown = RUNE_COOLDOWN;
     float multiplier = 1.f;
-    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
-        if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == POWER_RUNE && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(index))
-            multiplier *= (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100.f;
+    //AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    //for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
+    //    if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == POWER_RUNE && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(index))
+    //        multiplier *= (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100.f;
 
     return cooldown / multiplier;
 }

@@ -1383,6 +1383,7 @@ class Player : public Unit
         void SendEquipError(InventoryResult msg, Item* pItem = nullptr, Item* pItem2 = nullptr, uint8 slot = 0, uint32 itemid = 0) const;
         void SendBuyError(BuyResult msg, Creature* pCreature, uint32 item, uint32 param) const;
         void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid, uint32 param) const;
+        void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid) const;
         void SendOpenContainer(ObjectGuid itemGuid);
         void SendResetRangedCombatTimer();
         void AddWeaponProficiency(uint32 newflag) { m_WeaponProficiency |= newflag; }
