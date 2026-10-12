@@ -573,6 +573,12 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if (pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) > 0 && pItem->GetUInt32Value(ITEM_FIELD_DURABILITY) == 0)
+    {
+        _player->SendSellError(SellResult::MUST_REPAIR_DURABILITY, pCreature, itemGuid);
+        return;
+    }
+
     uint32 money = pProto->SellPrice * count;
 
     for (auto i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
@@ -588,6 +594,12 @@ void WorldSession::HandleSellItemOpcode(WorldPacket& recv_data)
             break;
         }
     }
+
+    uint32 durabilityRepairCosts = pItem->CalculateDurabilityRepairCost(1.f);
+    if (durabilityRepairCosts < money)
+        money -= durabilityRepairCosts;
+    else
+        money = 1;
 
     if (count < pItem->GetCount())              // need split items
     {
