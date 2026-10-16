@@ -46,28 +46,50 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        // Church
         case NPC_SORCERER:
         case NPC_MYRMIDON:
         case NPC_DEFENDER:
-        case NPC_CHAPLAIN: 
+        case NPC_CHAPLAIN:
         case NPC_WIZARD:
         case NPC_CENTURION:
-        case NPC_CHAMPION: 
-        case NPC_ABBOT:    
+        case NPC_CHAMPION:
+        case NPC_ABBOT:
         case NPC_MONK:
         case NPC_FAIRBANKS:
-            m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
+            m_sAshbringerFriendlyGuids.emplace(pCreature->GetObjectGuid());
+            break;
+        case NPC_MOGRAINE:
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_sAshbringerFriendlyGuids.emplace(pCreature->GetObjectGuid());
             break;
         case NPC_WHITEMANE:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
-        case NPC_MOGRAINE:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-            m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
+        //armory
+        case NPC_DEFIAS_CUTPURSE:
+        case NPC_THE_SCARLET_CHAMPION:
+        case NPC_SCARLET_SOLDIER:
+        case NPC_SCARLET_EVOKER:
+        case NPC_SCARLET_GUARDSMAN:
+        case NPC_SCARLET_PROTECTOR:
+        case NPC_SCARLET_CONJUROR:
+       //Library
+        case NPC_HOUNDMASTER_LOKSEY:
+        case NPC_SCARLET_GALLANT:
+        case NPC_SCARLET_BEASTMASTER:
+        case NPC_SCARLET_DIVINER:
+        case NPC_SCARLET_ADEPT:
+        case NPC_SCARLET_TRACKING_HOUND:
+        case NPC_ARCANIST_DOAN:
+            m_sAshbringerFriendlyGuids.emplace(pCreature->GetObjectGuid());
             break;
+
         case NPC_VORREL:
         case NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        default:
             break;
     }
 }
@@ -78,7 +100,7 @@ void instance_scarlet_monastery::OnCreatureDeath(Creature* pCreature)
     {
         // Any other actions to do with Vorrel? setStandState?
         if (Creature* pVorrel = GetSingleCreatureFromStorage(NPC_VORREL))
-            DoScriptText(SAY_TRIGGER_VORREL, pVorrel);
+            DoBroadcastText(SAY_TRIGGER_VORREL, pVorrel);
     }
 }
 
@@ -157,7 +179,7 @@ void instance_scarlet_monastery::SetData(uint32 uiType, uint32 uiData)
             if (whitemane && whitemane->IsAlive() && !whitemane->IsInCombat())
                 whitemane->ForcedDespawn();
 
-            for (auto scarletCathedralNpcGuid : m_sAshbringerFriendlyGuids)
+            for (const auto& scarletCathedralNpcGuid : m_sAshbringerFriendlyGuids)
                 if (Creature* scarletNpc = instance->GetCreature(scarletCathedralNpcGuid))
                     if (scarletNpc->IsAlive() && !scarletNpc->IsInCombat())
                         scarletNpc->setFaction(35);
@@ -181,18 +203,22 @@ InstanceData* GetInstanceData_instance_scarlet_monastery(Map* pMap)
     return new instance_scarlet_monastery(pMap);
 }
 
-bool instance_scarlet_monastery::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger)
+bool instance_scarlet_monastery::DoHandleAreaTrigger(AreaTriggerEntry const* areaTrigger, Player* player)
 {
-    if (areaTrigger->id == AREATRIGGER_CATHEDRAL_ENTRANCE)
+    if (areaTrigger->id != AREATRIGGER_CATHEDRAL_ENTRANCE)
+        return false;
+
+    if (GetData(TYPE_ASHBRINGER_EVENT) != NOT_STARTED)
+        return false;
+
+    SetData(TYPE_ASHBRINGER_EVENT, IN_PROGRESS);
+    if (Creature* mograine = GetSingleCreatureFromStorage(NPC_MOGRAINE))
     {
-        if (GetData(TYPE_ASHBRINGER_EVENT) == NOT_STARTED)
-        {
-            SetData(TYPE_ASHBRINGER_EVENT, IN_PROGRESS);
-            DoOrSimulateScriptTextForThisInstance(SAY_ASHBRINGER_ENTRANCE, NPC_MOGRAINE);
-            return true;
-        }
+        if (mograine->IsAlive())
+            DoBroadcastText(SAY_ASHBRINGER_ENTRANCE, mograine, player, CHAT_TYPE_ZONE_YELL);
     }
-    return false;
+
+    return true;
 }
 
 bool AreaTrigger_at_cathedral_entrance(Player* player, AreaTriggerEntry const* areaTrigger)
@@ -201,7 +227,7 @@ bool AreaTrigger_at_cathedral_entrance(Player* player, AreaTriggerEntry const* a
         return false;
 
     if (auto* instance = (instance_scarlet_monastery*)player->GetInstanceData())
-        return instance->DoHandleAreaTrigger(areaTrigger);
+        return instance->DoHandleAreaTrigger(areaTrigger, player);
 
     return false;
 }
