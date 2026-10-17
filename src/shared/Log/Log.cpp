@@ -231,7 +231,7 @@ void Log::Initialize()
     m_logsTimestamp = "_" + GetTimestampStr();
 
     /// Open specific log files
-    logfile = openLogFile("LogFile", "LogTimestamp", "w");
+    logfile = openLogFile("LogFile", "LogTimestamp", "a");
 
     m_gmlog_per_account = sConfig.GetBoolDefault("GmLogPerAccount", false);
     if (!m_gmlog_per_account)
