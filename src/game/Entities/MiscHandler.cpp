@@ -805,7 +805,7 @@ void WorldSession::HandleUpdateAccountData(WorldPacket& recv_data)
 
     DEBUG_LOG("UAD: type %u, time %u, decompressedSize %u", type, timestamp, decompressedSize);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    if (type >= NUM_ACCOUNT_DATA_TYPES)
         return;
 
     if (decompressedSize == 0)                              // erase
@@ -860,7 +860,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 
     DEBUG_LOG("RAD: type %u", type);
 
-    if (type > NUM_ACCOUNT_DATA_TYPES)
+    if (type >= NUM_ACCOUNT_DATA_TYPES)
         return;
 
     AccountData* adata = GetAccountData(AccountDataType(type));
