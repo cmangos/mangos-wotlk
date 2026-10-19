@@ -2217,7 +2217,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
     }
 
-    if ((GetMapId() == mapid))
+    // A player outside the world (already removed from its map) needs the far path even on the same map id: the near path
+    // never adds it back to a map.
+    if ((GetMapId() == mapid) && IsInWorld())
     {
         // lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
