@@ -11393,11 +11393,9 @@ bool Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
                 GetMotionMaster()->MoveFleeing(source ? source : this);
             }
 
-            // Deliver a client control change that was deferred on uncharm once no
-            // crowd-control state remains (e.g. uncharmed while still polymorphed).
+            // The generator that would give control back may be gone (e.g. cleared on uncharm)
             if (!apply && IsPlayer() && !HasCharmer() && !IsFleeing() && !IsInPanic())
-                if (static_cast<Player*>(this)->ConsumePendingClientControlChange())
-                    static_cast<Player*>(this)->UpdateClientControl(this, true);
+                static_cast<Player*>(this)->UpdateClientControl(this, true);
         }
 
         if (apply)
@@ -11442,11 +11440,9 @@ bool Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint
                 GetMotionMaster()->MoveFleeing((source ? source : this), duration);
             }
 
-            // Deliver a client control change that was deferred on uncharm once no
-            // crowd-control state remains (e.g. uncharmed while still feared).
+            // The generator that would give control back may be gone (e.g. cleared on uncharm)
             if (!apply && IsPlayer() && !HasCharmer() && !IsConfused() && !IsInPanic())
-                if (static_cast<Player*>(this)->ConsumePendingClientControlChange())
-                    static_cast<Player*>(this)->UpdateClientControl(this, true);
+                static_cast<Player*>(this)->UpdateClientControl(this, true);
         }
 
         if (apply)
@@ -13396,11 +13392,6 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     // Update possessed's client control status after altering flags
     if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, true);
-
-    // A charmed player still under crowd control regains no client control now -
-    // flag the pending change so it is delivered once the CC state actually fades
-    if (charmed->IsPlayer() && (charmed->IsConfused() || charmed->IsFleeing() || charmed->IsInPanic()))
-        static_cast<Player*>(charmed)->SetPendingClientControlChange();
 
     if (charmed->IsAlive()) // must be done after flag update
     {
