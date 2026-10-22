@@ -2362,6 +2362,8 @@ class Player : public Unit
         bool CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area, bool ignoreColdWeather) const;
 
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
+        void SetPendingClientControlChange() { m_pendingClientControlChange = true; }
+        bool ConsumePendingClientControlChange() { bool pending = m_pendingClientControlChange; m_pendingClientControlChange = false; return pending; }
 
         void SetMover(Unit* target) { m_mover = target ? target : this; }
         Unit* GetMover() const { return m_mover; }
@@ -2926,6 +2928,7 @@ class Player : public Unit
         CinematicMgrUPtr m_cinematicMgr;
 
         Unit* m_mover;
+        bool m_pendingClientControlChange;
         Camera m_camera;
 
         GridReference<Player> m_gridRef;
