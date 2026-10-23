@@ -16,6 +16,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Globals/ObjectMgr.h"
+#include "Entities/Vehicle.h"
 
 struct Replenishment : public SpellScript
 {
@@ -164,6 +165,38 @@ struct AutoBreakProc : public AuraScript
     }
 };
 
+// 67393 - Eject Passenger
+struct EjectPassengerChopper : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsVehicle())
+            return;
+        VehicleInfo* vInfo = target->GetVehicleInfo();
+        if (!vInfo)
+            return;
+        int32 simpleVal = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0) - 1;
+        Unit* passenger = vInfo->GetPassenger(simpleVal);
+        if (!passenger)
+            return;
+
+        std::unordered_set<uint32> spellIds;
+        for (auto aura : target->GetAurasByType(SPELL_AURA_CONTROL_VEHICLE))
+        {
+            if (aura->GetCasterGuid() == passenger->GetObjectGuid())
+                spellIds.emplace(aura->GetId());
+        }
+
+        for (uint32 spell : spellIds)
+            passenger->RemoveAurasByCasterSpell(spell, passenger->GetObjectGuid());
+        spellIds.clear();
+        if (passenger = vInfo->GetPassenger(simpleVal))
+            vInfo->UnBoard(passenger, false);
+        target->CastSpell(nullptr, 67395, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_spell_scripts_wotlk()
 {
     RegisterSpellScript<Replenishment>("spell_replenishment");
@@ -172,4 +205,5 @@ void AddSC_spell_scripts_wotlk()
     RegisterSpellScript<StoicismAbsorb>("spell_stoicism");
     RegisterSpellScript<BloodReserveEnchant>("spell_blood_reserve_enchant");
     RegisterSpellScript<AutoBreakProc>("spell_auto_break_proc");
+    RegisterSpellScript<EjectPassengerChopper>("spell_eject_passenger_chopper");
 }
