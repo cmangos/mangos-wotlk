@@ -346,7 +346,10 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
                     player->SendDungeonDifficulty(true);
                 }
                 if (player->GetRaidDifficulty() != GetRaidDifficulty())
+                {
+                    player->SetRaidDifficulty(GetRaidDifficulty());
                     player->SendRaidDifficulty(true, GetRaidDifficulty());
+                }
             }
         }
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
@@ -1386,17 +1389,19 @@ void Group::SetRaidDifficulty(Difficulty difficulty, bool send)
     if (!IsBattleGroup())
         CharacterDatabase.PExecute("UPDATE `groups` SET raiddifficulty = %u WHERE groupId='%u'", m_raidDifficulty, m_Id);
 
-    if (!send)
-        return;
-
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {
         Player* player = itr->getSource();
         if (!player->GetSession() || player->GetLevel() < LEVELREQUIREMENT_HEROIC)
             continue;
 
-        player->SendRaidDifficulty(true, difficulty);
+        player->SetRaidDifficulty(difficulty);
+        if (send)
+            player->SendRaidDifficulty(true, difficulty);
     }
+
+    if (send)
+        SendUpdate();
 }
 
 bool Group::InCombatToInstance(uint32 instanceId)
