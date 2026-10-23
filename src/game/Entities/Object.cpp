@@ -458,7 +458,9 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     if (updateFlags & UPDATEFLAG_VEHICLE)
     {
         *data << uint32(((Unit*)this)->GetVehicleInfo()->GetVehicleEntry()->m_ID); // vehicle id
-        *data << float(((WorldObject*)this)->GetOrientation());
+
+        WorldObject const* vehicle = static_cast<WorldObject const*>(this);
+        *data << float(vehicle->GetPosition(vehicle->GetTransport()).o);
     }
 
     // 0x200

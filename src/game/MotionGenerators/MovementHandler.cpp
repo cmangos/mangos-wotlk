@@ -859,6 +859,11 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
     }
     else                                                    // creature charmed
     {
+        // TrinityCore and AzerothCore persist the complete movement record
+        // for every controlled mover before relocation. CMaNGOS previously
+        // updated only the creature's world coordinates here, leaving its
+        // transport-local orientation stale for the next transport update.
+        mover->m_movementInfo = movementInfo;
         if (mover->IsInWorld())
             mover->GetMap()->CreatureRelocation((Creature*)mover, movementInfo.GetPos().x, movementInfo.GetPos().y, movementInfo.GetPos().z, movementInfo.GetPos().o);
     }
