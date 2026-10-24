@@ -152,15 +152,46 @@ struct DeathRuneDK : public AuraScript
 
         Player* player = static_cast<Player*>(aura->GetTarget());
 
-        for (uint8 i = 0; i < MAX_RUNES; ++i)
+	// Death Rune Mastery only: Death Strike or Obliterate
+	bool deathRuneMastery =
+	    aura->GetId() == 49467 ||  // Rank 1: 33%
+	    aura->GetId() == 50033 ||  // Rank 2: 66%
+	    aura->GetId() == 50034;    // Rank 3: 100%
+
+	uint32 spellId = procData.spell->m_spellInfo->Id;
+
+	if (deathRuneMastery &&
+	    //All ranks of Death Strike
+	    spellId != 49998 &&
+	    spellId != 49999 &&
+	    spellId != 45463 &&
+	    spellId != 49923 &&
+	    spellId != 49924 &&
+	    //All ranks of Obliterate
+	    spellId != 49020 &&
+	    spellId != 51423 &&
+	    spellId != 51424 &&
+	    spellId != 51425)
+    {
+    	return SPELL_AURA_PROC_OK;
+    }
+
+for (uint8 i = 0; i < MAX_RUNES; ++i)
+{
+    uint8 mask = (1 << i);
+
+    if (mask & oldRunesState && !(mask & newRunesState))
+    {
+        if (deathRuneMastery)
         {
-            uint8 mask = (1 << i);
-            if (mask & oldRunesState && (!(mask & newRunesState))) // runes that were used by spell as cost
-            {
-                player->AddRuneByAuraEffect(i, RUNE_DEATH, aura);
-            }
+            RuneType baseRune = player->GetBaseRune(i);
+            if (baseRune != RUNE_FROST && baseRune != RUNE_UNHOLY)
+                continue;
         }
 
+        player->AddRuneByAuraEffect(i, RUNE_DEATH, aura);
+    }
+}
         aura->ForcePeriodicity(aura->GetModifier()->periodictime);
         return SPELL_AURA_PROC_OK;
     }
