@@ -1478,7 +1478,16 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (55090,'spell_scourge_strike'),
 (55265,'spell_scourge_strike'),
 (55270,'spell_scourge_strike'),
-(55271,'spell_scourge_strike');
+(55271,'spell_scourge_strike'),
+(48263,'spell_frost_presence'),
+(48265,'spell_unholy_presence'),
+(48266,'spell_blood_presence'),
+(50365,'spell_improved_blood_presence'),
+(50371,'spell_improved_blood_presence'),
+(50384,'spell_improved_frost_presence'),
+(50385,'spell_improved_frost_presence'),
+(50391,'spell_improved_unholy_presence'),
+(50392,'spell_improved_unholy_presence');
 
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
