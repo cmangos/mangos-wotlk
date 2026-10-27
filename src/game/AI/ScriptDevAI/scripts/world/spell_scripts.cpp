@@ -1095,6 +1095,23 @@ struct SummonPedestalNpc : public SpellScript
     }
 };
 
+// Summon Generic - spells:
+// 54964 - Summon and Mount Frosthound
+// 55038 - Contact Brann
+// 55460 - Ride Frostbite
+// 56839 - To Icecrown Airship (A) - Summon Vehicle
+// 57418 - To Icecrown Airship (H) - Summon Vehicle
+// 58524 - Control Eidolon Watcher
+// 59724 - Refurbished Demolisher
+struct SummonGeneric : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
 void AddSC_spell_scripts()
 {
     RegisterSpellScript<CastFishingNet>("spell_cast_fishing_net");
@@ -1149,4 +1166,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<InvisibleForAlive>("spell_shroud_of_death");
     RegisterSpellScript<SummonWaterElemental>("spell_summon_water_elemental");
     RegisterSpellScript<SummonPedestalNpc>("spell_summon_pedestal_npc");
+    RegisterSpellScript<SummonGeneric>("spell_summon_generic");
 }
