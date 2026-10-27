@@ -3854,6 +3854,12 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- child spell is a triggered non channel and isnt meant to interrupt parent channel
 UPDATE `spell_template` SET `AttributesEx` = `AttributesEx`&~0x00000004 WHERE `Id` = 59728; -- SPELL_ATTR_EX_CHANNELED_1
 
+UPDATE spell_template SET AttributesServerSide = AttributesServerSide|4 WHERE Id IN (
+54993); -- Frosthound Periodic
+
+-- spell: 54994 Summon Stormforged Pursuer - original = 36
+UPDATE spell_template SET DurationIndex = 8 WHERE id = 54994;
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
