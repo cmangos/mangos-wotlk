@@ -1044,26 +1044,6 @@ struct DropOffCapturedCrusader : public SpellScript
     }
 };
 
-// 56839 - To Icecrown Airship (A) - Summon Vehicle
-struct ToIcecrownAirshipASummonVehicle : public SpellScript
-{
-    void OnSummon(Spell* spell, Creature* summon) const override
-    {
-        summon->SelectLevel(spell->GetCaster()->GetLevel());
-        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
-    }
-};
-
-// 57418 - To Icecrown Airship (H) - Summon Vehicle
-struct ToIcecrownAirshipHSummonVehicle : public SpellScript
-{
-    void OnSummon(Spell* spell, Creature* summon) const override
-    {
-        summon->SelectLevel(spell->GetCaster()->GetLevel());
-        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
-    }
-};
-
 // 57534 - Frozen Siegebolt
 // 57650 - Frozen Siegebolt
 // 57666 - Frozen Siegebolt
@@ -1298,26 +1278,6 @@ struct BurningSkeleton : public SpellScript
     }
 };
 
-// 59724 - Refurbished Demolisher
-struct RefurbishedDemolisher : public SpellScript
-{
-    void OnSummon(Spell* spell, Creature* summon) const override
-    {
-        summon->SelectLevel(spell->GetCaster()->GetLevel());
-        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
-    }
-};
-
-// 58524 - Control Eidolon Watcher
-struct ControlEidolonWatcher : public SpellScript
-{
-    void OnSummon(Spell* spell, Creature* summon) const override
-    {
-        summon->SelectLevel(spell->GetCaster()->GetLevel());
-        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
-    }
-};
-
 // 58203 - Iron Chain
 struct IronChain : public SpellScript, public AuraScript
 {
@@ -1464,8 +1424,6 @@ void AddSC_icecrown()
     RegisterSpellScript<CreateLance>("spell_create_lance");
     RegisterSpellScript<GrabCapturedCrusader>("spell_grab_captured_crusader");
     RegisterSpellScript<DropOffCapturedCrusader>("spell_drop_off_captured_crusader");
-    RegisterSpellScript<ToIcecrownAirshipASummonVehicle>("spell_to_icecrown_air_ship_a_summon_vehicle");
-    RegisterSpellScript<ToIcecrownAirshipHSummonVehicle>("spell_to_icecrown_air_ship_h_summon_vehicle");
     RegisterSpellScript<FrozenSiegebolt>("spell_frozen_siegebolt");
     RegisterSpellScript<ArgentCannon>("spell_argent_cannon");
     RegisterSpellScript<ReckoningBomb>("spell_reckoning_bomb");
@@ -1484,8 +1442,6 @@ void AddSC_icecrown()
     RegisterSpellScript<FindtheAncientHero>("spell_find_the_ancient_hero");
     RegisterSpellScript<MasterSummonersStaff>("spell_master_summoners_staff");
     RegisterSpellScript<BurningSkeleton>("spell_burning_skeleton");
-    RegisterSpellScript<RefurbishedDemolisher>("spell_refurbished_demolisher");
-    RegisterSpellScript<ControlEidolonWatcher>("spell_control_eidolon_watcher");
     RegisterSpellScript<IronChain>("spell_iron_chain");
     RegisterSpellScript<SummonOminousCloud>("spell_summon_ominous_cloud");
     RegisterSpellScript<SubduedLitheStalker>("spell_subdued_lithe_stalker");
