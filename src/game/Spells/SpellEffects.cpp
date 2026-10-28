@@ -6988,7 +6988,8 @@ void Spell::EffectEnchantItemTmp(SpellEffectIndex eff_idx)
 
     // select enchantment duration
     uint32 duration = 3600; // old code default - lets see if this will cause pain - 1 hour
-    if (damage > 0)
+    // some spells have no duration in EffBasePoints (0 + DieSides 1), e.g. Instant Poison VIII/IX (57967, 57968), Anesthetic Poison II (57982)
+    if (damage > 1)
         duration = damage;
 
     // item can be in trade slot and have owner diff. from caster
