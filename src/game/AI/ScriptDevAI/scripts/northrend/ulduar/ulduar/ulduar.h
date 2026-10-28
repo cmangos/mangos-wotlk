@@ -72,21 +72,26 @@ enum
     NPC_XT_TOY_PILE             = 33337,                    // robot spawner npc for XT002
 
     // Leviathan other npcs
+    NPC_LORE_KEEPER_NORGANNON   = 33686,
     NPC_ULDUAR_COLOSSUS         = 33237,
     NPC_BRONZEBEARD_RADIO       = 34054,
     NPC_EXPLORER_DELLORAH       = 33701,
     NPC_BRANN_BRONZEBEARD       = 33579,
+    NPC_PROJECTION_UNIT         = 33721,
     NPC_ORBITAL_SUPPORT         = 34286,
     // NPC_GENERATOR            = 33571,                    // spawns iron dwarfs from Storm Beacons
     NPC_GENERATOR_SMALL         = 34159,                    // spawns iron dwarfs from hard mode towers
+    NPC_LEVIATHAN_SEAT          = 33114,
 
     // Leviathan reinforcements
     // NPC_HIRED_ENGINEER       = 33626,
     // NPC_HIRED_DEMOLITIONIST  = 33627,
     // NPC_BATTLE_MAGE          = 33662,
     NPC_SALVAGED_SIEGE_ENGINE   = 33060,
+    NPC_SALVAGED_SIEGE_TURRET   = 33067,
     NPC_SALVAGED_CHOPPER        = 33062,
     NPC_SALVAGED_DEMOLISHER     = 33109,
+    NPC_SALVAGED_DEMOLISHER_SEAT= 33167,
     // NPC_LIQUID_PYRITE        = 33189,
 
     // Ignis adds
@@ -277,6 +282,7 @@ enum
 
     // Doors and other Objects
     // The siege
+    GO_PROTECTIVE_BUBBLE        = 194484,
     GO_SHIELD_WALL              = 194416,                   // Gate before Leviathan
     GO_LIGHTNING_DOOR           = 194905,                   // Lightning gate after the Leviathan. It closes after the boss enters the arena
     GO_LEVIATHAN_GATE           = 194630,                   // Gate after Leviathan -> this will be broken when the boss enters the arena
