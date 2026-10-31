@@ -3164,7 +3164,7 @@ uint32 Unit::CalculateDamage(WeaponAttackType attType, bool normalized, uint8 in
 float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 {
     uint32 spellLevel = spellProto->spellLevel;
-    if (spellLevel <= 0)
+    if (spellLevel <= 0 || !spellProto->maxLevel)
         return 1.0f;
 
     float LvlPenalty = 0.0f;
