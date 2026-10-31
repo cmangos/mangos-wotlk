@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_creature.h"
 #include "ulduar.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
+#include "World/WorldStateDefines.h"
 
 enum
 {
@@ -53,12 +54,13 @@ enum
     SPELL_PETRIFYING_BREATH_H           = 63980,
     SPELL_BERSERK                       = 64238,
     SPELL_REDUCE_PARRY_CHANCE           = 64651,
+    SPELL_NO_TELEPORT                   = 65219,                // TODO: Unknown serverside
 
     // Arms spells
     SPELL_ARM_VISUAL                    = 64753,                // spawn visual
     SPELL_ARM_DEAD_DAMAGE_KOLOGARN      = 63629,                // damage to Kologarn on arm death
     SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H    = 63979,
-    SPELL_RIDE_KOLOGARN_ARMS            = 65343,
+    SPELL_RIDE_VEHICLE_KOLOGARN_ARMS    = 65343,
 
     // Left arm
     SPELL_ARM_SWEEP                     = 63766,                // triggers shockwave effect and visual spells
@@ -76,12 +78,17 @@ enum
     SPELL_EYEBEAM_DAMAGE_H              = 63976,
     SPELL_EYEBEAM_VISUAL_LEFT           = 63702,                // visual link to Kologarn
     SPELL_EYEBEAM_VISUAL_RIGHT          = 63676,
+    SPELL_AGGRO_CREATOR                 = 63709,                // cast by beam npc on combat start - TODO: 50000000 threat
 
     // Rubble stalkers
     SPELL_SUMMON_RUBBLE                 = 63633,                // triggers 63634 five times
     SPELL_FALLING_RUBBLE                = 63821,
     SPELL_FALLING_RUBBLE_H              = 64001,
     SPELL_CANCEL_STONE_GRIP             = 65594,                // cancels stone grip aura from players
+
+    EVENT_ACHIEV_DISARMED               = 21687,
+
+    ITEM_INVISIBLE_AXE                  = 45630,                // wields it when arm dead - TODO: Check what happens when both are dead
 
     // NPC ids
     NPC_FOCUSED_EYEBEAM_RIGHT           = 33802,
@@ -183,8 +190,6 @@ struct boss_kologarnAI : public BossAI
     uint8 m_armStatus[2];
     bool m_disarmedStatus;
 
-    uint8 m_rubbleCount;
-
     void Reset() override
     {
         BossAI::Reset();
@@ -194,6 +199,15 @@ struct boss_kologarnAI : public BossAI
         ResetTimer(KOLOGARN_INIT_ARMS, 5s);
 
         DoCastSpellIfCan(nullptr, SPELL_REDUCE_PARRY_CHANCE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void Aggro(Unit* who) override
+    {
+        BossAI::Aggro(who);
+
+        m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_KOLOGARN_HANDS_DESTROYED, 0);
+        m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_KOLOGARN_PLAYER_DAMAGED_WITH_BEAM, 0);
+        m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_KOLOGARN_RUBBLE_SPAWNED, 0);
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -220,7 +234,7 @@ struct boss_kologarnAI : public BossAI
             case NPC_RIGHT_ARM:
             {
                 int32 seat = (int32)SEAT_ID_RIGHT;
-                summoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &seat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_KOLOGARN_ARMS, &seat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->GetVictim())
@@ -230,7 +244,7 @@ struct boss_kologarnAI : public BossAI
             case NPC_LEFT_ARM:
             {
                 int32 seat = (int32)SEAT_ID_LEFT;
-                summoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &seat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_KOLOGARN_ARMS, &seat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                 summoned->CastSpell(summoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->GetVictim())
@@ -272,10 +286,10 @@ struct boss_kologarnAI : public BossAI
                     stalker->CastSpell(nullptr, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
                 }
 
-                m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
+                m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_KOLOGARN_HANDS_DESTROYED, 1);
             }
 
-            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, summoned->GetObjectGuid());
+            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_VEHICLE_KOLOGARN_ARMS, summoned->GetObjectGuid());
             summoned->CastSpell(m_creature, m_isRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
             DoBroadcastText(SAY_ARM_LOST_LEFT, m_creature);
             ResetTimer(KOLOGARN_RESPAWN_LEFT_ARM, 48s);
@@ -285,7 +299,7 @@ struct boss_kologarnAI : public BossAI
             if (m_disarmedStatus)
             {
                 if (m_instance)
-                    m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
+                    m_creature->GetMap()->StartEventForAllPlayersInMap(EVENT_ACHIEV_DISARMED, m_creature);
             }
             else
             {
@@ -305,10 +319,10 @@ struct boss_kologarnAI : public BossAI
                     stalker->CastSpell(nullptr, SPELL_CANCEL_STONE_GRIP, TRIGGERED_OLD_TRIGGERED);
                 }
 
-                m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_OPEN_ARMS, false);
+                m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_KOLOGARN_HANDS_DESTROYED, 1);
             }
 
-            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_KOLOGARN_ARMS, summoned->GetObjectGuid());
+            m_creature->RemoveAurasByCasterSpell(SPELL_RIDE_VEHICLE_KOLOGARN_ARMS, summoned->GetObjectGuid());
             summoned->CastSpell(m_creature, m_isRegularMode ? SPELL_ARM_DEAD_DAMAGE_KOLOGARN : SPELL_ARM_DEAD_DAMAGE_KOLOGARN_H, TRIGGERED_OLD_TRIGGERED);
             DoBroadcastText(SAY_ARM_LOST_RIGHT, m_creature);
             ResetTimer(KOLOGARN_RESPAWN_RIGHT_ARM, 48s);
@@ -318,7 +332,7 @@ struct boss_kologarnAI : public BossAI
             if (m_disarmedStatus)
             {
                 if (m_instance)
-                    m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DISARMED, true);
+                    m_creature->GetMap()->StartEventForAllPlayersInMap(EVENT_ACHIEV_DISARMED, m_creature);
             }
             else
             {
@@ -333,10 +347,7 @@ struct boss_kologarnAI : public BossAI
         // count the summoned Rubble
         if (eventType == AI_EVENT_CUSTOM_A && invoker->GetEntry() == NPC_RUBBLE_STALKER)
         {
-            ++m_rubbleCount;
-
-            if (m_rubbleCount == MAX_ACHIEV_RUBBLE && m_instance)
-                m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_RUBBLE, true);
+            m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_KOLOGARN_RUBBLE_SPAWNED, m_creature->GetMap()->GetVariableManager().GetVariable(WORLD_STATE_KOLOGARN_RUBBLE_SPAWNED) + 1);
         }
     }
 
@@ -364,7 +375,7 @@ struct boss_kologarnAI : public BossAI
         {
             case KOLOGARN_STONE_SHOUT:
             {
-                if (GetArmStatus() == 0)
+                if (GetArmStatus() == 0) // likely operated by world states in spell lists
                     DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_STONE_SHOUT : SPELL_STONE_SHOUT_H);
                 break;
             }
@@ -487,7 +498,7 @@ struct npc_focused_eyebeamAI : public ScriptedAI
     void SpellHitTarget(Unit* target, SpellEntry const* spellEntry) override
     {
         if (target->GetTypeId() == TYPEID_PLAYER && (spellEntry->Id == SPELL_EYEBEAM_DAMAGE || spellEntry->Id == SPELL_EYEBEAM_DAMAGE_H) && m_instance)
-            m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_LOOKS_KILL, false);
+            m_creature->GetMap()->GetVariableManager().SetVariable(WORLD_STATE_KOLOGARN_PLAYER_DAMAGED_WITH_BEAM, 1);
     }
 };
 
