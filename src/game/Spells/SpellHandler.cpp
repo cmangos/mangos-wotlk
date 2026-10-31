@@ -123,6 +123,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     {
         for (const auto& Spell : proto->Spells)
         {
+            if (Spell.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE)
+                continue;
+
             if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId))
             {
                 if (IsNonCombatSpell(spellInfo))
