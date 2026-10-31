@@ -463,7 +463,7 @@ void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* t
         default: break;
     }
 
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX_TRACK_TARGET_IN_CHANNEL))
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX_TRACK_TARGET_IN_CHANNEL) && !spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_ACTIONS_DURING_CHANNEL))
         forceTarget = true;
 
     if (state)
