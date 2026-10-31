@@ -413,13 +413,6 @@ struct HealingStreamTotemEffect : public SpellScript
             Unit* caster = spell->GetCaster();
             if (Unit* owner = caster->GetOwner())
             {
-                // spell have SPELL_DAMAGE_CLASS_NONE and not get bonuses from owner, use main spell for bonuses
-                if (spell->m_triggeredBySpellInfo)
-                {
-                    damage = int32(owner->SpellHealingBonusDone(unitTarget, spell->m_triggeredBySpellInfo, effIdx, damage, HEAL));
-                    damage = int32(unitTarget->SpellHealingBonusTaken(owner, spell->m_triggeredBySpellInfo, effIdx, damage, HEAL));
-                }
-
                 // Restorative Totems
                 Aura* restorativeTotems = owner->GetAura(16206, EFFECT_INDEX_1);
                 if (!restorativeTotems)
