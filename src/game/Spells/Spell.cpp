@@ -4168,7 +4168,7 @@ void Spell::update(uint32 difftime)
                         }
                     }
 
-                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_TRACK_TARGET_IN_CHANNEL) && m_UniqueTargetInfo.begin() != m_UniqueTargetInfo.end())
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_TRACK_TARGET_IN_CHANNEL) && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_ACTIONS_DURING_CHANNEL) && m_UniqueTargetInfo.begin() != m_UniqueTargetInfo.end())
                     {
                         if (WorldObject* target = m_caster->GetChannelObject())
                         {
