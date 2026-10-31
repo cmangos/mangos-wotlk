@@ -8379,22 +8379,26 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellInfo, Sp
         if (Unit* owner = GetOwner())
             return owner->SpellHealingBonusDone(victim, spellInfo, effectIndex, healamount, damagetype, stack);
 
-    // No heal amount for this class spells
-    if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE)
-        return healamount < 0 ? 0 : healamount;
-
     // Healing Done
     // Done total percent damage auras
     float  DoneTotalMod = 1.0f;
     int32  DoneTotal = 0;
 
+    SpellSchoolMask mask = GetSpellSchoolMask(spellInfo);
+
     // Healing done percent
     AuraList const& mHealingDonePct = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for (auto i : mHealingDonePct)
+    {
+        if ((i->GetModifier()->m_miscvalue & mask) == 0)
+            continue;
+        if (!i->GetAuraSpellClassMask().Empty() && !i->isAffectedOnSpell(spellInfo))
+            continue;
         DoneTotalMod *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
+    }
 
     // Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit = SpellBaseHealingBonusDone(GetSpellSchoolMask(spellInfo));
+    int32 DoneAdvertisedBenefit = SpellBaseHealingBonusDone(mask);
 
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner();
@@ -8445,13 +8449,6 @@ uint32 Unit::SpellHealingBonusTaken(Unit* caster, SpellEntry const* spellInfo, S
     // no SPELL_AURA_MOD_PERIODIC_HEAL positive cases
     if (maxval)
         TakenTotalMod *= (100.0f + maxval) / 100.0f;
-
-    // No heal amount for this class spells
-    if (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE)
-    {
-        healamount = int32(healamount * TakenTotalMod);
-        return healamount < 0 ? 0 : healamount;
-    }
 
     // Healing Done
     // Done total percent damage auras
