@@ -609,6 +609,19 @@ bool GOUse_go_activate_tram(Player* pPlayer, GameObject* pGo)
     return false;
 }
 
+// 62522 - Electroshock
+struct ElectroshockUlduar : public SpellScript
+{
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_BAD_TARGETS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_64_NONE;
+        }
+    }
+};
+
 void AddSC_ulduar()
 {
     Script* pNewScript = new Script;
@@ -654,4 +667,6 @@ void AddSC_ulduar()
     pNewScript->Name = "go_activate_tram";
     pNewScript->pGOUse = &GOUse_go_activate_tram;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ElectroshockUlduar>("spell_electroshock_ulduar");
 }
