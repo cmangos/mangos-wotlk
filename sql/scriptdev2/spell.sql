@@ -1177,6 +1177,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (62669,'spell_firebolt_razorscale'),
 (62707,'spell_ignis_grab'),
 (62717,'spell_slag_pot'),
+(62767,'spell_break_curse_of_ice'),
 (63343,'spell_focused_eyebeam_summon'),
 (63701,'spell_focused_eyebeam_summon'),
 (63474,'spell_ignis_scorch'),
