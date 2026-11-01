@@ -21,6 +21,7 @@
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
+// 55090 - Scourge Strike
 struct ScourgeStrike : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo missInfo) const override
@@ -44,6 +45,7 @@ struct ScourgeStrike : public SpellScript
     }
 };
 
+// 46584 - Raise Dead
 struct RaiseDeadDk : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
@@ -87,6 +89,7 @@ struct RaiseDeadDk : public SpellScript
     }
 };
 
+// 47541 - Death Coil
 struct DeathCoilDK : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -115,6 +118,7 @@ struct DeathCoilDK : public SpellScript
     }
 };
 
+// 49194 - Unholy Blight
 struct UnholyBlightDK : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
@@ -130,6 +134,9 @@ struct UnholyBlightDK : public AuraScript
     }
 };
 
+// 49208 - Reaping
+// 49467 - Death Rune Mastery
+// 54637 - Blood of the North
 struct DeathRuneDK : public AuraScript
 {
     bool OnCheckProc(Aura* aura, ProcExecutionData& procData) const override
@@ -176,6 +183,7 @@ struct DeathRuneDK : public AuraScript
     }
 };
 
+// 50452 - Bloodworm
 struct Bloodworm : public SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
@@ -186,6 +194,7 @@ struct Bloodworm : public SpellScript
     }
 };
 
+// 50453 - Health Leech
 struct HealthLeechPassive : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
@@ -196,6 +205,7 @@ struct HealthLeechPassive : public AuraScript
     }
 };
 
+// 51052 - Anti-Magic Zone
 struct AntiMagicZone : public SpellScript
 {
     void OnSummon(Spell* /*spell*/, Creature* summon) const override
@@ -205,6 +215,7 @@ struct AntiMagicZone : public SpellScript
     }
 };
 
+// 49158 - Corpse Explosion
 struct CorpseExplosionDK : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
@@ -245,6 +256,7 @@ struct CorpseExplosionDK : public SpellScript
     }
 };
 
+// 47496 - Explode
 struct ExplodeGhoulCorpseExplosion : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -271,6 +283,8 @@ struct ExplodeGhoulCorpseExplosion : public SpellScript
     }          
 };
 
+// 55078 - Blood Plague
+// 55095 - Frost Fever
 struct DeathKnightDisease : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
@@ -335,6 +349,7 @@ struct CryptFeverServerside : public AuraScript
     }
 };
 
+// 42650 - Army of the Dead
 struct ArmyOfTheDead : public AuraScript
 {
     int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
@@ -345,6 +360,7 @@ struct ArmyOfTheDead : public AuraScript
     }
 };
 
+// 42651 - Army of the Dead
 struct ArmyOfTheDeadGhoul : public SpellScript
 {
     void OnSummon(Spell* /*spell*/, Creature* summon) const override
@@ -357,6 +373,7 @@ struct ArmyOfTheDeadGhoul : public SpellScript
     }
 };
 
+// 49018 - Sudden Doom
 struct SuddenDoom : public AuraScript
 {
     bool OnCheckProc(Aura* aura, ProcExecutionData& /*data*/) const override
@@ -377,6 +394,7 @@ struct SuddenDoom : public AuraScript
     }
 };
 
+// 52284 - Will of the Necropolis
 struct WillOfTheNecropolis : public AuraScript
 {
     void OnAbsorb(Aura* aura, int32& currentAbsorb, int32& remainingDamage, uint32& /*reflectedSpellId*/, int32& /*reflectDamage*/, bool& /*preventedDeath*/, bool& /*dropCharge*/, DamageEffectType /*damageType*/) const override
