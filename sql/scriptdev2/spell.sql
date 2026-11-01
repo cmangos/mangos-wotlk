@@ -1142,6 +1142,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (62138,'spell_teleport_inside_violet_hold'),
 (62382,'spell_ignis_brittle'),
 (62457,'spell_ice_shards'),
+(62522,'spell_electroshock_ulduar'),
 (62563,'spell_charge_62563'),
 (62609,'spell_argent_gruntling'),
 (62722,'spell_tournament_mm_gossip'),
