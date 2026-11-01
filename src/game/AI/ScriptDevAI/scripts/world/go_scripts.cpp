@@ -1223,6 +1223,43 @@ struct go_ai_ectoplasmic_distiller_trap : public GameObjectAI
     }
 };
 
+// 65728 - Portal Effect: Hellfire Peninsula, Alliance
+// 65729 - Portal Effect: Hellfire Peninsula, Horde
+struct PortalEffectHfpCities : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->m_targets.getUnitTarget())
+        {
+            SpellCastResult result = spell->m_targets.getUnitTarget()->CastSpell(nullptr, 66074, TRIGGERED_OLD_TRIGGERED);
+            if (result == SPELL_CAST_OK)
+                return SPELL_CAST_OK;
+        }
+
+        return SPELL_FAILED_BAD_TARGETS;
+    }
+};
+
+// 66074 - Portal Effect: Hellfire Peninsula - Fail - Too Low Level
+struct PortalEffectHfpFailTooLowLevel : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->GetCaster()->GetLevel() < 58)
+            return SPELL_FAILED_LOWLEVEL;
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_LOWLEVEL)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_66;
+        }
+    }
+};
+
 void AddSC_go_scripts()
 {
     Script* pNewScript = new Script;
@@ -1339,4 +1376,7 @@ void AddSC_go_scripts()
     pNewScript->Name = "go_ectoplasmic_distiller_trap";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_ai_ectoplasmic_distiller_trap>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<PortalEffectHfpCities>("spell_portal_effect_hfp_cities");
+    RegisterSpellScript<PortalEffectHfpFailTooLowLevel>("spell_portal_effect_hfp_fail_too_low_level");
 }
