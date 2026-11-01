@@ -1040,6 +1040,78 @@ struct ImprovedUnholyPresence : public AuraScript
     }
 };
 
+// 48743 - Death Pact
+struct DeathPactDk : public SpellScript
+{
+    // Note: There is an indication that a selected target might not be necessary
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster->IsPlayer())
+            return SPELL_FAILED_ERROR;
+
+        ObjectGuid selectionGuid = static_cast<Player*>(caster)->GetSelectionGuid();
+        if (!selectionGuid)
+            return SPELL_FAILED_OUT_OF_RANGE;
+
+        Pet* target = caster->GetMap()->GetPet(selectionGuid);
+        // alive
+        if (!target || target->IsDead())
+            return SPELL_FAILED_TARGETS_DEAD;
+        // undead
+        if (target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
+            return SPELL_FAILED_BAD_TARGETS;
+        // owned
+        if (target->GetOwnerGuid() != caster->GetObjectGuid())
+            return SPELL_FAILED_UNKNOWN;
+
+        float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(spell->m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
+        if (!target->IsWithinDistInMap(caster, dist))
+            return SPELL_FAILED_OUT_OF_RANGE;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_UNKNOWN)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_52;
+        }
+        else if (result == SPELL_FAILED_BAD_TARGETS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_53;
+        }
+        else if (result == SPELL_FAILED_OUT_OF_RANGE)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_54;
+        }
+    }
+
+     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+     {
+         Unit* caster = spell->GetCaster();
+         if (!caster->IsPlayer())
+             return false;
+
+         ObjectGuid selectionGuid = static_cast<Player*>(caster)->GetSelectionGuid();
+         if (!selectionGuid)
+             return false;
+
+         return target->GetObjectGuid() == selectionGuid;
+     }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (effIdx != EFFECT_INDEX_2 || !target)
+            return;
+
+        spell->SetDamage(spell->GetDamage() * target->GetMaxHealth() / 100);
+    }
+};
+
 void LoadDeathKnightScripts()
 {
     RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
@@ -1081,6 +1153,8 @@ void LoadDeathKnightScripts()
     RegisterSpellScript<ImprovedBloodPresence>("spell_improved_blood_presence");
     RegisterSpellScript<ImprovedFrostPresence>("spell_improved_frost_presence");
     RegisterSpellScript<ImprovedUnholyPresence>("spell_improved_unholy_presence");
+
+    RegisterSpellScript<DeathPactDk>("spell_death_pact_dk");
 
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_gargoyle_dk";

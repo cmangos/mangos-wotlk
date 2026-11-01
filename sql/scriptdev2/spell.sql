@@ -1409,6 +1409,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (42650,'spell_army_of_the_dead'),
 (42651,'spell_army_of_the_dead_ghoul'),
 (46584,'spell_dk_raise_dead'),
+(48743,'spell_death_pact_dk'),
 (49028,'spell_dancing_rune_weapon'),
 (49812,'spell_fake_aggro_radius_8yd'),
 (49813,'spell_aggro_radius_8yd'),
