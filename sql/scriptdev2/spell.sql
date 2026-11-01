@@ -1396,6 +1396,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (74562,'spell_fiery_combustion_aura'),
 (74792,'spell_soul_consumption_aura'),
 (74812,'spell_leave_twilight_realm_aura'),
+(75102,'spell_voljins_war_drums'),
 (75396,'spell_clear_debuffs'),
 (75415,'spell_rallying_shout'),
 (75475,'spell_proc_only_below_35_percent');
