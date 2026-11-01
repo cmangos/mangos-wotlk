@@ -2704,16 +2704,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             FillAreaTargets(tempUnitList, radius, cone, PUSH_SELF_CENTER, SPELL_TARGETS_ASSISTABLE, GetCastingObject());
             break;
         case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
-            // Death Pact (in fact selection by player selection)
-            if (m_spellInfo->Id == 48743)
-            {
-                // checked in Spell::CheckCast
-                if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                    if (Unit* target = m_caster->GetMap()->GetPet(((Player*)m_caster)->GetSelectionGuid()))
-                        tempUnitList.push_back(target);
-            }
-            else
-                FillAreaTargets(tempUnitList, radius, cone, PUSH_DEST_CENTER, SPELL_TARGETS_ASSISTABLE);
+            FillAreaTargets(tempUnitList, radius, cone, PUSH_DEST_CENTER, SPELL_TARGETS_ASSISTABLE);
             break;
         // TARGET_UNIT_PARTY means that the spells can only be casted on a party member and not on the caster (some seals, fire shield from imp, etc..)
         case TARGET_UNIT_PARTY:
@@ -6186,32 +6177,6 @@ SpellCastResult Spell::CheckCast(bool strict)
         switch (m_spellInfo->Effect[i])
         {
             case SPELL_EFFECT_INSTAKILL:
-                // Death Pact
-                if (m_spellInfo->Id == 48743)
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return SPELL_FAILED_ERROR;
-
-                    if (!((Player*)m_caster)->GetSelectionGuid())
-                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                    Pet* target = m_caster->GetMap()->GetPet(((Player*)m_caster)->GetSelectionGuid());
-
-                    // alive
-                    if (!target || target->IsDead())
-                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                    // undead
-                    if (target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
-                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                    // owned
-                    if (target->GetOwnerGuid() != m_caster->GetObjectGuid())
-                        return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-
-                    float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-                    if (!target->IsWithinDistInMap(m_caster, dist))
-                        return SPELL_FAILED_OUT_OF_RANGE;
-
-                    // will set in target selection code
-                }
                 break;
             case SPELL_EFFECT_DUMMY:
             {
