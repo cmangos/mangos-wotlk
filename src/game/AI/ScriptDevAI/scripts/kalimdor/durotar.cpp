@@ -247,6 +247,38 @@ struct AwakenPeon : public SpellScript
     }
 };
 
+// 75102 - Vol'jin's War Drums
+struct VoljinsWarDrums : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->m_targets.getUnitTargetGuid().IsCreatureOrVehicle() || spell->m_targets.getUnitTargetGuid().GetEntry() != 40256) // Harold Lane
+            return SPELL_FAILED_BAD_TARGETS;
+        if (spell->GetCaster()->IsPlayer())
+        {
+            // trollin for volunteers
+            if (static_cast<Player*>(spell->GetCaster())->IsCurrentQuest(25461, 1))
+                return SPELL_CAST_OK;
+            else
+            {
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+        }
+        return SPELL_FAILED_CASTER_AURASTATE; // should never happen
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_CUSTOM_ERROR)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_97;
+        }
+    }
+
+    // TODO: 49415, 74071, 73952, and follow 75086
+};
+
 void AddSC_durotar()
 {
     Script* pNewScript = new Script;
@@ -255,4 +287,5 @@ void AddSC_durotar()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<AwakenPeon>("spell_awaken_peon");
+    RegisterSpellScript<VoljinsWarDrums>("spell_voljins_war_drums");
 }
