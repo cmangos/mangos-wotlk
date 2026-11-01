@@ -1015,6 +1015,26 @@ struct LuriellesPendant : public SpellScript
     }
 };
 
+// 62767 - Break Curse of Ice
+struct BreakCurseOfIce : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->m_targets.getUnitTargetGuid().IsCreature() || spell->m_targets.getUnitTargetGuid().GetEntry() != 33303) // Maiden of Winter's Breath Lake
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_BAD_TARGETS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_61;
+        }
+    }
+};
+
 void AddSC_howling_fjord()
 {
     Script* pNewScript = new Script;
@@ -1071,4 +1091,5 @@ void AddSC_howling_fjord()
     RegisterSpellScript<BurnBody>("spell_burn_body");
     RegisterSpellScript<UseBricksBonesaw>("spell_use_bricks_bonesaw");
     RegisterSpellScript<LuriellesPendant>("spell_lurielles_pendant");
+    RegisterSpellScript<BreakCurseOfIce>("spell_break_curse_of_ice");
 }
