@@ -798,6 +798,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (46073,'spell_has_eaten_recently'),
 (46340,'spell_crates_carried'),
 (46361,'spell_reinforced_net_borean'),
+(46368,'spell_blow_cenarion_horn'),
 (46607,'spell_drake_harpoon_borean'),
 (46620,'spell_red_dragonblood'),
 (46673,'spell_capture_trigger_nexus_drake'),
