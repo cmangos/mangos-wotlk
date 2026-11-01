@@ -1705,6 +1705,26 @@ struct ACSummonChainedMageHunter : public SpellScript
     }
 };
 
+// 46368 - Blow Cenarion Horn
+struct BlowCenarionHorn : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->m_targets.getUnitTargetGuid().IsCreatureOrVehicle() || spell->m_targets.getUnitTargetGuid().GetEntry() != 25804) // Harold Lane
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_BAD_TARGETS)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_23;
+        }
+    }
+};
+
 void AddSC_borean_tundra()
 {
     Script* pNewScript = new Script;
@@ -1796,4 +1816,5 @@ void AddSC_borean_tundra()
     RegisterSpellScript<ReinforcedNetBorean>("spell_reinforced_net_borean");
     RegisterSpellScript<CratesCarried>("spell_crates_carried");
     RegisterSpellScript<TheUltrasonicScrewdriver>("spell_ultrasonic_screwdriver");
+    RegisterSpellScript<BlowCenarionHorn>("spell_blow_cenarion_horn");
 }
