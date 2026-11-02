@@ -258,12 +258,11 @@ void BattlefieldWG::HandlePlayerEnterArea(Player* player, uint32 areaId, bool is
         case AREA_ID_WESTPARK_WORKSHOP:
         case AREA_ID_EASTPARK_WORKSHOP:
             // apply corresponding workshop aura
-            // ToDo: needs to be enabled when phase stacking is supported
-            /*for (auto workshop : m_capturableWorkshops)
+            for (auto workshop : m_capturableWorkshops)
             {
                 if (areaId == workshop->GetAreaId() && workshop->GetOwner() != TEAM_NONE)
-                     player->CastSpell(player, wgTeamFactoryAuras[GetTeamIndexByTeamId(workshop->GetOwner())], TRIGGERED_OLD_TRIGGERED);
-            }*/
+                    player->CastSpell(player, wgTeamFactoryAuras[GetTeamIndexByTeamId(workshop->GetOwner())], TRIGGERED_OLD_TRIGGERED);
+            }
             return;
     }
 }
@@ -276,9 +275,8 @@ void BattlefieldWG::HandlePlayerLeaveArea(Player* player, uint32 areaId, bool is
         case AREA_ID_THE_BROKEN_TEMPLE:
         case AREA_ID_WESTPARK_WORKSHOP:
         case AREA_ID_EASTPARK_WORKSHOP:
-            // ToDo: needs to be enabled when phase stacking is supported
-            /*player->RemoveAurasDueToSpell(SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE);
-            player->RemoveAurasDueToSpell(SPELL_HORDE_CONTROLS_FACTORY_PHASE);*/
+            player->RemoveAurasDueToSpell(SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE);
+            player->RemoveAurasDueToSpell(SPELL_HORDE_CONTROLS_FACTORY_PHASE);
             return;
     }
 }
