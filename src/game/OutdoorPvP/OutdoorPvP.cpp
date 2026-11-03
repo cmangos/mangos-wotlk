@@ -147,7 +147,7 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/, co
 {
     for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
-        Player* player = m_map.GetPlayer(itr->first); // TODO: Fix for buffing different map
+        Player* player = m_map.GetPlayer(itr->first);
         if (player && player->GetTeam() == team)
         {
             // validate area id for buffs which aren't applied to the entire zone

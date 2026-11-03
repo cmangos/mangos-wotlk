@@ -477,6 +477,7 @@ struct OutdoorPvPStateData
     std::map<uint32, GuidVector> outdoorPvpZonePlayers;
     uint8 eplTowersAlliance = 0;
     uint8 eplTowersHorde = 0;
+    Team silithusZoneOwner = TEAM_NONE;
 };
 
 // Intended for implementing server wide scripts, note: all behaviour must be safeguarded towards multithreading
@@ -620,6 +621,7 @@ class WorldState
 
         // OutdoorPvP state
         void SetEplTowerData(uint8 towersHorde, uint8 towersAlliance);
+        void SetSilithusZoneOwner(Team zoneOwner);
     private:
         std::map<uint32, GuidVector> m_areaPlayers;
         std::map<uint32, GuidVector> m_zonePlayers;
