@@ -25,23 +25,18 @@
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
 #include "Tools/Language.h"
+#include "World/WorldState.h"
 
 OutdoorPvPSI::OutdoorPvPSI(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
-    m_resourcesAlliance(0),
-    m_resourcesHorde(0),
     m_zoneOwner(TEAM_NONE)
 {
-}
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_SI_GATHERED_A, true, ZONE_ID_SILITHUS, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_SI_GATHERED_H, true, ZONE_ID_SILITHUS, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_SI_SILITHYST_MAX, true, ZONE_ID_SILITHUS, 0);
 
-// Send initial world states
-void OutdoorPvPSI::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_SI_ENABLED))
-    {
-        FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
-        FillInitialWorldState(data, count, WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
-        FillInitialWorldState(data, count, WORLD_STATE_SI_SILITHYST_MAX, MAX_SILITHYST);
-    }
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_A, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_H, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_SILITHYST_MAX, MAX_SILITHYST);
 }
 
 // Handle buffs when player enters the zone
@@ -50,18 +45,15 @@ void OutdoorPvPSI::HandlePlayerEnterZone(Player* player, bool isMainZone)
     OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
 
     // remove the buff from the player first; Sometimes on relog players still have the aura
-    player->RemoveAurasDueToSpell(SPELL_CENARION_FAVOR);
+    OutdoorPvPSI::UnBuffPlayer(player);
 
-    // buff the player if same team is controlling the zone
-    if (player->GetTeam() == m_zoneOwner)
-        player->CastSpell(player, SPELL_CENARION_FAVOR, TRIGGERED_OLD_TRIGGERED);
+    OutdoorPvPSI::BuffPlayer(player, m_zoneOwner);
 }
 
 // Remove buffs when player leaves zone
 void OutdoorPvPSI::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
-    // remove the buff from the player
-    player->RemoveAurasDueToSpell(SPELL_CENARION_FAVOR);
+    OutdoorPvPSI::UnBuffPlayer(player);
 
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
@@ -75,23 +67,22 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 triggerId)
     switch (triggerId)
     {
         case AREATRIGGER_SILITHUS_ALLIANCE:
+        {
             if (player->GetTeam() != ALLIANCE || !player->HasAura(SPELL_SILITHYST))
                 return false;
 
             // update counter
-            ++ m_resourcesAlliance;
-            SendUpdateWorldState(WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
+            uint32 allianceCounter = m_map.GetVariableManager().GetVariable(WORLD_STATE_SI_GATHERED_A) + 1;
 
             // handle the case when the faction has reached maximum resources allowed
-            if (m_resourcesAlliance == MAX_SILITHYST)
+            if (allianceCounter == MAX_SILITHYST)
             {
                 // NOTE: On retail it would not reset until server restart but we do not support weekly restart :)
                 m_zoneOwner = ALLIANCE;
-                m_resourcesAlliance = 0;
-                m_resourcesHorde = 0;
+                m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_A, 0);
+                m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_H, 0);
 
-                // also update the horde counter if resources were reset
-                SendUpdateWorldState(WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
+                sWorldState.SetSilithusZoneOwner(m_zoneOwner);
 
                 // apply buff to owner team
                 BuffTeam(ALLIANCE, SPELL_CENARION_FAVOR);
@@ -99,29 +90,30 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 triggerId)
                 // Send defense message
                 sWorld.SendDefenseMessage(ZONE_ID_SILITHUS, LANG_OPVP_SI_CAPTURE_A);
             }
+            else
+                m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_A, allianceCounter);
 
             // give quest credit if necessary
             if (player->GetQuestStatus(QUEST_SCOURING_DESERT_ALLIANCE) == QUEST_STATUS_INCOMPLETE)
                 player->KilledMonsterCredit(NPC_SILITHUS_DUST_QUEST_ALLIANCE);
             break;
+        }
         case AREATRIGGER_SILITHUS_HORDE:
+        {
             if (player->GetTeam() != HORDE || !player->HasAura(SPELL_SILITHYST))
                 return false;
 
-            // update counter
-            ++ m_resourcesHorde;
-            SendUpdateWorldState(WORLD_STATE_SI_GATHERED_H, m_resourcesHorde);
+            uint32 hordeCounter = m_map.GetVariableManager().GetVariable(WORLD_STATE_SI_GATHERED_A) + 1;
 
             // handle the case when the faction has reached maximum resources allowed
-            if (m_resourcesHorde == MAX_SILITHYST)
+            if (hordeCounter == MAX_SILITHYST)
             {
                 // NOTE: On retail it would not reset until server restart but we do not support weekly restart :)
                 m_zoneOwner = HORDE;
-                m_resourcesAlliance = 0;
-                m_resourcesHorde = 0;
+                m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_A, 0);
+                m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_H, 0);
 
-                // also update the alliance counter if resources were reset
-                SendUpdateWorldState(WORLD_STATE_SI_GATHERED_A, m_resourcesAlliance);
+                sWorldState.SetSilithusZoneOwner(m_zoneOwner);
 
                 // apply buff to owner team
                 BuffTeam(HORDE, SPELL_CENARION_FAVOR);
@@ -129,11 +121,14 @@ bool OutdoorPvPSI::HandleAreaTrigger(Player* player, uint32 triggerId)
                 // Send defense message
                 sWorld.SendDefenseMessage(ZONE_ID_SILITHUS, LANG_OPVP_SI_CAPTURE_H);
             }
+            else
+                m_map.GetVariableManager().SetVariable(WORLD_STATE_SI_GATHERED_H, hordeCounter);
 
             // give quest credit if necessary
             if (player->GetQuestStatus(QUEST_SCOURING_DESERT_HORDE) == QUEST_STATUS_INCOMPLETE)
                 player->KilledMonsterCredit(NPC_SILITHUS_DUST_QUEST_HORDE);
             break;
+        }
         default:
             return false;
     }
@@ -186,6 +181,18 @@ bool OutdoorPvPSI::HandleDropFlag(Player* player, uint32 spellId)
     // drop the flag in other case
     player->CastSpell(player, SPELL_SILITHYST_FLAG_DROP, TRIGGERED_OLD_TRIGGERED);
     return true;
+}
+
+void OutdoorPvPSI::BuffPlayer(Player* player, uint32 zoneOwner)
+{
+    // buff the player if same team is controlling the zone
+    if (player->GetTeam() == zoneOwner)
+        player->CastSpell(player, SPELL_CENARION_FAVOR, TRIGGERED_OLD_TRIGGERED);
+}
+
+void OutdoorPvPSI::UnBuffPlayer(Player* player)
+{
+    player->RemoveAurasDueToSpell(SPELL_CENARION_FAVOR);
 }
 
 // Handle the case when player picks a silithyst mound or geyser

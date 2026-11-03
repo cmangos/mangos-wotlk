@@ -28,6 +28,7 @@
 #include <World/WorldStateDefines.h>
 #include "AI/ScriptDevAI/scripts/world/scourge_invasion.h"
 #include "OutdoorPvP/OutdoorPvPEP.h"
+#include "OutdoorPvP/OutdoorPvPSI.h"
 
 enum
 {
@@ -528,6 +529,7 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
                 case ZONE_ID_TEMPLE_OF_AQ:
                 case ZONE_ID_RUINS_OF_AQ:
                 case ZONE_ID_GATES_OF_AQ:
+                    OutdoorPvPSI::BuffPlayer(player, m_outdoorPvpStateData.silithusZoneOwner);
                     break;
                 case ZONE_ID_STRATHOLME:
                 case ZONE_ID_SCHOLOMANCE:
@@ -666,6 +668,7 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
                 case ZONE_ID_TEMPLE_OF_AQ:
                 case ZONE_ID_RUINS_OF_AQ:
                 case ZONE_ID_GATES_OF_AQ:
+                    OutdoorPvPSI::UnBuffPlayer(player);
                     break;
                 case ZONE_ID_STRATHOLME:
                 case ZONE_ID_SCHOLOMANCE:
@@ -1044,35 +1047,75 @@ void WorldState::SetEplTowerData(uint8 towersHorde, uint8 towersAlliance)
     std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
     Team affectedTeam = towersHorde != m_outdoorPvpStateData.eplTowersHorde ? HORDE : ALLIANCE;
 
-    uint8 towersHordeOld = m_outdoorPvpStateData.eplTowersHorde;
-    uint8 towersAllianceOld = m_outdoorPvpStateData.eplTowersAlliance;
-
     m_outdoorPvpStateData.eplTowersHorde = towersHorde;
     m_outdoorPvpStateData.eplTowersAlliance = towersAlliance;
 
-    for (ObjectGuid& guid : m_magtheridonHeadPlayers)
+    uint32 zoneArray[] = { ZONE_ID_STRATHOLME, ZONE_ID_SCHOLOMANCE };
+
+    for (uint32 zoneId : zoneArray)
     {
-        if (Player* player = sObjectMgr.GetPlayer(guid))
+        for (ObjectGuid& guid : m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId])
         {
-            if (affectedTeam == ALLIANCE && player->GetTeam() == ALLIANCE)
+            if (Player* player = sObjectMgr.GetPlayer(guid))
             {
-                player->GetMap()->GetMessager().AddMessage([guid, towersHorde, towersAlliance](Map* map) -> void {
-                    if (Player* player = map->GetPlayer(guid))
-                    {
-                        OutdoorPvPEP::UnBuffPlayer(player);
-                        OutdoorPvPEP::BuffPlayer(player, towersAlliance, towersHorde);
-                    }
-                });
+                if (affectedTeam == ALLIANCE && player->GetTeam() == ALLIANCE)
+                {
+                    player->GetMap()->GetMessager().AddMessage([guid, towersHorde, towersAlliance](Map* map) -> void {
+                        if (Player* player = map->GetPlayer(guid))
+                        {
+                            OutdoorPvPEP::UnBuffPlayer(player);
+                            OutdoorPvPEP::BuffPlayer(player, towersAlliance, towersHorde);
+                        }
+                    });
+                }
+                if (affectedTeam == HORDE && player->GetTeam() == HORDE)
+                {
+                    player->GetMap()->GetMessager().AddMessage([guid, towersHorde, towersAlliance](Map* map) -> void {
+                        if (Player* player = map->GetPlayer(guid))
+                        {
+                            OutdoorPvPEP::UnBuffPlayer(player);
+                            OutdoorPvPEP::BuffPlayer(player, towersAlliance, towersHorde);
+                        }
+                    });
+                }
             }
-            if (affectedTeam == HORDE && player->GetTeam() == HORDE)
+        }
+    }
+}
+
+void WorldState::SetSilithusZoneOwner(Team zoneOwner)
+{
+    std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
+    m_outdoorPvpStateData.silithusZoneOwner = zoneOwner;
+
+    uint32 zoneArray[] = {ZONE_ID_TEMPLE_OF_AQ, ZONE_ID_RUINS_OF_AQ, ZONE_ID_GATES_OF_AQ};
+
+    for (uint32 zoneId : zoneArray)
+    {
+        for (ObjectGuid& guid : m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId])
+        {
+            if (Player* player = sObjectMgr.GetPlayer(guid))
             {
-                player->GetMap()->GetMessager().AddMessage([guid, towersHorde, towersAlliance](Map* map) -> void {
-                    if (Player* player = map->GetPlayer(guid))
-                    {
-                        OutdoorPvPEP::UnBuffPlayer(player);
-                        OutdoorPvPEP::BuffPlayer(player, towersAlliance, towersHorde);
-                    }
-                });
+                if (zoneOwner == ALLIANCE && player->GetTeam() == ALLIANCE)
+                {
+                    player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                        if (Player* player = map->GetPlayer(guid))
+                        {
+                            OutdoorPvPSI::UnBuffPlayer(player);
+                            OutdoorPvPSI::BuffPlayer(player, zoneOwner);
+                        }
+                    });
+                }
+                if (zoneOwner == HORDE && player->GetTeam() == HORDE)
+                {
+                    player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                        if (Player* player = map->GetPlayer(guid))
+                        {
+                            OutdoorPvPSI::UnBuffPlayer(player);
+                            OutdoorPvPSI::BuffPlayer(player, zoneOwner);
+                        }
+                    });
+                }
             }
         }
     }
