@@ -126,7 +126,7 @@ static const uint32 nagrandRoostStatesHordeNeutral[MAX_NA_ROOSTS]       = {WORLD
 class OutdoorPvPNA : public OutdoorPvP
 {
     public:
-        OutdoorPvPNA();
+        OutdoorPvPNA(Map& map, OutdoorPvPMgr& mgr);
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;

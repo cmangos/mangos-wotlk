@@ -25,7 +25,7 @@
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
 
-OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
+OutdoorPvPZM::OutdoorPvPZM(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_graveyardOwner(TEAM_NONE),
     m_graveyardWorldState(WORLD_STATE_ZM_GRAVEYARD_NEUTRAL),
     m_scoutWorldStateAlliance(WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE),

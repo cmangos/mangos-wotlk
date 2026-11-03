@@ -25,7 +25,7 @@
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
 
-OutdoorPvPTF::OutdoorPvPTF() : OutdoorPvP(),
+OutdoorPvPTF::OutdoorPvPTF(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_zoneWorldState(WORLD_STATE_TF_TOWERS_CONTROLLED),
     m_zoneOwner(TEAM_NONE),
     //m_zoneUpdateTimer(TIMER_TF_UPDATE_TIME),
@@ -368,7 +368,7 @@ void OutdoorPvPTF::LockTowers(const WorldObject* objRef)
         {
             // if grid is unloaded, changing the saved slider value is enough
             CapturePointSlider value(m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, true);
-            sOutdoorPvPMgr.SetCapturePointSlider(terokkarTowers[i], value);
+            m_mgr.SetCapturePointSlider(terokkarTowers[i], value);
         }
     }
 }
@@ -388,7 +388,7 @@ void OutdoorPvPTF::ResetTowers(const WorldObject* objRef)
         {
             // if grid is unloaded, changing the saved slider value is enough
             CapturePointSlider value(CAPTURE_SLIDER_MIDDLE, false);
-            sOutdoorPvPMgr.SetCapturePointSlider(terokkarTowers[i], value);
+            m_mgr.SetCapturePointSlider(terokkarTowers[i], value);
         }
     }
 }

@@ -58,7 +58,7 @@ enum
 class OutdoorPvPGH : public OutdoorPvP
 {
     public:
-        OutdoorPvPGH();
+        OutdoorPvPGH(Map& map, OutdoorPvPMgr& mgr);
 
         bool HandleEvent(uint32 eventId, Object* source, Object* target) override;
 

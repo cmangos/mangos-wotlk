@@ -26,6 +26,8 @@
 
 class Group;
 class BattlefieldWG;
+class Map;
+class OutdoorPvPMgr;
 
 enum
 {
@@ -670,7 +672,7 @@ class WintergraspPlayer : public BattlefieldPlayer
 class BattlefieldWG : public Battlefield
 {
     public:
-        BattlefieldWG();
+        BattlefieldWG(Map& map, OutdoorPvPMgr& mgr);
 
         void Reset() override;
 

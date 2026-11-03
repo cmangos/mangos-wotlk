@@ -471,6 +471,14 @@ struct LoveIsInTheAir
     uint32 counters[LOVE_LEADER_MAX]; // potential race condition which wont cause anything critical
 };
 
+struct OutdoorPvPStateData
+{
+    std::mutex outdoorPvpMutex;
+    std::map<uint32, GuidVector> outdoorPvpZonePlayers;
+    uint8 eplTowersAlliance = 0;
+    uint8 eplTowersHorde = 0;
+};
+
 // Intended for implementing server wide scripts, note: all behaviour must be safeguarded towards multithreading
 class WorldState
 {
@@ -609,6 +617,9 @@ class WorldState
             data << int32(value);
             ++count;
         }
+
+        // OutdoorPvP state
+        void SetEplTowerData(uint8 towersHorde, uint8 towersAlliance);
     private:
         std::map<uint32, GuidVector> m_areaPlayers;
         std::map<uint32, GuidVector> m_zonePlayers;
@@ -663,6 +674,9 @@ class WorldState
         bool m_highlordKruulSpawned;
         uint32 m_highlordKruulTimer;
         uint8 m_highlordKruulChosenPosition;
+
+        // OutdoorPvP state - synched from respective map for buffs
+        OutdoorPvPStateData m_outdoorPvpStateData;
 };
 
 #define sWorldState MaNGOS::Singleton<WorldState>::Instance()

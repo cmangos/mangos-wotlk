@@ -1511,10 +1511,6 @@ void World::SetInitialWorldSettings()
     ///- Initialize static helper structures
     AIRegistry::Initialize();
 
-    ///- Initialize Outdoor PvP
-    sLog.outString("Starting Outdoor PvP System");          // should be before loading maps
-    sOutdoorPvPMgr.InitOutdoorPvP();
-
     ///- Initialize MapManager
     sLog.outString("Starting Map System");
     sMapMgr.Initialize();
@@ -1782,7 +1778,6 @@ void World::Update(uint32 diff)
     auto postMapTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
 #endif
     sBattleGroundMgr.Update(diff);
-    sOutdoorPvPMgr.Update(diff);
     sWorldState.Update(diff);
 #ifdef BUILD_METRICS
     auto postSingletonTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());

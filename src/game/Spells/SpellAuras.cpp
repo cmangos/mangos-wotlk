@@ -5579,7 +5579,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
 
             if (BattleGround* bg = player->GetBattleGround())
                 bg->HandlePlayerDroppedFlag(player);
-            else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
+            else if (OutdoorPvP* outdoorPvP = player->GetMap()->GetOutdoorPvPMgr().GetScript(player->GetCachedZoneId()))
                 outdoorPvP->HandleDropFlag(player, GetSpellProto()->Id);
         }
     }
@@ -5595,7 +5595,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
         case 32431:                     // Battle Standard (Horde - ZM OPVP)
         {
             // Handle OPVP script condition change on aura apply; Specific for Zangarmarsh outdoor pvp
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(3521))
+            if (OutdoorPvP* outdoorPvP = target->GetMap()->GetOutdoorPvPMgr().GetScript(ZONE_ID_ZANGARMARSH))
                 outdoorPvP->HandleConditionStateChange(uint32(GetSpellProto()->Id == 32431), apply);
         }
     }

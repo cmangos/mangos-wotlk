@@ -27,6 +27,7 @@
 #include <map>
 #include <World/WorldStateDefines.h>
 #include "AI/ScriptDevAI/scripts/world/scourge_invasion.h"
+#include "OutdoorPvP/OutdoorPvPEP.h"
 
 enum
 {
@@ -499,6 +500,60 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         default:
             break;
     }
+
+    switch (zoneId)
+    {
+        case ZONE_ID_TEMPLE_OF_AQ:
+        case ZONE_ID_RUINS_OF_AQ:
+        case ZONE_ID_GATES_OF_AQ:
+        case ZONE_ID_STRATHOLME:
+        case ZONE_ID_SCHOLOMANCE:
+        case ZONE_ID_HELLFIRE_RAMPARTS:
+        case ZONE_ID_HELLFIRE_CITADEL:
+        case ZONE_ID_BLOOD_FURNACE:
+        case ZONE_ID_SHATTERED_HALLS:
+        case ZONE_ID_STEAMVAULT:
+        case ZONE_ID_UNDERBOG:
+        case ZONE_ID_SLAVE_PENS:
+        case ZONE_ID_SHADOW_LABYRINTH:
+        case ZONE_ID_AUCHENAI_CRYPTS:
+        case ZONE_ID_SETHEKK_HALLS:
+        case ZONE_ID_MANA_TOMBS:
+        {
+            std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
+            m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId].push_back(player->GetObjectGuid());
+
+            switch (zoneId) // so that we keep the mutex lock
+            {
+                case ZONE_ID_TEMPLE_OF_AQ:
+                case ZONE_ID_RUINS_OF_AQ:
+                case ZONE_ID_GATES_OF_AQ:
+                    break;
+                case ZONE_ID_STRATHOLME:
+                case ZONE_ID_SCHOLOMANCE:
+                    OutdoorPvPEP::BuffPlayer(player, m_outdoorPvpStateData.eplTowersAlliance, m_outdoorPvpStateData.eplTowersHorde);
+                    break;
+                case ZONE_ID_HELLFIRE_RAMPARTS:
+                case ZONE_ID_HELLFIRE_CITADEL:
+                case ZONE_ID_BLOOD_FURNACE:
+                case ZONE_ID_SHATTERED_HALLS:
+                    break;
+                case ZONE_ID_STEAMVAULT:
+                case ZONE_ID_UNDERBOG:
+                case ZONE_ID_SLAVE_PENS:
+                    break;
+                case ZONE_ID_SHADOW_LABYRINTH:
+                case ZONE_ID_AUCHENAI_CRYPTS:
+                case ZONE_ID_SETHEKK_HALLS:
+                case ZONE_ID_MANA_TOMBS: {
+                    break;
+                }
+            }
+
+            break;
+        }
+    }
+
     if (IsHolidayActive(HOLIDAY_FIRE_FESTIVAL)) // On midsummer starting, players can end up without buff but with bonfire in zone - keeping like this for simplicity and optimization
     {
         if (player->GetMap()->IsContinent())
@@ -581,6 +636,62 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
         default:
             break;
     }
+
+    switch (zoneId)
+    {
+        case ZONE_ID_TEMPLE_OF_AQ:
+        case ZONE_ID_RUINS_OF_AQ:
+        case ZONE_ID_GATES_OF_AQ:
+        case ZONE_ID_STRATHOLME:
+        case ZONE_ID_SCHOLOMANCE:
+        case ZONE_ID_HELLFIRE_RAMPARTS:
+        case ZONE_ID_HELLFIRE_CITADEL:
+        case ZONE_ID_BLOOD_FURNACE:
+        case ZONE_ID_SHATTERED_HALLS:
+        case ZONE_ID_STEAMVAULT:
+        case ZONE_ID_UNDERBOG:
+        case ZONE_ID_SLAVE_PENS:
+        case ZONE_ID_SHADOW_LABYRINTH:
+        case ZONE_ID_AUCHENAI_CRYPTS:
+        case ZONE_ID_SETHEKK_HALLS:
+        case ZONE_ID_MANA_TOMBS:
+        {
+            std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
+            auto position = std::find(m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId].begin(), m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId].end(), player->GetObjectGuid());
+            if (position != m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId].end())
+                m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId].erase(position);
+
+            switch (zoneId) // so that we keep the mutex lock
+            {
+                case ZONE_ID_TEMPLE_OF_AQ:
+                case ZONE_ID_RUINS_OF_AQ:
+                case ZONE_ID_GATES_OF_AQ:
+                    break;
+                case ZONE_ID_STRATHOLME:
+                case ZONE_ID_SCHOLOMANCE:
+                    OutdoorPvPEP::UnBuffPlayer(player);
+                    break;
+                case ZONE_ID_HELLFIRE_RAMPARTS:
+                case ZONE_ID_HELLFIRE_CITADEL:
+                case ZONE_ID_BLOOD_FURNACE:
+                case ZONE_ID_SHATTERED_HALLS:
+                    break;
+                case ZONE_ID_STEAMVAULT:
+                case ZONE_ID_UNDERBOG:
+                case ZONE_ID_SLAVE_PENS:
+                    break;
+                case ZONE_ID_SHADOW_LABYRINTH:
+                case ZONE_ID_AUCHENAI_CRYPTS:
+                case ZONE_ID_SETHEKK_HALLS:
+                case ZONE_ID_MANA_TOMBS:
+                {
+                    break;
+                }
+            }
+            break;
+        }
+    }
+
     if (IsHolidayActive(HOLIDAY_FIRE_FESTIVAL))
     {
         if (!player->IsInWorld() || player->GetMap()->IsContinent())
@@ -927,6 +1038,45 @@ static uint32 pathIds[4] =
 {
     1,0,0,0
 };
+
+void WorldState::SetEplTowerData(uint8 towersHorde, uint8 towersAlliance)
+{
+    std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
+    Team affectedTeam = towersHorde != m_outdoorPvpStateData.eplTowersHorde ? HORDE : ALLIANCE;
+
+    uint8 towersHordeOld = m_outdoorPvpStateData.eplTowersHorde;
+    uint8 towersAllianceOld = m_outdoorPvpStateData.eplTowersAlliance;
+
+    m_outdoorPvpStateData.eplTowersHorde = towersHorde;
+    m_outdoorPvpStateData.eplTowersAlliance = towersAlliance;
+
+    for (ObjectGuid& guid : m_magtheridonHeadPlayers)
+    {
+        if (Player* player = sObjectMgr.GetPlayer(guid))
+        {
+            if (affectedTeam == ALLIANCE && player->GetTeam() == ALLIANCE)
+            {
+                player->GetMap()->GetMessager().AddMessage([guid, towersHorde, towersAlliance](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPEP::UnBuffPlayer(player);
+                        OutdoorPvPEP::BuffPlayer(player, towersAlliance, towersHorde);
+                    }
+                });
+            }
+            if (affectedTeam == HORDE && player->GetTeam() == HORDE)
+            {
+                player->GetMap()->GetMessager().AddMessage([guid, towersHorde, towersAlliance](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPEP::UnBuffPlayer(player);
+                        OutdoorPvPEP::BuffPlayer(player, towersAlliance, towersHorde);
+                    }
+                });
+            }
+        }
+    }
+}
 
 bool WorldState::IsDragonSpawned(uint32 entry)
 {

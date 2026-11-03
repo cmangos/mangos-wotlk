@@ -26,6 +26,7 @@
 #include "OutdoorPvPMgr.h"
 
 class WorldPacket;
+class Map;
 
 enum CapturePointArtKits
 {
@@ -48,7 +49,7 @@ class OutdoorPvP
         friend class OutdoorPvPMgr;
 
     public:
-        OutdoorPvP() : m_isBattlefield(false) {}
+        OutdoorPvP(Map& map, OutdoorPvPMgr& mgr);
         virtual ~OutdoorPvP() {}
 
         // called when the zone is initialized
@@ -133,6 +134,9 @@ class OutdoorPvP
         GuidZoneMap m_zonePlayers;
 
         bool m_isBattlefield;
+
+        OutdoorPvPMgr& m_mgr;
+        Map& m_map;
 };
 
 #endif

@@ -26,7 +26,7 @@
 #include "Entities/Player.h"
 #include "Tools/Language.h"
 
-OutdoorPvPSI::OutdoorPvPSI() : OutdoorPvP(),
+OutdoorPvPSI::OutdoorPvPSI(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_resourcesAlliance(0),
     m_resourcesHorde(0),
     m_zoneOwner(TEAM_NONE)

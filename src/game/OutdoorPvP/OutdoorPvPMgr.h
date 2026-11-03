@@ -104,7 +104,7 @@ typedef std::map<uint32 /*capture point entry*/, CapturePointSlider /*slider val
 class OutdoorPvPMgr
 {
     public:
-        OutdoorPvPMgr();
+        OutdoorPvPMgr(Map& map);
         ~OutdoorPvPMgr();
 
         // load all outdoor pvp scripts
@@ -123,7 +123,7 @@ class OutdoorPvPMgr
         void HandlePlayerLeaveArea(Player* player, uint32 zoneId, uint32 areaId);
 
         // return assigned outdoor pvp script
-        OutdoorPvP* GetScript(uint32 zoneId);
+        OutdoorPvP* GetScript(uint32 zoneId) const;
 
         void Update(uint32 diff);
 
@@ -135,9 +135,6 @@ class OutdoorPvPMgr
         Battlefield * GetBattlefieldById(uint32 id);
 
     private:
-        // return assigned outdoor pvp script
-        OutdoorPvP* GetScriptOfAffectedZone(uint32 zoneId);
-
         // contains all outdoor pvp scripts
         OutdoorPvP* m_scripts[MAX_OPVP_ID];
 
@@ -145,8 +142,8 @@ class OutdoorPvPMgr
 
         // update interval
         ShortIntervalTimer m_updateTimer;
-};
 
-#define sOutdoorPvPMgr MaNGOS::Singleton<OutdoorPvPMgr>::Instance()
+        Map& m_map;
+};
 
 #endif
