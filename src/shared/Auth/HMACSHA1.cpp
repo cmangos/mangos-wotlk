@@ -51,9 +51,10 @@ HMACSHA1::~HMACSHA1()
     EVP_MAC_free(m_mac);
 }
 
-void HMACSHA1::UpdateBigNumber(BigNumber* bn)
+void HMACSHA1::UpdateBigNumber(BigNumber* bn, int minSize)
 {
-    UpdateData(bn->AsByteArray().data(), bn->GetNumBytes());
+    auto const bytes = bn->AsByteArray(minSize);
+    UpdateData(bytes.data(), bytes.size());
 }
 
 void HMACSHA1::UpdateData(const uint8* data, int length)
@@ -82,9 +83,10 @@ void HMACSHA1::Finalize()
     MANGOS_ASSERT(length == SHA_DIGEST_LENGTH);
 }
 
-uint8* HMACSHA1::ComputeHash(BigNumber* bn)
+uint8* HMACSHA1::ComputeHash(BigNumber* bn, int minSize)
 {
-    UpdateData(bn->AsByteArray().data(), bn->GetNumBytes());
+    auto const bytes = bn->AsByteArray(minSize);
+    UpdateData(bytes.data(), bytes.size());
     Finalize();
     return m_digest;
 }
