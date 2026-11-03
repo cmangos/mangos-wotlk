@@ -24,8 +24,10 @@
 #include "Entities/Vehicle.h"
 #include "Spells/SpellAuras.h"
 #include "Globals/ObjectMgr.h"
+#include "Maps/Map.h"
+#include "OutdoorPvP/OutdoorPvPMgr.h"
 
-BattlefieldWG::BattlefieldWG() : Battlefield()
+BattlefieldWG::BattlefieldWG(Map& map, OutdoorPvPMgr& mgr) : Battlefield(map, mgr)
 {
     m_zoneOwner         = TEAM_NONE;
     m_zoneId            = ZONE_ID_WINTERGRASP;
@@ -779,7 +781,7 @@ void BattlefieldWG::LockWorkshops(bool lock, const WorldObject* objRef, Wintergr
         {
             // if grid is unloaded, changing the saved slider value is enough
             CapturePointSlider value(workshop->GetOwner() == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, true);
-            sOutdoorPvPMgr.SetCapturePointSlider(workshop->GetCapturePointEntry(GetTeamIndexByTeamId(workshop->GetOwner())), value);
+            m_mgr.SetCapturePointSlider(workshop->GetCapturePointEntry(GetTeamIndexByTeamId(workshop->GetOwner())), value);
         }
     }
     else
@@ -795,7 +797,7 @@ void BattlefieldWG::LockWorkshops(bool lock, const WorldObject* objRef, Wintergr
         {
             // if grid is unloaded, changing the saved slider value is enough
             CapturePointSlider value(workshop->GetOwner() == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, false);
-            sOutdoorPvPMgr.SetCapturePointSlider(workshop->GetCapturePointEntry(GetTeamIndexByTeamId(workshop->GetOwner())), value);
+            m_mgr.SetCapturePointSlider(workshop->GetCapturePointEntry(GetTeamIndexByTeamId(workshop->GetOwner())), value);
         }
     }
 }

@@ -22,7 +22,7 @@
 #include "Entities/Creature.h"
 #include "Entities/GameObject.h"
 
-OutdoorPvPGH::OutdoorPvPGH() : OutdoorPvP(),
+OutdoorPvPGH::OutdoorPvPGH(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_zoneOwner(TEAM_NONE)
 {
 }
@@ -148,7 +148,7 @@ void OutdoorPvPGH::LockLighthouse(const WorldObject* objRef)
     {
         // if grid is unloaded, changing the saved slider value is enough
         CapturePointSlider value(m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, true);
-        sOutdoorPvPMgr.SetCapturePointSlider(GO_VENTURE_BAY_LIGHTHOUSE, value);
+        m_mgr.SetCapturePointSlider(GO_VENTURE_BAY_LIGHTHOUSE, value);
     }
 }
 
@@ -161,6 +161,6 @@ void OutdoorPvPGH::UnlockLighthouse(const WorldObject* objRef)
     {
         // if grid is unloaded, changing the saved slider value is enough
         CapturePointSlider value(m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, false);
-        sOutdoorPvPMgr.SetCapturePointSlider(GO_VENTURE_BAY_LIGHTHOUSE, value);
+        m_mgr.SetCapturePointSlider(GO_VENTURE_BAY_LIGHTHOUSE, value);
     }
 }

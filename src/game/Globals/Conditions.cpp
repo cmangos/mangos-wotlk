@@ -502,8 +502,10 @@ bool inline ConditionEntry::Evaluate(WorldObject const* target, Map const* map, 
                 sLog.outErrorDb("CONDITION_PVP_SCRIPT (entry %u) is used on non player target. Target is %s", m_entry, target->GetGuidStr().c_str());
                 return false;
             }
+            if (!map)
+                map = source ? source->GetMap() : target->GetMap();
             Player* player = (Player*)target;
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(m_value1))
+            if (OutdoorPvP* outdoorPvP = map->GetOutdoorPvPMgr().GetScript(m_value1))
                 return outdoorPvP->IsConditionFulfilled(player, m_value2, source, conditionSourceType);
             else if (player->InBattleGround() && player->GetZoneId() == m_value1)
             {

@@ -263,7 +263,7 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
 #ifdef ENABLE_PLAYERBOTS
       m_activeZonesTimer(0), hasRealPlayers(false),
 #endif      
-      m_variableManager(this)
+      m_variableManager(this), m_outdoorPvpMgr(*this)
 {
     m_weatherSystem = new WeatherSystem(this);
     m_transportGuids.Set(sMapMgr.GetTransportCounter());
@@ -318,6 +318,8 @@ void Map::Initialize(std::mutex* mmapMutex, bool loadInstanceData /*= true*/)
     sObjectMgr.LoadLargeEntities(this);
 
     LoadTransports();
+
+    m_outdoorPvpMgr.InitOutdoorPvP();
 }
 
 void Map::InitVisibilityDistance()
@@ -1164,6 +1166,8 @@ void Map::Update(const uint32& t_diff)
 
     if (i_data)
         i_data->Update(t_diff);
+
+    m_outdoorPvpMgr.Update(t_diff);
 
     // Send world objects and item update field changes
     if (IsUpdateObjectTick())
@@ -2633,7 +2637,7 @@ bool Map::StartEvent(uint32 eventId, Object* source, Object* target, bool isStar
         if (IsBattleGroundOrArena())
             bg = static_cast<BattleGroundMap*>(this)->GetBG();
         else // Use the go, because GOs don't move
-            opvp = sOutdoorPvPMgr.GetScript(zoneId);
+            opvp = m_outdoorPvpMgr.GetScript(zoneId);
 
         if (bg && bg->HandleEvent(eventId, source, target))
             return true;

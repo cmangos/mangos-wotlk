@@ -1099,6 +1099,8 @@ struct DeathPactDk : public SpellScript
         float dist = GetSpellRadius(sSpellRadiusStore.LookupEntry(spell->m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_1]));
         if (!target->IsWithinDistInMap(caster, dist))
             return SPELL_FAILED_OUT_OF_RANGE;
+
+        return SPELL_CAST_OK;
     }
 
     void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override

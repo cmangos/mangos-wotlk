@@ -119,7 +119,7 @@ void WorldSession::HandleBattlefieldQueueResponse(WorldPacket& recv_data)
     recv_data >> battlefieldId >> accepted;
     DEBUG_LOG("HandleBattlefieldQueueResponse: battlefieldId: %u accepted: %u", battlefieldId, accepted);
 
-    if (Battlefield* battlefield = sOutdoorPvPMgr.GetBattlefieldById(battlefieldId))
+    if (Battlefield* battlefield = GetPlayer()->GetMap()->GetOutdoorPvPMgr().GetBattlefieldById(battlefieldId))
         battlefield->HandleQueueInviteResponse(GetPlayer(), accepted != 0);
 }
 
@@ -132,7 +132,7 @@ void WorldSession::HandleBattlefieldWarResponse(WorldPacket& recv_data)
     recv_data >> battlefieldId >> accepted;
     DEBUG_LOG("HandleBattlefieldWarResponse: battlefieldId: %u accepted: %u", battlefieldId, accepted);
 
-    if (Battlefield* battlefield = sOutdoorPvPMgr.GetBattlefieldById(battlefieldId))
+    if (Battlefield* battlefield = GetPlayer()->GetMap()->GetOutdoorPvPMgr().GetBattlefieldById(battlefieldId))
         battlefield->HandleWarInviteResponse(GetPlayer(), accepted != 0);
 }
 
@@ -144,6 +144,6 @@ void WorldSession::HandleBattlefieldExitRequest(WorldPacket& recv_data)
 
     DEBUG_LOG("HandleBattlefieldExitRequest: battlefieldId: %u", battlefieldId);
 
-    if (Battlefield* battlefield = sOutdoorPvPMgr.GetBattlefieldById(battlefieldId))
+    if (Battlefield* battlefield = GetPlayer()->GetMap()->GetOutdoorPvPMgr().GetBattlefieldById(battlefieldId))
         battlefield->HandleExitRequest(GetPlayer());
 }

@@ -1272,7 +1272,7 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
             else if (victim != killer)
             {
                 // selfkills are not handled in outdoor pvp scripts
-                if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(playerVictim->GetCachedZoneId()))
+                if (OutdoorPvP* outdoorPvP = playerVictim->GetMap()->GetOutdoorPvPMgr().GetScript(playerVictim->GetCachedZoneId()))
                     outdoorPvP->HandlePlayerKill(responsiblePlayer, playerVictim);
             }
         }
@@ -1467,7 +1467,7 @@ void Unit::JustKilledCreature(Unit* killer, Creature* victim, Player* responsibl
             bg->HandleKillUnit(victim, responsiblePlayer);
 
     // Notify the outdoor pvp script
-    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : victim->GetZoneId()))
+    if (OutdoorPvP* outdoorPvP = victim->GetMap()->GetOutdoorPvPMgr().GetScript(responsiblePlayer ? responsiblePlayer->GetCachedZoneId() : victim->GetZoneId()))
     {
         outdoorPvP->HandleCreatureDeath(victim);
 

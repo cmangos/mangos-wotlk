@@ -153,7 +153,7 @@ void GameObject::RemoveFromWorld()
     if (IsInWorld())
     {
         // Notify the outdoor pvp script
-        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+        if (OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(GetZoneId()))
             outdoorPvP->HandleGameObjectRemove(this);
 
         // Remove GO from owner
@@ -297,7 +297,7 @@ bool GameObject::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Map* map,
     // Notify the battleground or outdoor pvp script
     if (map->IsBattleGroundOrArena())
         ((BattleGroundMap*)map)->GetBG()->HandleGameObjectCreate(this);
-    else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetZoneId()))
+    else if (OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(GetZoneId()))
         outdoorPvP->HandleGameObjectCreate(this);
 
     // Notify the map's instance data.
@@ -2595,7 +2595,7 @@ void GameObject::TickCapturePoint()
 
         // handle objective complete
         if (m_captureState == CAPTURE_STATE_NEUTRAL)
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
+            if (OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
                 outdoorPvP->HandleObjectiveComplete(eventId, capturingPlayers, progressFaction);
 
         // set capture state to alliance
@@ -2608,7 +2608,7 @@ void GameObject::TickCapturePoint()
 
         // handle objective complete
         if (m_captureState == CAPTURE_STATE_NEUTRAL)
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
+            if (OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
                 outdoorPvP->HandleObjectiveComplete(eventId, capturingPlayers, progressFaction);
 
         // set capture state to horde

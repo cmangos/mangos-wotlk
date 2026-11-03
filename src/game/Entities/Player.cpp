@@ -774,7 +774,6 @@ void Player::CleanupsBeforeDelete()
     }
 
     // notify zone scripts for player logout
-    sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
     sWorldState.HandlePlayerLeaveZone(this, m_zoneUpdateId);
     sWorldState.HandlePlayerLeaveArea(this, m_areaUpdateId);
 
@@ -5103,7 +5102,7 @@ Corpse* Player::CreateCorpse()
         flags |= CORPSE_FLAG_HIDE_HELM;
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
         flags |= CORPSE_FLAG_HIDE_CLOAK;
-    OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
+    OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(GetCachedZoneId());
     if ((InBattleGround() && !InArena()) || (outdoorPvP && outdoorPvP->IsBattlefield() &&
         ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && ((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
         flags |= CORPSE_FLAG_LOOTABLE;                      // to be able to remove insignia
@@ -7610,8 +7609,8 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
 void Player::UpdateArea(uint32 newArea)
 {
     // handle outdoor pvp zones
-    sOutdoorPvPMgr.HandlePlayerLeaveArea(this, GetCachedZoneId(), m_areaUpdateId);
-    sOutdoorPvPMgr.HandlePlayerEnterArea(this, GetCachedZoneId(), newArea);
+    GetMap()->GetOutdoorPvPMgr().HandlePlayerLeaveArea(this, GetCachedZoneId(), m_areaUpdateId);
+    GetMap()->GetOutdoorPvPMgr().HandlePlayerEnterArea(this, GetCachedZoneId(), newArea);
 
     m_areaUpdateId    = newArea;
 
@@ -7641,7 +7640,7 @@ void Player::UpdateArea(uint32 newArea)
         // Wintergrasp parachute when battle in progress
         if ((area->flags & AREA_FLAG_OUTDOOR_PVP) && IsFreeFlying() && !IsGameMaster() && !HasAura(58730))
         {
-            OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
+            OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(GetCachedZoneId());
             if (outdoorPvP && outdoorPvP->IsBattlefield() && ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
                 CastSpell(this, 58730, TRIGGERED_OLD_TRIGGERED);
         }
@@ -7685,9 +7684,9 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
     if (updateZone)
     {
         // handle outdoor pvp zones
-        sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+        GetMap()->GetOutdoorPvPMgr().HandlePlayerLeaveZone(this, m_zoneUpdateId);
         sWorldState.HandlePlayerLeaveZone(this, m_zoneUpdateId);
-        sOutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
+        GetMap()->GetOutdoorPvPMgr().HandlePlayerEnterZone(this, newZone);
         sWorldState.HandlePlayerEnterZone(this, newZone);
 
         if (sWorld.getConfig(CONFIG_BOOL_WEATHER))
@@ -8946,7 +8945,7 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype* ammo_proto) const
     Called by remove insignia spell effect    */
 void Player::RemovedInsignia(Player* looterPlr)
 {
-    OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
+    OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(GetCachedZoneId());
     if (!GetBattleGroundId() && (!outdoorPvP || !outdoorPvP->IsBattlefield() ||
         ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS || !((Battlefield*)outdoorPvP)->HasPlayer(GetObjectGuid())))
         return;
@@ -9030,16 +9029,15 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid) const
     // Time when next Battle for Wintergrasp starts
     FillInitialWorldState(data, count, WORLD_STATE_WINTERGRASP_NEXT_BATTLE_TIME, uint32(time(nullptr) + 9000));
 
-    switch (zoneid)
+    switch (zoneid) // TODO: Remove this by moving it to regular worldstates
     {
-        case 139:                                           // Eastern Plaguelands
         case 1377:                                          // Silithus
         case 3483:                                          // Hellfire Peninsula
         case 3518:                                          // Nagrand
         case 3519:                                          // Terokkar Forest
         case 3521:                                          // Zangarmarsh
         case 4197:                                          // Wintergrasp
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zoneid))
+            if (OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(zoneid))
                 outdoorPvP->FillInitialWorldStates(data, count);
             break;
     }
@@ -16613,12 +16611,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         }
     }
 
-    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(fields[34].GetUInt32()))
-    {
-        if (outdoorPvP->IsBattlefield())
-            ((Battlefield*)outdoorPvP)->HandlePlayerLoggedIn(this);
-    }
-
     if (transGUID != 0)
     {
         m_movementInfo.SetTransportData(ObjectGuid(HIGHGUID_MO_TRANSPORT, transGUID), fields[26].GetFloat(), fields[27].GetFloat(), fields[28].GetFloat(), fields[29].GetFloat(), 0, -1);
@@ -16645,6 +16637,12 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     // load the player's map here if it's not already loaded
     SetMap(sMapMgr.CreateMap(GetMapId(), this));
+
+    if (OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(fields[34].GetUInt32()))
+    {
+        if (outdoorPvP->IsBattlefield())
+            ((Battlefield*)outdoorPvP)->HandlePlayerLoggedIn(this);
+    }
 
     if (transGUID != 0)
     {
@@ -23385,10 +23383,10 @@ bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area, bool igno
         return false;
 
     // Disallow mounting in wintergrasp when battle is in progress
-    if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(zone))
+    if (OutdoorPvP* outdoorPvP = GetMap()->GetOutdoorPvPMgr().GetScript(zone))
     {
         if (outdoorPvP->IsBattlefield())
-            return ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS;
+            return static_cast<Battlefield*>(outdoorPvP)->GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS;
     }
 
     // don't allow flying in Dalaran restricted areas

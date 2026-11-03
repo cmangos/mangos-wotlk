@@ -132,7 +132,7 @@ static const uint32 hellfireBanners[MAX_HP_TOWERS] = {GO_HELLFIRE_BANNER_OVERLOO
 class OutdoorPvPHP : public OutdoorPvP
 {
     public:
-        OutdoorPvPHP();
+        OutdoorPvPHP(Map& map, OutdoorPvPMgr& mgr);
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;

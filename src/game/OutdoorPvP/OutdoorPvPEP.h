@@ -204,12 +204,10 @@ static const uint32 plaguelandsBanners[MAX_EP_TOWERS] = {GO_TOWER_BANNER_NORTHPA
 class OutdoorPvPEP : public OutdoorPvP
 {
     public:
-        OutdoorPvPEP();
+        OutdoorPvPEP(Map& map, OutdoorPvPMgr& mgr);
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        void SendRemoveWorldStates(Player* player) override;
 
         bool HandleEvent(uint32 eventId, Object* source, Object* target) override;
         void HandleObjectiveComplete(uint32 eventId, const PlayerList& players, Team team) override;
@@ -218,6 +216,10 @@ class OutdoorPvPEP : public OutdoorPvP
         void HandleGameObjectCreate(GameObject* go) override;
         bool HandleGameObjectUse(Player* player, GameObject* go) override;
 
+        void SetTowers(uint8 alliance, uint8 horde);
+
+        static void BuffPlayer(Player* player, uint32 towersAlliance, uint32 towersHorde);
+        static void UnBuffPlayer(Player* player);
     private:
         // process capture events
         bool ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState);
@@ -231,8 +233,8 @@ class OutdoorPvPEP : public OutdoorPvP
 
         Team m_towerOwner[MAX_EP_TOWERS];
         uint32 m_towerWorldState[MAX_EP_TOWERS];
-        uint8 m_towersAlliance;
-        uint8 m_towersHorde;
+        uint8 m_towersAllianceb;
+        uint8 m_towersHordeb;
 
         ObjectGuid m_flightMaster;
         ObjectGuid m_lordaeronShrineAlliance;

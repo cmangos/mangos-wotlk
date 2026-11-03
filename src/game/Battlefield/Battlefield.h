@@ -141,7 +141,7 @@ typedef std::map<ObjectGuid /*playerGuid*/, BattlefieldPlayer* /*playerData*/> B
 class Battlefield : public OutdoorPvP
 {
     public:
-        Battlefield();
+        Battlefield(Map& map, OutdoorPvPMgr& mgr);
 
         // Player related stuff
         virtual void HandlePlayerEnterZone(Player* /*player*/, bool /*isMainZone*/) override;

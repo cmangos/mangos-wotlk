@@ -264,7 +264,7 @@ struct spell_outdoor_pvp_banner_trigger : public SpellScript
         {
             Player* player = static_cast<Player*>(spell->GetUnitTarget());
 
-            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
+            if (OutdoorPvP* outdoorPvP = player->GetMap()->GetOutdoorPvPMgr().GetScript(player->GetCachedZoneId()))
                 outdoorPvP->HandleGameObjectUse(player, static_cast<GameObject*>(obj));
         }
     }
@@ -280,7 +280,7 @@ struct OutdoorPvpNotifyAI : public GameObjectAI
             return;
 
         Player* player = static_cast<Player*>(user);
-        if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
+        if (OutdoorPvP* outdoorPvP = player->GetMap()->GetOutdoorPvPMgr().GetScript(player->GetCachedZoneId()))
             outdoorPvP->HandleGameObjectUse(player, m_go);
     }
 };

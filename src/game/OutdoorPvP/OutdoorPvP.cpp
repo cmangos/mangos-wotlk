@@ -20,7 +20,6 @@
 #include "Entities/Object.h"
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
-#include "Globals/ObjectMgr.h"
 #include "World/World.h"
 
 /**
@@ -72,9 +71,13 @@ void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
         if (!itr->second)
             continue;
 
-        if (Player* player = sObjectMgr.GetPlayer(itr->first))
+        if (Player* player = m_map.GetPlayer(itr->first))
             player->SendUpdateWorldState(field, value);
     }
+}
+
+OutdoorPvP::OutdoorPvP(Map& map, OutdoorPvPMgr& mgr) : m_isBattlefield(false), m_mgr(mgr), m_map(map)
+{
 }
 
 void OutdoorPvP::HandleGameObjectCreate(GameObject* go)
@@ -82,7 +85,7 @@ void OutdoorPvP::HandleGameObjectCreate(GameObject* go)
     // set initial data and activate capture points
     if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
-        CapturePointSliderMap const* capturePoints = sOutdoorPvPMgr.GetCapturePointSliderMap();
+        CapturePointSliderMap const* capturePoints = m_mgr.GetCapturePointSliderMap();
         CapturePointSliderMap::const_iterator itr = capturePoints->find(go->GetEntry());
         if (itr != capturePoints->end())
             go->SetCapturePointSlider(itr->second.Value, itr->second.IsLocked);
@@ -97,7 +100,7 @@ void OutdoorPvP::HandleGameObjectRemove(GameObject* go)
     if (go->GetGOInfo()->type == GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
         CapturePointSlider value(go->GetCapturePointSliderValue(), go->GetLootState() != GO_ACTIVATED);
-        sOutdoorPvPMgr.SetCapturePointSlider(go->GetEntry(), value);
+        m_mgr.SetCapturePointSlider(go->GetEntry(), value);
     }
 }
 
@@ -144,7 +147,7 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/, co
 {
     for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
-        Player* player = sObjectMgr.GetPlayer(itr->first);
+        Player* player = m_map.GetPlayer(itr->first); // TODO: Fix for buffing different map
         if (player && player->GetTeam() == team)
         {
             // validate area id for buffs which aren't applied to the entire zone
@@ -165,7 +168,7 @@ void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/, co
                 ObjectGuid guid = player->GetObjectGuid();
                 player->GetMap()->GetMessager().AddMessage([guid, spellId](Map* map) -> void
                 {
-                    if(Player* player = map->GetPlayer(guid))
+                    if (Player* player = map->GetPlayer(guid))
                         player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
                 });
             }

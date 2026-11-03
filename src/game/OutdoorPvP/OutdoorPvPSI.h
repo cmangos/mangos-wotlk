@@ -59,7 +59,7 @@ enum
 class OutdoorPvPSI : public OutdoorPvP
 {
     public:
-        OutdoorPvPSI();
+        OutdoorPvPSI(Map& map, OutdoorPvPMgr& mgr);
 
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;

@@ -24,7 +24,7 @@
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
 
-OutdoorPvPHP::OutdoorPvPHP() : OutdoorPvP(),
+OutdoorPvPHP::OutdoorPvPHP(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_towersAlliance(0),
     m_towersHorde(0)
 {

@@ -41,6 +41,7 @@
 #include "Maps/MapGuidAllocator.h"
 #include "Util/UniqueTrackablePtr.h"
 #include "World/WorldStateVariableManager.h"
+#include "OutdoorPvP/OutdoorPvPMgr.h"
 
 #include <bitset>
 #include <functional>
@@ -125,6 +126,14 @@ struct ZoneDynamicInfo
 #define UPDATE_TICK         400
 
 typedef std::unordered_map<uint32 /*zoneId*/, ZoneDynamicInfo> ZoneDynamicInfoMap;
+
+enum class WorldMaps
+{
+    EASTERN_KINGDOMS    = 0,
+    KALIMDOR            = 1,
+    OUTLAND             = 530,
+    NORTHREND           = 571
+};
 
 class Map : public GridRefManager<NGridType>
 {
@@ -477,6 +486,9 @@ class Map : public GridRefManager<NGridType>
         void AddWaypointingNpc(Unit* npc);
         void RemoveWaypointingNpc(Unit* npc);
 
+        OutdoorPvPMgr& GetOutdoorPvPMgr() { return m_outdoorPvpMgr; }
+        OutdoorPvPMgr const& GetOutdoorPvPMgr() const { return m_outdoorPvpMgr; }
+
         void UpdateInfinite(Player& player, UpdateData& updateData, GuidSet& clientGUIDs, WorldObjectSet& visibleNow) const;
 
     private:
@@ -623,6 +635,7 @@ class Map : public GridRefManager<NGridType>
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
 
         WorldStateVariableManager m_variableManager;
+        OutdoorPvPMgr m_outdoorPvpMgr;
 
 #ifdef ENABLE_PLAYERBOTS
         std::vector<uint32> m_activeZones;

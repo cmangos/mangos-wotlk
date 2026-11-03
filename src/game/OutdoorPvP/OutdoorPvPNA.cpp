@@ -26,7 +26,7 @@
 #include "Entities/Player.h"
 #include "Tools/Language.h"
 
-OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
+OutdoorPvPNA::OutdoorPvPNA(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_zoneOwner(TEAM_NONE),
     m_soldiersRespawnTimer(0),
     m_zoneWorldState(0),
@@ -543,7 +543,7 @@ void OutdoorPvPNA::LockHalaa(const WorldObject* objRef)
     {
         // if grid is unloaded, changing the saved slider value is enough
         CapturePointSlider value(m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, true);
-        sOutdoorPvPMgr.SetCapturePointSlider(GO_HALAA_BANNER, value);
+        m_mgr.SetCapturePointSlider(GO_HALAA_BANNER, value);
     }
 }
 
@@ -556,6 +556,6 @@ void OutdoorPvPNA::UnlockHalaa(const WorldObject* objRef)
     {
         // if grid is unloaded, changing the saved slider value is enough
         CapturePointSlider value(m_zoneOwner == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, false);
-        sOutdoorPvPMgr.SetCapturePointSlider(GO_HALAA_BANNER, value);
+        m_mgr.SetCapturePointSlider(GO_HALAA_BANNER, value);
     }
 }

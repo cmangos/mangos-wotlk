@@ -80,7 +80,7 @@ struct npc_spirit_guide_wintergraspAI : public ScriptedAI
             if (!m_battlefield)
             {
                 // attempt to initialize the opvp
-                OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(m_creature->GetZoneId());
+                OutdoorPvP* outdoorPvP = m_creature->GetMap()->GetOutdoorPvPMgr().GetScript(m_creature->GetZoneId());
                 if (outdoorPvP && outdoorPvP->IsBattlefield())
                     m_battlefield = (Battlefield*)outdoorPvP;
                 else
@@ -155,7 +155,7 @@ struct go_vehicle_teleporter : public GameObjectAI
             if (!m_battlefield)
             {
                 // attempt to initialize the opvp
-                OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(m_gameobject->GetZoneId());
+                OutdoorPvP* outdoorPvP = m_go->GetMap()->GetOutdoorPvPMgr().GetScript(m_gameobject->GetZoneId());
                 if (outdoorPvP && outdoorPvP->IsBattlefield())
                     m_battlefield = (Battlefield*)outdoorPvP;
                 else
@@ -233,7 +233,7 @@ struct spell_teleport_lake_wintergrasp : public SpellScript
         if (!target || !target->IsPlayer())
             return;
 
-        OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(ZONE_ID_WINTERGRASP);
+        OutdoorPvP* outdoorPvP = target->GetMap()->GetOutdoorPvPMgr().GetScript(ZONE_ID_WINTERGRASP);
         if (outdoorPvP && outdoorPvP->IsBattlefield())
         {
             Player* player = static_cast<Player*>(target);

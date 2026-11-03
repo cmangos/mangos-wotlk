@@ -24,10 +24,9 @@
 #include "Entities/Creature.h"
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
+#include "World/WorldState.h"
 
-OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
-    m_towersAlliance(0),
-    m_towersHorde(0)
+OutdoorPvPEP::OutdoorPvPEP(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr)
 {
     m_towerWorldState[0] = WORLD_STATE_EP_NORTHPASS_NEUTRAL;
     m_towerWorldState[1] = WORLD_STATE_EP_CROWNGUARD_NEUTRAL;
@@ -39,55 +38,30 @@ OutdoorPvPEP::OutdoorPvPEP() : OutdoorPvP(),
 
     // initially set graveyard owner to neither faction
     SetGraveYardLinkTeam(GRAVEYARD_ID_EASTERN_PLAGUE, GRAVEYARD_ZONE_EASTERN_PLAGUE, TEAM_INVALID, 0);
-}
 
-void OutdoorPvPEP::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    if (sWorld.getConfig(CONFIG_BOOL_OUTDOORPVP_EP_ENABLED))
-    {
-        FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-        FillInitialWorldState(data, count, WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, true, ZONE_ID_EASTERN_PLAGUELANDS, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_EP_TOWER_COUNT_HORDE, true, ZONE_ID_EASTERN_PLAGUELANDS, 0);
 
-        for (unsigned int i : m_towerWorldState)
-            FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
-    }
-}
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_EP_TOWER_COUNT_HORDE, 0);
 
-void OutdoorPvPEP::SendRemoveWorldStates(Player* player)
-{
     for (unsigned int i : m_towerWorldState)
-        player->SendUpdateWorldState(i, WORLD_STATE_REMOVE);
+    {
+        m_map.GetVariableManager().SetVariableData(i, true, ZONE_ID_EASTERN_PLAGUELANDS, 0);
+        m_map.GetVariableManager().SetVariable(i, WORLD_STATE_ADD);
+    }
 }
 
 void OutdoorPvPEP::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
     OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
 
-    // remove the buff from the player first; Sometimes on relog players still have the aura
-    for (auto plaguelandsTowerBuff : plaguelandsTowerBuffs)
-        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuff.spellIdAlliance : plaguelandsTowerBuff.spellIdHorde);
-
-    // buff the player
-    switch (player->GetTeam())
-    {
-        case ALLIANCE:
-            if (m_towersAlliance > 0)
-                player->CastSpell(player, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, TRIGGERED_OLD_TRIGGERED);
-            break;
-        case HORDE:
-            if (m_towersHorde > 0)
-                player->CastSpell(player, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, TRIGGERED_OLD_TRIGGERED);
-            break;
-        default:
-            break;
-    }
+    OutdoorPvPEP::BuffPlayer(player, m_map.GetVariableManager().GetVariable(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE), m_map.GetVariableManager().GetVariable(WORLD_STATE_EP_TOWER_COUNT_HORDE));
 }
 
 void OutdoorPvPEP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
-    // remove the buff from the player
-    for (auto plaguelandsTowerBuff : plaguelandsTowerBuffs)
-        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuff.spellIdAlliance : plaguelandsTowerBuff.spellIdHorde);
+    OutdoorPvPEP::UnBuffPlayer(player);
 
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
@@ -220,11 +194,13 @@ bool OutdoorPvPEP::HandleEvent(uint32 eventId, Object* source, Object* /*target*
 
 bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState)
 {
+    uint32 towersAlliance = m_map.GetVariableManager().GetVariable(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE);
+    uint32 towersHorde = m_map.GetVariableManager().GetVariable(WORLD_STATE_EP_TOWER_COUNT_HORDE);
     // Remove existing buff for both teams before applying new one: this prevent auras stacking
-    if (m_towersAlliance != 0)
-        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance, true);
-    if (m_towersHorde != 0)
-        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde, true);
+    if (towersAlliance != 0)
+        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[towersAlliance - 1].spellIdAlliance, true);
+    if (towersHorde != 0)
+        BuffTeam(HORDE, plaguelandsTowerBuffs[towersHorde - 1].spellIdHorde, true);
 
     // Update world state and banners for captured tower
     if (team == ALLIANCE)
@@ -234,8 +210,7 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
             SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ANIM_ALLIANCE);
 
         // update counter
-        ++m_towersAlliance;
-        SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+        SetTowers(towersAlliance + 1, towersHorde);
     }
     else if (team == HORDE)
     {
@@ -244,8 +219,7 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
             SetBannerVisual(go, (*itr), CAPTURE_ARTKIT_HORDE, CAPTURE_ANIM_HORDE);
 
         // update counter
-        ++m_towersHorde;
-        SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
+        SetTowers(towersAlliance, towersHorde + 1);
     }
     else
     {
@@ -256,23 +230,23 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         if (m_towerOwner[towerId] == ALLIANCE)
         {
             // update counter
-            --m_towersAlliance;
-            SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+            SetTowers(towersAlliance - 1, towersHorde);
         }
         else
         {
             // update counter
-            --m_towersHorde;
-            SendUpdateWorldState(WORLD_STATE_EP_TOWER_COUNT_HORDE, m_towersHorde);
+            SetTowers(towersAlliance, towersHorde - 1);
         }
     }
 
+    towersAlliance = m_map.GetVariableManager().GetVariable(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE);
+    towersHorde = m_map.GetVariableManager().GetVariable(WORLD_STATE_EP_TOWER_COUNT_HORDE);
     // Update Echoes of Lordaeron aura for capturing team and opposite team (if needed)
     // Apply auras with updated capture towers values
-    if (m_towersAlliance != 0)
-        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[m_towersAlliance - 1].spellIdAlliance);
-    if (m_towersHorde != 0)
-        BuffTeam(HORDE, plaguelandsTowerBuffs[m_towersHorde - 1].spellIdHorde);
+    if (towersAlliance != 0)
+        BuffTeam(ALLIANCE, plaguelandsTowerBuffs[towersAlliance - 1].spellIdAlliance);
+    if (towersHorde != 0)
+        BuffTeam(HORDE, plaguelandsTowerBuffs[towersHorde - 1].spellIdHorde);
 
     // Update reward for captured tower
     bool eventHandled = true;
@@ -326,9 +300,9 @@ bool OutdoorPvPEP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
     }
 
     // update tower state
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
     m_towerWorldState[towerId] = newWorldState;
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_ADD);
 
     // there are some events which required further DB script
     return eventHandled;
@@ -341,6 +315,42 @@ bool OutdoorPvPEP::HandleGameObjectUse(Player* /*player*/, GameObject* go)
         go->SetRespawnTime(0);
 
     return false;
+}
+
+void OutdoorPvPEP::SetTowers(uint8 alliance, uint8 horde)
+{
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, alliance);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_EP_TOWER_COUNT_HORDE, horde);
+    sWorldState.SetEplTowerData(horde, alliance);
+}
+
+void OutdoorPvPEP::BuffPlayer(Player* player, uint32 towersAlliance, uint32 towersHorde)
+{
+    // remove the buff from the player first; Sometimes on relog players still have the aura
+    for (auto plaguelandsTowerBuff : plaguelandsTowerBuffs)
+        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuff.spellIdAlliance : plaguelandsTowerBuff.spellIdHorde);
+
+    // buff the player
+    switch (player->GetTeam())
+    {
+        case ALLIANCE:
+            if (towersAlliance)
+                player->CastSpell(player, plaguelandsTowerBuffs[towersAlliance - 1].spellIdAlliance, TRIGGERED_OLD_TRIGGERED);
+            break;
+        case HORDE:
+            if (towersHorde)
+                player->CastSpell(player, plaguelandsTowerBuffs[towersHorde - 1].spellIdHorde, TRIGGERED_OLD_TRIGGERED);
+            break;
+        default:
+            break;
+    }
+}
+
+void OutdoorPvPEP::UnBuffPlayer(Player* player)
+{
+    // remove the buff from the player
+    for (auto plaguelandsTowerBuff : plaguelandsTowerBuffs)
+        player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? plaguelandsTowerBuff.spellIdAlliance : plaguelandsTowerBuff.spellIdHorde);
 }
 
 void OutdoorPvPEP::InitBanner(GameObject* go, uint32 towerId)
