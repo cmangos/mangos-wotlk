@@ -43,6 +43,9 @@
 #include "Tools/Formulas.h"
 #include "Groups/Group.h"
 #include "Guilds/Guild.h"
+#include "GMTickets/GMTicketMgr.h"
+#include "AuctionHouse/AuctionHouseMgr.h"
+#include "Calendar/Calendar.h"
 #include "Guilds/GuildMgr.h"
 #include "Entities/Pet.h"
 #include "Util/Util.h"
@@ -4613,6 +4616,9 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
  */
 void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRealmChars, bool deleteFinally)
 {
+    // the guid can come from a client packet: only its counter is trusted, whatever type its high part claims
+    playerguid = ObjectGuid(HIGHGUID_PLAYER, playerguid.GetCounter());
+
     // for nonexistent account avoid update realm
     if (accountId == 0)
         updateRealmChars = false;
@@ -4650,6 +4656,13 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
 
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(playerguid, 10);
+
+    // Sends mail, so it has to come before the transaction below
+    if (charDelete_method == 0)
+    {
+        sAuctionMgr.RemovePlayerAuctions(playerguid);
+        sCalendarMgr.RemovePlayerCalendar(playerguid);      // the character's events, and its invitations to others'
+    }
 
     switch (charDelete_method)
     {
@@ -4780,7 +4793,9 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_battleground_data WHERE guid = '%u'", lowguid);
-            CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE guid = '%u'", lowguid);
+            // A gift it wrapped and already sent belongs to its receiver: only the ones it still holds go
+            CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE guid = '%u' AND item_guid IN (SELECT guid FROM item_instance WHERE owner_guid = '%u')", lowguid, lowguid);
+            CharacterDatabase.PExecute("UPDATE character_gifts SET guid = 0 WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_glyphs WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_homebind WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%u'", lowguid);
@@ -4805,6 +4820,27 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
             CharacterDatabase.PExecute("DELETE FROM character_equipmentsets WHERE guid = '%u'", lowguid);
             CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE PlayerGuid1 = '%u' OR PlayerGuid2 = '%u'", lowguid, lowguid);
             CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE PlayerGuid = '%u'", lowguid);
+
+            // What other tables still keep of the character, so that nothing is left to name it
+            CharacterDatabase.PExecute("DELETE FROM character_stats WHERE guid = '%u'", lowguid);
+            CharacterDatabase.PExecute("DELETE FROM character_queststatus_monthly WHERE guid = '%u'", lowguid);
+            CharacterDatabase.PExecute("DELETE FROM character_battleground_random WHERE guid = '%u'", lowguid);
+            CharacterDatabase.PExecute("DELETE FROM item_loot WHERE owner_guid = '%u'", lowguid);
+            CharacterDatabase.PExecute("DELETE FROM pvpstats_players WHERE character_guid = '%u'", lowguid);
+            CharacterDatabase.PExecute("DELETE FROM playerbot_saved_data WHERE guid = '%u'", lowguid);
+            // Auras it cast on others: caster_guid holds the full guid
+            CharacterDatabase.PExecute("DELETE FROM character_aura WHERE caster_guid = '" UI64FMTD "'", playerguid.GetRawValue());
+            CharacterDatabase.PExecute("DELETE FROM pet_aura WHERE caster_guid = '" UI64FMTD "'", playerguid.GetRawValue());
+            // Items it crafted that now belong to others. The gift creator is left alone: a wrapped item is
+            // recognised by a non-empty one.
+            CharacterDatabase.PExecute("UPDATE item_instance SET creatorGuid = 0 WHERE creatorGuid = '%u'", lowguid);
+            // GM tickets: its own are removed, the ones it handled as a GM go back to unassigned
+            CharacterDatabase.PExecute("DELETE FROM gm_tickets WHERE author_guid = '%u'", lowguid);
+            CharacterDatabase.PExecute("UPDATE gm_tickets SET assignee_guid = 0, assignee_name = '', status = CASE WHEN status = '%u' THEN '%u' ELSE status END "
+                                       "WHERE assignee_guid = '%u'", uint32(GMTICKET_ASSIGNEDTOGM_STATUS_ASSIGNED), uint32(GMTICKET_ASSIGNEDTOGM_STATUS_NOT_ASSIGNED), lowguid);
+            sTicketMgr.RemovePlayerReferences(playerguid);
+            // The calendar events it created (their invitations go with them, in memory and in the database)
+            CharacterDatabase.PExecute("DELETE FROM calendar_events WHERE creatorGuid = '%u'", lowguid);
             CharacterDatabase.CommitTransaction();
             break;
         }
