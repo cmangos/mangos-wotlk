@@ -990,7 +990,7 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recv_data)
     }
 
     // reputation discount
-    float discountMod = _player->GetReputationPriceDiscount(unit);
+    float discountMod = _player->GetRepairPriceMultiplier(unit);
 
     uint32 TotalCost = 0;
     if (itemGuid)

@@ -363,7 +363,10 @@ class Item : public Object
         bool HasMaxCharges() const;
         void RestoreCharges();
 
+        uint32 GetBaseRepairCost() const;
         uint32 CalculateDurabilityRepairCost(float discountMod) const;
+        uint32 GetSellPrice() const;
+        bool HasUseSpellEnchantment() const;
 
         void SetLootState(ItemLootUpdateState state);
         bool HasGeneratedLoot() const { return m_loot && m_lootState != ITEM_LOOT_NONE && m_lootState != ITEM_LOOT_REMOVED; }
