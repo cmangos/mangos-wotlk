@@ -1653,37 +1653,39 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             WorldPacket p(packet); // 8+4+4+1
             ObjectGuid vendorguid;
             p >> vendorguid;
-            uint32 itemid;
-            p >> itemid;
+            uint32 vendorSlot;
+            p >> vendorSlot;
             uint8 msg;
             p >> msg; // error msg
             p.resize(13);
 
-            switch (msg)
+            switch (BuyResult(msg))
             {
-                case BUY_ERR_CANT_FIND_ITEM:
+                case BuyResult::CANT_FIND_ITEM:
                     break;
-                case BUY_ERR_ITEM_ALREADY_SOLD:
+                case BuyResult::ITEM_ALREADY_SOLD:
                     break;
-                case BUY_ERR_NOT_ENOUGHT_MONEY:
+                case BuyResult::NOT_ENOUGHT_MONEY:
                 {
                     Announce(CANT_AFFORD);
                     break;
                 }
-                case BUY_ERR_SELLER_DONT_LIKE_YOU:
+                case BuyResult::SELLER_DONT_LIKE_YOU:
                     break;
-                case BUY_ERR_DISTANCE_TOO_FAR:
+                case BuyResult::DISTANCE_TOO_FAR:
                     break;
-                case BUY_ERR_ITEM_SOLD_OUT:
+                case BuyResult::SILENT_ERROR:
                     break;
-                case BUY_ERR_CANT_CARRY_MORE:
+                case BuyResult::ITEM_SOLD_OUT:
+                    break;
+                case BuyResult::CANT_CARRY_MORE:
                 {
                     Announce(INVENTORY_FULL);
                     break;
                 }
-                case BUY_ERR_RANK_REQUIRE:
+                case BuyResult::RANK_REQUIRE:
                     break;
-                case BUY_ERR_REPUTATION_REQUIRE:
+                case BuyResult::REPUTATION_REQUIRE:
                     break;
             }
             return;
