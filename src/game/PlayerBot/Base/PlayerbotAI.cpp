@@ -11681,7 +11681,7 @@ void PlayerbotAI::_HandleCommandSkill(std::string& text, Player& fromPlayer)
 
                 uint32 reqLevel = 0;
                 uint32 learnedSpell = tSpell->learnedSpell.size() > 1 ? tSpell->learnedSpell[1] : tSpell->learnedSpell[0];
-                if (!learnedSpell && !m_bot->IsSpellFitByClassAndRace(learnedSpell, &reqLevel))
+                if (!learnedSpell || !m_bot->IsSpellFitByClassAndRace(learnedSpell, &reqLevel))
                     continue;
 
                 if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(learnedSpell) && m_bot->HasSpell(learnedSpell))
@@ -11822,7 +11822,7 @@ bool PlayerbotAI::_HandleCommandSkillLearnHelper(TrainerSpell const* tSpell, uin
 
     uint32 reqLevel = 0;
     uint32 learnedSpell = tSpell->learnedSpell.size() > 1 ? tSpell->learnedSpell[1] : tSpell->learnedSpell[0];
-    if (!learnedSpell && !m_bot->IsSpellFitByClassAndRace(learnedSpell, &reqLevel))
+    if (!learnedSpell || !m_bot->IsSpellFitByClassAndRace(learnedSpell, &reqLevel))
         return false;
 
     if (sSpellMgr.IsPrimaryProfessionFirstRankSpell(learnedSpell) && m_bot->HasSpell(learnedSpell))
