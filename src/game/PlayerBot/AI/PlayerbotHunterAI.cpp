@@ -435,7 +435,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
                         caster.CastSpell(&caster, 51284, TRIGGERED_OLD_TRIGGERED); // pet feed visual
                         uint32 count = 1; // number of items used
                         int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
-                        m_bot.DestroyItemCount(pItem, count, true); // remove item from inventory
+                        m_bot.DestroyItemCount(*pItem, count, true); // remove item from inventory
                         m_bot.CastCustomSpell(&m_bot, PET_FEED, &benefit, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED); // feed pet
                         m_ai.TellMaster("feeding pet.");
                         m_ai.SetIgnoreUpdateTime(10);
@@ -463,7 +463,7 @@ void PlayerbotHunterAI::DoNonCombatActions()
                                 caster.CastSpell(&caster, 51284, TRIGGERED_OLD_TRIGGERED); // pet feed visual
                                 uint32 count = 1; // number of items used
                                 int32 benefit = pet->GetCurrentFoodBenefitLevel(pItemProto->ItemLevel); // nutritional value of food
-                                m_bot.DestroyItemCount(pItem, count, true); // remove item from inventory
+                                m_bot.DestroyItemCount(*pItem, count, true); // remove item from inventory
                                 m_bot.CastCustomSpell(&m_bot, PET_FEED, &benefit, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED); // feed pet
                                 m_ai.TellMaster("feeding pet.");
                                 m_ai.SetIgnoreUpdateTime(10);
