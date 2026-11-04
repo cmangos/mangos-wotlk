@@ -788,25 +788,8 @@ void WorldSession::SendListInventory(ObjectGuid vendorguid) const
             ItemPrototype const* pProto = ObjectMgr::GetItemPrototype(itemId);
             if (pProto)
             {
-                if (!_player->IsGameMaster())
-                {
-                    // class wrong item skip only for bindable case
-                    if ((pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP)
-                        continue;
-
-                    // race wrong item skip always
-                    if ((pProto->Flags2 & ITEM_FLAG2_FACTION_HORDE) && _player->GetTeam() != HORDE)
-                        continue;
-
-                    if ((pProto->Flags2 & ITEM_FLAG2_FACTION_ALLIANCE) && _player->GetTeam() != ALLIANCE)
-                        continue;
-
-                    if ((pProto->AllowableRace & _player->getRaceMask()) == 0)
-                        continue;
-
-                    if (crItem->conditionId && !sObjectMgr.IsConditionSatisfied(crItem->conditionId, _player, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
-                        continue;
-                }
+                if (!_player->CanSeeVendorItem(pCreature, crItem, pProto))
+                    continue;
 
                 // possible item coverting for BoA case
                 if (pProto->Flags & ITEM_FLAG_IS_BOUND_TO_ACCOUNT)

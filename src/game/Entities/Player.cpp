@@ -20578,6 +20578,31 @@ void Player::TakeExtendedCost(uint32 extendedCostId, uint32 count)
     }
 }
 
+bool Player::CanSeeVendorItem(Creature const* vendor, VendorItem const* vendorItem, ItemPrototype const* proto) const
+{
+    if (IsGameMaster())
+        return true;
+
+    // class wrong item skip only for bindable case
+    if ((proto->AllowableClass & getClassMask()) == 0 && proto->Bonding == BIND_WHEN_PICKED_UP)
+        return false;
+
+    // race wrong item skip always
+    if ((proto->Flags2 & ITEM_FLAG2_FACTION_HORDE) && GetTeam() != HORDE)
+        return false;
+
+    if ((proto->Flags2 & ITEM_FLAG2_FACTION_ALLIANCE) && GetTeam() != ALLIANCE)
+        return false;
+
+    if ((proto->AllowableRace & getRaceMask()) == 0)
+        return false;
+
+    if (vendorItem->conditionId && !sObjectMgr.IsConditionSatisfied(vendorItem->conditionId, this, vendor->GetMap(), vendor, CONDITION_FROM_VENDOR))
+        return false;
+
+    return true;
+}
+
 // Return true is the bought item has a max count to force refresh of window by caller
 bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uint32 item, uint8 count, uint8 bag, uint8 slot)
 {
@@ -20643,6 +20668,13 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         }
     }
 
+    // hidden from this player in the vendor list (cheating)
+    if (!CanSeeVendorItem(pCreature, crItem, ObjectMgr::GetItemPrototype(crItem->item)))
+    {
+        SendBuyError(BuyResult::CANT_FIND_ITEM, pCreature, vendorslot);
+        return false;
+    }
+
     uint32 totalCount = pProto->BuyCount * count;
 
     // check current item amount if it limited
@@ -20701,12 +20733,6 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, nullptr, nullptr);
             return false;
         }
-    }
-
-    if (crItem->conditionId && !IsGameMaster() && !sObjectMgr.IsConditionSatisfied(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
-    {
-        SendBuyError(BuyResult::CANT_FIND_ITEM, pCreature, vendorslot);
-        return false;
     }
 
     uint32 price = (crItem->ExtendedCost == 0 || pProto->Flags2 & ITEM_FLAG2_DONT_IGNORE_BUY_PRICE) ? pProto->BuyPrice * count : 0;
