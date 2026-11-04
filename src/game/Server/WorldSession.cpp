@@ -1210,11 +1210,7 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port) const
 
     pkt << uint32(0);                                       // unknown
 
-    // The client always hashes K as 40 fixed bytes; a plain AsByteArray() can return fewer, which made this
-    // read past the end of a shorter source buffer (K's natural length varies; K.AsByteArray() dropped to that
-    // length). Note: HMACSHA1's own m_key is only 16 bytes wide, so the len=40 below already overflows it on
-    // write regardless of the source buffer's size -- a separate, preexisting bug in HMACSHA1, not fixed here
-    // (this function has no caller today; see BUGS-INTERNES.md F7).
+    // The client hashes K as 40 fixed bytes, whatever the natural length of K: AsByteArray(40) pads it.
     std::vector<uint8> sessionKey = m_socket->GetSessionKey().AsByteArray(40);
     HMACSHA1 sha1(40, sessionKey.data());
     sha1.UpdateData((uint8*)&ip2, 4);
