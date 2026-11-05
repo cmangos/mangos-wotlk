@@ -603,7 +603,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_deathTimer = 0;
     m_deathExpireTime = 0;
 
-    m_swingErrorMsg = 0;
+    m_swingErrorMsg = SWING_ERROR_NONE;
 
     for (auto& j : m_bgBattleGroundQueueID)
     {
