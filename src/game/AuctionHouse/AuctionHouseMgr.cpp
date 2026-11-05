@@ -702,6 +702,37 @@ static uint32 GetAuctionBuyoutOrPrice(AuctionEntry const* auction)
     return auction->buyout ? auction->buyout : GetAuctionPrice(auction);
 }
 
+// Lower-case name of the item as shown in the game: its name, then the suffix of its random property
+static std::wstring GetAuctionSortName(AuctionEntry const* auction, ItemPrototype const* proto, WorldSession const* session)
+{
+    std::string name = proto->Name1;
+    sObjectMgr.GetItemLocaleStrings(proto->ItemId, session->GetSessionDbLocaleIndex(), &name);
+
+    char* const* suffix = nullptr;
+    if (auction->itemRandomPropertyId > 0)
+    {
+        if (ItemRandomPropertiesEntry const* property = sItemRandomPropertiesStore.LookupEntry(uint32(auction->itemRandomPropertyId)))
+            suffix = property->nameSuffix;
+    }
+    else if (auction->itemRandomPropertyId < 0)
+    {
+        if (ItemRandomSuffixEntry const* property = sItemRandomSuffixStore.LookupEntry(uint32(-auction->itemRandomPropertyId)))
+            suffix = property->nameSuffix;
+    }
+
+    LocaleConstant const locale = session->GetSessionDbcLocale();
+    if (suffix && suffix[locale] && *suffix[locale])
+    {
+        name += ' ';
+        name += suffix[locale];
+    }
+
+    std::wstring wname;
+    Utf8toWStr(name, wname);
+    wstrToLower(wname);
+    return wname;
+}
+
 // Order of a browse search: the server picks each page of results in this order
 int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Player* viewPlayer) const
 {
@@ -773,21 +804,12 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             if (!itemProto2 || !itemProto1)
                 return 0;
 
-            int32 loc_idx = viewPlayer->GetSession()->GetSessionDbLocaleIndex();
+            // full name, random suffix included
+            if (itemTemplate == auc->itemTemplate && itemRandomPropertyId == auc->itemRandomPropertyId)
+                return 0;
 
-            std::string name1 = itemProto1->Name1;
-            sObjectMgr.GetItemLocaleStrings(itemProto1->ItemId, loc_idx, &name1);
-
-            std::string name2 = itemProto2->Name1;
-            sObjectMgr.GetItemLocaleStrings(itemProto2->ItemId, loc_idx, &name2);
-
-            std::wstring wname1, wname2;
-            Utf8toWStr(name1, wname1);
-            Utf8toWStr(name2, wname2);
-            // case does not count
-            wstrToLower(wname1);
-            wstrToLower(wname2);
-            return wname1.compare(wname2);
+            WorldSession const* session = viewPlayer->GetSession();
+            return GetAuctionSortName(this, itemProto1, session).compare(GetAuctionSortName(auc, itemProto2, session));
         }
         case 6:                                             // minbidbuyout = 6
         {
