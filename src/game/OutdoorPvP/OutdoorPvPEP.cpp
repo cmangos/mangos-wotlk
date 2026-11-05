@@ -45,9 +45,16 @@ OutdoorPvPEP::OutdoorPvPEP(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr)
     m_map.GetVariableManager().SetVariable(WORLD_STATE_EP_TOWER_COUNT_ALLIANCE, 0);
     m_map.GetVariableManager().SetVariable(WORLD_STATE_EP_TOWER_COUNT_HORDE, 0);
 
+    for (auto& data : plaguelandsTowerEvents)
+    {
+        for (auto& towerData : data)
+        {
+            m_map.GetVariableManager().SetVariableData(towerData.worldState, true, ZONE_ID_EASTERN_PLAGUELANDS, 0);
+        }
+    }
+
     for (unsigned int i : m_towerWorldState)
     {
-        m_map.GetVariableManager().SetVariableData(i, true, ZONE_ID_EASTERN_PLAGUELANDS, 0);
         m_map.GetVariableManager().SetVariable(i, WORLD_STATE_ADD);
     }
 }
