@@ -426,14 +426,19 @@ void TradeData::SetItem(TradeSlots slot, Item* item)
     ObjectGuid itemGuid = item ? item->GetObjectGuid() : ObjectGuid();
 
     if (m_items[slot] == itemGuid)
+    {
+        Update(false);                                      // the client drops the updates of its offer sent before this request
         return;
+    }
 
     m_items[slot] = itemGuid;
 
     SetAccepted(false);
     GetTraderData()->SetAccepted(false);
 
-    Update();
+    ++m_serverStateIndex;
+    Update(true);
+    Update(false);
 
     // need remove possible trader spell applied to changed item
     if (slot == TRADE_SLOT_NONTRADED)
@@ -456,6 +461,7 @@ void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= nullptr*/)
     SetAccepted(false);
     GetTraderData()->SetAccepted(false);
 
+    ++m_serverStateIndex;
     Update(true);                                           // send spell info to item owner
     Update(false);                                          // send spell info to caster self
 }
@@ -463,7 +469,10 @@ void TradeData::SetSpell(uint32 spell_id, Item* castItem /*= nullptr*/)
 void TradeData::SetMoney(uint32 money)
 {
     if (m_money == money)
+    {
+        Update(false);                                      // the client drops the updates of its offer sent before this request
         return;
+    }
 
     if (money > m_player->GetMoney())
     {
@@ -479,7 +488,9 @@ void TradeData::SetMoney(uint32 money)
     SetAccepted(false);
     GetTraderData()->SetAccepted(false);
 
-    Update();
+    ++m_serverStateIndex;
+    Update(true);
+    Update(false);
 }
 
 void TradeData::Update(bool for_trader /*= true*/) const
