@@ -392,6 +392,13 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recv_data)
     AuctionEntry* auction = auctionHouse->GetAuction(auctionId);
     Player* pl = GetPlayer();
 
+    // a sold auction only waits for the delivery of its money
+    if (auction && auction->moneyDeliveryTime)
+    {
+        SendAuctionCommandResult(nullptr, AUCTION_BID_PLACED, AUCTION_ERR_ITEM_NOT_FOUND);
+        return;
+    }
+
     if (!auction || auction->owner == pl->GetGUIDLow())
     {
         // you cannot bid your own auction:
