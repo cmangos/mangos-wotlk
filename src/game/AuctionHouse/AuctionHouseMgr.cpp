@@ -690,6 +690,19 @@ void AuctionHouseObject::BuildListOwnerItems(WorldPacket& data, Player* player, 
     }
 }
 
+// Current bid, or the start bid while nobody has bid
+static uint32 GetAuctionPrice(AuctionEntry const* auction)
+{
+    return auction->bid ? auction->bid : auction->startbid;
+}
+
+// Buyout, or the current price when there is no buyout
+static uint32 GetAuctionBuyoutOrPrice(AuctionEntry const* auction)
+{
+    return auction->buyout ? auction->buyout : GetAuctionPrice(auction);
+}
+
+// Order of a browse search: the server picks each page of results in this order
 int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Player* viewPlayer) const
 {
     switch (column)
@@ -700,9 +713,12 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             ItemPrototype const* itemProto2 = ObjectMgr::GetItemPrototype(auc->itemTemplate);
             if (!itemProto2 || !itemProto1)
                 return 0;
-            if (itemProto1->RequiredLevel < itemProto2->RequiredLevel)
+            // a required level of 0 counts as 1
+            uint32 const level1 = std::max(itemProto1->RequiredLevel, 1u);
+            uint32 const level2 = std::max(itemProto2->RequiredLevel, 1u);
+            if (level1 < level2)
                 return -1;
-            if (itemProto1->RequiredLevel > itemProto2->RequiredLevel)
+            if (level1 > level2)
                 return +1;
             break;
         }
@@ -712,28 +728,26 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             ItemPrototype const* itemProto2 = ObjectMgr::GetItemPrototype(auc->itemTemplate);
             if (!itemProto2 || !itemProto1)
                 return 0;
-            if (itemProto1->Quality < itemProto2->Quality)
-                return -1;
+            // best quality first
             if (itemProto1->Quality > itemProto2->Quality)
+                return -1;
+            if (itemProto1->Quality < itemProto2->Quality)
                 return +1;
             break;
         }
         case 2:                                             // buyoutthenbid = 2
-            if (buyout != auc->buyout)
-            {
-                if (buyout < auc->buyout)
-                    return -1;
-                if (buyout > auc->buyout)
-                    return +1;
-            }
-            else
-            {
-                if (bid < auc->bid)
-                    return -1;
-                if (bid > auc->bid)
-                    return +1;
-            }
+        {
+            uint32 const buyout1 = GetAuctionBuyoutOrPrice(this);
+            uint32 const buyout2 = GetAuctionBuyoutOrPrice(auc);
+            if (buyout1 != buyout2)
+                return buyout1 < buyout2 ? -1 : +1;
+
+            uint32 const price1 = GetAuctionPrice(this);
+            uint32 const price2 = GetAuctionPrice(auc);
+            if (price1 != price2)
+                return price1 < price2 ? -1 : +1;
             break;
+        }
         case 3:                                             // duration = 3
         {
             if (expireTime < auc->expireTime)
@@ -744,12 +758,14 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
         break;
         case 4:                                             // status = 4
         {
-            if (bidder < auc->bidder)
-                return -1;
-            if (bidder > auc->bidder)
-                return +1;
+            // the viewer's own bids first, then the auctions someone else bid on
+            uint32 const viewer = viewPlayer->GetGUIDLow();
+            uint32 const rank1 = !bidder ? 0 : (bidder == viewer ? 2 : 1);
+            uint32 const rank2 = !auc->bidder ? 0 : (auc->bidder == viewer ? 2 : 1);
+            if (rank1 != rank2)
+                return rank1 > rank2 ? -1 : +1;
+            break;
         }
-        break;
         case 5:                                             // name = 5
         {
             ItemPrototype const* itemProto1 = ObjectMgr::GetItemPrototype(itemTemplate);
@@ -768,28 +784,17 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             std::wstring wname1, wname2;
             Utf8toWStr(name1, wname1);
             Utf8toWStr(name2, wname2);
+            // case does not count
+            wstrToLower(wname1);
+            wstrToLower(wname2);
             return wname1.compare(wname2);
         }
         case 6:                                             // minbidbuyout = 6
         {
-            uint32 bid1 = bid ? bid : startbid;
-            uint32 bid2 = auc->bid ? auc->bid : auc->startbid;
-
-            if (bid1 != bid2)
-            {
-                if (bid1 < bid2)
-                    return -1;
-                if (bid1 > bid2)
-                    return +1;
-            }
-            else
-            {
-                if (buyout < auc->buyout)
-                    return -1;
-                if (buyout > auc->buyout)
-                    return +1;
-            }
-
+            uint32 const buyout1 = GetAuctionBuyoutOrPrice(this);
+            uint32 const buyout2 = GetAuctionBuyoutOrPrice(auc);
+            if (buyout1 != buyout2)
+                return buyout1 < buyout2 ? -1 : +1;
             break;
         }
         case 7:                                             // seller = 7
