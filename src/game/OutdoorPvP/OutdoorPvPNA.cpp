@@ -31,36 +31,38 @@ OutdoorPvPNA::OutdoorPvPNA(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_soldiersRespawnTimer(0),
     m_zoneWorldState(0),
     m_zoneMapState(WORLD_STATE_NA_HALAA_NEUTRAL),
-    m_guardsLeft(0),
     m_isUnderSiege(false)
 {
     // initially set graveyard owner to neither faction
     SetGraveYardLinkTeam(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, TEAM_INVALID, 530);
-}
 
-void OutdoorPvPNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    if (m_zoneOwner != TEAM_NONE)
-    {
-        FillInitialWorldState(data, count, m_zoneWorldState, WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_HALAA_NEUTRAL, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_HALAA_NEUTRAL_A, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_HALAA_NEUTRAL_H, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_HALAA_HORDE, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_HALAA_ALLIANCE, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_GUARDS_MAX, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_GUARDS_LEFT, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_GUARDS_ALLIANCE, true, ZONE_ID_NAGRAND, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_NA_GUARDS_HORDE, true, ZONE_ID_NAGRAND, 0);
 
-        // map states
-        for (unsigned int i : m_roostWorldState)
-            FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
-    }
+    for (uint32 worldState : nagrandRoostStatesAlliance)
+        m_map.GetVariableManager().SetVariableData(worldState, true, ZONE_ID_NAGRAND, 0);
 
-    FillInitialWorldState(data, count, m_zoneMapState, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, WORLD_STATE_NA_GUARDS_MAX, MAX_NA_GUARDS);
-    FillInitialWorldState(data, count, WORLD_STATE_NA_GUARDS_LEFT, m_guardsLeft);
-}
+    for (uint32 worldState : nagrandRoostStatesHorde)
+        m_map.GetVariableManager().SetVariableData(worldState, true, ZONE_ID_NAGRAND, 0);
 
-void OutdoorPvPNA::SendRemoveWorldStates(Player* player)
-{
-    player->SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_REMOVE);
-    player->SendUpdateWorldState(m_zoneMapState, WORLD_STATE_REMOVE);
+    for (uint32 worldState : nagrandRoostStatesAllianceNeutral)
+        m_map.GetVariableManager().SetVariableData(worldState, true, ZONE_ID_NAGRAND, 0);
 
+    for (uint32 worldState : nagrandRoostStatesHordeNeutral)
+        m_map.GetVariableManager().SetVariableData(worldState, true, ZONE_ID_NAGRAND, 0);
+
+    m_map.GetVariableManager().SetVariable(m_zoneMapState, WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_NA_GUARDS_MAX, MAX_NA_GUARDS);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_NA_GUARDS_LEFT, 0);
     for (unsigned int i : m_roostWorldState)
-        player->SendUpdateWorldState(i, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(i, WORLD_STATE_ADD);
 }
 
 void OutdoorPvPNA::HandlePlayerEnterZone(Player* player, bool isMainZone)
@@ -121,21 +123,21 @@ void OutdoorPvPNA::HandleCreatureCreate(Creature* creature)
         case NPC_HORDE_HALAANI_GUARD:
         case NPC_ALLIANCE_HANAANI_GUARD:
             // prevent updating guard counter on owner take over
-            if (m_guardsLeft == MAX_NA_GUARDS)
+            if (m_map.GetVariableManager().GetVariable(WORLD_STATE_NA_GUARDS_LEFT) == MAX_NA_GUARDS)
                 return;
 
-            if (m_guardsLeft == 0)
+            uint32 guardsLeft = m_map.GetVariableManager().GetVariable(WORLD_STATE_NA_GUARDS_LEFT);
+            if (guardsLeft == 0)
             {
                 LockHalaa(creature);
 
                 // update world state
-                SendUpdateWorldState(m_zoneMapState, WORLD_STATE_REMOVE);
+                m_map.GetVariableManager().SetVariable(m_zoneMapState, WORLD_STATE_REMOVE);
                 m_zoneMapState = m_zoneOwner == ALLIANCE ? WORLD_STATE_NA_HALAA_ALLIANCE : WORLD_STATE_NA_HALAA_HORDE;
-                SendUpdateWorldState(m_zoneMapState, WORLD_STATE_ADD);
+                m_map.GetVariableManager().SetVariable(m_zoneMapState, WORLD_STATE_ADD);
             }
 
-            ++m_guardsLeft;
-            SendUpdateWorldState(WORLD_STATE_NA_GUARDS_LEFT, m_guardsLeft);
+            m_map.GetVariableManager().SetVariable(WORLD_STATE_NA_GUARDS_LEFT, guardsLeft + 1);
             break;
     }
 }
@@ -156,10 +158,10 @@ void OutdoorPvPNA::HandleCreatureDeath(Creature* creature)
         m_soldiersRespawnTimer = m_isUnderSiege ? HOUR * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS;
 
     // decrease the counter
-    --m_guardsLeft;
-    SendUpdateWorldState(WORLD_STATE_NA_GUARDS_LEFT, m_guardsLeft);
+    uint32 guardsLeft = m_map.GetVariableManager().GetVariable(WORLD_STATE_NA_GUARDS_LEFT) - 1;
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_NA_GUARDS_LEFT, guardsLeft);
 
-    if (m_guardsLeft == 0)
+    if (guardsLeft == 0)
     {
         // set the zone under siege and increase the respawn timer
         m_isUnderSiege = true;
@@ -169,9 +171,9 @@ void OutdoorPvPNA::HandleCreatureDeath(Creature* creature)
         UnlockHalaa(creature);
 
         // update world state
-        SendUpdateWorldState(m_zoneMapState, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(m_zoneMapState, WORLD_STATE_REMOVE);
         m_zoneMapState = m_zoneOwner == ALLIANCE ? WORLD_STATE_NA_HALAA_NEUTRAL_A : WORLD_STATE_NA_HALAA_NEUTRAL_H;
-        SendUpdateWorldState(m_zoneMapState, WORLD_STATE_ADD);
+        m_map.GetVariableManager().SetVariable(m_zoneMapState, WORLD_STATE_ADD);
 
         sWorld.SendDefenseMessage(ZONE_ID_NAGRAND, LANG_OPVP_NA_DEFENSELESS);
     }
@@ -270,8 +272,8 @@ void OutdoorPvPNA::HandleGameObjectCreate(GameObject* go)
 
 void OutdoorPvPNA::UpdateWorldState(uint32 value)
 {
-    SendUpdateWorldState(m_zoneWorldState, value);
-    SendUpdateWorldState(m_zoneMapState, value);
+    m_map.GetVariableManager().SetVariable(m_zoneWorldState, value);
+    m_map.GetVariableManager().SetVariable(m_zoneMapState, value);
 
     UpdateWyvernsWorldState(value);
 }
@@ -279,7 +281,7 @@ void OutdoorPvPNA::UpdateWorldState(uint32 value)
 void OutdoorPvPNA::UpdateWyvernsWorldState(uint32 value)
 {
     for (unsigned int i : m_roostWorldState)
-        SendUpdateWorldState(i, value);
+        m_map.GetVariableManager().SetVariable(i, value);
 }
 
 // process the capture events
@@ -327,7 +329,6 @@ void OutdoorPvPNA::ProcessCaptureEvent(GameObject* go, Team team)
     m_zoneOwner = team;
 
     LockHalaa(go);
-    m_guardsLeft = MAX_NA_GUARDS;
 
     m_isUnderSiege = false;
     m_soldiersRespawnTimer = 0;
@@ -350,7 +351,7 @@ void OutdoorPvPNA::ProcessCaptureEvent(GameObject* go, Team team)
     HandleFactionObjects(go);
     UpdateWorldState(WORLD_STATE_ADD);
 
-    SendUpdateWorldState(WORLD_STATE_NA_GUARDS_LEFT, m_guardsLeft);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_NA_GUARDS_LEFT, MAX_NA_GUARDS);
 
     BuffTeam(m_zoneOwner, SPELL_STRENGTH_HALAANI);
     sWorld.SendDefenseMessage(ZONE_ID_NAGRAND, m_zoneOwner == ALLIANCE ? LANG_OPVP_NA_CAPTURE_A : LANG_OPVP_NA_CAPTURE_H);
@@ -504,7 +505,7 @@ void OutdoorPvPNA::Update(uint32 diff)
             RespawnSoldier();
 
             // if all the guards are respawned, stop the timer, else resume the timer depending on the siege state
-            if (m_guardsLeft == MAX_NA_GUARDS)
+            if (m_map.GetVariableManager().GetVariable(WORLD_STATE_NA_GUARDS_LEFT) == MAX_NA_GUARDS)
                 m_soldiersRespawnTimer = 0;
             else
                 m_soldiersRespawnTimer = m_isUnderSiege ? HOUR * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS;
@@ -523,14 +524,11 @@ void OutdoorPvPNA::RespawnSoldier()
         if (!itr->second)
             continue;
 
-        if (Player* player = sObjectMgr.GetPlayer(itr->first))
-        {
-            // summon a soldier replacement in the order they were set in the deque. delete the element after summon
-            const HalaaSoldiersSpawns& location = m_deadSoldiers.front();
-            player->SummonCreature(m_zoneOwner == ALLIANCE ? NPC_ALLIANCE_HANAANI_GUARD : NPC_HORDE_HALAANI_GUARD, location.x, location.y, location.z, location.o, TEMPSPAWN_DEAD_DESPAWN, 0, true);
-            m_deadSoldiers.pop();
-            break;
-        }
+        // summon a soldier replacement in the order they were set in the deque. delete the element after summon
+        const HalaaSoldiersSpawns& location = m_deadSoldiers.front();
+        WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_zoneOwner == ALLIANCE ? NPC_ALLIANCE_HANAANI_GUARD : NPC_HORDE_HALAANI_GUARD, location.x, location.y, location.z, location.o, TEMPSPAWN_DEAD_DESPAWN, 0, true), &m_map, 1);
+        m_deadSoldiers.pop();
+        break;
     }
 }
 
