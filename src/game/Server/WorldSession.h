@@ -433,7 +433,7 @@ class WorldSession
         void SendAuctionBidderNotification(AuctionEntry* auction) const;
         void SendAuctionOwnerNotification(AuctionEntry* auction) const;
         void SendAuctionRemovedNotification(AuctionEntry* auction) const;
-        static void SendAuctionOutbiddedMail(AuctionEntry* auction);
+        static void SendAuctionOutbiddedMail(AuctionEntry* auction, uint32 oldBidderLowGuid, uint32 oldBid);
         static void SendAuctionCancelledToBidderMail(AuctionEntry* auction);
         void BuildListAuctionItems(std::vector<AuctionEntry*> const& auctions, WorldPacket& data, std::wstring const& searchedname, uint32 listfrom, uint32 levelmin,
                                    uint32 levelmax, uint32 usable, uint32 inventoryType, uint32 itemClass, uint32 itemSubClass, uint32 quality, uint32& count, uint32& totalcount, bool isFull) const;
