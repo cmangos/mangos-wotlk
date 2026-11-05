@@ -223,6 +223,11 @@ bool GossipSelect_npc_brann_ulduar(Player* pPlayer, Creature* pCreature, uint32 
             // set gauntlet in progress; rest of the event is done by DB scripts
             pInstance->SetData(TYPE_LEVIATHAN_GAUNTLET, IN_PROGRESS);
             pCreature->GetMotionMaster()->MoveWaypoint();
+
+            for (auto& player : pCreature->GetMap()->GetPlayers())
+            {
+                player.getSource()->UpdateEverything();
+            }
         }
 
         pPlayer->CLOSE_GOSSIP_MENU();
@@ -283,6 +288,13 @@ bool GossipSelect_npc_keeper_norgannon(Player* pPlayer, Creature* pCreature, uin
                     pDellorah->GetMotionMaster()->MoveWaypoint();
                 if (Creature* pBrann = pInstance->GetSingleCreatureFromStorage(NPC_BRANN_BRONZEBEARD))
                     pBrann->GetMotionMaster()->MoveWaypoint();
+                if (Creature* pProjector = pInstance->GetSingleCreatureFromStorage(NPC_PROJECTION_UNIT))
+                    pProjector->GetMotionMaster()->MovePath(1);
+
+                for (auto& player : pCreature->GetMap()->GetPlayers())
+                {
+                    player.getSource()->UpdateEverything();
+                }
             }
 
             pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_ID_ACTIVATED, pCreature->GetObjectGuid());

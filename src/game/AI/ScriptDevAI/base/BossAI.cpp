@@ -14,11 +14,9 @@
 * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-#include "AI/ScriptDevAI/include/sc_creature.h"
 #include "AI/ScriptDevAI/include/sc_instance.h"
 #include "Entities/Creature.h"
 #include "AI/ScriptDevAI/base/BossAI.h"
-#include "Spells/Spell.h"
 #include "Spells/SpellMgr.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 
@@ -93,6 +91,7 @@ void BossAI::AddExitObject(uint32 value)
 
 void BossAI::EnterEvadeMode()
 {
+    OpenEntrances();
     if (m_instanceDataType == -1)
     {
         CombatAI::EnterEvadeMode();
@@ -100,14 +99,13 @@ void BossAI::EnterEvadeMode()
     }
     if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
         instance->SetData(m_instanceDataType, FAIL);
-    OpenEntrances();
     if (m_respawnDelay == -1)
     {
         CombatAI::EnterEvadeMode();
         return;
     }
     m_creature->SetRespawnDelay(m_respawnDelay, true);
-    m_creature->ForcedDespawn();
+    m_creature->ForcedDespawn(2000);
 }
 
 void BossAI::AddCastOnDeath(QueuedCast cast)
