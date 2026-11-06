@@ -81,7 +81,12 @@ void AuctionHouseMgr::SendAuctionWonMail(AuctionEntry* auction)
 {
     Item* pItem = GetAItem(auction->itemGuidLow);
     if (!pItem)
+    {
+        if (auction->itemGuidLow)
+            sLog.outError("Auction %u won but its item (GUID: %u) is not found, and lost.", auction->Id, auction->itemGuidLow);
+        auction->itemGuidLow = 0;                           // nothing left to deliver
         return;
+    }
 
     ObjectGuid bidder_guid = ObjectGuid(HIGHGUID_PLAYER, auction->bidder);
     Player* bidder = sObjectMgr.GetPlayer(bidder_guid);
@@ -387,6 +392,13 @@ void AuctionHouseMgr::LoadAuctions()
         auction->deposit = fields[13].GetUInt32();
         auction->auctionHouseEntry = nullptr;                  // init later
 
+        if (auction->moneyDeliveryTime && !auction->bid)    // nobody paid: not a sale, the auction still runs
+        {
+            sLog.outError("Auction %u has a payment time without any bid, it goes back on sale", auction->Id);
+            auction->moneyDeliveryTime = 0;
+            CharacterDatabase.PExecute("UPDATE auction SET moneyTime = 0 WHERE id = '%u'", auction->Id);
+        }
+
         if (auction->moneyDeliveryTime)
             auction->itemGuidLow = 0;                       // must be 0 if auction delivery pending
         else
@@ -613,14 +625,27 @@ void AuctionHouseObject::Update()
     ///- Handle expired auctions
     for (AuctionEntryMap::iterator itr = AuctionsMap.begin(); itr != AuctionsMap.end();)
     {
+        AuctionEntry* auction = itr->second;
+        if (auction->moneyDeliveryTime && !auction->bid)    // nobody paid: not a sale, the auction still runs
+        {
+            sLog.outError("Auction %u has a payment time without any bid, it goes back on sale", auction->Id);
+            auction->moneyDeliveryTime = 0;
+            CharacterDatabase.PExecute("UPDATE auction SET moneyTime = 0 WHERE id = '%u'", auction->Id);
+        }
+
         if (itr->second->moneyDeliveryTime)                 // pending auction
         {
             if (curTime > itr->second->moneyDeliveryTime)
             {
+                if (auction->itemGuidLow)                   // the buyer never got the item: deliver it before paying the seller
+                {
+                    sLog.outError("Auction %u is paid out while it still holds item %u, the buyer gets it now", auction->Id, auction->itemGuidLow);
+                    sAuctionMgr.SendAuctionWonMail(auction);
+                }
+
                 sAuctionMgr.SendAuctionSuccessfulMail(itr->second);
 
                 itr->second->DeleteFromDB();
-                MANGOS_ASSERT(!itr->second->itemGuidLow);   // already removed or send in mail at won
                 delete itr->second;
                 AuctionsMap.erase(itr++);
                 continue;
