@@ -1741,7 +1741,9 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
             float slotX, slotY;
             std::tie(slotX, slotY) = GetClosestChairSlotPosition(user);
-            user->NearTeleportTo(slotX, slotY, GetPositionZ(), GetOrientation());
+            // the seat and the chair's height and orientation are relative to its transport, if any
+            Position const& chairPos = GetPosition(GetTransport());
+            user->NearTeleportTo(slotX, slotY, chairPos.GetPositionZ(), chairPos.GetPositionO());
             user->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR + info->chair.height);
 
             if (uint32 eventId = GetGOInfo()->chair.triggeredEvent)
