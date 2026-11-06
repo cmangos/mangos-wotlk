@@ -431,6 +431,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             myCanCompleteInfo.IsTargetResult = true;
             trader->GetSession()->SendTradeStatus(myCanCompleteInfo);
 
+            delete my_spell;
+            delete his_spell;
+
             // the client closes both windows on this status, so the trade ends here
             delete _player->m_trade;
             _player->m_trade = nullptr;
@@ -446,6 +449,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             trader->GetSession()->SendTradeStatus(hisCanCompleteInfo);
             hisCanCompleteInfo.IsTargetResult = true;
             SendTradeStatus(hisCanCompleteInfo);
+
+            delete my_spell;
+            delete his_spell;
 
             // the client closes both windows on this status, so the trade ends here
             delete _player->m_trade;
