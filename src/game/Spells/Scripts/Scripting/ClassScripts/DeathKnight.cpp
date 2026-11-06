@@ -1091,8 +1091,11 @@ struct DeathPactDk : public SpellScript
         }
     }
 
-     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex effIdx) const override
      {
+         if (effIdx != EFFECT_INDEX_1)
+             return true;
+
          Unit* caster = spell->GetCaster();
          if (!caster->IsPlayer())
              return false;
