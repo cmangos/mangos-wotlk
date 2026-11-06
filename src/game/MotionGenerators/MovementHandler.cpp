@@ -410,10 +410,12 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     if (!ProcessMovementInfo(movementInfo, mover, plMover, recv_data))
         return;
 
-    // CMSG opcode has no handler in client, should not be sent to others.
-    // It is sent by client when you jump and hit something on the way up,
+    // These CMSG opcodes have no handler in client, should not be sent to others.
+    // CMSG_MOVE_FALL_RESET is sent by client when you jump and hit something on the way up,
     // thus stopping upward movement and causing you to descend sooner.
-    if (opcode == CMSG_MOVE_FALL_RESET || opcode == CMSG_MOVE_CHNG_TRANSPORT)
+    // CMSG_MOVE_CHNG_TRANSPORT is sent by client when it boards or leaves a transport.
+    // CMSG_MOVE_SET_FLY is sent by client when it starts or stops flying.
+    if (opcode == CMSG_MOVE_FALL_RESET || opcode == CMSG_MOVE_CHNG_TRANSPORT || opcode == CMSG_MOVE_SET_FLY)
         return;
 
     WorldPacket data(opcode, recv_data.size());
@@ -789,8 +791,7 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mo
     if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
         // transports size limited
-        // (also received at zeppelin/lift leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
-        if (movementInfo.GetTransportPos().x > 50 || movementInfo.GetTransportPos().y > 50 || movementInfo.GetTransportPos().z > 100)
+        if (std::fabs(movementInfo.GetTransportPos().x) > 100.0f || std::fabs(movementInfo.GetTransportPos().y) > 100.0f || std::fabs(movementInfo.GetTransportPos().z) > 100.0f)
             return false;
 
         if (!MaNGOS::IsValidMapCoord(movementInfo.GetPos().x + movementInfo.GetTransportPos().x, movementInfo.GetPos().y + movementInfo.GetTransportPos().y,
@@ -895,6 +896,13 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
 {
     if (plMover && plMover->IsBeingTeleported() && recv_data.GetOpcode() != CMSG_MOVE_SET_COLLISION_HGT_ACK)
         return false;
+
+    // leaving a transport sends the transport flag with an empty transport guid and the world position as offsets
+    if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT) && movementInfo.GetTransportGuid().IsEmpty())
+    {
+        movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
+        movementInfo.ClearTransportData();
+    }
 
     if (!VerifyMovementInfo(movementInfo, mover, recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK))
         return false;

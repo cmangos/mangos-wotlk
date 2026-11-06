@@ -29,6 +29,7 @@
 #include "AI/ScriptDevAI/scripts/world/scourge_invasion.h"
 #include "OutdoorPvP/OutdoorPvPEP.h"
 #include "OutdoorPvP/OutdoorPvPSI.h"
+#include "OutdoorPvP/OutdoorPvPZM.h"
 
 enum
 {
@@ -543,6 +544,7 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
                 case ZONE_ID_STEAMVAULT:
                 case ZONE_ID_UNDERBOG:
                 case ZONE_ID_SLAVE_PENS:
+                    OutdoorPvPZM::BuffPlayer(player, m_outdoorPvpStateData.zangarGraveyardOwner);
                     break;
                 case ZONE_ID_SHADOW_LABYRINTH:
                 case ZONE_ID_AUCHENAI_CRYPTS:
@@ -682,6 +684,7 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
                 case ZONE_ID_STEAMVAULT:
                 case ZONE_ID_UNDERBOG:
                 case ZONE_ID_SLAVE_PENS:
+                    OutdoorPvPZM::UnBuffPlayer(player);
                     break;
                 case ZONE_ID_SHADOW_LABYRINTH:
                 case ZONE_ID_AUCHENAI_CRYPTS:
@@ -1096,26 +1099,52 @@ void WorldState::SetSilithusZoneOwner(Team zoneOwner)
         {
             if (Player* player = sObjectMgr.GetPlayer(guid))
             {
-                if (zoneOwner == ALLIANCE && player->GetTeam() == ALLIANCE)
-                {
-                    player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
-                        if (Player* player = map->GetPlayer(guid))
-                        {
-                            OutdoorPvPSI::UnBuffPlayer(player);
-                            OutdoorPvPSI::BuffPlayer(player, zoneOwner);
-                        }
-                    });
-                }
-                if (zoneOwner == HORDE && player->GetTeam() == HORDE)
-                {
-                    player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
-                        if (Player* player = map->GetPlayer(guid))
-                        {
-                            OutdoorPvPSI::UnBuffPlayer(player);
-                            OutdoorPvPSI::BuffPlayer(player, zoneOwner);
-                        }
-                    });
-                }
+                player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPSI::UnBuffPlayer(player);
+                        OutdoorPvPSI::BuffPlayer(player, zoneOwner);
+                    }
+                });
+                player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPSI::UnBuffPlayer(player);
+                        OutdoorPvPSI::BuffPlayer(player, zoneOwner);
+                    }
+                });
+            }
+        }
+    }
+}
+
+void WorldState::SetZangarmarshGraveyardOwner(Team graveyardOwner)
+{
+    std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
+    m_outdoorPvpStateData.zangarGraveyardOwner = graveyardOwner;
+
+    uint32 zoneArray[] = {ZONE_ID_STEAMVAULT, ZONE_ID_UNDERBOG, ZONE_ID_SLAVE_PENS};
+
+    for (uint32 zoneId : zoneArray)
+    {
+        for (ObjectGuid& guid : m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId])
+        {
+            if (Player* player = sObjectMgr.GetPlayer(guid))
+            {
+                player->GetMap()->GetMessager().AddMessage([guid, graveyardOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPZM::UnBuffPlayer(player);
+                        OutdoorPvPZM::BuffPlayer(player, graveyardOwner);
+                    }
+                });
+                player->GetMap()->GetMessager().AddMessage([guid, graveyardOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPZM::UnBuffPlayer(player);
+                        OutdoorPvPZM::BuffPlayer(player, graveyardOwner);
+                    }
+                });
             }
         }
     }

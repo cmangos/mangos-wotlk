@@ -24,6 +24,7 @@
 #include "Entities/Creature.h"
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
+#include "World/WorldState.h"
 
 OutdoorPvPZM::OutdoorPvPZM(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_graveyardOwner(TEAM_NONE),
@@ -48,52 +49,50 @@ OutdoorPvPZM::OutdoorPvPZM(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
         m_flagReady[i] = false;
     }
 
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_ZM_GRAVEYARD_NEUTRAL, true, ZONE_ID_ZANGARMARSH, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_ZM_GRAVEYARD_ALLIANCE, true, ZONE_ID_ZANGARMARSH, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_ZM_GRAVEYARD_HORDE, true, ZONE_ID_ZANGARMARSH, 0);
+
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_ZM_FLAG_READY_HORDE, true, ZONE_ID_ZANGARMARSH, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_ZM_FLAG_NOT_READY_HORDE, true, ZONE_ID_ZANGARMARSH, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_ZM_FLAG_READY_ALLIANCE, true, ZONE_ID_ZANGARMARSH, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE, true, ZONE_ID_ZANGARMARSH, 0);
+
+    for (auto& data : zangarmarshTowerEvents)
+    {
+        for (auto& towerData : data)
+        {
+            m_map.GetVariableManager().SetVariableData(towerData.worldState, true, ZONE_ID_ZANGARMARSH, 0);
+            m_map.GetVariableManager().SetVariableData(towerData.mapState, true, ZONE_ID_ZANGARMARSH, 0);
+        }
+    }
+
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_ZM_GRAVEYARD_NEUTRAL, WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE, WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_ZM_FLAG_NOT_READY_HORDE, WORLD_STATE_ADD);
+
+    for (uint32 worldState : m_towerWorldState)
+        m_map.GetVariableManager().SetVariable(worldState, WORLD_STATE_ADD);
+
+    for (uint32 worldState : m_towerMapState)
+        m_map.GetVariableManager().SetVariable(worldState, WORLD_STATE_ADD);
+
     // initially set graveyard owner to neither faction
     SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID, 530);
-}
-
-void OutdoorPvPZM::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    FillInitialWorldState(data, count, m_scoutWorldStateAlliance, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, m_scoutWorldStateHorde, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, m_graveyardWorldState, WORLD_STATE_ADD);
-
-    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
-    {
-        FillInitialWorldState(data, count, m_towerWorldState[i], WORLD_STATE_ADD);
-        FillInitialWorldState(data, count, m_towerMapState[i], WORLD_STATE_ADD);
-    }
-}
-
-void OutdoorPvPZM::SendRemoveWorldStates(Player* player)
-{
-    player->SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_REMOVE);
-    player->SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_REMOVE);
-    player->SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_REMOVE);
-
-    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
-    {
-        player->SendUpdateWorldState(m_towerWorldState[i], WORLD_STATE_REMOVE);
-        player->SendUpdateWorldState(m_towerMapState[i], WORLD_STATE_REMOVE);
-    }
 }
 
 void OutdoorPvPZM::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
     OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
 
-    // remove the buff from the player first; Sometimes on relog players still have the aura
-    player->RemoveAurasDueToSpell(SPELL_TWIN_SPIRE_BLESSING);
+    OutdoorPvPZM::UnBuffPlayer(player);
 
-    // cast buff the the player which enters the zone
-    if (player->GetTeam() == m_graveyardOwner)
-        player->CastSpell(player, SPELL_TWIN_SPIRE_BLESSING, TRIGGERED_OLD_TRIGGERED);
+    OutdoorPvPZM::BuffPlayer(player, m_graveyardOwner);
 }
 
 void OutdoorPvPZM::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
-    // remove the buff from the player
-    player->RemoveAurasDueToSpell(SPELL_TWIN_SPIRE_BLESSING);
+    OutdoorPvPZM::UnBuffPlayer(player);
 
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
@@ -259,13 +258,13 @@ bool OutdoorPvPZM::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
     }
 
     // update tower state
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
     m_towerWorldState[towerId] = newWorldState;
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_ADD);
 
-    SendUpdateWorldState(m_towerMapState[towerId], WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(m_towerMapState[towerId], WORLD_STATE_REMOVE);
     m_towerMapState[towerId] = newMapState;
-    SendUpdateWorldState(m_towerMapState[towerId], WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(m_towerMapState[towerId], WORLD_STATE_ADD);
 
     // update capture point owner
     m_towerOwner[towerId] = team;
@@ -279,9 +278,9 @@ void OutdoorPvPZM::UpdateScoutState(Team team, bool spawned)
 {
     if (team == ALLIANCE)
     {
-        SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(m_scoutWorldStateAlliance, WORLD_STATE_REMOVE);
         m_scoutWorldStateAlliance = spawned ? WORLD_STATE_ZM_FLAG_READY_ALLIANCE : WORLD_STATE_ZM_FLAG_NOT_READY_ALLIANCE;
-        SendUpdateWorldState(m_scoutWorldStateAlliance, WORLD_STATE_ADD);
+        m_map.GetVariableManager().SetVariable(m_scoutWorldStateAlliance, WORLD_STATE_ADD);
 
         m_flagReady[TEAM_INDEX_ALLIANCE] = spawned;
 
@@ -290,9 +289,9 @@ void OutdoorPvPZM::UpdateScoutState(Team team, bool spawned)
     }
     else
     {
-        SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(m_scoutWorldStateHorde, WORLD_STATE_REMOVE);
         m_scoutWorldStateHorde = spawned ? WORLD_STATE_ZM_FLAG_READY_HORDE : WORLD_STATE_ZM_FLAG_NOT_READY_HORDE;
-        SendUpdateWorldState(m_scoutWorldStateHorde, WORLD_STATE_ADD);
+        m_map.GetVariableManager().SetVariable(m_scoutWorldStateHorde, WORLD_STATE_ADD);
 
         m_flagReady[TEAM_INDEX_HORDE] = spawned;
 
@@ -343,9 +342,9 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
         SetBeaconArtKit(go, m_beamGraveyardBlue, SPELL_BEAM_BLUE);
 
         // update world state
-        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(m_graveyardWorldState, WORLD_STATE_REMOVE);
         m_graveyardWorldState = WORLD_STATE_ZM_GRAVEYARD_ALLIANCE;
-        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_ADD);
+        m_map.GetVariableManager().SetVariable(m_graveyardWorldState, WORLD_STATE_ADD);
 
         // remove player flag aura
         player->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_ALLIANCE);
@@ -360,9 +359,9 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
         SetBeaconArtKit(go, m_beamGraveyardRed, SPELL_BEAM_RED);
 
         // update world state
-        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(m_graveyardWorldState, WORLD_STATE_REMOVE);
         m_graveyardWorldState = WORLD_STATE_ZM_GRAVEYARD_HORDE;
-        SendUpdateWorldState(m_graveyardWorldState, WORLD_STATE_ADD);
+        m_map.GetVariableManager().SetVariable(m_graveyardWorldState, WORLD_STATE_ADD);
 
         // remove player flag aura
         player->RemoveAurasDueToSpell(SPELL_BATTLE_STANDARD_HORDE);
@@ -388,6 +387,7 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
 
     // update graveyard owner
     m_graveyardOwner = team;
+    sWorldState.SetZangarmarshGraveyardOwner(team);
 
     // return true when completed successfully
     // this is required for the proper despawn of the flag; it won't stop further DB scripts from being executed
@@ -434,4 +434,17 @@ void OutdoorPvPZM::HandleConditionStateChange(uint32 conditionId, bool state)
             m_playerCarryingFlag[TEAM_INDEX_HORDE] = state;
             break;
     }
+}
+
+void OutdoorPvPZM::BuffPlayer(Player* player, uint32 graveyardOwner)
+{
+    // cast buff the the player which enters the zone
+    if (player->GetTeam() == graveyardOwner)
+        player->CastSpell(player, SPELL_TWIN_SPIRE_BLESSING, TRIGGERED_OLD_TRIGGERED);
+}
+
+void OutdoorPvPZM::UnBuffPlayer(Player* player)
+{
+    // remove the buff from the player
+    player->RemoveAurasDueToSpell(SPELL_TWIN_SPIRE_BLESSING);
 }
