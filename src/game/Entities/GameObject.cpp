@@ -1512,14 +1512,6 @@ bool GameObject::CanUseNow(Player const* player) const
         {
             if (player->GetDisplayId() != player->GetNativeDisplayId() || player->IsShapeShifted())
                 return false;
-            [[fallthrough]];
-        }
-        case GAMEOBJECT_TYPE_CHAIR:
-        {
-            float x, y;
-            std::tie(x, y) = GetClosestChairSlotPosition(player);
-            if (player->GetDistance(x, y, GetPositionZ(), DIST_CALC_NONE, GetTransport()) > 3.f * 3.f)
-                return false;
             break;
         }
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
@@ -1749,7 +1741,9 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
             float slotX, slotY;
             std::tie(slotX, slotY) = GetClosestChairSlotPosition(user);
-            user->NearTeleportTo(slotX, slotY, GetPositionZ(), GetOrientation());
+            // the seat and the chair's height and orientation are relative to its transport, if any
+            Position const& chairPos = GetPosition(GetTransport());
+            user->NearTeleportTo(slotX, slotY, chairPos.GetPositionZ(), chairPos.GetPositionO());
             user->SetStandState(UNIT_STAND_STATE_SIT_LOW_CHAIR + info->chair.height);
 
             if (uint32 eventId = GetGOInfo()->chair.triggeredEvent)
@@ -3031,7 +3025,7 @@ std::pair<float, float> GameObject::GetClosestChairSlotPosition(Unit const* user
     // check if the db is sane
     if (GetGOInfo()->chair.slots > 0)
     {
-        float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
+        float lowestDist = std::numeric_limits<float>::max();
 
         float x_lowest = pos.GetPositionX();
         float y_lowest = pos.GetPositionY();

@@ -5130,6 +5130,7 @@ bool ChatHandler::HandleTitlesSetMaskCommand(char* args)
     titles &= ~titles2;                                     // remove nonexistent titles
 
     target->SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, titles);
+    target->SetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_LIFETIME_MAX_PVP_RANK, target->GetHighestPvPRankIndex());
     SendSysMessage(LANG_DONE);
 
     if (!target->HasTitle(target->GetInt32Value(PLAYER_CHOSEN_TITLE)))

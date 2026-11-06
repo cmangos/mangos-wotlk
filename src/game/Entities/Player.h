@@ -1048,7 +1048,10 @@ class TradeData
 
         uint32 GetClientStateIndex() const { return m_clientStateIndex; }
         void UpdateClientStateIndex() { ++m_clientStateIndex; }
+<<<<<<< HEAD
         void ResetClientStateIndex() { m_clientStateIndex = 1; }
+=======
+>>>>>>> upstream/master
         uint32 GetServerStateIndex() const { return m_serverStateIndex; }
 
         void SetItem(TradeSlots slot, Item* item);

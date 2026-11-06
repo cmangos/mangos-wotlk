@@ -650,13 +650,6 @@ void WorldSession::HandlePetRename(WorldPacket& recv_data)
         return;
     }
 
-    pet->SetName(name);
-
-    if (_player->GetGroup())
-        _player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
-
-    pet->RemoveByteFlag(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PET_FLAGS, UNIT_CAN_BE_RENAMED);
-
     if (isdeclined)
     {
         for (auto& i : declinedname.name)
@@ -672,6 +665,13 @@ void WorldSession::HandlePetRename(WorldPacket& recv_data)
             return;
         }
     }
+
+    pet->SetName(name);
+
+    if (_player->GetGroup())
+        _player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
+
+    pet->RemoveByteFlag(UNIT_FIELD_BYTES_2, UNIT_BYTES_2_OFFSET_PET_FLAGS, UNIT_CAN_BE_RENAMED);
 
     CharacterDatabase.BeginTransaction();
     if (isdeclined)
