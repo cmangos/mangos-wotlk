@@ -791,7 +791,6 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mo
     if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
     {
         // transports size limited
-        // (also received at zeppelin/lift leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
         if (movementInfo.GetTransportPos().x > 50 || movementInfo.GetTransportPos().y > 50 || movementInfo.GetTransportPos().z > 100)
             return false;
 
@@ -897,6 +896,13 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
 {
     if (plMover && plMover->IsBeingTeleported() && recv_data.GetOpcode() != CMSG_MOVE_SET_COLLISION_HGT_ACK)
         return false;
+
+    // leaving a transport sends the transport flag with an empty transport guid and the world position as offsets
+    if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT) && movementInfo.GetTransportGuid().IsEmpty())
+    {
+        movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
+        movementInfo.ClearTransportData();
+    }
 
     if (!VerifyMovementInfo(movementInfo, mover, recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK))
         return false;
