@@ -7528,9 +7528,10 @@ bool Player::RewardHonor(Unit* uVictim, uint32 groupsize, float honor)
 
     // honor - for show honor points in log
     // victim_guid - for show victim name in log
+    // victim_rank 0       HK: <lowest alliance\horde rank>
     // victim_rank [1..4]  HK: <dishonored rank>
     // victim_rank [5..19] HK: <alliance\horde rank>
-    // victim_rank [0,20+] HK: <>
+    // victim_rank -1      honor gain without a rank
     WorldPacket data(SMSG_PVP_CREDIT, 4 + 8 + 4);
     data << uint32(honor);
     data << ObjectGuid(victim_guid);
@@ -16497,6 +16498,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     _LoadIntoDataField(fields[60].GetString(), PLAYER_EXPLORED_ZONES_1, PLAYER_EXPLORED_ZONES_SIZE);
     _LoadIntoDataField(fields[63].GetString(), PLAYER__FIELD_KNOWN_TITLES, KNOWN_TITLES_SIZE * 2);
+    // lifetime highest PvP rank, from the old PvP rank titles
+    SetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_LIFETIME_MAX_PVP_RANK, GetHighestPvPRankIndex());
 
     InitDisplayIds();                                       // model, scale and model data
 
@@ -23164,6 +23167,8 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost, bool send)
 
         SetFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
     }
+
+    SetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_LIFETIME_MAX_PVP_RANK, GetHighestPvPRankIndex());
 
     if (!send)
         return;
