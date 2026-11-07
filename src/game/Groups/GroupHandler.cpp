@@ -841,7 +841,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
     uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
     if (charm)
-        mask1 = 0x7FFFFFFF;                                 // for hunters and other classes with pets
+        mask1 = 0x7FFFFFFF & ~GROUP_UPDATE_FLAG_VEHICLE_SEAT; // for hunters and other classes with pets
+    if (player->GetTransportInfo())
+        mask1 |= GROUP_UPDATE_FLAG_VEHICLE_SEAT;
 
     Powers powerType = player->GetPowerType();
     data << uint32(mask1);                                  // group update mask
@@ -908,17 +910,17 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
 
         uint64 petauramask = 0;
         size_t petMaskPos = data.wpos();
-        data << uint64(auramask);                        // placeholder
+        data << uint64(petauramask);                     // placeholder
         for (uint8 i = 0; i < MAX_AURAS; ++i)
         {
             if (uint32 charmAura = charm->GetVisibleAura(i))
             {
-                auramask |= (uint64(1) << i);
+                petauramask |= (uint64(1) << i);
                 data << uint32(charmAura);
                 data << uint8(1);
             }
         }
-        data.put<uint64>(petMaskPos, auramask);          // GROUP_UPDATE_FLAG_PET_AURAS
+        data.put<uint64>(petMaskPos, petauramask);       // GROUP_UPDATE_FLAG_PET_AURAS
     }
     else
     {
