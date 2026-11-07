@@ -42,7 +42,7 @@ extern Config botConfig;
 
 GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 {
-    uint8 flags = MEMBER_STATUS_OFFLINE;
+    uint16 flags = MEMBER_STATUS_OFFLINE;
     if (member && member->GetSession() && !member->GetSession()->PlayerLogout())
     {
         flags |= MEMBER_STATUS_ONLINE;
@@ -61,6 +61,8 @@ GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
             flags |= MEMBER_STATUS_AFK;
         if (member->isDND())
             flags |= MEMBER_STATUS_DND;
+        if (member->IsBoarded())
+            flags |= MEMBER_STATUS_VEHICLE;
     }
     return GroupMemberStatus(flags);
 }

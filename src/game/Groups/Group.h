@@ -56,6 +56,7 @@ enum GroupMemberStatus
     MEMBER_STATUS_ZONE_OUT  = 0x0020,                       // Lua_GetPlayerMapPosition
     MEMBER_STATUS_AFK       = 0x0040,                       // Lua_UnitIsAFK
     MEMBER_STATUS_DND       = 0x0080,                       // Lua_UnitIsDND
+    MEMBER_STATUS_VEHICLE   = 0x0200,                       // Lua_UnitInVehicle
 };
 
 GroupMemberStatus GetGroupMemberStatus(const Player* member);
