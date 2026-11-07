@@ -20743,8 +20743,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         // check for personal arena rating requirement
         if (GetMaxPersonalArenaRatingRequirement(iece->reqarenaslot) < iece->reqpersonalarenarating)
         {
-            // probably not the proper equip err
-            SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK, nullptr, nullptr);
+            SendEquipError(EQUIP_ERR_PERSONAL_ARENA_RATING_TOO_LOW, nullptr, nullptr);
             return false;
         }
     }
