@@ -1048,14 +1048,7 @@ class TradeData
 
         uint32 GetClientStateIndex() const { return m_clientStateIndex; }
         void UpdateClientStateIndex() { ++m_clientStateIndex; }
-<<<<<<< HEAD
-<<<<<<< HEAD
         void ResetClientStateIndex() { m_clientStateIndex = 1; }
-=======
->>>>>>> upstream/master
-=======
-	void ResetClientStateIndex() { m_clientStateIndex = 1; }
->>>>>>> 93708ee16 (fix)
         uint32 GetServerStateIndex() const { return m_serverStateIndex; }
 
         bool IsWindowOpen() const { return m_windowOpen; }
