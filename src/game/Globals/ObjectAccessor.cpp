@@ -273,7 +273,7 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
         bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
         bones->SetPhaseMask(corpse->GetPhaseMask(), false);
 
-        bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);
+        bones->SetUInt32Value(CORPSE_FIELD_FLAGS, (corpse->GetUInt32Value(CORPSE_FIELD_FLAGS) & CORPSE_FLAG_PVP) | CORPSE_FLAG_BONES);
         bones->SetOwnerGuid(player_guid);
 
         for (int i = 0; i < EQUIPMENT_SLOT_END; ++i)
