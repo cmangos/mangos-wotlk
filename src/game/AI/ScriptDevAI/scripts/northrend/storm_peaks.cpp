@@ -29,6 +29,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include <Entities/Pet.h>
 
 /*######
 ## npc_floating_spirit
@@ -779,6 +780,26 @@ struct JokkumScriptcast : public SpellScript, public AuraScript
     }
 };
 
+// 55808 - Aid of the Earthen
+struct AidoftheEarthen : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return;
+
+        if (Pet* guardian = caster->FindGuardianWithEntry(30036))
+            guardian->Unsummon(PET_SAVE_AS_DELETED, caster);
+    }
+
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->SelectLevel(spell->GetCaster()->GetLevel());
+        summon->SetFactionTemporary(spell->GetCaster()->GetFaction());
+    }
+};
+
 
 void AddSC_storm_peaks()
 {
@@ -846,4 +867,5 @@ void AddSC_storm_peaks()
     RegisterSpellScript<JawsOfDeath>("spell_jaws_of_death");
     RegisterSpellScript<JokkumScriptcast>("spell_jokkum_scriptcast");
     RegisterSpellScript<InitialProtoDrake>("spell_initial_proto_drake");
+    RegisterSpellScript<AidoftheEarthen>("spell_aid_of_the_earthen");
 }

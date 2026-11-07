@@ -1017,6 +1017,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (55460,'spell_summon_generic'),
 (55479,'spell_forced_obedience'),
 (55593,'spell_loatheb_necrotic_aura'),
+(55808,'spell_aid_of_the_earthen'),
 (55814,'spell_eck_spit'),
 (55853,'spell_vortex_aura'),
 (55872,'spell_random_radius_picker'),
