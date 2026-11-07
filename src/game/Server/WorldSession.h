@@ -1098,6 +1098,7 @@ class WorldSession
 
         std::map<uint32, uint32> m_pendingTimeSyncRequests; // key: counter. value: server time when packet with that counter was sent.
         uint32 m_timeSyncNextCounter;
+        uint32 m_timeSyncTimer;
 
         // Recruit-A-Friend
         uint32 m_recruitingFriendId;
