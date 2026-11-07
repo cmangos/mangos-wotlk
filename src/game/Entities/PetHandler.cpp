@@ -60,6 +60,14 @@ void SendNoPathToOwner(Unit* pet)
     pet->SendPetActionFeedback(FEEDBACK_NO_PATH);
 }
 
+static bool IsSpellAimedAtEnemy(SpellEntry const* spellInfo)
+{
+    for (uint32 target : spellInfo->EffectImplicitTargetA)
+        if (IsUnitTargetTarget(target) && IsHostileTarget(target))
+            return true;
+    return false;
+}
+
 void WorldSession::HandlePetAction(WorldPacket& recv_data)
 {
     ObjectGuid petGuid;
@@ -371,6 +379,11 @@ void WorldSession::HandlePetActionHelper(uint8 flag, uint32 spellid, Unit* petUn
 
             if (!IsSpellRequireTarget(spellInfo))
                 unit_target = nullptr;
+            else if (!unit_target && IsSpellAimedAtEnemy(spellInfo))
+            {
+                petUnit->SendPetActionFeedback(FEEDBACK_NOTHING_TO_ATT, spellid);
+                return;
+            }
 
             if (unit_target && !(petUnit->IsWithinDistInMap(unit_target, sRange->maxRange) && petUnit->IsWithinLOSInMap(unit_target, true))
                     && petUnit->CanAttackNow(unit_target))

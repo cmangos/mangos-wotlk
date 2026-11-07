@@ -11275,14 +11275,18 @@ bool Unit::isFrozen() const
 }
 
 ///----------Pet responses methods-----------------
-void Unit::SendPetActionFeedback(uint8 msg) const
+void Unit::SendPetActionFeedback(uint8 msg, uint32 spellId /*= 0*/) const
 {
     Unit* owner = GetOwner();
     if (!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 1);
+    WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 1 + 4);
     data << uint8(msg);
+    // a spell id follows FEEDBACK_NOTHING_TO_ATT and FEEDBACK_CANT_ATT_TARGET only when a pet spell was refused; the client then resets
+    // that spell's cooldown as for a failed pet cast. A refused attack command sends these codes alone.
+    if (spellId)
+        data << uint32(spellId);
     ((Player*)owner)->GetSession()->SendPacket(data);
 }
 

@@ -2507,7 +2507,7 @@ class Unit : public WorldObject
         void ClearComboPointHolders();
 
         ///----------Pet responses methods-----------------
-        void SendPetActionFeedback(uint8 msg) const;
+        void SendPetActionFeedback(uint8 msg, uint32 spellId = 0) const;
         void SendPetTalk(uint32 pettalk) const;
         void SendPetAIReaction() const;
         void SendPetDismiss(uint32 soundId) const;
