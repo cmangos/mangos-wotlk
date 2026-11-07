@@ -259,6 +259,15 @@ void CreatureAI::OnCallForHelp(Unit* enemy)
         if (!factionTemplate->IsRespondToCallForHelp())
             return;
     }
+
+    // already fighting: join the combat against the enemy without leaving the current victim,
+    // the threat list decides who to attack
+    if (m_creature->GetVictim())
+    {
+        m_creature->EngageInCombatWith(enemy);
+        return;
+    }
+
     AttackStart(enemy);
 }
 
