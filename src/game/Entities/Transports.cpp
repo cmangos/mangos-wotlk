@@ -285,6 +285,27 @@ void Transport::DespawnPassengers()
     m_staticPassengers.clear();
 }
 
+void Transport::RemoveFromWorld()
+{
+    if (!IsInWorld())
+        return;
+
+    Map* map = GetMap();
+    auto passengers = m_passengers;
+    for (WorldObject* passenger : passengers)
+    {
+        RemovePassenger(passenger);
+        if (passenger->GetTypeId() != TYPEID_PLAYER)
+            passenger->AddObjectToRemoveList();
+    }
+    m_staticPassengers.clear();
+
+    RemoveModelFromMap();
+    UpdateForMap(map, false);
+    map->RemoveTransport(this);
+    GameObject::RemoveFromWorld();
+}
+
 bool Transport::IsCrossMapTransport() const
 {
     return m_transportTemplate.mapsUsed.size() > 1;
@@ -459,6 +480,26 @@ bool GenericTransport::RemovePassenger(WorldObject* passenger)
             m_staticPassengers.erase(passenger->GetObjectGuid());
     }
     return true;
+}
+
+bool GenericTransport::HasPassenger(WorldObject const* passenger) const
+{
+    if (!passenger)
+        return false;
+
+    // Vehicle boarding removes a player from the MO transport's direct
+    // passenger set. Follow the vehicle chain back to its root carrier so a
+    // player seated in a cannon still counts as being aboard the gunship.
+    WorldObject const* carrier = passenger;
+    while (carrier->IsBoarded())
+    {
+        TransportInfo const* transportInfo = carrier->GetTransportInfo();
+        if (!transportInfo || !transportInfo->GetTransport())
+            return false;
+        carrier = transportInfo->GetTransport();
+    }
+
+    return carrier->GetTransport() == this;
 }
 
 bool GenericTransport::AddPetToTransport(Unit* passenger, Pet* pet)
