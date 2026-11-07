@@ -12479,6 +12479,16 @@ SpellAuraHolder* Unit::GetSpellAuraHolder(uint32 spellid, ObjectGuid casterGuid)
     return nullptr;
 }
 
+uint8 Unit::GetVisibleAuraFlags(uint8 slot) const
+{
+    SpellAuraHolderConstBounds bounds = GetSpellAuraHolderBounds(GetVisibleAura(slot));
+    for (SpellAuraHolderMap::const_iterator iter = bounds.first; iter != bounds.second; ++iter)
+        if (iter->second->GetAuraSlot() == slot)
+            return iter->second->GetAuraFlags();
+
+    return AFLAG_NONE;
+}
+
 bool Unit::IsAllowedDamageInArea(Unit* attacker, Unit* pVictim)
 {
     if (!attacker) // GOs can damage anywhere

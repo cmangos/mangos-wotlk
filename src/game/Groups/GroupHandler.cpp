@@ -719,7 +719,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
             if (auramask & (uint64(1) << i))
             {
                 data << uint32(player->GetVisibleAura(i));
-                data << uint8(1);
+                data << uint8(player->GetVisibleAuraFlags(i));
             }
         }
     }
@@ -795,7 +795,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
                 if (auramask & (uint64(1) << i))
                 {
                     data << uint32(charm->GetVisibleAura(i));
-                    data << uint8(1);
+                    data << uint8(charm->GetVisibleAuraFlags(i));
                 }
             }
         }
@@ -891,7 +891,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         {
             auramask |= (uint64(1) << i);
             data << uint32(aura);
-            data << uint8(1);
+            data << uint8(player->GetVisibleAuraFlags(i));
         }
     }
     data.put<uint64>(maskPos, auramask);                    // GROUP_UPDATE_FLAG_AURAS
@@ -917,7 +917,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
             {
                 petauramask |= (uint64(1) << i);
                 data << uint32(charmAura);
-                data << uint8(1);
+                data << uint8(charm->GetVisibleAuraFlags(i));
             }
         }
         data.put<uint64>(petMaskPos, petauramask);       // GROUP_UPDATE_FLAG_PET_AURAS

@@ -2254,6 +2254,7 @@ class Unit : public WorldObject
                 return itr->second;
             return 0;
         }
+        uint8 GetVisibleAuraFlags(uint8 slot) const;
         void SetVisibleAura(uint8 slot, uint32 spellid)
         {
             if (spellid == 0)
