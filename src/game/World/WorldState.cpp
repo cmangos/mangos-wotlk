@@ -31,6 +31,7 @@
 #include "OutdoorPvP/OutdoorPvPSI.h"
 #include "OutdoorPvP/OutdoorPvPZM.h"
 #include "OutdoorPvP/OutdoorPvPTF.h"
+#include "OutdoorPvP/OutdoorPvPHP.h"
 
 enum
 {
@@ -541,6 +542,7 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
                 case ZONE_ID_HELLFIRE_CITADEL:
                 case ZONE_ID_BLOOD_FURNACE:
                 case ZONE_ID_SHATTERED_HALLS:
+                    OutdoorPvPHP::BuffPlayer(player, m_outdoorPvpStateData.hellfireZoneOwner);
                     break;
                 case ZONE_ID_STEAMVAULT:
                 case ZONE_ID_UNDERBOG:
@@ -681,6 +683,7 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
                 case ZONE_ID_HELLFIRE_CITADEL:
                 case ZONE_ID_BLOOD_FURNACE:
                 case ZONE_ID_SHATTERED_HALLS:
+                    OutdoorPvPHP::UnBuffPlayer(player);
                     break;
                 case ZONE_ID_STEAMVAULT:
                 case ZONE_ID_UNDERBOG:
@@ -1111,6 +1114,38 @@ void WorldState::SetSilithusZoneOwner(Team zoneOwner)
                     {
                         OutdoorPvPSI::UnBuffPlayer(player);
                         OutdoorPvPSI::BuffPlayer(player, zoneOwner);
+                    }
+                });
+            }
+        }
+    }
+}
+
+void WorldState::SetHellfireZoneOwner(Team zoneOwner)
+{
+    std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
+    m_outdoorPvpStateData.hellfireZoneOwner = zoneOwner;
+
+    uint32 zoneArray[] = {ZONE_ID_HELLFIRE_RAMPARTS, ZONE_ID_BLOOD_FURNACE, ZONE_ID_SHATTERED_HALLS};
+
+    for (uint32 zoneId : zoneArray)
+    {
+        for (ObjectGuid& guid : m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId])
+        {
+            if (Player* player = sObjectMgr.GetPlayer(guid))
+            {
+                player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPTF::UnBuffPlayer(player);
+                        OutdoorPvPTF::BuffPlayer(player, zoneOwner);
+                    }
+                });
+                player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPTF::UnBuffPlayer(player);
+                        OutdoorPvPTF::BuffPlayer(player, zoneOwner);
                     }
                 });
             }

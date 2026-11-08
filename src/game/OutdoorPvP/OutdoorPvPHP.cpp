@@ -23,10 +23,9 @@
 #include "Entities/Creature.h"
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
+#include "World/WorldState.h"
 
-OutdoorPvPHP::OutdoorPvPHP(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
-    m_towersAlliance(0),
-    m_towersHorde(0)
+OutdoorPvPHP::OutdoorPvPHP(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr)
 {
     m_towerWorldState[0] = WORLD_STATE_HP_OVERLOOK_NEUTRAL;
     m_towerWorldState[1] = WORLD_STATE_HP_STADIUM_NEUTRAL;
@@ -34,46 +33,39 @@ OutdoorPvPHP::OutdoorPvPHP(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
 
     for (auto& i : m_towerOwner)
         i = TEAM_NONE;
-}
 
-void OutdoorPvPHP::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    FillInitialWorldState(data, count, WORLD_STATE_HP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
-    FillInitialWorldState(data, count, WORLD_STATE_HP_TOWER_COUNT_HORDE, m_towersHorde);
-    FillInitialWorldState(data, count, WORLD_STATE_HP_TOWER_DISPLAY_A, WORLD_STATE_ADD);
-    FillInitialWorldState(data, count, WORLD_STATE_HP_TOWER_DISPLAY_H, WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE, true, ZONE_ID_HELLFIRE_PENINSULA, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_HP_TOWER_COUNT_HORDE, true, ZONE_ID_HELLFIRE_PENINSULA, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_HP_TOWER_DISPLAY_A, true, ZONE_ID_HELLFIRE_PENINSULA, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_HP_TOWER_DISPLAY_H, true, ZONE_ID_HELLFIRE_PENINSULA, 0);
 
-    for (unsigned int i : m_towerWorldState)
-        FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
-}
+    for (auto& data : hellfireTowerEvents)
+        for (auto& towerData : data)
+            m_map.GetVariableManager().SetVariableData(towerData.worldState, true, ZONE_ID_HELLFIRE_PENINSULA, 0);
 
-void OutdoorPvPHP::SendRemoveWorldStates(Player* player)
-{
-    player->SendUpdateWorldState(WORLD_STATE_HP_TOWER_DISPLAY_A, WORLD_STATE_REMOVE);
-    player->SendUpdateWorldState(WORLD_STATE_HP_TOWER_DISPLAY_H, WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_HP_TOWER_COUNT_HORDE, 0);
 
-    for (unsigned int i : m_towerWorldState)
-        player->SendUpdateWorldState(i, WORLD_STATE_REMOVE);
+    for (auto& towerWorldState : m_towerWorldState)
+        m_map.GetVariableManager().SetVariable(towerWorldState, WORLD_STATE_ADD);
 }
 
 void OutdoorPvPHP::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
     OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
 
-    // remove the buff from the player first; Sometimes on relog players still have the aura
-    player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? SPELL_HELLFIRE_SUPERIORITY_ALLIANCE : SPELL_HELLFIRE_SUPERIORITY_HORDE);
+    Team zoneOwner = TEAM_NONE;
+    if (m_map.GetVariableManager().GetVariable(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE) == MAX_HP_TOWERS && player->GetTeam() == ALLIANCE)
+        zoneOwner = ALLIANCE;
+    else if (m_map.GetVariableManager().GetVariable(WORLD_STATE_HP_TOWER_COUNT_HORDE) == MAX_HP_TOWERS && player->GetTeam() == HORDE)
+        zoneOwner = HORDE;
 
-    // buff the player if same team is controlling all capture points
-    if (m_towersAlliance == MAX_HP_TOWERS && player->GetTeam() == ALLIANCE)
-        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_ALLIANCE, TRIGGERED_OLD_TRIGGERED);
-    else if (m_towersHorde == MAX_HP_TOWERS && player->GetTeam() == HORDE)
-        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_HORDE, TRIGGERED_OLD_TRIGGERED);
+    OutdoorPvPHP::BuffPlayer(player, zoneOwner);
 }
 
 void OutdoorPvPHP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
-    // remove the buff from the player
-    player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? SPELL_HELLFIRE_SUPERIORITY_ALLIANCE : SPELL_HELLFIRE_SUPERIORITY_HORDE);
+    OutdoorPvPHP::UnBuffPlayer(player);
 
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
@@ -160,6 +152,19 @@ void OutdoorPvPHP::HandlePlayerKillInsideArea(Player* player, Unit* victim)
     }
 }
 
+void OutdoorPvPHP::BuffPlayer(Player* player, uint32 zoneOwner)
+{
+    if (zoneOwner == ALLIANCE && player->GetTeam() == ALLIANCE)
+        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_ALLIANCE, TRIGGERED_OLD_TRIGGERED);
+    else if (zoneOwner == HORDE && player->GetTeam() == HORDE)
+        player->CastSpell(player, SPELL_HELLFIRE_SUPERIORITY_HORDE, TRIGGERED_OLD_TRIGGERED);
+}
+
+void OutdoorPvPHP::UnBuffPlayer(Player* player)
+{
+    player->RemoveAurasDueToSpell(player->GetTeam() == ALLIANCE ? SPELL_HELLFIRE_SUPERIORITY_ALLIANCE : SPELL_HELLFIRE_SUPERIORITY_HORDE);
+}
+
 // process the capture events
 bool OutdoorPvPHP::HandleEvent(uint32 eventId, Object* source, Object* /*target*/)
 {
@@ -203,22 +208,28 @@ bool OutdoorPvPHP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         SetBannerVisual(go, CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ANIM_ALLIANCE);
 
         // update counter state
-        ++m_towersAlliance;
-        SendUpdateWorldState(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+        uint32 controlledTowers = m_map.GetVariableManager().GetVariable(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE) + 1;
+        m_map.GetVariableManager().SetVariable(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE, controlledTowers);
 
-        if (m_towersAlliance == MAX_HP_TOWERS)
+        if (controlledTowers == MAX_HP_TOWERS)
+        {
             BuffTeam(ALLIANCE, SPELL_HELLFIRE_SUPERIORITY_ALLIANCE);
+            sWorldState.SetHellfireZoneOwner(ALLIANCE);
+        }
     }
     else if (team == HORDE)
     {
         SetBannerVisual(go, CAPTURE_ARTKIT_HORDE, CAPTURE_ANIM_HORDE);
 
         // update counter
-        ++m_towersHorde;
-        SendUpdateWorldState(WORLD_STATE_HP_TOWER_COUNT_HORDE, m_towersHorde);
+        uint32 controlledTowers = m_map.GetVariableManager().GetVariable(WORLD_STATE_HP_TOWER_COUNT_HORDE) + 1;
+        m_map.GetVariableManager().SetVariable(WORLD_STATE_HP_TOWER_COUNT_HORDE, controlledTowers);
 
-        if (m_towersHorde == MAX_HP_TOWERS)
+        if (controlledTowers == MAX_HP_TOWERS)
+        {
             BuffTeam(HORDE, SPELL_HELLFIRE_SUPERIORITY_HORDE);
+            sWorldState.SetHellfireZoneOwner(HORDE);
+        }
     }
     else
     {
@@ -226,30 +237,36 @@ bool OutdoorPvPHP::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
 
         if (m_towerOwner[towerId] == ALLIANCE)
         {
-            if (m_towersAlliance == MAX_HP_TOWERS)
+            uint32 controlledTowers = m_map.GetVariableManager().GetVariable(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE);
+            if (controlledTowers == MAX_HP_TOWERS)
+            {
                 BuffTeam(ALLIANCE, SPELL_HELLFIRE_SUPERIORITY_ALLIANCE, true);
+                sWorldState.SetHellfireZoneOwner(TEAM_NONE);
+            }
 
             // update counter
-            --m_towersAlliance;
-            SendUpdateWorldState(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE, m_towersAlliance);
+            m_map.GetVariableManager().SetVariable(WORLD_STATE_HP_TOWER_COUNT_ALLIANCE, controlledTowers - 1);
         }
         else
         {
-            if (m_towersHorde == MAX_HP_TOWERS)
+            uint32 controlledTowers = m_map.GetVariableManager().GetVariable(WORLD_STATE_HP_TOWER_COUNT_HORDE);
+            if (controlledTowers == MAX_HP_TOWERS)
+            {
                 BuffTeam(HORDE, SPELL_HELLFIRE_SUPERIORITY_HORDE, true);
+                sWorldState.SetHellfireZoneOwner(TEAM_NONE);
+            }
 
             // update counter
-            --m_towersHorde;
-            SendUpdateWorldState(WORLD_STATE_HP_TOWER_COUNT_HORDE, m_towersHorde);
+            m_map.GetVariableManager().SetVariable(WORLD_STATE_HP_TOWER_COUNT_HORDE, controlledTowers - 1);
         }
     }
 
     SetBannerVisual(go, m_banners[towerId], towerArtKit, towerAnim);
 
     // update tower state
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
     m_towerWorldState[towerId] = newWorldState;
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_ADD);
 
     // update capture point owner
     m_towerOwner[towerId] = team;

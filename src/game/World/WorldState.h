@@ -479,6 +479,7 @@ struct OutdoorPvPStateData
     uint8 eplTowersHorde = 0;
     Team silithusZoneOwner = TEAM_NONE;
     // TBC
+    Team hellfireZoneOwner = TEAM_NONE;
     Team zangarGraveyardOwner = TEAM_NONE;
     Team terokkarZoneOwner = TEAM_NONE;
 };
@@ -626,6 +627,7 @@ class WorldState
         void SetEplTowerData(uint8 towersHorde, uint8 towersAlliance);
         void SetSilithusZoneOwner(Team zoneOwner);
         // TBC
+        void SetHellfireZoneOwner(Team zoneOwner);
         void SetZangarmarshGraveyardOwner(Team graveyardOwner);
         void SetTerokkarZoneOwner(Team zoneOwner);
     private:
