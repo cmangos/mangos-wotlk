@@ -24,14 +24,13 @@
 #include "Entities/Creature.h"
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
+#include "World/WorldState.h"
 
 OutdoorPvPTF::OutdoorPvPTF(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
     m_zoneWorldState(WORLD_STATE_TF_TOWERS_CONTROLLED),
     m_zoneOwner(TEAM_NONE),
     //m_zoneUpdateTimer(TIMER_TF_UPDATE_TIME),
-    m_zoneLockTimer(0),
-    m_towersAlliance(0),
-    m_towersHorde(0)
+    m_zoneLockTimer(0)
 {
     m_towerWorldState[0] = WORLD_STATE_TF_WEST_TOWER_NEUTRAL;
     m_towerWorldState[1] = WORLD_STATE_TF_NORTH_TOWER_NEUTRAL;
@@ -41,53 +40,44 @@ OutdoorPvPTF::OutdoorPvPTF(Map& map, OutdoorPvPMgr& mgr) : OutdoorPvP(map, mgr),
 
     for (auto& i : m_towerOwner)
         i = TEAM_NONE;
-}
 
-void OutdoorPvPTF::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    FillInitialWorldState(data, count, m_zoneWorldState, WORLD_STATE_ADD);
-    if (m_zoneWorldState == WORLD_STATE_TF_TOWERS_CONTROLLED)
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT, true, ZONE_ID_TEROKKAR_FOREST, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, true, ZONE_ID_TEROKKAR_FOREST, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_TIME_HOURS, true, ZONE_ID_TEROKKAR_FOREST, 0);
+
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_TOWERS_CONTROLLED, true, ZONE_ID_TEROKKAR_FOREST, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_LOCKED_ALLIANCE, true, ZONE_ID_TEROKKAR_FOREST, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_LOCKED_HORDE, true, ZONE_ID_TEROKKAR_FOREST, 0);
+
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_TOWER_COUNT_H, true, ZONE_ID_TEROKKAR_FOREST, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_TF_TOWER_COUNT_A, true, ZONE_ID_TEROKKAR_FOREST, 0);
+
+    for (auto& data : terokkarTowerEvents)
     {
-        FillInitialWorldState(data, count, WORLD_STATE_TF_TOWER_COUNT_H, m_towersHorde);
-        FillInitialWorldState(data, count, WORLD_STATE_TF_TOWER_COUNT_A, m_towersAlliance);
-
-        for (unsigned int i : m_towerWorldState)
-            FillInitialWorldState(data, count, i, WORLD_STATE_ADD);
+        for (auto& towerData : data)
+        {
+            m_map.GetVariableManager().SetVariableData(towerData.worldState, true, ZONE_ID_TEROKKAR_FOREST, 0);
+        }
     }
-    else
-    {
-        uint32 firstDigit, secondDigit, hoursLeft;
-        CalculateTimerWorldStateValues(firstDigit, secondDigit, hoursLeft);
-        FillInitialWorldState(data, count, WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT, firstDigit);
-        FillInitialWorldState(data, count, WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, secondDigit);
-        FillInitialWorldState(data, count, WORLD_STATE_TF_TIME_HOURS, hoursLeft);
-    }
-}
 
-void OutdoorPvPTF::SendRemoveWorldStates(Player* player)
-{
-    player->SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_H, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_A, 0);
 
     for (unsigned int i : m_towerWorldState)
-        player->SendUpdateWorldState(i, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(i, WORLD_STATE_ADD);
 }
 
 void OutdoorPvPTF::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
     OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
 
-    // remove the buff from the player first because there are some issues at relog
-    player->RemoveAurasDueToSpell(SPELL_AUCHINDOUN_BLESSING);
-
-    // Handle the buffs
-    if (player->GetTeam() == m_zoneOwner)
-        player->CastSpell(player, SPELL_AUCHINDOUN_BLESSING, TRIGGERED_OLD_TRIGGERED);
+    OutdoorPvPTF::UnBuffPlayer(player);
+    OutdoorPvPTF::BuffPlayer(player, m_zoneOwner);
 }
 
 void OutdoorPvPTF::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
-    // remove the buff from the player
-    player->RemoveAurasDueToSpell(SPELL_AUCHINDOUN_BLESSING);
+    OutdoorPvPTF::UnBuffPlayer(player);
 
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 }
@@ -182,17 +172,17 @@ bool OutdoorPvPTF::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         SetBannerVisual(go, CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ANIM_ALLIANCE);
 
         // update tower count
-        ++m_towersAlliance;
+        uint32 towersAlliance = m_map.GetVariableManager().GetVariable(WORLD_STATE_TF_TOWER_COUNT_A);
 
         // if all towers are captured then process event
-        if (m_towersAlliance == MAX_TF_TOWERS)
+        if (towersAlliance + 1 == MAX_TF_TOWERS)
         {
             LockZone(go, towerId, team, newWorldState);
             return true;
         }
 
         // update tower count world state
-        SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_A, m_towersAlliance);
+        m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_A, towersAlliance + 1);
     }
     else if (team == HORDE)
     {
@@ -200,17 +190,17 @@ bool OutdoorPvPTF::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         SetBannerVisual(go, CAPTURE_ARTKIT_HORDE, CAPTURE_ANIM_HORDE);
 
         // update tower count
-        ++m_towersHorde;
+        uint32 towersAlliance = m_map.GetVariableManager().GetVariable(WORLD_STATE_TF_TOWER_COUNT_H);
 
         // if all towers are captured then process event
-        if (m_towersHorde == MAX_TF_TOWERS)
+        if (towersAlliance + 1 == MAX_TF_TOWERS)
         {
             LockZone(go, towerId, team, newWorldState);
             return true;
         }
 
         // update tower count world state
-        SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_H, m_towersHorde);
+        m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_H, towersAlliance + 1);
     }
     else
     {
@@ -220,20 +210,18 @@ bool OutdoorPvPTF::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
         // update tower count
         if (m_towerOwner[towerId] == ALLIANCE)
         {
-            --m_towersAlliance;
-            SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_A, m_towersAlliance);
+            m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_A, m_map.GetVariableManager().GetVariable(WORLD_STATE_TF_TOWER_COUNT_A) - 1);
         }
         else
         {
-            --m_towersHorde;
-            SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_H, m_towersHorde);
+            m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_H, m_map.GetVariableManager().GetVariable(WORLD_STATE_TF_TOWER_COUNT_H) - 1);
         }
     }
 
     // update tower state
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_REMOVE);
     m_towerWorldState[towerId] = newWorldState;
-    SendUpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(m_towerWorldState[towerId], WORLD_STATE_ADD);
 
     // update capture point owner
     m_towerOwner[towerId] = team;
@@ -245,14 +233,15 @@ bool OutdoorPvPTF::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
 // Handle the zone lock when the timer is activated
 void OutdoorPvPTF::LockZone(GameObject* go, uint32 towerId, Team team, uint32 newWorldState)
 {
-    SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(m_zoneWorldState, WORLD_STATE_REMOVE);
     m_zoneWorldState = team == ALLIANCE ? WORLD_STATE_TF_LOCKED_ALLIANCE : WORLD_STATE_TF_LOCKED_HORDE;
-    SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(m_zoneWorldState, WORLD_STATE_ADD);
 
     m_zoneLockTimer = TIMER_TF_LOCK_TIME;
     UpdateTimerWorldState();
 
     m_zoneOwner = team;
+    sWorldState.SetTerokkarZoneOwner(team);
     BuffTeam(team, SPELL_AUCHINDOUN_BLESSING);
 
     // lock the towers
@@ -262,7 +251,7 @@ void OutdoorPvPTF::LockZone(GameObject* go, uint32 towerId, Team team, uint32 ne
 
     // remove tower states when zone has been captured and locked
     for (unsigned int i : m_towerWorldState)
-        SendUpdateWorldState(i, WORLD_STATE_REMOVE);
+        m_map.GetVariableManager().SetVariable(i, WORLD_STATE_REMOVE);
 
     m_towerWorldState[towerId] = newWorldState;
 }
@@ -274,11 +263,12 @@ void OutdoorPvPTF::UnlockZone()
     BuffTeam(m_zoneOwner, SPELL_AUCHINDOUN_BLESSING, true);
 
     m_zoneOwner = TEAM_NONE;
+    sWorldState.SetTerokkarZoneOwner(TEAM_NONE);
 
     // reset world states and towers
-    SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(m_zoneWorldState, WORLD_STATE_REMOVE);
     m_zoneWorldState = WORLD_STATE_TF_TOWERS_CONTROLLED;
-    SendUpdateWorldState(m_zoneWorldState, WORLD_STATE_ADD);
+    m_map.GetVariableManager().SetVariable(m_zoneWorldState, WORLD_STATE_ADD);
 
     // reset tower states
     m_towerWorldState[0] = WORLD_STATE_TF_WEST_TOWER_NEUTRAL;
@@ -287,13 +277,15 @@ void OutdoorPvPTF::UnlockZone()
     m_towerWorldState[3] = WORLD_STATE_TF_SOUTH_EAST_TOWER_NEUTRAL;
     m_towerWorldState[4] = WORLD_STATE_TF_SOUTH_TOWER_NEUTRAL;
     for (unsigned int i : m_towerWorldState)
-        SendUpdateWorldState(i, WORLD_STATE_ADD);
+        m_map.GetVariableManager().SetVariable(i, WORLD_STATE_ADD);
 
     // update tower count
-    m_towersAlliance = 0;
-    m_towersHorde = 0;
-    SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_A, m_towersAlliance);
-    SendUpdateWorldState(WORLD_STATE_TF_TOWER_COUNT_H, m_towersHorde);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_A, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TOWER_COUNT_H, 0);
+
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TIME_HOURS, 0);
 
     for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
@@ -337,15 +329,26 @@ void OutdoorPvPTF::Update(uint32 diff)
     }
 }
 
+void OutdoorPvPTF::BuffPlayer(Player* player, uint32 zoneOwner)
+{
+    if (player->GetTeam() == zoneOwner)
+        player->CastSpell(player, SPELL_AUCHINDOUN_BLESSING, TRIGGERED_OLD_TRIGGERED);
+}
+
+void OutdoorPvPTF::UnBuffPlayer(Player* player)
+{
+    player->RemoveAurasDueToSpell(SPELL_AUCHINDOUN_BLESSING);
+}
+
 void OutdoorPvPTF::UpdateTimerWorldState()
 {
     // Calculate time
     uint32 firstDigit, secondDigit, hoursLeft;
     CalculateTimerWorldStateValues(firstDigit, secondDigit, hoursLeft);
 
-    SendUpdateWorldState(WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT, firstDigit);
-    SendUpdateWorldState(WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, secondDigit);
-    SendUpdateWorldState(WORLD_STATE_TF_TIME_HOURS, hoursLeft);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TIME_MIN_FIRST_DIGIT, firstDigit);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TIME_MIN_SECOND_DIGIT, secondDigit);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_TF_TIME_HOURS, hoursLeft);
 }
 
 void OutdoorPvPTF::CalculateTimerWorldStateValues(uint32& firstDigit, uint32& secondDigit, uint32& hoursLeft)

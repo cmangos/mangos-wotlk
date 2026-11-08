@@ -480,6 +480,7 @@ struct OutdoorPvPStateData
     Team silithusZoneOwner = TEAM_NONE;
     // TBC
     Team zangarGraveyardOwner = TEAM_NONE;
+    Team terokkarZoneOwner = TEAM_NONE;
 };
 
 // Intended for implementing server wide scripts, note: all behaviour must be safeguarded towards multithreading
@@ -626,6 +627,7 @@ class WorldState
         void SetSilithusZoneOwner(Team zoneOwner);
         // TBC
         void SetZangarmarshGraveyardOwner(Team graveyardOwner);
+        void SetTerokkarZoneOwner(Team zoneOwner);
     private:
         std::map<uint32, GuidVector> m_areaPlayers;
         std::map<uint32, GuidVector> m_zonePlayers;

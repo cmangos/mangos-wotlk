@@ -30,6 +30,7 @@
 #include "OutdoorPvP/OutdoorPvPEP.h"
 #include "OutdoorPvP/OutdoorPvPSI.h"
 #include "OutdoorPvP/OutdoorPvPZM.h"
+#include "OutdoorPvP/OutdoorPvPTF.h"
 
 enum
 {
@@ -549,9 +550,9 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
                 case ZONE_ID_SHADOW_LABYRINTH:
                 case ZONE_ID_AUCHENAI_CRYPTS:
                 case ZONE_ID_SETHEKK_HALLS:
-                case ZONE_ID_MANA_TOMBS: {
+                case ZONE_ID_MANA_TOMBS:
+                    OutdoorPvPTF::BuffPlayer(player, m_outdoorPvpStateData.terokkarZoneOwner);
                     break;
-                }
             }
 
             break;
@@ -690,9 +691,8 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
                 case ZONE_ID_AUCHENAI_CRYPTS:
                 case ZONE_ID_SETHEKK_HALLS:
                 case ZONE_ID_MANA_TOMBS:
-                {
+                    OutdoorPvPTF::UnBuffPlayer(player);
                     break;
-                }
             }
             break;
         }
@@ -1143,6 +1143,38 @@ void WorldState::SetZangarmarshGraveyardOwner(Team graveyardOwner)
                     {
                         OutdoorPvPZM::UnBuffPlayer(player);
                         OutdoorPvPZM::BuffPlayer(player, graveyardOwner);
+                    }
+                });
+            }
+        }
+    }
+}
+
+void WorldState::SetTerokkarZoneOwner(Team zoneOwner)
+{
+    std::lock_guard<std::mutex> guard(m_outdoorPvpStateData.outdoorPvpMutex);
+    m_outdoorPvpStateData.terokkarZoneOwner = zoneOwner;
+
+    uint32 zoneArray[] = {ZONE_ID_AUCHENAI_CRYPTS, ZONE_ID_SETHEKK_HALLS, ZONE_ID_MANA_TOMBS, ZONE_ID_SHADOW_LABYRINTH};
+
+    for (uint32 zoneId : zoneArray)
+    {
+        for (ObjectGuid& guid : m_outdoorPvpStateData.outdoorPvpZonePlayers[zoneId])
+        {
+            if (Player* player = sObjectMgr.GetPlayer(guid))
+            {
+                player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPTF::UnBuffPlayer(player);
+                        OutdoorPvPTF::BuffPlayer(player, zoneOwner);
+                    }
+                });
+                player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
+                    if (Player* player = map->GetPlayer(guid))
+                    {
+                        OutdoorPvPTF::UnBuffPlayer(player);
+                        OutdoorPvPTF::BuffPlayer(player, zoneOwner);
                     }
                 });
             }
