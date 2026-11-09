@@ -272,6 +272,37 @@ struct BuildWintergraspVehicleForce : public SpellScript
     }
 };
 
+// 56575, 56661, 56663, 56665, 56667, 56669, 61408 - Build X Vehicle
+struct BuildWintergraspVehicle : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (caster->IsPlayer())
+        {
+            Player* player = static_cast<Player*>(caster);
+            Team playerTeam = player->GetTeam();
+            if (playerTeam == ALLIANCE)
+            {
+                if (player->GetMap()->GetVariableManager().GetVariable(WORLD_STATE_WG_VEHICLE_A) >= player->GetMap()->GetVariableManager().GetVariable(WORLD_STATE_WG_MAX_VEHICLE_A))
+                    return SPELL_FAILED_CUSTOM_ERROR;
+            }
+            else if (playerTeam == HORDE)
+            {
+                if (player->GetMap()->GetVariableManager().GetVariable(WORLD_STATE_WG_VEHICLE_H) >= player->GetMap()->GetVariableManager().GetVariable(WORLD_STATE_WG_MAX_VEHICLE_H))
+                    return SPELL_FAILED_CUSTOM_ERROR;
+            }
+        }
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_CUSTOM_ERROR)
+            param1 = SPELL_FAILED_CUSTOM_ERROR_42;
+    }
+};
+
 void AddSC_wintergrasp()
 {
     Script* pNewScript = new Script;
@@ -290,5 +321,6 @@ void AddSC_wintergrasp()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<TeleportToLakeWintergrasp>("spell_teleport_lake_wintergrasp");
-    RegisterSpellScript<BuildWintergraspVehicleForce>("spell_build_wintergrasp_vehicle");
+    RegisterSpellScript<BuildWintergraspVehicleForce>("spell_build_wintergrasp_vehicle_force");
+    RegisterSpellScript<BuildWintergraspVehicle>("spell_build_wintergrasp_vehicle");
 }
