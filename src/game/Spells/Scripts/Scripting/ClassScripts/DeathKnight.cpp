@@ -48,6 +48,12 @@ struct ScourgeStrike : public SpellScript
 // 46584 - Raise Dead
 struct RaiseDeadDk : public SpellScript
 {
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_BAD_TARGETS)
+            param1 = SPELL_FAILED_CUSTOM_ERROR_11;
+    }
+
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex eff) const override
     {
         if (eff == EFFECT_INDEX_1)

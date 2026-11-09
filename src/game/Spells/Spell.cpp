@@ -868,6 +868,16 @@ bool Spell::FillUnitTargets(TempTargetingData& targetingData, SpellTargetingData
             }
         }
 
+        if (m_spellInfo->Id == 46584 && i == EFFECT_INDEX_1) // Raise Dead
+        {
+            if (unitTargetList.size() <= 0 && m_caster->IsPlayer() && static_cast<Player*>(m_caster)->HasItemCount(37201, 1))
+            {
+                SendCastResult(SPELL_FAILED_BAD_TARGETS);
+                finish(false);
+                return false;
+            }
+        }
+
         for (Unit* unit : unitTargetList)
             AddUnitTarget(unit, effectMask);
     }
