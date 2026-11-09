@@ -1248,6 +1248,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (67630,'spell_leeching_swarm_aura'),
 (67693,'spell_black_knight_res'),
 (67799,'spell_mind_amplification_dish'),
+(67830,'spell_ride_vehicle_argent_tournament'),
 (68084,'spell_clear_valkyr_touch'),
 (68614,'spell_irresistible_cologne_spill_aura'),
 (68644,'spell_valentine_boss_validate_area'),

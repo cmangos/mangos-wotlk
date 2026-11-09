@@ -350,6 +350,27 @@ struct SummonTournamentAspirant : public SpellScript, public AuraScript
     }
 };
 
+// 67830 - Ride Vehicle
+struct RideVehicleArgentTournament : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->GetCaster()->HasAura(SPELL_LANCE_EQUIPPED)) // Player must have aura from equiped item
+            return SPELL_FAILED_EQUIPPED_ITEM;
+
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_EQUIPPED_ITEM)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_60;
+        }
+    }
+};
+
 enum
 {
     SPELL_DEFEND    = 62719,    // Defend
@@ -610,6 +631,7 @@ void AddSC_argent_tournament()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SummonTournamentAspirant>("spell_summon_tournament_aspirant");
+    RegisterSpellScript<RideVehicleArgentTournament>("spell_ride_vehicle_argent_tournament");
     RegisterSpellScript<BlockNpc>("spell_blocknpc");
     RegisterSpellScript<BlockPlayer>("spell_blockplayer");
     RegisterSpellScript<PlayerOnTournamentMount>("spell_player_on_tournament_mount");
