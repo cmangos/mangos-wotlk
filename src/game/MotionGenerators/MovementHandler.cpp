@@ -316,19 +316,27 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     plMover->SetDelayedZoneUpdate(false, 0);
 
-    plMover->SetPosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation, true);
+    GenericTransport* currentTransport = nullptr;
+    if (plMover->m_teleportTransport)
+        currentTransport = plMover->GetMap()->GetTransport(plMover->m_teleportTransport);
 
-    plMover->SetFallInformation(0, dest.coord_z);
+    // onto a transport the destination is in transport offsets
+    float x = dest.coord_x, y = dest.coord_y, z = dest.coord_z, o = dest.orientation;
+    if (currentTransport)
+    {
+        plMover->m_movementInfo.t_pos = Position(x, y, z, o);
+        currentTransport->CalculatePassengerPosition(x, y, z, &o);
+    }
+    plMover->SetPosition(x, y, z, o, true);
+
+    plMover->SetFallInformation(0, z);
 
 #ifdef ENABLE_PLAYERBOTS
     plMover->m_movementInfo.ChangePosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation);
 #endif
 
-    GenericTransport* currentTransport = nullptr;
-    if (plMover->m_teleportTransport)
-        currentTransport = plMover->GetMap()->GetTransport(plMover->m_teleportTransport);
     if (currentTransport)
-        currentTransport->AddPassenger(plMover);
+        currentTransport->AddPassenger(plMover, false);
     plMover->m_teleportTransport = ObjectGuid();
 
     uint32 newzone, newarea;
