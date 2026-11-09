@@ -723,78 +723,78 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         }
     }
 
-    Unit* charm = player->GetCharm();
+    Unit* pet = player->GetGroupUpdatePet();
     if (mask & GROUP_UPDATE_FLAG_PET_GUID)
-        data << (charm ? charm->GetObjectGuid() : ObjectGuid());
+        data << (pet ? pet->GetObjectGuid() : ObjectGuid());
 
     if (mask & GROUP_UPDATE_FLAG_PET_NAME)
     {
-        if (charm)
-            data << charm->GetName();
+        if (pet)
+            data << pet->GetName();
         else
             data << uint8(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MODEL_ID)
     {
-        if (charm)
-            data << uint16(charm->GetDisplayId());
+        if (pet)
+            data << uint16(pet->GetDisplayId());
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_HP)
     {
-        if (charm)
-            data << uint32(charm->GetHealth());
+        if (pet)
+            data << uint32(pet->GetHealth());
         else
             data << uint32(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_HP)
     {
-        if (charm)
-            data << uint32(charm->GetMaxHealth());
+        if (pet)
+            data << uint32(pet->GetMaxHealth());
         else
             data << uint32(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)
     {
-        if (charm)
-            data << uint8(charm->GetPowerType());
+        if (pet)
+            data << uint8(pet->GetPowerType());
         else
             data << uint8(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_CUR_POWER)
     {
-        if (charm)
-            data << uint16(charm->GetPower(charm->GetPowerType()));
+        if (pet)
+            data << uint16(pet->GetPower(pet->GetPowerType()));
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_MAX_POWER)
     {
-        if (charm)
-            data << uint16(charm->GetMaxPower(charm->GetPowerType()));
+        if (pet)
+            data << uint16(pet->GetMaxPower(pet->GetPowerType()));
         else
             data << uint16(0);
     }
 
     if (mask & GROUP_UPDATE_FLAG_PET_AURAS)
     {
-        if (charm)
+        if (pet)
         {
-            const uint64& auramask = charm->GetAuraUpdateMask();
+            const uint64& auramask = pet->GetAuraUpdateMask();
             data << uint64(auramask);
             for (uint32 i = 0; i < MAX_AURAS; ++i)
             {
                 if (auramask & (uint64(1) << i))
                 {
-                    data << uint32(charm->GetVisibleAura(i));
-                    data << uint8(charm->GetVisibleAuraFlags(i));
+                    data << uint32(pet->GetVisibleAura(i));
+                    data << uint8(pet->GetVisibleAuraFlags(i));
                 }
             }
         }
@@ -832,14 +832,14 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
         return;
     }
 
-    Unit* charm = player->GetCharm();
+    Unit* pet = player->GetGroupUpdatePet();
 
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4 + 2 + 2 + 2 + 1 + 2 * 6 + 8 + 1 + 8);
     data << uint8(isArenaOpponent); // only for SMSG_PARTY_MEMBER_STATS_FULL
     data << player->GetPackGUID();
 
     uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
-    if (charm)
+    if (pet)
         mask1 = 0x7FFFFFFF & ~GROUP_UPDATE_FLAG_VEHICLE_SEAT; // for hunters and other classes with pets
     if (player->GetTransportInfo())
         mask1 |= GROUP_UPDATE_FLAG_VEHICLE_SEAT;
@@ -895,28 +895,28 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     }
     data.put<uint64>(maskPos, auramask);                    // GROUP_UPDATE_FLAG_AURAS
 
-    if (charm)
+    if (pet)
     {
-        Powers charmPowerType = charm->GetPowerType();
-        data << charm->GetObjectGuid();                       // GROUP_UPDATE_FLAG_PET_GUID
-        data << charm->GetName();                             // GROUP_UPDATE_FLAG_PET_NAME
-        data << uint16(charm->GetDisplayId());                // GROUP_UPDATE_FLAG_PET_MODEL_ID
-        data << uint32(charm->GetHealth());                   // GROUP_UPDATE_FLAG_PET_CUR_HP
-        data << uint32(charm->GetMaxHealth());                // GROUP_UPDATE_FLAG_PET_MAX_HP
-        data << uint8(charmPowerType);                        // GROUP_UPDATE_FLAG_PET_POWER_TYPE
-        data << uint16(charm->GetPower(charmPowerType));        // GROUP_UPDATE_FLAG_PET_CUR_POWER
-        data << uint16(charm->GetMaxPower(charmPowerType));     // GROUP_UPDATE_FLAG_PET_MAX_POWER
+        Powers petPowerType = pet->GetPowerType();
+        data << pet->GetObjectGuid();                       // GROUP_UPDATE_FLAG_PET_GUID
+        data << pet->GetName();                             // GROUP_UPDATE_FLAG_PET_NAME
+        data << uint16(pet->GetDisplayId());                // GROUP_UPDATE_FLAG_PET_MODEL_ID
+        data << uint32(pet->GetHealth());                   // GROUP_UPDATE_FLAG_PET_CUR_HP
+        data << uint32(pet->GetMaxHealth());                // GROUP_UPDATE_FLAG_PET_MAX_HP
+        data << uint8(petPowerType);                        // GROUP_UPDATE_FLAG_PET_POWER_TYPE
+        data << uint16(pet->GetPower(petPowerType));        // GROUP_UPDATE_FLAG_PET_CUR_POWER
+        data << uint16(pet->GetMaxPower(petPowerType));     // GROUP_UPDATE_FLAG_PET_MAX_POWER
 
         uint64 petauramask = 0;
         size_t petMaskPos = data.wpos();
         data << uint64(petauramask);                     // placeholder
         for (uint8 i = 0; i < MAX_AURAS; ++i)
         {
-            if (uint32 charmAura = charm->GetVisibleAura(i))
+            if (uint32 petAura = pet->GetVisibleAura(i))
             {
                 petauramask |= (uint64(1) << i);
-                data << uint32(charmAura);
-                data << uint8(charm->GetVisibleAuraFlags(i));
+                data << uint32(petAura);
+                data << uint8(pet->GetVisibleAuraFlags(i));
             }
         }
         data.put<uint64>(petMaskPos, petauramask);       // GROUP_UPDATE_FLAG_PET_AURAS
