@@ -110,9 +110,34 @@ struct spell_parachute_aura : public AuraScript
     }
 };
 
+// 50341 - Touch the Nightmare
+struct TouchTheNightmare : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->GetCaster()->GetHealthPercent() < 30.f)
+            return SPELL_FAILED_CUSTOM_ERROR;
+
+        return SPELL_CAST_OK;
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_CUSTOM_ERROR)
+            param1 = SPELL_FAILED_CUSTOM_ERROR_28;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_2)
+            spell->SetDamage(int32(spell->GetCaster()->GetMaxHealth() * 0.3f));
+    }
+};
+
 void AddSC_oculus()
 {
     RegisterSpellScript<spell_call_oculus_drake>("spell_call_oculus_drake");
     RegisterSpellScript<spell_ride_oculus_drake_saddle>("spell_ride_oculus_drake_saddle");
     RegisterSpellScript<spell_parachute_aura>("spell_parachute_aura");
+    RegisterSpellScript<TouchTheNightmare>("spell_touch_the_nightmare");
 }

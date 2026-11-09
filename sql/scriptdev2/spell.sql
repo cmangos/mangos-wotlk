@@ -856,6 +856,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (49590,'spell_arcane_disruption'),
 (49890,'spell_hourglass_of_eternity'),
 (50255,'spell_poisoned_spear'),
+(50341,'spell_touch_the_nightmare'),
 (50442,'spell_crystal_spike_visual_aura'),
 (50471,'spell_escape_from_silverbrook_credit_master'),
 (50546,'spell_ley_line_focus_item_trigger'),
