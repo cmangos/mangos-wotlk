@@ -252,7 +252,7 @@ struct VoljinsWarDrums : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        if (!spell->m_targets.getUnitTargetGuid().IsCreatureOrVehicle() || spell->m_targets.getUnitTargetGuid().GetEntry() != 40256) // Harold Lane
+        if (!spell->m_targets.getUnitTargetGuid().IsCreatureOrVehicle() || spell->m_targets.getUnitTargetGuid().GetEntry() != 40256)
             return SPELL_FAILED_BAD_TARGETS;
         if (spell->GetCaster()->IsPlayer())
         {
@@ -279,6 +279,38 @@ struct VoljinsWarDrums : public SpellScript
     // TODO: 49415, 74071, 73952, and follow 75086
 };
 
+// 74035 - Motivate
+struct MotivateGnomeCitizen : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->m_targets.getUnitTargetGuid().IsCreatureOrVehicle() || spell->m_targets.getUnitTargetGuid().GetEntry() != 39623)
+            return SPELL_FAILED_BAD_TARGETS;
+        if (spell->GetCaster()->IsPlayer())
+        {
+            // A Few Good Gnomes
+            if (static_cast<Player*>(spell->GetCaster())->IsCurrentQuest(25229, 1))
+                return SPELL_CAST_OK;
+            else
+            {
+                return SPELL_FAILED_CUSTOM_ERROR;
+            }
+        }
+        return SPELL_FAILED_CASTER_AURASTATE; // should never happen
+    }
+
+    void OnSpellCastResultOverride(SpellCastResult& result, uint32& param1, uint32& param2) const override
+    {
+        if (result == SPELL_FAILED_CUSTOM_ERROR)
+        {
+            result = SPELL_FAILED_CUSTOM_ERROR;
+            param1 = SPELL_FAILED_CUSTOM_ERROR_96;
+        }
+    }
+
+    // TODO: Subsequent spells
+};
+
 void AddSC_durotar()
 {
     Script* pNewScript = new Script;
@@ -288,4 +320,5 @@ void AddSC_durotar()
 
     RegisterSpellScript<AwakenPeon>("spell_awaken_peon");
     RegisterSpellScript<VoljinsWarDrums>("spell_voljins_war_drums");
+    RegisterSpellScript<MotivateGnomeCitizen>("spell_motivate_gnome_citizen");
 }

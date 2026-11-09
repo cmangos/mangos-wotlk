@@ -1397,6 +1397,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (73034,'spell_festergut_blighted_spores'),
 (73142,'spell_bone_spike_graveyard_storm'),
 (73159,'spell_play_movie'),
+(74035,'spell_motivate_gnome_citizen'),
 (74452,'spell_conflagration_targeting'),
 (74455,'spell_conflagration'),
 (74502,'spell_enervating_brand_aura'),
