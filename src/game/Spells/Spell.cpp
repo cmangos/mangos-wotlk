@@ -7004,6 +7004,12 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->IsInDisallowedMountForm())
                     return SPELL_FAILED_NOT_SHAPESHIFT;
 
+                if (m_caster->HasAura(51966)) // Scourge Disguise
+                {
+                    m_param1 = SPELL_FAILED_CUSTOM_ERROR_99;
+                    return SPELL_FAILED_CUSTOM_ERROR;
+                }
+
                 break;
             }
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
