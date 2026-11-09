@@ -2061,6 +2061,7 @@ class Player : public Unit
         void SetLaunched(bool apply) { m_launched = apply; }
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
+        ObjectGuid const& GetTeleportTransportGuid() const { return m_teleportTransport; }
         bool IsBeingTeleported() const { return m_semaphoreTeleport_Near || m_semaphoreTeleport_Far; }
         bool IsBeingTeleportedNear() const { return m_semaphoreTeleport_Near; }
         bool IsBeingTeleportedFar() const { return m_semaphoreTeleport_Far; }
