@@ -686,7 +686,6 @@ class BattlefieldWG : public Battlefield
 
         // update world states
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        void SendRemoveWorldStates(Player* player) override;
 
         // handle gameobject events
         bool HandleEvent(uint32 eventId, Object* source, Object* target) override;

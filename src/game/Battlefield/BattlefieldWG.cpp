@@ -33,6 +33,38 @@ BattlefieldWG::BattlefieldWG(Map& map, OutdoorPvPMgr& mgr) : Battlefield(map, mg
     m_zoneId            = ZONE_ID_WINTERGRASP;
     m_battleFieldId     = BATTLEFIELD_WG;
 
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_VEHICLE_H, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_MAX_VEHICLE_H, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_VEHICLE_A, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_MAX_VEHICLE_A, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_SHOW_BATTLE, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_SHOW_COOLDOWN, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_HORDE_DEFENDER, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_ALLIANCE_DEFENDER, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_TIME_TO_END, true, ZONE_ID_WINTERGRASP, 0);
+    m_map.GetVariableManager().SetVariableData(WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, true, ZONE_ID_WINTERGRASP, 0);
+
+    for (auto& goData : wgFortressData)
+        m_map.GetVariableManager().SetVariableData(goData.worldState, true, ZONE_ID_WINTERGRASP, 0);
+
+    for (auto& goData : wgFortressTowersData)
+        m_map.GetVariableManager().SetVariableData(goData.worldState, true, ZONE_ID_WINTERGRASP, 0);
+
+    for (auto& goData : wgOffenseData)
+        m_map.GetVariableManager().SetVariableData(goData.worldState, true, ZONE_ID_WINTERGRASP, 0);
+
+    for (auto& goData : wgFortressWorkshopsData)
+        m_map.GetVariableManager().SetVariableData(goData.worldState, true, ZONE_ID_WINTERGRASP, 0);
+
+    for (auto& goData : wgDefendeWorkshopsData)
+        m_map.GetVariableManager().SetVariableData(goData.worldState, true, ZONE_ID_WINTERGRASP, 0);
+
+    for (auto& goData : wgOffensiveWorkshopsData)
+        m_map.GetVariableManager().SetVariableData(goData.worldState, true, ZONE_ID_WINTERGRASP, 0);
+
+    for (auto& capturePointData : wgCapturePointData)
+        m_map.GetVariableManager().SetVariableData(capturePointData.worldState, true, ZONE_ID_WINTERGRASP, 0);
+
     Reset();
 }
 
@@ -152,47 +184,6 @@ void BattlefieldWG::Reset()
         factory.SetConditionId(i.conditionId);
         m_capturableWorkshops.emplace_back(std::move(factory));
     }
-}
-
-void BattlefieldWG::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    // general world states
-    FillInitialWorldState(data, count, WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    FillInitialWorldState(data, count, WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? uint32(time(nullptr) + m_timer / 1000) : 0);
-
-    FillInitialWorldState(data, count, WORLD_STATE_WG_SHOW_BATTLE, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    FillInitialWorldState(data, count, WORLD_STATE_WG_TIME_TO_END, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? uint32(time(nullptr) + m_timer / 1000) : 0);
-
-    // team specific world states
-    FillInitialWorldState(data, count, WORLD_STATE_WG_ALLIANCE_DEFENDER, GetDefender() == ALLIANCE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    FillInitialWorldState(data, count, WORLD_STATE_WG_HORDE_DEFENDER, GetDefender() == HORDE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-
-    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_A, uint32(m_activeVehiclesGuids[TEAM_INDEX_ALLIANCE].size()));
-    FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[TEAM_INDEX_ALLIANCE] * 4);
-
-    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[TEAM_INDEX_HORDE].size()));
-    FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[TEAM_INDEX_HORDE] * 4);
-
-    // display all the walls, towers and workshops
-    for (BattlefieldBuilding& building : m_keepBuildings)
-        FillInitialWorldState(data, count, building.GetWorldState(), building.GetGoState());
-
-    for (BattlefieldBuilding& building : m_defenseTowers)
-        FillInitialWorldState(data, count, building.GetWorldState(), building.GetGoState());
-
-    for (WintergraspFactory& building : m_defenseWorkshops)
-        FillInitialWorldState(data, count, building.GetWorldState(), building.GetGoState());
-
-    for (BattlefieldBuilding& building : m_offenseTowers)
-        FillInitialWorldState(data, count, building.GetWorldState(), building.GetGoState());
-
-    for (WintergraspFactory& building : m_capturableWorkshops)
-        FillInitialWorldState(data, count, building.GetWorldState(), building.GetGoState());
-}
-
-void BattlefieldWG::SendRemoveWorldStates(Player* player)
-{
-    player->SendUpdateWorldState(WORLD_STATE_WG_SHOW_BATTLE, WORLD_STATE_REMOVE);
 }
 
 void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
@@ -357,7 +348,7 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
                 {
                     Team creatorTeam = creator->GetTeam();
                     m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].push_back(creature->GetObjectGuid());
-                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
+                    m_map.GetVariableManager().SetVariable(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
 
                     // apply faction and faction flag
                     creature->CastSpell(creature, creatorTeam == ALLIANCE ? SPELL_ALLIANCE_FLAG : SPELL_HORDE_FLAG, TRIGGERED_OLD_TRIGGERED);
@@ -392,7 +383,7 @@ void BattlefieldWG::HandleCreatureDeath(Creature* creature)
                 {
                     Team creatorTeam = creator->GetTeam();
                     m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].remove(creature->GetObjectGuid());
-                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
+                    m_map.GetVariableManager().SetVariable(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
                 }
             }
             break;
@@ -592,7 +583,7 @@ bool BattlefieldWG::HandleCapturePointEvent(uint32 eventId, GameObject* go)
 
                     // send zone warning and update world state
                     SendWintergraspWarning(wgCapturePointEventData[index][i].defenseMessage, go);
-                    SendUpdateWorldState(workshop.GetWorldState(), workshop.GetGoState());
+                    m_map.GetVariableManager().SetVariable(workshop.GetWorldState(), workshop.GetGoState());
 
                     // change the banner visuals (if required)
                     if (wgCapturePointEventData[index][i].bannerArtKit)
@@ -664,7 +655,7 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             }
 
             // send world state updatem
-            SendUpdateWorldState(tower.GetWorldState(), tower.GetGoState());
+            m_map.GetVariableManager().SetVariable(tower.GetWorldState(), tower.GetGoState());
 
             // allow further DB script processing
             return false;
@@ -730,7 +721,7 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             }
 
             // send world state update
-            SendUpdateWorldState(tower.GetWorldState(), tower.GetGoState());
+            m_map.GetVariableManager().SetVariable(tower.GetWorldState(), tower.GetGoState());
 
             // allow further DB script processing
             return false;
@@ -759,7 +750,7 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             }
 
             // send world state update
-            SendUpdateWorldState(wall.GetWorldState(), wall.GetGoState());
+            m_map.GetVariableManager().SetVariable(wall.GetWorldState(), wall.GetGoState());
 
             // allow further DB script processing
             return false;
@@ -876,7 +867,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         else
         {
             building.SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-            SendUpdateWorldState(building.GetWorldState(), building.GetGoState());
+            m_map.GetVariableManager().SetVariable(building.GetWorldState(), building.GetGoState());
         }
 
         // Buff attacker for each tower
@@ -890,7 +881,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         else
         {
             building.SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-            SendUpdateWorldState(building.GetWorldState(), building.GetGoState());
+            m_map.GetVariableManager().SetVariable(building.GetWorldState(), building.GetGoState());
         }
     }
     // rebuild defense towers - factions handled by event
@@ -901,7 +892,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         else
         {
             building.SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-            SendUpdateWorldState(building.GetWorldState(), building.GetGoState());
+            m_map.GetVariableManager().SetVariable(building.GetWorldState(), building.GetGoState());
         }
     }
     // reset defense workshops
@@ -909,7 +900,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
     {
         workshop.SetOwner(GetDefender());
         workshop.SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState(workshop.GetWorldState(), workshop.GetGoState());
+        m_map.GetVariableManager().SetVariable(workshop.GetWorldState(), workshop.GetGoState());
         SetGraveYardLinkTeam(workshop.GetGraveyardId(), ZONE_ID_WINTERGRASP, GetDefender(), 571);
 
         ++m_workshopCount[GetTeamIndexByTeamId(GetDefender())];
@@ -920,7 +911,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         Team owner = workshop.GetGoEntry() == GO_WORKSHOP_BROKEN_TEMPLE || workshop.GetGoEntry() == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
         workshop.SetOwner(owner);
         workshop.SetGoState(owner == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState(workshop.GetWorldState(), workshop.GetGoState());
+        m_map.GetVariableManager().SetVariable(workshop.GetWorldState(), workshop.GetGoState());
         SetGraveYardLinkTeam(workshop.GetGraveyardId(), ZONE_ID_WINTERGRASP, owner, 571);
 
         ++m_workshopCount[GetTeamIndexByTeamId(owner)];
@@ -1072,20 +1063,20 @@ void BattlefieldWG::CleanupBattlefield(const WorldObject* objRef, Team winner)
         for (BattlefieldBuilding& building : m_keepBuildings)
         {
             building.SetGoState(building.GetOppositeGoState());
-            SendUpdateWorldState(building.GetWorldState(), building.GetGoState());
+            m_map.GetVariableManager().SetVariable(building.GetWorldState(), building.GetGoState());
         }
         // reset defense tower owner
         for (BattlefieldBuilding& building : m_defenseTowers)
         {
             building.SetGoState(building.GetOppositeGoState());
-            SendUpdateWorldState(building.GetWorldState(), building.GetGoState());
+            m_map.GetVariableManager().SetVariable(building.GetWorldState(), building.GetGoState());
         }
     }
     // set attacker towers to neutral and keep the object state
     for (BattlefieldBuilding& building : m_offenseTowers)
     {
         building.SetGoState(building.GetNeutralGoState());
-        SendUpdateWorldState(building.GetWorldState(), building.GetGoState());
+        m_map.GetVariableManager().SetVariable(building.GetWorldState(), building.GetGoState());
     }
 
     // ***** Update general stated **** //
@@ -1096,21 +1087,21 @@ void BattlefieldWG::CleanupBattlefield(const WorldObject* objRef, Team winner)
 void BattlefieldWG::SendUpdateGeneralWorldStates()
 {
     // update global states
-    SendUpdateWorldState(WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    SendUpdateWorldState(WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? uint32(time(nullptr) + m_timer / 1000) : 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? uint32(time(nullptr) + m_timer / 1000) : 0);
 
-    SendUpdateWorldState(WORLD_STATE_WG_SHOW_BATTLE, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    SendUpdateWorldState(WORLD_STATE_WG_TIME_TO_END, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? uint32(time(nullptr) + m_timer / 1000) : 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_SHOW_BATTLE, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_TIME_TO_END, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? uint32(time(nullptr) + m_timer / 1000) : 0);
 
     // team specific world states
-    SendUpdateWorldState(WORLD_STATE_WG_ALLIANCE_DEFENDER, GetDefender() == ALLIANCE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    SendUpdateWorldState(WORLD_STATE_WG_HORDE_DEFENDER, GetDefender() == HORDE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_ALLIANCE_DEFENDER, GetDefender() == ALLIANCE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_HORDE_DEFENDER, GetDefender() == HORDE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
 
-    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_A, uint32(m_activeVehiclesGuids[TEAM_INDEX_ALLIANCE].size()));
-    SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[TEAM_INDEX_ALLIANCE] * 4);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_VEHICLE_A, uint32(m_activeVehiclesGuids[TEAM_INDEX_ALLIANCE].size()));
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[TEAM_INDEX_ALLIANCE] * 4);
 
-    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[TEAM_INDEX_HORDE].size()));
-    SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[TEAM_INDEX_HORDE] * 4);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[TEAM_INDEX_HORDE].size()));
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[TEAM_INDEX_HORDE] * 4);
 }
 
 void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
@@ -1422,11 +1413,11 @@ void BattlefieldWG::Update(uint32 diff)
 
 void BattlefieldWG::SendBattlefieldTimerUpdate()
 {
-    SendUpdateWorldState(WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    SendUpdateWorldState(WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? uint32(time(nullptr) + m_timer / 1000) : 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? uint32(time(nullptr) + m_timer / 1000) : 0);
 
-    SendUpdateWorldState(WORLD_STATE_WG_SHOW_BATTLE, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
-    SendUpdateWorldState(WORLD_STATE_WG_TIME_TO_END, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? uint32(time(nullptr) + m_timer / 1000) : 0);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_SHOW_BATTLE, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    m_map.GetVariableManager().SetVariable(WORLD_STATE_WG_TIME_TO_END, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? uint32(time(nullptr) + m_timer / 1000) : 0);
 }
 
 bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
