@@ -684,9 +684,6 @@ class BattlefieldWG : public Battlefield
         void HandlePlayerEnterArea(Player* player, uint32 areaId, bool isMainZone) override;
         void HandlePlayerLeaveArea(Player* player, uint32 areaId, bool isMainZone) override;
 
-        // update world states
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-
         // handle gameobject events
         bool HandleEvent(uint32 eventId, Object* source, Object* target) override;
 
