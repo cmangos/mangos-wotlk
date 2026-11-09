@@ -386,13 +386,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                             damage *= aura->GetAuraTicks();
                         break;
                     }
-                    // Touch the Nightmare
-                    case 50341:
-                    {
-                        if (eff_idx == EFFECT_INDEX_2)
-                            damage = int32(unitTarget->GetMaxHealth() * 0.3f);
-                        break;
-                    }
                     // Tympanic Tantrum
                     case 62775:
                     {
