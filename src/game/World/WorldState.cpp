@@ -1137,15 +1137,15 @@ void WorldState::SetHellfireZoneOwner(Team zoneOwner)
                 player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
                     if (Player* player = map->GetPlayer(guid))
                     {
-                        OutdoorPvPTF::UnBuffPlayer(player);
-                        OutdoorPvPTF::BuffPlayer(player, zoneOwner);
+                        OutdoorPvPHP::UnBuffPlayer(player);
+                        OutdoorPvPHP::BuffPlayer(player, zoneOwner);
                     }
                 });
                 player->GetMap()->GetMessager().AddMessage([guid, zoneOwner](Map* map) -> void {
                     if (Player* player = map->GetPlayer(guid))
                     {
-                        OutdoorPvPTF::UnBuffPlayer(player);
-                        OutdoorPvPTF::BuffPlayer(player, zoneOwner);
+                        OutdoorPvPHP::UnBuffPlayer(player);
+                        OutdoorPvPHP::BuffPlayer(player, zoneOwner);
                     }
                 });
             }
