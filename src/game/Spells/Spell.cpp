@@ -7707,7 +7707,12 @@ SpellCastResult Spell::CheckItems()
                     }
 
                     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
-                    if (target->GetPower(power) == target->GetMaxPower(power))
+                    if (target->GetPowerType() != power && (target->getClass() != CLASS_DRUID || power != POWER_MANA))
+                    {
+                        m_param1 = SPELL_FAILED_CUSTOM_ERROR_56;
+                        failReason = SPELL_FAILED_CUSTOM_ERROR;
+                    }
+                    else if (target->GetPower(power) == target->GetMaxPower(power))
                     {
                         failReason = SPELL_FAILED_ALREADY_AT_FULL_POWER;
                     }
