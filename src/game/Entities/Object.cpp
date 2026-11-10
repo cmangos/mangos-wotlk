@@ -193,7 +193,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData& data, Player* target) c
     buf << GetPackGUID();
     buf << uint8(m_objectTypeId);
 
-    BuildMovementUpdate(&buf, updateFlags);
+    BuildMovementUpdate(&buf, updateFlags, target);
 
     UpdateMask updateMask;
     updateMask.SetCount(m_valuesCount);
@@ -276,7 +276,7 @@ void Object::DestroyForPlayer(Player* target, bool anim) const
     target->GetSession()->SendPacket(data);
 }
 
-void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
+void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags, Player const* target) const
 {
     // uint16 moveFlags2 = (isType(TYPEMASK_UNIT) ? ((Unit*)this)->m_movementInfo.GetMovementFlags2() : MOVEFLAG2_NONE);
 
@@ -450,8 +450,13 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     // 0x2
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
+        // the client takes this time as the transport time at the moment it gets the packet: it is given the time the
+        // packet arrives at this client
         WorldObject const* wo = static_cast<WorldObject const*>(this);
-        *data << uint32(wo->GetMap()->GetCurrentMSTime());
+        uint32 transportTime = wo->GetMap()->GetCurrentMSTime();
+        if (target)
+            transportTime += target->GetSession()->GetOneWayDelay();
+        *data << uint32(transportTime);
     }
 
     // 0x80

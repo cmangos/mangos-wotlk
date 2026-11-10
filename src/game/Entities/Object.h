@@ -629,7 +629,7 @@ class Object
         void _SetUpdateBits(UpdateMask& updateMask, Player* target) const;
         void _SetCreateBits(UpdateMask& updateMask, Player* target) const;
 
-        void BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const;
+        void BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags, Player const* target) const;
         void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const;
         void BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players) const;
 

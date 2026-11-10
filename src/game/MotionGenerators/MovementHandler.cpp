@@ -996,6 +996,7 @@ void WorldSession::ComputeNewClockDelta()
         latencyAccumulator(pair.second);
 
     uint32 latencyMedian = static_cast<uint32>(std::round(median(latencyAccumulator)));
+    m_timeSyncRoundTrip = latencyMedian;
     uint32 latencyStandardDeviation = static_cast<uint32>(std::round(sqrt(variance(latencyAccumulator))));
 
     accumulator_set<int64, features<tag::mean> > clockDeltasAfterFiltering;
