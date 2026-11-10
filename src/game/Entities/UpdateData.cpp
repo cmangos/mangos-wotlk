@@ -135,8 +135,14 @@ WorldPacket UpdateData::BuildPacket(size_t index)
         buf << (uint8) UPDATETYPE_OUT_OF_RANGE_OBJECTS;
         buf << (uint32) m_outOfRangeGUIDs.size();
 
-        for (auto m_outOfRangeGUID : m_outOfRangeGUIDs)
-            buf << m_outOfRangeGUID.WriteAsPacked();
+        // transports go after their passengers: a client takes off the passengers of a transport it removes, and a
+        // corpse taken off does not go back aboard if it is created again while the client still keeps it
+        for (ObjectGuid const& guid : m_outOfRangeGUIDs)
+            if (!guid.IsTransport() && !guid.IsMOTransport())
+                buf << guid.WriteAsPacked();
+        for (ObjectGuid const& guid : m_outOfRangeGUIDs)
+            if (guid.IsTransport() || guid.IsMOTransport())
+                buf << guid.WriteAsPacked();
     }
 
     buf.append(m_data[index].m_buffer);
