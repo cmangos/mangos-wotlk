@@ -2291,9 +2291,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // at client packet MSG_MOVE_TELEPORT_ACK
         SetSemaphoreTeleportNear(true);
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
-        // an elevator is moved at map update: bring it to the current time, the one its create block gives the client
-        if (currentTransport && currentTransport->GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT)
-            currentTransport->Update(0);
         if (!GetSession()->PlayerLogout())
             SendTeleportPacket(x, y, z, orientation, currentTransport);
 
