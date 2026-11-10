@@ -12080,8 +12080,11 @@ void Unit::SendTeleportPacket(float x, float y, float z, float ori, GenericTrans
     MovementInfo teleportMovementInfo = m_movementInfo;
     if (transport)
     {
-        teleportMovementInfo.SetTransportData(transport->GetObjectGuid(), x, y, z, ori, transport->GetPathProgress(), -1);
-        transport->CalculatePassengerPosition(x, y, z, &ori); // recalculate to real coords
+        Position transportPos;
+        uint32 pathProgress;
+        transport->GetCurrentPathState(transportPos, pathProgress);
+        teleportMovementInfo.SetTransportData(transport->GetObjectGuid(), x, y, z, ori, pathProgress, -1);
+        GenericTransport::CalculatePassengerPosition(x, y, z, &ori, transportPos.x, transportPos.y, transportPos.z, transportPos.o); // recalculate to real coords
     }
     teleportMovementInfo.ChangePosition(x, y, z, ori);
 

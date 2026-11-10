@@ -60,6 +60,13 @@ class GenericTransport : public GameObject
 
         uint32 GetPathProgress() const { return m_pathProgress; }
 
+        /// Position and path progress of the transport at the current map time, computed without moving it
+        virtual void GetCurrentPathState(Position& pos, uint32& pathProgress) const
+        {
+            pos = Position(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+            pathProgress = GetPathProgress();
+        }
+
         void SetGoState(GOState state) override;
 
         virtual void SpawnPassengers() {}
@@ -89,7 +96,20 @@ class ElevatorTransport : public GenericTransport
         void SetGoState(GOState state) override;
 
         bool IsCrossMapTransport() const override { return false; }
+
+        void GetCurrentPathState(Position& pos, uint32& pathProgress) const override;
     private:
+        struct PathPoint
+        {
+            TransportAnimationEntry const* node = nullptr;  // last animation node passed
+            Position pos;                                   // world position and orientation
+            bool hasRotation = false;
+            QuaternionData rotation;                        // local rotation, when the animation has one
+        };
+
+        uint32 GetPathProgressAt(uint32 msTime, bool& reachedStop) const;
+        bool GetPathPoint(uint32 pathProgress, PathPoint& point) const;
+
         TransportAnimation const* m_animationInfo;
         uint32 m_currentSeg;
         bool m_eventTriggered;

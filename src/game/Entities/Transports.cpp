@@ -630,6 +630,94 @@ bool ElevatorTransport::Create(uint32 dbGuid, uint32 guidlow, uint32 name_id, Ma
     return false;
 }
 
+// A pausing elevator stops at its next stop point, which sets reachedStop
+uint32 ElevatorTransport::GetPathProgressAt(uint32 msTime, bool& reachedStop) const
+{
+    reachedStop = false;
+    uint32 timeSinceLastStop = (msTime - m_movementStarted) % m_animationInfo->TotalTime;
+    uint32 const pause = GetGOInfo()->transport.pause;
+    if (!pause)
+        return timeSinceLastStop;
+
+    if (timeSinceLastStop >= pause)
+    {
+        reachedStop = true;
+        timeSinceLastStop = pause;
+    }
+    return ((m_pathProgress / pause) * pause + timeSinceLastStop) % m_animationInfo->TotalTime;
+}
+
+bool ElevatorTransport::GetPathPoint(uint32 pathProgress, PathPoint& point) const
+{
+    TransportAnimationEntry const* nodeNext = m_animationInfo->GetNextAnimNode(pathProgress);
+    TransportAnimationEntry const* nodePrev = m_animationInfo->GetPrevAnimNode(pathProgress);
+    if (!nodeNext || !nodePrev)
+        return false;
+
+    point.node = nodePrev;
+
+    G3D::Vector3 posPrev = G3D::Vector3(nodePrev->X, nodePrev->Y, nodePrev->Z);
+    G3D::Vector3 posNext = G3D::Vector3(nodeNext->X, nodeNext->Y, nodeNext->Z);
+    G3D::Vector3 currentPos;
+    if (posPrev == posNext)
+        currentPos = posPrev;
+    else
+    {
+        float nodeProgress = float(pathProgress - nodePrev->TimeSeg) / float(nodeNext->TimeSeg - nodePrev->TimeSeg);
+
+        currentPos = posPrev.lerp(posNext, nodeProgress);
+    }
+
+    point.pos.o = GetOrientation();
+    point.hasRotation = false;
+    if (TransportRotationEntry const* rotPrev = m_animationInfo->GetPrevRotation(pathProgress))
+    {
+        G3D::Quat rotation;
+        TransportRotationEntry const* rotNext = m_animationInfo->GetNextRotation(pathProgress);
+        if (rotPrev == rotNext)
+            rotation = G3D::Quat(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
+        else
+        {
+            G3D::Quat quatPrev(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
+            G3D::Quat quatNext(rotNext->x, rotNext->y, rotNext->z, rotNext->w);
+
+            float nodeProgress = float(pathProgress - rotPrev->TimeSeg) / float(rotNext->TimeSeg - rotPrev->TimeSeg);
+
+            rotation = quatPrev.slerp(quatNext, nodeProgress);
+        }
+
+        point.pos.o = std::asin(rotation.z) * 2;
+        point.hasRotation = true;
+        point.rotation = QuaternionData(rotation.x, rotation.y, rotation.z, rotation.w);
+    }
+
+    G3D::Quat transportPathRotation(GetFloatValue(GAMEOBJECT_PARENTROTATION + 0), GetFloatValue(GAMEOBJECT_PARENTROTATION + 1), GetFloatValue(GAMEOBJECT_PARENTROTATION + 2), GetFloatValue(GAMEOBJECT_PARENTROTATION + 3));
+    currentPos = currentPos * transportPathRotation;
+
+    currentPos += G3D::Vector3(m_stationaryPosition.x, m_stationaryPosition.y, m_stationaryPosition.z);
+
+    point.pos.x = currentPos.x;
+    point.pos.y = currentPos.y;
+    point.pos.z = currentPos.z;
+    return true;
+}
+
+void ElevatorTransport::GetCurrentPathState(Position& pos, uint32& pathProgress) const
+{
+    GenericTransport::GetCurrentPathState(pos, pathProgress);
+    if (!m_animationInfo || m_stopped)
+        return;
+
+    bool reachedStop;
+    uint32 currentProgress = GetPathProgressAt(GetMap()->GetCurrentMSTime(), reachedStop);
+    PathPoint point;
+    if (!GetPathPoint(currentProgress, point))
+        return;
+
+    pos = point.pos;
+    pathProgress = currentProgress;
+}
+
 void ElevatorTransport::Update(const uint32 diff)
 {
     if (!m_animationInfo)
@@ -637,68 +725,31 @@ void ElevatorTransport::Update(const uint32 diff)
 
     if (!m_stopped)
     {
-        uint32 timeSinceLastStop = (GetMap()->GetCurrentMSTime() - m_movementStarted) % m_animationInfo->TotalTime;
-        if (!GetGOInfo()->transport.pause)
-            m_pathProgress = timeSinceLastStop;
-        else
+        bool reachedStop;
+        uint32 pathProgress = GetPathProgressAt(GetMap()->GetCurrentMSTime(), reachedStop);
+        if (reachedStop) // stopped and needs to be reenabled by script
         {
-            if (timeSinceLastStop >= GetGOInfo()->transport.pause) // stopped and needs to be reenabled by script
-            {
-                m_stopped = true;
-                timeSinceLastStop = GetGOInfo()->transport.pause;
+            m_stopped = true;
 
-                if (AI())
-                    AI()->JustReachedStopPoint();
-            }
-            m_pathProgress = ((m_pathProgress / GetGOInfo()->transport.pause) * GetGOInfo()->transport.pause + timeSinceLastStop) % m_animationInfo->TotalTime;
+            if (AI())
+                AI()->JustReachedStopPoint();
         }
-        TransportAnimationEntry const* nodeNext = m_animationInfo->GetNextAnimNode(m_pathProgress);
-        TransportAnimationEntry const* nodePrev = m_animationInfo->GetPrevAnimNode(m_pathProgress);
-        if (nodeNext && nodePrev)
+        m_pathProgress = pathProgress;
+
+        PathPoint point;
+        if (GetPathPoint(m_pathProgress, point))
         {
-            m_currentSeg = nodePrev->TimeSeg;
+            m_currentSeg = point.node->TimeSeg;
 
-            G3D::Vector3 posPrev = G3D::Vector3(nodePrev->X, nodePrev->Y, nodePrev->Z);
-            G3D::Vector3 posNext = G3D::Vector3(nodeNext->X, nodeNext->Y, nodeNext->Z);
-            G3D::Vector3 currentPos;
-            if (posPrev == posNext)
-                currentPos = posPrev;
-            else
+            if (point.hasRotation)
             {
-                float nodeProgress = float(m_pathProgress - nodePrev->TimeSeg) / float(nodeNext->TimeSeg - nodePrev->TimeSeg);
+                SetOrientation(point.pos.o);
 
-                currentPos = posPrev.lerp(posNext, nodeProgress);
+                SetLocalRotation(point.rotation.x, point.rotation.y, point.rotation.z, point.rotation.w);
             }
 
-            TransportRotationEntry const* rotPrev = m_animationInfo->GetPrevRotation(m_pathProgress);
-            if (rotPrev)
-            {
-                G3D::Quat rotation;
-                TransportRotationEntry const* rotNext = m_animationInfo->GetNextRotation(m_pathProgress);
-                if (rotPrev == rotNext)
-                    rotation = G3D::Quat(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
-                else
-                {
-                    G3D::Quat quatPrev(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
-                    G3D::Quat quatNext(rotNext->x, rotNext->y, rotNext->z, rotNext->w);
-
-                    float nodeProgress = float(m_pathProgress - rotPrev->TimeSeg) / float(rotNext->TimeSeg - rotPrev->TimeSeg);
-
-                    rotation = quatPrev.slerp(quatNext, nodeProgress);
-                }
-
-                SetOrientation(std::asin(rotation.z) * 2);
-
-                SetLocalRotation(rotation.x, rotation.y, rotation.z, rotation.w);
-            }
-
-            G3D::Quat transportPathRotation(GetFloatValue(GAMEOBJECT_PARENTROTATION + 0), GetFloatValue(GAMEOBJECT_PARENTROTATION + 1), GetFloatValue(GAMEOBJECT_PARENTROTATION + 2), GetFloatValue(GAMEOBJECT_PARENTROTATION + 3));
-            currentPos = currentPos * transportPathRotation;
-
-            currentPos += G3D::Vector3(m_stationaryPosition.x, m_stationaryPosition.y, m_stationaryPosition.z);
-
-            GetMap()->GameObjectRelocation(this, currentPos.x, currentPos.y, currentPos.z, GetOrientation());
-            // SummonCreature(1, currentPos.x, currentPos.y, currentPos.z, GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 5000);
+            GetMap()->GameObjectRelocation(this, point.pos.x, point.pos.y, point.pos.z, GetOrientation());
+            // SummonCreature(1, point.pos.x, point.pos.y, point.pos.z, GetOrientation(), TEMPSPAWN_TIMED_DESPAWN, 5000);
 
             UpdatePassengerPositions(GetPassengers());
 
@@ -709,9 +760,9 @@ void ElevatorTransport::Update(const uint32 diff)
                 {
                     case 194675: // Ulduar Tram
                     {
-                        if (nodePrev->id == 179512)
+                        if (point.node->id == 179512)
                             eventId = GetGOInfo()->transport.pause1EventID;
-                        else if (nodePrev->id == 179620)
+                        else if (point.node->id == 179620)
                             eventId = GetGOInfo()->transport.pause2EventID;
                         break;
                     }
