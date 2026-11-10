@@ -22,6 +22,7 @@
 #include "Entities/Player.h"
 #include "Entities/Item.h"
 #include "Entities/Corpse.h"
+#include "Entities/Transports.h"
 #include "Maps/MapManager.h"
 #include "Maps/Map.h"
 #include "Grids/CellImpl.h"
@@ -240,6 +241,9 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
 
     DEBUG_LOG("Deleting Corpse and spawning bones.");
 
+    // removing the corpse from the map takes it off its transport
+    GenericTransport* transport = corpse->GetTransport();
+
     // remove corpse from player_guid -> corpse map
     RemoveCorpse(corpse);
 
@@ -284,6 +288,10 @@ ObjectAccessor::ConvertCorpseForPlayer(ObjectGuid player_guid, bool insignia)
 
         // add bones in grid store if grid loaded where corpse placed
         map->Add(bones);
+
+        // the bones stay aboard the transport the corpse was on
+        if (transport)
+            transport->AddPassenger(bones, true);
     }
 
     // all references to the corpse should be removed at this point
