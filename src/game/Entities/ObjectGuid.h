@@ -89,7 +89,7 @@ class ObjectGuid
     public:                                                 // constructors
         ObjectGuid() : m_guid(0) {}
         explicit ObjectGuid(uint64 guid) : m_guid(guid) {}
-        ObjectGuid(HighGuid hi, uint32 entry, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(entry) << 24) | (uint64(hi) << 52) : 0) {}
+        ObjectGuid(HighGuid hi, uint32 entry, uint32 counter) : m_guid(counter ? uint64(counter) | (HasEntry(hi) ? uint64(entry) << 24 : 0) | (uint64(hi) << 52) : 0) {}
         ObjectGuid(HighGuid hi, uint32 counter) : m_guid(counter ? uint64(counter) | (uint64(hi) << 52) : 0) {}
 
         operator uint64() const { return m_guid; }
