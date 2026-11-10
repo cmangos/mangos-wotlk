@@ -16729,13 +16729,15 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     if (transGUID != 0)
     {
         ObjectGuid guid(HIGHGUID_MO_TRANSPORT, transGUID);
+        bool elevator = false;
         if (GameObjectData const* data = sObjectMgr.GetGOData(transGUID))
         {
             GameObjectInfo const* transportInfo = sGOStorage.LookupEntry<GameObjectInfo>(data->id);
             if (transportInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
             {
-                guid = ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, transGUID);
+                guid = ObjectGuid(transportInfo->GetHighGuid(), data->id, transGUID);
                 m_movementInfo.t_guid = guid;
+                elevator = true;
             }
         }
         GenericTransport* transport = GetMap()->GetTransport(guid);
@@ -16766,7 +16768,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             }
         }
 
-        if (!m_transport && guid.GetHigh() == HIGHGUID_MO_TRANSPORT)
+        if (!m_transport && !elevator)
         {
             sLog.outError("%s have problems with transport guid (%u). Teleport to default race/class locations.",
                 guid.GetString().c_str(), transGUID);
@@ -18458,7 +18460,7 @@ void Player::SaveToDB()
     uberInsert.addFloat(finiteAlways(transportPosition.o));
 
     if (m_transport)
-        uberInsert.addUInt32(m_transport->GetGUIDLow());
+        uberInsert.addUInt32(m_transport->GetDbGuid());
     else
         uberInsert.addUInt32(0);
 
