@@ -1161,10 +1161,6 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
     if (!IsInWorld() || !u->IsInWorld())
         return false;
 
-    // the transport a player stands on, or is teleporting onto, stays at the player's client until the player has landed
-    if (IsTransport() && (static_cast<GameObject const*>(u->GetTransport()) == this || u->GetTeleportTransportGuid() == GetObjectGuid()))
-        return true;
-
     // invisible at client always
     if (!GetGOInfo()->displayId)
         return false;
