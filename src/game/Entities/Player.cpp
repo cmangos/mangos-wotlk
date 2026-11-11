@@ -13463,7 +13463,7 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
     data << uint32(item->GetItemSuffixFactor());            // SuffixFactor
     data << uint32(item->GetItemRandomPropertyId());        // random item property id
     data << uint32(count);                                  // count of items
-    data << uint32(GetItemCount(item->GetEntry()));         // count of items in inventory
+    data << uint32(GetItemCount(item->GetEntry(), true));   // count of items in bags and bank
 
     if (broadcast && GetGroup())
         GetGroup()->BroadcastPacket(data, true);
