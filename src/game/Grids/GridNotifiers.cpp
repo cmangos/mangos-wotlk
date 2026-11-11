@@ -29,19 +29,6 @@
 
 using namespace MaNGOS;
 
-void VisibleChangesNotifier::Visit(CameraMapType& m)
-{
-    for (auto& iter : m)
-    {
-        if (iter.getSource()->IsSendInProgress() || iter.getSource()->GetOwner()->HasAtClient(&i_object))
-            continue;
-        UpdateData data;
-        iter.getSource()->UpdateVisibilityOf(&i_object, data);
-        m_unvisitedGuids.erase(iter.getSource()->GetOwner()->GetObjectGuid());
-        data.SendData(*iter.getSource()->GetOwner()->GetSession());
-    }
-}
-
 void VisibleNotifier::Notify()
 {
     Player& player = *i_camera.GetOwner();
@@ -119,29 +106,10 @@ void VisibleNotifier::Notify()
                          itr->GetString().c_str(), player.GetGuidStr().c_str());
     }
 
-    if (i_data.HasData())
-    {
-        // send create/outofrange packet to player (except player create updates that already sent using SendUpdateToPlayer)
-        if (i_processSend)
-            i_data.SendData(*player.GetSession());
-    }
-
-    // Now do operations that required done at object visibility change to visible
-
-    // send data at target visibility change (adding to client)
-    if (i_processSend)
-    {
-        for (auto vItr : i_visibleNow)
-        {
-            // target aura duration for caster show only if target exist at caster client
-            if (vItr != &player && vItr->isType(TYPEMASK_UNIT))
-                player.SendAurasForTarget((Unit*)vItr);
-        }
-    }
-    else
-        for (auto vItr : i_visibleNow)
-            if (vItr != &player && vItr->isType(TYPEMASK_UNIT))
-                i_data.AddAfterCreatePacket(Player::BuildAurasForTarget(static_cast<Unit const*>(vItr)));
+    // target aura duration for caster show only if target exist at caster client
+    for (auto vItr : i_visibleNow)
+        if (vItr != &player && vItr->isType(TYPEMASK_UNIT))
+            i_data.AddAfterCreatePacket(Player::BuildAurasForTarget(static_cast<Unit const*>(vItr)));
 }
 
 void MessageDeliverer::Visit(CameraMapType& m)
