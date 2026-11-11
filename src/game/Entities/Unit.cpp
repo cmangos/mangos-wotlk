@@ -12075,7 +12075,7 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
     }
 }
 
-void Unit::SendTeleportPacket(float x, float y, float z, float ori, GenericTransport* transport)
+Position Unit::SendTeleportPacket(float x, float y, float z, float ori, GenericTransport* transport)
 {
     MovementInfo teleportMovementInfo = m_movementInfo;
     if (transport)
@@ -12108,6 +12108,8 @@ void Unit::SendTeleportPacket(float x, float y, float z, float ori, GenericTrans
     moveUpdateTeleport << GetPackGUID();
     teleportMovementInfo.Write(moveUpdateTeleport);
     SendMessageToSetExcept(moveUpdateTeleport, player);
+
+    return Position(x, y, z, ori);
 }
 
 void Unit::MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath, bool forceDestination)

@@ -315,14 +315,12 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
 
     plMover->SetSemaphoreTeleportNear(false);
 
-    uint32 old_zone = plMover->GetZoneId();
+    // the position is the destination since the order, the zone still the one before the teleport
+    uint32 old_zone = plMover->GetCachedZoneId();
 
     WorldLocation const& dest = plMover->GetTeleportDest();
 
 #ifdef ENABLE_PLAYERBOTS
-    // send MSG_MOVE_TELEPORT to observers around old position
-    SendTeleportToObservers(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation);
-
     // interrupt moving for bot if any
     if (plMover->GetPlayerbotAI() && !plMover->GetMotionMaster()->empty())
     {
@@ -476,7 +474,8 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
     {
         WorldPacket data(MSG_MOVE_SET_COLLISION_HGT, 18);
         data << guid.WriteAsPacked();
-        data << movementInfo;
+        // during a near teleport the client still sends the place before the order: the observers get the destination
+        data << (_player->IsBeingTeleportedNear() ? mover->m_movementInfo : movementInfo);
         data << newspeed; // new collision height
         mover->SendMessageToSetExcept(data, _player);
 
@@ -954,7 +953,9 @@ bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, 
     }
 
     /* process position-change */
-    HandleMoverRelocation(movementInfo);
+    // a player teleported near is at the destination since the order: a move the client sent before applying it is stale
+    if (!plMover || !plMover->IsBeingTeleportedNear())
+        HandleMoverRelocation(movementInfo);
 
     // just landed from a knockback? update status
     if (plMover && plMover->IsLaunched() && (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND || recv_data.GetOpcode() == MSG_MOVE_START_SWIM))

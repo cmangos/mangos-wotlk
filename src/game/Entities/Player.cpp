@@ -1610,7 +1610,8 @@ void Player::Update(const uint32 diff)
             m_positionStatusUpdateTimer -= diff;
     }
 
-    if (m_zoneUpdateTimer > 0)
+    // the zone of a near teleport changes at its acknowledgement, though the position is the destination since the order
+    if (m_zoneUpdateTimer > 0 && !IsBeingTeleportedNear())
     {
         if (diff >= m_zoneUpdateTimer)
         {
@@ -2243,14 +2244,6 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
             m_movementInfo.t_guid = GetObjectGuid();
             m_movementInfo.t_time = currentTransport->GetPathProgress();
-
-            if (!HasAtClient(currentTransport)) // in sniff, this aggregates all surroundings and sends them at once
-            {
-                AddAtClient(currentTransport);
-                UpdateData data;
-                currentTransport->BuildCreateUpdateBlockForPlayer(data, this);
-                data.SendData(*GetSession());
-            }
         }
 
         // this will be used instead of the current location in SaveToDB
@@ -2261,7 +2254,31 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetSemaphoreTeleportNear(true);
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
-            SendTeleportPacket(x, y, z, orientation, currentTransport);
+        {
+            Position const worldDest = SendTeleportPacket(x, y, z, orientation, currentTransport);
+
+            // the player is at the destination, aboard its transport, from the order on: the next visibility update sends
+            // the objects around it and removes those of the old place
+            if (IsInWorld())
+            {
+                SetDelayedZoneUpdate(false, 0);
+                if (currentTransport)
+                    m_movementInfo.t_pos = Position(x, y, z, orientation);
+                SetPosition(worldDest.x, worldDest.y, worldDest.z, worldDest.o, true);
+                if (currentTransport)
+                    currentTransport->AddPassenger(this, false);
+                GetMap()->AddUpdateCreateObject(this);
+
+                // the client applies a teleport onto a transport once it has that transport, whatever its visibility
+                if (currentTransport && !HasAtClient(currentTransport))
+                {
+                    AddAtClient(currentTransport);
+                    UpdateData data;
+                    currentTransport->BuildCreateUpdateBlockForPlayer(data, this);
+                    data.SendData(*GetSession());
+                }
+            }
+        }
 
         if (Loot* loot = sLootMgr.GetLoot(this))
             loot->Release(this);
