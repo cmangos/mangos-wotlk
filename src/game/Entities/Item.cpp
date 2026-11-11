@@ -1213,8 +1213,13 @@ void Item::RemoveFromClientUpdateList()
 void Item::BuildUpdateData()
 {
     if (Player* pl = GetOwner())
+    {
         if (!pl->IsItemCreationPending(this))               // a creation not written yet carries all the values
-            BuildValuesUpdateBlockForPlayer(pl->GetClientUpdate(), pl);
+        {
+            ChangedValuesWriter values(*this);
+            values.WriteFor(pl);
+        }
+    }
 
     ClearUpdateMask(false);
 }
