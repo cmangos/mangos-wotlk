@@ -1789,10 +1789,12 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
         if (item->GetPos() == dest)
             continue;
 
-        uint8 src = item->GetPos();
+        uint16 src = item->GetPos();
         _player->SwapItem(src, dest);
 
-        if (dest == EQUIPMENT_SLOT_MAINHAND || dest == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+        uint16 const mainHandPos = (INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_MAINHAND;
+        uint16 const offHandPos = (INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_OFFHAND;
+        if (dest == mainHandPos || dest == offHandPos || src == mainHandPos || src == offHandPos)
             weaponChanged = true;
     }
 
