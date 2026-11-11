@@ -2034,7 +2034,6 @@ void Guild::SwapItems(Player* pl, uint8 BankTab, uint8 BankTabSlot, uint8 BankTa
         if (BankTab != BankTabDst)
             LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pItemSrc->GetEntry(), SplitedAmount, BankTabDst);
 
-        pl->ItemRemovedQuestCheck(pItemSrc->GetEntry(), SplitedAmount);
         pItemSrc->SetCount(pItemSrc->GetCount() - SplitedAmount);
         pItemSrc->FSetState(ITEM_CHANGED);
         pItemSrc->SaveToDB();                               // not in inventory and can be save standalone
