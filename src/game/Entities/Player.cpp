@@ -2211,6 +2211,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         // lets reset far teleport flag if it wasn't reset during chained teleports
         SetSemaphoreTeleportFar(false);
+        // set when this call carries out a teleport delayed by an earlier call
+        bool const delayedTeleport = m_bHasDelayedTeleport;
         // setup delayed teleport flag
         // if teleport spell is casted in Unit::Update() func
         // then we need to delay it until update process will be finished
@@ -2230,9 +2232,12 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!IsWithinDist3d(x, y, z, GetMap()->GetVisibilityDistance()))
             RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_WORLD);
 
+        // a delayed teleport is carried out without its transport, kept by the call that delayed it
         GenericTransport* currentTransport = transport;
-        if (!transport && m_teleportTransport)
+        if (!transport && delayedTeleport && m_teleportTransport)
             currentTransport = GetMap()->GetTransport(m_teleportTransport);
+        // the acknowledgement places the player aboard from the offsets of the destination
+        m_teleportTransport = currentTransport ? currentTransport->GetObjectGuid() : ObjectGuid();
         if (currentTransport)
         {
             m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
