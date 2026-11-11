@@ -365,7 +365,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
             if (Player* member = itr->getSource())
             {
-                if (player->HasAtClient(member))
+                if (player->IsCreatedAtClient(member))      // a creation not written yet carries the values
                 {
                     UpdateMask updateMask;
                     updateMask.SetCount(member->GetValuesCount());
@@ -374,7 +374,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
                         member->BuildValuesUpdateBlockForPlayer(groupData, updateMask, player);
                 }
 
-                if (member->HasAtClient(player))
+                if (member->IsCreatedAtClient(player))
                 {
                     UpdateMask updateMask;
                     updateMask.SetCount(member->GetValuesCount());

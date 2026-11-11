@@ -4606,7 +4606,9 @@ void Aura::HandleModPossess(bool apply, bool Real)
 
         caster->TakePossessOf(target);
 
-        if (Player* playerCaster = caster->IsPlayer() ? static_cast<Player*>(caster) : nullptr)
+        // a creation not written yet carries the values
+        Player* playerCaster = caster->IsPlayer() ? static_cast<Player*>(caster) : nullptr;
+        if (playerCaster && !playerCaster->IsCreationPending(target))
         {
             UpdateData newData;
             target->BuildValuesUpdateBlockForPlayerWithFlags(newData, playerCaster, UF_FLAG_OWNER_ONLY);
@@ -4736,7 +4738,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
         caster->TakeCharmOf(target, GetId());
 
-        if (playerCaster)
+        if (playerCaster && !playerCaster->IsCreationPending(target)) // a creation not written yet carries the values
         {
             UpdateMask updateMask;
             updateMask.SetCount(target->GetValuesCount());
@@ -9277,7 +9279,8 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
         //sLog.outString("Boarding %s %s on %s %s", caster->GetName(), caster->GetGuidStr().c_str(), target->GetName(), target->GetGuidStr().c_str());
         target->GetVehicleInfo()->Board(caster, GetBasePoints() - 1);
 
-        if (Player* playerCaster = dynamic_cast<Player*>(caster))
+        Player* playerCaster = dynamic_cast<Player*>(caster);
+        if (playerCaster && !playerCaster->IsCreationPending(target)) // a creation not written yet carries the values
         {
             UpdateMask updateMask;
             updateMask.SetCount(target->GetValuesCount());

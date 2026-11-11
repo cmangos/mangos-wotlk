@@ -396,16 +396,16 @@ class Object
         // must be overwrite in appropriate subclasses (WorldObject, Item currently), or will crash
         virtual void AddToClientUpdateList();
         virtual void RemoveFromClientUpdateList();
-        virtual void UpdateVisibility(UpdateDataMapType& update_players) = 0;
-        virtual void BuildUpdateData(UpdateDataMapType& update_players) = 0;
+        // decides which clients start or stop seeing the object (Player::ScheduleCreate, Player::ScheduleOutOfRange)
+        virtual void UpdateVisibility() = 0;
+        // writes the changed values into the update packet of each client that has the object, then clears the field marks
+        virtual void BuildUpdateData() = 0;
         void MarkForClientUpdate();
-        void SendForcedObjectUpdate();
 
         void BuildValuesUpdateBlockForPlayer(UpdateData& data, Player* target) const;
         void BuildValuesUpdateBlockForPlayerWithFlags(UpdateData& data, Player* target, UpdateFieldFlags flags) const;
         void BuildValuesUpdateBlockForPlayer(UpdateData& data, UpdateMask& updateMask, Player* target) const;
         void BuildForcedValuesUpdateBlockForPlayer(UpdateData& data, Player* target) const;
-        void BuildOutOfRangeUpdateBlock(UpdateData& data) const;
 
         virtual void DestroyForPlayer(Player* target, bool anim = false) const;
 
@@ -614,9 +614,6 @@ class Object
 
         MaNGOS::unique_weak_ptr<Object> GetWeakPtr() const { return m_scriptRef; }
 
-        static void BuildOutOfRangeDataForPlayer(Player* pl, UpdateDataMapType& update_players, ObjectGuid oorObject);
-        void BuildCreateDataForPlayer(Player* pl, UpdateDataMapType& update_players, bool auras = true) const;
-
         void SetUpdateFlag(ObjectUpdateFlags flag, bool add);
 
     protected:
@@ -631,7 +628,6 @@ class Object
 
         void BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags, Player const* target) const;
         void BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* updateMask, Player* target) const;
-        void BuildUpdateDataForPlayer(Player* pl, UpdateDataMapType& update_players) const;
 
         uint16 m_objectType;
 
@@ -1160,9 +1156,13 @@ class WorldObject : public Object
 
         void AddToClientUpdateList() override;
         void RemoveFromClientUpdateList() override;
-        void BuildUpdateData(UpdateDataMapType&) override;
-        void UpdateVisibility(UpdateDataMapType& update_players) override;
-        
+        void BuildUpdateData() override;
+        void UpdateVisibility() override;
+        // sends the changed values now instead of at the next client update tick
+        void SendForcedObjectUpdate();
+        // number of transports and vehicles carrying the object, 0 if none
+        uint32 GetCarrierDepth() const;
+
         static Creature* SummonCreature(TempSpawnSettings settings, Map* map, uint32 phaseMask);
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject = false, bool setRun = false, uint32 pathId = 0, uint32 faction = 0, uint32 modelId = 0, bool spawnCounting = false, bool forcedOnTop = false);
 
@@ -1256,6 +1256,8 @@ class WorldObject : public Object
         GuidSet& GetClientGuidsIAmAt() { return m_clientGUIDsIAmAt; }
 
         void DestroyOnClientsIAmAt();
+        // the object leaves the view of all its clients: out of range in their next update packet
+        void ScheduleOutOfRangeOnClientsIAmAt();
 
         // Event handler
         EventProcessor m_events;

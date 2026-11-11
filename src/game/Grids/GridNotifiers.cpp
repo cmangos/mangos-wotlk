@@ -32,87 +32,68 @@ using namespace MaNGOS;
 void VisibleNotifier::Notify()
 {
     Player& player = *i_camera.GetOwner();
+
+    // the vehicles met are decided, then their passengers: nested vehicles first
+    std::stable_sort(i_vehiclePassengers.begin(), i_vehiclePassengers.end(),
+        [](WorldObject const* a, WorldObject const* b) { return a->GetCarrierDepth() < b->GetCarrierDepth(); });
+    for (WorldObject* passenger : i_vehiclePassengers)
+        i_camera.UpdateVisibilityOf(passenger);
+
 #ifdef ENABLE_PLAYERBOTS
     if (!player.isRealPlayer())
         return;
 #endif
 
-    // at this moment i_clientGUIDs have guids that not iterate at grid level checks
-    // but exist one case when this possible and object not out of range: transports
-    if (GenericTransport* transport = player.GetTransport())
-    {
-        for (auto itr : transport->GetPassengers())
-        {
-            if (i_clientGUIDs.find(itr->GetObjectGuid()) != i_clientGUIDs.end())
-            {
-                // ignore far sight case
-                if (itr->IsPlayer())
-                {
-                    UpdateData data;
-                    static_cast<Player*>(itr)->UpdateVisibilityOf(static_cast<Player*>(itr), &player, data);
-                    data.SendData(*static_cast<Player*>(itr)->GetSession());
-                }
-                player.UpdateVisibilityOf(&player, itr, i_data, i_visibleNow);
-                i_clientGUIDs.erase(itr->GetObjectGuid());
-            }
-        }
-    }
+    // the objects at the client that were not met around the camera
+    GuidVector notMetGuids;
+    player.GetObjectsNotMetByCameraVisit(notMetGuids);
 
-    // Far objects update on player notify
-    for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end();)
+    GenericTransport* transport = player.GetTransport();
+    for (ObjectGuid const& guid : notMetGuids)
     {
-        GuidSet::iterator current = itr++;
-        if (WorldObject* obj = player.GetMap()->GetWorldObject(*current))
-        {
-            if (!obj->GetVisibilityData().IsVisibilityOverridden())
-                continue;
+        // a transport of the map is never met around the camera nor found by GetWorldObject: it stays at the client while
+        // it is on the map (Map::SendInitInfiniteObjects, Map::UpdateInfinite, Transport::UpdateForMap)
+        if (guid.IsMOTransport())
+            continue;
 
-            player.UpdateVisibilityOf(&player, obj, i_data);
-            i_clientGUIDs.erase(current);
-        }
-    }
-
-    for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end();)
-    {
-        if ((*itr).IsMOTransport())
+        WorldObject* target = player.GetMap()->GetWorldObject(guid);
+        if (!target)
         {
-            itr = i_clientGUIDs.erase(itr);
+            sLog.outCustomLog("Object was %s in current map.", player.GetMap()->m_objRemoveList.find(guid) == player.GetMap()->m_objRemoveList.end() ? "not found" : "found");
+            player.ScheduleOutOfRange(guid);
             continue;
         }
-        ++itr;
+
+        // the passengers of the player's transport are not always met around the camera but stay visible
+        if (transport && target->GetTransport() == transport)
+        {
+            // ignore far sight case
+            if (target->IsPlayer())
+                static_cast<Player*>(target)->UpdateVisibilityOf(target, &player);
+            player.UpdateVisibilityOf(&player, target);
+            continue;
+        }
+
+        // far objects update on player notify
+        if (target->GetVisibilityData().IsVisibilityOverridden())
+        {
+            player.UpdateVisibilityOf(&player, target);
+            continue;
+        }
+
+        if (target->GetTypeId() == TYPEID_UNIT)
+            player.BeforeVisibilityDestroy(static_cast<Creature*>(target));
+        player.ScheduleOutOfRange(target);
+
+        DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range (no in active cells set) now for %s",
+                         guid.GetString().c_str(), player.GetGuidStr().c_str());
     }
 
     if (player.IsPendingPhaseChange())
     {
-        player.GetMap()->UpdateInfinite(player, i_data, i_clientGUIDs, i_visibleNow);
+        player.GetMap()->UpdateInfinite(player);
         player.RemovePendingPhaseChange();
     }
-
-    // generate outOfRange for not iterate objects
-    i_data.AddOutOfRangeGUID(i_clientGUIDs);
-    for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)
-    {
-        if (WorldObject* target = player.GetMap()->GetWorldObject(*itr))
-        {
-            if (target->GetTypeId() == TYPEID_UNIT)
-                player.BeforeVisibilityDestroy(static_cast<Creature*>(target));
-            player.RemoveAtClient(target);
-        }
-        else
-        {
-            sLog.outCustomLog("Object was %s in current map.", player.GetMap()->m_objRemoveList.find(*itr) == player.GetMap()->m_objRemoveList.end() ? "not found" : "found");
-            // the out of range block removes it from the client
-            player.GetClientGuids().erase(*itr);
-        }
-
-        DEBUG_FILTER_LOG(LOG_FILTER_VISIBILITY_CHANGES, "%s is out of range (no in active cells set) now for %s",
-                         itr->GetString().c_str(), player.GetGuidStr().c_str());
-    }
-
-    // target aura duration for caster show only if target exist at caster client
-    for (auto vItr : i_visibleNow)
-        if (vItr != &player && vItr->isType(TYPEMASK_UNIT))
-            i_data.AddAfterCreatePacket(Player::BuildAurasForTarget(static_cast<Unit const*>(vItr)));
 }
 
 void MessageDeliverer::Visit(CameraMapType& m)

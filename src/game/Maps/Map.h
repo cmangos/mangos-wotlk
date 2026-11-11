@@ -359,12 +359,6 @@ class Map : public GridRefManager<NGridType>
         // schedule for update object visibility change
         void AddUpdateMovementObject(Object* obj) { m_objectsToClientMovementUpdate.insert(obj); }
         void RemoveUpdateMovementObject(Object* obj) { m_objectsToClientMovementUpdate.erase(obj); }
-        // schedule update object destruction of object
-        void AddUpdateRemoveObject(GuidSet& visible, ObjectGuid guid);
-        void AddUpdateRemoveObject(GuidSet&& visible, ObjectGuid guid);
-
-        void AddCreateAtClientObject(Player* player, Object* obj);
-        void AddCreateAtClientObjects(PlayerSet const& players, Object* obj);
 
         void AddCameraToWorld(WorldObject* obj);
 
@@ -488,7 +482,7 @@ class Map : public GridRefManager<NGridType>
         OutdoorPvPMgr& GetOutdoorPvPMgr() { return m_outdoorPvpMgr; }
         OutdoorPvPMgr const& GetOutdoorPvPMgr() const { return m_outdoorPvpMgr; }
 
-        void UpdateInfinite(Player& player, UpdateData& updateData, GuidSet& clientGUIDs, WorldObjectSet& visibleNow) const;
+        void UpdateInfinite(Player& player) const;
 
     private:
         void LoadMapAndVMap(int gx, int gy);
@@ -524,13 +518,13 @@ class Map : public GridRefManager<NGridType>
         void setNGrid(NGridType* grid, uint32 x, uint32 y);
         void ScriptsProcess();
 
-        void UpdateVisibility(UpdateDataMapType& update_players);
+        void UpdateVisibility();
         void SendObjectUpdates();
         std::set<Object*> m_objectsToClientUpdate;
         std::set<std::pair<Object*, ObjectGuid>> m_objectsToClientCreateUpdate;
         std::set<Object*> m_objectsToClientMovementUpdate;
-        std::vector<std::pair<GuidSet, ObjectGuid>> m_objectsToClientRemove;
-        std::unordered_map<Object*, PlayerSet> m_visibilityAdded;
+        std::vector<std::pair<uint32, Object*>> m_visibilityCheckedObjects; // carrier depth and object, checked at this tick
+        ClientUpdateTick m_clientUpdateTickData;            // shared by the clients while their view changes are written
 
         std::set<WorldObject*> m_largeObjects;
         std::set<WorldObject*> m_infiniteObjects;

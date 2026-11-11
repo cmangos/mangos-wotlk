@@ -34,8 +34,11 @@ inline void MaNGOS::VisibleNotifier::Visit(GridRefManager<T>& m)
 {
     for (typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
-        i_camera.UpdateVisibilityOf(iter->getSource(), i_data, i_visibleNow);
-        i_clientGUIDs.erase(iter->getSource()->GetObjectGuid());
+        // a passenger of a vehicle is seen only once its vehicle is
+        if (iter->getSource()->GetTransportInfo())
+            i_vehiclePassengers.push_back(iter->getSource());
+        else
+            i_camera.UpdateVisibilityOf(iter->getSource());
     }
 }
 

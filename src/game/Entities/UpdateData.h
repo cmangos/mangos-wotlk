@@ -24,6 +24,8 @@
 
 class WorldPacket;
 class WorldSession;
+class Object;
+class Unit;
 
 enum ObjectUpdateType
 {
@@ -81,4 +83,12 @@ class UpdateData
 
         static void Compress(void* dst, uint32* dst_size, void* src, int src_size);
 };
+
+// Shared by the clients of a map while their view changes are written at its client update tick
+struct ClientUpdateTick
+{
+    std::unordered_map<Unit const*, size_t> aurasPacketIndexes; // auras of a unit, built once for all the clients it enters
+    std::vector<WorldPacket> aurasPackets;
+};
+
 #endif
