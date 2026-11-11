@@ -44,12 +44,6 @@
 
 bool WorldSession::CheckChatMessage(std::string& msg, bool addon/* = false*/)
 {
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    // bot check can be avoided
-    if (_player->GetPlayerbotAI())
-        return true;
-#endif
-
     // check max length: as of 2.3.x+ no longer disconnects, silently truncates to 255 (wowwiki)
     if (msg.length() > 255)
         utf8limit(msg, 255);

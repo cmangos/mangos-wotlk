@@ -49,11 +49,6 @@
 #include <cstdarg>
 #include <iostream>
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-#include "PlayerBot/Base/PlayerbotMgr.h"
-#include "PlayerBot/Base/PlayerbotAI.h"
-#endif
-
 #ifdef ENABLE_PLAYERBOTS
 #include "playerbot/playerbot.h"
 #endif
@@ -204,7 +199,7 @@ void WorldSession::SetExpansion(uint8 expansion)
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const& packet) const
 {
-#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
+#ifdef ENABLE_PLAYERBOTS
     // Send packet to bot AI
     if (GetPlayer())
     {
@@ -396,7 +391,7 @@ bool WorldSession::Update(uint32 /*diff*/)
 
                 // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
 
-#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
+#ifdef ENABLE_PLAYERBOTS
                 if (_player && _player->GetPlayerbotMgr())
                     _player->GetPlayerbotMgr()->HandleMasterIncomingPacket(*packet);
 #endif
@@ -450,31 +445,6 @@ bool WorldSession::Update(uint32 /*diff*/)
                 break;
         }
     }
-
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    // Process player bot packets
-    // The PlayerbotAI class adds to the packet queue to simulate a real player
-    // since Playerbots are known to the World obj only by its master's WorldSession object
-    // we need to process all master's bot's packets.
-    if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
-    {
-        for (PlayerBotMap::const_iterator itr = GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsBegin();
-                itr != GetPlayer()->GetPlayerbotMgr()->GetPlayerBotsEnd(); ++itr)
-        {
-            Player* const botPlayer = itr->second;
-            WorldSession* const pBotWorldSession = botPlayer->GetSession();
-            while(!pBotWorldSession->m_recvQueue.empty())
-            {
-                auto const botpacket = std::move(pBotWorldSession->m_recvQueue.front());
-                pBotWorldSession->m_recvQueue.pop_front();
-
-                OpcodeHandler const& opHandle = opcodeTable[botpacket->GetOpcode()];
-                pBotWorldSession->ExecuteOpcode(opHandle, *botpacket);
-            }
-        }
-        GetPlayer()->GetPlayerbotMgr()->RemoveBots();
-    }
-#endif
 
 #ifdef ENABLE_PLAYERBOTS
     if (GetPlayer() && GetPlayer()->GetPlayerbotMgr())
@@ -640,12 +610,6 @@ void WorldSession::LogoutPlayer()
 
     if (_player)
     {
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-        // Log out all player bots owned by this toon
-        if (_player->GetPlayerbotMgr())
-            _player->GetPlayerbotMgr()->LogoutAllBots(true);
-#endif
-
 #ifdef ENABLE_PLAYERBOTS
         if (_player->GetPlayerbotMgr() && (!_player->GetPlayerbotAI() || _player->GetPlayerbotAI()->IsRealPlayer()))
             _player->GetPlayerbotMgr()->LogoutAllBots();
@@ -726,20 +690,11 @@ void WorldSession::LogoutPlayer()
         // No SQL injection as AccountID is uint32
         static SqlStatementID id;
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-        if (!_player->GetPlayerbotAI())
-        {
-            // Unmodded core code below
-            SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
-            stmt.PExecute(uint32(0), GetAccountId());
-        }
-#else
         // Scope for SqlStatement.
         {
             SqlStatement stmt = LoginDatabase.CreateStatement(id, "UPDATE account SET active_realm_id = ? WHERE id = ?");
             stmt.PExecute(uint32(0), GetAccountId());
         }
-#endif
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         if (Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId()))
@@ -786,7 +741,7 @@ void WorldSession::LogoutPlayer()
         // GM ticket notification
         sTicketMgr.OnPlayerOnlineState(*_player, false);
 
-#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
+#ifdef ENABLE_PLAYERBOTS
         // Remember player GUID for update SQL below
         uint32 guid = _player->GetGUIDLow();
 #endif
@@ -818,7 +773,7 @@ void WorldSession::LogoutPlayer()
 
         static SqlStatementID updChars;
 
-#if defined(BUILD_DEPRECATED_PLAYERBOT) || defined(ENABLE_PLAYERBOTS)
+#ifdef ENABLE_PLAYERBOTS
         // Set for only character instead of accountid
         // Different characters can be alive as bots
         SqlStatement stmt = CharacterDatabase.CreateStatement(updChars, "UPDATE characters SET online = 0 WHERE guid = ?");
@@ -863,22 +818,7 @@ void WorldSession::KickPlayer(bool save, bool inPlace)
         return;
     }
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    if (!_player)
-        return;
-
-    if (_player->GetPlayerbotAI())
-    {
-        auto master = _player->GetPlayerbotAI()->GetMaster();
-        auto botMgr = master->GetPlayerbotMgr();
-        if (botMgr)
-            botMgr->LogoutPlayerBot(_player->GetObjectGuid());
-    }
-    else
-        LogoutRequest(time(nullptr) - 20, save);
-#else
     LogoutRequest(time(nullptr) - 20, save, true);
-#endif
 }
 
 void WorldSession::SendExpectedSpamRecords()
@@ -1366,15 +1306,6 @@ void WorldSession::AssignAnticheat(std::unique_ptr<SessionAnticheatInterface>&& 
 {
     m_anticheat = std::move(anticheat);
 }
-
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-
-void WorldSession::SetNoAnticheat()
-{
-    m_anticheat.reset(new NullSessionAnticheat(this));
-}
-
-#endif
 
 void WorldSession::AfkStateChange(bool state)
 {

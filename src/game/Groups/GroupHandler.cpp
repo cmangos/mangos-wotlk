@@ -208,7 +208,6 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleGroupAcceptOpcode(WorldPacket& /*recv_data*/)
 {
-    // Playerbot mod
     //recv_data.read_skip<uint32>();                          // roles mask?
 
     Group* group = GetPlayer()->GetGroupInvite();

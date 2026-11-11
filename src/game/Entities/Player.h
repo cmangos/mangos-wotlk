@@ -62,11 +62,6 @@ class Item;
 struct FactionTemplateEntry;
 struct VendorItem;
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-#include "PlayerBot/Base/PlayerbotMgr.h"
-#include "PlayerBot/Base/PlayerbotAI.h"
-#endif
-
 #ifdef ENABLE_PLAYERBOTS
 class PlayerbotAI;
 class PlayerbotMgr;
@@ -1597,19 +1592,6 @@ class Player : public Unit
         void AddTimedQuest(uint32 quest_id) { m_timedquests.insert(quest_id); }
         void RemoveTimedQuest(uint32 quest_id) { m_timedquests.erase(quest_id); }
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-        PlayerTalentMap GetTalents(uint8 spec) { return m_talents[spec]; }
-        void chompAndTrim(std::string& str);
-        bool getNextQuestId(const std::string& pString, unsigned int& pStartPos, unsigned int& pId);
-        void skill(std::list<uint32>& m_spellsToLearn);
-        void MakeTalentGlyphLink(std::ostringstream& out);
-        bool requiredQuests(const char* pQuestIdString);
-        PlayerMails::reverse_iterator GetMailRBegin() { return m_mail.rbegin();}
-        PlayerMails::reverse_iterator GetMailREnd() { return m_mail.rend();}
-        void UpdateMail();
-        uint32 GetSpec();
-#endif
-
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
@@ -2552,17 +2534,6 @@ class Player : public Unit
 
         void SendMessageToPlayer(std::string const& message) const; // debugging purposes
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-        // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
-        // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
-        void SetPlayerbotAI(PlayerbotAI* ai) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotAI = ai; }
-        PlayerbotAI* GetPlayerbotAI() { return m_playerbotAI; }
-        void SetPlayerbotMgr(PlayerbotMgr* mgr) { assert(!m_playerbotAI && !m_playerbotMgr); m_playerbotMgr = mgr; }
-        PlayerbotMgr* GetPlayerbotMgr() { return m_playerbotMgr; }
-        void SetBotDeathTimer() { m_deathTimer = 0; }
-        bool IsInDuel() const { return duel && duel->startTime != 0; }
-#endif
-
 #ifdef ENABLE_PLAYERBOTS
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
         // neither. Code that enables bots must create the playerbotMgr and set it using SetPlayerbotMgr.
@@ -2948,11 +2919,6 @@ class Player : public Unit
         GridReference<Player> m_gridRef;
         MapReference m_mapRef;
         std::unique_ptr<PlayerMenu> m_playerMenu;
-
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-        PlayerbotAI* m_playerbotAI;
-        PlayerbotMgr* m_playerbotMgr;
-#endif
 
 #ifdef ENABLE_PLAYERBOTS
         std::unique_ptr<PlayerbotAI> m_playerbotAI;

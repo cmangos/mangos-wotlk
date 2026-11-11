@@ -1579,10 +1579,6 @@ void World::SetInitialWorldSettings()
 #endif // BUILD_METRICS
 
 
-#ifdef BUILD_DEPRECATED_PLAYERBOT
-    PlayerbotMgr::SetInitialWorldSettings();
-#endif
-
 #ifdef ENABLE_PLAYERBOTS
     sPlayerbotAIConfig.Initialize();
 #ifndef BUILD_AHBOT
