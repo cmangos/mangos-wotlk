@@ -312,7 +312,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         if (obj->IsUnit())
         {
             Unit* unit = static_cast<Unit*>(obj);
-            if (unit->GetVehicleInfo())
+            if (mapChange && unit->GetVehicleInfo())
             {
                 unit->GetVehicleInfo()->TeleportPassengers(newMapid);
             }
@@ -332,6 +332,10 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
             }
             case TYPEID_PLAYER:
             {
+                // a path that goes on in the same map keeps its passengers aboard, as the client does
+                if (!mapChange)
+                    break;
+
                 Player* player = static_cast<Player*>(obj);
                 if (player->IsDead() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
                     player->ResurrectPlayer(1.0);
