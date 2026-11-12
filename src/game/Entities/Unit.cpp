@@ -12063,7 +12063,16 @@ void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool cas
             if (MovementGenerator* movgen = c->GetMotionMaster()->top())
                 movgen->Interrupt(*c);
 
-        SendTeleportPacket(x, y, z, orientation, GetTransport());
+        // the teleport packet of a passenger carries its place on its transport
+        float packetX = x, packetY = y, packetZ = z, packetO = orientation;
+        if (GenericTransport* transport = GetTransport())
+        {
+            Position transportPos;
+            uint32 pathProgress;
+            transport->GetCurrentPathState(transportPos, pathProgress);
+            GenericTransport::CalculatePassengerOffset(packetX, packetY, packetZ, &packetO, transportPos.x, transportPos.y, transportPos.z, transportPos.o);
+        }
+        SendTeleportPacket(packetX, packetY, packetZ, packetO, GetTransport());
 
         GetMap()->CreatureRelocation(c, x, y, z, orientation);
 
