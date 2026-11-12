@@ -255,13 +255,17 @@ void Transport::SpawnPassengers()
     if (!mapId)
         return;
 
+    // the crew comes with its ship: the clients get it as existing objects, never as objects that appear
     auto& guids = sObjectMgr.GetDbGuidsForTransport(mapId);
     for (auto& data : guids)
     {
+        WorldObject* passenger = nullptr;
         if (data.first == TYPEID_GAMEOBJECT)
-            WorldObject::SpawnGameObject(data.second, GetMap(), 0, this);
+            passenger = WorldObject::SpawnGameObject(data.second, GetMap(), 0, this);
         else if (data.first == TYPEID_UNIT)
-            WorldObject::SpawnCreature(data.second, GetMap(), 0, this);
+            passenger = WorldObject::SpawnCreature(data.second, GetMap(), 0, this);
+        if (passenger)
+            passenger->SetItsNewObject(false);
     }
 }
 
