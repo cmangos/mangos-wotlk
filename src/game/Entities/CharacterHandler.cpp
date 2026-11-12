@@ -1677,7 +1677,7 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
     DEBUG_LOG("CMSG_EQUIPMENT_SET_USE");
     recv_data.hexlike();
 
-    bool weaponChanged = false;
+    auto const handItems = _player->GetHandItemGuids();
     bool bagsFull = false;
     bool fail = false;
 
@@ -1730,19 +1730,13 @@ void WorldSession::HandleEquipmentSetUseOpcode(WorldPacket& recv_data)
         if (item->GetPos() == dest)
             continue;
 
-        uint16 src = item->GetPos();
-        _player->SwapItem(src, dest);
-
-        uint16 const mainHandPos = (INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_MAINHAND;
-        uint16 const offHandPos = (INVENTORY_SLOT_BAG_0 << 8) | EQUIPMENT_SLOT_OFFHAND;
-        if (dest == mainHandPos || dest == offHandPos || src == mainHandPos || src == offHandPos)
-            weaponChanged = true;
+        _player->SwapItem(item->GetPos(), dest);
     }
 
     WorldPacket data(SMSG_USE_EQUIPMENT_SET_RESULT, 1);
     data << uint8(bagsFull ? 4 : (fail ? 1 : 0)); // 4 - equipment swap failed - inventory is full, 1 any failure
     SendPacket(data);
 
-    if (weaponChanged)
+    if (_player->HasNewHandItem(handItems))
         _player->SendResetRangedCombatTimer();
 }

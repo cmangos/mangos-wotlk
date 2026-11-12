@@ -12921,6 +12921,21 @@ void Player::SendResetRangedCombatTimer()
     GetSession()->SendPacket(data);
 }
 
+std::pair<ObjectGuid, ObjectGuid> Player::GetHandItemGuids() const
+{
+    Item* mainHand = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    Item* offHand = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    return { mainHand ? mainHand->GetObjectGuid() : ObjectGuid(), offHand ? offHand->GetObjectGuid() : ObjectGuid() };
+}
+
+// a hand holds an item it did not hold in handItems; a hand only emptied does not count
+bool Player::HasNewHandItem(std::pair<ObjectGuid, ObjectGuid> const& handItems) const
+{
+    auto const newHandItems = GetHandItemGuids();
+    return (!newHandItems.first.IsEmpty() && newHandItems.first != handItems.first) ||
+        (!newHandItems.second.IsEmpty() && newHandItems.second != handItems.second);
+}
+
 void Player::TradeCancel(bool sendback, TradeStatus status /*= TRADE_STATUS_TRADE_CANCELED*/)
 {
     if (m_trade)

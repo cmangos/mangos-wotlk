@@ -1393,6 +1393,8 @@ class Player : public Unit
         void SendSellError(SellResult msg, Creature* pCreature, ObjectGuid itemGuid) const;
         void SendOpenContainer(ObjectGuid itemGuid);
         void SendResetRangedCombatTimer();
+        std::pair<ObjectGuid, ObjectGuid> GetHandItemGuids() const;
+        bool HasNewHandItem(std::pair<ObjectGuid, ObjectGuid> const& handItems) const;
         void AddWeaponProficiency(uint32 newflag) { m_WeaponProficiency |= newflag; }
         void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag; }
         uint32 GetWeaponProficiency() const { return m_WeaponProficiency; }

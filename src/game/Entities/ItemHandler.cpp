@@ -87,7 +87,12 @@ void WorldSession::HandleSwapInvItemOpcode(WorldPacket& recv_data)
     uint16 src = ((INVENTORY_SLOT_BAG_0 << 8) | srcslot);
     uint16 dst = ((INVENTORY_SLOT_BAG_0 << 8) | dstslot);
 
+    auto const handItems = _player->GetHandItemGuids();
+
     _player->SwapItem(src, dst);
+
+    if (_player->HasNewHandItem(handItems))
+        _player->SendResetRangedCombatTimer();
 }
 
 void WorldSession::HandleAutoEquipItemSlotOpcode(WorldPacket& recv_data)
@@ -106,7 +111,12 @@ void WorldSession::HandleAutoEquipItemSlotOpcode(WorldPacket& recv_data)
     if (!item || item->GetPos() == dstpos)
         return;
 
+    auto const handItems = _player->GetHandItemGuids();
+
     _player->SwapItem(item->GetPos(), dstpos);
+
+    if (_player->HasNewHandItem(handItems))
+        _player->SendResetRangedCombatTimer();
 }
 
 void WorldSession::HandleSwapItem(WorldPacket& recv_data)
@@ -136,9 +146,11 @@ void WorldSession::HandleSwapItem(WorldPacket& recv_data)
         return;
     }
 
+    auto const handItems = _player->GetHandItemGuids();
+
     _player->SwapItem(src, dst);
 
-    if (dst == EQUIPMENT_SLOT_MAINHAND || dst == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+    if (_player->HasNewHandItem(handItems))
         _player->SendResetRangedCombatTimer();
 }
 
@@ -165,6 +177,8 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
     uint16 src = pSrcItem->GetPos();
     if (dest == src)                                        // prevent equip in same slot, only at cheat
         return;
+
+    auto const handItems = _player->GetHandItemGuids();
 
     Item* pDstItem = _player->GetItemByPos(dest);
     if (!pDstItem)                                          // empty slot, simple case
@@ -238,7 +252,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
 
     if (Player::IsBagPos(dest))
         _player->SendOpenContainer(pSrcItem->GetObjectGuid());
-    else if (dest == EQUIPMENT_SLOT_MAINHAND || dest == EQUIPMENT_SLOT_OFFHAND || src == EQUIPMENT_SLOT_MAINHAND || src == EQUIPMENT_SLOT_OFFHAND)
+    else if (_player->HasNewHandItem(handItems))
         _player->SendResetRangedCombatTimer();
 }
 
