@@ -83,7 +83,7 @@ typedef std::vector<KeyFrame>  KeyFrameVec;
 
 struct TransportTemplate
 {
-    TransportTemplate() : inInstance(false), pathTime(0), accelTime(0.0f), accelDist(0.0f), entry(0) { }
+    TransportTemplate() : inInstance(false), pathTime(0), accelTime(0.0f), accelDist(0.0f), entry(0), counter(0) { }
     ~TransportTemplate();
 
     std::set<uint32> mapsUsed;

@@ -16672,6 +16672,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     {
         ObjectGuid guid(HIGHGUID_MO_TRANSPORT, transGUID);
         bool elevator = false;
+        TransportTemplate const* transportTemplate = nullptr;
         if (GameObjectData const* data = sObjectMgr.GetGOData(transGUID))
         {
             GameObjectInfo const* transportInfo = sGOStorage.LookupEntry<GameObjectInfo>(data->id);
@@ -16685,11 +16686,22 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
                     GetMap()->LoadGrid(data->posX, data->posY);
             }
         }
+        // a map transport is saved by its entry: its guid counter is the load order of the transports table
+        if (!elevator)
+        {
+            transportTemplate = sTransportMgr.GetTransportTemplate(transGUID);
+            if (transportTemplate)
+            {
+                guid = ObjectGuid(HIGHGUID_MO_TRANSPORT, transportTemplate->counter);
+                m_movementInfo.t_guid = guid;
+            }
+        }
         GenericTransport* transport = GetMap()->GetTransport(guid);
         Map* map = GetMap();
         if (!transport)
         {
-            if (TransportTemplate const* transportTemplate = sTransportMgr.GetTransportTemplate(guid.GetCounter()))
+            // a transport that crosses maps may be on the other map of its path, which is never instanced
+            if (transportTemplate && transportTemplate->mapsUsed.size() > 1)
             {
                 uint32 mapId = *transportTemplate->mapsUsed.begin();
                 if (mapId == map->GetId()) // only two maps max
@@ -18408,8 +18420,9 @@ void Player::SaveToDB()
     uberInsert.addFloat(finiteAlways(transportPosition.z));
     uberInsert.addFloat(finiteAlways(transportPosition.o));
 
+    // a map transport has no spawn guid, its entry identifies it
     if (m_transport)
-        uberInsert.addUInt32(m_transport->GetDbGuid());
+        uberInsert.addUInt32(m_transport->IsMoTransport() ? m_transport->GetEntry() : m_transport->GetDbGuid());
     else
         uberInsert.addUInt32(0);
 
