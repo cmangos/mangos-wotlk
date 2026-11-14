@@ -519,8 +519,20 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     if (!changeVehicle)                                     // Send expected unboarding packages
     {
-        if (GenericTransport* transport = m_owner->GetTransport())
-            transport->AddPassenger(passenger);
+        // Preserve the vehicle owner's position relative to its parent
+        // transport.  A controlled passenger's world position can still be
+        // the transport origin, so deriving new transport offsets from the
+        // passenger during AddPassenger() snaps it to the middle of a moving
+        // ship when a cannon (or another nested vehicle) ejects it.
+        GenericTransport* parentTransport = m_owner->GetTransport();
+        float const exitOrientationOffset = passenger->GetTransOffsetO();
+        Position exitPos = m_owner->GetPosition(parentTransport);
+
+        if (parentTransport)
+        {
+            parentTransport->AddPassenger(passenger, false);
+            passenger->m_movementInfo.UpdateTransportData(exitPos);
+        }
         else
         {
             // Update movementInfo
@@ -541,8 +553,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         if (passenger->hasUnitState(UNIT_STAT_ROOT) && !passenger->HasAuraType(SPELL_AURA_MOD_ROOT))
             passenger->SetImmobilizedState(false);
 
-        Position exitPos = m_owner->GetPosition(m_owner->GetTransport());
-        exitPos.o = exitPos.o + passenger->GetTransOffsetO();
+        exitPos.o = exitPos.o + exitOrientationOffset;
 
         if (VehicleSeatParameters const* params = sObjectMgr.GetVehicleSeatParameters(seatEntry->m_ID))
         {
@@ -943,6 +954,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
         if (seatFlags & SEAT_FLAG_CAN_CONTROL)
         {
             CharmInfo* charmInfo = pVehicle->GetCharmInfo();
+
             MANGOS_ASSERT(charmInfo);
 
             pPlayer->SetCharm(nullptr);
