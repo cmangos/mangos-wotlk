@@ -1170,8 +1170,79 @@ void WorldSession::SendRedirectClient(std::string& ip, uint16 port) const
     SendPacket(pkt);
 }
 
+// Packets by which a client makes its own character act in the world. While another unit controls the character (charm,
+// mind control) its client has lost that control, so they are dropped and reported to the anticheat; spells and items
+// have their own check, which still lets through those that break the charm.
+static bool IsCharacterActionOpcode(Opcodes opcode)
+{
+    switch (opcode)
+    {
+        // melee
+        case CMSG_ATTACKSWING:
+        case CMSG_ATTACKSTOP:
+        // movement of the character itself, not the acknowledgements of the server orders
+        case MSG_MOVE_START_FORWARD:
+        case MSG_MOVE_START_BACKWARD:
+        case MSG_MOVE_STOP:
+        case MSG_MOVE_START_STRAFE_LEFT:
+        case MSG_MOVE_START_STRAFE_RIGHT:
+        case MSG_MOVE_STOP_STRAFE:
+        case MSG_MOVE_JUMP:
+        case MSG_MOVE_START_TURN_LEFT:
+        case MSG_MOVE_START_TURN_RIGHT:
+        case MSG_MOVE_STOP_TURN:
+        case MSG_MOVE_START_PITCH_UP:
+        case MSG_MOVE_START_PITCH_DOWN:
+        case MSG_MOVE_STOP_PITCH:
+        case MSG_MOVE_SET_RUN_MODE:
+        case MSG_MOVE_SET_WALK_MODE:
+        case MSG_MOVE_FALL_LAND:
+        case MSG_MOVE_START_SWIM:
+        case MSG_MOVE_STOP_SWIM:
+        case MSG_MOVE_SET_FACING:
+        case MSG_MOVE_SET_PITCH:
+        case MSG_MOVE_HEARTBEAT:
+        case CMSG_MOVE_FALL_RESET:
+        case CMSG_MOVE_SET_FLY:
+        case MSG_MOVE_START_ASCEND:
+        case MSG_MOVE_STOP_ASCEND:
+        case MSG_MOVE_START_DESCEND:
+        case CMSG_MOVE_CHNG_TRANSPORT:
+        // spells under way
+        case CMSG_CANCEL_CHANNELLING:
+        case CMSG_CANCEL_AUTO_REPEAT_SPELL:
+        // equipment
+        case CMSG_AUTOEQUIP_ITEM:
+        case CMSG_AUTOEQUIP_ITEM_SLOT:
+        case CMSG_SWAP_ITEM:
+        case CMSG_SWAP_INV_ITEM:
+        case CMSG_AUTOSTORE_BAG_ITEM:
+        case CMSG_SET_AMMO:
+        case CMSG_USE_EQUIPMENT_SET:
+        // pet commands
+        case CMSG_PET_ACTION:
+        case CMSG_PET_CAST_SPELL:
+        case CMSG_PET_STOP_ATTACK:
+        // actions in the world
+        case CMSG_GAMEOBJ_USE:
+        case CMSG_ACTIVATETAXI:
+        case CMSG_ACTIVATETAXIEXPRESS:
+        case CMSG_SUMMON_RESPONSE:
+        case CMSG_TOTEM_DESTROYED:
+            return true;
+        default:
+            return false;
+    }
+}
+
 void WorldSession::ExecuteOpcode(OpcodeHandler const& opHandle, WorldPacket& packet)
 {
+    if (_player && _player->HasCharmer() && IsCharacterActionOpcode(packet.GetOpcode()))
+    {
+        m_anticheat->CharmedAction(packet.GetOpcode());
+        return;
+    }
+
     // need prevent do internal far teleports in handlers because some handlers do lot steps
     // or call code that can do far teleports in some conditions unexpectedly for generic way work code
     if (_player)
