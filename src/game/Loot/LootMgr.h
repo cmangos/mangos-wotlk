@@ -405,6 +405,7 @@ class Loot
         {}
         void Clear();
         bool IsLootedForAll() const;
+        bool ReleaseIfLootedForAll();
         void SendReleaseFor(ObjectGuid const& guid);
         void SendReleaseForAll();
         void SendAllowedLooter();
