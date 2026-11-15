@@ -949,6 +949,9 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
             {
                 m_lootItem->isReleased = true;
                 m_lootItem->allowedGuid.clear();
+                // for a chest, allowedGuid holds who looted the item: left empty, the item stays lootable
+                if (m_loot->m_isChest)
+                    m_lootItem->allowedGuid.emplace(player->GetObjectGuid());
                 
                 ItemPrototype const* pProto = sObjectMgr.GetItemPrototype(m_lootItem->itemId);                   
                 Loot loot(player, pProto->DisenchantID, LOOT_DISENCHANTING);
