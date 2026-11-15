@@ -189,6 +189,7 @@ class GroupLootRoll
         void SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNumber, RollVote rollType);
         void Finish(RollVoteMap::const_iterator& winnerItr);
         bool AllPlayerVoted(RollVoteMap::const_iterator& winnerItr);
+        RollVoteMask GetVoteMaskFor(Player const* player) const;
         RollVoteMap           m_rollVoteMap;
         bool                  m_isStarted;
         LootItem*             m_lootItem;

@@ -643,15 +643,20 @@ void GroupLootRoll::SendStartRoll()
         Player* plr = sObjectMgr.GetPlayer(itr->first);
         if (!plr || !plr->GetSession())
             continue;
-        // dependent from player
-        RollVoteMask mask = m_voteMask;
-        // In NEED_BEFORE_GREED need disabled for non-usable item for player
-        if (m_loot->m_lootMethod == NEED_BEFORE_GREED && plr->CanUseItem(m_lootItem->itemProto) != EQUIP_ERR_OK)
-            mask = RollVoteMask(mask & ~ROLL_VOTE_MASK_NEED);
-        data.put<uint8>(voteMaskPos, uint8(mask));
+        data.put<uint8>(voteMaskPos, uint8(GetVoteMaskFor(plr)));
 
         plr->GetSession()->SendPacket(data);
     }
+}
+
+// Choices offered to the player in SMSG_LOOT_START_ROLL, the client sends no other vote
+RollVoteMask GroupLootRoll::GetVoteMaskFor(Player const* player) const
+{
+    RollVoteMask mask = m_voteMask;
+    // In NEED_BEFORE_GREED need disabled for non-usable item for player
+    if (m_loot->m_lootMethod == NEED_BEFORE_GREED && player->CanUseItem(m_lootItem->itemProto) != EQUIP_ERR_OK)
+        mask = RollVoteMask(mask & ~ROLL_VOTE_MASK_NEED);
+    return mask;
 }
 
 // Send all passed message
@@ -814,7 +819,11 @@ bool GroupLootRoll::PlayerVote(Player* player, RollVote vote)
 {
     ObjectGuid const& playerGuid = player->GetObjectGuid();
     RollVoteMap::iterator voterItr = m_rollVoteMap.find(playerGuid);
-    if (voterItr == m_rollVoteMap.end())
+    // only a player offered the roll may vote, once, and for one of the offered choices
+    if (voterItr == m_rollVoteMap.end() || voterItr->second.vote != ROLL_NOT_EMITED_YET)
+        return false;
+
+    if (!(GetVoteMaskFor(player) & (1 << vote)))
         return false;
 
     voterItr->second.vote = vote;
