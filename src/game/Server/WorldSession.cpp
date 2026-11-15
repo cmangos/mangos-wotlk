@@ -100,7 +100,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
     m_timeSyncClockDeltaQueue(6), m_timeSyncClockDelta(0), m_timeSyncRoundTrip(0), m_pendingTimeSyncRequests(), m_timeSyncNextCounter(0), m_timeSyncTimer(0),
-    m_requestSocket(nullptr), m_recruitingFriendId(recruitingFriend), m_isRecruiter(isARecruiter) {}
+    m_requestSocket(nullptr), m_accountFlags(accountFlags), m_recruitingFriendId(recruitingFriend), m_isRecruiter(isARecruiter) {}
 
 /// WorldSession destructor
 WorldSession::~WorldSession()
