@@ -894,6 +894,10 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
         {
+            if (pVehicle->IsCreature())
+                if (uint32 charmedSpellList = static_cast<Creature*>(pVehicle)->GetCreatureInfo()->CharmedSpellList)
+                    static_cast<Creature*>(pVehicle)->SetSpellList(charmedSpellList);
+
             if (!charmInfo)
                 charmInfo = pVehicle->InitCharmInfo(pVehicle);
             charmInfo->InitVehicleCreateSpells();
@@ -974,7 +978,13 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
         }
 
         if (seatFlags & SEAT_FLAG_CAN_CAST)
+        {
+            if (pVehicle->IsCreature())
+                if (static_cast<Creature*>(pVehicle)->GetCreatureInfo()->CharmedSpellList)
+                    static_cast<Creature*>(pVehicle)->SetSpellList(static_cast<Creature*>(pVehicle)->GetCreatureInfo()->SpellList);
+
             pPlayer->RemovePetActionBar();
+        }
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
     {
