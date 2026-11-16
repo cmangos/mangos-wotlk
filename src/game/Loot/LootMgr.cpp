@@ -1382,6 +1382,7 @@ void Loot::SetPlayerIsNotLooting(Player* player)
 void Loot::Release(Player* player)
 {
     bool updateClients = false;
+    bool releasedItemToLoot = false;
     if (player->GetObjectGuid() == m_currentLooterGuid)
     {
         // the owner of the loot released his item
@@ -1392,6 +1393,12 @@ void Loot::Release(Player* player)
             {
                 lootItem->isReleased = true;
                 updateClients = true;
+
+                // the turn ends only on an item someone else may take: free for all items, and items above the threshold
+                // in master loot, are not reserved to the current looter
+                if (!lootItem->freeForAll && (m_lootMethod != MASTER_LOOT || lootItem->isUnderThreshold) &&
+                    lootItem->allowedGuid.size() > lootItem->allowedGuid.count(player->GetObjectGuid()))
+                    releasedItemToLoot = true;
             }
         }
     }
@@ -1599,6 +1606,12 @@ void Loot::Release(Player* player)
                     {
                         SendReleaseForAll();
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
+                    }
+                    else if (releasedItemToLoot)
+                    {
+                        // the round robin is over: the corpse tooltip of the looters no longer names anyone
+                        m_currentLooterGuid.Clear();
+                        SendAllowedLooter();
                     }
                     break;
                 }
