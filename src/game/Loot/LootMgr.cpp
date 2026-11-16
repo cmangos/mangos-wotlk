@@ -625,7 +625,7 @@ bool LootItem::IsAllowed(Player const* player, Loot const* loot) const
 // ------- Loot Roll -------
 //
 
-// Send the roll for the whole group
+// Send the roll to the voters on the map of the loot
 void GroupLootRoll::SendStartRoll()
 {
     WorldPacket data(SMSG_LOOT_START_ROLL, (8 + 4 + 4 + 4 + 4 + 4 + 4 + 1));
@@ -646,8 +646,8 @@ void GroupLootRoll::SendStartRoll()
         if (itr->second.vote == ROLL_NOT_VALID)
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
-        if (!plr || !plr->GetSession())
+        Player* plr = GetPlayerOnLootMap(itr->first);
+        if (!plr)
             continue;
         data.put<uint8>(voteMaskPos, uint8(GetVoteMaskFor(plr)));
 
@@ -680,15 +680,15 @@ void GroupLootRoll::SendAllPassed()
         if (itr->second.vote == ROLL_NOT_VALID)
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
-        if (!plr || !plr->GetSession())
+        Player* plr = GetPlayerOnLootMap(itr->first);
+        if (!plr)
             continue;
 
         plr->GetSession()->SendPacket(data);
     }
 }
 
-// Send roll 'value' of the whole group and the winner to the whole group
+// Send the roll 'value' of the voters and the winner to the voters on the map of the loot
 void GroupLootRoll::SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNumber, RollVote rollType)
 {
     WorldPacket data(SMSG_LOOT_ROLL_WON, (8 + 4 + 4 + 4 + 4 + 8 + 1 + 1));
@@ -726,14 +726,14 @@ void GroupLootRoll::SendLootRollWon(ObjectGuid const& targetGuid, uint32 rollNum
         if (itr->second.vote == ROLL_NOT_VALID)
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
-        if (!plr || !plr->GetSession())
+        Player* plr = GetPlayerOnLootMap(itr->first);
+        if (!plr)
             continue;
         plr->GetSession()->SendPacket(data);
     }
 }
 
-// Send roll of targetGuid to the whole group (included targuetGuid)
+// Send the roll of targetGuid to the voters on the map of the loot, targetGuid included
 void GroupLootRoll::SendRoll(ObjectGuid const& targetGuid, uint32 rollNumber, uint32 rollType)
 {
     WorldPacket data(SMSG_LOOT_ROLL, (8 + 4 + 8 + 4 + 4 + 4 + 1 + 1 + 1));
@@ -752,12 +752,19 @@ void GroupLootRoll::SendRoll(ObjectGuid const& targetGuid, uint32 rollNumber, ui
         if (itr->second.vote == ROLL_NOT_VALID)
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
-        if (!plr || !plr->GetSession())
+        Player* plr = GetPlayerOnLootMap(itr->first);
+        if (!plr)
             continue;
 
         plr->GetSession()->SendPacket(data);
     }
+}
+
+// Only the voters on the map of the loot get the roll: from another map, a player can neither see the loot nor vote
+Player* GroupLootRoll::GetPlayerOnLootMap(ObjectGuid const& playerGuid) const
+{
+    Player* player = m_lootMap->GetPlayer(playerGuid);
+    return player && player->GetSession() ? player : nullptr;
 }
 
 GroupLootRoll::~GroupLootRoll()
@@ -782,6 +789,7 @@ bool GroupLootRoll::TryToStart(Loot& loot, uint32 itemSlot)
             return false;
 
         m_loot = &loot;
+        m_lootMap = loot.GetLootTarget()->GetMap();
         m_itemSlot = itemSlot;
         m_lootItem->isBlocked = true;                           // block the item while rolling
 
