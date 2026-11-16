@@ -521,7 +521,7 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
         return MAX_LOOT_SLOT_TYPE;
 
     if (!rollWinnerGuid.IsEmpty())
-        return player->GetObjectGuid() == rollWinnerGuid ? LOOT_SLOT_NORMAL : MAX_LOOT_SLOT_TYPE;
+        return player->GetObjectGuid() == rollWinnerGuid ? LOOT_SLOT_NORMAL : LOOT_SLOT_LOCKED;
 
     if (freeForAll)
         return loot->m_lootMethod == NOT_GROUP_TYPE_LOOT ? LOOT_SLOT_OWNER : LOOT_SLOT_NORMAL; // player have not yet looted a free for all item
@@ -1022,7 +1022,6 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
         {
             m_lootItem->isReleased = true;
             m_lootItem->rollWinnerGuid = winnerItr->first;
-            m_loot->ForceLootAnimationClientUpdate();
         }
     }
     m_isStarted = false;
