@@ -2182,8 +2182,9 @@ void Loot::SendAllowedLooter()
 
     data << m_currentLooterGuid.WriteAsPacked();
 
+    // a looter on another map cannot see the loot target
     for (auto itr : m_ownerSet)
-        if (Player* plr = ObjectAccessor::FindPlayer(itr))
+        if (Player* plr = m_lootTarget->GetMap()->GetPlayer(itr))
             plr->GetSession()->SendPacket(data);
 }
 
