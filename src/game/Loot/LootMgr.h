@@ -58,7 +58,10 @@ enum LootSlotType
     LOOT_SLOT_MASTER  = 2,                                  // can be looted only master (error message)
     LOOT_SLOT_REQS    = 3,                                  // can't be looted (error message about missing reqs)
     LOOT_SLOT_OWNER   = 4,                                  // ignore binding confirmation and etc, for single player looting
-    MAX_LOOT_SLOT_TYPE                                      // custom, use for mark skipped from show items
+    MAX_LOOT_SLOT_TYPE,                                     // custom, use for mark skipped from show items
+
+    // item seen by a player who may not take it: the client shows it locked
+    LOOT_SLOT_LOCKED = LOOT_SLOT_REQS
 };
 
 enum RollVote
