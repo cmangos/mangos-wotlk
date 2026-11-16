@@ -481,6 +481,7 @@ class Map : public GridRefManager<NGridType>
 
         // the group loot rolls of this loot target are updated by the map until they end
         void AddRollingLoot(ObjectGuid const& lootTargetGuid) { m_rollingLoots.insert(lootTargetGuid); }
+        void ResendLootRollsTo(Player const* player);
 
         OutdoorPvPMgr& GetOutdoorPvPMgr() { return m_outdoorPvpMgr; }
         OutdoorPvPMgr const& GetOutdoorPvPMgr() const { return m_outdoorPvpMgr; }
