@@ -286,6 +286,10 @@ void AuctionHouseMgr::LoadAuctionItems()
         uint32 item_guid        = fields[12].GetUInt32();
         uint32 item_template    = fields[13].GetUInt32();
 
+        // auctions that share an item join the same item row: the item is loaded once and LoadAuctions keeps the newest of them
+        if (GetAItem(item_guid))
+            continue;
+
         ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item_template);
 
         if (!proto)
@@ -333,7 +337,7 @@ void AuctionHouseMgr::LoadAuctions()
         return;
     }
 
-    queryResult = CharacterDatabase.Query("SELECT id,houseid,itemguid,item_template,item_count,item_randompropertyid,itemowner,buyoutprice,time,moneyTime,buyguid,lastbid,startbid,deposit FROM auction");
+    queryResult = CharacterDatabase.Query("SELECT id,houseid,itemguid,item_template,item_count,item_randompropertyid,itemowner,buyoutprice,time,moneyTime,buyguid,lastbid,startbid,deposit FROM auction ORDER BY id DESC");
     if (!queryResult)
     {
         BarGoLink bar(1);
@@ -343,6 +347,8 @@ void AuctionHouseMgr::LoadAuctions()
     }
 
     BarGoLink bar(AuctionCount);
+
+    std::unordered_set<uint32> auctionedItems;              // items of the auctions loaded so far
 
     typedef std::map<uint32, std::wstring> PlayerNames;
     PlayerNames playerNames;                                // caching for load time
@@ -398,6 +404,15 @@ void AuctionHouseMgr::LoadAuctions()
             {
                 auction->DeleteFromDB();
                 sLog.outError("Auction %u has not a existing item : %u, deleted", auction->Id, auction->itemGuidLow);
+                delete auction;
+                continue;
+            }
+
+            // an item is in one auction at most: rows come newest first, so an older row of the same item belongs to an auction that is over
+            if (!auctionedItems.insert(auction->itemGuidLow).second)
+            {
+                auction->DeleteFromDB();
+                sLog.outError("Auction %u has the item %u of a newer auction, deleted", auction->Id, auction->itemGuidLow);
                 delete auction;
                 continue;
             }
