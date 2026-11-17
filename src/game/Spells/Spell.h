@@ -643,7 +643,7 @@ class Spell
         // void HandleAddAura(Unit* Target);
 
         void SetCastItem(Item* item);
-        Item* GetCastItem() { return m_CastItem; }
+        Item* GetCastItem() const;
 
         SpellEntry const* m_spellInfo;
         SpellEntry const* m_triggeredBySpellInfo;
@@ -932,7 +932,8 @@ class Spell
         std::pair<float, float> GetMinMaxRange(bool strict);
 
         Unit* m_caster;
-        Item* m_CastItem;
+        ObjectGuid m_castItemGuid;                          // the item is looked up in its owner's inventory at each use
+        ObjectGuid m_castItemOwnerGuid;
         bool m_itemCastSpell;
         ObjectGuid m_forwardedCastItemGuid;
 
