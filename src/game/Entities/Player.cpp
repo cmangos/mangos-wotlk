@@ -9636,7 +9636,8 @@ uint32 Player::GetItemCountWithLimitCategory(uint32 limitCategory, Item* skipIte
         if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             count += pBag->GetItemCountWithLimitCategory(limitCategory, skipItem);
 
-    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; ++i)
+    // bank slots and bank bags, whose contents are counted below
+    for (int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_BAG_END; ++i)
         if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
             if (pItem->GetProto()->ItemLimitCategory == limitCategory && pItem != skipItem)
                 count += pItem->GetCount();
