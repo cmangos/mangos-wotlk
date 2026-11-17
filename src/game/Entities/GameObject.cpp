@@ -926,7 +926,7 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     if (map->GetGameObject(dbGuid))
         return false;
 
-    uint32 entry = forcedEntry ? forcedEntry : data->id;
+    uint32 entry = forcedEntry;
     // uint32 map_id = data->mapid;                         // already used before call
     uint32 phaseMask = data->phaseMask;
     float x = data->posX;
@@ -944,9 +944,13 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forc
     if (groupEntry)
     {
         group = static_cast<GameObjectGroup*>(map->GetSpawnManager().GetSpawnGroup(groupEntry->Id));
-        if (!entry)
+        // a member loaded with its grid takes the entry its group chose for it, as when the group spawns it
+        if (!entry && group)
             entry = group->GetGuidEntry(dbGuid);
     }
+
+    if (!entry)
+        entry = data->id;
 
     if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(dbGuid))
         entry = randomEntry;
