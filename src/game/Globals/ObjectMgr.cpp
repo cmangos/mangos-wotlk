@@ -7546,8 +7546,9 @@ void ObjectMgr::SetHighestGuids()
         newInstanceId = (*result)[0].GetUInt32() + 1;
     }
 
-    if (newInstanceId < 2) //Instance id 0 and 1 are taken by ebon hold.
-        newInstanceId = 2;
+    // ids are handed out from FIRST_INSTANCE_ID up, as PackInstances numbers the stored instances
+    if (newInstanceId < FIRST_INSTANCE_ID)
+        newInstanceId = FIRST_INSTANCE_ID;
 
     m_InstanceGuids.Set(newInstanceId);
 
