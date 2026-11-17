@@ -800,6 +800,39 @@ struct AidoftheEarthen : public SpellScript
     }
 };
 
+// 56512 - Submeged State Aura
+struct SubmegedStateAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsCreature())
+            return;
+        if (apply)
+        {
+            Creature* worm = static_cast<Creature*>(target);
+            CharmInfo* charmInfo = worm->GetCharmInfo();
+            if (!charmInfo)
+                return;
+            worm->SetSpellList(3030102);
+            charmInfo->InitVehicleCreateSpells();
+            if (Player* player = dynamic_cast<Player*>(worm->GetCharmer()))
+                player->VehicleSpellInitialize();
+        }
+        else
+        {
+            Creature* worm = static_cast<Creature*>(target);
+            CharmInfo* charmInfo = worm->GetCharmInfo();
+            if (!charmInfo)
+                return;
+            worm->SetSpellList(3030101);
+            charmInfo->InitVehicleCreateSpells();
+            if (Player* player = dynamic_cast<Player*>(worm->GetCharmer()))
+                player->VehicleSpellInitialize();
+        }
+    }
+};
+
 
 void AddSC_storm_peaks()
 {
@@ -868,4 +901,5 @@ void AddSC_storm_peaks()
     RegisterSpellScript<JokkumScriptcast>("spell_jokkum_scriptcast");
     RegisterSpellScript<InitialProtoDrake>("spell_initial_proto_drake");
     RegisterSpellScript<AidoftheEarthen>("spell_aid_of_the_earthen");
+    RegisterSpellScript<SubmegedStateAura>("spell_submeged_state_aura");
 }

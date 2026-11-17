@@ -1037,6 +1037,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (56266,'spell_vortex_aura'),
 (56278,'spell_read_pronouncement'),
 (56430,'spell_arcane_bomb'),
+(56512,'spell_submeged_state_aura'),
 (56578,'spell_rapid_fire_harpoon'),
 (56671,'spell_spear_of_hodir'),
 (56683,'spell_grab_captured_crusader'),
