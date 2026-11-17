@@ -1013,8 +1013,8 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
         // delete them from the DB, even if not loaded
         // TODO: add difficulty to queries if it becomes a problem
         CharacterDatabase.BeginTransaction();
-        CharacterDatabase.PExecute("DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = id WHERE (ExtendState = 0 or permanent = 0) and map = '%u'", mapid);
-        CharacterDatabase.PExecute("DELETE FROM group_instance USING group_instance LEFT JOIN instance ON group_instance.instance = id WHERE map = '%u'", mapid);
+        CharacterDatabase.PExecute("DELETE FROM character_instance WHERE (ExtendState = 0 OR permanent = 0) AND instance IN (SELECT id FROM instance WHERE map = '%u')", mapid);
+        CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance IN (SELECT id FROM instance WHERE map = '%u')", mapid);
         CharacterDatabase.PExecute("DELETE FROM instance WHERE map = '%u' and (SELECT guid FROM character_instance WHERE ExtendState != 0 AND instance = id LIMIT 1) IS NULL", mapid);
         CharacterDatabase.CommitTransaction();
 
@@ -1023,7 +1023,7 @@ void MapPersistentStateManager::_ResetOrWarnAll(uint32 mapid, Difficulty difficu
         // update it in the DB
         CharacterDatabase.PExecute("UPDATE instance_reset SET resettime = '" UI64FMTD "' WHERE mapid = '%u' AND difficulty = '%u'", (uint64)next_reset, mapid, difficulty);
         // decrement extension state
-        CharacterDatabase.PExecute("UPDATE character_instance LEFT JOIN instance ON character_instance.instance = id SET ExtendState=ExtendState-1 WHERE map = '%u'", mapid);
+        CharacterDatabase.PExecute("UPDATE character_instance SET ExtendState = ExtendState - 1 WHERE instance IN (SELECT id FROM instance WHERE map = '%u')", mapid);
         return;
     }
 
