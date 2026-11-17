@@ -66,6 +66,9 @@ void Pet::RemoveFromWorld()
     ///- Remove the pet from the accessor
     if (IsInWorld())
     {
+        // before leaving the object store: the vehicle finds its passenger on the map to unboard it
+        ExitVehicle();
+
         if (!m_removed && !IsPlayerControlled())
             Unsummon(PET_SAVE_NOT_IN_SLOT, nullptr, false);
 

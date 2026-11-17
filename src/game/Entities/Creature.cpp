@@ -212,6 +212,9 @@ void Creature::RemoveFromWorld()
     ///- Remove the creature from the accessor
     if (IsInWorld())
     {
+        // before leaving the object store: the vehicle finds its passenger on the map to unboard it
+        ExitVehicle();
+
         if (GetObjectGuid().IsCreatureOrVehicle())
             GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)nullptr);
         if (GetDbGuid())
