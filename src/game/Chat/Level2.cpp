@@ -2328,6 +2328,7 @@ bool ChatHandler::HandleNpcFactionIdCommand(char* args)
     }
 
     pCreature->setFaction(factionId);
+    pCreature->CallForAllControlledUnits([factionId](Unit* unit) { unit->setFaction(factionId); }, CONTROLLED_PET | CONTROLLED_TOTEMS | CONTROLLED_GUARDIANS | CONTROLLED_CHARM);
 
     // faction is set in creature_template - not inside creature
 
