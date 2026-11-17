@@ -2141,9 +2141,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (!InBattleGround() && mEntry->IsBattleGroundOrArena())
         return false;
 
-    // Get MapEntrance trigger if teleport to other -nonBG- map
+    // Get MapEntrance trigger if teleport to other -nonBG- map, or for a player outside the world, who enters the map anew
     bool assignedAreaTrigger = false;
-    if (GetMapId() != mapid && !mEntry->IsBattleGroundOrArena() && !at)
+    if ((GetMapId() != mapid || !IsInWorld()) && !mEntry->IsBattleGroundOrArena() && !at)
     {
         at = sObjectMgr.GetMapEntranceTrigger(mapid);
         assignedAreaTrigger = true;
@@ -2153,7 +2153,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (at)
     {
         uint32 miscRequirement = 0;
-        AreaLockStatus lockStatus = GetAreaTriggerLockStatus(at, GetDifficulty(mEntry->IsRaid()), miscRequirement);
+        AreaLockStatus lockStatus = GetAreaTriggerLockStatus(at, GetDifficulty(mEntry->IsRaid()), miscRequirement, !IsInWorld());
         if (lockStatus != AREA_LOCKSTATUS_OK)
         {
             // Teleport not requested by area-trigger
