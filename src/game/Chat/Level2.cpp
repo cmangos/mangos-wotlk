@@ -21,6 +21,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Server/DBCStores.h"
 #include "Globals/ObjectMgr.h"
+#include "Server/SQLStorages.h"
 #include "Entities/ObjectGuid.h"
 #include "Entities/Item.h"
 #include "Entities/Player.h"
@@ -502,10 +503,10 @@ static char const* const creatureKeys[] =
 * .go creature <GUID>     --> TP using creature.guid
 * .go creature azuregos   --> TP player to the mob with this name
 *                             Warning: If there is more than one mob with this name
-*                                      you will be teleported to the first one that is found.
+*                                      you will be teleported to the nearest one on your map, otherwise to any one.
 * .go creature id 6109    --> TP player to the mob, that has this creature_template.entry
 *                             Warning: If there is more than one mob with this "id"
-*                                      you will be teleported to the first one that is found.
+*                                      you will be teleported to the nearest one on your map, otherwise to any one.
 */
 // teleport to creature
 bool ChatHandler::HandleGoCreatureCommand(char* args)
@@ -580,59 +581,59 @@ bool ChatHandler::HandleGoCreatureCommand(char* args)
             // Number is invalid - maybe the user specified the mob's name
             else
             {
-                std::string name = pParam1;
-                WorldDatabase.escape_string(name);
-                auto getGuid = [&](std::unique_ptr<QueryResult>& queryResult) -> CreatureDataPair const*
+                std::set<uint32> entries;
+                std::wstring wnamepart;
+                if (Utf8toWStr(pParam1, wnamepart))
                 {
-                    if (!queryResult)
+                    wstrToLower(wnamepart);
+                    for (SQLStorageBase::SQLSIterator<CreatureInfo> itr = sCreatureStorage.getDataBegin<CreatureInfo>(); itr < sCreatureStorage.getDataEnd<CreatureInfo>(); ++itr)
+                        if (Utf8FitTo(itr->Name, wnamepart))
+                            entries.insert(itr->Entry);
+                }
+
+                if (entries.empty())
+                    break;
+
+                // entries checked for a spawn: its own entry, its creature_spawn_entry entries, its squad entries and, without own entry, its spawn group entries
+                std::shared_ptr<SpawnGroupEntryContainer> spawnGroups = sObjectMgr.GetSpawnGroupContainer();
+                auto hasEntry = [&entries](uint32 entry) { return entries.find(entry) != entries.end(); };
+                auto canHaveEntry = [&](CreatureDataPair const& dataPair) -> bool
+                {
+                    if (hasEntry(dataPair.second.id))
+                        return true;
+
+                    if (std::vector<uint32> const* spawnEntries = sObjectMgr.GetAllRandomCreatureEntries(dataPair.first))
+                        if (std::any_of(spawnEntries->begin(), spawnEntries->end(), hasEntry))
+                            return true;
+
+                    auto groupItr = spawnGroups->spawnGroupByGuidMap.find(std::make_pair(dataPair.first, uint32(TYPEID_UNIT)));
+                    if (groupItr == spawnGroups->spawnGroupByGuidMap.end())
+                        return false;
+
+                    for (SpawnGroupSquad const& squad : groupItr->second->Squads)
                     {
-                        SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
-                        SetSentErrorMessage(true);
-                        return nullptr;
-                    }                        
+                        auto squadItr = squad.GuidToEntry.find(dataPair.first);
+                        if (squadItr != squad.GuidToEntry.end() && hasEntry(squadItr->second))
+                            return true;
+                    }
 
-                    FindCreatureData worker(0, m_session ? m_session->GetPlayer() : nullptr);
+                    if (dataPair.second.id)
+                        return false;
 
-                    do
-                    {
-                        Field* fields = queryResult->Fetch();
-                        uint32 guid = fields[0].GetUInt32();
-
-                        CreatureDataPair const* cr_data = sObjectMgr.GetCreatureDataPair(guid);
-                        if (!cr_data)
-                            continue;
-
-                        worker(*cr_data);
-                    } while (queryResult->NextRow());
-
-                    return worker.GetResult();
+                    std::vector<SpawnGroupRandomEntry> const& randomEntries = groupItr->second->RandomEntries;
+                    return std::any_of(randomEntries.begin(), randomEntries.end(), [&](SpawnGroupRandomEntry const& randomEntry) { return hasEntry(randomEntry.Entry); });
                 };
-                CreatureDataPair const* dataPair;
-                {
-                    auto queryResult = WorldDatabase.PQuery("SELECT COALESCE(creature.guid, creature_spawn_entry.guid) AS guid "
-                        "FROM creature_template "
-                        "LEFT JOIN creature ON creature.id = creature_template.entry "
-                        "LEFT JOIN creature_spawn_entry ON creature_spawn_entry.entry = creature_template.entry "
-                        "WHERE creature_template.name LIKE '%%%s%%' LIMIT 1;", name.c_str());
 
-                    dataPair = getGuid(queryResult);
-                }
+                FindCreatureData worker(0, m_session ? m_session->GetPlayer() : nullptr);
+                auto nameWorker = [&](CreatureDataPair const& dataPair) { return canHaveEntry(dataPair) && worker(dataPair); };
+                sObjectMgr.DoCreatureData(nameWorker);
+
+                CreatureDataPair const* dataPair = worker.GetResult();
                 if (!dataPair)
-                {
-                    auto queryResult = WorldDatabase.PQuery("SELECT creature.guid FROM creature_template "
-                        "LEFT JOIN spawn_group_entry ON spawn_group_entry.entry = creature_template.entry "
-                        "LEFT JOIN spawn_group ON spawn_group_entry.Id=spawn_group.Id "
-                        "LEFT JOIN spawn_group_spawn ON spawn_group_spawn.Id=spawn_group.Id "
-                        "LEFT JOIN creature ON creature.guid=spawn_group_spawn.Guid "
-                        "WHERE creature_template.name LIKE '%%%s%%' AND spawn_group.type=0 AND creature.Id=0 LIMIT 1;", name.c_str());
+                    break;
 
-                    dataPair = getGuid(queryResult);
-                    if (!dataPair)
-                        break;
-                }
-
-                data = &dataPair->second;
                 dbGuid = dataPair->first;
+                data = &dataPair->second;
             }
             break;
         }
@@ -812,34 +813,56 @@ bool ChatHandler::HandleGoObjectCommand(char* args)
             }
             else
             {
-                std::string name = pParam1;
-                WorldDatabase.escape_string(name);
-                auto queryResult = WorldDatabase.PQuery("SELECT gameobject.guid, gameobject_spawn_entry.guid "
-                    "FROM gameobject, gameobject_template, gameobject_spawn_entry "
-                    "WHERE (gameobject.id = gameobject_template.entry "
-                    "OR (gameobject_spawn_entry.entry = gameobject_template.entry AND gameobject.guid = gameobject_spawn_entry.guid)) "
-                    "AND gameobject_template.name LIKE '%%%s%%' LIMIT 1;", name.c_str());
-                if (!queryResult)
+                std::set<uint32> entries;
+                std::wstring wnamepart;
+                if (Utf8toWStr(pParam1, wnamepart))
+                {
+                    wstrToLower(wnamepart);
+                    for (SQLStorageBase::SQLSIterator<GameObjectInfo> itr = sGOStorage.getDataBegin<GameObjectInfo>(); itr < sGOStorage.getDataEnd<GameObjectInfo>(); ++itr)
+                        if (Utf8FitTo(itr->name, wnamepart))
+                            entries.insert(itr->id);
+                }
+
+                if (entries.empty())
                 {
                     SendSysMessage(LANG_COMMAND_GOOBJNOTFOUND);
                     SetSentErrorMessage(true);
                     return false;
                 }
 
-                FindGOData worker(0, m_session ? m_session->GetPlayer() : nullptr);
-
-                do
+                // entries checked for a spawn: its own entry, its gameobject_spawn_entry entries, its squad entries and, without own entry, its spawn group entries
+                std::shared_ptr<SpawnGroupEntryContainer> spawnGroups = sObjectMgr.GetSpawnGroupContainer();
+                auto hasEntry = [&entries](uint32 entry) { return entries.find(entry) != entries.end(); };
+                auto canHaveEntry = [&](GameObjectDataPair const& dataPair) -> bool
                 {
-                    Field* fields = queryResult->Fetch();
-                    uint32 guid = fields[0].GetUInt32();
+                    if (hasEntry(dataPair.second.id))
+                        return true;
 
-                    GameObjectDataPair const* go_data = sObjectMgr.GetGODataPair(guid);
-                    if (!go_data)
-                        continue;
+                    if (std::vector<uint32> const* spawnEntries = sObjectMgr.GetAllRandomGameObjectEntries(dataPair.first))
+                        if (std::any_of(spawnEntries->begin(), spawnEntries->end(), hasEntry))
+                            return true;
 
-                    worker(*go_data);
-                }
-                while (queryResult->NextRow());
+                    auto groupItr = spawnGroups->spawnGroupByGuidMap.find(std::make_pair(dataPair.first, uint32(TYPEID_GAMEOBJECT)));
+                    if (groupItr == spawnGroups->spawnGroupByGuidMap.end())
+                        return false;
+
+                    for (SpawnGroupSquad const& squad : groupItr->second->Squads)
+                    {
+                        auto squadItr = squad.GuidToEntry.find(dataPair.first);
+                        if (squadItr != squad.GuidToEntry.end() && hasEntry(squadItr->second))
+                            return true;
+                    }
+
+                    if (dataPair.second.id)
+                        return false;
+
+                    std::vector<SpawnGroupRandomEntry> const& randomEntries = groupItr->second->RandomEntries;
+                    return std::any_of(randomEntries.begin(), randomEntries.end(), [&](SpawnGroupRandomEntry const& randomEntry) { return hasEntry(randomEntry.Entry); });
+                };
+
+                FindGOData worker(0, m_session ? m_session->GetPlayer() : nullptr);
+                auto nameWorker = [&](GameObjectDataPair const& dataPair) { return canHaveEntry(dataPair) && worker(dataPair); };
+                sObjectMgr.DoGOData(nameWorker);
 
                 GameObjectDataPair const* dataPair = worker.GetResult();
                 if (!dataPair)
