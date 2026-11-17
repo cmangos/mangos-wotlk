@@ -694,6 +694,20 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
 
     Unit* mover = _player->GetMover();
 
+    if (opcode == CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK)
+    {
+        if (isApplied)
+        {
+            if (!movementInfo.HasMovementFlag(MOVEFLAG2_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY))
+                return;
+        }
+        else
+        {
+            if (movementInfo.HasMovementFlag(MOVEFLAG2_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY))
+                return;
+        }
+    }
+
     if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
         return;
 
@@ -707,6 +721,7 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
         case CMSG_MOVE_SET_CAN_FLY_ACK: response = MSG_MOVE_UPDATE_CAN_FLY; break;
         case CMSG_MOVE_GRAVITY_DISABLE_ACK: response = MSG_MOVE_GRAVITY_CHNG; break;
         case CMSG_MOVE_GRAVITY_ENABLE_ACK: response = MSG_MOVE_GRAVITY_CHNG; break;
+        case CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK: response = MSG_MOVE_UPDATE_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY; break;
         default: break;
     }
 

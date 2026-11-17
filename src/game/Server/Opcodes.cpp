@@ -858,7 +858,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x33D*/ { "SMSG_MOTD",                                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x33E*/ { "SMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY", STATUS_NEVER, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x33F*/ { "SMSG_MOVE_UNSET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY", STATUS_NEVER, PROCESS_INPLACE,    &WorldSession::Handle_ServerSide               },
-    /*0x340*/ { "CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK", STATUS_NEVER, PROCESS_INPLACE,  &WorldSession::Handle_NULL                     },
+    /*0x340*/ { "CMSG_MOVE_SET_CAN_TRANSITION_BETWEEN_SWIM_AND_FLY_ACK", STATUS_NEVER, PROCESS_INPLACE,  &WorldSession::HandleMoveFlagChangeOpcode    },
     /*0x341*/ { "MSG_MOVE_START_SWIM_CHEAT",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x342*/ { "MSG_MOVE_STOP_SWIM_CHEAT",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x343*/ { "SMSG_MOVE_SET_CAN_FLY",                        STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
