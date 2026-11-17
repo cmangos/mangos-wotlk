@@ -9848,7 +9848,7 @@ void Unit::SetDeathState(DeathState s)
 
         StopMoving();
         i_motionMaster.Clear(false, true);
-        if (!CanFly() || !i_motionMaster.MoveFall())
+        if (!CanFly() || IsClientControlled() || !i_motionMaster.MoveFall())
             i_motionMaster.MoveIdle();
 
         // Unsummon vehicle accessories
