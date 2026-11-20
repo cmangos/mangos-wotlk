@@ -6,6 +6,7 @@
 #define DEF_ICECROWN_CITADEL_H
 
 #include "Chat/Chat.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -79,6 +80,9 @@ enum
     NPC_KORKRON_ROCKETEER           = 36982,
     NPC_KORKRON_REAVER              = 36957,
     NPC_KORKRON_SERGEANT            = 36960,
+
+    ITEM_GOBLIN_ROCKET_PACK         = 49278,
+    SPELL_ROCKET_PACK        = 73077,
 
     NPC_OVERLORD_SAURFANG           = 37187,        // Saurfang intro / outro
     NPC_KORKRON_REAVER_RISE         = 37920,
@@ -198,15 +202,15 @@ enum
     GO_SAURFANG_CACHE_10_H          = 202238,
     GO_SAURFANG_CACHE_25_H          = 202241,
 
-    GO_GUNSHIP_ARMORY_A             = 201872,
-    GO_GUNSHIP_ARMORY_A_25          = 201873,
-    GO_GUNSHIP_ARMORY_A_10H         = 201874,
+    GO_GUNSHIP_ARMORY_A             = 201873,
+    GO_GUNSHIP_ARMORY_A_25          = 201874,
+    GO_GUNSHIP_ARMORY_A_10H         = 201872,
     GO_GUNSHIP_ARMORY_A_25H         = 201875,
 
-    GO_GUNSHIP_ARMORY_H             = 202177,
-    GO_GUNSHIP_ARMORY_H_25          = 202178,
-    GO_GUNSHIP_ARMORY_H_10H         = 202179,
-    GO_GUNSHIP_ARMORY_H_25H         = 202180,
+    GO_GUNSHIP_ARMORY_H             = 202178,
+    GO_GUNSHIP_ARMORY_H_25          = 202180,
+    GO_GUNSHIP_ARMORY_H_10H         = 202177,
+    GO_GUNSHIP_ARMORY_H_25H         = 202179,
 
     GO_DREAMWALKER_CACHE            = 201959,
     GO_DREAMWALKER_CACHE_25         = 202339,
@@ -349,6 +353,8 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         uint32 GetData(uint32 uiType) const override;
 
         uint32 GetPlayerTeam() const { return m_uiTeam; }
+        Creature* GetGunshipCaptain() const;
+        void RequestGunshipMage();
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* strIn) override;
@@ -377,6 +383,21 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 
     private:
+        void InitializeGunshipActions();
+        void StartGunshipActions();
+        void StopGunshipActions();
+        void GunshipCrewDied(Creature* creature);
+        void SpawnGunshipCrew(uint32 slot);
+        void SpawnGunshipFreezeMage();
+        void SpawnGunshipBoardingWave();
+
+        TimerManager m_gunshipTimers;
+        ObjectGuid m_gunshipCrewGuids[14];
+        ObjectGuid m_gunshipFreezeMageGuid;
+        bool m_gunshipFreezeRequested;
+        bool m_gunshipFreezeReady;
+        bool m_gunshipNextArtilleryCall;
+
         void JustDidDialogueStep(int32 iEntry) override;
 
         void ProcessEventNpcs(Player* pPlayer);
@@ -388,11 +409,14 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         uint32 m_uiTeam;                                    // Team of first entered player, used on the Gunship event
         uint32 m_uiPutricideValveTimer;
         uint8 m_lightsHammerDamnedKills;
+        uint32 m_gunshipResetTimer;
+        uint32 m_gunshipVictorySceneTimer;
 
         bool m_bHasMarrowgarIntroYelled;
         bool m_bHasDeathwhisperIntroYelled;
         bool m_bHasRimefangLanded;
         bool m_bHasSpinestalkerLanded;
+        bool m_gunshipReloadPending;
 
         ObjectGuid m_leftScientistStalkerGuid;
         ObjectGuid m_rightScientistStalkerGuid;
