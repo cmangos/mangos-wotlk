@@ -158,6 +158,7 @@ struct CreatureInfo
     uint32  QuestItems[6];
     uint32  MechanicImmuneMask;
     uint32  SchoolImmuneMask;
+    uint32  ImmunityFlags;
     int32   ResistanceHoly;
     int32   ResistanceFire;
     int32   ResistanceNature;
