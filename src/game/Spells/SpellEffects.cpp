@@ -5752,6 +5752,21 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     }
 
     bool summonResult = false;
+
+    // Battle Standards: summon property 121 has no totem title in DBC, but these behave as stationary,
+    // owner-bound totems (no movement, no melee, same faction/PvP state as the owner, attackable by enemies)
+    switch (m_spellInfo->Id)
+    {
+        case 23034:                                         // Alliance Battle Standard (14465)
+        case 23035:                                         // Horde Battle Standard (14466)
+        case 23538:                                         // Frostwolf Battle Standard (14751)
+        case 23539:                                         // Stormpike Battle Standard (14752)
+            DoSummonTotem(summonPositions, eff_idx);        // slot none: must not replace a shaman totem
+            return;                                         // totem summon is fully handled there
+        default:
+            break;
+    }
+
     switch (summon_prop->Group)
     {
         // faction handled later on, or loaded from template
