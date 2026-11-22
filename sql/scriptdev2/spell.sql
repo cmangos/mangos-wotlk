@@ -1020,6 +1020,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (55593,'spell_loatheb_necrotic_aura'),
 (55808,'spell_aid_of_the_earthen'),
 (55814,'spell_eck_spit'),
+(55848,'spell_detect_through_invisibility_mob'),
 (55853,'spell_vortex_aura'),
 (55872,'spell_random_radius_picker'),
 (55882,'spell_random_radius_picker'),
