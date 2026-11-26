@@ -5980,7 +5980,17 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
             if (prop->Group == SUMMON_PROP_GROUP_FRIENDLY && summonInvoker) // for example 54359
             {
                 if (summonInvoker->IsPlayerControlled())
+                {
                     summon->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+                    // the owner's PvP state, except in dungeons and raids and for a summon immune to players
+                    if (!summon->GetMap()->IsDungeon() && !summon->IsImmuneToPlayer())
+                    {
+                        summon->SetPvP(summonInvoker->IsPvP());
+                        summon->SetPvPFreeForAll(summonInvoker->IsPvPFreeForAll());
+                        summon->SetPvPSanctuary(summonInvoker->IsPvPSanctuary());
+                    }
+                }
 
                 summon->setFaction(summonInvoker->GetFaction());
                 summon->SetOwnerGuid(summonInvoker->GetObjectGuid());
