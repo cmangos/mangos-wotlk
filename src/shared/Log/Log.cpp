@@ -56,6 +56,7 @@ LogFilterData logFilterData[LOG_FILTER_COUNT] =
     { "event_ai_dev",        "LogFilter_EventAiDev",         true  },
     { "calendar",            "LogFilter_Calendar",           true  },
     { "db_scripts_dev",      "LogFilter_DbScriptDev",        true  },
+    { "conditions",          "LogFilter_Conditions",         true  },
 };
 
 enum LogType
