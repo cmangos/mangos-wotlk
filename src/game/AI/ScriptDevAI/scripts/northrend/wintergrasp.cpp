@@ -177,9 +177,9 @@ struct go_vehicle_teleporter : public GameObjectAI
                     if ((m_battlefield->GetDefender() == ALLIANCE && vehicle->HasAura(SPELL_ALLIANCE_FLAG)) ||
                         (m_battlefield->GetDefender() == HORDE && vehicle->HasAura(SPELL_HORDE_FLAG)))
                     {
-                        // teleport to the trigger which is furthest away
-                        if (Unit* target = GetTeleportTarget(vehicle))
-                            vehicle->CastSpell(target, SPELL_TELEPORT_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+                        // teleport to the trigger which is furthest away: it casts the spell on the vehicle, which goes to the caster
+                        if (Unit* trigger = GetTeleportTarget(vehicle))
+                            trigger->CastSpell(vehicle, SPELL_TELEPORT_VEHICLE, TRIGGERED_OLD_TRIGGERED);
                     }
                 }
             }
