@@ -219,7 +219,15 @@ struct AntiMagicZone : public SpellScript
         summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_HIDE_BODY);
         summon->CastSpell(nullptr, 40031, TRIGGERED_OLD_TRIGGERED);
         if (Unit* caster = spell->GetCaster())
+        {
             caster->AddSummonForOnDeathDespawn(summon->GetObjectGuid());
+
+            // the zone absorbs up to its health: the spell value plus twice the caster's attack power
+            uint32 health = spell->GetDamage() + 2 * uint32(caster->GetTotalAttackPowerValue(BASE_ATTACK));
+            summon->SetLevel(caster->GetLevel());
+            summon->SetMaxHealth(health);
+            summon->SetHealth(health);
+        }
     }
 };
 
