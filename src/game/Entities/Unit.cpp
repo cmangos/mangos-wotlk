@@ -13217,6 +13217,10 @@ void Unit::BreakCharmOutgoing(Unit* charmed)
     // Verify charmed with self as a charmer
     if (charmed && charmed->HasCharmer(guid))
     {
+        // A vehicle is charmed through its seat: the unboarding ends the charm in the order the vehicle needs
+        if (IsBoarded() && GetTransportInfo()->GetTransportGuid() == charmed->GetObjectGuid())
+            ExitVehicle();
+
         // Break any aura-based charm spells on the charmed unit placed by self
         charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS, guid);
         charmed->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM, guid);
