@@ -722,6 +722,7 @@ class Creature : public Unit
         void UpdateSpell(int32 index, int32 newSpellId);
         void SetSpellList(uint32 spellSet);
         void UpdateImmunitiesSet(uint32 immunitySet);
+        void ClearImmunitiesSet();
 
         bool UpdateEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr, bool preserveHPAndPower = true, bool randomizeLevels = true);
         void ResetEntry(bool respawn = false);
