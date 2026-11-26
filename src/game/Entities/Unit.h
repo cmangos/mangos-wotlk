@@ -2207,6 +2207,8 @@ class Unit : public WorldObject
 
         // common function for visibility checks for player/creatures with detection code
         bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true, bool spell = false, bool ignorePhase = false) const;
+        // a unit driven by its AI for a player only acts against what that player sees
+        bool CanControllingPlayerSee(Unit const* target) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update) override; // overwrite WorldObject::SetPhaseMask
 
         // virtual functions for all world objects types

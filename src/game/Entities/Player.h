@@ -2425,6 +2425,7 @@ class Player : public Unit
         void GetObjectsNotMetByCameraVisit(GuidVector& guids) const;
 
         void BeforeVisibilityDestroy(Creature* creature);
+        void AfterVisibilityDestroy(WorldObject* target);
 
         void ResetMap() override;
 
