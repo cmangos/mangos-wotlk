@@ -94,7 +94,7 @@ class VehicleInfo : public TransportBase
         void Board(Unit* passenger, uint8 seat);            // Board a passenger to a vehicle
         void ChangeSeat(Unit* passenger, uint8 currentSeat, bool next); // Used to switch seat to next/previous seat
         void SwitchSeat(Unit* passenger, uint8 seat);        // Used to switch seats of a passenger
-        void UnBoard(Unit* passenger, bool changeVehicle);  // Used to Unboard a passenger from a vehicle
+        void UnBoard(Unit* passenger, bool changeVehicle, bool leaveMap = false); // Used to Unboard a passenger from a vehicle
 
         bool CanBoard(Unit* passenger) const;               // Used to check if a Unit can board a vehicle
         Unit* GetPassenger(uint8 seat) const;

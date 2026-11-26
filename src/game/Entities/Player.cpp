@@ -2172,6 +2172,21 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (Group* grp = GetGroup())                            // TODO: Verify that this is correct place
         grp->SetPlayerMap(GetObjectGuid(), mapid);
 
+    // a vehicle stays behind: on the same map its passenger steps down before the teleport, on another map the passenger is
+    // taken off when it leaves its map, after the client is told of the transfer
+    if (IsBoarded() && GetTransportInfo()->IsOnVehicle() && GetMapId() == mapid && IsInWorld())
+    {
+        ExitVehicle();
+
+        // the unboarding puts the passenger on the transport carrying the vehicle: it is left unless the teleport goes onto it
+        if (m_transport && m_transport != transport)
+        {
+            m_transport->RemovePassenger(this);
+            m_transport = nullptr;
+            m_movementInfo.ClearTransportData();
+        }
+    }
+
     // if we were on a transport, leave
     if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT) && m_transport)
     {
@@ -2210,8 +2225,10 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
         else
         {
+            // the charm of a vehicle ends with its seat, left with the map
             if (Unit* charm = GetCharm())
-                BreakCharmOutgoing(charm);
+                if (!IsBoarded() || GetTransportInfo()->GetTransportGuid() != charm->GetObjectGuid())
+                    BreakCharmOutgoing(charm);
 
             if (GetPet())
                 UnsummonPetTemporaryIfAny();
@@ -2525,6 +2542,10 @@ void Player::RemoveFromWorld()
         ///- Release charmed creatures, unsummon totems and remove pets/guardians
         sWorld.SetOnlinePlayer(GetTeam(), getRace(), getClass(), false);
         UnsummonAllTotems();
+
+        // the vehicle stays on the map, which the client drops with all its objects
+        if (IsBoarded() && GetTransportInfo()->IsOnVehicle())
+            static_cast<Unit*>(GetTransportInfo()->GetTransport())->GetVehicleInfo()->UnBoard(this, false, true);
     }
 
     for (int i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; ++i)

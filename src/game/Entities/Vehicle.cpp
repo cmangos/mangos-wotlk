@@ -495,8 +495,11 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
  * @param passenger         MUST be provided. This Unit will be unboarded from the vehicle
  * @param changeVehicle     If set, the passenger is expected to be directly boarded to another vehicle,
  *                          and hence he will not be unboarded but only removed from this vehicle.
+ * @param leaveMap          If set, the passenger leaves the map, as a player changing map or logging out does. Its client
+ *                          drops the vehicle with the map: the passenger is only removed from this vehicle, without exit
+ *                          move, summoned pet or parachute.
  */
-void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
+void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle, bool leaveMap /*= false*/)
 {
     MANGOS_ASSERT(passenger);
 
@@ -517,7 +520,16 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     // Remove passenger modifications
     RemoveSeatMods(passenger, seatEntry->m_flags);
 
-    if (!changeVehicle)                                     // Send expected unboarding packages
+    if (leaveMap)
+    {
+        passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
+        passenger->m_movementInfo.ClearTransportData();
+
+        // the client leaves the map: the root set at boarding is lifted without an order to it
+        if (!passenger->HasAuraType(SPELL_AURA_MOD_ROOT))
+            passenger->clearUnitState(UNIT_STAT_ROOT);
+    }
+    else if (!changeVehicle)                                // Send expected unboarding packages
     {
         if (GenericTransport* transport = m_owner->GetTransport())
             transport->AddPassenger(passenger);
@@ -574,7 +586,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     // Some creature vehicles get despawned after passenger unboarding
     // Condition only applies for player passengers; creature passengers are controlled by script
-    if (m_owner->IsUnit() && passenger->IsPlayer())
+    if (m_owner->IsUnit() && passenger->IsPlayer() && !leaveMap)
     {
         // only for flyable vehicles
         if (passenger->IsFlying())
