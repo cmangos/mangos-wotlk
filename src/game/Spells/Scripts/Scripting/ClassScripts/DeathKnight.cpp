@@ -214,10 +214,12 @@ struct HealthLeechPassive : public AuraScript
 // 51052 - Anti-Magic Zone
 struct AntiMagicZone : public SpellScript
 {
-    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    void OnSummon(Spell* spell, Creature* summon) const override
     {
         summon->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_HIDE_BODY);
         summon->CastSpell(nullptr, 40031, TRIGGERED_OLD_TRIGGERED);
+        if (Unit* caster = spell->GetCaster())
+            caster->AddSummonForOnDeathDespawn(summon->GetObjectGuid());
     }
 };
 

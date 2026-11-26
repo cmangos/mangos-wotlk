@@ -10834,6 +10834,7 @@ void Unit::RemoveFromWorld()
         }
         RemoveMiniPet();
         m_pvpSummons.clear();                               // the summons stay on this map
+        m_summonsForOnDeathDespawn.clear();
         UnsummonAllTotems();
         RemoveAllGameObjects();
         RemoveAllDynObjects();

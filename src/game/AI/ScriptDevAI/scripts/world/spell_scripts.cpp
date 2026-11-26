@@ -617,6 +617,16 @@ struct SummonNoFollowMovement : public SpellScript
     }
 };
 
+// 23034, 23035, 23538, 23539 - Battle Standard
+struct SummonDespawnOnSummonerDeath : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+            caster->AddSummonForOnDeathDespawn(summon->GetObjectGuid());
+    }
+};
+
 // 33953 - Spell Haste Healer Trinket
 struct SpellHasteHealerTrinket : public AuraScript
 {
@@ -1137,6 +1147,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<DrinkAnimation>("spell_drink_animation");
     RegisterSpellScript<Drink>("spell_drink");
     RegisterSpellScript<SummonNoFollowMovement>("spell_effect_summon_no_follow_movement");
+    RegisterSpellScript<SummonDespawnOnSummonerDeath>("spell_effect_summon_despawn_on_summoner_death");
     RegisterSpellScript<SpellHasteHealerTrinket>("spell_spell_haste_healer_trinket");
     RegisterSpellScript<IncreasedHealingDoneDummy>("spell_increased_healing_done_dummy");
     RegisterSpellScript<IncreasedSpellDamageDoneDummy>("spell_increased_spell_damage_done_dummy");
