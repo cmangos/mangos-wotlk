@@ -364,14 +364,15 @@ void WorldSession::HandleMailMarkAsRead(WorldPacket& recv_data)
 
     Player* pl = _player;
 
-    if (Mail* m = pl->GetMail(mailId))
-    {
-        if (pl->unReadMails)
-            --pl->unReadMails;
-        m->checked = m->checked | MAIL_CHECK_MASK_READ;
-        pl->m_mailsUpdated = true;
-        m->state = MAIL_STATE_CHANGED;
-    }
+    Mail* m = pl->GetMail(mailId);
+    if (!m || m->state == MAIL_STATE_DELETED || (m->checked & MAIL_CHECK_MASK_READ))
+        return;
+
+    if (pl->unReadMails)
+        --pl->unReadMails;
+    m->checked = m->checked | MAIL_CHECK_MASK_READ;
+    pl->m_mailsUpdated = true;
+    m->state = MAIL_STATE_CHANGED;
 }
 
 /**
@@ -406,6 +407,7 @@ void WorldSession::HandleMailDelete(WorldPacket& recv_data)
         }
 
         m->state = MAIL_STATE_DELETED;
+        pl->UpdateNextMailTimeAndUnreads();
     }
     pl->SendMailResult(mailId, MAIL_DELETED, MAIL_OK);
 }
@@ -445,6 +447,7 @@ void WorldSession::HandleMailReturnToSender(WorldPacket& recv_data)
     CharacterDatabase.PExecute("DELETE FROM mail_items WHERE mail_id = '%u'", mailId);
     CharacterDatabase.CommitTransaction();
     pl->RemoveMail(mailId);
+    pl->UpdateNextMailTimeAndUnreads();
 
     // send back only to existing players and simple drop for other cases
     if (m->messageType == MAIL_NORMAL && m->sender)
@@ -821,6 +824,10 @@ void WorldSession::HandleQueryNextMailTime(WorldPacket& /**recv_data*/)
 
             // and already delivered
             if (now < m->deliver_time)
+                continue;
+
+            // and not deleted
+            if (m->state == MAIL_STATE_DELETED)
                 continue;
 
             HighGuid guidType = m->messageType == MAIL_CREATURE ? HIGHGUID_UNIT : HIGHGUID_PLAYER;
