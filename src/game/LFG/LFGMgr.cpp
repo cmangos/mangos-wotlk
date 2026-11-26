@@ -962,7 +962,12 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
     {
         sLog.outDebug("Player %s is being teleported out. Current Map %u - Expected Map %u", player->GetName(), player->GetMapId(), uint32(dungeon->map));
         if (player->GetMapId() == uint32(dungeon->map))
-            player->TeleportToBGEntryPoint();
+        {
+            if (player->IsBoarded() && player->GetTransportInfo()->IsOnVehicle())
+                player->GetSession()->SendLfgTeleportError(uint8(LFG_TELEPORTERROR_IN_VEHICLE));
+            else
+                player->TeleportToBGEntryPoint();
+        }
 
         return;
     }
@@ -975,7 +980,7 @@ void LFGMgr::TeleportPlayer(Player* player, bool out, bool fromOpcode /*= false*
         error = LFG_TELEPORTERROR_FALLING;
     else if (player->IsMirrorTimerActive(MirrorTimer::FATIGUE))
         error = LFG_TELEPORTERROR_FATIGUE;
-    else if (player->GetVehicleInfo())
+    else if (player->IsBoarded() && player->GetTransportInfo()->IsOnVehicle())
         error = LFG_TELEPORTERROR_IN_VEHICLE;
     else if (player->GetCharm())
         error = LFG_TELEPORTERROR_CHARMING;
