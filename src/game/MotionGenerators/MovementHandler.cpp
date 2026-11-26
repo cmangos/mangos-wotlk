@@ -295,7 +295,18 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
     Unit* mover = _player->GetMover();
     Player* plMover = mover->GetTypeId() == TYPEID_PLAYER ? (Player*)mover : nullptr;
 
-    if (!plMover || !plMover->IsBeingTeleportedNear())
+    // a unit this client moves in place of its player is at the destination since the order
+    if (!plMover)
+    {
+        if (_player->IsMoverTeleportPending() && guid == mover->GetObjectGuid())
+        {
+            m_anticheat->OrderAck(recv_data.GetOpcode(), counter);
+            _player->SetMoverTeleportPending(false);
+        }
+        return;
+    }
+
+    if (!plMover->IsBeingTeleportedNear())
         return;
 
     if (guid != plMover->GetObjectGuid())
@@ -926,6 +937,10 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
 bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, Player* plMover, WorldPacket& recv_data)
 {
     if (plMover && plMover->IsBeingTeleported() && recv_data.GetOpcode() != CMSG_MOVE_SET_COLLISION_HGT_ACK)
+        return false;
+
+    // likewise for a unit this client moves in place of its player, teleported and not yet acknowledged
+    if (mover != _player && _player->IsMoverTeleportPending())
         return false;
 
     // leaving a transport sends the transport flag with an empty transport guid and the world position as offsets

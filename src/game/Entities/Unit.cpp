@@ -12109,11 +12109,24 @@ Position Unit::SendTeleportPacket(float x, float y, float z, float ori, GenericT
     }
     teleportMovementInfo.ChangePosition(x, y, z, ori);
 
+    // the order goes to the client that moves this unit: its own player, or the player driving or possessing it
     Player* player = nullptr;
 
     if (GetTypeId() == TYPEID_PLAYER)
-    {
         player = static_cast<Player*>(this);
+    else if (IsClientControlled())
+    {
+        if (Player const* controller = GetControllingPlayer())
+            if (controller->GetMover() == this)
+                player = const_cast<Player*>(controller);
+    }
+
+    if (player)
+    {
+        // the moves this client sends before applying the order are stale, until its acknowledgement
+        if (player != this)
+            player->SetMoverTeleportPending(true);
+
         auto const counter = player->GetSession()->GetOrderCounter();
         WorldPacket data;
         data.Initialize(MSG_MOVE_TELEPORT_ACK, 41);

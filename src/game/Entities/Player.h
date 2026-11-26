@@ -2363,9 +2363,12 @@ class Player : public Unit
 
         void UpdateClientControl(Unit const* target, bool enabled, bool forced = false) const;
 
-        void SetMover(Unit* target) { m_mover = target ? target : this; }
+        void SetMover(Unit* target) { m_mover = target ? target : this; m_moverTeleportPending = false; }
         Unit* GetMover() const { return m_mover; }
         bool IsSelfMover() const { return m_mover == this; }// normal case for player not controlling other unit
+        // the unit this client moves in place of its player was teleported, and the client has not acknowledged it yet
+        bool IsMoverTeleportPending() const { return m_moverTeleportPending; }
+        void SetMoverTeleportPending(bool pending) { m_moverTeleportPending = pending; }
 
         bool SetStunnedByLogout(bool apply);
 
@@ -2936,6 +2939,7 @@ class Player : public Unit
         CinematicMgrUPtr m_cinematicMgr;
 
         Unit* m_mover;
+        bool m_moverTeleportPending = false;
         Camera m_camera;
 
         GridReference<Player> m_gridRef;
