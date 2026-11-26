@@ -3579,7 +3579,9 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
     if (deliver_time <= time(nullptr))                         // ready now
     {
         ++unReadMails;
-        SendNewMail();
+        // a client on a loading screen asks for the next mail time once it enters the world
+        if (IsInWorld())
+            SendNewMail();
     }
     else                                                    // not ready and no have ready mails
     {
