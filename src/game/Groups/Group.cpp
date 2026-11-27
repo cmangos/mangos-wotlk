@@ -442,12 +442,12 @@ uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
                 player->GetSession()->SendPacket(data);
             }
 
-            // we already removed player from group and in player->GetGroup() is his original group!
+            // a player leaving a battleground raid gets the update of their original group when rejoining it
             if (Group* group = player->GetGroup())
             {
                 group->SendUpdate();
             }
-            else
+            else if (!player->GetOriginalGroup())
             {
                 data.Initialize(SMSG_GROUP_LIST, 1 + 1 + 1 + 1 + 8 + 4 + 4 + 8);
                 data << uint8(0x10) << uint8(0) << uint8(0) << uint8(0);
@@ -523,12 +523,12 @@ void Group::Disband(bool hideDestroy)
             player->GetSession()->SendPacket(data);
         }
 
-        // we already removed player from group and in player->GetGroup() is his original group, send update
+        // a player leaving a battleground raid gets the update of their original group when rejoining it
         if (Group* group = player->GetGroup())
         {
             group->SendUpdate();
         }
-        else
+        else if (!player->GetOriginalGroup())
         {
             data.Initialize(SMSG_GROUP_LIST, 1 + 1 + 1 + 1 + 8 + 4 + 4 + 8);
             data << uint8(0x10) << uint8(0) << uint8(0) << uint8(0);
