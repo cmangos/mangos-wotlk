@@ -622,7 +622,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
     m_countSpawns = (GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_COUNT_SPAWNS) != 0;
     ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, IsWorldBoss());
 
-    if (m_settings.HasFlag(CreatureStaticFlags::NO_AUTOMATIC_REGEN))
+    if (GetCreatureInfo()->HasFlag(CreatureStaticFlags::NO_AUTOMATIC_REGEN))
         RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);
     else if ((GetCreatureInfo()->RegenerateStats & (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER)) == (REGEN_FLAG_POWER_IN_COMBAT | REGEN_FLAG_POWER))
         SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_REGENERATE_POWER);        
@@ -1562,7 +1562,8 @@ void Creature::SelectLevel(uint32 forcedLevel /*= USE_DEFAULT_DATABASE_LEVEL*/)
 
     SetHealth(GetMaxHealth());
     for (int i = POWER_MANA; i <= POWER_HAPPINESS; ++i)
-        SetPower(Powers(i), GetMaxPower(Powers(i)));
+        SetPower(Powers(i), GetCreatureInfo()->HasFlag(CreatureStaticFlags::NO_AUTOMATIC_REGEN) &&
+            (i == POWER_ENERGY || i == POWER_MANA) ? 0 : GetMaxPower(Powers(i)));
 }
 
 float Creature::_GetHealthMod(int32 Rank)
@@ -1874,6 +1875,9 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forced
     {
         if (isUsingNewSpawningSystem && !group) // only at this point we know if marked as dynguid per entry
         {
+            // Create initialized optional vehicle state, but the grid loader
+            // will delete this creature without adding it to the world.
+            SetVehicleId(0, 0);
             return false;
         }
         m_deathState = DEAD;
